@@ -2,15 +2,15 @@
 
 > Bu dosya Android CI tarafından otomatik üretilir. Keystore veya parola değerleri yazılmaz.
 
-- Zaman (UTC): 2026-10-16T19:36:13Z
-- Workflow commit'i: 5f56bc86ba5f427ad0b2c601e67e01f387dd0eed
+- Zaman (UTC): 2026-10-16T19:40:04Z
+- Workflow commit'i: 5a827d741c889b7ed066c95f75ccf5a767b4ee8e
 - Dal: arena/0ec2226d-question-note
 - Uygulama sürümü: 1.0.1 (versionCode 2)
 - Android SDK: compileSdk/targetSdk 37, minSdk 26; build-tools 37.0.0
 - Genel sonuç: **BAŞARISIZ**
 - Wrapper çıkış kodu: 0
 - testDebugUnitTest çıkış kodu: 1
-- Birim test özeti: 29 test; 5 başarısız; 0 hata; 0 atlandı
+- Birim test özeti: 31 test; 1 başarısız; 0 hata; 0 atlandı
 - assembleRelease çıkış kodu: 125
 - İmzalama secret durumu: İki gerekli secret dolu (değerler gösterilmez)
 - İmzalama/verify durumu: İmzalama henüz çalıştırılmadı (kod: 125; apksigner verify: 125)
@@ -53,7 +53,7 @@ OS:            Linux 6.17.0-1022-azure amd64
 
 ```text
 -- Derleyici/Gradle hata satırları --
-89:* What went wrong:
+77:* What went wrong:
 
 -- İlk 100 satır --
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
@@ -71,6 +71,7 @@ Daemon will be stopped at the end of the build
 > Task :app:compileDebugNavigationResources
 > Task :app:createDebugCompatibleScreenManifests
 > Task :app:extractDeepLinksDebug
+> Task :app:mergeDebugResources
 > Task :app:processDebugMainManifest
 > Task :app:processDebugManifest
 > Task :app:preDebugUnitTestBuild UP-TO-DATE
@@ -78,9 +79,8 @@ Daemon will be stopped at the end of the build
 > Task :app:processDebugManifestForPackage
 > Task :app:generateDebugAssets UP-TO-DATE
 > Task :app:mergeDebugAssets
-> Task :app:mergeDebugResources
-> Task :app:processDebugUnitTestManifest
 > Task :app:processDebugResources
+> Task :app:processDebugUnitTestManifest
 > Task :app:packageDebugUnitTestForUnitTest
 > Task :app:generateDebugUnitTestConfig
 > Task :app:kspDebugKotlin
@@ -106,8 +106,8 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 
 > Task :app:compileDebugJavaWithJavac NO-SOURCE
 > Task :app:bundleDebugClassesToRuntimeJar
-> Task :app:bundleDebugClassesToCompileJar
 > Task :app:processDebugJavaRes
+> Task :app:bundleDebugClassesToCompileJar
 > Task :app:kspDebugUnitTestKotlin
 
 > Task :app:compileDebugUnitTestKotlin
@@ -121,22 +121,10 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/ke
 
 > Task :app:testDebugUnitTest
 
-YerelYedeklemeHizmetiTest > interruptedRestoreRecoveryKeepsCommittedFilesAndRollsBackUncommittedFiles FAILED
-    java.lang.IllegalArgumentException at YerelYedeklemeHizmetiTest.kt:146
+LocalSoruGorselDeposuTest > nonImageInputIsRejectedAndStaleStagesAreOnlyRemovedAfterOneDay FAILED
+    java.lang.AssertionError at LocalSoruGorselDeposuTest.kt:77
 
-YerelYedeklemeHizmetiTest > fullRestoreReplacesRowsRewritesImagePathsAndLeavesSafetyArchive FAILED
-    java.lang.IllegalArgumentException at YerelYedeklemeHizmetiTest.kt:75
-
-GorselTutarliligiHizmetiTest > cleanupDeletesOnlySelectedOldOrphansAndNeverDeletesReferencedFiles FAILED
-    java.lang.IllegalArgumentException at GorselTutarliligiHizmetiTest.kt:86
-
-LocalSoruGorselDeposuTest > initializationError FAILED
-    org.junit.runners.model.InvalidTestClassError at ParentRunner.java:525
-
-RoomSoruRepositoryTest > archiveRetainsTopicLinkAndDeletingQuestionCascadesOnlyItsRowsAndFiles FAILED
-    java.lang.AssertionError at RoomSoruRepositoryTest.kt:121
-
-29 tests completed, 5 failed
+31 tests completed, 1 failed
 
 > Task :app:testDebugUnitTest FAILED
 
@@ -156,6 +144,18 @@ org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':app:tes
 	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.lambda$doExecute$1(DefaultTaskNodeExecutor.java:367)
 	at org.gradle.internal.Try$Failure.ifSuccessfulOrElse(Try.java:288)
 	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.doExecute(DefaultTaskNodeExecutor.java:365)
+	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.executeTrackingTaskIdentity(DefaultTaskNodeExecutor.java:332)
+	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.executeFinalizingProperties(DefaultTaskNodeExecutor.java:318)
+	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.executeSkippingWithNoActions(DefaultTaskNodeExecutor.java:289)
+	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.executeSkippingOnlyIf(DefaultTaskNodeExecutor.java:272)
+	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.executeCatchingFailures(DefaultTaskNodeExecutor.java:228)
+	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.executeWithFallbackOperationId(DefaultTaskNodeExecutor.java:197)
+	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.executeWithLifecycle(DefaultTaskNodeExecutor.java:171)
+	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.access$000(DefaultTaskNodeExecutor.java:67)
+	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor$1.run(DefaultTaskNodeExecutor.java:136)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:30)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:27)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
 
 -- Son 80 satır --
 	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
@@ -236,20 +236,19 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD FAILED in 2m 19s
+BUILD FAILED in 2m 18s
 30 actionable tasks: 30 executed
 ```
 
 ## JUnit başarısızlık ayrıntıları
 
 ```text
-com.keremtulu.questionnote.data.repository.RoomSoruRepositoryTest > archiveRetainsTopicLinkAndDeletingQuestionCascadesOnlyItsRowsAndFiles: java.lang.AssertionError: java.lang.AssertionError: expected: com.keremtulu.questionnote.domain.model.SoruIslemSonucu$Basarili<Basarili> but was: com.keremtulu.questionnote.domain.model.KonuIslemSonucu$Basarili<Basarili>
-java.lang.AssertionError: expected: com.keremtulu.questionnote.domain.model.SoruIslemSonucu$Basarili<Basarili> but was: com.keremtulu.questionnote.domain.model.KonuIslemSonucu$Basarili<Basarili>
-	at org.junit.Assert.fail(Assert.java:89)
-	at org.junit.Assert.failNotEquals(Assert.java:835)
-	at org.junit.Assert.assertEquals(Assert.java:120)
-	at org.junit.Assert.assertEquals(Assert.java:146)
-	at com.keremtulu.questionnote.data.repository.RoomSoruRepositoryTest$archiveRetainsTopicLinkAndDeletingQuestionCascadesOnlyItsRowsAndFiles$1.invokeSuspend(RoomSoruRepositoryTest.kt:131)
+com.keremtulu.questionnote.data.images.LocalSoruGorselDeposuTest > nonImageInputIsRejectedAndStaleStagesAreOnlyRemovedAfterOneDay: java.lang.AssertionError: java.lang.AssertionError
+java.lang.AssertionError
+	at org.junit.Assert.fail(Assert.java:87)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at org.junit.Assert.assertTrue(Assert.java:53)
+	at com.keremtulu.questionnote.data.images.LocalSoruGorselDeposuTest$nonImageInputIsRejectedAndStaleStagesAreOnlyRemovedAfterOneDay$1.invokeSuspend(LocalSoruGorselDeposuTest.kt:88)
 	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
 	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
 	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:263)
@@ -258,7 +257,7 @@ java.lang.AssertionError: expected: com.keremtulu.questionnote.domain.model.Soru
 	at kotlinx.coroutines.BuildersKt.runBlocking(Unknown Source)
 	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking$default(Builders.kt:47)
 	at kotlinx.coroutines.BuildersKt.runBlocking$default(Unknown Source)
-	at com.keremtulu.questionnote.data.repository.RoomSoruRepositoryTest.archiveRetainsTopicLinkAndDeletingQuestionCascadesOnlyItsRowsAndFiles(RoomSoruRepositoryTest.kt:121)
+	at com.keremtulu.questionnote.data.images.LocalSoruGorselDeposuTest.nonImageInputIsRejectedAndStaleStagesAreOnlyRemovedAfterOneDay(LocalSoruGorselDeposuTest.kt:77)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -267,77 +266,6 @@ java.lang.AssertionError: expected: com.keremtulu.questionnote.domain.model.Soru
 	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
 	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
 	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:26)
-	at org.junit.internal.runners.statements.RunAfters.evaluate(RunAfters.java:27)
-	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
-	at org.robolectric.RobolectricTestRunner$HelperTestRunner$1.evaluate(RobolectricTestRunner.java:524)
-	at org.robolectric.internal.SandboxTestRunner.executeInSandbox(SandboxTestRunner.java:494)
-	at org.robolectric.internal.SandboxTestRunner.access$900(SandboxTestRunner.java:67)
-	at org.robolectric.internal.SandboxTestRunner$7.evaluate(SandboxTestRunner.java:442)
-	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
-	at org.robolectric.internal.SandboxTestRunner.access$600(SandboxTestRunner.java:67)
-	at org.robolectric.inter
-
-com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest > interruptedRestoreRecoveryKeepsCommittedFilesAndRollsBackUncommittedFiles: java.lang.IllegalArgumentException: java.lang.IllegalArgumentException: Required value was null.
-java.lang.IllegalArgumentException: Required value was null.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest$interruptedRestoreRecoveryKeepsCommittedFilesAndRollsBackUncommittedFiles$1.invokeSuspend(YerelYedeklemeHizmetiTest.kt:160)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:263)
-	at kotlinx.coroutines.BlockingCoroutine.joinBlocking(Builders.kt:95)
-	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking(Builders.kt:69)
-	at kotlinx.coroutines.BuildersKt.runBlocking(Unknown Source)
-	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking$default(Builders.kt:47)
-	at kotlinx.coroutines.BuildersKt.runBlocking$default(Unknown Source)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest.interruptedRestoreRecoveryKeepsCommittedFilesAndRollsBackUncommittedFiles(YerelYedeklemeHizmetiTest.kt:146)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:26)
-	at org.junit.internal.runners.statements.RunAfters.evaluate(RunAfters.java:27)
-	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
-	at org.robolectric.RobolectricTestRunner$HelperTestRunner$1.evaluate(RobolectricTestRunner.java:524)
-	at org.robolectric.internal.SandboxTestRunner.executeInSandbox(SandboxTestRunner.java:494)
-	at org.robolectric.internal.SandboxTestRunner.access$900(SandboxTestRunner.java:67)
-	at org.robolectric.internal.SandboxTestRunner$7.evaluate(SandboxTestRunner.java:442)
-	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
-	at org.robolectric.internal.SandboxTestRunner.access$600(SandboxTestRunner.java:67)
-	at org.robolectric.internal.SandboxTestRunner$6.evaluate(SandboxTestRunner.java:333)
-	at org.robolectric.internal.SandboxTestRunner$3.evaluate(SandboxTestRunner.java:233)
-	at org.robolectric.internal.SandboxTestRunner$5.lambda$evaluate$0(SandboxTestRunner.java:317)
-	at org.robolectric.internal.bytecode.Sandbox.lambda$runOnMainThread$0(Sandb
-
-com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest > fullRestoreReplacesRowsRewritesImagePathsAndLeavesSafetyArchive: java.lang.IllegalArgumentException: java.lang.IllegalArgumentException: Required value was null.
-java.lang.IllegalArgumentException: Required value was null.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest$fullRestoreReplacesRowsRewritesImagePathsAndLeavesSafetyArchive$1.invokeSuspend(YerelYedeklemeHizmetiTest.kt:93)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:263)
-	at kotlinx.coroutines.BlockingCoroutine.joinBlocking(Builders.kt:95)
-	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking(Builders.kt:69)
-	at kotlinx.coroutines.BuildersKt.runBlocking(Unknown Source)
-	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking$default(Builders.kt:47)
-	at kotlinx.coroutines.BuildersKt.runBlocking$default(Unknown Source)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest.fullRestoreReplacesRowsRewritesImagePathsAndLeavesSafetyArchive(YerelYedeklemeHizmetiTest.kt:75)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:26)
-	at org.junit.internal.runners.statements.RunAfters.evaluate(RunAfters.java:27)
 	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
 	at org.robolectric.RobolectricTestRunner$HelperTestRunner$1.evaluate(RobolectricTestRunner.java:524)
 	at org.robolectric.internal.SandboxTestRunner.executeInSandbox(SandboxTestRunner.java:494)
@@ -351,77 +279,7 @@ java.lang.IllegalArgumentException: Required value was null.
 	at org.robolectric.internal.SandboxTestRunner$3.evaluate(SandboxTestRunner.java:233)
 	at org.robolectric.internal.SandboxTestRunner$5.lambda$evaluate$0(SandboxTestRunner.java:317)
 	at org.robolectric.internal.bytecode.Sandbox.lambda$runOnMainThread$0(Sandbox.java:101)
-	at java.
-
-com.keremtulu.questionnote.data.images.LocalSoruGorselDeposuTest > initializationError: org.junit.runners.model.InvalidTestClassError: org.junit.runners.model.InvalidTestClassError: Invalid test class 'com.keremtulu.questionnote.data.images.LocalSoruGorselDeposuTest':   1. Method nonImageInputIsRejectedAndStaleStagesAreOnlyRemovedAfterOneDay() should be void
-org.junit.runners.model.InvalidTestClassError: Invalid test class 'com.keremtulu.questionnote.data.images.LocalSoruGorselDeposuTest':
-  1. Method nonImageInputIsRejectedAndStaleStagesAreOnlyRemovedAfterOneDay() should be void
-	at org.junit.runners.ParentRunner.validate(ParentRunner.java:525)
-	at org.junit.runners.ParentRunner.<init>(ParentRunner.java:92)
-	at org.junit.runners.BlockJUnit4ClassRunner.<init>(BlockJUnit4ClassRunner.java:74)
-	at org.robolectric.internal.SandboxTestRunner.<init>(SandboxTestRunner.java:95)
-	at org.robolectric.RobolectricTestRunner.<init>(RobolectricTestRunner.java:125)
-	at org.robolectric.RobolectricTestRunner.<init>(RobolectricTestRunner.java:120)
-	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
-	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
-	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:500)
-	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:481)
-	at org.junit.internal.builders.AnnotatedBuilder.buildRunner(AnnotatedBuilder.java:104)
-	at org.junit.internal.builders.AnnotatedBuilder.runnerForClass(AnnotatedBuilder.java:86)
-	at org.junit.runners.model.RunnerBuilder.safeRunnerForClass(RunnerBuilder.java:70)
-	at org.junit.internal.builders.AllDefaultPossibilitiesBuilder.runnerForClass(AllDefaultPossibilitiesBuilder.java:37)
-	at org.junit.runners.model.RunnerBuilder.safeRunnerForClass(RunnerBuilder.java:70)
-	at org.junit.internal.requests.ClassRequest.createRunner(ClassRequest.java:28)
-	at org.junit.internal.requests.MemoizingRequest.getRunner(MemoizingRequest.java:19)
-	at org.gradle.api.internal.tasks.testing.junit.JUnitTestExecutor.buildFilteredRequest(JUnitTestExecutor.java:128)
-	at org.gradle.api.internal.tasks.testing.junit.JUnitTestExecutor.shouldRunTestClass(JUnitTestExecutor.java:108)
-	at org.gradle.api.internal.tasks.testing.junit.JUnitTestExecutor.accept(JUnitTestExecutor.java:77)
-	at org.gradle.api.internal.tasks.testing.junit.JUnitTestExecutor.accept(JUnitTestExecutor.java:47)
-	at org.gradle.api.internal.tasks.testing.junit.AbstractJUnitTestDefinitionProcessor.processTestDefinition(AbstractJUnitTestDefinitionProcessor.java:65)
-	at org.gradle.api.internal.tasks.testing.SuiteTestDefinitionProcessor.processTestDefinition(SuiteTestDefinitionProcessor.java:53)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.gradle.internal.dispatch.MethodInvocation.invokeOn(MethodInvocation.java:77)
-	at org.gradle.internal.dispatch.Re
-
-com.keremtulu.questionnote.data.images.GorselTutarliligiHizmetiTest > cleanupDeletesOnlySelectedOldOrphansAndNeverDeletesReferencedFiles: java.lang.IllegalArgumentException: java.lang.IllegalArgumentException: Required value was null.
-java.lang.IllegalArgumentException: Required value was null.
-	at com.keremtulu.questionnote.data.images.GorselTutarliligiHizmetiTest$cleanupDeletesOnlySelectedOldOrphansAndNeverDeletesReferencedFiles$1.invokeSuspend(GorselTutarliligiHizmetiTest.kt:99)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:263)
-	at kotlinx.coroutines.BlockingCoroutine.joinBlocking(Builders.kt:95)
-	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking(Builders.kt:69)
-	at kotlinx.coroutines.BuildersKt.runBlocking(Unknown Source)
-	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking$default(Builders.kt:47)
-	at kotlinx.coroutines.BuildersKt.runBlocking$default(Unknown Source)
-	at com.keremtulu.questionnote.data.images.GorselTutarliligiHizmetiTest.cleanupDeletesOnlySelectedOldOrphansAndNeverDeletesReferencedFiles(GorselTutarliligiHizmetiTest.kt:86)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:26)
-	at org.junit.internal.runners.statements.RunAfters.evaluate(RunAfters.java:27)
-	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
-	at org.robolectric.RobolectricTestRunner$HelperTestRunner$1.evaluate(RobolectricTestRunner.java:524)
-	at org.robolectric.internal.SandboxTestRunner.executeInSandbox(SandboxTestRunner.java:494)
-	at org.robolectric.internal.SandboxTestRunner.access$900(SandboxTestRunner.java:67)
-	at org.robolectric.internal.SandboxTestRunner$7.evaluate(SandboxTestRunner.java:442)
-	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
-	at org.robolectric.internal.SandboxTestRunner.access$600(SandboxTestRunner.java:67)
-	at org.robolectric.internal.SandboxTestRunner$6.evaluate(SandboxTestRunner.java:333)
-	at org.robolectric.internal.SandboxTestRunner$3.evaluate(SandboxTestRunner.java:233)
-	at org.robolectric.internal.SandboxTestRunner$5.lambda$evaluate$0(SandboxTestRunner.java:317)
-	at org.robolectric.internal.bytecode.Sandbox.lambda$runOnMainThread$0(Sandbox.j
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
 ```
 
 ## Derleme çıktısı (son 120 satır)
