@@ -98,6 +98,7 @@ class LocalSoruGorselDeposuTest {
             assertFalse(stale.exists())
             assertTrue(fresh.exists())
             fresh.delete()
+            Unit
         } finally {
             invalid.delete()
         }

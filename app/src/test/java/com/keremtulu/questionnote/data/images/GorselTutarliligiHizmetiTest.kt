@@ -96,7 +96,7 @@ class GorselTutarliligiHizmetiTest {
             assertTrue(file.setLastModified(now - ORPHAN_AGE_MS - 1))
         }
         assertEquals(1, service.onaylananYetimleriSil(setOf(orphan.dosyaAdi, referenced.dosyaAdi), simdi = now))
-        assertFalse(requireNotNull(store.dosyaGoruntuIcin(orphan.dosyaAdi)).exists())
+        assertFalse(File(RuntimeEnvironment.getApplication().filesDir, orphan.dosyaAdi).exists())
         assertTrue(requireNotNull(store.dosyaGoruntuIcin(referenced.dosyaAdi)).exists())
         assertEquals(0, service.onaylananYetimleriSil(setOf(referenced.dosyaAdi), simdi = now))
     }

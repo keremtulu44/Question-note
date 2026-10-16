@@ -4,6 +4,7 @@ import androidx.room.Room
 import com.keremtulu.questionnote.data.local.VarsayilanDersleriEkle
 import com.keremtulu.questionnote.data.local.YanlisDefteriDatabase
 import com.keremtulu.questionnote.domain.model.GorselTuru
+import com.keremtulu.questionnote.domain.model.KonuIslemSonucu
 import com.keremtulu.questionnote.domain.model.SoruGorselGirdisi
 import com.keremtulu.questionnote.domain.model.SoruIslemSonucu
 import com.keremtulu.questionnote.domain.model.SoruKaydetmeIstegi
@@ -128,7 +129,7 @@ class RoomSoruRepositoryTest {
             repository.soruKaydet(SoruKaydetmeIstegi(dersId = dersId, konuId = konuId, gorseller = listOf(image))),
         )
         val soru = repository.sorulariIzle(dersId).first().single()
-        assertEquals(SoruIslemSonucu.Basarili, konuRepo.konuArsivle(konuId))
+        assertEquals(KonuIslemSonucu.Basarili, konuRepo.konuArsivle(konuId))
         val details = repository.soruGetir(soru.id)!!
         assertEquals(konuId, details.konuId)
         assertEquals(

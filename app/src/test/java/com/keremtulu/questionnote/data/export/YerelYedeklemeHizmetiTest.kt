@@ -90,7 +90,7 @@ class YerelYedeklemeHizmetiTest {
         assertEquals(stored.id, restoredImage.id)
         assertNotEquals(stored.dosyaAdi, restoredImage.dosyaAdi)
         assertTrue(store.kaliciDosyayiDogrula(restoredImage.toInput()))
-        assertFalse(requireNotNull(store.dosyaGoruntuIcin(stored.dosyaAdi)).exists())
+        assertFalse(File(RuntimeEnvironment.getApplication().filesDir, stored.dosyaAdi).exists())
         assertEquals(null, database.geriYuklemeIsaretiDao().idGetir())
 
         val safety = File(RuntimeEnvironment.getApplication().filesDir, "yedekler/${result.guvenlikYedegiAdi}")
@@ -157,7 +157,7 @@ class YerelYedeklemeHizmetiTest {
         writeJournal(restoreId, oldImage.dosyaAdi, newName, "PREPARED")
         service.kesintiliGeriYuklemeyiTamamla()
         assertTrue(requireNotNull(store.dosyaGoruntuIcin(oldImage.dosyaAdi)).exists())
-        assertFalse(requireNotNull(store.dosyaGoruntuIcin(newName)).exists())
+        assertFalse(File(RuntimeEnvironment.getApplication().filesDir, newName).exists())
         assertFalse(File(RuntimeEnvironment.getApplication().filesDir, "yedekler/geri-yukleme.json").exists())
 
         // Simulate the post-commit state: the marker and the new row make recovery finish cleanup, not roll back.
@@ -171,7 +171,7 @@ class YerelYedeklemeHizmetiTest {
         }
         writeJournal(restoreId, oldImage.dosyaAdi, nextName, "PREPARED")
         service.kesintiliGeriYuklemeyiTamamla()
-        assertFalse(requireNotNull(store.dosyaGoruntuIcin(oldImage.dosyaAdi)).exists())
+        assertFalse(File(RuntimeEnvironment.getApplication().filesDir, oldImage.dosyaAdi).exists())
         assertTrue(store.kaliciDosyayiDogrula(committedImage.asInput()))
         assertEquals(null, database.geriYuklemeIsaretiDao().idGetir())
         assertFalse(File(RuntimeEnvironment.getApplication().filesDir, "yedekler/geri-yukleme.json").exists())
