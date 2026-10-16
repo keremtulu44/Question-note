@@ -2,21 +2,22 @@
 
 > Bu dosya Android CI tarafından otomatik üretilir. Keystore veya parola değerleri yazılmaz.
 
-- Zaman (UTC): 2026-10-16T18:00:40Z
-- Workflow commit'i: cbab9db6549cebf88b5384acc652eed830d9556e
+- Zaman (UTC): 2026-10-16T18:03:25Z
+- Workflow commit'i: cd2f8949c15163b6d60da1f0110f917455cbe221
 - Dal: arena/0ec2226d-question-note
 - Uygulama sürümü: 1.0.1 (versionCode 2)
 - Android SDK: compileSdk/targetSdk 37, minSdk 26; build-tools 37.0.0
 - Genel sonuç: **BAŞARILI**
 - Wrapper çıkış kodu: 0
 - testDebugUnitTest çıkış kodu: 0
+- Birim test özeti: 3 test; 0 başarısız; 0 hata; 0 atlandı
 - assembleRelease çıkış kodu: 0
 - İmzalama secret durumu: İki gerekli secret dolu (değerler gösterilmez)
 - İmzalama/verify durumu: İmzalandı; apksigner doğruladı ve beklenen sertifika eşleşti (kod: 0; apksigner verify: 0)
 - Sertifika parmak izi: FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54 (beklenen: FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54; durum: eşleşti)
 - Release: Bu sürüm etiketi için Release zaten mevcut; yeniden oluşturulmadı (kod: 0)
 - Release URL: https://github.com/keremtulu44/Question-note/releases/tag/v1.0.1
-- İmzalı APK SHA-256: d254516dfa9b62c25964f75b3745fc73a127a9a5c61aacafa59499ff5a78a843
+- İmzalı APK SHA-256: e33120bc3f45ecf436d196b19d9b96b91e28c20c221ae3bee5f0857d0e692e62
 
 ## Gradle sürümü
 
@@ -58,40 +59,40 @@ To honour the JVM settings for this build a single-use Daemon process will be fo
 Daemon will be stopped at the end of the build 
 > Task :app:preBuild UP-TO-DATE
 > Task :app:preDebugBuild UP-TO-DATE
-> Task :app:generateDebugResources
-> Task :app:packageDebugResources
-> Task :app:processDebugNavigationResources
-> Task :app:parseDebugLocalResources
-> Task :app:javaPreCompileDebug
-> Task :app:generateDebugRFile
+> Task :app:generateDebugResources FROM-CACHE
+> Task :app:packageDebugResources FROM-CACHE
+> Task :app:processDebugNavigationResources FROM-CACHE
+> Task :app:parseDebugLocalResources FROM-CACHE
+> Task :app:generateDebugRFile FROM-CACHE
+> Task :app:kspDebugKotlin FROM-CACHE
+> Task :app:compileDebugKotlin FROM-CACHE
+> Task :app:javaPreCompileDebug FROM-CACHE
+> Task :app:compileDebugJavaWithJavac NO-SOURCE
 > Task :app:checkDebugAarMetadata
 > Task :app:mapDebugSourceSetPaths
-> Task :app:compileDebugNavigationResources
+> Task :app:compileDebugNavigationResources FROM-CACHE
+> Task :app:mergeDebugResources FROM-CACHE
 > Task :app:createDebugCompatibleScreenManifests
-> Task :app:extractDeepLinksDebug
-> Task :app:mergeDebugResources
-> Task :app:processDebugMainManifest
-> Task :app:processDebugManifest
+> Task :app:extractDeepLinksDebug FROM-CACHE
+> Task :app:processDebugMainManifest FROM-CACHE
+> Task :app:processDebugManifest FROM-CACHE
+> Task :app:processDebugManifestForPackage FROM-CACHE
+> Task :app:processDebugResources FROM-CACHE
 > Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest FROM-CACHE
 > Task :app:generateDebugAssets UP-TO-DATE
-> Task :app:javaPreCompileDebugUnitTest
-> Task :app:mergeDebugAssets
-> Task :app:processDebugUnitTestManifest
-> Task :app:processDebugManifestForPackage
-> Task :app:processDebugResources
-> Task :app:packageDebugUnitTestForUnitTest
-> Task :app:generateDebugUnitTestConfig
-> Task :app:kspDebugKotlin
-> Task :app:compileDebugKotlin
-> Task :app:compileDebugJavaWithJavac NO-SOURCE
-> Task :app:bundleDebugClassesToCompileJar
 > Task :app:bundleDebugClassesToRuntimeJar
-> Task :app:processDebugJavaRes
-> Task :app:kspDebugUnitTestKotlin
-> Task :app:compileDebugUnitTestKotlin
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:mergeDebugAssets
+> Task :app:kspDebugUnitTestKotlin FROM-CACHE
+> Task :app:compileDebugUnitTestKotlin FROM-CACHE
 > Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:packageDebugUnitTestForUnitTest
+> Task :app:processDebugUnitTestManifest
+> Task :app:generateDebugUnitTestConfig
+> Task :app:processDebugJavaRes
 > Task :app:processDebugUnitTestJavaRes
-> Task :app:testDebugUnitTest
+> Task :app:testDebugUnitTest FROM-CACHE
 
 [Incubating] Problems report is available at: file:///home/runner/work/Question-note/Question-note/build/reports/problems/problems-report.html
 
@@ -101,8 +102,8 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 1m 55s
-30 actionable tasks: 30 executed
+BUILD SUCCESSFUL in 13s
+30 actionable tasks: 11 executed, 19 from cache
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 
 -- Son 80 satır --
@@ -110,40 +111,40 @@ To honour the JVM settings for this build a single-use Daemon process will be fo
 Daemon will be stopped at the end of the build 
 > Task :app:preBuild UP-TO-DATE
 > Task :app:preDebugBuild UP-TO-DATE
-> Task :app:generateDebugResources
-> Task :app:packageDebugResources
-> Task :app:processDebugNavigationResources
-> Task :app:parseDebugLocalResources
-> Task :app:javaPreCompileDebug
-> Task :app:generateDebugRFile
+> Task :app:generateDebugResources FROM-CACHE
+> Task :app:packageDebugResources FROM-CACHE
+> Task :app:processDebugNavigationResources FROM-CACHE
+> Task :app:parseDebugLocalResources FROM-CACHE
+> Task :app:generateDebugRFile FROM-CACHE
+> Task :app:kspDebugKotlin FROM-CACHE
+> Task :app:compileDebugKotlin FROM-CACHE
+> Task :app:javaPreCompileDebug FROM-CACHE
+> Task :app:compileDebugJavaWithJavac NO-SOURCE
 > Task :app:checkDebugAarMetadata
 > Task :app:mapDebugSourceSetPaths
-> Task :app:compileDebugNavigationResources
+> Task :app:compileDebugNavigationResources FROM-CACHE
+> Task :app:mergeDebugResources FROM-CACHE
 > Task :app:createDebugCompatibleScreenManifests
-> Task :app:extractDeepLinksDebug
-> Task :app:mergeDebugResources
-> Task :app:processDebugMainManifest
-> Task :app:processDebugManifest
+> Task :app:extractDeepLinksDebug FROM-CACHE
+> Task :app:processDebugMainManifest FROM-CACHE
+> Task :app:processDebugManifest FROM-CACHE
+> Task :app:processDebugManifestForPackage FROM-CACHE
+> Task :app:processDebugResources FROM-CACHE
 > Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest FROM-CACHE
 > Task :app:generateDebugAssets UP-TO-DATE
-> Task :app:javaPreCompileDebugUnitTest
-> Task :app:mergeDebugAssets
-> Task :app:processDebugUnitTestManifest
-> Task :app:processDebugManifestForPackage
-> Task :app:processDebugResources
-> Task :app:packageDebugUnitTestForUnitTest
-> Task :app:generateDebugUnitTestConfig
-> Task :app:kspDebugKotlin
-> Task :app:compileDebugKotlin
-> Task :app:compileDebugJavaWithJavac NO-SOURCE
-> Task :app:bundleDebugClassesToCompileJar
 > Task :app:bundleDebugClassesToRuntimeJar
-> Task :app:processDebugJavaRes
-> Task :app:kspDebugUnitTestKotlin
-> Task :app:compileDebugUnitTestKotlin
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:mergeDebugAssets
+> Task :app:kspDebugUnitTestKotlin FROM-CACHE
+> Task :app:compileDebugUnitTestKotlin FROM-CACHE
 > Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:packageDebugUnitTestForUnitTest
+> Task :app:processDebugUnitTestManifest
+> Task :app:generateDebugUnitTestConfig
+> Task :app:processDebugJavaRes
 > Task :app:processDebugUnitTestJavaRes
-> Task :app:testDebugUnitTest
+> Task :app:testDebugUnitTest FROM-CACHE
 
 [Incubating] Problems report is available at: file:///home/runner/work/Question-note/Question-note/build/reports/problems/problems-report.html
 
@@ -153,8 +154,8 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 1m 55s
-30 actionable tasks: 30 executed
+BUILD SUCCESSFUL in 13s
+30 actionable tasks: 11 executed, 19 from cache
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 ```
 
@@ -173,48 +174,48 @@ Daemon will be stopped at the end of the build
 > Task :app:stripReleaseDebugSymbols
 Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so. Run with --info option to learn more.
 
-> Task :app:packageReleaseResources
-> Task :app:extractReleaseNativeSymbolTables
-> Task :app:processReleaseNavigationResources FROM-CACHE
+> Task :app:extractReleaseNativeSymbolTables FROM-CACHE
 > Task :app:mergeReleaseNativeDebugMetadata NO-SOURCE
+> Task :app:packageReleaseResources FROM-CACHE
+> Task :app:processReleaseNavigationResources FROM-CACHE
 > Task :app:parseReleaseLocalResources FROM-CACHE
 > Task :app:generateReleaseRFile FROM-CACHE
 > Task :app:kspReleaseKotlin FROM-CACHE
+> Task :app:compileReleaseKotlin FROM-CACHE
 > Task :app:javaPreCompileRelease FROM-CACHE
+> Task :app:compileReleaseJavaWithJavac NO-SOURCE
+> Task :app:checkReleaseAarMetadata
 > Task :app:mapReleaseSourceSetPaths
 > Task :app:compileReleaseNavigationResources FROM-CACHE
-> Task :app:checkReleaseAarMetadata
+> Task :app:mergeReleaseResources FROM-CACHE
 > Task :app:createReleaseCompatibleScreenManifests
 > Task :app:extractDeepLinksRelease FROM-CACHE
-> Task :app:processReleaseMainManifest
-> Task :app:processReleaseManifest
-> Task :app:desugarReleaseFileDependencies
-> Task :app:processReleaseManifestForPackage
+> Task :app:processReleaseMainManifest FROM-CACHE
+> Task :app:processReleaseManifest FROM-CACHE
+> Task :app:processReleaseManifestForPackage FROM-CACHE
+> Task :app:processReleaseResources FROM-CACHE
+> Task :app:dexBuilderRelease FROM-CACHE
+> Task :app:desugarReleaseFileDependencies FROM-CACHE
 > Task :app:mergeReleaseStartupProfile
-> Task :app:mergeReleaseResources
-> Task :app:compileReleaseKotlin
-> Task :app:mergeExtDexRelease
-> Task :app:compileReleaseJavaWithJavac NO-SOURCE
-> Task :app:generateReleaseAssets UP-TO-DATE
+> Task :app:mergeExtDexRelease FROM-CACHE
+> Task :app:mergeDexRelease FROM-CACHE
 > Task :app:mergeReleaseArtProfile
+> Task :app:mergeReleaseGlobalSynthetics FROM-CACHE
+> Task :app:compileReleaseArtProfile FROM-CACHE
+> Task :app:generateReleaseAssets UP-TO-DATE
 > Task :app:mergeReleaseAssets
-> Task :app:compressReleaseAssets
+> Task :app:compressReleaseAssets FROM-CACHE
 > Task :app:extractReleaseVersionControlInfo
 > Task :app:extractProguardFiles
-> Task :app:processReleaseResources
 > Task :app:generateReleaseLintVitalReportModel
-> Task :app:dexBuilderRelease
-> Task :app:mergeReleaseGlobalSynthetics
+> Task :app:lintVitalAnalyzeRelease FROM-CACHE
 > Task :app:processReleaseJavaRes
-> Task :app:optimizeReleaseResources
+> Task :app:optimizeReleaseResources FROM-CACHE
 > Task :app:collectReleaseDependencies
 > Task :app:sdkReleaseDependencyData
 > Task :app:writeReleaseAppMetadata
 > Task :app:writeReleaseSigningConfigVersions
 > Task :app:mergeReleaseJavaResource
-> Task :app:mergeDexRelease
-> Task :app:compileReleaseArtProfile
-> Task :app:lintVitalAnalyzeRelease
 > Task :app:lintVitalReportRelease
 > Task :app:lintVitalRelease
 > Task :app:packageRelease
@@ -229,8 +230,8 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 1m 33s
-48 actionable tasks: 40 executed, 8 from cache
+BUILD SUCCESSFUL in 13s
+48 actionable tasks: 23 executed, 25 from cache
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 ```
 
@@ -272,5 +273,5 @@ Bu sürüm etiketi için Release zaten mevcut; yeniden oluşturulmadı
 
 ```text
 APK: app/build/outputs/apk/release/yanlis-defteri-1.0.1.apk
-SHA-256: d254516dfa9b62c25964f75b3745fc73a127a9a5c61aacafa59499ff5a78a843
+SHA-256: e33120bc3f45ecf436d196b19d9b96b91e28c20c221ae3bee5f0857d0e692e62
 ```
