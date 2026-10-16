@@ -180,6 +180,7 @@ class LocalSoruGorselDeposu(context: Context) : GorselDosyaYonetimi {
     suspend fun yedektenKaliciyaKopyala(
         source: File,
         beklenen: SoruGorselGirdisi,
+        hedefDosyaAdi: String? = null,
     ): String? = withContext(Dispatchers.IO) {
         if (
             !source.isFile ||
@@ -189,9 +190,10 @@ class LocalSoruGorselDeposu(context: Context) : GorselDosyaYonetimi {
             !boyutlarEslesiyor(source, beklenen.genislik, beklenen.yukseklik)
         ) return@withContext null
         val id = UUID.randomUUID()
-        val name = "img/$id.jpg"
+        val name = hedefDosyaAdi ?: "img/$id.jpg"
         val destination = kaliciDosyasi(name) ?: return@withContext null
-        val pending = File(kaliciDizin, "$id.pending")
+        if (destination.exists()) return@withContext null
+        val pending = File(kaliciDizin, "${UUID.randomUUID()}.pending")
         try {
             Files.copy(source.toPath(), pending.toPath())
             Files.move(pending.toPath(), destination.toPath(), ATOMIC_MOVE)

@@ -1,147 +1,103 @@
-# Yedek Formatı (v1 taslağı)
+# Tam ZIP yedek biçimi — v2
 
-> Aşama 3'te uygulanacak yedek yapısının taslağıdır. Son güncelleme: 2026-10-16 (dış inceleme
-> notları işlendi)
+> Uygulanan biçim: `yanlis-defteri-backup`, format sürümü **2**, Room şema sürümü **2**. Bu belge
+> kodla günceldir. Son güncelleme: 2026-10-16.
 
----
+## 1. Arşiv yapısı
 
-## 1. Dosya yapısı
-
-```
-yanlis-defteri-yedek-YYYYMMDD-HHMM.zip
+```text
+yanlis-defteri-yedek.zip
 ├── manifest.json
-├── dersler.json
-├── konular.json
-├── sorular.json
-├── tekrarlar.json
-├── sorular.csv              (yalnızca okuma/inceleme kolaylığı; geri yüklemede kullanılmaz)
-└── gorseller/
-    ├── <uuid>.jpg
-    └── ...
+├── data.json                 # Geri yüklemenin kanonik kaynağı
+├── csv/
+│   ├── lessons.csv
+│   ├── topics.csv
+│   ├── questions.csv
+│   ├── images.csv
+│   └── reviews.csv           # İnceleme/tablo uygulamalarına yönelik kopyalar
+└── images/
+    └── <uuid>.jpg            # Soru ve çözüm görselleri
 ```
 
-- `gorseller/` içindeki dosya adları veritabanındaki `dosya_adi` alanıyla **birebir** eşleşir.
-- Yedek, **tam** yedektir: dersler, konular, sorular, soru ve çözüm görselleri, notlar, plan durumu,
-  tekrar planı ve tekrar geçmişi dâhildir.
-- Yedek **hiçbir cihaz kimliğine, dosya yoluna veya URI'ye bağlı değildir**; yeni telefonda aynı
-  uygulama sürümü yedeği eksiksiz geri yükleyebilir.
-- Veriler ayrı JSON dosyalarında tutulur: büyük arşivde tek tek incelenebilir, iki yedek
-  karşılaştırılabilir ve tek bir dosya bozulsa bile kalanı okunabilir kalır. (Tek `data.json`
-  alternatifi değerlendirildi; bu avantajlar nedeniyle ayrı dosyalar tercih edildi.)
-- Önizleme/thumbnail dosyaları yedeğe **konmaz** (önbellekte, asıl görselden yeniden üretilebilir).
-- CSV yalnızca başka programlarda inceleme içindir; tam veri aktarımı JSON iledir.
-- PDF gibi ek çıktılar ileride eklenebilir ama **tam yedek yerine geçmez**.
+Yedek; ders, konu, soru/not, plan ve öğrenme durumu, tekrar geçmişi/algoritma alanları ve
+soru/çözüm görsellerini içerir. CSV dosyaları yardımcı kopyadır; geri yükleme ilişkileri JSON
+üzerinden doğrular ve CSV'yi veri kaynağı olarak kullanmaz. Cihaz içindeki gerçek dosya yolu yedeğe
+konmaz; geri yüklemede yeni kalıcı dosya adları üretilir. Önizleme/küçük resimler dâhil değildir.
 
-## 2. `manifest.json` alanları (taslak)
+## 2. Manifest, bütünlük ve sınırlar
 
-| Alan | Açıklama |
-|---|---|
-| `yedek_format_surumu` | Ör. `1`. Dosya yapısı değiştiğinde artar. **Uygulama sürümünden bağımsızdır.** |
-| `uygulama_surumu` | `versionName` |
-| `uygulama_surum_kodu` | `versionCode` |
-| `olusturma_zamani` | ISO 8601 |
-| `veritabani_sema_surumu` | Room şema sürümü |
-| `sayilar` | ders, konu, soru, görsel, tekrar kayıt sayıları |
-| `dosyalar` | Her dosya için `ad` (göreli yol), `boyut`, `sha256` |
-| `toplam_boyut` | Sıkıştırılmamış toplam bayt |
+`manifest.json` en az biçim kimliği/sürümü, Room şema sürümü, oluşturulma zamanı, `data.json` ve
+`images/` yolları, beş tablonun satır sayıları, zorunlu CSV yolları ve her yük için göreli yol,
+byte uzunluğu ve SHA-256 içerir. JSON, ilişki ve enum alanları ayrıca doğrulanır; görsellerin boyutu,
+SHA-256'sı, JPEG MIME türü ve çözünürlük metadata ile eşleştirilir.
 
-## 3. Geri yükleme kuralları
+Uygulanan üst sınırlar: ZIP 512 MiB; açılmış toplam içerik 1 GiB; tek girdi 128 MiB; `data.json`
+64 MiB; manifest 1 MiB; 10.007 ZIP girdisi (manifest dâhil); 10.000 görsel; tablo başına 200.000
+kayıt; görsel kenarı en çok 3.000 px; sıkıştırma oranı en çok 1.000:1. İçe aktarma, arşivi app-private
+güvenli hazırlık dizinine sınırlandırılmış şekilde kopyalar, SHA-256 ve ilişki kontrollerini yapar,
+yol kaçışı/tekrarlı/yabancı ZIP girdilerini reddeder ve çıkarma öncesi yaklaşık boş alanı denetler.
+Dışa aktarma ve görsel kopyalama öncesinde de boş alan kontrolü uygulanır. SHA-256 bozulmayı
+saptar; **şifreleme veya kaynağın kimliğini doğrulama sağlamaz**.
 
-1. **Doğrulama:** ZIP okunabilirliği; `manifest.json` varlığı ve okunabilirliği; format sürümü
-   destekleniyor mu; her dosyanın `sha256` ve boyut kontrolü; JSON içeriklerinin ayrıştırılması;
-   ilişkilerin tutarlılığı (her görselin bir sorusu var mı, `konu_id` değerleri var olan konulara
-   mı işaret ediyor).
-2. **Anlamsız/boş yedek koruması:** Yedekteki kayıt sayıları bildirilir ve mevcut arşivle
-   karşılaştırılır. Kullanıcı **onaylamadan** hiçbir şey değiştirilmez.
-3. **Boş alan ve boyut kontrolü:** Hedef için yeterli boş alan yoksa işlem başlatılmaz.
-4. **Geçici dizine açma:** İçerik önce geçici dizine çıkarılır; mevcut arşive hiç dokunulmaz.
-5. **Yeni arşivi hazırlama ve bütünlük kontrolü:** Veritabanı dosyası geçici alanda oluşturulur ve
-   açılabildiği, tabloların beklendiği gibi olduğu doğrulanır.
-6. **Güvenlik kopyası:** Mevcut veritabanı ve görseller, `yanlis-defteri-guvenlik-yedegi-<tarih>.zip`
-   olarak otomatik yedeklenir (kullanıcı onayı olmadan silinmez).
-7. **Değiştirme:** Yalnızca **"tamamen değiştir"** desteklenir. Yeni içerik yerleştirilir, veritabanı
-   yeni veriyle açılır ve sonuç doğrulanır (soru/görsel sayıları).
-8. **Hata durumu:** Herhangi bir adım başarısız olursa güvenlik kopyasından geri dönülür; mevcut
-   çalışan arşiv korunur ve kullanıcıya anlaşılır hata mesajı gösterilir.
+Daha yeni format veya Room şema sürümü açık hata ile reddedilir. Format v2'den eski yedekler için
+uyumluluk taahhüdü yoktur; henüz eski bir yayımlanmış format bulunmuyor. Format sürümü ve Room
+migration'ı birbirinden bağımsız yönetilir; yeni bir alan/format değişiminde bu belge ve testler
+birlikte güncellenmelidir.
 
-### 3.1 Kesintiye dayanıklılık (uygulama işlem sırasında kapanırsa)
+## 3. Dışa aktarma ve SAF/Drive
 
-- Geri yükleme başlamadan önce küçük bir **"işlem sürüyor" işaret dosyası** yazılır (seçilen yedek,
-  hangi aşamada olunduğu).
-- Uygulama işlem sırasında kapatılır veya öldürülürse, **bir sonraki açılışta** işlem ya
-  tamamlanır ya da güvenlik kopyasından geri alınır. Kullanıcıya ne olduğu açıkça bildirilir.
-- Yarım kalmış bir arşiv hiçbir zaman "etkin" hâle getirilmez.
+Kullanıcı Android belge seçicisinde hedefi seçer. ZIP önce cache içinde geçici dosyaya yazılır; her
+yükün boyutu/hash'i kaynağa karşı kontrol edilir, dosya `fsync` ve atomik taşıma ile tamamlanır;
+ancak bundan sonra `ContentResolver` üzerinden seçilen hedefe kopyalanır ve son yedek özeti
+kaydedilir. Başarısız işlem başarı olarak gösterilmez. Son özet dosya adı, tarih, boyut ve bunun
+seçilen konum mu yoksa güvenlik kopyası mı olduğunu gösterir.
 
-### 3.2 Bozuk veya kötü niyetli ZIP korumaları
+Android belge sağlayıcısına yazmanın tamamlanması Drive/bulut yüklemesinin bittiğini kanıtlamaz.
+Arayüz kullanıcıya bulut sağlayıcısındaki yüklemeyi ayrıca doğrulaması gerektiğini söyler.
+Uygulama kaldırılırsa cihaz içi veriler ve uygulamanın özel alanındaki güvenlik kopyası silinebilir;
+önemli yedek ayrıca kullanıcının seçtiği kalıcı konuma kaydedilmelidir.
 
-- Mutlak yol ve `..` içeren ZIP girdileri reddedilir (yol kaçışı).
-- Dosya sayısı, tek dosya boyutu ve **toplam açılmış boyut** için üst sınır uygulanır.
-- Sıkıştırma oranı anormal olan arşivler (zip bomb) açılmadan reddedilir.
-- Beklenmeyen dosya türleri (görsel değil, JSON değil) yok sayılmaz; rapor edilir.
-- Desteklenmeyen **daha yeni** format sürümü, anlaşılır mesajla reddedilir.
+## 4. Tam geri yükleme
 
-**v1'de desteklenmeyen:** "Birleştir" tipi geri yükleme. Kimlik çakışması ve yinelenen kayıt tasarımı
-gerektirdiği için sonraya bırakıldı.
+Geri yükleme **mevcut arşivin tamamını değiştirir**; birleştirme desteklenmez.
 
-**Politika:** Geri yükleme, bozuk/eksik/desteklenmeyen yedekleri **açık hata mesajıyla reddeder**.
-Hiçbir koşulda mevcut veriler sessizce silinmez.
+1. SAF'ten seçilen ZIP sınırlı biçimde özel hazırlık dizinine kopyalanır. Manifest, sürüm, girdi
+   yolları, sayılar, dosya boyutları/SHA-256, JSON ilişkileri, JPEG metadata'sı ve boş alan kontrolü
+   tamamlanmadan onay gösterilmez.
+2. Önizleme yedekteki ve mevcut arşivdeki kayıt/görsel sayılarını gösterir. Kullanıcının açık
+   onayı olmadan veritabanı veya kalıcı görseller değiştirilmez.
+3. Mevcut veritabanı ve görsellerden doğrulanmış `safety-<uuid>.zip` güvenlik kopyası oluşturulur;
+   oluşturulamıyorsa işlem başlamaz. Kopya `files/yedekler/` altında tutulur.
+4. İşlem günlüğü yazılır, yeni görseller farklı kalıcı adlarla kopyalanıp doğrulanır. Sonra Room
+   transaction'ında eski tekrar/görsel/soru/konu/ders tabloları silinir, doğrulanmış içerik sırayla
+   eklenir ve geri yükleme işareti yazılır.
+5. Yeni satırlar ve görsel dosyaları tekrar doğrulanır. Başarılıysa eskiye ait görseller silinir,
+   Room işareti ve günlük temizlenir. Soru/görsel referanslarının yanlışlıkla aynı dosyayı
+   göstermemesi için yeni kalıcı adlar kullanılır.
 
-## 4. Yedek üretme kuralları
+Kesinti kurtarması için app-private JSON işlem günlüğü ile Room v1→v2 migration'ında oluşturulan
+`geri_yukleme_isaretleri` tablosu birlikte kullanılır. Uygulama normal ekranları açmadan önce
+kurtarmayı çalıştırır: Room işareti yoksa işlem transaction'a ulaşmamıştır ve yalnızca yeni dosyalar
+silinerek eski arşiv bırakılır; işaret varsa yeni arşiv commit edilmiştir ve eski dosya temizliği
+idempotent biçimde tamamlanır. Günlük/işaret tutarsızlığı veya yeni görsel doğrulama hatası varsa
+uygulama verileri sessizce değiştirmek yerine normal kullanımı kilitler ve tekrar kurtarma seçeneği
+gösterir.
 
-- Önce **yeni** yedek başarıyla tamamlanır ve doğrulanır; ancak ondan sonra eski geçici/artık yedekler
-  silinebilir.
-- Yeterli boş alan yoksa işlem başlatılmaz, kullanıcı bilgilendirilir.
-- Yedek yazılamaz veya doğrulanamazsa işlem **başarısız** olarak raporlanır; arayüz asla
-  "yedeklendi" demez.
-- Yedek, kullanıcının seçtiği konuma yazılır: cihazdaki bir klasör veya Android dosya seçicisindeki
-  bir sağlayıcı (ör. Drive).
-- **Son yedek bilgisi** saklanır ve gösterilir: tarih, dosya boyutu, dosya adı, kaydedilen konum.
+## 5. Test ve cihaz kabulü
 
-## 5. Drive ile ilgili açık ayrım
+Robolectric/JVM testleri ZIP üretimini, her envanter SHA/uzunluğunu, tam geri yükleme ve dosya adı
+yeniden üretimini, mevcut verinin güvenlik kopyasını, checksum bozulmasını, path-traversal reddini,
+kesinti kurtarmasında commit/rollback ayrımını, Room v1→v2 migration/veri korumasını kapsar. Bunlar
+CI'da gerçek çalıştırılmadan geçilmiş sayılmaz. CI testi fiziksel cihaz/SAF sağlayıcı davranışını
+kanıtlamaz.
 
-Android dosya seçicisi üzerinden bir belge sağlayıcısına yazmak, **buluta yüklemeyi tamamlamış olmak
-anlamına gelmez.** Sağlayıcı yüklemeyi arka planda yapar ve sonucu bildirmez.
+Kullanıcı kabulü ayrıca gerekir: cihazda seçilen Downloads/Drive hedefi, uygulama kapanıp açılması,
+yedek seçme-önizleme-onay/iptal akışları ve başka/temiz kurulumda geri yükleme kontrol edilmelidir.
+Bulut yükleme durumu Drive arayüzünden ayrıca doğrulanır. 30–50 fotoğraflı okunabilirlik ve Aşama 2
+kamera/galeri testleri de gerçek cihazda bekliyor.
 
-Arayüz üç durumu karıştırmaz:
+## 6. Şifreleme ve gizlilik
 
-| Durum | Gösterilebilir mi? |
-|---|---|
-| **Yedek oluşturuldu** (ZIP başarıyla hazırlandı) | Evet |
-| **Konuma kaydedildi** (sağlayıcı yazmayı tamamladı) | Evet |
-| **Bulutta doğrulandı** (yükleme gerçekten tamamlandı) | Hayır — uygulama bunu doğrulayamaz |
-
-Önerilen metin: *"Yedek seçilen konuma kaydedildi. Bulut yüklemesinin tamamlandığını ayrıca kontrol
-edin."*
-
-- **Öneri:** Yedeği önce cihazdaki İndirilenler klasörüne yazmak; böylece her yedeğin garantili yerel
-  bir kopyası bulunur. Drive'a kopyalama kullanıcının tercihine bırakılır.
-- Çoklu cihaz eşzamanlı düzenleme ve çakışma çözümü kapsam dışıdır. Drive bir senkronizasyon sistemi
-  değildir.
-
-## 6. Sürümleme ve eski yedekler
-
-| Yedek format sürümü | Okuma politikası |
-|---|---|
-| 1 | Geçerli sürüm |
-| Gelecek sürümler | Yeni alanlar eklendiğinde sürüm artırılır; uygulama **eski** sürümleri okumayı destekler, kendi sürümünden yeni olan yedekleri anlaşılır hata ile reddeder |
-
-Eski yedekleri okuma politikası her format değişikliğinde bu belgeye işlenir. Yedek format sürümü
-uygulama sürümünden bağımsız yürür: uygulama 1.5 aynı formatı kullanabilir; 3.0 sürümü eski formatı
-okuyabilir.
-
-## 7. Şifreleme
-
-v1'de **yoktur**. Eklenirse:
-
-- Yedek, üçüncü parti programlarda incelenemez hâle gelir (CSV'nin amacına ters).
-- Parola kaybı = yedek kaybı.
-- Kendi kripto kodu yazılmaz; olgun bir araç/format kullanılır.
-
-Karar kullanıcıya bırakılmıştır (bkz. PROJECT_BRIEF §8, A5).
-
-## 8. Gizlilik uyarısı
-
-Yedek; kişisel notlar, çözüm açıklamaları ve soru fotoğraflarını içerir. Yedeğin saklandığı yerin
-gizliliği kullanıcının sorumluluğundadır; arayüz bu konuda kısa bir uyarı gösterir. Uygulama
-kaldırılırsa yerel veri kaybolur; **yedek, cihaz değiştirmenin ve veri kaybına karşı korunmanın ana
-yoludur.**
+v2 yedeği şifrelenmez. ZIP; kişisel not, çözüm açıklaması ve soru fotoğrafları içerebilir. Yedeği
+kullanıcının seçtiği saklama yerinde koruması gerekir. İleride şifreleme eklenirse parola kaybı riski,
+CSV'nin incelenebilirliği ve olgun bir standart kullanımı ayrıca kararlaştırılmalıdır.

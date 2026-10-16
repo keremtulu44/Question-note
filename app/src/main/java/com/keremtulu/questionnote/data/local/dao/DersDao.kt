@@ -38,9 +38,15 @@ interface DersDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun ekle(ders: DersEntity)
 
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun ekle(dersler: List<DersEntity>)
+
     @Update
     suspend fun guncelle(ders: DersEntity): Int
 
     @Update
     suspend fun guncelle(dersler: List<DersEntity>)
+
+    @Query("DELETE FROM dersler")
+    suspend fun tumunuSil()
 }

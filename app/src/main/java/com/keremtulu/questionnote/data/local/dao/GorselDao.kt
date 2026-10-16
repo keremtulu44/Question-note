@@ -24,4 +24,7 @@ interface GorselDao {
 
     @Query("DELETE FROM gorseller WHERE soru_id = :soruId")
     suspend fun sorununGorselleriniSil(soruId: String)
+
+    @Query("DELETE FROM gorseller")
+    suspend fun tumunuSil()
 }

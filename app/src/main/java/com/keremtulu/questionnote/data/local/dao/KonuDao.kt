@@ -31,6 +31,12 @@ interface KonuDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun ekle(konu: KonuEntity)
 
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun ekle(konular: List<KonuEntity>)
+
+    @Query("DELETE FROM konular")
+    suspend fun tumunuSil()
+
     @Update
     suspend fun guncelle(konu: KonuEntity): Int
 }

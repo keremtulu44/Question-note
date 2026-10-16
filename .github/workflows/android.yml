@@ -61,6 +61,7 @@ jobs:
           wrapper_exit=0
           unit_test_exit=125
           unit_test_summary="JUnit sonucu henüz yok"
+          unit_test_failure_details="JUnit hata ayrıntısı henüz yok"
           build_exit=125
           signing_exit=125
           zipalign_exit=125
@@ -137,6 +138,28 @@ jobs:
           PY
             )
             test_summary_exit=$?
+            unit_test_failure_details=$(python3 - <<'PY'
+          from pathlib import Path
+          from xml.etree import ElementTree
+
+          files = list(Path("app/build/test-results/testDebugUnitTest").glob("TEST-*.xml"))
+          details = []
+          for path in files:
+              root = ElementTree.parse(path).getroot()
+              for case in root.iter():
+                  if not case.tag.endswith("testcase"):
+                      continue
+                  for failure in list(case):
+                      if failure.tag.endswith("failure") or failure.tag.endswith("error"):
+                          message = failure.attrib.get("message", "").replace("\n", " ")
+                          details.append(
+                              f"{case.attrib.get('classname', '')} > {case.attrib.get('name', '')}: "
+                              f"{failure.attrib.get('type', failure.tag)}: {message}\n"
+                              f"{(failure.text or '').strip()[:3000]}"
+                          )
+          print("\n\n".join(details) if details else "Başarısız JUnit testi yok.")
+          PY
+            )
             if [[ "$unit_test_exit" -eq 0 && "$test_summary_exit" -ne 0 ]]; then
               unit_test_exit=1
             fi
@@ -301,6 +324,12 @@ jobs:
             else
               echo "Birim testleri çalıştırılmadı."
             fi
+            echo '```'
+            echo
+            echo "## JUnit başarısızlık ayrıntıları"
+            echo
+            echo '```text'
+            printf '%s\n' "$unit_test_failure_details"
             echo '```'
             echo
             echo "## Derleme çıktısı (son 120 satır)"

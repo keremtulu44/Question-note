@@ -130,14 +130,29 @@ class YerelDisaAktarmaHizmetiTest {
                 val manifest = zip.getInputStream(zip.getEntry("manifest.json")).bufferedReader().use {
                     JSONObject(it.readText())
                 }
-                assertEquals("yanlis-defteri-export", manifest.getString("format"))
+                assertEquals("yanlis-defteri-backup", manifest.getString("format"))
+                assertEquals(2, manifest.getInt("format_version"))
+                assertEquals(2, manifest.getInt("room_schema_version"))
+                assertTrue(manifest.getJSONArray("files").length() >= 7)
+                val inventory = manifest.getJSONArray("files")
+                for (index in 0 until inventory.length()) {
+                    val item = inventory.getJSONObject(index)
+                    val bytes = zip.getInputStream(zip.getEntry(item.getString("path"))).use { it.readBytes() }
+                    val digest = java.security.MessageDigest.getInstance("SHA-256").digest(bytes)
+                        .joinToString("") { "%02x".format(it.toInt() and 0xff) }
+                    assertEquals(item.getLong("size_bytes"), bytes.size.toLong())
+                    assertEquals(item.getString("sha256"), digest)
+                }
+                assertTrue(entryNames.containsAll(setOf(
+                    "csv/lessons.csv", "csv/topics.csv", "csv/questions.csv", "csv/images.csv", "csv/reviews.csv",
+                )))
                 assertEquals(1, manifest.getJSONObject("counts").getInt("questions"))
                 assertEquals(1, manifest.getJSONObject("counts").getInt("reviews"))
                 val data = zip.getInputStream(zip.getEntry("data.json")).bufferedReader().use {
                     JSONObject(it.readText())
                 }
                 assertEquals("Dışa aktarma test notu", data.getJSONArray("questions").getJSONObject(0).getString("question_note"))
-                assertEquals(1, data.getJSONArray("lessons").length())
+                assertEquals(7, data.getJSONArray("lessons").length())
                 assertEquals(1, data.getJSONArray("topics").length())
             }
         } finally {

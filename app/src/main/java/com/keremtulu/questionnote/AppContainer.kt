@@ -4,7 +4,7 @@ import android.content.Context
 import com.keremtulu.questionnote.data.local.YanlisDefteriDatabaseProvider
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
 import com.keremtulu.questionnote.data.images.GorselTutarliligiHizmeti
-import com.keremtulu.questionnote.data.export.YerelDisaAktarmaHizmeti
+import com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti
 import com.keremtulu.questionnote.data.repository.RoomDersRepository
 import com.keremtulu.questionnote.data.repository.RoomKonuRepository
 import com.keremtulu.questionnote.data.repository.RoomSoruRepository
@@ -20,5 +20,5 @@ class AppContainer(context: Context) {
     val konuRepository: KonuRepository = RoomKonuRepository(database)
     val soruRepository: SoruRepository = RoomSoruRepository(database, gorselDeposu)
     val gorselTutarliligi = GorselTutarliligiHizmeti(database, gorselDeposu)
-    val disaAktarmaHizmeti = YerelDisaAktarmaHizmeti(context, database, gorselDeposu)
+    val disaAktarmaHizmeti = YerelYedeklemeHizmeti(context, database, gorselDeposu)
 }

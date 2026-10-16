@@ -47,12 +47,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.keremtulu.questionnote.R
+import com.keremtulu.questionnote.data.export.SonYedekBilgisi
 import com.keremtulu.questionnote.domain.model.Ders
 import com.keremtulu.questionnote.domain.model.DersIslemSonucu
 import com.keremtulu.questionnote.domain.repository.DersRepository
 import com.keremtulu.questionnote.ui.bilesenler.DersKartVerisi
 import com.keremtulu.questionnote.ui.bilesenler.DersKarti
 import com.keremtulu.questionnote.ui.tema.DersRenkleri
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.catch
@@ -99,6 +102,9 @@ fun DerslerEkrani(
     repository: DersRepository,
     onDersSecildi: (Ders, Boolean) -> Unit,
     onDisariAktar: () -> Unit,
+    onIceriAktar: () -> Unit,
+    sonYedek: SonYedekBilgisi?,
+    yedeklemeIslemde: Boolean,
     onBakim: () -> Unit,
 ) {
     var arsivlilerGosteriliyor by remember { mutableStateOf(false) }
@@ -193,10 +199,34 @@ fun DerslerEkrani(
                 TextButton(onClick = { yonetimAcik = true }) {
                     Text(stringResource(R.string.lesson_manage))
                 }
-                TextButton(onClick = onDisariAktar) {
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 2.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                TextButton(onClick = onDisariAktar, enabled = !yedeklemeIslemde) {
                     Text(stringResource(R.string.export_action))
                 }
+                TextButton(onClick = onIceriAktar, enabled = !yedeklemeIslemde) {
+                    Text(stringResource(R.string.backup_restore_action))
+                }
             }
+            Text(
+                text = sonYedek?.let { info ->
+                    val date = SimpleDateFormat("d MMM yyyy HH:mm", Locale("tr", "TR")).format(Date(info.olusturmaZamani))
+                    val size = android.text.format.Formatter.formatShortFileSize(context, info.boyutBayt)
+                    context.getString(
+                        R.string.backup_last_info,
+                        info.dosyaAdi,
+                        date,
+                        size,
+                        context.getString(if (info.guvenlikKopyasi) R.string.backup_safety_copy else R.string.backup_external_copy),
+                    )
+                } ?: stringResource(R.string.backup_last_none),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 22.dp, vertical = 2.dp),
+                style = MaterialTheme.typography.bodySmall,
+                color = colors.onSurfaceVariant,
+            )
             TextButton(
                 onClick = onBakim,
                 modifier = Modifier.padding(start = 14.dp),

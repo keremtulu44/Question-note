@@ -19,4 +19,10 @@ interface TekrarDao {
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun ekle(tekrar: TekrarEntity)
+
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun ekle(tekrarlar: List<TekrarEntity>)
+
+    @Query("DELETE FROM tekrarlar")
+    suspend fun tumunuSil()
 }

@@ -39,7 +39,7 @@ class RoomSoruRepository(
         konuId: String?,
         konusuz: Boolean,
     ): Flow<List<Soru>> = soruDao.sorulariIzle(dersId, konuId, konusuz)
-        .map { rows -> rows.map { it.toDomain(emptyList()) } }
+        .map { rows -> rows.map { row -> row.soru.toDomain(row.gorseller.map { it.toDomain() }) } }
 
     override suspend fun soruGetir(soruId: String): Soru? {
         val row = soruDao.idIleGetir(soruId) ?: return null

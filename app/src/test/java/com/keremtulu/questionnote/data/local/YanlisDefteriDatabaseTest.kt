@@ -109,14 +109,14 @@ class YanlisDefteriDatabaseTest {
     }
 
     @Test
-    fun schemaCreatesAllPlannedTablesAtVersionOne() {
+    fun schemaCreatesAllPlannedTablesAtVersionTwo() {
         val sqlite = database.openHelper.readableDatabase
         val cursor = sqlite.query("PRAGMA user_version")
         val version = cursor.use {
             assertTrue(it.moveToFirst())
             it.getInt(0)
         }
-        assertEquals(1, version)
+        assertEquals(2, version)
 
         val namesCursor = sqlite.query("SELECT name FROM sqlite_master WHERE type = 'table'")
         val tableNames = namesCursor.use { rows ->
@@ -124,7 +124,58 @@ class YanlisDefteriDatabaseTest {
                 while (rows.moveToNext()) add(rows.getString(0))
             }
         }
-        assertTrue(tableNames.containsAll(setOf("dersler", "konular", "sorular", "gorseller", "tekrarlar")))
+        assertTrue(tableNames.containsAll(setOf(
+            "dersler", "konular", "sorular", "gorseller", "tekrarlar", "geri_yukleme_isaretleri",
+        )))
+    }
+
+    @Test
+    fun migrationOneToTwoAddsRecoveryMarkerWithoutLosingExistingRows() = runBlocking {
+        val context = RuntimeEnvironment.getApplication()
+        val databaseName = "migration-preserve-${System.nanoTime()}.db"
+        val file = context.getDatabasePath(databaseName)
+        file.parentFile?.mkdirs()
+        val legacy = android.database.sqlite.SQLiteDatabase.openOrCreateDatabase(file, null)
+        try {
+            LEGACY_V1_SCHEMA.forEach { legacy.execSQL(it) }
+            legacy.execSQL("CREATE TABLE room_master_table (id INTEGER PRIMARY KEY, identity_hash TEXT)")
+            legacy.execSQL(
+                "INSERT OR REPLACE INTO room_master_table (id, identity_hash) VALUES(42, ?)",
+                arrayOf("db016c68a6f4baddd5a20169d44768ba"),
+            )
+            legacy.execSQL("PRAGMA user_version = 1")
+            legacy.execSQL(
+                "INSERT INTO dersler (id, ad, sira, arsivli, olusturma, guncelleme) VALUES (?, ?, ?, 0, ?, ?)",
+                arrayOf<Any?>("migration-kept-lesson", "Kaybolmayan ders", 0, 1L, 1L),
+            )
+        } finally {
+            legacy.close()
+        }
+
+        val migrated = Room.databaseBuilder(
+            context,
+            YanlisDefteriDatabase::class.java,
+            databaseName,
+        )
+            .addMigrations(YanlisDefteriMigrations.MIGRATION_1_2)
+            .allowMainThreadQueries()
+            .build()
+        try {
+            assertEquals("Kaybolmayan ders", migrated.dersDao().idIleGetir("migration-kept-lesson")?.ad)
+            assertEquals(null, migrated.geriYuklemeIsaretiDao().idGetir())
+            migrated.geriYuklemeIsaretiDao().ekle(
+                com.keremtulu.questionnote.data.local.entity.GeriYuklemeIsaretiEntity("migration-kept-marker"),
+            )
+            assertEquals("migration-kept-marker", migrated.geriYuklemeIsaretiDao().idGetir())
+            val version = migrated.openHelper.readableDatabase.query("PRAGMA user_version").use {
+                it.moveToFirst()
+                it.getInt(0)
+            }
+            assertEquals(2, version)
+        } finally {
+            migrated.close()
+            context.deleteDatabase(databaseName)
+        }
     }
 
     @Test
@@ -155,5 +206,24 @@ class YanlisDefteriDatabaseTest {
                 while (rows.moveToNext()) add(rows.getString(actionColumn))
             }
         }
+    }
+
+    private companion object {
+        val LEGACY_V1_SCHEMA = listOf(
+            """CREATE TABLE IF NOT EXISTS `dersler` (`id` TEXT NOT NULL, `ad` TEXT NOT NULL, `sira` INTEGER NOT NULL, `arsivli` INTEGER NOT NULL DEFAULT 0, `olusturma` INTEGER NOT NULL, `guncelleme` INTEGER NOT NULL, PRIMARY KEY(`id`))""",
+            """CREATE INDEX IF NOT EXISTS `index_dersler_sira` ON `dersler` (`sira`)""",
+            """CREATE TABLE IF NOT EXISTS `konular` (`id` TEXT NOT NULL, `ders_id` TEXT NOT NULL, `ad` TEXT NOT NULL, `sira` INTEGER NOT NULL, `arsivli` INTEGER NOT NULL DEFAULT 0, `olusturma` INTEGER NOT NULL, `guncelleme` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`ders_id`) REFERENCES `dersler`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )""",
+            """CREATE INDEX IF NOT EXISTS `index_konular_ders_id_sira` ON `konular` (`ders_id`, `sira`)""",
+            """CREATE TABLE IF NOT EXISTS `sorular` (`id` TEXT NOT NULL, `ders_id` TEXT NOT NULL, `konu_id` TEXT, `soru_notu` TEXT, `cozum_notu` TEXT, `kaynak` TEXT, `yanlis_nedeni` TEXT, `favori` INTEGER NOT NULL DEFAULT 0, `plan_durumu` TEXT NOT NULL DEFAULT 'AKTIF', `ogrenme_durumu` TEXT NOT NULL DEFAULT 'YENI', `son_tekrar_gun` INTEGER, `sonraki_tekrar_gun` INTEGER, `olusturma` INTEGER NOT NULL, `guncelleme` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`ders_id`) REFERENCES `dersler`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`konu_id`) REFERENCES `konular`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )""",
+            """CREATE INDEX IF NOT EXISTS `index_sorular_ders_id` ON `sorular` (`ders_id`)""",
+            """CREATE INDEX IF NOT EXISTS `index_sorular_konu_id` ON `sorular` (`konu_id`)""",
+            """CREATE INDEX IF NOT EXISTS `index_sorular_sonraki_tekrar_gun` ON `sorular` (`sonraki_tekrar_gun`)""",
+            """CREATE INDEX IF NOT EXISTS `index_sorular_plan_durumu` ON `sorular` (`plan_durumu`)""",
+            """CREATE INDEX IF NOT EXISTS `index_sorular_guncelleme` ON `sorular` (`guncelleme`)""",
+            """CREATE TABLE IF NOT EXISTS `gorseller` (`id` TEXT NOT NULL, `soru_id` TEXT NOT NULL, `tur` TEXT NOT NULL, `sira` INTEGER NOT NULL, `dosya_adi` TEXT NOT NULL, `mime_type` TEXT NOT NULL, `genislik` INTEGER NOT NULL, `yukseklik` INTEGER NOT NULL, `boyut` INTEGER NOT NULL, `sha256` TEXT NOT NULL, `olusturma` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`soru_id`) REFERENCES `sorular`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )""",
+            """CREATE UNIQUE INDEX IF NOT EXISTS `index_gorseller_soru_id_tur_sira` ON `gorseller` (`soru_id`, `tur`, `sira`)""",
+            """CREATE TABLE IF NOT EXISTS `tekrarlar` (`id` TEXT NOT NULL, `soru_id` TEXT NOT NULL, `zaman` INTEGER NOT NULL, `gun` INTEGER NOT NULL, `planlanan_gun` INTEGER, `sonuc` TEXT NOT NULL, `cozum_acildi` INTEGER NOT NULL DEFAULT 0, `onceki_aralik` INTEGER, `sonraki_aralik` INTEGER, `algoritma_surumu` INTEGER NOT NULL DEFAULT 1, `elle_atandi` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`id`), FOREIGN KEY(`soru_id`) REFERENCES `sorular`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )""",
+            """CREATE INDEX IF NOT EXISTS `index_tekrarlar_soru_id_gun` ON `tekrarlar` (`soru_id`, `gun`)""",
+        )
     }
 }

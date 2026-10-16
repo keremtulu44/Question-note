@@ -88,7 +88,16 @@ class LocalSoruGorselDeposuTest {
             assertTrue(failed)
 
             val oneDay = Duration.ofDays(1).toMillis()
-            assertEquals(0, store.eskiGecicileriTemizle(enAzYas = oneDay))
+            val now = System.currentTimeMillis()
+            val staging = File(context.cacheDir, "yanlis-defteri/staging").apply { mkdirs() }
+            val stale = File(staging, "test-stale-${System.nanoTime()}.jpg").apply { writeBytes(byteArrayOf(1)) }
+            val fresh = File(staging, "test-fresh-${System.nanoTime()}.jpg").apply { writeBytes(byteArrayOf(1)) }
+            assertTrue(stale.setLastModified(now - oneDay - 1))
+            assertTrue(fresh.setLastModified(now))
+            assertTrue(store.eskiGecicileriTemizle(simdi = now, enAzYas = oneDay) >= 1)
+            assertFalse(stale.exists())
+            assertTrue(fresh.exists())
+            fresh.delete()
         } finally {
             invalid.delete()
         }
