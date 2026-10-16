@@ -145,7 +145,7 @@ jobs:
                   if [[ "$apksigner_exit" -eq 0 ]]; then
                     "$build_tools/apksigner" verify --verbose --print-certs "$signed_apk" > "$verify_log" 2>&1
                     verify_exit=$?
-                    fingerprint_raw=$(awk -F': ' '/Signer #1 certificate SHA-256 digest:/ {print $2; exit}' "$verify_log")
+                    fingerprint_raw=$(awk -F': ' '/certificate SHA-256 digest:/ {print $NF; exit}' "$verify_log")
                     actual_fingerprint_hex=$(printf '%s' "$fingerprint_raw" | tr -cd '[:xdigit:]' | tr '[:lower:]' '[:upper:]')
                     if [[ -n "$actual_fingerprint_hex" ]]; then
                       actual_fingerprint_display=$(printf '%s' "$actual_fingerprint_hex" | sed 's/../&:/g; s/:$//')
