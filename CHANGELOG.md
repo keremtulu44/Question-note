@@ -59,6 +59,10 @@ Bu dosya **kullanıcıya yansıyan** değişiklikleri içerir. Henüz yayımlanm
 ### Kullanıcı kararları — 2026-10-16 (ikinci tur)
 
 - **Uygulama kimliği: `com.keremtulu.questionnote`** (A1 kapandı, değiştirilemez).
-- **İmzalama secret'ları için yol A seçildi:** Arena'daki GitHub bağlantısına Actions/Secrets yazma
-  izni eklenecek; ardından 4 secret komutla eklenecek. İzin gelmezse yol B'ye (web arayüzünden
-  ekleme) düşülecek. Ölçüm: `gh secret list` ve `actions/secrets/public-key` şu an **403**.
+- **İmzalama secret'ları:** Arena secret uçları **403** verdi; kullanıcı iki gerekli secret'ı web arayüzünden eklediğini bildirdi. Değerler görünmediği için G3 imza doğrulaması bekleniyor.
+
+### Aşama 1 / G2 — Android proje iskeleti — 2026-10-16
+
+- Tek modüllü Kotlin + Compose Android projesi, `libs.versions.toml` sürüm kataloğu ve Gradle 9.8.1 wrapper eklendi.
+- `applicationId=com.keremtulu.questionnote`, minSdk 26, compile/target API 37 sabitlendi.
+- Arayüzsüz `assembleRelease` CI'da başarıyla derlendi. APK henüz imzasızdır; cihazda kurulum testi yapılmadı.

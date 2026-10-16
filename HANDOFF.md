@@ -3,8 +3,8 @@
 > Yeni bir geliştirme oturumu önce [PROJECT_BRIEF.md](PROJECT_BRIEF.md) ve bu belgeyi okur.
 
 - Son güncelleme: 2026-10-16
-- Aktif aşama: **Aşama 0 tamamlandı**, Aşama 1 için kullanıcı onayı bekleniyor
-- Son başarılı derleme: **yok** (henüz derleme yapılmadı)
+- Aktif aşama: **Aşama 1 — G2 tamamlandı; G3 imzalı APK/Release doğrulaması sırada**
+- Son başarılı derleme: CI run `38925064386` — `assembleRelease` başarılı, imzasız APK üretildi
 
 ---
 
@@ -14,10 +14,11 @@
 - Kesinleşen kararlar alındı (bkz. PROJECT_BRIEF §4, §5).
 - Aşama 0 belgeleri oluşturuldu: README, PROJECT_BRIEF, ROADMAP, HANDOFF, BUILDING, CHANGELOG,
   `docs/` altında veri modeli, yedek formatı, test listesi, kodlama planı, imzalama prosedürü.
-- **Aşama 1 / G1 tamamlandı:** yetki ve CI ortamı ölçüldü; ilk workflow yazıldı ve **çalıştırıldı**
-  (2 başarılı koşu); ölçüm sonucu `docs/ORTAM_RAPORU.md` olarak repoda.
-- **İmzalama anahtarı üretildi** (git dışı `anahtar/` klasöründe); secret'ların eklenmesi bekleniyor.
-- **Uygulama kodu hâlâ yok.** Depoda Gradle dosyası veya `app/` klasörü bulunmuyor.
+- **Aşama 1 / G1 tamamlandı:** push ile otomatik CI iki kez çalıştı; ortam ölçümü `docs/ORTAM_RAPORU.md` içinde.
+- **Aşama 1 / G2 tamamlandı:** tek modüllü Kotlin + Compose iskeleti, sabit sürüm kataloğu ve Gradle 9.8.1 wrapper eklendi. `assembleRelease` CI'da başarılı; rapor `docs/DERLEME_RAPORU.md` içinde.
+- G2 ilk denemesi AGP 9.2'nin built-in Kotlin desteği nedeniyle `org.jetbrains.kotlin.android` eklentisiyle başarısız oldu; bu eklenti kaldırılınca aynı aday sürüm kombinasyonu derlendi (run `38925064386`).
+- **İmzalama anahtarı üretildi** (git dışı `anahtar/` klasöründe). Kullanıcı iki secret'ı eklediğini bildirdi; Arena token'ı secrets API'sine 403 aldığı için doğrulama G3 iş akışında yapılacak.
+- Şu an uygulamada **arayüz veya veri katmanı yok**; G2 `MainActivity` bilerek boş.
 
 ## Kullanıcıyla netleşen ek kararlar (Aşama 0 sırasında)
 
@@ -47,6 +48,10 @@
 | Actions **okuma** (workflow/run listesi) | ✅ Var | `actions/workflows`, `actions/runs` |
 | Derleme **logu indirme** | ❌ Engelli | Log başka bir sunucudan geliyor (sandbox'ta erişilemiyor) |
 
+**Bu oturumdaki tekrar kontrolü (2026-10-16):** `gh auth status` başarılı; `gh repo view` depo için
+`viewerPermission=ADMIN` gösterdi. `gh api .../permissions` 404, `gh secret list` 403 döndü. Secret
+uçları tekrar çağrılmayacak; doğrulama G3 imzalama iş akışında yapılacak.
+
 **Kritik sonuç:** Elle tetikleme izni gerekmiyor. Workflow **push ile otomatik** çalıştırıldığında
 hiçbir özel izin gerekmiyor → **CI çalışıyor.** Denendi ve kanıtlandı: iki başarılı koşu
 (`38919720842`, `38920099577`).
@@ -71,9 +76,9 @@ ileride APK'yı Release'e koyabileceğiz. Arena token'ına ihtiyaç yok.
 | Gradle | **9.8.1** önceden kurulu |
 | openssl / keytool | 3.0.13 / var |
 
-→ `compileSdk`/`targetSdk` 37.x seçilebilir; sürümler G2'de derlemeyle doğrulanacak.
+→ G2'de `compileSdk=37` ve `targetSdk=37` ile imzasız release derlemesi başarıyla doğrulandı.
 
-### İmzalama anahtarı (üretildi, secret bekliyor)
+### İmzalama anahtarı (üretildi; secret doğrulaması G3'te)
 
 - RSA 2048, PKCS12, alias `yanlisdefteri`, 30 yıl (2056'ya kadar)
 - SHA-256 parmak izi: `FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54`
@@ -82,10 +87,11 @@ ileride APK'yı Release'e koyabileceğiz. Arena token'ına ihtiyaç yok.
 - Ölçüm: base64 uzunluğu **3404 karakter** (RSA 2048). RSA 4096 olsaydı 5696 olurdu → 2048 tercih edildi.
 - Kullanıcıya adım adım talimat: `anahtar/KURULUM_ADIMLARI.md` (git dışı)
 
-**E1 güncel durum:** Secret'ları ben ekleyemiyorum (403). Kullanıcı **yol B**'yi uygulayacak:
-GitHub web → Settings → Secrets and variables → Actions → 2 secret ekleme
-(`SIGNING_KEYSTORE_BASE64`, `SIGNING_PASSWORD`). Yol A (Arena bağlantı izni) uygulamanın izin
-tanımına bağlı olduğu için kullanıcının vermesiyle değişmeyebilir; pratik yol B.
+**E1 güncel durum:** `gh secret list` → **403**; secret uçlarını tekrar çağırmayacağız. Kullanıcı
+`SIGNING_KEYSTORE_BASE64` ve `SIGNING_PASSWORD` secret'larını eklediğini bildirdi. Bu yalnızca kullanıcı
+beyanı; isim/değer durumu doğrulanmış sayılmıyor. G3 workflow keystore'u secret'tan açıp imzalı APK
+üretecek ve beklenen sertifika parmak izini karşılaştıracak; bu test değerleri açığa çıkarmadan
+secret'ların doğru olup olmadığını gösterecek.
 
 ## Dış inceleme — ikinci görüş (2026-10-16)
 
@@ -133,6 +139,11 @@ reddedildi.
 
 - CI iş akışı **iki kez başarıyla çalıştı** (koşular `38919720842`, `38920099577`;
   "completed / success"). Push ile otomatik tetiklendi — elle tetikleme izni gerekmedi.
+- G2 ilk build koşusu `38924729686` başarısız oldu: AGP 9.2.0, dış `org.jetbrains.kotlin.android`
+  eklentisini AGP 9'un built-in Kotlin desteği nedeniyle reddetti. Sadece bu eklenti çıkarıldı; aynı
+  sürüm adaylarıyla `38925064386` başarılı oldu. `compileReleaseKotlin` ve `assembleRelease` geçti.
+- G2 başarı raporu `docs/DERLEME_RAPORU.md` içinde; `app-release-unsigned.apk` ve SHA-256 üretildi.
+  İmza, Release ve cihaz kurulumu bu koşuda **test edilmedi**.
 - Workflow token'ı repoya **commit atabildi** → `docs/ORTAM_RAPORU.md` CI tarafından üretildi
   (contents:write yetkisi doğrulandı; Release oluşturmak için de aynı yetki gerekir).
 - Runner ortamı ölçüldü: Temurin JDK 17 (8/11/21/25 de kurulu), Android SDK (`build-tools` 34→37.0.0,
@@ -144,9 +155,13 @@ reddedildi.
 
 **Yalnızca incelenen / henüz doğrulanmayan:**
 
-- Aday sürümler (AGP 9.2.x, Kotlin 2.4.x, Compose BOM 2026.09.00, activity-compose 1.13.0,
-  lifecycle 2.11.0): kaynaklardan derlendi, **derlemeyle doğrulanmadı** → G2'de ölçülecek.
-- APK'nın telefondan kurulup güncellenmesi → G3/G5'te kullanıcı testi.
+- **G2'de derlemeyle doğrulanan:** AGP 9.2.0, AGP built-in Kotlin + Compose compiler plugin 2.4.0,
+  Compose BOM 2026.09.00, Activity-Compose 1.13.0, Gradle 9.8.1 wrapper, JDK 17, compileSdk/
+  targetSdk 37, minSdk 26. Tam özet `gradle/libs.versions.toml` ve `docs/KODLAMA_PLANI.md` içinde.
+- **G3'te henüz doğrulanacak:** secret'lardan açılan keystore, imzalı APK, SHA-256 sertifika eşleşmesi,
+  GitHub Release. Arena secret listesi 403 verdi; iş akışı üzerinden doğrulanacak.
+- **Kullanıcı cihazında test edilecek:** APK kurulumu, 7 ders kartının görünmesi ve ikinci APK'yı
+  kaldırmadan güncelleme.
 
 ## Bilinen hatalar / engeller
 
@@ -154,38 +169,38 @@ reddedildi.
   Buna karşılık **gerek olmadığı ölçüldü**: workflow push ile otomatik çalışıyor ve workflow'un kendi
   token'ı repoya yazabiliyor (Release dâhil). Tek eksik: **secret'ları yalnızca kullanıcı ekleyebilir**
   (web arayüzü, 2 alan). Adımlar: `anahtar/KURULUM_ADIMLARI.md` (git dışı).
-- **E2 (kısıt, çözümü yok):** Yapay zekâ ortamında derleme/test yapılamaz; ayrıca **derleme logları
-  indirilemiyor** (log sunucusu sandbox'tan erişilemez). Çözüm: CI kendi ölçüm/rapor çıktısını repoya
-  yazar (`docs/ORTAM_RAPORU.md` yaklaşımı) → yeni iş akışları da bu deseni kullanacak.
+- **E2 (kısıt, çözümü yok):** Yapay zekâ ortamında Android derlemesi/testi yapılamaz; ayrıca **CI
+  derleme logları indirilemiyor**. Çözüm: workflow ölçüm/özet/hata çıktısını repoya yazar; G1 için
+  `docs/ORTAM_RAPORU.md`, Android derlemeleri için `docs/DERLEME_RAPORU.md`.
 - **E3 (izlenecek):** `hasFragileUserData` davranışı gerçek cihazda doğrulanmadı.
 - **E4 (izlenecek):** Android Auto Backup, uygulama başına **25 MB** ile sınırlıdır; fotoğraf arşivi bu
-  kotayı ilk günden aşar. Bu nedenle sistem yedeklemesi birincil mekanizma olarak görülmez ve
-  `allowBackup=false` planlanır.
+  kotayı aşabilir. Manifest'te `allowBackup=false` ayarlandı; gerçek cihazdaki kaldırma/geri yükleme
+  davranışı uygulama testlerinde ayrıca ele alınacak.
 
 ## Sıradaki somut adım
 
 **Sıra:**
 
-1. **Kullanıcı** 2 secret'ı GitHub web arayüzünden ekler
-   (`SIGNING_KEYSTORE_BASE64`, `SIGNING_PASSWORD`) — `anahtar/KURULUM_ADIMLARI.md`.
-2. **Ben** `gh secret list` ile isimleri ölçerim (değerler görünmez, isimler yeter).
-3. **G2:** Proje iskeleti + ilk CI derlemesi (arayüzsüz) → sürümler doğrulanır.
-4. **G3:** İmzalı APK + Release akışı + parmak izi doğrulaması.
+1. **G3:** Push ile otomatik CI'da secret'tan keystore'u aç, APK'yı imzala, beklenen SHA-256
+   parmak izini karşılaştır, Release oluştur. Başarı/hata `docs/DERLEME_RAPORU.md` içinde okunur.
+2. **G4:** Tema + 7 ders kartı; `versionCode` artırılmış ikinci imzalı APK/Release.
+3. **G5:** Kullanıcı iki APK'yı cihazda kaldırmadan güncelleyerek zinciri doğrular.
 
 Ayrıntılı sıra: [docs/KODLAMA_PLANI.md](docs/KODLAMA_PLANI.md) §4 (G1…G6).
 
-**Kapananlar:** A1 (uygulama kimliği: `com.keremtulu.questionnote`), G1 (yetki + ortam ölçümü).
+**Kapananlar:** A1 (`com.keremtulu.questionnote`), G1 (yetki/ortam), G2 (arayüzsüz derleme).
 
 ## Kullanıcının yapacağı iş (Aşama 1)
 
-**Şimdi (5 dakika):**
+**Şimdi:**
 
-- 2 secret'ı GitHub'da ekle: `SIGNING_KEYSTORE_BASE64`, `SIGNING_PASSWORD`
-  → adımlar: `anahtar/KURULUM_ADIMLARI.md` (git dışı klasörde).
+- Ek secret işlemi yapma; iki secret'ı eklediğini bildirdin. Arena token'ı secret listesini 403 ile
+  göremediği için doğrulamayı G3 workflow yapacak. İmza raporu başarısız olursa yalnızca o zaman
+  `anahtar/KURULUM_ADIMLARI.md` ile değerleri kontrol et.
 - İmzalama anahtarını ve parolasını **iki bağımsız yerde** sakla (şifre yöneticisi + Drive).
   Bu, güncellemelerin veriyi koruyarak üzerine kurulabilmesi için şarttır.
 
-**Sonra (APK geldiğinde):**
+**APK'lar geldiğinde (G5):**
 
-- İlk APK'yı telefondan indirip kurmak ve 7 ders kartını görmek.
-- İkinci APK geldiğinde **kaldırmadan** üzerine kurmak ve çalıştığını bildirmek.
+- İlk imzalı APK'yı indirip telefona kur; G4 tamamlandığında 7 ders kartını gördüğünü bildir.
+- İkinci APK'yı **uygulamayı kaldırmadan** üzerine kur; uygulamanın açıldığını ve güncellendiğini bildir.

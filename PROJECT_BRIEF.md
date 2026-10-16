@@ -4,7 +4,7 @@ Bu belge projenin **karar kaydıdır**. Yeni bir geliştirme oturumu (insan veya
 belgeyi, sonra [HANDOFF.md](HANDOFF.md) dosyasını okur.
 
 - Son güncelleme: 2026-10-16
-- Durum: Aşama 0 (plan ve kararlar) — kod yazılmadı
+- Durum: Aşama 1 — G2 iskeleti CI'da başarıyla derlendi; G3 imzalama/Release doğrulaması sıradaki iş
 
 ---
 
@@ -89,7 +89,7 @@ kaynak (kitap/sayfa/soru no), yanlış yapma nedeni, favori/önemli işareti.
 | Min. Android | **minSdk 26 (Android 8)** | Ek kod maliyeti yok, geniş uyum |
 | Hedef SDK | Aşama 1'de güncel kararlı sürüm olarak sabitlenir | Güncel gerekliliklere uyum |
 | Kaynak kodu | GitHub deposu | Sürüm kontrolü ve oturumlar arası devamlılık |
-| Derleme | GitHub Actions (elle tetikleme) | Kullanıcının cihazında derleme ortamı gerektirmez |
+| Derleme | GitHub Actions (push ile otomatik) | Kullanıcının cihazında derleme ortamı gerektirmez; workflow ölçüm/özet raporunu repoya yazar |
 | Dağıtım | GitHub **Releases** üzerinden APK | Telefondan doğrudan indirilir; artifact ZIP'i ve saklama süresi sorunu yok |
 | İmzalama | **Sabit release anahtarı**, GitHub Secret'ta | Aynı imza olmadan güncelleme üzerine kurulamaz; kaldırmak veri kaybı demektir |
 
@@ -160,13 +160,13 @@ Ayrıca v1'de yok: otomatik yedekleme, Drive API/OAuth bağlantısı, yedek şif
 | # | Konu | Durum |
 |---|---|---|
 | ~~A1~~ | ~~Uygulama kimliği (applicationId)~~ | **Kapandı (2026-10-16): `com.keremtulu.questionnote`** — sabitlendi, değiştirilemez |
-| A2 | Hedef SDK değeri | Aşama 1'de güncel kararlı sürüm olarak sabitlenir |
+| A2 | Hedef SDK değeri | **API 37** seçildi ve G2 CI derlemesiyle doğrulandı (platform android-37.2); cihaz davranışı ayrıca test edilecek |
 | A3 | `hasFragileUserData` (kaldırırken veriyi koru) | Denenecek; davranışı gerçek cihazda doğrulanmalı. Birincil güvenlik ağı yine kendi ZIP yedeğimiz |
 | A4 | Kırpma (crop) ekranı | Aşama 5'e ertelendi; v1'de döndürme + tam ekran yakınlaştırma |
 | A5 | Yedek şifreleme | Gerekirse konuşulacak; parola kaybı = veri kaybı riski |
 | A6 | Doğrudan Drive bağlantısı | Aşama 6'da, önce SAF kalıcı izni + Drive klasörü yolu denenerek |
 | A7 | Aralık değerlerinin kullanıcı tarafından ayarlanması | Aşama 4'te değerlendirilecek |
-| A8 | GitHub Actions/Secret yazma yetkisi | **Secret yazma kapalı (403, ölçüldü)**; kullanıcı yol A'yı seçti → Arena bağlantı izni bekleniyor |
+| A8 | GitHub Actions/Secret yazma yetkisi | **Secret uçları 403**; kullanıcı iki secret'ı eklediğini bildirdi, değerler görünmediği için doğrulama G3 imzalama iş akışında yapılacak |
 | ~~A9~~ | ~~Görsel kalite varsayılanı~~ | **Kapandı (2026-10-16): K21 — otomatik optimize** (uzun kenar ~3000 px, JPEG ~%90; ölçüt okunabilirlik) |
 | A10 | Depolama dolduğunda "eski görselleri yeniden sıkıştır" aracı | Aşama 5'te değerlendirilecek |
 | A11 | Önizleme stratejisi (Coil önbelleği yeterli mi) | Aşama 5'te ölçümle karar verilecek |

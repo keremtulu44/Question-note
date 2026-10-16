@@ -17,7 +17,7 @@ bildirimler → ek özellikler.**
 - [x] Dış inceleme (ikinci görüş) alınması ve önerilerin gerekçeyle değerlendirilmesi
 - [x] Bekleme: kullanıcının Aşama 1 için açık onayı
 
-**Çıktı:** Bu depodaki belgeler. Kod yazılmadı.
+**Çıktı:** Kararlar ve uygulama planı; Aşama 1 kodlaması başladı (G2 ayrıntıları aşağıda).
 
 ---
 
@@ -28,15 +28,15 @@ bildirimler → ek özellikler.**
 **Amaç:** Derleme → indirme → kurma → güncelleme zincirini doğrulamak. Bu zincir kırıkken
 uygulama geliştirmenin anlamı yok.
 
-- [ ] GitHub Actions'ta yazma yetkisinin ve Secret ekleme imkânının doğrulanması
-- [ ] Temel Android proje iskeleti (tek Gradle modülü, Kotlin + Compose, sürüm kataloğu)
-- [ ] `applicationId`, veritabanı adı ve imza anahtarının ilk günden sabitlenmesi
-- [ ] Sabit release imzalama anahtarının oluşturulması ve GitHub Secret olarak tanımlanması
-- [ ] Elle tetiklenen derleme workflow'u
-- [ ] APK'nın GitHub Release olarak yayımlanması; release notlarında sürüm, commit kimliği, APK SHA-256
-- [ ] Temel tema (açık/koyu), ekran iskeleti, 7 ders kartı
-- [ ] **Kullanıcı testi:** APK'yı indir, kur, aç, 7 ders kartını gör
-- [ ] **Kullanıcı testi:** ikinci APK'yı (v2) **kaldırmadan** üzerine kur — veri/imza zinciri çalışıyor mu
+- [x] G1: push ile otomatik çalışan GitHub Actions ve `contents:write` yetkisi ölçüldü
+- [x] G2: tek Android modülü, Kotlin + Compose, sabit sürüm kataloğu ve Gradle wrapper; arayüzsüz `assembleRelease` CI'da başarılı
+- [x] `applicationId=com.keremtulu.questionnote`, `minSdk=26`, API 37 compile/target sabitlendi
+- [x] Sabit release anahtarı üretildi; kullanıcı iki secret'ı eklediğini bildirdi (değer/parmak izi G3 iş akışında doğrulanacak)
+- [x] Push ile otomatik Android derleme workflow'u (elle tetikleme gerekmiyor)
+- [ ] G3: APK'yı sabit anahtarla imzalama, sertifika parmak izi kontrolü ve GitHub Release
+- [ ] G4: açık/koyu tema, ekran iskeleti ve 7 ders kartı
+- [ ] **Kullanıcı testi:** ilk imzalı APK'yı indirip kur; arayüz ve 7 ders kartını gör
+- [ ] **Kullanıcı testi:** ikinci imzalı APK'yı (v2) **kaldırmadan** üzerine kur — güncelleme zinciri çalışıyor mu
 
 **Çıkış kriteri:** Kullanıcı, telefonda kaldırma yapmadan yeni APK ile güncelleme yapabiliyor.
 

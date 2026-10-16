@@ -11,7 +11,7 @@
 > ZIP yol güvenliği) ve **Robolectric** (şema/migration testleri). Emülatör yalnızca gerçekten
 > gerekirse kullanılır; asıl kabul testleri gerçek cihazda yapılır.
 
-Son güncelleme: 2026-10-16 (dış inceleme notları işlendi)
+Son güncelleme: 2026-10-16 (G2 CI derlemesi doğrulandı)
 
 ---
 
@@ -19,13 +19,14 @@ Son güncelleme: 2026-10-16 (dış inceleme notları işlendi)
 
 | # | Test | Sorumlu | Durum |
 |---|---|---|---|
-| 1.1 | Actions workflow'u yazılabiliyor ve çalışıyor | YZ | [ ] |
-| 1.2 | Derleme başarıyla tamamlanıyor (loglar hatasız) | YZ | [ ] |
+| 1.1 | Actions workflow'u yazılabiliyor ve push ile otomatik çalışıyor | YZ | [x] |
+| 1.2 | G2 arayüzsüz `assembleRelease` derlemesi başarılı | YZ | [x] |
 | 1.3 | İmzalı APK Release'e ekleniyor | YZ | [ ] |
 | 1.4 | Release notlarında sürüm, commit kimliği ve APK SHA-256 bulunuyor | YZ | [ ] |
 | 1.5 | APK telefondan indirilip kuruluyor | KULLANICI | [ ] |
 | 1.6 | Uygulama açılıyor, 7 ders kartı görünüyor | KULLANICI | [ ] |
 | 1.7 | İkinci APK **kaldırmadan** üzerine kuruluyor | KULLANICI | [ ] |
+| 1.8 | CI derleme özeti, hata çıktısı ve APK SHA-256 repoda okunabiliyor | YZ | [x] |
 
 ## Aşama 2 — Yerel arşiv
 

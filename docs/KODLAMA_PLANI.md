@@ -1,7 +1,7 @@
 # KODLAMA PLANI (Aşama 1 ve sonrası)
 
-> Bu belge **nasıl kodlayacağımızı** anlatır: görev sırası, dosya yapısı, sürüm sabitleme, imzalama
-> kurulumu, derleme bütçesi, test stratejisi. Kod içermez; kod Aşama 1 onayıyla başlar.
+> Bu belge **nasıl kodlayacağımızı** ve ölçülen sonuçları kaydeder: görev sırası, dosya yapısı,
+> sürüm sabitleme, imzalama kurulumu, derleme bütçesi, test stratejisi. Aşama 1 kodlaması başladı.
 >
 > İlgili belgeler: [PROJECT_BRIEF.md](../PROJECT_BRIEF.md) (kararlar) · [ROADMAP.md](../ROADMAP.md)
 > (aşamalar) · [BUILDING.md](../BUILDING.md) (derleme/imzalama) · [docs/VERI_MODELI.md](VERI_MODELI.md)
@@ -58,28 +58,31 @@ adımlara** bölünmüştür; tek seferde büyük kod yazıp log okuyarak hata a
 
 ## 2. Sürüm ve hedef belirleme (Aşama 1'in ilk teknik işi)
 
-Sürümler **tahminle değil, derleme zamanında doğrulanarak** sabitlenir. Aşağıdakiler bu oturumdaki
-araştırmadan gelen **aday** değerlerdir; Google Maven / Maven Central'a bu sandbox'tan erişemediğim
-için **doğrulanmış sayılmazlar**. (CI ortamının ölçülen tabanı: JDK 17 varsayılan, platforms
-android-34→37.2, build-tools 34.0.0→37.0.0, Gradle 9.8.1 hazır.)
+Sürümler **tahminle değil, derleme zamanında doğrulanarak** sabitlenir. İlk adaylar G2'de CI'da
+ölçüldü; aşağıdaki tabloda başarılı kombinasyon gösterilir. Sandbox'tan Google Maven / Maven
+Central'a erişilemese de GitHub CI derlemesi bu bağımlılıkları çözdü. (Ölçülen CI tabanı: JDK 17,
+platforms android-34→37.2, build-tools 34.0.0→37.0.0, Gradle 9.8.1.)
 
-| Bileşen | Aday | Doğrulama |
+| Bileşen | Sabitlenen sürüm | G2 CI sonucu |
 |---|---|---|
-| Android Gradle Plugin | 9.2.x (Nisan 2026) | AGP sürüm notları + Google Maven |
-| Kotlin | 2.4.x (kararlı) | plugins.gradle.org |
-| Compose BOM | 2026.09.00 | Google Maven |
-| Gradle | AGP'nin istediği sürüm | AGP sürüm notları |
-| JDK | 17 veya 21 (CI'da Temurin) | AGP gereksinimi |
-| minSdk | **26 (Android 8)** — kesin karar | — |
-| targetSdk | O günkü en güncel kararlı API | Aşama 1'de sabitlenir (A2) |
-| Room, Coil, Activity-Compose, Lifecycle | Aday: Room 2.8+, Coil 3.x, activity-compose 1.13, lifecycle 2.11 | Google Maven / Maven Central |
+| Android Gradle Plugin | **9.2.0** | `assembleRelease` başarılı |
+| AGP built-in Kotlin + Compose compiler plugin | **2.4.0** (`org.jetbrains.kotlin.plugin.compose`) | Kotlin kaynağı derlendi; dış `org.jetbrains.kotlin.android` eklentisi kullanılmıyor |
+| Compose BOM | **2026.09.00** | Bağımlılıklar çözüldü ve derleme başarılı |
+| Activity-Compose | **1.13.0** | Derleme başarılı |
+| Gradle wrapper | **9.8.1** | CI'da gerçek Gradle ile üretildi (Yol A), repoya yazıldı ve kullanıldı |
+| JDK | **Temurin 17** | G2 CI derlemesi başarılı |
+| compileSdk / targetSdk | **37 / 37** | G2 CI derlemesi başarılı; cihaz davranışı ayrıca test edilecek |
+| minSdk | **26 (Android 8)** — kesin karar | Yapılandırıldı |
+| Room, Coil, Lifecycle | Henüz eklenmedi | İlgili aşamada sürümlenip CI ile doğrulanacak |
 
-**Kural:** İlk `build.gradle.kts` dosyası bu tablodaki adaylarla yazılır; CI ilk derlemede hangi
-sürümü çözdüğünü loglar. Uyumsuzluk çıkarsa **tek tek** düşürülür ve hangi kombinasyonun çalıştığı
-`libs.versions.toml` + HANDOFF'a yazılır.
+**G2 ölçüm sonucu (2026-10-16):** İlk koşu `38924729686`, AGP 9.2.0'ın built-in Kotlin desteği
+nedeniyle `org.jetbrains.kotlin.android` eklentisini reddetti. Yalnızca bu eklenti kaldırıldı;
+AGP 9.2.0, Compose compiler plugin 2.4.0, Compose BOM 2026.09.00, Activity-Compose 1.13.0 ve
+Gradle 9.8.1 korunarak ikinci koşu `38925064386` başarılı oldu. Detaylı kanıt:
+[`docs/DERLEME_RAPORU.md`](DERLEME_RAPORU.md). Sürümler `gradle/libs.versions.toml` içindedir.
 
-**Şema/gereksinim notu:** Kotlin 2.x'te Compose için ayrı derleyici eklentisi gerekir
-(`org.jetbrains.kotlin.plugin.compose`); bu, sürüm kataloğuna baştan eklenir.
+**Compose notu:** AGP 9'un built-in Kotlin desteği kullanılır; `org.jetbrains.kotlin.android`
+eklentisi eklenmez. Compose için `org.jetbrains.kotlin.plugin.compose` sürüm kataloğunda sabitlenir.
 
 ### Gradle wrapper nasıl oluşturulacak?
 
@@ -95,7 +98,7 @@ Sandbox'ta Java olmadığı için `gradle wrapper` komutu buradan çalıştırı
 - **Yol C (son çare):** CI, `gradle/actions/setup-gradle@v4` ile Gradle'ı kurar ve wrapper'a hiç
   ihtiyaç duymadan derler. Repo kendi kendine yeterli olmaz; kabul edilmez ama derleme kurtarılır.
 
-A başarısız olursa B, o da olmazsa C; hangisinin kullanıldığı HANDOFF'a yazılır.
+**Ölçülen seçim:** Yol A başarıyla uygulandı; Gradle 9.8.1 wrapper CI'da üretildi, repoya commit edildi ve sonraki derlemede kullanıldı. Yol B/C gerekmedi.
 
 ---
 
@@ -137,23 +140,21 @@ PKCS12'de store ve key parolası aynı → tek parola secret'ı yeterlidir.
 
 | Yol | Ne olur | Kimin işi |
 |---|---|---|
-| **A. Arena GitHub bağlantı iznini genişletmek** ✅ *(seçildi)* | Bağlantıya Actions/Secrets yazma izni eklenir; ben 4 secret'ı komutla eklerim | Kullanıcı (Arena'da izin) |
-| **B. Kullanıcı secret'ları web arayüzünden ekler** *(A olmazsa)* | Ben anahtarı ve değerleri üretirim; kullanıcı GitHub web'den 4 alanı doldurur | Kullanıcı (telefondan ~5 dk) |
-| **C. Şimdilik imzasız/debug ile ilerle** | İlk APK kurulur ama üzerine güncelleme **çalışmaz**; gerçek arşiv başlamadan bir kez kaldır-kur gerekir | Ben + kullanıcı |
+| Yol | Ölçülen durum |
+|---|---|
+| Arena token'ıyla secret API | `gh secret list` → 403; bu uç tekrar denenmeyecek |
+| GitHub web arayüzü | Kullanıcı `SIGNING_KEYSTORE_BASE64` ve `SIGNING_PASSWORD` secret'larını eklediğini bildirdi; değerler görünmez |
+| İmzasız APK ile ilerlemek | Güncelleme zincirini doğrulamayacağı için kalıcı testte kullanılmayacak |
 
-**Güncel durum (G1 ölçümü):** Arena uygulamasının izin tanımı değişmedi; dispatch ve secrets
-uçları hâlâ **403**. Bu nedenle **yol B uygulanıyor**: kullanıcı 2 secret'ı GitHub web arayüzünden
-ekleyecek (adımlar: `anahtar/KURULUM_ADIMLARI.md`, git dışı).
+**G3 doğrulaması:** CI secret değerlerini rapora/komut çıktısına yazmadan keystore'u çözer, APK'yı
+imzalar ve sertifika SHA-256 parmak izini bu belgedeki değerle karşılaştırır. Eşleşme olmadan Release
+yayımlanmaz. Secret'ları workflow kendisi oluşturamaz.
 
-**Önemli:** Secret'ları **workflow da oluşturamaz** (güvenlik gereği). Yani "GitHub'da yeni bir action
-açmak" CI'ı çalıştırır ama secret sorununu çözmez. CI'ın tek ihtiyacı olan şey, bir kez elle eklenmiş
-2 secret'tır.
+### 3.4 G2/G3 imza ayrımı
 
-### 3.4 Yerel derleme anahtarı
-
-CI secret'ları yokken yerel derleme yapılabilmesi için `app/build.gradle.kts`, imzalama bilgilerini
-**ortam değişkenlerinden** okur, yoksa `debug` imzasına düşer. Release APK üretmeye çalışırken
-anahtar yoksa **derleme hata vererek durur** (sessizce debug'lamaz).
+G2'de `assembleRelease` yalnızca imzasız derleme doğrulamasıdır. G3 workflow'u APK'yı `apksigner`
+ile ayrı adımda imzalar; secret eksikse, açılamazsa veya parmak izi eşleşmezse Release yayımlanmaz.
+Gradle tarafında debug imzasına sessiz düşüş yapılmaz.
 
 ---
 
@@ -161,19 +162,20 @@ anahtar yoksa **derleme hata vererek durur** (sessizce debug'lamaz).
 
 Her görev: amaç → dosyalar → bitti ölçütü. Sıra, **en ucuz doğrulamadan en pahalıya** doğrudur.
 
-### G1. Yetki denemesi (kod yazmadan)
-- **Amaç:** Workflow dosyası yazma ve (varsa) secret ekleme yetkisini ölçmek.
-- **Yöntem:** En küçük workflow dosyası (`hello` job'u) eklenir, `gh workflow run` ile tetiklenir,
-  log okunur. Başarısızsa dosya geri alınır ve yol §3.3-A/B'ye göre seçilir.
-- **Bitti ölçütü:** "Workflow yazabiliyorum: evet/hayır" ve "Secret ekleyebiliyorum: evet/hayır"
-  sorusunun **ölçülmüş** cevabı.
+### G1. Yetki denemesi ✅ (2026-10-16)
+- Push ile otomatik CI iki kez çalıştı; workflow token'ının `contents:write` ile raporu repoya
+  commit edebildiği doğrulandı. `workflow_dispatch` ve secret uçları 403 verdi; elle tetikleme
+  gerekmediği için bu engel G2/G3 akışını durdurmuyor.
+- Kullanıcı iki imzalama secret'ını eklediğini bildirdi; secret değerleri/isimleri Arena token'ından
+  okunamıyor. Doğrulama G3 imzalama iş akışında yapılacak.
 
-### G2. Proje iskeleti (yalnızca derleme, arayüz yok)
+### G2. Proje iskeleti (yalnızca derleme, arayüz yok) ✅ (2026-10-16)
 - **Dosyalar:** `settings.gradle.kts`, `build.gradle.kts`, `gradle.properties`,
   `gradle/libs.versions.toml`, wrapper dosyaları, `app/build.gradle.kts`,
-  `app/src/main/AndroidManifest.xml`, boş `MainActivity.kt` + `ui/theme/` (renk/tema/tipografi).
+  `app/src/main/AndroidManifest.xml` ve arayüz içermeyen `MainActivity.kt`. `ui/theme/` G4'te eklenir.
 - **Neden arayüz yok:** İlk CI derlemesinde tek sorun kaynağı olsun. Arayüz G4'te eklenir.
 - **Bitti ölçütü:** CI yeşil; `assembleRelease` çıktısı üretiliyor; log temiz.
+- **Ölçülen sonuç:** `assembleRelease` başarılı; imzasız APK ve SHA-256 raporu `docs/DERLEME_RAPORU.md` içinde. Wrapper CI'da gerçek Gradle 9.8.1 ile üretildi ve repoya commit edildi. İlk denemedeki built-in Kotlin çakışması yukarıda kayıtlıdır.
 
 ### G3. İmzalama + Release akışı
 - **Yapı:** CI, base64 secret'tan keystore'u çözer → `assembleRelease` → `apksigner verify
@@ -213,7 +215,7 @@ Her görev: amaç → dosyalar → bitti ölçütü. Sıra, **en ucuz doğrulama
 │   ├── libs.versions.toml                # sabitlenmiş sürümler (tek kaynak)
 │   └── wrapper/gradle-wrapper.{jar,properties}
 └── app/
-    ├── build.gradle.kts                  # applicationId, minSdk 26, targetSdk, imzalama
+    ├── build.gradle.kts                  # applicationId, minSdk/targetSdk, sürüm bilgisi
     ├── proguard-rules.pro
     └── src/
         ├── main/
@@ -332,8 +334,8 @@ edilecek" ayrımı yazılır. `docs/TEST_KONTROL_LISTESI.md` işaretlenir.
 
 - Sandbox'ta derleme yapılamadığı için **her doğrulama bir CI turudur.** Bu yüzden:
   - İlk commit **arayüzsüz** olur (G2) — bağımlılık/sürüm sorunlarını arayüz gürültüsünden ayırır.
-  - Hata durumunda `gh run view --log-failed` ile yalnızca başarısız adım okunur.
-  - Gradle önbelleği CI'da açık tutulur; ilk turdan sonra süreler kısalır.
+  - `gh run view --log-failed` logları indirilemediği için hata, CI'ın repoya yazdığı `docs/DERLEME_RAPORU.md` içinden okunur.
+  - Gradle bağımlılık önbelleği CI'da `setup-java` cache'i ile tutulur.
   - Aynı hatayı iki kez almamak için hata + çözüm HANDOFF'a yazılır.
 - Actions kotası kurulumda kontrol edilir; sınırsız/ücretsiz varsayılmaz (repo public olduğu sürece
   standart runner'larda dakika sınırı yok, ama bu varsayım olarak değil kontrol olarak işlenir).

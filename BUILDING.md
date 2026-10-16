@@ -4,7 +4,7 @@
 > Hiçbir anahtar, parola veya token bu depoya yazılmaz.
 
 - Son güncelleme: 2026-10-16
-- Durum: Aşama 0. Derleme altyapısı henüz kurulmadı; bu belge planlanan düzeni tanımlar.
+- Durum: G2 iskeleti CI'da derlendi; G3 imzalı APK/Release doğrulaması sürüyor.
 
 ---
 
@@ -13,7 +13,7 @@
 ```
 Kod değişikliği (yapay zekâ, GitHub)
         ↓
-GitHub Actions: elle tetiklenen derleme (workflow_dispatch)
+GitHub Actions: push ile otomatik derleme
         ↓
 Sabit release anahtarı ile imzalanmış APK
         ↓
@@ -28,7 +28,7 @@ Kullanıcının telefonunda Android SDK, Gradle veya Termux kurması **gerekmez*
 
 - Tek Gradle modülü, Kotlin + Jetpack Compose.
 - Sürümler `gradle/libs.versions.toml` içinde sabitlenir; Gradle wrapper depoda tutulur.
-- minSdk 26; targetSdk ve sürüm kodu Aşama 1'de sabitlenir.
+- minSdk 26, compileSdk/targetSdk 37, versionCode 1. Bu yapılandırma G2 CI derlemesinde doğrulandı.
 - Yapay zekâ ortamında Java/Android SDK ve Maven erişimi yoktur → derleme **yalnızca** Actions'ta olur.
 
 ## 3. İmzalama düzeni (kritik)
@@ -52,7 +52,8 @@ Takma ad (`yanlisdefteri`) gizli bilgi olmadığı için workflow içinde sabit 
 Secret'lar **yalnızca kullanıcı** tarafından eklenebilir: Settings → Secrets and variables → Actions →
 New repository secret. Adımlar `anahtar/KURULUM_ADIMLARI.md` içinde (git dışı). Yapay zekânın token'ı
 secret uçlarına erişemiyor (403) ve **bir workflow kendi secret'ını oluşturamaz** (GitHub güvenlik
-kuralı) — bu yüzden bu adım elle yapılır.
+kuralı) — bu yüzden bu adım elle yapılır. Kullanıcı iki secret'ı eklediğini bildirdi; G3'te keystore
+secret'tan çözülüp imzalı APK parmak izi kontrol edilmeden doğru kabul edilmeyecek.
 
 **Kullanıcının sorumluluğu:** Anahtar dosyası ve parolası, telefondan bağımsız **iki ayrı yerde**
 saklanır (ör. şifre yöneticisi + Drive'da bir klasör). Anahtar kaybedilirse:
@@ -65,10 +66,9 @@ için uygun değildir.
 
 ## 4. Actions kullanımı
 
-- Derleme **push ile otomatik** çalışır (`on: push: branches: [main]`). Ölçülen neden: yapay zekânın
-  token'ında elle tetikleme (`workflow_dispatch` çağrısı) izni yok (403) ama push ile otomatik
-  tetikleme için özel izin gerekmiyor. Kullanıcı isterse GitHub arayüzünden "Run workflow" düğmesini
-  de kullanabilir (kendi hesabıyla).
+- Derleme **push ile otomatik** çalışır (`main` ve geliştirme dalı). Elle tetikleme (`workflow_dispatch`)
+  izni 403 olsa da gerekmez. G1'de push ile çalıştığı iki kez doğrulandı; G2 arayüzsüz APK derlemesi
+  de push sonrası başarıyla tamamlandı.
 - Workflow'un **kendi token'ı** `permissions: contents: write` ile repoya yazabiliyor; bu yetki
   **Release oluşturmak için yeterlidir** (G1'de commit atarak kanıtlandı).
 - **Log okuma deseni:** derleme logları dışarıdan indirilemiyor; bu yüzden her iş akışı ölçüm/özet

@@ -4,8 +4,9 @@
 > GitHub Secret'larında ve kullanıcının kendi yedeklerinde bulunur.
 
 - Son güncelleme: 2026-10-16
-- Durum: **Anahtar üretildi** (2026-10-16). Secret'ların eklenmesi ve ilk imzalı derlemenin
-  doğrulanması bekleniyor.
+- Durum: **Anahtar üretildi** (2026-10-16). Kullanıcı iki GitHub Secret'ını eklediğini bildirdi;
+  secret uçları 403 verdiği için doğrulanmadı. G3 imzalama iş akışı bunları kullanıp parmak izini
+  karşılaştıracak; sonuç bu belgedeki parmak izine göre değerlendirilecek.
 
 ---
 

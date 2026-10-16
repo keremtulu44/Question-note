@@ -25,10 +25,11 @@ cevaplamak ve çözümü öğrenme sürecinden ayrı saklamaktır.
 
 ## Durum
 
-**Aşama 0 — Plan ve kararlar.** Henüz kod yok, derlenebilir uygulama yok. Bu depoda şu an yalnızca
-proje belgeleri bulunur. Kod çalışmaları kullanıcı onayıyla Aşama 1'de başlayacaktır.
+**Aşama 1 — ilk APK zinciri.** Arayüzsüz Android/Compose iskeleti ve Gradle wrapper eklendi;
+G2 `assembleRelease` CI derlemesi başarılı oldu. İmzalı APK ve Release henüz doğrulanmadı; 7 dersli
+arayüz G4'te eklenecek.
 
-Sıradaki adım: Aşama 1 — kurulabilir ilk APK ve derleme/dağıtım zincirinin doğrulanması
+Sıradaki adım: G3 — sabit anahtarla imzalama, sertifika parmak izi kontrolü ve ilk Release
 (bkz. [ROADMAP.md](ROADMAP.md)).
 
 ---
