@@ -45,6 +45,8 @@ internal val KoyuRenkSemasi = darkColorScheme(
 )
 
 internal object DersRenkleri {
+    val GenelAcik = Color(0xFF3A5C6F)
+    val GenelKoyu = Color(0xFFA7C9D8)
     val EdebiyatAcik = Color(0xFFA34F5C)
     val EdebiyatKoyu = Color(0xFFE9A4AE)
     val MatematikAcik = Color(0xFF3E6E96)

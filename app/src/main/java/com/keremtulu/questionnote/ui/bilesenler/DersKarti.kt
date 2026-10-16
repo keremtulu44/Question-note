@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.keremtulu.questionnote.R
 
 internal data class DersKartVerisi(
-    @StringRes val ad: Int,
+    val ad: String,
     @StringRes val isaret: Int,
     val acikRenk: Color,
     val koyuRenk: Color,
@@ -99,7 +99,7 @@ internal fun DersKarti(
                 }
             }
             Text(
-                text = stringResource(veri.ad),
+                text = veri.ad,
                 color = renkler.onSurface,
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = 1,

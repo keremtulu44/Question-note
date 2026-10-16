@@ -4,6 +4,9 @@
     <string name="home_kicker">YANLIŞ DEFTERİ</string>
     <string name="home_title">Dersler</string>
     <string name="home_subtitle">Sorularını derslerine göre düzenle.</string>
+    <string name="home_loading_dersler">Dersler yükleniyor…</string>
+    <string name="home_error_dersler">Dersler yüklenemedi. Uygulamayı yeniden açmayı deneyin.</string>
+    <string name="home_empty_dersler">Henüz etkin ders yok.</string>
 
     <string name="lesson_edebiyat">Edebiyat</string>
     <string name="lesson_matematik">Matematik</string>
@@ -20,6 +23,7 @@
     <string name="symbol_fizik">λ</string>
     <string name="symbol_cografya">◎</string>
     <string name="symbol_tarih">M</string>
+    <string name="symbol_diger">•</string>
 
     <plurals name="lesson_count">
         <item quantity="one">%d ders</item>

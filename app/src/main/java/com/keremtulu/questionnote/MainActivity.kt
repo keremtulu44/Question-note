@@ -8,12 +8,16 @@ import com.keremtulu.questionnote.ui.DerslerEkrani
 import com.keremtulu.questionnote.ui.tema.YanlisDefteriTema
 
 class MainActivity : ComponentActivity() {
+    private val appContainer by lazy(LazyThreadSafetyMode.NONE) {
+        AppContainer(applicationContext)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             YanlisDefteriTema {
-                DerslerEkrani()
+                DerslerEkrani(repository = appContainer.dersRepository)
             }
         }
     }

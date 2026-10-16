@@ -1,6 +1,9 @@
 package com.keremtulu.questionnote.data.local
 
 import androidx.room.Room
+import com.keremtulu.questionnote.data.repository.RoomDersRepository
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -40,6 +43,32 @@ class YanlisDefteriDatabaseTest {
         assertEquals((0..6).toList(), dersler.map { it.sira })
         assertTrue(dersler.none { it.arsivli })
         assertTrue(dersler.all { it.id.isNotBlank() && it.olusturma > 0L })
+    }
+
+    @Test
+    fun repositoryStreamsActiveSubjectsAndTheirQuestionCountsInStableOrder() = runBlocking {
+        val sqlite = database.openHelper.writableDatabase
+        val firstDers = database.dersDao().tumunuGetir().first()
+        sqlite.execSQL("UPDATE dersler SET arsivli = 1 WHERE sira = 1")
+        sqlite.execSQL(
+            "INSERT INTO sorular (id, ders_id, olusturma, guncelleme) VALUES (?, ?, ?, ?)",
+            arrayOf<Any?>("test-soru-1", firstDers.id, 1L, 1L),
+        )
+
+        val dersler = RoomDersRepository(database.dersDao())
+            .aktifDersleriIzle()
+            .first()
+
+        assertEquals(
+            VarsayilanDersAdlari.filterIndexed { index, _ -> index != 1 },
+            dersler.map { it.ad },
+        )
+        assertEquals(
+            (0..6).filter { it != 1 },
+            dersler.map { it.sira },
+        )
+        assertEquals(1, dersler.first().soruSayisi)
+        assertTrue(dersler.drop(1).all { it.soruSayisi == 0 })
     }
 
     @Test
