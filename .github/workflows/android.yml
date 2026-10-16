@@ -60,6 +60,7 @@ jobs:
           apk_info="$RUNNER_TEMP/apk-info.txt"
           wrapper_exit=0
           unit_test_exit=125
+          unit_test_summary="JUnit sonucu henüz yok"
           build_exit=125
           signing_exit=125
           zipalign_exit=125
@@ -110,6 +111,35 @@ jobs:
           if [[ "$wrapper_exit" -eq 0 ]]; then
             ./gradlew --no-daemon --console=plain --stacktrace :app:testDebugUnitTest > "$test_log" 2>&1
             unit_test_exit=$?
+            unit_test_summary=$(python3 - <<'PY'
+          import sys
+          from pathlib import Path
+          from xml.etree import ElementTree
+
+          files = list(Path("app/build/test-results/testDebugUnitTest").glob("TEST-*.xml"))
+          if not files:
+              print("JUnit XML raporu yok (0 test)")
+              sys.exit(1)
+
+          totals = {"tests": 0, "failures": 0, "errors": 0, "skipped": 0}
+          for path in files:
+              root = ElementTree.parse(path).getroot()
+              for suite in root.iter():
+                  if suite.tag.endswith("testsuite"):
+                      for key in totals:
+                          totals[key] += int(suite.attrib.get(key, "0"))
+
+          print(
+              f"{totals['tests']} test; {totals['failures']} başarısız; "
+              f"{totals['errors']} hata; {totals['skipped']} atlandı"
+          )
+          sys.exit(1 if totals["tests"] == 0 or totals["failures"] or totals["errors"] else 0)
+          PY
+            )
+            test_summary_exit=$?
+            if [[ "$unit_test_exit" -eq 0 && "$test_summary_exit" -ne 0 ]]; then
+              unit_test_exit=1
+            fi
             if [[ "$unit_test_exit" -eq 0 ]]; then
               ./gradlew --no-daemon --console=plain --stacktrace :app:assembleRelease > "$build_log" 2>&1
               build_exit=$?
@@ -241,6 +271,7 @@ jobs:
             echo "- Genel sonuç: **$overall**"
             echo "- Wrapper çıkış kodu: $wrapper_exit"
             echo "- testDebugUnitTest çıkış kodu: $unit_test_exit"
+            echo "- Birim test özeti: $unit_test_summary"
             echo "- assembleRelease çıkış kodu: $build_exit"
             echo "- İmzalama secret durumu: $secret_status"
             echo "- İmzalama/verify durumu: $signing_result (kod: $signing_exit; apksigner verify: $verify_exit)"
