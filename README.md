@@ -29,12 +29,11 @@ cevaplamak ve çözümü öğrenme sürecinden ayrı saklamaktır.
 kullanıcı v1.0.0'dan v1.0.1'e kaldırmadan güncellemeyi, uygulamanın açılmasını ve 7 ders kartını
 telefonda doğruladı. Son yayımlanan uygulama v1.0.1'dir; onda soru kaydı yoktur.
 
-**Aşama 2 başladı, tamamlanmadı.** Room v1'e repository katmanı bağlandı; ana ekran etkin dersleri ve
-soru sayılarını Room akışından okuyor. CI'da beş Robolectric testi (şema/ilişkiler, başlangıç verisi,
-repository sorgusu ve veritabanını yeniden açma) geçti. Bu akış gerçek cihazda denenmedi; konu/soru
-yönetimi, görsel dosyası yaşam döngüsü ve yedek özellikleri henüz açık. CI run `38946633709` derleme
-ve imzayı doğruladı; v1.0.1 Release zaten bulunduğundan yeni Release/APK yayımlanmadı. Sıradaki adım
-ders/konu yönetimini eklemektir.
+**Aşama 2 başladı, tamamlanmadı.** Room v1 repository'si, DB'den beslenen ders ekranı ve konu ekleme/
+düzenleme/arşivleme/yeniden etkinleştirme akışı eklendi. CI run `38948106275` içinde 8 Robolectric
+testi geçti; derleme ve imza doğrulandı. Gerçek cihaz testi yapılmadı. Ders yönetimi, soru CRUD/listeleme,
+görsel dosyası yaşam döngüsü ve minimum dışa aktarma hâlâ açık. v1.0.1 Release mevcut olduğundan yeni
+Release/APK yayımlanmadı. Sonraki adım ders yönetimi, ardından soru ve görsel akışıdır.
 
 ---
 

@@ -11,7 +11,7 @@
 > ZIP yol güvenliği) ve **Robolectric** (şema/migration testleri). Emülatör yalnızca gerçekten
 > gerekirse kullanılır; asıl kabul testleri gerçek cihazda yapılır.
 
-Son güncelleme: 2026-10-16 (Room repository/ana ekran bağlantısı ve 5 Robolectric testi CI'da geçti; run `38946633709`)
+Son güncelleme: 2026-10-16 (konu CRUD/arşiv akışı ve toplam 8 Robolectric testi CI'da geçti; run `38948106275`)
 
 ---
 
@@ -56,6 +56,10 @@ Son güncelleme: 2026-10-16 (Room repository/ana ekran bağlantısı ve 5 Robole
 | 2.21 | Soru/ders/konu yabancı anahtarları ve görsel/geçmiş CASCADE kuralları açık | YZ (Robolectric) | [x] |
 | 2.22 | Repository yalnızca etkin dersleri, sabit sırada ve doğru soru sayılarıyla yayımlıyor | YZ (Robolectric) | [x] |
 | 2.23 | Dosya tabanlı veritabanı yeniden açılınca yedi seed dersi koruyor, çoğaltmıyor | YZ (Robolectric) | [x] |
+| 2.24 | Konu ekleme adı trimler; yinelenen Türkçe büyük/küçük harf varyantını reddeder | YZ (Robolectric) | [x] |
+| 2.25 | Konu yeniden adlandırma boş/tekrarlı adı reddeder, geçerli adı ve sırayı korur | YZ (Robolectric) | [x] |
+| 2.26 | Konu arşivleme/geri getirme soruyu veya `konu_id` ilişkisini silmez | YZ (Robolectric) | [x] |
+| 2.27 | Konu ekle/düzenle/arşivle/geri getir akışı gerçek cihazda anlaşılır ve kalıcı çalışır | KULLANICI | [ ] |
 
 ## Aşama 3 — Yedek ve geri yükleme
 

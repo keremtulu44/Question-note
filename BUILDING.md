@@ -4,7 +4,7 @@
 > Hiçbir anahtar, parola veya token bu depoya yazılmaz.
 
 - Son güncelleme: 2026-10-16
-- Durum: **Aşama 1 tamamlandı; Aşama 2 sürüyor.** Room repository'si ve ders ekranı CI'da 5 testle doğrulandı (run `38946633709`); release derlemesi/imzası başarılı. Yeni Release yayımlanmadı; kullanıcıya yayımlanan son sürüm v1.0.1'dir.
+- Durum: **Aşama 1 tamamlandı; Aşama 2 sürüyor.** Room, ders ekranı ve konu yönetimi CI'da 8 testle doğrulandı (run `38948106275`); release derlemesi/imzası başarılı. Yeni Release yayımlanmadı; kullanıcıya yayımlanan son sürüm v1.0.1'dir.
 
 ---
 

@@ -4,7 +4,7 @@ Bu belge projenin **karar kaydıdır**. Yeni bir geliştirme oturumu (insan veya
 belgeyi, sonra [HANDOFF.md](HANDOFF.md) dosyasını okur.
 
 - Son güncelleme: 2026-10-16
-- Durum: **Aşama 1 tamamlandı; Aşama 2 başladı.** Room v1 repository'si ana ekrana bağlandı; etkin dersler ve soru sayıları Room'dan okunuyor. CI run `38946633709` beş Robolectric testini, release derlemesini ve imza doğrulamasını geçti. Gerçek cihaz testi yapılmadı; konu/soru ve görsel akışları, migration'lar ve minimum dışa aktarma hâlâ açık.
+- Durum: **Aşama 1 tamamlandı; Aşama 2 başladı.** Room repository/ders ekranına ek olarak konu CRUD ve arşivleme/geri getirme eklendi. CI run `38948106275` 8 Robolectric testi, release derlemesini ve imza doğrulamasını geçti. Cihaz testi yapılmadı; ders yönetimi, soru/görsel akışı ve minimum dışa aktarma açık. Her şema değişikliği için veri koruyan migration ve test şart; migration fallback'i yasak.
 
 ---
 

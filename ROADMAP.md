@@ -17,7 +17,7 @@ bildirimler → ek özellikler.**
 - [x] Dış inceleme (ikinci görüş) alınması ve önerilerin gerekçeyle değerlendirilmesi
 - [x] Bekleme: kullanıcının Aşama 1 için açık onayı
 
-**Çıktı:** Kararlar ve uygulama planı. Aşama 1'in kullanıcı cihazı G5 testi geçti. Aşama 2 başladı; Room v1, repository ve veritabanından beslenen ders ana ekranı CI'da doğrulandı. Konu/soru/görsel akışları ve dışa aktarma hâlâ açık.
+**Çıktı:** Kararlar ve uygulama planı. Aşama 1'in kullanıcı cihazı G5 testi geçti. Aşama 2 başladı; Room v1, ders ekranı ve konu yönetimi CI'da doğrulandı. Ders düzenleme, soru/görsel akışları, dışa aktarma ve gerçek cihaz kabul testleri hâlâ açık.
 
 ---
 
@@ -44,30 +44,28 @@ uygulama geliştirmenin anlamı yok.
 ## Aşama 2 — Yerel soru arşivi [~]
 
 > Veri yaşam döngüsü baştan doğru kurulur: yedekleme sonradan "eklenen bir düğme" değil, veri
-> katmanının sınırlarından biri olarak tasarlanır. Aşama 2 sürüyor; Room repository'si ve ana ekran
-> bağlantısı eklendi, konu/soru/görsel ve yedek akışları henüz yok.
+> katmanının sınırlarından biri olarak tasarlanır. Room, ders ekranı ve konu yönetimi eklendi; Aşama 2
+> tamamlanmadı.
 
-- [~] Paket ayrımı: `data/local`, `data/repository`, `domain` model/repository ve `ui` başladı; tekrar
-      kuralları, `images` ve `backup` katmanları henüz uygulanmadı
+- [~] Paket ayrımı: `data/local`, `data/repository`, `domain` model/repository ve `ui` kullanılıyor;
+      tekrar kuralları, `images` ve `backup` katmanları henüz tamamlanmadı
 - [x] Room şema v1, `exportSchema` ve açık yabancı anahtar ilişkileri; şema testleri geçti
 - [ ] Sonraki her şema değişikliği için veri koruyan migration ve migration testi; yıkıcı fallback yok
-- [x] Yedi dersin ilk açılışta seed edilmesi ve veritabanının yeniden açılınca kopyalanmaması Robolectric'te geçti
+- [x] Yedi ders seed'i ilk açılışta yazılıyor; dosya tabanlı DB yeniden açılınca çoğalmıyor (Robolectric)
 - [x] Ders repository'si etkin dersleri/soru sayılarını Flow ile sunuyor; ana ekran Room'dan okuyor
-- [ ] Konu yönetimi (ekle / yeniden adlandır / arşivle / yeniden etkinleştir)
-- [ ] Gerçek cihazda ilk açılış, uygulamayı kapatıp açma ve verinin korunması doğrulaması
+- [x] Konu ekleme, yeniden adlandırma, arşivleme ve geri getirme; arşiv ilişkiyi/soruları silmiyor
+- [ ] Ders (ad/sıra/arşiv) yönetimi
+- [ ] Soru ekleme, listeleme/filtreleme (ders/konu/plan durumu ve "konusuz"), ayrıntı, düzenleme ve silme
+- [ ] Tekrar/plan durumu kuralları ve JVM birim testleri (aktif / askıda / tamamlandı)
 - [ ] Kamera ile çekim ve sistem fotoğraf seçicisi ile galeriden seçim
-- [ ] Görsellerin kalıcı dosya alanına alınması, atomik yazma, tutarlılık denetimi, onaylı temizlik
-- [ ] Soru ekleme akışı: fotoğraf → (isteğe bağlı döndür) → ders → kaydet
 - [ ] Çok görsel: "bir sayfa daha ekle" (soru ve çözüm için); çözüm sonradan da eklenebilir
+- [ ] Görsellerin kalıcı dosya alanına alınması, atomik yazma, tutarlılık denetimi ve onaylı temizlik
 - [ ] Görsel kalite politikası: otomatik optimize (uzun kenar ~3000 px, JPEG ~%90) ve 30–50 gerçek
-      soru fotoğrafıyla doğrulama (küçük formüller, kök içi ifadeler, grafik etiketleri okunuyor mu)
-- [ ] Listeleme (derse/konuya/plana göre filtre, "konusuz" listesi)
-- [ ] Soru görüntüleme: tam ekran, yakınlaştırma, çözüm gizli + "Çözümü göster"
-- [ ] Düzenleme, silme (onay diyaloğu ile) ve plan durumu (aktif / askıda / tamamlandı)
-- [ ] JVM birim testleri: aralık hesabı, yedek doğrulama, ZIP yol güvenliği
-- [ ] Robolectric ile migration/DAO zincir testleri (migration henüz yok; şema değişikliğinde eklenecek)
+      fotoğrafta küçük formül/kök/grafik etiketlerinin okunabilirliğini doğrulama
 - [ ] **Aşama sonu ek güvenlik ağı:** minimum "dışa aktar" (yedek özelliği tamamlanmasa bile veriyi
-      dışarı alabilme)
+      dışarı alabilme); doğrulama testleri dahil
+- [ ] Migration gerekirse veri koruyan migration + Robolectric zincir testi (şema henüz değişmedi)
+- [ ] Gerçek cihazda konu/ders/soru akışları, uygulamayı yeniden başlatma ve veri koruma kabul testi
 
 ---
 
