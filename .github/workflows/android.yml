@@ -36,7 +36,7 @@ jobs:
           java-version: "17"
           cache: gradle
 
-      - name: G3 derle, imzala, parmak izini doğrula ve yayımla
+      - name: A2 testlerini çalıştır, derle, imzala ve yayımla
         id: release
         shell: bash
         env:
@@ -51,6 +51,7 @@ jobs:
           set -o pipefail
           mkdir -p docs
           wrapper_log="$RUNNER_TEMP/wrapper-bootstrap.log"
+          test_log="$RUNNER_TEMP/android-unit-tests.log"
           build_log="$RUNNER_TEMP/android-build.log"
           sign_log="$RUNNER_TEMP/android-sign.log"
           verify_log="$RUNNER_TEMP/android-verify.log"
@@ -58,6 +59,7 @@ jobs:
           gradle_info="$RUNNER_TEMP/gradle-version.txt"
           apk_info="$RUNNER_TEMP/apk-info.txt"
           wrapper_exit=0
+          unit_test_exit=125
           build_exit=125
           signing_exit=125
           zipalign_exit=125
@@ -106,8 +108,14 @@ jobs:
           fi
 
           if [[ "$wrapper_exit" -eq 0 ]]; then
-            ./gradlew --no-daemon --console=plain --stacktrace :app:assembleRelease > "$build_log" 2>&1
-            build_exit=$?
+            ./gradlew --no-daemon --console=plain --stacktrace :app:testDebugUnitTest > "$test_log" 2>&1
+            unit_test_exit=$?
+            if [[ "$unit_test_exit" -eq 0 ]]; then
+              ./gradlew --no-daemon --console=plain --stacktrace :app:assembleRelease > "$build_log" 2>&1
+              build_exit=$?
+            else
+              printf '%s\n' "assembleRelease, birim testleri başarısız olduğu için çalıştırılmadı." > "$build_log"
+            fi
           fi
 
           if [[ "$build_exit" -eq 0 && -f "$unsigned_apk" ]]; then
@@ -214,7 +222,7 @@ jobs:
             fi
           fi
 
-          if [[ "$wrapper_exit" -eq 0 && "$build_exit" -eq 0 && "$signing_exit" -eq 0 && "$fingerprint_exit" -eq 0 && "$release_exit" -eq 0 ]]; then
+          if [[ "$wrapper_exit" -eq 0 && "$unit_test_exit" -eq 0 && "$build_exit" -eq 0 && "$signing_exit" -eq 0 && "$fingerprint_exit" -eq 0 && "$release_exit" -eq 0 ]]; then
             overall="BAŞARILI"
           else
             overall="BAŞARISIZ"
@@ -232,6 +240,7 @@ jobs:
             echo "- Android SDK: compileSdk/targetSdk 37, minSdk 26; build-tools $BUILD_TOOLS_VERSION"
             echo "- Genel sonuç: **$overall**"
             echo "- Wrapper çıkış kodu: $wrapper_exit"
+            echo "- testDebugUnitTest çıkış kodu: $unit_test_exit"
             echo "- assembleRelease çıkış kodu: $build_exit"
             echo "- İmzalama secret durumu: $secret_status"
             echo "- İmzalama/verify durumu: $signing_result (kod: $signing_exit; apksigner verify: $verify_exit)"
@@ -244,6 +253,12 @@ jobs:
             echo
             echo '```text'
             cat "$gradle_info"
+            echo '```'
+            echo
+            echo "## Birim test çıktısı (son 120 satır)"
+            echo
+            echo '```text'
+            if [[ -f "$test_log" ]]; then tail -n 120 "$test_log"; else echo "Birim testleri çalıştırılmadı."; fi
             echo '```'
             echo
             echo "## Derleme çıktısı (son 120 satır)"
@@ -278,13 +293,14 @@ jobs:
           } > docs/DERLEME_RAPORU.md
 
           echo "wrapper_exit=$wrapper_exit" >> "$GITHUB_OUTPUT"
+          echo "unit_test_exit=$unit_test_exit" >> "$GITHUB_OUTPUT"
           echo "build_exit=$build_exit" >> "$GITHUB_OUTPUT"
           echo "signing_exit=$signing_exit" >> "$GITHUB_OUTPUT"
           echo "fingerprint_exit=$fingerprint_exit" >> "$GITHUB_OUTPUT"
           echo "release_exit=$release_exit" >> "$GITHUB_OUTPUT"
 
-      - name: Derleme, imza veya Release başarısızsa işi kırmızıya çevir
-        if: steps.release.outputs.wrapper_exit != '0' || steps.release.outputs.build_exit != '0' || steps.release.outputs.signing_exit != '0' || steps.release.outputs.fingerprint_exit != '0' || steps.release.outputs.release_exit != '0'
+      - name: Test, derleme, imza veya Release başarısızsa işi kırmızıya çevir
+        if: steps.release.outputs.wrapper_exit != '0' || steps.release.outputs.unit_test_exit != '0' || steps.release.outputs.build_exit != '0' || steps.release.outputs.signing_exit != '0' || steps.release.outputs.fingerprint_exit != '0' || steps.release.outputs.release_exit != '0'
         run: exit 1
 
       - name: Wrapper ve raporu repoya yaz
@@ -295,6 +311,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/DERLEME_RAPORU.md
+          if [[ -d app/schemas ]]; then git add app/schemas; fi
           for path in gradlew gradlew.bat gradle/wrapper/gradle-wrapper.jar gradle/wrapper/gradle-wrapper.properties; do
             if [[ -f "$path" ]]; then git add "$path"; fi
           done
