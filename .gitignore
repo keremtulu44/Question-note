@@ -1,0 +1,23 @@
+# --- Sırlar: bunlar asla depoya girmemeli ---
+*.jks
+*.keystore
+*.p12
+*.pem
+keystore.properties
+local.properties
+.env
+secrets/
+anahtar/
+
+# --- Yedek dosyaları (kullanıcı verisi) ---
+yanlis-defteri-*.zip
+*.apk
+
+# --- Android / Gradle derleme çıktıları ---
+.gradle/
+build/
+captures/
+.cxx/
+*.iml
+.idea/
+.kotlin/
