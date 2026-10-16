@@ -72,6 +72,43 @@ class YanlisDefteriDatabaseTest {
     }
 
     @Test
+    fun diskDatabaseSeedsOnceAndKeepsSubjectsAfterReopen() {
+        val context = RuntimeEnvironment.getApplication()
+        val databaseName = "room-seed-test-${System.nanoTime()}.db"
+
+        fun openDiskDatabase() = Room.databaseBuilder(
+            context,
+            YanlisDefteriDatabase::class.java,
+            databaseName,
+        )
+            .addCallback(VarsayilanDersleriEkle())
+            .allowMainThreadQueries()
+            .build()
+
+        try {
+            val firstOpen = openDiskDatabase()
+            val firstRows = try {
+                firstOpen.dersDao().tumunuGetir()
+            } finally {
+                firstOpen.close()
+            }
+
+            val secondOpen = openDiskDatabase()
+            val secondRows = try {
+                secondOpen.dersDao().tumunuGetir()
+            } finally {
+                secondOpen.close()
+            }
+
+            assertEquals(VarsayilanDersAdlari, firstRows.map { it.ad })
+            assertEquals(firstRows, secondRows)
+            assertEquals(7, secondRows.size)
+        } finally {
+            context.deleteDatabase(databaseName)
+        }
+    }
+
+    @Test
     fun schemaCreatesAllPlannedTablesAtVersionOne() {
         val sqlite = database.openHelper.readableDatabase
         val cursor = sqlite.query("PRAGMA user_version")
