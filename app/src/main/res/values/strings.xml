@@ -1,4 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Yanlış Defteri</string>
+    <string name="home_kicker">YANLIŞ DEFTERİ</string>
+    <string name="home_title">Dersler</string>
+    <string name="home_subtitle">Sorularını derslerine göre düzenle.</string>
+
+    <string name="lesson_edebiyat">Edebiyat</string>
+    <string name="lesson_matematik">Matematik</string>
+    <string name="lesson_biyoloji">Biyoloji</string>
+    <string name="lesson_kimya">Kimya</string>
+    <string name="lesson_fizik">Fizik</string>
+    <string name="lesson_cografya">Coğrafya</string>
+    <string name="lesson_tarih">Tarih</string>
+
+    <string name="symbol_edebiyat">Aa</string>
+    <string name="symbol_matematik">∑</string>
+    <string name="symbol_biyoloji">β</string>
+    <string name="symbol_kimya">H₂</string>
+    <string name="symbol_fizik">λ</string>
+    <string name="symbol_cografya">◎</string>
+    <string name="symbol_tarih">M</string>
+
+    <plurals name="lesson_count">
+        <item quantity="one">%d ders</item>
+        <item quantity="other">%d ders</item>
+    </plurals>
+    <plurals name="question_count">
+        <item quantity="one">%d soru</item>
+        <item quantity="other">%d soru</item>
+    </plurals>
 </resources>
