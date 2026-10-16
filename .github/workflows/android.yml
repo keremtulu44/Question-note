@@ -255,10 +255,21 @@ jobs:
             cat "$gradle_info"
             echo '```'
             echo
-            echo "## Birim test çıktısı (son 120 satır)"
+            echo "## Birim test çıktısı (hata özeti + başlangıç/son bölüm)"
             echo
             echo '```text'
-            if [[ -f "$test_log" ]]; then tail -n 120 "$test_log"; else echo "Birim testleri çalıştırılmadı."; fi
+            if [[ -f "$test_log" ]]; then
+              echo "-- Derleyici/Gradle hata satırları --"
+              grep -nEi '(^e: |error:|unresolved reference|compilation error|what went wrong|failed to)' "$test_log" | head -n 80 || true
+              echo
+              echo "-- İlk 100 satır --"
+              head -n 100 "$test_log"
+              echo
+              echo "-- Son 80 satır --"
+              tail -n 80 "$test_log"
+            else
+              echo "Birim testleri çalıştırılmadı."
+            fi
             echo '```'
             echo
             echo "## Derleme çıktısı (son 120 satır)"
