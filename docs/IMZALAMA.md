@@ -4,7 +4,8 @@
 > GitHub Secret'larında ve kullanıcının kendi yedeklerinde bulunur.
 
 - Son güncelleme: 2026-10-16
-- Durum: **Anahtar henüz üretilmedi.** Aşama 1, G3 görevi sırasında doldurulacak.
+- Durum: **Anahtar üretildi** (2026-10-16). Secret'ların eklenmesi ve ilk imzalı derlemenin
+  doğrulanması bekleniyor.
 
 ---
 
@@ -13,19 +14,23 @@
 | Değer | Nerede |
 |---|---|
 | Keystore dosyası (`.p12`) | GitHub Secret `SIGNING_KEYSTORE_BASE64` (base64) + kullanıcının 2 bağımsız yedeği |
-| Keystore parolası | GitHub Secret `SIGNING_STORE_PASSWORD` + kullanıcının 2 bağımsız yedeği |
-| Anahtar takma adı (alias) | GitHub Secret `SIGNING_KEY_ALIAS` (gizli değil, `yanlisdefteri`) |
-| Anahtar parolası | GitHub Secret `SIGNING_KEY_PASSWORD` |
+| Keystore **ve anahtar** parolası | GitHub Secret `SIGNING_PASSWORD` + kullanıcının 2 bağımsız yedeği |
+| Anahtar takma adı (alias) | **Secret değil**; gizli bilgi olmadığı için workflow içinde sabit: `yanlisdefteri` |
 | Sertifika SHA-256 parmak izi | **Bu belge** (gizli değildir) |
+
+Yalnızca **2 secret** gerekir. Secret'ları yalnızca kullanıcı ekleyebilir (Settings → Secrets and
+variables → Actions); workflow kendi secret'ını oluşturamaz. Adımlar git dışı
+`anahtar/KURULUM_ADIMLARI.md` dosyasında.
 
 ## 2. Sertifika parmak izi
 
 ```
-SHA-256 (sertifika): <Aşama 1, G3'te doldurulacak>
+SHA-256 (sertifika): FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54
 Anahtar takma adı   : yanlisdefteri
-Algoritma           : RSA 4096
-Geçerlilik          : 30 yıl
-Anahtar türü        : PKCS12
+Algoritma           : RSA 2048
+Geçerlilik          : 30 yıl (2056-10-08'e kadar)
+Anahtar türü        : PKCS12 (PBE-SHA1-3DES, evrensel JDK uyumluluğu için)
+Base64 uzunluğu     : 3404 karakter
 ```
 
 ## 3. CI doğrulaması

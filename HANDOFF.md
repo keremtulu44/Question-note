@@ -12,9 +12,12 @@
 
 - Proje brifi kullanıcıyla birlikte değerlendirildi; teknik riskler ve gereksiz karmaşıklıklar konuşuldu.
 - Kesinleşen kararlar alındı (bkz. PROJECT_BRIEF §4, §5).
-- Aşama 0 belgeleri oluşturuldu: README, PROJECT_BRIEF, ROADMAP, HANDOFF, BUILDING, CHANGELOG ve
-  `docs/` altında veri modeli, yedek formatı, test kontrol listesi.
-- **Kod yazılmadı.** Depoda uygulama kaynağı, Gradle dosyası veya workflow yok.
+- Aşama 0 belgeleri oluşturuldu: README, PROJECT_BRIEF, ROADMAP, HANDOFF, BUILDING, CHANGELOG,
+  `docs/` altında veri modeli, yedek formatı, test listesi, kodlama planı, imzalama prosedürü.
+- **Aşama 1 / G1 tamamlandı:** yetki ve CI ortamı ölçüldü; ilk workflow yazıldı ve **çalıştırıldı**
+  (2 başarılı koşu); ölçüm sonucu `docs/ORTAM_RAPORU.md` olarak repoda.
+- **İmzalama anahtarı üretildi** (git dışı `anahtar/` klasöründe); secret'ların eklenmesi bekleniyor.
+- **Uygulama kodu hâlâ yok.** Depoda Gradle dosyası veya `app/` klasörü bulunmuyor.
 
 ## Kullanıcıyla netleşen ek kararlar (Aşama 0 sırasında)
 
@@ -28,6 +31,61 @@
    açılmışsa sonraki tekrar **1 gün** sonraya planlanır (K19). Model bu sayede sadeleşti.
 7. **Görsel kalite: otomatik optimize** (uzun kenar ~3000 px, JPEG ~%90) — K21, A9 kapandı.
 8. **Askıya alma / tamamlandı işaretleme 1. sürümde olacak** (K17).
+
+## Aşama 1 / G1 — Yetki ve ortam ölçümü (TAMAMLANDI, 2026-10-16)
+
+### Ölçülen yetki tablosu (Arena token'ı)
+
+| İşlem | Sonuç | Kanıt |
+|---|---|---|
+| Repo içeriği yazma (push) | ✅ Var | Belge commit'leri itildi |
+| Workflow dosyası yazma | ✅ Var | `.github/workflows/ortam-testi.yml` itildi |
+| PR açma / birleştirme | ✅ Var | PR #1, #2, #3 birleştirildi |
+| Workflow **elle tetikleme** (`dispatches`) | ❌ **403** | `Resource not accessible by integration` |
+| **Secret** okuma/yazma | ❌ **403** | `gh secret list`, `actions/secrets/public-key` |
+| Actions ayarlarını okuma | ❌ 403 | `actions/permissions` |
+| Actions **okuma** (workflow/run listesi) | ✅ Var | `actions/workflows`, `actions/runs` |
+| Derleme **logu indirme** | ❌ Engelli | Log başka bir sunucudan geliyor (sandbox'ta erişilemiyor) |
+
+**Kritik sonuç:** Elle tetikleme izni gerekmiyor. Workflow **push ile otomatik** çalıştırıldığında
+hiçbir özel izin gerekmiyor → **CI çalışıyor.** Denendi ve kanıtlandı: iki başarılı koşu
+(`38919720842`, `38920099577`).
+
+**İkinci kritik sonuç:** Workflow'un kendi token'ı `permissions: contents: write` ile **repoya commit
+atabildi** (`docs/ORTAM_RAPORU.md` oluştu). Aynı yetki **Release oluşturmak** için de gerekli →
+ileride APK'yı Release'e koyabileceğiz. Arena token'ına ihtiyaç yok.
+
+**Log okuma çözümü:** Derleme çıktısını göremesem de CI kendi raporunu repoya yazıyor
+(`docs/ORTAM_RAPORU.md`). Teşhis döngüsü: CI ölçer → repoya yazar → ben okurum.
+
+### Ölçülen CI ortamı
+
+| Bileşen | Ölçülen değer |
+|---|---|
+| Runner | `ubuntu-latest` (ubuntu24 görüntüsü) |
+| Java (varsayılan) | Temurin **17.0.20.1** — ayrıca 8, 11, 21, 25 kurulu |
+| Android SDK | `/usr/local/lib/android/sdk` (lisanslar mevcut) |
+| build-tools | 34.0.0, 35.0.0, 35.0.1, 36.0.0, 36.1.0, **37.0.0** |
+| platforms | android-34 … **android-37.2** (+ 37.2 beta'ları) |
+| apksigner | 0.9 (build-tools 37.0.0) |
+| Gradle | **9.8.1** önceden kurulu |
+| openssl / keytool | 3.0.13 / var |
+
+→ `compileSdk`/`targetSdk` 37.x seçilebilir; sürümler G2'de derlemeyle doğrulanacak.
+
+### İmzalama anahtarı (üretildi, secret bekliyor)
+
+- RSA 2048, PKCS12, alias `yanlisdefteri`, 30 yıl (2056'ya kadar)
+- SHA-256 parmak izi: `FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54`
+- Dosyalar **git dışı** `anahtar/` klasöründe: `yanlis-defteri.p12`, `PAROLA.txt`, `keystore.b64`
+  (puantaj: `git status` temiz, klasör `.gitignore`'da)
+- Ölçüm: base64 uzunluğu **3404 karakter** (RSA 2048). RSA 4096 olsaydı 5696 olurdu → 2048 tercih edildi.
+- Kullanıcıya adım adım talimat: `anahtar/KURULUM_ADIMLARI.md` (git dışı)
+
+**E1 güncel durum:** Secret'ları ben ekleyemiyorum (403). Kullanıcı **yol B**'yi uygulayacak:
+GitHub web → Settings → Secrets and variables → Actions → 2 secret ekleme
+(`SIGNING_KEYSTORE_BASE64`, `SIGNING_PASSWORD`). Yol A (Arena bağlantı izni) uygulamanın izin
+tanımına bağlı olduğu için kullanıcının vermesiyle değişmeyebilir; pratik yol B.
 
 ## Dış inceleme — ikinci görüş (2026-10-16)
 
@@ -71,32 +129,34 @@ reddedildi.
 
 ## Ne test edildi?
 
-**Gerçekten çalıştırılan:** Yok. Bu aşama yalnızca planlama ve belge yazımı içeriyor.
+**Gerçekten çalıştırılan (ölçüm/kanıt ile):**
 
-**İncelenen / doğrulanan (salt okuma):**
+- CI iş akışı **iki kez başarıyla çalıştı** (koşular `38919720842`, `38920099577`;
+  "completed / success"). Push ile otomatik tetiklendi — elle tetikleme izni gerekmedi.
+- Workflow token'ı repoya **commit atabildi** → `docs/ORTAM_RAPORU.md` CI tarafından üretildi
+  (contents:write yetkisi doğrulandı; Release oluşturmak için de aynı yetki gerekir).
+- Runner ortamı ölçüldü: Temurin JDK 17 (8/11/21/25 de kurulu), Android SDK (`build-tools` 34→37.0.0,
+  `platforms` android-34→37.2), apksigner 0.9, Gradle 9.8.1 hazır, openssl 3.0.13.
+- Sandbox yetenekleri: `openssl` var, `java`/`keytool` **yok**; Maven/Gradle depoları **kapalı**.
+- Arena token'ı: içerik yazma ✅, workflow dosyası yazma ✅, PR açma/birleştirme ✅;
+  workflow dispatch ❌ 403, secrets ❌ 403, Actions ayarları ❌ 403.
+- İmzalama anahtarı üretildi ve parola ile açılabildiği doğrulandı (parmak izi okundu).
 
-- Depo: `keremtulu44/Question-note`, **public**, geçmişte tek commit (`Initial commit`), workflow yok.
-- Yapay zekâ ortamı: Java/Android SDK **yok**; `maven.google.com`, `repo1.maven.org`,
-  `plugins.gradle.org`, `dl.google.com`, `services.gradle.org` erişimi **kapalı** (HTTP 000).
-  → Bu ortamda APK derlenemez. **Buna karşılık `openssl 3.0.20` var** → imzalama anahtarı (PKCS12)
-  sandbox'ta üretilebilir; Java/keytool gerekmez.
-- GitHub bağlantısı: `keremtulu44` olarak kimliği doğrulanmış token mevcut; depoda **admin: true**.
-  Ancak Actions Secrets erişimi **403** (bkz. E1). Actions workflow listesi okunabiliyor
-  (`total_count: 0`), yani derleme loglarını izleyebiliyorum.
-- Aday sürümler (bu oturumda araştırıldı, **doğrulanmadı**): AGP 9.2.x, Kotlin 2.4.x,
-  Compose BOM 2026.09.00, activity-compose 1.13.0, lifecycle 2.11.0. Doğrulama Aşama 1, G2'de
-  derleme loguyla yapılacak.
+**Yalnızca incelenen / henüz doğrulanmayan:**
+
+- Aday sürümler (AGP 9.2.x, Kotlin 2.4.x, Compose BOM 2026.09.00, activity-compose 1.13.0,
+  lifecycle 2.11.0): kaynaklardan derlendi, **derlemeyle doğrulanmadı** → G2'de ölçülecek.
+- APK'nın telefondan kurulup güncellenmesi → G3/G5'te kullanıcı testi.
 
 ## Bilinen hatalar / engeller
 
-- **E1 (engel, Aşama 1'i etkiler):** Token'da depo **admin** yetkisi var (`{"admin":true,...}`) ancak
-  **Actions Secrets erişimi yok** — `gh secret list` ve `repos/.../actions/secrets/public-key`
-  uçları **403 "Resource not accessible by integration"** (2026-10-16'da ölçüldü). Actions **okuma**
-  çalışıyor (`workflows`, `runs`). Kullanıcı **yol A**'yı seçti: Arena GitHub bağlantısına
-  Actions/Secrets yazma izni eklenecek. İzin geldiğinde ilk iş ölçüm, sonra 4 secret'ın eklenmesi.
-  İzin gelmezse **yol B** (kullanıcı secret'ları web arayüzünden ekler).
-  Ayrıntı: [KODLAMA_PLANI §3.3](docs/KODLAMA_PLANI.md).
-- **E2 (kısıt, çözümü yok):** Yapay zekâ ortamında derleme/test yapılamaz. Cihaz testleri kullanıcıya ait.
+- **E1 (G1'de çözüldü, kısmi):** Arena token'ında **Actions/Secrets yazma izni yok** (403).
+  Buna karşılık **gerek olmadığı ölçüldü**: workflow push ile otomatik çalışıyor ve workflow'un kendi
+  token'ı repoya yazabiliyor (Release dâhil). Tek eksik: **secret'ları yalnızca kullanıcı ekleyebilir**
+  (web arayüzü, 2 alan). Adımlar: `anahtar/KURULUM_ADIMLARI.md` (git dışı).
+- **E2 (kısıt, çözümü yok):** Yapay zekâ ortamında derleme/test yapılamaz; ayrıca **derleme logları
+  indirilemiyor** (log sunucusu sandbox'tan erişilemez). Çözüm: CI kendi ölçüm/rapor çıktısını repoya
+  yazar (`docs/ORTAM_RAPORU.md` yaklaşımı) → yeni iş akışları da bu deseni kullanacak.
 - **E3 (izlenecek):** `hasFragileUserData` davranışı gerçek cihazda doğrulanmadı.
 - **E4 (izlenecek):** Android Auto Backup, uygulama başına **25 MB** ile sınırlıdır; fotoğraf arşivi bu
   kotayı ilk günden aşar. Bu nedenle sistem yedeklemesi birincil mekanizma olarak görülmez ve
@@ -104,25 +164,28 @@ reddedildi.
 
 ## Sıradaki somut adım
 
-**Aşama 1, G1:** Kullanıcıdan "Aşama 1'e başla" onayı alındıktan sonra, kod yazmadan önce **yetki
-ölçümü** yapılır (en küçük workflow dosyası eklenir, tetiklenir, log okunur; başarısızsa geri alınır).
-Sonuç HANDOFF'a yazılır.
+**Sıra:**
+
+1. **Kullanıcı** 2 secret'ı GitHub web arayüzünden ekler
+   (`SIGNING_KEYSTORE_BASE64`, `SIGNING_PASSWORD`) — `anahtar/KURULUM_ADIMLARI.md`.
+2. **Ben** `gh secret list` ile isimleri ölçerim (değerler görünmez, isimler yeter).
+3. **G2:** Proje iskeleti + ilk CI derlemesi (arayüzsüz) → sürümler doğrulanır.
+4. **G3:** İmzalı APK + Release akışı + parmak izi doğrulaması.
 
 Ayrıntılı sıra: [docs/KODLAMA_PLANI.md](docs/KODLAMA_PLANI.md) §4 (G1…G6).
 
-**Bekleyen karar:**
-
-- **Secret yolu (E1):** Kullanıcı **yol A**'yı seçti → Arena'daki GitHub bağlantısına Actions/Secrets
-  yazma izni eklenmesi bekleniyor. İzin geldikten sonra ilk iş: `gh secret list` ile **ölçmek**,
-  ardından 4 secret'ı eklemek. İzin gelmezse yol B'ye (kullanıcı web arayüzünden ekler) düşülecek.
-
-**Kapanan kararlar:**
-
-- **Uygulama kimliği (A1):** `com.keremtulu.questionnote` — sabitlendi (2026-10-16).
+**Kapananlar:** A1 (uygulama kimliği: `com.keremtulu.questionnote`), G1 (yetki + ortam ölçümü).
 
 ## Kullanıcının yapacağı iş (Aşama 1)
 
-- İmzalama anahtarını ve parolasını **iki ayrı yerde** saklamak (şifre yöneticisi + Drive'da bir dosya).
+**Şimdi (5 dakika):**
+
+- 2 secret'ı GitHub'da ekle: `SIGNING_KEYSTORE_BASE64`, `SIGNING_PASSWORD`
+  → adımlar: `anahtar/KURULUM_ADIMLARI.md` (git dışı klasörde).
+- İmzalama anahtarını ve parolasını **iki bağımsız yerde** sakla (şifre yöneticisi + Drive).
   Bu, güncellemelerin veriyi koruyarak üzerine kurulabilmesi için şarttır.
+
+**Sonra (APK geldiğinde):**
+
 - İlk APK'yı telefondan indirip kurmak ve 7 ders kartını görmek.
 - İkinci APK geldiğinde **kaldırmadan** üzerine kurmak ve çalıştığını bildirmek.

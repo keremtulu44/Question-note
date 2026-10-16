@@ -44,6 +44,18 @@ Bu dosya **kullanıcıya yansıyan** değişiklikleri içerir. Henüz yayımlanm
 - Ölçülen kısıtlar belgelendi: token'da depo admin'i var ama **Actions Secrets erişimi 403**;
   sandbox'ta Java/keytool yok, **openssl var**; Maven/Gradle depoları erişilemez.
 
+### Aşama 1 / G1 — yetki ve ortam ölçümü — 2026-10-16
+
+- **CI çalışıyor:** ilk iş akışı yazıldı ve push ile otomatik tetiklenerek **iki kez başarıyla** çalıştı.
+- **Ölçülen CI ortamı:** Temurin JDK 17 (8/11/21/25 de kurulu), Android SDK (build-tools 34→37.0.0,
+  platformlar android-34→37.2), apksigner 0.9, Gradle 9.8.1 hazır kurulu.
+- **Workflow token'ının yazma yetkisi doğrulandı** → ileride APK'yı Release olarak yayımlayabilir.
+- **Derleme logları indirilemiyor** (log sunucusu erişilemez) → CI artık ölçüm sonucunu repoya yazıyor
+  (`docs/ORTAM_RAPORU.md`).
+- **İmzalama anahtarı üretildi:** RSA 2048, PKCS12, 30 yıl geçerli, alias `yanlisdefteri`;
+  parmak izi `FA:13:DE:D7:…:89:DE:54`. Anahtar git dışı `anahtar/` klasöründe.
+- **Kalan tek engel:** 2 secret'ın GitHub'a eklenmesi (yalnızca kullanıcı yapabilir).
+
 ### Kullanıcı kararları — 2026-10-16 (ikinci tur)
 
 - **Uygulama kimliği: `com.keremtulu.questionnote`** (A1 kapandı, değiştirilemez).
