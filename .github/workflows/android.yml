@@ -1,0 +1,158 @@
+name: Android CI
+
+on:
+  push:
+    branches:
+      - main
+      - arena/0ec2226d-question-note
+    paths:
+      - 'app/**'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - 'settings.gradle.kts'
+      - 'build.gradle.kts'
+      - 'gradle.properties'
+      - '.github/workflows/android.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-ci-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Depoyu al
+        uses: actions/checkout@v4
+
+      - name: Temurin JDK 17'i kur
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: G2 iskeletini derle ve raporu üret
+        id: build
+        shell: bash
+        env:
+          WRAPPER_VERSION: "9.8.1"
+        run: |
+          set +e
+          mkdir -p docs
+          wrapper_log="$RUNNER_TEMP/wrapper-bootstrap.log"
+          build_log="$RUNNER_TEMP/android-build.log"
+          gradle_info="$RUNNER_TEMP/gradle-version.txt"
+          apk_info="$RUNNER_TEMP/apk-info.txt"
+          wrapper_exit=0
+          build_exit=125
+          wrapper_result="Depodaki wrapper kullanıldı"
+
+          gradle --version > "$gradle_info" 2>&1
+
+          if [[ ! -f gradle/wrapper/gradle-wrapper.jar || ! -f gradle/wrapper/gradle-wrapper.properties ]]; then
+            wrapper_result="CI'da Gradle ${WRAPPER_VERSION} ile üretildi"
+            bootstrap_dir="$RUNNER_TEMP/gradle-wrapper-bootstrap"
+            mkdir -p "$bootstrap_dir"
+            printf '// Temporary project used only to generate the official Gradle wrapper.\n' > "$bootstrap_dir/build.gradle"
+            (cd "$bootstrap_dir" && gradle wrapper --gradle-version "$WRAPPER_VERSION" --distribution-type bin) > "$wrapper_log" 2>&1
+            wrapper_exit=$?
+            if [[ "$wrapper_exit" -eq 0 ]]; then
+              mkdir -p gradle/wrapper
+              cp "$bootstrap_dir/gradlew" ./gradlew && \
+                cp "$bootstrap_dir/gradlew.bat" ./gradlew.bat && \
+                cp "$bootstrap_dir/gradle/wrapper/gradle-wrapper.jar" gradle/wrapper/gradle-wrapper.jar && \
+                cp "$bootstrap_dir/gradle/wrapper/gradle-wrapper.properties" gradle/wrapper/gradle-wrapper.properties
+              wrapper_exit=$?
+              if [[ "$wrapper_exit" -eq 0 ]]; then
+                chmod +x ./gradlew
+              fi
+            fi
+          fi
+
+          if [[ "$wrapper_exit" -eq 0 ]]; then
+            ./gradlew --no-daemon --console=plain --stacktrace :app:assembleRelease > "$build_log" 2>&1
+            build_exit=$?
+          fi
+
+          if [[ "$build_exit" -eq 0 ]]; then
+            find app/build/outputs/apk/release -type f -name '*.apk' -print -exec sha256sum {} \; > "$apk_info" 2>&1
+          fi
+
+          if [[ "$wrapper_exit" -eq 0 && "$build_exit" -eq 0 ]]; then
+            overall="BAŞARILI"
+          else
+            overall="BAŞARISIZ"
+          fi
+
+          {
+            echo "# CI Derleme Raporu — G2"
+            echo
+            echo "> Bu dosya Android CI iş akışı tarafından otomatik üretilir. Sırlar rapora yazılmaz."
+            echo
+            echo "- Zaman (UTC): $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "- Workflow commit'i: $GITHUB_SHA"
+            echo "- Dal: $GITHUB_REF_NAME"
+            echo "- Sonuç: **$overall**"
+            echo "- Wrapper: $wrapper_result (çıkış kodu: $wrapper_exit)"
+            echo "- assembleRelease çıkış kodu: $build_exit"
+            echo "- JDK: Temurin 17 (actions/setup-java)"
+            echo
+            echo "## Aday sürümler"
+            echo
+            echo '```toml'
+            grep -E '^(agp|kotlin|composeBom|activityCompose) = ' gradle/libs.versions.toml || true
+            echo '```'
+            echo
+            echo "## Wrapper üretim çıktısı"
+            echo
+            echo '```text'
+            if [[ -f "$wrapper_log" ]]; then tail -n 100 "$wrapper_log"; else echo "Bu çalıştırmada wrapper üretimi gerekmedi."; fi
+            echo '```'
+            echo
+            echo "## Gradle sürümü"
+            echo
+            echo '```text'
+            cat "$gradle_info"
+            echo '```'
+            echo
+            echo "## APK çıktısı ve SHA-256 (varsa)"
+            echo
+            echo '```text'
+            if [[ -s "$apk_info" ]]; then cat "$apk_info"; else echo "APK çıktısı alınamadı."; fi
+            echo '```'
+            echo
+            echo "## Derleme çıktısı (son 160 satır)"
+            echo
+            echo '```text'
+            if [[ -f "$build_log" ]]; then tail -n 160 "$build_log"; else echo "Derleme çalıştırılmadı."; fi
+            echo '```'
+          } > docs/DERLEME_RAPORU.md
+
+          echo "wrapper_exit=$wrapper_exit" >> "$GITHUB_OUTPUT"
+          echo "build_exit=$build_exit" >> "$GITHUB_OUTPUT"
+
+      - name: Wrapper ve raporu repoya yaz
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/DERLEME_RAPORU.md
+          for path in gradlew gradlew.bat gradle/wrapper/gradle-wrapper.jar gradle/wrapper/gradle-wrapper.properties; do
+            if [[ -f "$path" ]]; then git add "$path"; fi
+          done
+          if git diff --cached --quiet; then
+            echo "Rapor/wrapper değişmedi; commit atlanıyor."
+          else
+            git commit -m "ci: save Android build report and wrapper [skip ci]"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
+
+      - name: Derleme başarısızsa işi kırmızıya çevir
+        if: steps.build.outputs.wrapper_exit != '0' || steps.build.outputs.build_exit != '0'
+        run: exit 1
