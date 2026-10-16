@@ -54,8 +54,8 @@ uygulama geliştirmenin anlamı yok.
 - [ ] Görsellerin kalıcı dosya alanına alınması, atomik yazma, tutarlılık denetimi, onaylı temizlik
 - [ ] Soru ekleme akışı: fotoğraf → (isteğe bağlı döndür) → ders → kaydet
 - [ ] Çok görsel: "bir sayfa daha ekle" (soru ve çözüm için); çözüm sonradan da eklenebilir
-- [ ] Görsel kalite politikası: 30–50 gerçek soru fotoğrafıyla sıkıştırma denemesi
-      (küçük formüller, kök içi ifadeler, grafik etiketleri okunuyor mu)
+- [ ] Görsel kalite politikası: otomatik optimize (uzun kenar ~3000 px, JPEG ~%90) ve 30–50 gerçek
+      soru fotoğrafıyla doğrulama (küçük formüller, kök içi ifadeler, grafik etiketleri okunuyor mu)
 - [ ] Listeleme (derse/konuya/plana göre filtre, "konusuz" listesi)
 - [ ] Soru görüntüleme: tam ekran, yakınlaştırma, çözüm gizli + "Çözümü göster"
 - [ ] Düzenleme, silme (onay diyaloğu ile) ve plan durumu (aktif / askıda / tamamlandı)
@@ -88,8 +88,8 @@ uygulama geliştirmenin anlamı yok.
 ## Aşama 4 — Tekrar sistemi
 
 - [ ] Tekrar değerlendirmesi: Çözemedim / Zorlanarak çözdüm / Rahat çözdüm
-- [ ] "Çözüm açıldı" işaretinin kaydı; destekli tekrarın bağımsız sayılmaması (aralık en fazla 1–3 gün)
-- [ ] "Çözümü kapat ve tekrar dene": aynı gün ikinci, bağımsız deneme kaydı
+- [ ] "Çözüm açıldı" işaretinin kaydı; destekli tekrarın bağımsız sayılmaması (sonraki tekrar 1 gün)
+- [ ] Aynı gün ikinci deneme oluşturulmaması (kayıt tekilliği)
 - [ ] Aralık kuralının **sürümlü tek sınıfta** yazılması (`algoritma_surumu`)
 - [ ] Sonraki tekrar tarihi hesabı (1·3·7·21·45·90, üst sınır ~180)
 - [ ] Elle tarih atama

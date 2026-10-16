@@ -165,10 +165,10 @@ Veritabanı işlemi ile dosya sistemi işlemi tek atomik işlem değildir. Bu y�
 - `COZEMEDIM` → aralık 1 güne döner.
 - `ZORLANDIM` → aralık daha yavaş büyür (mevcut aralıkta kalır veya bir kademe ilerler).
 - `RAHAT` → aralık bir kademe büyür.
-- **`cozum_acildi = 1` olan tekrar bağımsız deneme sayılmaz:** sonuç ne olursa olsun aralık en fazla
-  **1–3 gün** uzar. Böylece "çözümü görünce anladım" ile "yardımsız çözdüm" aynı sayılmaz.
-- Kullanıcı isterse **"Çözümü kapat ve tekrar dene"** ile aynı gün ikinci bir deneme kaydedebilir;
-  aralık bu **bağımsız** denemeden hesaplanır. İki kayıt da geçmişte ayrı satır olarak durur.
+- **`cozum_acildi = 1` olan tekrar bağımsız deneme sayılmaz:** sonuç ne olursa olsun sonraki tekrar
+  **1 gün** sonradır. Amaç unutulanı hatırlamak olduğu için soru kısa süre sonra yeniden karşımıza
+  çıkar ve bu kez bağımsız olarak çözülür. **Aynı gün ikinci deneme kaydedilmez;** çözüm görüldükten
+  sonra aynı oturumda yapılan çözüm gerçek hatırlama sayılmaz.
 - Aralık kuralı **tek bir sınıfta** ve **sürümlü** olarak yazılır; kayıtlar `algoritma_surumu` ile
   etiketlenir. Sabit aralıklardan SM-2 benzeri bir modele geçmek istenirse geçmiş yeniden yazılmaz.
 - Kullanıcı sonucu seçtikten sonra sonraki tarihi elle değiştirebilir (`elle_atandi = 1`).

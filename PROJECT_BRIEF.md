@@ -62,8 +62,9 @@ Android telefonda kullanılacak, tek kişilik bir dijital yanlış defteri:
 | K16 | Soru ekleme akışı: fotoğraf çek/seç → (isteğe bağlı döndür) → ders seç → kaydet. Diğer tüm alanlar isteğe bağlıdır. |
 | K17 | Sorunun **plan durumu** (`AKTIF` / `ASKIDA` / `TAMAMLANDI`) öğrenme düzeyinden **ayrı** bir alandır. Kullanıcı bir soruyu tekrar planından geçici olarak çıkarabilir veya kalıcı olarak bitirebilir; kayıt ve geçmiş silinmez, işlem geri alınabilir. |
 | K18 | Tekrar aralığı kuralı **sürümlenmiş tek bir sınıfta** tutulur (`algoritma_surumu`); ileride algoritma değişirse geçmiş kayıtlar yeniden yazılmaz. |
-| K19 | Çözüm açılarak yapılan tekrar **bağımsız deneme sayılmaz**: sonuç ne olursa olsun aralık en fazla 1–3 gün uzar. Kullanıcı isterse "Çözümü kapat ve tekrar dene" ile aynı gün ikinci, bağımsız bir deneme kaydedebilir. |
+| K19 | Çözüm açılarak yapılan tekrar **bağımsız deneme sayılmaz**. Aynı gün ikinci deneme yapılmaz (çözüm görüldüğü için bu gerçek hatırlama olmaz); soru **1 gün sonra** yeniden karşımıza çıkar ve bu kez bağımsız olarak çözülür. |
 | K20 | Uzun bir aradan sonra **hiçbir soru otomatik olarak sıfırlanmaz**; gecikmiş sorular tek listede toplanır ve kullanıcı ne yapacağını kendisi seçer. |
+| K21 | **Görsel kalite politikası:** fotoğraflar kaydedilirken otomatik optimize edilir (uzun kenar ~3000 piksel, JPEG kalitesi ~%90). Tek ölçüt **okunabilirliktir**: küçük formüller, kök içi ifadeler ve grafik etiketleri okunur kalmalı. Bu, Aşama 2'de gerçek fotoğraflarla doğrulanır. |
 
 ### Soru kaydındaki alanlar
 
@@ -131,8 +132,8 @@ kaynak (kitap/sayfa/soru no), yanlış yapma nedeni, favori/önemli işareti.
 - "Çözemedim" → aralık 1 güne döner.
 - "Zorlanarak çözdüm" → daha yavaş ilerler.
 - "Rahat çözdüm" → aralık büyür.
-- **Çözüm açıldıysa** tekrar bağımsız sayılmaz; aralık en fazla 1–3 gün uzar. Kullanıcı isterse
-  "Çözümü kapat ve tekrar dene" ile aynı gün ikinci, bağımsız deneme kaydedebilir.
+- **Çözüm açıldıysa** tekrar bağımsız sayılmaz; soru **1 gün sonra** yeniden karşımıza çıkar ve o
+  zaman yardımsız çözülür. Aynı gün ikinci deneme kaydedilmez.
 - Sorunun **plan durumu** (aktif/askıda/tamamlandı) ayrı tutulur; "Bugün" listesi yalnızca aktif
   soruları gösterir.
 - Uzun aradan sonra hiçbir soru otomatik sıfırlanmaz; gecikmişler tek listede toplanır.

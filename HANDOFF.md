@@ -23,6 +23,11 @@
 3. Tekrar değerlendirmesi 3 buton + "çözümü açtım" ayrı işaret.
 4. Geri yükleme yalnızca "tamamen değiştir" + otomatik güvenlik kopyası.
 5. Sabit imzalama anahtarı Aşama 1'de kurulacak (kullanıcı onayladı).
+6. **Aynı gün ikinci deneme yok.** Kullanıcının gerekçesi: amaç unutulanları hatırlamak; çözüm
+   görüldükten sonra aynı oturumda yapılan çözüm gerçek hatırlama değildir. Bu yüzden çözüm
+   açılmışsa sonraki tekrar **1 gün** sonraya planlanır (K19). Model bu sayede sadeleşti.
+7. **Görsel kalite: otomatik optimize** (uzun kenar ~3000 px, JPEG ~%90) — K21, A9 kapandı.
+8. **Askıya alma / tamamlandı işaretleme 1. sürümde olacak** (K17).
 
 ## Dış inceleme — ikinci görüş (2026-10-16)
 
@@ -36,7 +41,7 @@ reddedildi.
 |---|---|
 | Sorunun **plan durumu** (aktif/askıda/tamamlandı) öğrenme düzeyinden ayrılmalı | PROJECT_BRIEF K17, VERI_MODELI §2 |
 | Aralık kuralı **sürümlü tek sınıf** olmalı (`algoritma_surumu`) | K18, VERI_MODELI §2/§5 |
-| Çözüm açılarak yapılan tekrar bağımsız sayılmamalı (tavan 1–3 gün) + ikinci bağımsız deneme | K19, VERI_MODELI §5 |
+| Çözüm açılarak yapılan tekrar bağımsız sayılmamalı (tavan 1–3 gün) + ikinci bağımsız deneme | K19, VERI_MODELI §5 — *sonradan değişti, bkz. Reddedilenler #5: tavan yerine 1 gün* |
 | Uzun aradan sonra otomatik sıfırlama yapılmamalı | K20, VERI_MODELI §5 |
 | Geri yüklemede **kesintiye dayanıklılık** (işlem sürerken kapanma) | YEDEK_FORMATI §3.1 |
 | ZIP bomb / yol kaçışı / boyut üst sınırı korumaları | YEDEK_FORMATI §3.2 |
@@ -60,6 +65,9 @@ reddedildi.
    bulunur; parolanın keystore dosyasının yanında düz metin durmaması koşuluyla.
 4. **Tek `data.json`** → veriler ayrı JSON dosyalarında kalacak (incelenebilirlik/karşılaştırma);
    fark küçük, gerekçe YEDEK_FORMATI §1'de.
+5. **"Çözümü kapat ve tekrar dene" düğmesi** → önce kabul edilmişti, **kullanıcı reddetti**: çözüm
+   görüldükten sonra aynı gün yapılan çözüm gerçek hatırlama sayılmaz. Sonraki tekrar 1 gün sonraya
+   planlanır (K19). Bu, hem bir düğmeyi hem de ek kayıt tipini ortadan kaldırdı.
 
 ## Ne test edildi?
 

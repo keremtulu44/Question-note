@@ -81,8 +81,8 @@ Son güncelleme: 2026-10-16 (dış inceleme notları işlendi)
 | 4.3 | "Çözemedim" sonrası tarih 1 güne dönüyor | YZ + KULLANICI | [ ] |
 | 4.4 | "Rahat çözdüm" sonrası aralık büyüyor | YZ + KULLANICI | [ ] |
 | 4.5 | Çözüm açıldığında bu bilgi kaydediliyor | YZ + KULLANICI | [ ] |
-| 4.6 | **Çözüm açılarak yapılan tekrar bağımsız sayılmıyor** (aralık en fazla 1–3 gün) | YZ + KULLANICI | [ ] |
-| 4.7 | "Çözümü kapat ve tekrar dene" aynı gün ikinci, bağımsız deneme kaydediyor | KULLANICI | [ ] |
+| 4.6 | **Çözüm açılarak yapılan tekrar bağımsız sayılmıyor**; sonraki tekrar 1 gün sonraya planlanıyor | YZ + KULLANICI | [ ] |
+| 4.7 | Çözüm açıldıktan sonra aynı gün ikinci deneme kaydı oluşmuyor | YZ | [ ] |
 | 4.8 | Tekrar geçmişi görüntülenebiliyor (planlanan gün ile gerçekleşen gün ayrı) | KULLANICI | [ ] |
 | 4.9 | Bildirim izni verilmese de "Bugün" listesi çalışıyor | KULLANICI | [ ] |
 | 4.10 | Elle tarih atama çalışıyor | KULLANICI | [ ] |

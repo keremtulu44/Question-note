@@ -16,8 +16,8 @@ Bu dosya **kullanıcıya yansıyan** değişiklikleri içerir. Henüz yayımlanm
 
 - Sorunun **plan durumu** (aktif / askıda / tamamlandı) öğrenme durumundan ayrıldı; bir soruyu tekrar
   planından geçici olarak çıkarmak veya bitirmek mümkün olacak (kayıt silinmez).
-- Çözüm açılarak yapılan tekrar **bağımsız sayılmayacak**; aralık en fazla 1–3 gün uzayacak ve
-  istenirse "çözümü kapat ve tekrar dene" ile aynı gün ikinci bir bağımsız deneme kaydedilebilecek.
+- Çözüm açılarak yapılan tekrar **bağımsız sayılmayacak** ve sonraki tekrar kısa tutulacak (bu madde
+  aşağıda yeniden düzenlendi — bkz. "Kullanıcı kararları").
 - Uzun bir aradan sonra hiçbir soru otomatik sıfırlanmayacak.
 - Tekrar aralığı kuralı sürümlü hâle getirildi; ileride algoritma değişse bile geçmiş korunacak.
 - Geri yüklemede **kesintiye dayanıklılık** (işlem sürerken uygulama kapanırsa sonraki açılışta
@@ -25,3 +25,11 @@ Bu dosya **kullanıcıya yansıyan** değişiklikleri içerir. Henüz yayımlanm
 - Şema değişiklikleri için **otomatik migration testleri** plana alındı.
 - Release çıktısına sürüm, commit kimliği ve APK SHA-256 bilgisi eklendi.
 - Reddedilen öneriler ve gerekçeleri [HANDOFF.md](HANDOFF.md) içinde kayda geçti.
+
+### Kullanıcı kararları — 2026-10-16
+
+- **Görsel kalite: otomatik optimize.** Fotoğraflar kaydedilirken küçültülür (uzun kenar ~3000 px,
+  JPEG ~%90); ölçüt okunabilirlik. Depolama tasarrufu sağlar.
+- **"Çözümü kapat ve tekrar dene" düğmesi olmayacak.** Çözüm görüldükten sonra aynı gün yapılan
+  çözüm gerçek hatırlama değildir; çözüm açılmışsa soru **1 gün sonra** yeniden karşımıza çıkar.
+- **Soruyu askıya alma ve "tamamlandı" işaretleme 1. sürümde olacak** (kayıt silinmez, geri alınır).
