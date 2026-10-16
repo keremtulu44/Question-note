@@ -41,7 +41,7 @@ internal class VarsayilanDersleriEkle : RoomDatabase.Callback() {
 
         VarsayilanDersAdlari.forEachIndexed { index, ad ->
             val stableId = "00000000-0000-4000-8000-${(index + 1).toString().padStart(12, '0')}"
-            db.execSQL(insertSql, arrayOf(stableId, ad, index, now, now))
+            db.execSQL(insertSql, arrayOf<Any?>(stableId, ad, index, now, now))
         }
     }
 }
