@@ -16,6 +16,11 @@ Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih 
 
 ## Proje ve belge geçmişi
 
+### Aşama 2 başlangıç — 2026-10-16 (yayımlanmadı)
+
+- Room v1 şeması (ders/konu/soru/görsel/tekrar), açık ilişkiler, yedi ders başlangıç kaydı ve şema dışa aktarımı eklendi. Üç Robolectric testi CI'da geçti (run `38944293610`).
+- CI derleme ve imza doğrulaması başarılı; v1.0.1 Release zaten bulunduğundan yeni Release/APK yayımlanmadı. Uygulama arayüzü Room'a bağlı değil; soru/görsel özellikleri henüz yok.
+
 ### Belgeler — 2026-10-16
 
 - Proje belgeleri oluşturuldu: README, PROJECT_BRIEF, ROADMAP, HANDOFF, BUILDING, CHANGELOG.

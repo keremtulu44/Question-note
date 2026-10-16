@@ -1,7 +1,7 @@
-# Veri Modeli (v1 taslağı)
+# Veri Modeli (v1)
 
-> Aşama 2'de uygulanacak şemanın taslağıdır. Kod yazılmadan önce gözden geçirilebilir.
-> Son güncelleme: 2026-10-16 (dış inceleme notları işlendi)
+> Şema v1 Room'da uygulanıp CI'da doğrulandı; bu belge veri sözleşmesidir. Uygulama akışları, kalıcı görsel yaşam döngüsü ve migration'lar henüz tamamlanmadı.
+> Son güncelleme: 2026-10-16 (Room v1 şema CI run `38944293610` ile doğrulandı)
 
 Veritabanı: **Room / SQLite**. Yerel veri tek doğruluk kaynağıdır.
 

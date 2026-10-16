@@ -11,7 +11,7 @@
 > ZIP yol güvenliği) ve **Robolectric** (şema/migration testleri). Emülatör yalnızca gerçekten
 > gerekirse kullanılır; asıl kabul testleri gerçek cihazda yapılır.
 
-Son güncelleme: 2026-10-16 (G5 güncelleme zinciri kullanıcı tarafından geçti olarak bildirildi)
+Son güncelleme: 2026-10-16 (A2 Room v1 şeması ve 3 Robolectric testi CI'da geçti; run `38944293610`)
 
 ---
 
@@ -51,6 +51,9 @@ Son güncelleme: 2026-10-16 (G5 güncelleme zinciri kullanıcı tarafından geç
 | 2.16 | Kullanılmayan dosya temizliği onaysız/yıkıcı biçimde çalışmıyor, ne sildiğini bildiriyor | YZ + KULLANICI | [ ] |
 | 2.17 | Eksik görsel (dosya yok) durumunda kayıt kırılmıyor, anlaşılır mesaj gösteriliyor | YZ + KULLANICI | [ ] |
 | 2.18 | Sıkıştırma testi: 30–50 gerçek soru fotoğrafında küçük formüller/kök içi ifadeler okunuyor | YZ + KULLANICI | [ ] |
+| 2.19 | Room v1 oluşturuluyor; beş tablo ve sürüm 1 doğrulanıyor | YZ (Robolectric) | [x] |
+| 2.20 | Yeni veritabanında yedi ders, sabit sırada ve arşivsiz oluşturuluyor | YZ (Robolectric) | [x] |
+| 2.21 | Soru/ders/konu yabancı anahtarları ve görsel/geçmiş CASCADE kuralları açık | YZ (Robolectric) | [x] |
 
 ## Aşama 3 — Yedek ve geri yükleme
 

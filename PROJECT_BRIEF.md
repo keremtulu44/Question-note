@@ -4,7 +4,7 @@ Bu belge projenin **karar kaydıdır**. Yeni bir geliştirme oturumu (insan veya
 belgeyi, sonra [HANDOFF.md](HANDOFF.md) dosyasını okur.
 
 - Son güncelleme: 2026-10-16
-- Durum: **Aşama 1 tamamlandı** — G5'te kullanıcı v1.0.0 → v1.0.1 güncellemesini telefonda doğruladı; uygulama açıldı ve 7 ders göründü. Sıradaki: Aşama 2 (yerel soru arşivi).
+- Durum: **Aşama 1 tamamlandı; Aşama 2 başladı.** G5 kullanıcı cihazında geçti. Room şema v1 ve başlangıç verisi CI'da 3 Robolectric testiyle doğrulandı (run `38944293610`); soru/görsel akışı, migration'lar ve minimum dışa aktarma hâlâ açık.
 
 ---
 

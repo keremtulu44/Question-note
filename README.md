@@ -25,13 +25,15 @@ cevaplamak ve çözümü öğrenme sürecinden ayrı saklamaktır.
 
 ## Durum
 
-**Aşama 1 tamamlandı.** CI'da derleme, sabit anahtarla imzalama, sertifika parmak izi ve Releases
-başarılı oldu. Kullanıcı cihazında G5 güncellemesi de geçti: v1.0.0'dan v1.0.1'e uygulamayı
-kaldırmadan güncellendi; uygulama açıldı ve 7 ders kartı göründü. v1.0.1 açık/koyu temalı ana
-ekrandır; soru kaydetme henüz eklenmedi.
+**Aşama 1 tamamlandı.** CI'da derleme, sabit anahtarla imzalama ve sertifika doğrulaması başarılı;
+kullanıcı v1.0.0'dan v1.0.1'e kaldırmadan güncellemeyi, uygulamanın açılmasını ve 7 ders kartını
+telefonda doğruladı. Son yayımlanan uygulama v1.0.1'dir; onda soru kaydı yoktur.
 
-**Sıradaki: Aşama 2 — yerel soru arşivi.** Önce Room şeması, veri ilişkileri ve migration testleri;
-ardından soru/görsel ekleme ve listeleme akışı.
+**Aşama 2 başladı, tamamlanmadı.** Room şema v1, ilişkiler ve yedi ders için başlangıç verisi kuruldu;
+CI'da üç Robolectric testi geçti. Soru ekleme/listeleme, görsel dosyalarının saklanması ve yedek
+özellikleri henüz uygulanmadı; Room için gerçek cihaz testi de yapılmadı. Yeni CI derlemesi imzalandı;
+v1.0.1 Release zaten bulunduğundan yeni Release/APK yayımlanmadı. Sonraki adım veritabanını repository
+ve arayüze bağlamaktır.
 
 ---
 

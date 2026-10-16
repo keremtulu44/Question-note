@@ -17,7 +17,7 @@ bildirimler → ek özellikler.**
 - [x] Dış inceleme (ikinci görüş) alınması ve önerilerin gerekçeyle değerlendirilmesi
 - [x] Bekleme: kullanıcının Aşama 1 için açık onayı
 
-**Çıktı:** Kararlar ve uygulama planı. Aşama 1'in kullanıcı cihazı G5 testi geçti; Aşama 2 sırada.
+**Çıktı:** Kararlar ve uygulama planı. Aşama 1'in kullanıcı cihazı G5 testi geçti. Aşama 2 başladı; Room şema v1 CI'da doğrulandı, yerel arşiv akışı henüz tamamlanmadı.
 
 ---
 
@@ -41,16 +41,18 @@ uygulama geliştirmenin anlamı yok.
 
 ---
 
-## Aşama 2 — Yerel soru arşivi
+## Aşama 2 — Yerel soru arşivi [~]
 
 > Veri yaşam döngüsü baştan doğru kurulur: yedekleme sonradan "eklenen bir düğme" değil, veri
-> katmanının sınırlarından biri olarak tasarlanır.
+> katmanının sınırlarından biri olarak tasarlanır. Aşama 2 sürüyor; yalnızca Room şema temeli
+> tamamlanıp CI'da doğrulandı.
 
-- [ ] Paket ayrımı ilk günden: `data` (Room/DAO/repository) · `domain` (tekrar kuralı) ·
-      `images` (içe aktarma/dosya yönetimi) · `backup` (ZIP/doğrulama/geri yükleme) · `ui`
-- [ ] Room veritabanı, şema v1, migration altyapısı ve `exportSchema`
-- [ ] Yabancı anahtarlar ve silme davranışlarının açıkça tanımlanması
-- [ ] 7 ders + konu yönetimi (ekle / yeniden adlandır / arşivle / yeniden etkinleştir)
+- [~] Paket ayrımı: `data/local` (Room/DAO) ve `ui` başladı; repository, `domain`, `images` ve `backup`
+      katmanları henüz uygulanmadı
+- [x] Room şema v1, `exportSchema` ve açık yabancı anahtar ilişkileri; üç Robolectric testi geçti
+- [ ] Sonraki her şema değişikliği için veri koruyan migration ve migration testi; yıkıcı fallback yok
+- [x] Yedi dersin başlangıç sırası ve Room oluşturma callback'i test edildi; uygulama/provider entegrasyonu açık
+- [ ] Ders/konu yönetimi (ekle / yeniden adlandır / arşivle / yeniden etkinleştir)
 - [ ] Kamera ile çekim ve sistem fotoğraf seçicisi ile galeriden seçim
 - [ ] Görsellerin kalıcı dosya alanına alınması, atomik yazma, tutarlılık denetimi, onaylı temizlik
 - [ ] Soru ekleme akışı: fotoğraf → (isteğe bağlı döndür) → ders → kaydet
@@ -61,7 +63,7 @@ uygulama geliştirmenin anlamı yok.
 - [ ] Soru görüntüleme: tam ekran, yakınlaştırma, çözüm gizli + "Çözümü göster"
 - [ ] Düzenleme, silme (onay diyaloğu ile) ve plan durumu (aktif / askıda / tamamlandı)
 - [ ] JVM birim testleri: aralık hesabı, yedek doğrulama, ZIP yol güvenliği
-- [ ] Robolectric ile şema ve migration testleri
+- [ ] Robolectric ile migration/DAO zincir testleri (migration henüz yok; şema değişikliğinde eklenecek)
 - [ ] **Aşama sonu ek güvenlik ağı:** minimum "dışa aktar" (yedek özelliği tamamlanmasa bile veriyi
       dışarı alabilme)
 

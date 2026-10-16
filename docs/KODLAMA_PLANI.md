@@ -1,7 +1,7 @@
 # KODLAMA PLANI (Aşama 1 ve sonrası)
 
 > Bu belge **nasıl kodlayacağımızı** ve ölçülen sonuçları kaydeder: görev sırası, dosya yapısı,
-> sürüm sabitleme, imzalama kurulumu, derleme bütçesi, test stratejisi. Aşama 1 kodlaması başladı.
+> sürüm sabitleme, imzalama kurulumu, derleme bütçesi, test stratejisi. Aşama 1 tamamlandı; Aşama 2'nin Room şema temeli CI'da doğrulandı.
 >
 > İlgili belgeler: [PROJECT_BRIEF.md](../PROJECT_BRIEF.md) (kararlar) · [ROADMAP.md](../ROADMAP.md)
 > (aşamalar) · [BUILDING.md](../BUILDING.md) (derleme/imzalama) · [docs/VERI_MODELI.md](VERI_MODELI.md)
@@ -73,7 +73,12 @@ platforms android-34→37.2, build-tools 34.0.0→37.0.0, Gradle 9.8.1.)
 | JDK | **Temurin 17** | G2 CI derlemesi başarılı |
 | compileSdk / targetSdk | **37 / 37** | G2 CI derlemesi başarılı; cihaz davranışı ayrıca test edilecek |
 | minSdk | **26 (Android 8)** — kesin karar | Yapılandırıldı |
-| Room, Coil, Lifecycle | Henüz eklenmedi | İlgili aşamada sürümlenip CI ile doğrulanacak |
+| Room | **2.8.4** | A2 şema v1 derlendi ve test edildi (CI) |
+| KSP | **2.3.12** | Room kod üretimi CI'da başarılı |
+| JUnit / Robolectric | **4.13.2 / 4.15.1** | SDK 35 hedefli 3 Room testi geçti |
+| Coil, Lifecycle | Henüz eklenmedi | Görsel akışı/uygulama durumu aşamasında seçilip CI'da doğrulanacak |
+
+**A2 Room ölçümü (2026-10-16):** CI run `38944293610` Room `2.8.4` + KSP `2.3.12` kombinasyonunu, JUnit `4.13.2` / Robolectric `4.15.1` ile 3 testin geçtiğini doğruladı. Bu yalnızca şema/ilişki/seed testidir; uygulama akışı ve cihaz testi değildir. İmzalı derleme başarılı olsa da v1.0.1 Release zaten mevcut olduğundan yeni Release yayımlanmadı.
 
 **G2 ölçüm sonucu (2026-10-16):** İlk koşu `38924729686`, AGP 9.2.0'ın built-in Kotlin desteği
 nedeniyle `org.jetbrains.kotlin.android` eklentisini reddetti. Yalnızca bu eklenti kaldırıldı;
@@ -237,35 +242,27 @@ Her görev: amaç → dosyalar → bitti ölçütü. Sıra, **en ucuz doğrulama
 
 ```
 com.keremtulu.questionnote/       # applicationId (sabitlendi 2026-10-16)
-├── AppContainer.kt            # elle bağımlılık kurulumu (DB, repository'ler, dosya yöneticisi)
+├── AppContainer.kt            # sonraki adım: elle bağımlılık kurulumu (DB, repository'ler, dosya yöneticisi)
 ├── MainActivity.kt
 ├── data/
-│   ├── YanlisDefteriVeritabani.kt   # Room DB, migration listesi, exportSchema
-│   ├── entity/{Ders.kt, Konu.kt, Soru.kt, Gorsel.kt, Tekrar.kt}
-│   ├── dao/{DersDao.kt, KonuDao.kt, SoruDao.kt, GorselDao.kt, TekrarDao.kt}
-│   └── repo/{DersRepository.kt, SoruRepository.kt, TekrarRepository.kt}
-├── domain/
-│   ├── Tarih.kt                # yerel gün (epochDay) dönüşümleri, tek noktada
-│   ├── TekrarKurali.kt         # sürümlü aralık hesabı (algoritma_surumu = 1)
-│   └── OgrenmeDurumu.kt        # türetilmiş durum + plan durumu geçişleri
-├── images/
-│   ├── GorselIceAktarma.kt     # seç → geçici → doğrula → küçült → kalıcı → sha256
-│   ├── GorselDonusturucu.kt    # ölçekleme/kalite (uzun kenar ~3000 px, JPEG ~%90)
-│   └── GorselDosyaYonetimi.kt  # kalıcı klasör, tutarlılık denetimi, onaylı temizlik
-├── ui/
-│   ├── ekranlar/{BugunEkrani.kt, DerslerEkrani.kt, SoruEkleEkrani.kt, SoruDetayEkrani.kt,
-│   │             KonuYonetimiEkrani.kt, AyarlarEkrani.kt}
-│   ├── bilesenler/{SoruKarti.kt, GorselGosterici.kt, CozumBolumu.kt, TarihSecici.kt}
-│   └── tema/…
-└── backup/                     # Aşama 3'te doldurulur (paket Aşama 2'de açılır)
+│   ├── local/                  # ✅ v1 Room temeli
+│   │   ├── entity/{DersEntity.kt, KonuEntity.kt, SoruEntity.kt, GorselEntity.kt, TekrarEntity.kt}
+│   │   ├── dao/DersDao.kt      # şu an yalnızca okuma sorgusu
+│   │   ├── YanlisDefteriDatabase.kt
+│   │   └── YanlisDefteriDatabaseProvider.kt
+│   └── repository/             # sonraki adım: DAO'ları UI'dan ayır
+├── domain/                     # aralık/tarih kuralları henüz eklenmedi
+├── images/                     # kalıcı dosya yaşam döngüsü henüz eklenmedi
+├── ui/                         # mevcut Compose ekranı; Room'a henüz bağlı değil
+└── backup/                     # Aşama 3'te ZIP/geri yükleme; Aşama 2 sonunda minimum export
 ```
 
 ### 5.2 Görev sırası
 
 | # | Görev | Bitti ölçütü |
 |---|---|---|
-| 2.1 | Room şeması v1 + `exportSchema` + yabancı anahtar kuralları | Şema JSON'u repoda; migration altyapısı hazır |
-| 2.2 | 7 ders başlangıç verisi kişileri (ilk açılışta yalnızca bir kez) | Uygulama ilk açılışta dersleri oluşturur, ikinci açılışta tekrar eklemez |
+| 2.1 | ✅ Room şeması v1 + `exportSchema` + açık yabancı anahtarlar | `1.json` repoda; 3 Robolectric testi geçti; henüz migration yok |
+| 2.2 | 7 ders başlangıç verisi (ilk açılışta yalnızca bir kez) | Callback ve bellek içi test geçti; kalıcı provider/uygulama ilk açılış entegrasyonu açık |
 | 2.3 | Ders/konu yönetimi: ekle, yeniden adlandır, arşivle, geri getir | Test 2.13 geçer |
 | 2.4 | `Tarih.kt` + `TekrarKurali.kt` + birim testleri | Tüm sonuç × çözüm açıldı kombinasyonları testten geçer |
 | 2.5 | Görsel içe aktarma boru hattı (kamera + fotoğraf seçici) | Geçici→kalıcı akışı, iptal durumu, sha256, küçültme; Test 2.4/2.5/2.18 |
@@ -375,5 +372,5 @@ edilecek" ayrımı yazılır. `docs/TEST_KONTROL_LISTESI.md` işaretlenir.
 ## 11. Bir sonraki oturum nasıl başlar?
 
 1. Bu belge + HANDOFF okunur; HANDOFF'taki "sıradaki somut adım" uygulanır.
-2. **G5 geçti; sıradaki iş Aşama 2**: Room şeması, veri ilişkileri ve migration testleriyle yerel arşiv temelini kur; sonra soru/görsel akışına ilerle.
+2. **Aşama 2 sürüyor:** Room v1 şema temeli CI'da geçti. Sıradaki adım Room repository'sini kurup mevcut ders ekranına bağlamak; sonra konu/soru akışına ve görsel dosya yaşam döngüsüne ilerlemek. Migration henüz yok; her sonraki şema değişikliği veri koruyan migration ve test içermeli.
 3. Her görev sonunda HANDOFF güncellenir: yapılan, ölçülen, kalan, sürümler, son başarılı derleme.

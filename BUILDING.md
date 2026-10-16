@@ -4,7 +4,7 @@
 > Hiçbir anahtar, parola veya token bu depoya yazılmaz.
 
 - Son güncelleme: 2026-10-16
-- Durum: **Aşama 1 tamamlandı.** G3/G4 CI doğrulandı; kullanıcı G5 güncellemesini telefonda başarıyla tamamladığını bildirdi.
+- Durum: **Aşama 1 tamamlandı; Aşama 2 sürüyor.** Room v1 temeli CI'da derlenip 3 testten geçti (run `38944293610`). İmzalı CI APK'sı üretildi; v1.0.1 Release zaten mevcut olduğu için yeni Release yayımlanmadı. En son kullanıcıya yayımlanan sürüm v1.0.1'dir.
 
 ---
 
