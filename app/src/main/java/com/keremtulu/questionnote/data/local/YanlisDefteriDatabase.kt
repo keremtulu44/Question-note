@@ -5,6 +5,9 @@ import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.keremtulu.questionnote.data.local.dao.DersDao
 import com.keremtulu.questionnote.data.local.dao.KonuDao
+import com.keremtulu.questionnote.data.local.dao.GorselDao
+import com.keremtulu.questionnote.data.local.dao.SoruDao
+import com.keremtulu.questionnote.data.local.dao.TekrarDao
 import com.keremtulu.questionnote.data.local.entity.DersEntity
 import com.keremtulu.questionnote.data.local.entity.GorselEntity
 import com.keremtulu.questionnote.data.local.entity.KonuEntity
@@ -25,6 +28,9 @@ import com.keremtulu.questionnote.data.local.entity.TekrarEntity
 abstract class YanlisDefteriDatabase : RoomDatabase() {
     abstract fun dersDao(): DersDao
     abstract fun konuDao(): KonuDao
+    abstract fun soruDao(): SoruDao
+    abstract fun gorselDao(): GorselDao
+    abstract fun tekrarDao(): TekrarDao
 
     companion object {
         const val DATABASE_NAME = "yanlis_defteri.db"

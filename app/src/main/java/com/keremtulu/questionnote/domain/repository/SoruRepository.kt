@@ -1,0 +1,26 @@
+package com.keremtulu.questionnote.domain.repository
+
+import com.keremtulu.questionnote.domain.model.Soru
+import com.keremtulu.questionnote.domain.model.SoruIslemSonucu
+import com.keremtulu.questionnote.domain.model.SoruKaydetmeIstegi
+import com.keremtulu.questionnote.domain.model.SoruPlanDurumu
+import com.keremtulu.questionnote.domain.model.TekrarSonucu
+import kotlinx.coroutines.flow.Flow
+
+interface SoruRepository {
+    fun sorulariIzle(dersId: String, konuId: String? = null, konusuz: Boolean = false): Flow<List<Soru>>
+
+    suspend fun soruGetir(soruId: String): Soru?
+
+    suspend fun soruKaydet(istek: SoruKaydetmeIstegi): SoruIslemSonucu
+
+    suspend fun soruSil(soruId: String): SoruIslemSonucu
+
+    suspend fun planDurumunuAyarla(soruId: String, durum: SoruPlanDurumu): SoruIslemSonucu
+
+    suspend fun tekrarKaydet(
+        soruId: String,
+        sonuc: TekrarSonucu,
+        cozumAcildi: Boolean,
+    ): SoruIslemSonucu
+}

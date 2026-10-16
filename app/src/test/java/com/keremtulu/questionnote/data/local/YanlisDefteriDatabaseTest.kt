@@ -55,7 +55,7 @@ class YanlisDefteriDatabaseTest {
             arrayOf<Any?>("test-soru-1", firstDers.id, 1L, 1L),
         )
 
-        val dersler = RoomDersRepository(database.dersDao())
+        val dersler = RoomDersRepository(database)
             .aktifDersleriIzle()
             .first()
 

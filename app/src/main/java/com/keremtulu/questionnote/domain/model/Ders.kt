@@ -6,3 +6,10 @@ data class Ders(
     val sira: Int,
     val soruSayisi: Int,
 )
+
+sealed interface DersIslemSonucu {
+    data object Basarili : DersIslemSonucu
+    data object BosAd : DersIslemSonucu
+    data object AyniAdVar : DersIslemSonucu
+    data object Bulunamadi : DersIslemSonucu
+}

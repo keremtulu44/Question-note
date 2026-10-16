@@ -20,6 +20,10 @@ class MainActivity : ComponentActivity() {
                 YanlisDefteriUygulamasi(
                     dersRepository = appContainer.dersRepository,
                     konuRepository = appContainer.konuRepository,
+                    soruRepository = appContainer.soruRepository,
+                    gorselDeposu = appContainer.gorselDeposu,
+                    gorselTutarliligi = appContainer.gorselTutarliligi,
+                    disaAktarmaHizmeti = appContainer.disaAktarmaHizmeti,
                 )
             }
         }

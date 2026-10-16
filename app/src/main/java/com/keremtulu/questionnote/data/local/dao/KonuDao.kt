@@ -22,6 +22,9 @@ interface KonuDao {
     @Query("SELECT * FROM konular WHERE ders_id = :dersId")
     suspend fun dersinKonulariniGetir(dersId: String): List<KonuEntity>
 
+    @Query("SELECT * FROM konular ORDER BY ders_id ASC, sira ASC, id ASC")
+    suspend fun tumunuGetir(): List<KonuEntity>
+
     @Query("SELECT * FROM konular WHERE id = :id LIMIT 1")
     suspend fun idIleGetir(id: String): KonuEntity?
 
