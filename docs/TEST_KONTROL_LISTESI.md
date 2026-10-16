@@ -11,7 +11,7 @@
 > ZIP yol güvenliği) ve **Robolectric** (şema/migration testleri). Emülatör yalnızca gerçekten
 > gerekirse kullanılır; asıl kabul testleri gerçek cihazda yapılır.
 
-Son güncelleme: 2026-10-16 (A2 Room v1 şeması ve 3 Robolectric testi CI'da geçti; run `38944293610`)
+Son güncelleme: 2026-10-16 (Room repository/ana ekran bağlantısı ve 5 Robolectric testi CI'da geçti; run `38946633709`)
 
 ---
 
@@ -54,6 +54,8 @@ Son güncelleme: 2026-10-16 (A2 Room v1 şeması ve 3 Robolectric testi CI'da ge
 | 2.19 | Room v1 oluşturuluyor; beş tablo ve sürüm 1 doğrulanıyor | YZ (Robolectric) | [x] |
 | 2.20 | Yeni veritabanında yedi ders, sabit sırada ve arşivsiz oluşturuluyor | YZ (Robolectric) | [x] |
 | 2.21 | Soru/ders/konu yabancı anahtarları ve görsel/geçmiş CASCADE kuralları açık | YZ (Robolectric) | [x] |
+| 2.22 | Repository yalnızca etkin dersleri, sabit sırada ve doğru soru sayılarıyla yayımlıyor | YZ (Robolectric) | [x] |
+| 2.23 | Dosya tabanlı veritabanı yeniden açılınca yedi seed dersi koruyor, çoğaltmıyor | YZ (Robolectric) | [x] |
 
 ## Aşama 3 — Yedek ve geri yükleme
 

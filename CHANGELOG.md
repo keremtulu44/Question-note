@@ -18,8 +18,8 @@ Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih 
 
 ### Aşama 2 başlangıç — 2026-10-16 (yayımlanmadı)
 
-- Room v1 şeması (ders/konu/soru/görsel/tekrar), açık ilişkiler, yedi ders başlangıç kaydı ve şema dışa aktarımı eklendi. Üç Robolectric testi CI'da geçti (run `38944293610`).
-- CI derleme ve imza doğrulaması başarılı; v1.0.1 Release zaten bulunduğundan yeni Release/APK yayımlanmadı. Uygulama arayüzü Room'a bağlı değil; soru/görsel özellikleri henüz yok.
+- Room v1 şeması, açık ilişkiler, yedi ders seed'i, repository/AppContainer bağlantısı ve Room'dan beslenen ders ana ekranı eklendi; etkin ders soru sayıları da DB sorgusundan geliyor. Beş Robolectric testi CI'da geçti (run `38946633709`).
+- CI derleme ve imza doğrulaması başarılı; v1.0.1 Release zaten bulunduğundan yeni Release/APK yayımlanmadı. Bu CI kodu gerçek cihazda denenmedi; konu/soru/görsel akışları ve dışa aktarma henüz yok.
 
 ### Belgeler — 2026-10-16
 

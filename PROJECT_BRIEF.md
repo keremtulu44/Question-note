@@ -4,7 +4,7 @@ Bu belge projenin **karar kaydıdır**. Yeni bir geliştirme oturumu (insan veya
 belgeyi, sonra [HANDOFF.md](HANDOFF.md) dosyasını okur.
 
 - Son güncelleme: 2026-10-16
-- Durum: **Aşama 1 tamamlandı; Aşama 2 başladı.** G5 kullanıcı cihazında geçti. Room şema v1 ve başlangıç verisi CI'da 3 Robolectric testiyle doğrulandı (run `38944293610`); soru/görsel akışı, migration'lar ve minimum dışa aktarma hâlâ açık.
+- Durum: **Aşama 1 tamamlandı; Aşama 2 başladı.** Room v1 repository'si ana ekrana bağlandı; etkin dersler ve soru sayıları Room'dan okunuyor. CI run `38946633709` beş Robolectric testini, release derlemesini ve imza doğrulamasını geçti. Gerçek cihaz testi yapılmadı; konu/soru ve görsel akışları, migration'lar ve minimum dışa aktarma hâlâ açık.
 
 ---
 

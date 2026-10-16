@@ -75,10 +75,10 @@ platforms android-34→37.2, build-tools 34.0.0→37.0.0, Gradle 9.8.1.)
 | minSdk | **26 (Android 8)** — kesin karar | Yapılandırıldı |
 | Room | **2.8.4** | A2 şema v1 derlendi ve test edildi (CI) |
 | KSP | **2.3.12** | Room kod üretimi CI'da başarılı |
-| JUnit / Robolectric | **4.13.2 / 4.15.1** | SDK 35 hedefli 3 Room testi geçti |
+| JUnit / Robolectric | **4.13.2 / 4.15.1** | SDK 35 hedefli 5 Room/repository testi geçti (run `38946633709`) |
 | Coil, Lifecycle | Henüz eklenmedi | Görsel akışı/uygulama durumu aşamasında seçilip CI'da doğrulanacak |
 
-**A2 Room ölçümü (2026-10-16):** CI run `38944293610` Room `2.8.4` + KSP `2.3.12` kombinasyonunu, JUnit `4.13.2` / Robolectric `4.15.1` ile 3 testin geçtiğini doğruladı. Bu yalnızca şema/ilişki/seed testidir; uygulama akışı ve cihaz testi değildir. İmzalı derleme başarılı olsa da v1.0.1 Release zaten mevcut olduğundan yeni Release yayımlanmadı.
+**A2 Room ölçümü (2026-10-16):** Başlangıç CI run `38944293610`, Room `2.8.4` + KSP `2.3.12` ve JUnit `4.13.2` / Robolectric `4.15.1` ile 3 şema/seed testini doğruladı. Sonraki run `38946633709` repository akışı, etkin ders/soru sayıları ve dosya tabanlı DB'nin yeniden açılış testleriyle toplam 5 testi geçti; release derlemesi ve imza doğrulaması da başarılı. Gerçek cihaz testi yapılmadı, v1.0.1 Release zaten bulunduğundan yeni Release yayımlanmadı.
 
 **G2 ölçüm sonucu (2026-10-16):** İlk koşu `38924729686`, AGP 9.2.0'ın built-in Kotlin desteği
 nedeniyle `org.jetbrains.kotlin.android` eklentisini reddetti. Yalnızca bu eklenti kaldırıldı;
@@ -242,18 +242,20 @@ Her görev: amaç → dosyalar → bitti ölçütü. Sıra, **en ucuz doğrulama
 
 ```
 com.keremtulu.questionnote/       # applicationId (sabitlendi 2026-10-16)
-├── AppContainer.kt            # sonraki adım: elle bağımlılık kurulumu (DB, repository'ler, dosya yöneticisi)
-├── MainActivity.kt
+├── AppContainer.kt            # ✅ veritabanı ve repository bağlama noktası
+├── MainActivity.kt             # ✅ repository'yi ders ekranına verir
 ├── data/
 │   ├── local/                  # ✅ v1 Room temeli
 │   │   ├── entity/{DersEntity.kt, KonuEntity.kt, SoruEntity.kt, GorselEntity.kt, TekrarEntity.kt}
-│   │   ├── dao/DersDao.kt      # şu an yalnızca okuma sorgusu
+│   │   ├── dao/DersDao.kt      # etkin ders/soru sayısı Flow sorgusu
 │   │   ├── YanlisDefteriDatabase.kt
 │   │   └── YanlisDefteriDatabaseProvider.kt
-│   └── repository/             # sonraki adım: DAO'ları UI'dan ayır
-├── domain/                     # aralık/tarih kuralları henüz eklenmedi
+│   └── repository/RoomDersRepository.kt
+├── domain/
+│   ├── model/Ders.kt
+│   └── repository/DersRepository.kt
 ├── images/                     # kalıcı dosya yaşam döngüsü henüz eklenmedi
-├── ui/                         # mevcut Compose ekranı; Room'a henüz bağlı değil
+├── ui/                         # ✅ ders ekranı Room akışına bağlı
 └── backup/                     # Aşama 3'te ZIP/geri yükleme; Aşama 2 sonunda minimum export
 ```
 
@@ -262,7 +264,7 @@ com.keremtulu.questionnote/       # applicationId (sabitlendi 2026-10-16)
 | # | Görev | Bitti ölçütü |
 |---|---|---|
 | 2.1 | ✅ Room şeması v1 + `exportSchema` + açık yabancı anahtarlar | `1.json` repoda; 3 Robolectric testi geçti; henüz migration yok |
-| 2.2 | 7 ders başlangıç verisi (ilk açılışta yalnızca bir kez) | Callback ve bellek içi test geçti; kalıcı provider/uygulama ilk açılış entegrasyonu açık |
+| 2.2 | 7 ders başlangıç verisi + Room repository/ana ekran bağlantısı | Seed, Flow sorgusu ve dosya tabanlı DB yeniden açılış testi geçti; gerçek cihaz kabul testi açık |
 | 2.3 | Ders/konu yönetimi: ekle, yeniden adlandır, arşivle, geri getir | Test 2.13 geçer |
 | 2.4 | `Tarih.kt` + `TekrarKurali.kt` + birim testleri | Tüm sonuç × çözüm açıldı kombinasyonları testten geçer |
 | 2.5 | Görsel içe aktarma boru hattı (kamera + fotoğraf seçici) | Geçici→kalıcı akışı, iptal durumu, sha256, küçültme; Test 2.4/2.5/2.18 |
@@ -372,5 +374,5 @@ edilecek" ayrımı yazılır. `docs/TEST_KONTROL_LISTESI.md` işaretlenir.
 ## 11. Bir sonraki oturum nasıl başlar?
 
 1. Bu belge + HANDOFF okunur; HANDOFF'taki "sıradaki somut adım" uygulanır.
-2. **Aşama 2 sürüyor:** Room v1 şema temeli CI'da geçti. Sıradaki adım Room repository'sini kurup mevcut ders ekranına bağlamak; sonra konu/soru akışına ve görsel dosya yaşam döngüsüne ilerlemek. Migration henüz yok; her sonraki şema değişikliği veri koruyan migration ve test içermeli.
+2. **Aşama 2 sürüyor:** Room v1 repository'si ve DB-backed ders ekranı CI'da geçti. Sıradaki adım konu CRUD, ardından soru kaydetme/listeleme ve görsel dosya yaşam döngüsü. Migration henüz yok; her sonraki şema değişikliği veri koruyan migration ve test içermeli.
 3. Her görev sonunda HANDOFF güncellenir: yapılan, ölçülen, kalan, sürümler, son başarılı derleme.

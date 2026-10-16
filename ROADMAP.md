@@ -17,7 +17,7 @@ bildirimler → ek özellikler.**
 - [x] Dış inceleme (ikinci görüş) alınması ve önerilerin gerekçeyle değerlendirilmesi
 - [x] Bekleme: kullanıcının Aşama 1 için açık onayı
 
-**Çıktı:** Kararlar ve uygulama planı. Aşama 1'in kullanıcı cihazı G5 testi geçti. Aşama 2 başladı; Room şema v1 CI'da doğrulandı, yerel arşiv akışı henüz tamamlanmadı.
+**Çıktı:** Kararlar ve uygulama planı. Aşama 1'in kullanıcı cihazı G5 testi geçti. Aşama 2 başladı; Room v1, repository ve veritabanından beslenen ders ana ekranı CI'da doğrulandı. Konu/soru/görsel akışları ve dışa aktarma hâlâ açık.
 
 ---
 
@@ -44,15 +44,17 @@ uygulama geliştirmenin anlamı yok.
 ## Aşama 2 — Yerel soru arşivi [~]
 
 > Veri yaşam döngüsü baştan doğru kurulur: yedekleme sonradan "eklenen bir düğme" değil, veri
-> katmanının sınırlarından biri olarak tasarlanır. Aşama 2 sürüyor; yalnızca Room şema temeli
-> tamamlanıp CI'da doğrulandı.
+> katmanının sınırlarından biri olarak tasarlanır. Aşama 2 sürüyor; Room repository'si ve ana ekran
+> bağlantısı eklendi, konu/soru/görsel ve yedek akışları henüz yok.
 
-- [~] Paket ayrımı: `data/local` (Room/DAO) ve `ui` başladı; repository, `domain`, `images` ve `backup`
-      katmanları henüz uygulanmadı
-- [x] Room şema v1, `exportSchema` ve açık yabancı anahtar ilişkileri; üç Robolectric testi geçti
+- [~] Paket ayrımı: `data/local`, `data/repository`, `domain` model/repository ve `ui` başladı; tekrar
+      kuralları, `images` ve `backup` katmanları henüz uygulanmadı
+- [x] Room şema v1, `exportSchema` ve açık yabancı anahtar ilişkileri; şema testleri geçti
 - [ ] Sonraki her şema değişikliği için veri koruyan migration ve migration testi; yıkıcı fallback yok
-- [x] Yedi dersin başlangıç sırası ve Room oluşturma callback'i test edildi; uygulama/provider entegrasyonu açık
-- [ ] Ders/konu yönetimi (ekle / yeniden adlandır / arşivle / yeniden etkinleştir)
+- [x] Yedi dersin ilk açılışta seed edilmesi ve veritabanının yeniden açılınca kopyalanmaması Robolectric'te geçti
+- [x] Ders repository'si etkin dersleri/soru sayılarını Flow ile sunuyor; ana ekran Room'dan okuyor
+- [ ] Konu yönetimi (ekle / yeniden adlandır / arşivle / yeniden etkinleştir)
+- [ ] Gerçek cihazda ilk açılış, uygulamayı kapatıp açma ve verinin korunması doğrulaması
 - [ ] Kamera ile çekim ve sistem fotoğraf seçicisi ile galeriden seçim
 - [ ] Görsellerin kalıcı dosya alanına alınması, atomik yazma, tutarlılık denetimi, onaylı temizlik
 - [ ] Soru ekleme akışı: fotoğraf → (isteğe bağlı döndür) → ders → kaydet

@@ -4,7 +4,7 @@
 
 - Son güncelleme: 2026-10-16
 - Aktif aşama: **Aşama 2 — yerel soru arşivi** (Aşama 1 / G1–G5 tamamlandı; G5 cihaz testi kullanıcı tarafından doğrulandı)
-- Son başarılı CI: run `38944293610` — 3 birim test (0 başarısız/atlanan), release derlemesi ve imza/parmak izi doğrulaması başarılı; v1.0.1 Release yeniden yayımlanmadı
+- Son başarılı CI: run `38946633709` — 5 birim test (0 başarısız/hata/atlanan), release derlemesi ve imza/parmak izi doğrulaması başarılı; v1.0.1 Release yeniden yayımlanmadı
 
 ---
 
@@ -21,10 +21,11 @@
 - **G4 tamamlandı (CI):** v1.0.1 / versionCode 2, açık/koyu tema ve 7 ders kartı; run `38927750387` imza ve Release ile başarılı.
 - **G5 geçti (kullanıcı bildirimi, 2026-10-16):** v1.0.0'dan v1.0.1'e uygulama kaldırılmadan güncellendi; uygulama açıldı ve 7 ders kartı göründü.
 - **A2 Room temeli eklendi:** `data/local/entity` altında beş tablo (ders, konu, soru, görsel, tekrar), Room veritabanı/provider, ders DAO'su, ilk açılış callback'i ve yedi sabit ders. Şema `app/schemas/com.keremtulu.questionnote.data.local.YanlisDefteriDatabase/1.json` olarak repoda.
-- Üç Robolectric testi şema sürümünü/beş tabloyu, yedi başlangıç dersini ve yabancı anahtar/silme kurallarını doğruladı. CI run `38944293610`: 3 test, 0 başarısız, 0 hata, 0 atlanan; release derlemesi ve imza/parmak izi doğrulaması başarılı.
+- Şema/başlangıç/ilişki testlerine ek olarak repository'nin etkin dersleri ve soru sayılarını doğru yayınlaması ve dosya tabanlı veritabanının yeniden açılınca yedi dersi koruması doğrulandı. CI run `38946633709`: 5 test, 0 başarısız, 0 hata, 0 atlanan; release derlemesi ve imza/parmak izi doğrulaması başarılı.
 - Sabit ve CI'da doğrulanmış kombinasyon: AGP `9.2.0`, Compose/Kotlin plugin `2.4.0`, Compose BOM `2026.09.00`, Activity Compose `1.13.0`, Room `2.8.4`, KSP `2.3.12`, JUnit `4.13.2`, Robolectric `4.15.1`; Gradle `9.8.1`, Temurin JDK `17`, compile/target SDK `37/37`, minSdk `26`. Tam liste `gradle/libs.versions.toml` içinde.
-- İlk Room CI run `38943027931` derleme hatasında kaldı; rapor tanıyı göstermediği için workflow hata satırlarını koruyacak şekilde güncellendi. Run `38943350088`, Kotlin 2.4'ün karışık SQL argümanlarında tür kesişimi çıkardığını gösterdi; `arrayOf<Any?>` düzeltmesi `cbab9db` ile yapıldı. Run `38943580341` başarılı oldu; test sayısı daha sonra raporlamaya eklenip run `38944293610`'da 3 olarak doğrulandı.
-- Bu, yalnızca veri tabanı temeli: `MainActivity`/ders kartları henüz Room'a bağlı değil; repository, soru/görsel ekleme/listeleme ve dışa aktarma yok. Room için gerçek cihaz testi yapılmadı.
+- İlk Room CI run `38943027931` derleme hatasında kaldı; rapor tanıyı göstermediği için workflow hata satırlarını koruyacak şekilde güncellendi. Run `38943350088`, Kotlin 2.4'ün karışık SQL argümanlarında tür kesişimi çıkardığını gösterdi; `arrayOf<Any?>` düzeltmesi `cbab9db` ile yapıldı. Run `38943580341` başarılı oldu.
+- Ders ekranını bağlayan ilk UI CI run `38946121569`, Column scope `weight` uzantısına doğrudan import verildiği için başarısız oldu; erişilemeyen import kaldırıldı (`ba29656`). Run `38946302916` 4 testle, diskten yeniden açma testi eklendikten sonraki run `38946633709` 5 testle başarılı oldu.
+- `MainActivity` artık `AppContainer` → `DersRepository` → Room akışıyla etkin dersleri ve soru sayılarını gösteriyor. Bu entegrasyon ve dosya tabanlı DB'nin seed'i koruması Robolectric'te test edildi; gerçek cihazda çalıştırılmadı. Konu/soru CRUD, görsel ekleme/listeleme ve dışa aktarma hâlâ yok.
 - CI imzalı APK üretti ancak v1.0.1 etiketi/Release zaten bulunduğu için yeni Release oluşturulmadı. v1.0.1 kullanıcıya yayımlanmış sürüm olarak kalıyor.
 
 ## Kullanıcıyla netleşen ek kararlar (Aşama 0 sırasında)
@@ -168,7 +169,7 @@ reddedildi.
   Sabit sürüm kombinasyonu `gradle/libs.versions.toml` ve `docs/KODLAMA_PLANI.md` içinde.
 - **G5 kullanıcı bildirimi:** v1.0.0 → v1.0.1 uygulama kaldırılmadan güncellendi; uygulama açıldı ve
   7 ders kartı göründü. Bu cihaz testi kullanıcı raporudur; ben cihazda bağımsız çalıştırmadım.
-- Room v1 şeması, seed callback'i ve ilişkiler CI'da doğrulandı (3 test, run `38944293610`). **Henüz uygulanmadı/test edilmedi:** Room'u ana ekrana bağlama, repository/CRUD, soru kaydı, görsel seçimi/kamera ve dosya saklama, dışa aktarma/backup, gerçek fotoğraf okunabilirliği. Bunlar Aşama 2–3 işleridir.
+- Room v1, repository, ders ekranı bağlantısı ve seed'in yeniden açılışta korunması CI/Robolectric'te doğrulandı (5 test, run `38946633709`). **Henüz uygulanmadı/test edilmedi:** konu yönetimi, soru CRUD/listeleme, görsel seçimi/kamera ve dosya saklama, dışa aktarma/backup, gerçek fotoğraf okunabilirliği ve gerçek cihaz kabul testi. Bunlar Aşama 2–3 işleridir.
 - Açık/koyu tema kontrastının detaylı kabul testi daha sonra TEST 5.9'da yapılacak.
 
 ## Bilinen hatalar / engeller
@@ -186,12 +187,11 @@ reddedildi.
 
 ## Sıradaki somut adım
 
-**Aşama 2 — yerel soru arşivi.** Veri modeli incelendi; Room şema v1, ilişkiler, başlangıç callback'i ve üç
-Robolectric testi tamamlandı. Sıradaki küçük adım repository/DAO sınırını kurup varsayılan dersleri
-Room'dan mevcut ana ekrana bağlamak; ardından konu ve soru ekleme/listeleme, sonra dosya tabanlı
-görsel akışı. Her yeni şema sürümü için veri koruyan migration + test şart; `fallbackToDestructiveMigration`
-yasak. Aşama 2 kapanmadan önce en az bir veri dışa aktarma koruması eklenecek; tam ZIP/geri yükleme
-Aşama 3'tedir.
+**Aşama 2 — yerel soru arşivi.** Room v1, repository/AppContainer bağlantısı ve DB'den beslenen ders
+ana ekranı tamamlandı; beş Robolectric testi geçti. Sıradaki adım konu yönetimi (ekle/yeniden adlandır/
+arşivle/geri getir), ardından soru ekleme/listeleme ve görsel dosya yaşam döngüsü. Her yeni şema sürümü
+için veri koruyan migration + test şart; `fallbackToDestructiveMigration` yasak. Aşama 2 kapanmadan
+önce en az bir veri dışa aktarma koruması eklenecek; tam ZIP/geri yükleme Aşama 3'tedir.
 
 Ayrıntılı kapsam: [ROADMAP.md](ROADMAP.md) Aşama 2 ve [docs/KODLAMA_PLANI.md](docs/KODLAMA_PLANI.md).
 
