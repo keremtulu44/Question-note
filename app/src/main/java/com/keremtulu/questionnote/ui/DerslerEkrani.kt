@@ -64,7 +64,10 @@ private val varsayilanDersKartStili =
     DersKartStili(R.string.symbol_diger, DersRenkleri.GenelAcik, DersRenkleri.GenelKoyu)
 
 @Composable
-fun DerslerEkrani(repository: DersRepository) {
+fun DerslerEkrani(
+    repository: DersRepository,
+    onDersSecildi: (Ders) -> Unit,
+) {
     val durum = produceState<DerslerEkraniDurumu>(
         initialValue = DerslerEkraniDurumu.Yukleniyor,
         key1 = repository,
@@ -161,6 +164,7 @@ fun DerslerEkrani(repository: DersRepository) {
                                 DersKarti(
                                     veri = ders.toKartVerisi(),
                                     koyuTema = koyuTema,
+                                    onClick = { onDersSecildi(ders) },
                                 )
                             }
                         }

@@ -43,12 +43,14 @@ internal data class DersKartVerisi(
 internal fun DersKarti(
     veri: DersKartVerisi,
     koyuTema: Boolean,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val vurguRengi = if (koyuTema) veri.koyuRenk else veri.acikRenk
     val renkler = MaterialTheme.colorScheme
 
     Card(
+        onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
             .height(132.dp),

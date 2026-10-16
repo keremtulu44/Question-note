@@ -8,6 +8,36 @@
     <string name="home_error_dersler">Dersler yüklenemedi. Uygulamayı yeniden açmayı deneyin.</string>
     <string name="home_empty_dersler">Henüz etkin ders yok.</string>
 
+    <string name="topic_back_to_lessons">← Derslere dön</string>
+    <string name="topic_screen_title">Konular</string>
+    <string name="topic_filter_active">Etkin</string>
+    <string name="topic_filter_archived">Arşivlenen</string>
+    <string name="topic_add">Konu ekle</string>
+    <string name="topic_empty_active">Bu derste henüz konu yok.</string>
+    <string name="topic_empty_archived">Arşivlenmiş konu yok.</string>
+    <string name="topic_loading">Konular yükleniyor…</string>
+    <string name="topic_load_error">Konular yüklenemedi.</string>
+    <string name="topic_retry">Yeniden dene</string>
+    <string name="topic_dialog_add_title">Yeni konu</string>
+    <string name="topic_dialog_edit_title">Konuyu düzenle</string>
+    <string name="topic_edit">Düzenle</string>
+    <string name="topic_name_label">Konu adı</string>
+    <string name="topic_save">Kaydet</string>
+    <string name="topic_cancel">Vazgeç</string>
+    <string name="topic_saving">Kaydediliyor…</string>
+    <string name="topic_error_empty_name">Konu adı boş olamaz.</string>
+    <string name="topic_error_duplicate_name">Bu derste aynı ada sahip bir konu var.</string>
+    <string name="topic_not_found">Konu bulunamadı. Listeyi yenileyip tekrar deneyin.</string>
+    <string name="topic_save_error">Konu kaydedilemedi. Tekrar deneyin.</string>
+    <string name="topic_added">Konu eklendi.</string>
+    <string name="topic_updated">Konu güncellendi.</string>
+    <string name="topic_archive">Arşivle</string>
+    <string name="topic_archived_label">Arşivlendi</string>
+    <string name="topic_archived">Konu arşivlendi; bağlı sorular korunur.</string>
+    <string name="topic_restore">Etkinleştir</string>
+    <string name="topic_restored">Konu yeniden etkinleştirildi.</string>
+    <string name="topic_change_error">Konu durumu değiştirilemedi. Tekrar deneyin.</string>
+
     <string name="lesson_edebiyat">Edebiyat</string>
     <string name="lesson_matematik">Matematik</string>
     <string name="lesson_biyoloji">Biyoloji</string>
