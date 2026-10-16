@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
@@ -40,7 +41,7 @@ import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
 import com.keremtulu.questionnote.domain.model.Ders
 import com.keremtulu.questionnote.domain.model.Konu
 import com.keremtulu.questionnote.domain.model.Soru
-import com.keremtulu.questionnote.domain.model.SoruGorsel
+import com.keremtulu.questionnote.domain.model.SoruGorseli
 import com.keremtulu.questionnote.domain.model.SoruIslemSonucu
 import com.keremtulu.questionnote.domain.model.SoruPlanDurumu
 import com.keremtulu.questionnote.domain.repository.KonuRepository
@@ -78,7 +79,7 @@ fun SoruDetayEkrani(
     var cozumAcik by remember(soruId) { mutableStateOf(false) }
     var silmeOnayi by remember { mutableStateOf(false) }
     var durumMenusu by remember { mutableStateOf(false) }
-    var tamEkranGorsel by remember { mutableStateOf<SoruGorsel?>(null) }
+    var tamEkranGorsel by remember { mutableStateOf<SoruGorseli?>(null) }
     val detail = produceState<SoruDetayDurumu>(SoruDetayDurumu.Yukleniyor, soruId, yenileme) {
         value = try {
             soruRepository.soruGetir(soruId)?.let(SoruDetayDurumu::Hazir) ?: SoruDetayDurumu.Bulunamadi
