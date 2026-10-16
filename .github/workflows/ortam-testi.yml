@@ -1,0 +1,28 @@
+name: Ortam Testi (G1)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ortam:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sürüm bilgileri
+        run: |
+          echo "=== Runner ortamı ==="
+          uname -a
+          echo "--- Java ---"
+          java -version 2>&1 || echo "java yok"
+          echo "--- Gradle ---"
+          gradle --version 2>&1 | head -5 || echo "gradle yok"
+          echo "--- Android SDK ---"
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          ls "$ANDROID_HOME" 2>/dev/null || echo "sdk klasörü yok"
+          echo "--- Şifreleme araçları ---"
+          openssl version || true
+          keytool -help 2>&1 | head -2 || echo "keytool yok"
+      - name: Yetki özeti
+        run: |
+          echo "Workflow dosyası yazılabildi: EVET"
+          echo "Bu iş çalıştı: EVET"
