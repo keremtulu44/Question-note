@@ -40,14 +40,19 @@ kurulumu reddeder. Tek çare eski uygulamayı kaldırmaktır ki bu **telefondaki
 **Kural:** Sabit bir release anahtarı oluşturulur ve GitHub'da **şifreli Secret** olarak saklanır.
 Anahtarın değeri repoda, workflow dosyasında veya belgelerde asla bulunmaz.
 
-Planlanan Secret adları (değerler yalnızca GitHub'da tutulur):
+Secret'lar (değerler yalnızca GitHub'da tutulur; **yalnızca 2 alan** gerekir):
 
 | Secret adı | İçerik |
 |---|---|
-| `SIGNING_KEYSTORE_BASE64` | Keystore dosyasının base64 kodlanmış hâli |
-| `SIGNING_STORE_PASSWORD` | Keystore parolası |
-| `SIGNING_KEY_ALIAS` | Anahtar takma adı |
-| `SIGNING_KEY_PASSWORD` | Anahtar parolası |
+| `SIGNING_KEYSTORE_BASE64` | Keystore dosyasının base64 kodlanmış hâli (3404 karakter, tek satır) |
+| `SIGNING_PASSWORD` | Keystore **ve** anahtar parolası (PKCS12'de aynı) |
+
+Takma ad (`yanlisdefteri`) gizli bilgi olmadığı için workflow içinde sabit yazılır.
+
+Secret'lar **yalnızca kullanıcı** tarafından eklenebilir: Settings → Secrets and variables → Actions →
+New repository secret. Adımlar `anahtar/KURULUM_ADIMLARI.md` içinde (git dışı). Yapay zekânın token'ı
+secret uçlarına erişemiyor (403) ve **bir workflow kendi secret'ını oluşturamaz** (GitHub güvenlik
+kuralı) — bu yüzden bu adım elle yapılır.
 
 **Kullanıcının sorumluluğu:** Anahtar dosyası ve parolası, telefondan bağımsız **iki ayrı yerde**
 saklanır (ör. şifre yöneticisi + Drive'da bir klasör). Anahtar kaybedilirse:
@@ -60,8 +65,15 @@ için uygun değildir.
 
 ## 4. Actions kullanımı
 
-- Derleme başlangıçta **elle tetiklenir** (`workflow_dispatch`), sonradan gerekirse otomatik tetikleme
-  eklenir.
+- Derleme **push ile otomatik** çalışır (`on: push: branches: [main]`). Ölçülen neden: yapay zekânın
+  token'ında elle tetikleme (`workflow_dispatch` çağrısı) izni yok (403) ama push ile otomatik
+  tetikleme için özel izin gerekmiyor. Kullanıcı isterse GitHub arayüzünden "Run workflow" düğmesini
+  de kullanabilir (kendi hesabıyla).
+- Workflow'un **kendi token'ı** `permissions: contents: write` ile repoya yazabiliyor; bu yetki
+  **Release oluşturmak için yeterlidir** (G1'de commit atarak kanıtlandı).
+- **Log okuma deseni:** derleme logları dışarıdan indirilemiyor; bu yüzden her iş akışı ölçüm/özet
+  çıktısını (sürümler, dosya listesi, APK SHA-256, hata metni) **repoya yazar**
+  (ör. `docs/ORTAM_RAPORU.md`, ileride `docs/DERLEME_RAPORU.md`).
 - Kotlin/Compose derlemesi hatasız bitmeden "APK hazır" denmez; başarısız derleme için Release
   oluşturulmaz.
 - GitHub Actions kotası ve kullanım koşulları kurulum sırasında kontrol edilir; sınırsız/ücretsiz
@@ -86,6 +98,9 @@ release APK kullanılır; Actions'ın ürettiği test/debug çıktıları yalnı
 günlük arşivin kurulu olduğu telefonun üzerine kurulmaz.
 
 ## 5. APK'ya telefondan erişim
+
+> Not: İlk CI denemelerinde APK, Actions **artifact** olarak da üretilir (indirmek için ZIP'ten
+> çıkarmak gerekir). Kalıcı yol her zaman **Releases**'tir.
 
 1. GitHub'da deponun **Releases** bölümü açılır.
 2. En son sürümdeki `.apk` dosyasına dokunulur (bu doğrudan APK'dır, ZIP değildir).

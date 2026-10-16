@@ -10,20 +10,30 @@
 
 ---
 
-## 0. Kodlama öncesi durum (kanıtlanmış kısıtlar)
+## 0. Kodlama öncesi durum (ölçülmüş kısıtlar — G1, 2026-10-16)
 
 | Bulgu | Durum | Sonuç |
 |---|---|---|
-| Sandbox'ta Java / Android SDK **yok** | Doğrulandı (bu oturumda kontrol edildi) | APK yalnızca GitHub Actions'ta derlenir |
-| `maven.google.com`, `repo1.maven.org`, `plugins.gradle.org`, `services.gradle.org` erişilemez | Doğrulandı (HTTP 000) | Bağımlılık çözümleme ve Gradle dağıtımı sandbox'ta yapılamaz |
-| Sandbox'ta **openssl 3.0.20 var**, `keytool` yok | Doğrulandı | İmzalama anahtarı PKCS12 olarak burada üretilebilir |
-| GitHub token: depoda **admin: true** | Doğrulandı | Depo içeriği yazılabilir |
-| GitHub token: **Actions Secrets erişimi 403** | Doğrulandı | Secret'ları ben ekleyemiyorum → §3.3'teki karar gerekli |
-| GitHub Actions okuma (workflow listesi) | Çalıştı | Derleme logları izlenebilir olacak |
-| Workflow dosyası yazma yetkisi | **Bilinmiyor** | Aşama 1'in ilk denemesi bu |
+| Sandbox'ta Java / Android SDK **yok** | Ölçüldü | APK yalnızca GitHub Actions'ta derlenir |
+| `maven.google.com`, `repo1.maven.org`, `plugins.gradle.org`, `services.gradle.org` erişilemez | Ölçüldü (HTTP 000) | Bağımlılık çözümleme ve Gradle dağıtımı sandbox'ta yapılamaz |
+| Sandbox'ta **openssl var**, `keytool` yok | Ölçüldü | Anahtar PKCS12 olarak burada üretilir (**üretildi**) |
+| Arena token: depo içeriği / workflow dosyası yazma / PR | ✅ Var | Kod ve belge akışı doğrudan yürütülebilir |
+| Arena token: **elle tetikleme (dispatch)** ve **secrets** | ❌ 403 | Elle tetikleme **gerekmiyor** (push ile otomatik); secrets'ı kullanıcı ekler |
+| Workflow'un **kendi token'ı**: repoya commit atma | ✅ Var (kanıtlandı) | Release oluşturma da aynı yetkiyle yapılabilir |
+| Derleme **loglarını indirme** | ❌ Engelli (log sunucusu erişilemez) | **Desen:** CI ölçüm/raporu repoya yazar, ben repodan okurum |
+| CI ortamı | Ölçüldü: JDK 17 (8/11/21/25 de var), SDK build-tools ≤37.0.0, platforms ≤android-37.2, apksigner 0.9, Gradle 9.8.1 hazır | Sürüm seçimi bu aralığa göre yapılır |
 
 **Sonuç:** Kod yazma hızımız CI turu sayısıyla sınırlı. Bu yüzden plan **küçük, doğrulanabilir
 adımlara** bölünmüştür; tek seferde büyük kod yazıp log okuyarak hata ayıklamayacağız.
+
+### Log okuma deseni (önemli)
+
+`gh run view --log` çalışmıyor (log dosyası erişilemeyen bir sunucudan geliyor). Bu yüzden:
+
+- Her iş akışı, ölçüm ve özet bilgisini (sürümler, dosya listesi, APK hash'i, hata metni) **repoya
+  yazacak** (ör. `docs/ORTAM_RAPORU.md`, ileride `docs/DERLEME_RAPORU.md`).
+- Derleme başarısız olursa, hata çıktısı da bu rapora yazılır → hata ayıklama repodan yapılır.
+- Bu yaklaşım aynı zamanda "her derlemenin kanıtı repoda" ilkesini sağlar.
 
 ---
 
@@ -50,7 +60,8 @@ adımlara** bölünmüştür; tek seferde büyük kod yazıp log okuyarak hata a
 
 Sürümler **tahminle değil, derleme zamanında doğrulanarak** sabitlenir. Aşağıdakiler bu oturumdaki
 araştırmadan gelen **aday** değerlerdir; Google Maven / Maven Central'a bu sandbox'tan erişemediğim
-için **doğrulanmış sayılmazlar**:
+için **doğrulanmış sayılmazlar**. (CI ortamının ölçülen tabanı: JDK 17 varsayılan, platforms
+android-34→37.2, build-tools 34.0.0→37.0.0, Gradle 9.8.1 hazır.)
 
 | Bileşen | Aday | Doğrulama |
 |---|---|---|
@@ -72,43 +83,52 @@ sürümü çözdüğünü loglar. Uyumsuzluk çıkarsa **tek tek** düşürülü
 
 ### Gradle wrapper nasıl oluşturulacak?
 
-Sandbox'ta Java olmadığı için `gradle wrapper` komutu çalıştırılamaz. İki yol var:
+Sandbox'ta Java olmadığı için `gradle wrapper` komutu buradan çalıştırılamaz. **Üç yol** var
+(ilk ikisi G1'de ölçülen yeteneğe dayanır):
 
-- **Yol A (tercih edilen):** `gradle-wrapper.jar` ve `gradlew` dosyaları official `gradle/gradle`
-  deposundan (izinli host: github.com) sabit bir sürüm etiketiyle alınır, `gradle-wrapper.properties`
-  elle yazılır. Alınan jar'ın SHA-256'sı belgeye yazılır; sonraki oturumlar aynı dosyayı doğrulayabilir.
-- **Yol B (yedek):** CI, `gradle/actions/setup-gradle` ile Gradle'ı kurar ve wrapper'a hiç ihtiyaç
-  duymadan derler. Wrapper sonradan bir CI turunda üretilip repoya eklenir.
+- **Yol A (tercih edilen):** CI'da tek seferlik bir iş, `gradle wrapper --gradle-version <sürüm>`
+  çalıştırır ve üretilen `gradlew`, `gradlew.bat`, `gradle/wrapper/*` dosyalarını **repoya commit
+  eder** (workflow token'ının yazma yetkisi olduğu G1'de kanıtlandı). Böylece wrapper, gerçek Gradle
+  tarafından üretilmiş olur; elle hazırlanmış dosya riski kalmaz.
+- **Yol B (yedek):** `gradle-wrapper.jar` + `gradlew` official `gradle/gradle` deposundan sabit bir
+  etiketle alınır, `gradle-wrapper.properties` elle yazılır; jar'ın SHA-256'sı belgeye işlenir.
+- **Yol C (son çare):** CI, `gradle/actions/setup-gradle@v4` ile Gradle'ı kurar ve wrapper'a hiç
+  ihtiyaç duymadan derler. Repo kendi kendine yeterli olmaz; kabul edilmez ama derleme kurtarılır.
 
-Yol A başarısız olursa Yol B'ye geçilir; bu durum HANDOFF'a yazılır.
+A başarısız olursa B, o da olmazsa C; hangisinin kullanıldığı HANDOFF'a yazılır.
 
 ---
 
 ## 3. İmzalama kurulumu (Aşama 1'in en kritik adımı)
 
-### 3.1 Anahtar üretimi (sandbox, openssl ile)
+### 3.1 Anahtar üretimi ✅ (2026-10-16'da yapıldı)
 
-`keytool` yerine PKCS12 üretimi. Yapılacaklar (Java gerektirmez):
+`keytool` yerine PKCS12 üretildi (Java gerekmez). Ölçülen sonuçlar:
 
-1. 4096 bit RSA anahtarı + 30 yıl geçerli kendinden imzalı sertifika üretilir.
-2. PKCS12 dosyası (`yanlis-defteri.p12`) oluşturulur; alias: `yanlisdefteri`.
-3. Anahtar **dosya** olarak kullanıcıya verilir, **parola** ayrıca gösterilir.
-4. Doğrulama: dosya openssl ile yeniden açılıp sertifika parmak izi okunur (bozuk anahtar riski yok).
-5. Sertifikanın **SHA-256 parmak izi** `docs/IMZALAMA.md` içine yazılır (parmak izi gizli değildir).
-   CI her derlemede APK imzasını bu parmak iziyle karşılaştırır → yanlış anahtarla imzalanan APK
-   **sessizce geçemez**.
+| Ölçüm | Değer |
+|---|---|
+| Algoritma / boyut | RSA **2048**, PKCS12, alias `yanlisdefteri` |
+| Geçerlilik | 30 yıl (2056-10-08'e kadar) |
+| Dosya boyutu | 2552 bayt → base64 **3404 karakter** |
+| Karşılaştırma | RSA 4096 olsaydı: 4270 bayt → base64 5696 karakter (daha büyük yapıştırma) |
+| Sertifika SHA-256 parmak izi | `FA:13:DE:D7:…:89:DE:54` (tamamı `docs/IMZALAMA.md`) |
+| Yerel konum | `anahtar/` (git dışı): `yanlis-defteri.p12`, `PAROLA.txt`, `keystore.b64` |
 
-> **PKCS12 + OpenSSL 3 notu:** OpenSSL 3 varsayılan olarak PBES2/AES kullanır. Modern JDK bunu
-> destekler; yine de ilk CI derlemesinde imzalama adımı bu yüzden **açıkça doğrulanır**.
+**Neden RSA 2048:** imzalama için yeterli (Android'in kendi varsayılanı), yapıştırılacak metin %40
+daha kısa. **Neden `PBE-SHA1-3DES` + `sha1` MAC:** evrensel JDK uyumluluğu (PKCS12 PBES2/AES
+desteklenmeyen eski JDK'lar dâhil); ilk CI derlemesinde imzalama açıkça doğrulanır.
 
 ### 3.2 Depoda saklanacaklar / saklanmayacaklar
 
 | Nerede | Ne |
 |---|---|
-| GitHub Secret | `SIGNING_KEYSTORE_BASE64`, `SIGNING_STORE_PASSWORD`, `SIGNING_KEY_ALIAS`, `SIGNING_KEY_PASSWORD` |
+| GitHub Secret | **`SIGNING_KEYSTORE_BASE64`** ve **`SIGNING_PASSWORD`** (yalnızca 2 alan) |
 | Repo (`docs/IMZALAMA.md`) | Yalnızca **sertifika SHA-256 parmak izi** ve prosedür |
 | Repo dışı, kullanıcıda | Anahtar dosyası + parola (iki bağımsız yerde: şifre yöneticisi + Drive) |
 | `.gitignore` | `*.p12`, `*.jks`, `*.keystore`, `*.pem`, `anahtar/`, `secrets/` (hazır) |
+
+**Neden 2 secret yeterli:** takma ad (`yanlisdefteri`) gizli bilgi değil → workflow'da sabit yazılır;
+PKCS12'de store ve key parolası aynı → tek parola secret'ı yeterlidir.
 
 ### 3.3 Secret yetkisi sorunu (E1) — karar gerekli
 
@@ -121,7 +141,13 @@ Yol A başarısız olursa Yol B'ye geçilir; bu durum HANDOFF'a yazılır.
 | **B. Kullanıcı secret'ları web arayüzünden ekler** *(A olmazsa)* | Ben anahtarı ve değerleri üretirim; kullanıcı GitHub web'den 4 alanı doldurur | Kullanıcı (telefondan ~5 dk) |
 | **C. Şimdilik imzasız/debug ile ilerle** | İlk APK kurulur ama üzerine güncelleme **çalışmaz**; gerçek arşiv başlamadan bir kez kaldır-kur gerekir | Ben + kullanıcı |
 
-**Seçilen yol: A.** İzin gelmezse B'ye düşülür; C yalnızca son çare.
+**Güncel durum (G1 ölçümü):** Arena uygulamasının izin tanımı değişmedi; dispatch ve secrets
+uçları hâlâ **403**. Bu nedenle **yol B uygulanıyor**: kullanıcı 2 secret'ı GitHub web arayüzünden
+ekleyecek (adımlar: `anahtar/KURULUM_ADIMLARI.md`, git dışı).
+
+**Önemli:** Secret'ları **workflow da oluşturamaz** (güvenlik gereği). Yani "GitHub'da yeni bir action
+açmak" CI'ı çalıştırır ama secret sorununu çözmez. CI'ın tek ihtiyacı olan şey, bir kez elle eklenmiş
+2 secret'tır.
 
 ### 3.4 Yerel derleme anahtarı
 
