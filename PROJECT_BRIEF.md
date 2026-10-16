@@ -60,6 +60,10 @@ Android telefonda kullanılacak, tek kişilik bir dijital yanlış defteri:
 | K14 | Ürünün temel özellikleri için üyelik/uygulama hesabı gerekmez. |
 | K15 | Otomatik şifreleme v1'de yok (anahtar kaybı riski ve CSV'nin okunabilirliği nedeniyle ayrı değerlendirilecek). |
 | K16 | Soru ekleme akışı: fotoğraf çek/seç → (isteğe bağlı döndür) → ders seç → kaydet. Diğer tüm alanlar isteğe bağlıdır. |
+| K17 | Sorunun **plan durumu** (`AKTIF` / `ASKIDA` / `TAMAMLANDI`) öğrenme düzeyinden **ayrı** bir alandır. Kullanıcı bir soruyu tekrar planından geçici olarak çıkarabilir veya kalıcı olarak bitirebilir; kayıt ve geçmiş silinmez, işlem geri alınabilir. |
+| K18 | Tekrar aralığı kuralı **sürümlenmiş tek bir sınıfta** tutulur (`algoritma_surumu`); ileride algoritma değişirse geçmiş kayıtlar yeniden yazılmaz. |
+| K19 | Çözüm açılarak yapılan tekrar **bağımsız deneme sayılmaz**: sonuç ne olursa olsun aralık en fazla 1–3 gün uzar. Kullanıcı isterse "Çözümü kapat ve tekrar dene" ile aynı gün ikinci, bağımsız bir deneme kaydedebilir. |
+| K20 | Uzun bir aradan sonra **hiçbir soru otomatik olarak sıfırlanmaz**; gecikmiş sorular tek listede toplanır ve kullanıcı ne yapacağını kendisi seçer. |
 
 ### Soru kaydındaki alanlar
 
@@ -92,9 +96,13 @@ kaynak (kitap/sayfa/soru no), yanlış yapma nedeni, favori/önemli işareti.
 
 - Yerel veri **tek doğruluk kaynağıdır**; ağ bağlantısı olmadan temel uygulama çalışır.
 - Gereksiz katman, çok modüllü yapı ve ağır bağımlılık eklenmez.
-- Buna rağmen veri, dosya yönetimi, yedekleme ve arayüz birbirine karışmaz:
-  `data` (Room + DAO), `storage` (görsel dosyaları, sıkıştırma, öksüz dosya temizliği),
-  `backup` (ZIP üretme/doğrulama/geri yükleme), `ui` (Compose ekranları) ayrı paketler.
+- Buna rağmen veri, dosya yönetimi, yedekleme ve arayüz birbirine karışmaz. Tek modül içinde paket
+  ayrımı: `data` (Room + DAO + repository), `domain` (tekrar/aralık kuralları), `images` (içe
+  aktarma, dönüştürme, dosya yönetimi), `backup` (ZIP üretme/doğrulama/geri yükleme), `ui` (Compose
+  ekranları). Bildirimler eklendiğinde `notifications` paketi açılır.
+- **Veri yaşam döngüsü baştan doğru kurulur:** yedekleme, sonradan eklenen bir ayar düğmesi değil,
+  veri katmanının sınırlarından biridir. Soru ekleme, güncelleme, migration ve geri yükleme aynı
+  bütünlük kurallarına uyar.
 - Yaygın ve bakımı sürdürülen kütüphaneler tercih edilir; sürümler `libs.versions.toml` içinde
   sabitlenir, Gradle wrapper depoda tutulur.
 
@@ -123,7 +131,11 @@ kaynak (kitap/sayfa/soru no), yanlış yapma nedeni, favori/önemli işareti.
 - "Çözemedim" → aralık 1 güne döner.
 - "Zorlanarak çözdüm" → daha yavaş ilerler.
 - "Rahat çözdüm" → aralık büyür.
-- Çözüm açıldıysa aralık kısalır (yardımsız çözme ile karıştırılmaz).
+- **Çözüm açıldıysa** tekrar bağımsız sayılmaz; aralık en fazla 1–3 gün uzar. Kullanıcı isterse
+  "Çözümü kapat ve tekrar dene" ile aynı gün ikinci, bağımsız deneme kaydedebilir.
+- Sorunun **plan durumu** (aktif/askıda/tamamlandı) ayrı tutulur; "Bugün" listesi yalnızca aktif
+  soruları gösterir.
+- Uzun aradan sonra hiçbir soru otomatik sıfırlanmaz; gecikmişler tek listede toplanır.
 - Kullanıcı, sonucu seçtikten sonra sonraki tekrar tarihini elle değiştirebilmelidir.
 - **Bugün yapılacaklar** ve **gecikmiş tekrarlar** ayrı ayrı görünür.
 - Tekrar geçmişi saklanır ve görüntülenebilir.
@@ -154,6 +166,9 @@ Ayrıca v1'de yok: otomatik yedekleme, Drive API/OAuth bağlantısı, yedek şif
 | A6 | Doğrudan Drive bağlantısı | Aşama 6'da, önce SAF kalıcı izni + Drive klasörü yolu denenerek |
 | A7 | Aralık değerlerinin kullanıcı tarafından ayarlanması | Aşama 4'te değerlendirilecek |
 | A8 | GitHub Actions/Secret yazma yetkisi | Henüz doğrulanmadı (bkz. HANDOFF.md, Bilinen kısıtlar) |
+| A9 | Görsel kalite varsayılanı (optimize mi, orijinali koru mu) | Kullanıcı kararı bekliyor |
+| A10 | Depolama dolduğunda "eski görselleri yeniden sıkıştır" aracı | Aşama 5'te değerlendirilecek |
+| A11 | Önizleme stratejisi (Coil önbelleği yeterli mi) | Aşama 5'te ölçümle karar verilecek |
 
 ---
 
@@ -170,6 +185,9 @@ Ayrıca v1'de yok: otomatik yedekleme, Drive API/OAuth bağlantısı, yedek şif
 - Güvenlik veya veri kaybı riski varsa açıkça belirtilir.
 - Her önemli adımdan sonra ilgili belgeler (PROJECT_BRIEF, ROADMAP, HANDOFF, BUILDING, CHANGELOG)
   güncellenir.
+- **Dışarıdan gelen öneriler gerekçeyle kabul veya reddedilir.** Bir öneri, "başka biri söyledi"
+  diye değil, bu projenin kısıtlarına uyduğu ve gerçekten ihtiyaç doğurduğu için uygulanır.
+  Reddedilen öneriler de gerekçesiyle HANDOFF'ta kayda geçer.
 
 ## 10. Bilinen ortam kısıtları
 

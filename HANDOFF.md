@@ -24,6 +24,43 @@
 4. Geri yükleme yalnızca "tamamen değiştir" + otomatik güvenlik kopyası.
 5. Sabit imzalama anahtarı Aşama 1'de kurulacak (kullanıcı onayladı).
 
+## Dış inceleme — ikinci görüş (2026-10-16)
+
+Proje, bağımsız bir yapay zekâya teknik inceleme için gönderildi (`docs/FIKIR_ALMA_METNI.md`).
+Değerlendirme sonucu: teknoloji seçimi onaylandı; önerilerin bir kısmı kabul, bir kısmı gerekçeyle
+reddedildi.
+
+**Kabul edilenler (belgelere işlendi):**
+
+| Öneri | Nereye işlendi |
+|---|---|
+| Sorunun **plan durumu** (aktif/askıda/tamamlandı) öğrenme düzeyinden ayrılmalı | PROJECT_BRIEF K17, VERI_MODELI §2 |
+| Aralık kuralı **sürümlü tek sınıf** olmalı (`algoritma_surumu`) | K18, VERI_MODELI §2/§5 |
+| Çözüm açılarak yapılan tekrar bağımsız sayılmamalı (tavan 1–3 gün) + ikinci bağımsız deneme | K19, VERI_MODELI §5 |
+| Uzun aradan sonra otomatik sıfırlama yapılmamalı | K20, VERI_MODELI §5 |
+| Geri yüklemede **kesintiye dayanıklılık** (işlem sürerken kapanma) | YEDEK_FORMATI §3.1 |
+| ZIP bomb / yol kaçışı / boyut üst sınırı korumaları | YEDEK_FORMATI §3.2 |
+| Manifest'te dosya başına sha256; format sürümü uygulama sürümünden bağımsız | YEDEK_FORMATI §2/§6 |
+| Görsel kaydına `mime_type` ve `sha256` eklenmesi | VERI_MODELI §2 |
+| **Migration testleri otomatik olmalı** (zincir testi dâhil) | VERI_MODELI §6, ROADMAP Aşama 2 |
+| Depolama boyutunun asıl kısıt olduğu; 30–50 gerçek fotoğrafla sıkıştırma testi | ROADMAP Aşama 2, TEST 2.18 |
+| Yedek/geri yükleme mimarisinin baştan veri katmanının parçası olması | PROJECT_BRIEF §5, ROADMAP Aşama 2 |
+| Release çıktısında sürüm + commit + APK SHA-256 | BUILDING §4, TEST 1.4 |
+| Boş/anlamsız yedeğin onaysız uygulanmaması, son yedek bilgisi | YEDEK_FORMATI §3/§4 |
+
+**Reddedilenler (gerekçesiyle):**
+
+1. **Her görsel için ayrı önizleme dosyası üretmek** → v1'de yapılmayacak. Türetilmiş veri kalıcı
+   klasöre yazılırsa yedek boyutu artar ve silme/geri getirme mantığı gerekir. Liste görselleri
+   Coil'in önbelleğinden üretilecek; ölçümde yetersiz kalırsa (Aşama 5) karar yeniden değerlendirilir.
+2. **Emülatörde otomatik test** → öncelik JVM birim testleri ve Robolectric (şema/migration).
+   Emülatör yavaş ve kırılgan; gerçek cihaz testi zaten kullanıcıda.
+3. **Anahtar ve parolayı farklı yerlerde tutma kuralı (birincil kural olarak)** → bu projede tehdit
+   modeli "sızma" değil "kaybetme". Öncelik **yedeklilik**: anahtar + parola iki bağımsız yerde
+   bulunur; parolanın keystore dosyasının yanında düz metin durmaması koşuluyla.
+4. **Tek `data.json`** → veriler ayrı JSON dosyalarında kalacak (incelenebilirlik/karşılaştırma);
+   fark küçük, gerekçe YEDEK_FORMATI §1'de.
+
 ## Ne test edildi?
 
 **Gerçekten çalıştırılan:** Yok. Bu aşama yalnızca planlama ve belge yazımı içeriyor.

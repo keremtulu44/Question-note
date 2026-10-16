@@ -72,6 +72,19 @@ için uygun değildir.
 - Artifact **saklama süresi kalıcı değildir** (varsayılan 90 gün, public repoda azami 90 gün). Bu
   nedenle kalıcı dağıtım **Releases** üzerinden yapılır; artifact yalnızca ara çıktıdır.
 
+### Release çıktısının izlenebilirliği
+
+Her Release'de şunlar bulunur:
+
+- APK dosyası (`yanlis-defteri-<sürüm>.apk`)
+- `versionName` ve `versionCode`
+- Derlenen Git commit kimliği
+- APK'nın **SHA-256** özeti (indirilen dosyanın gerçekten üretilen sürüm olduğu doğrulanabilir)
+
+**Debug ve release APK'ları karıştırılmaz.** Günlük kullanımda her zaman sabit anahtarla imzalanmış
+release APK kullanılır; Actions'ın ürettiği test/debug çıktıları yalnızca geliştirme amaçlıdır ve
+günlük arşivin kurulu olduğu telefonun üzerine kurulmaz.
+
 ## 5. APK'ya telefondan erişim
 
 1. GitHub'da deponun **Releases** bölümü açılır.
