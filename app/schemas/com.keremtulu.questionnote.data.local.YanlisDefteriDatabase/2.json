@@ -1,0 +1,541 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "f351145897fa5e2e5c9197ee5f7a52b0",
+    "entities": [
+      {
+        "tableName": "dersler",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `ad` TEXT NOT NULL, `sira` INTEGER NOT NULL, `arsivli` INTEGER NOT NULL DEFAULT 0, `olusturma` INTEGER NOT NULL, `guncelleme` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ad",
+            "columnName": "ad",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sira",
+            "columnName": "sira",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "arsivli",
+            "columnName": "arsivli",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "olusturma",
+            "columnName": "olusturma",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "guncelleme",
+            "columnName": "guncelleme",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_dersler_sira",
+            "unique": false,
+            "columnNames": [
+              "sira"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_dersler_sira` ON `${TABLE_NAME}` (`sira`)"
+          }
+        ]
+      },
+      {
+        "tableName": "konular",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `ders_id` TEXT NOT NULL, `ad` TEXT NOT NULL, `sira` INTEGER NOT NULL, `arsivli` INTEGER NOT NULL DEFAULT 0, `olusturma` INTEGER NOT NULL, `guncelleme` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`ders_id`) REFERENCES `dersler`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dersId",
+            "columnName": "ders_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ad",
+            "columnName": "ad",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sira",
+            "columnName": "sira",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "arsivli",
+            "columnName": "arsivli",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "olusturma",
+            "columnName": "olusturma",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "guncelleme",
+            "columnName": "guncelleme",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_konular_ders_id_sira",
+            "unique": false,
+            "columnNames": [
+              "ders_id",
+              "sira"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_konular_ders_id_sira` ON `${TABLE_NAME}` (`ders_id`, `sira`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "dersler",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "ders_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "sorular",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `ders_id` TEXT NOT NULL, `konu_id` TEXT, `soru_notu` TEXT, `cozum_notu` TEXT, `kaynak` TEXT, `yanlis_nedeni` TEXT, `favori` INTEGER NOT NULL DEFAULT 0, `plan_durumu` TEXT NOT NULL DEFAULT 'AKTIF', `ogrenme_durumu` TEXT NOT NULL DEFAULT 'YENI', `son_tekrar_gun` INTEGER, `sonraki_tekrar_gun` INTEGER, `olusturma` INTEGER NOT NULL, `guncelleme` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`ders_id`) REFERENCES `dersler`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`konu_id`) REFERENCES `konular`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dersId",
+            "columnName": "ders_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "konuId",
+            "columnName": "konu_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "soruNotu",
+            "columnName": "soru_notu",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cozumNotu",
+            "columnName": "cozum_notu",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "kaynak",
+            "columnName": "kaynak",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "yanlisNedeni",
+            "columnName": "yanlis_nedeni",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "favori",
+            "columnName": "favori",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "planDurumu",
+            "columnName": "plan_durumu",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'AKTIF'"
+          },
+          {
+            "fieldPath": "ogrenmeDurumu",
+            "columnName": "ogrenme_durumu",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'YENI'"
+          },
+          {
+            "fieldPath": "sonTekrarGun",
+            "columnName": "son_tekrar_gun",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "sonrakiTekrarGun",
+            "columnName": "sonraki_tekrar_gun",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "olusturma",
+            "columnName": "olusturma",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "guncelleme",
+            "columnName": "guncelleme",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_sorular_ders_id",
+            "unique": false,
+            "columnNames": [
+              "ders_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_sorular_ders_id` ON `${TABLE_NAME}` (`ders_id`)"
+          },
+          {
+            "name": "index_sorular_konu_id",
+            "unique": false,
+            "columnNames": [
+              "konu_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_sorular_konu_id` ON `${TABLE_NAME}` (`konu_id`)"
+          },
+          {
+            "name": "index_sorular_sonraki_tekrar_gun",
+            "unique": false,
+            "columnNames": [
+              "sonraki_tekrar_gun"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_sorular_sonraki_tekrar_gun` ON `${TABLE_NAME}` (`sonraki_tekrar_gun`)"
+          },
+          {
+            "name": "index_sorular_plan_durumu",
+            "unique": false,
+            "columnNames": [
+              "plan_durumu"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_sorular_plan_durumu` ON `${TABLE_NAME}` (`plan_durumu`)"
+          },
+          {
+            "name": "index_sorular_guncelleme",
+            "unique": false,
+            "columnNames": [
+              "guncelleme"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_sorular_guncelleme` ON `${TABLE_NAME}` (`guncelleme`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "dersler",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "ders_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "konular",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "konu_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "gorseller",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `soru_id` TEXT NOT NULL, `tur` TEXT NOT NULL, `sira` INTEGER NOT NULL, `dosya_adi` TEXT NOT NULL, `mime_type` TEXT NOT NULL, `genislik` INTEGER NOT NULL, `yukseklik` INTEGER NOT NULL, `boyut` INTEGER NOT NULL, `sha256` TEXT NOT NULL, `olusturma` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`soru_id`) REFERENCES `sorular`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "soruId",
+            "columnName": "soru_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tur",
+            "columnName": "tur",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sira",
+            "columnName": "sira",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dosyaAdi",
+            "columnName": "dosya_adi",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mimeType",
+            "columnName": "mime_type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "genislik",
+            "columnName": "genislik",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "yukseklik",
+            "columnName": "yukseklik",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "boyut",
+            "columnName": "boyut",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sha256",
+            "columnName": "sha256",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "olusturma",
+            "columnName": "olusturma",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_gorseller_soru_id_tur_sira",
+            "unique": true,
+            "columnNames": [
+              "soru_id",
+              "tur",
+              "sira"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_gorseller_soru_id_tur_sira` ON `${TABLE_NAME}` (`soru_id`, `tur`, `sira`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "sorular",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "soru_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "tekrarlar",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `soru_id` TEXT NOT NULL, `zaman` INTEGER NOT NULL, `gun` INTEGER NOT NULL, `planlanan_gun` INTEGER, `sonuc` TEXT NOT NULL, `cozum_acildi` INTEGER NOT NULL DEFAULT 0, `onceki_aralik` INTEGER, `sonraki_aralik` INTEGER, `algoritma_surumu` INTEGER NOT NULL DEFAULT 1, `elle_atandi` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`id`), FOREIGN KEY(`soru_id`) REFERENCES `sorular`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "soruId",
+            "columnName": "soru_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zaman",
+            "columnName": "zaman",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "gun",
+            "columnName": "gun",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "planlananGun",
+            "columnName": "planlanan_gun",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "sonuc",
+            "columnName": "sonuc",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cozumAcildi",
+            "columnName": "cozum_acildi",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "oncekiAralik",
+            "columnName": "onceki_aralik",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "sonrakiAralik",
+            "columnName": "sonraki_aralik",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "algoritmaSurumu",
+            "columnName": "algoritma_surumu",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          },
+          {
+            "fieldPath": "elleAtandi",
+            "columnName": "elle_atandi",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_tekrarlar_soru_id_gun",
+            "unique": false,
+            "columnNames": [
+              "soru_id",
+              "gun"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_tekrarlar_soru_id_gun` ON `${TABLE_NAME}` (`soru_id`, `gun`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "sorular",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "soru_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "geri_yukleme_isaretleri",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f351145897fa5e2e5c9197ee5f7a52b0')"
+    ]
+  }
+}
