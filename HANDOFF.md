@@ -3,7 +3,7 @@
 > Yeni bir geliştirme oturumu önce [PROJECT_BRIEF.md](PROJECT_BRIEF.md) ve bu belgeyi okur.
 
 - Son güncelleme: 2026-10-16
-- Aktif aşama: **Aşama 1 — G2/G3/G4 tamamlandı; G5 gerçek cihazda güncelleme testi kullanıcıda**
+- Aktif aşama: **Aşama 2 — yerel soru arşivi** (Aşama 1 / G1–G5 tamamlandı; G5 cihaz testi kullanıcı tarafından doğrulandı)
 - Son başarılı derleme: CI run `38927750387` — v1.0.1, 7 dersli arayüz, imza/parmak izi ve Release başarılı
 
 ---
@@ -19,7 +19,8 @@
 - **G3 tamamlandı:** secret'lardan açılan sabit anahtarla v1.0.0 imzalandı, parmak izi eşleşti ve Release yayımlandı.
 - G3 ilk koşusu `38926666381` imza/verify aşamasında rapor ayrıştırma hatasıyla kırmızı oldu; `apksigner` sertifika çıktısı doğruydu. Parser düzeltildikten sonra run `38927072038` başarılı oldu; secret'lar doğru.
 - **G4 tamamlandı (CI):** v1.0.1 / versionCode 2, açık/koyu tema ve 7 ders kartı; run `38927750387` imza ve Release ile başarılı.
-- Şu an uygulamada **soru veritabanı/ekleme işlevi yok**. G5'te kurulum, kart görünümü ve kaldırmadan güncelleme kullanıcı cihazında doğrulanacak.
+- **G5 geçti (kullanıcı bildirimi, 2026-10-16):** v1.0.0'dan v1.0.1'e uygulama kaldırılmadan güncellendi; uygulama açıldı ve 7 ders kartı göründü.
+- Şu an uygulamada **soru veritabanı/ekleme işlevi yok**. Sıradaki aşama Aşama 2: yerel arşiv ve görsel ekleme.
 
 ## Kullanıcıyla netleşen ek kararlar (Aşama 0 sırasında)
 
@@ -156,13 +157,15 @@ reddedildi.
   workflow dispatch ❌ 403, secrets ❌ 403, Actions ayarları ❌ 403.
 - İmzalama anahtarı üretildi ve parola ile açılabildiği doğrulandı (parmak izi okundu).
 
-**Henüz doğrulanmayan / kullanıcı cihazında test edilecek:**
+**Durum ve henüz test edilmemiş olanlar:**
 
 - G2/G3/G4 derleme, wrapper, imzalama, parmak izi, APK SHA-256 ve Release CI'da doğrulandı.
   Sabit sürüm kombinasyonu `gradle/libs.versions.toml` ve `docs/KODLAMA_PLANI.md` içinde.
-- **G5 kullanıcı testi:** v1.0.0 telefona yükleniyor; v1.0.1 uygulama kaldırılmadan üstüne kuruluyor;
-  sonrasında 7 kart ve açık/koyu görünüm gerçek cihazda kontrol ediliyor.
-- Uygulama davranışı / ekran yerleşimi gerçek Samsung Galaxy S24 FE'de henüz görülmedi.
+- **G5 kullanıcı bildirimi:** v1.0.0 → v1.0.1 uygulama kaldırılmadan güncellendi; uygulama açıldı ve
+  7 ders kartı göründü. Bu cihaz testi kullanıcı raporudur; ben cihazda bağımsız çalıştırmadım.
+- Soru kaydı, görsel seçimi/kamera, dosya saklama, yedekleme ve gerçek soru fotoğraflarında okunabilirlik
+  henüz uygulanmadı veya test edilmedi; bunlar Aşama 2–3 işleridir.
+- Açık/koyu tema kontrastının detaylı kabul testi daha sonra TEST 5.9'da yapılacak.
 
 ## Bilinen hatalar / engeller
 
@@ -179,19 +182,19 @@ reddedildi.
 
 ## Sıradaki somut adım
 
-**G5 — kullanıcı cihaz testi** (v1.0.0 → v1.0.1). G2/G3/G4 ve iki imzalı Release tamamlandı;
-Aşama 2, G5 güncelleme zinciri doğrulanana kadar başlamaz.
+**Aşama 2 — yerel soru arşivi.** Önce `docs/VERI_MODELI.md` şemasını ve mevcut Compose iskeletini
+birlikte gözden geçir; Room şeması v1'i, yedi varsayılan dersi ve veri ilişkilerini kur. Migration
+otomatik testini ilk veritabanı değişikliğiyle birlikte ekle; `fallbackToDestructiveMigration`
+kullanma. Sonra soru/görsel ekleme akışına geç. Yedek mimarisi veri katmanının sınırı olarak tasarlanır;
+tam ZIP ve geri yükleme Aşama 3'tedir.
 
-Ayrıntılı sıra: [docs/KODLAMA_PLANI.md](docs/KODLAMA_PLANI.md) §4 (G1…G6).
+Ayrıntılı kapsam: [ROADMAP.md](ROADMAP.md) Aşama 2 ve [docs/KODLAMA_PLANI.md](docs/KODLAMA_PLANI.md).
 
-**Kapananlar:** A1 (`com.keremtulu.questionnote`), G1, G2, G3, G4. **Bekleyen:** G5 gerçek cihaz testi.
+**Kapananlar:** A1 (`com.keremtulu.questionnote`), G1–G5. **Aktif:** Aşama 2.
 
-## Kullanıcının yapacağı iş (Aşama 1)
+## Kullanıcının yapacağı iş
 
-1. [v1.0.0 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.0) içindeki APK'yı indirip kur; bir kez aç. Bu ilk sürümün ekranı bilerek boştur.
-2. **Uygulamayı kaldırmadan**, [v1.0.1 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.1) içindeki APK'yı indirip üzerine kur.
-3. Uygulamayı açıp 7 ders kartının göründüğünü ve kurulumun reddedilmediğini bildir.
-
-**Önemli:** Bu aşamada kullanıcı verisi henüz yok; yine de uygulamayı kaldırmadan güncelle. Kurulum
-hata verirse kaldırma—hata metnini ilet. Android bilinmeyen kaynak iznini sorabilir; yalnızca
-kullandığın indirici için ver. İmzalama anahtarını ve parolasını iki bağımsız yerde sakla.
+Şimdilik yeni APK kurman gerekmiyor. Aşama 2'de görsel kaliteyi gerçek içerikle doğrulamak için
+30–50 örnek soru fotoğrafını (özellikle küçük formül, köklü ifade ve grafik etiketleri içerenleri)
+telefonunda hazır tut; bu görselleri sohbete yüklemen gerekmiyor. Yeni test APK'sı hazır olduğunda
+fotoğraflarla kayıt/listeleme akışını denemeni isteyeceğim.

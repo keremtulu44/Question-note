@@ -4,7 +4,7 @@
 > Hiçbir anahtar, parola veya token bu depoya yazılmaz.
 
 - Son güncelleme: 2026-10-16
-- Durum: G3 imzalı Release ve G4 arayüzü CI'da doğrulandı; G5 gerçek cihaz güncelleme testi kullanıcıda.
+- Durum: **Aşama 1 tamamlandı.** G3/G4 CI doğrulandı; kullanıcı G5 güncellemesini telefonda başarıyla tamamladığını bildirdi.
 
 ---
 
@@ -104,15 +104,11 @@ G3/G4 Release'leri:
 - **v1.0.0 (versionCode 1):** [Release v1.0.0](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.0) — G2'nin arayüzsüz ilk imzalı sürümü.
 - **v1.0.1 (versionCode 2):** [Release v1.0.1](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.1) — açık/koyu temalı 7 ders kartı.
 
-### G5 — telefonda güncelleme zinciri (kullanıcı testi bekliyor)
+### G5 — telefonda güncelleme zinciri (**GEÇTİ**, kullanıcı bildirimi 2026-10-16)
 
-1. v1.0.0 Release sayfasından `.apk` dosyasını indirip kur; uygulamayı bir kez aç. Bu ilk sürüm
-   bilerek arayüzsüzdür ve yalnızca güncelleme zincirinin başlangıcıdır.
-2. **Uygulamayı kaldırma.** v1.0.1 Release sayfasından `yanlis-defteri-1.0.1.apk` dosyasını indirip
-   aç; Android'in güncelleme onayını ver.
-3. Kurulum tamamlandıktan sonra uygulamayı aç: **7 ders kartını** ve açık/koyu tema görünümünü
-   kontrol et. Kurulum reddedilirse uygulamayı kaldırma; hata mesajını bildir.
-4. Sonucu (v1.0.1 kuruldu mu, 7 kart göründü mü) ilet. G5 şu ana kadar cihazda **test edilmedi**.
+Kullanıcı v1.0.0'dan v1.0.1'e uygulamayı kaldırmadan güncelledi; uygulama açıldı ve dersler göründü.
+Bu, kurulum ve güncelleme zincirinin kullanıcı cihazında doğrulandığını gösterir. Release bağlantıları
+ve sürüm ayrıntıları aşağıda korunmuştur.
 
 Android ilk kurulumda "bilinmeyen kaynaklardan kurulum izni" isteyebilir; izni yalnızca kullandığın
 indiriciye ver. Release APK doğrudan `.apk` dosyasıdır, ZIP değildir. Depo public olduğu sürece

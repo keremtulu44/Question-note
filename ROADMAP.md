@@ -17,7 +17,7 @@ bildirimler → ek özellikler.**
 - [x] Dış inceleme (ikinci görüş) alınması ve önerilerin gerekçeyle değerlendirilmesi
 - [x] Bekleme: kullanıcının Aşama 1 için açık onayı
 
-**Çıktı:** Kararlar ve uygulama planı. Aşama 1'de G2/G3/G4 tamamlandı; G5 cihaz testi aşağıda bekliyor.
+**Çıktı:** Kararlar ve uygulama planı. Aşama 1'in kullanıcı cihazı G5 testi geçti; Aşama 2 sırada.
 
 ---
 
@@ -35,9 +35,9 @@ uygulama geliştirmenin anlamı yok.
 - [x] Push ile otomatik Android derleme, imzalama ve Release workflow'u (elle tetikleme gerekmiyor)
 - [x] G3: imzalı v1.0.0 APK + sertifika doğrulaması + Release
 - [x] G4: açık/koyu tema ve 7 ders kartı; imzalı v1.0.1 APK + Release
-- [ ] **KULLANICI / G5:** v1.0.0'ı kur; v1.0.1'i uygulamayı kaldırmadan yükle; 7 kartı gördüğünü bildir
+- [x] **KULLANICI / G5 (2026-10-16):** Kullanıcı v1.0.0 → v1.0.1 güncellemesinin telefonda başarılı olduğunu, uygulamanın açıldığını ve 7 ders kartının göründüğünü bildirdi.
 
-**Çıkış kriteri:** Kullanıcı, telefonda kaldırma yapmadan yeni APK ile güncelleme yapabiliyor.
+**Çıkış kriteri: GEÇTİ (kullanıcı bildirimi, 2026-10-16):** APK kaldırmadan yeni sürüme güncellendi ve açıldı.
 
 ---
 

@@ -191,13 +191,14 @@ Her görev: amaç → dosyalar → bitti ölçütü. Sıra, **en ucuz doğrulama
   `res/values/strings.xml`, tema; tek `Scaffold`, adaptive grid.
 - **Karar:** Gezinme kütüphanesi v1'de kullanılmıyor; bu aşamada tek ekran yeterli.
 - **Ölçülen:** v1.0.1 `assembleRelease`, imza/parmak izi kontrolü ve Release CI'da başarılı.
-  Açık/koyu tema ve gerçek cihaz görünümü kullanıcı tarafından G5'te doğrulanacak.
+  G5'te kullanıcı uygulamanın açıldığını ve 7 kartı gördüğünü bildirdi; ayrıntılı açık/koyu tema
+  kontrast testi TEST 5.9'da yapılacak.
 
-### G5. Güncelleme zinciri testi (kullanıcıda bekliyor)
-- **Yöntem:** v1.0.0 (`versionCode=1`) kurulur; v1.0.1 (`versionCode=2`) uygulama **kaldırılmadan** üzerine kurulur.
-- **Bitti ölçütü:** Android güncellemeyi kabul eder; v1.0.1 açılır ve 7 ders kartını gösterir. Zincir doğrulanmadan Aşama 2 başlamaz.
+### G5. Güncelleme zinciri testi ✅ (kullanıcı bildirimi, 2026-10-16)
+- **Yöntem:** v1.0.0 (`versionCode=1`) ardından v1.0.1 (`versionCode=2`) uygulama kaldırılmadan kuruldu.
+- **Sonuç:** Kullanıcı güncellemenin başarılı olduğunu, uygulamanın açıldığını ve 7 ders kartının göründüğünü bildirdi. Aşama 2 başlayabilir.
 
-### G6. Belge güncellemesi ✅ (G2–G4)
+### G6. Belge güncellemesi ✅ (G2–G5)
 - **Dosyalar:** HANDOFF (ne yapıldı, hangi sürümler sabitlendi, son başarılı derleme), BUILDING
   (secret adları ve prosedür doğrulandı mı), CHANGELOG (sürüm notu), ROADMAP (Aşama 1 durumu).
 - **Bitti ölçütü:** Yeni bir oturum yalnızca belgeleri okuyarak devam edebiliyor.
@@ -362,7 +363,7 @@ edilecek" ayrımı yazılır. `docs/TEST_KONTROL_LISTESI.md` işaretlenir.
 
 | Aşama | Ben (yapay zekâ) | Kullanıcı |
 |---|---|---|
-| 1 | G1–G4 CI/Release/arayüz, belgeler | Anahtarı iki yerde saklamak; G5'te v1.0.0'ı kurup v1.0.1'i kaldırmadan yükleyerek zinciri doğrulamak |
+| 1 | G1–G5 tamamlandı: CI, imzalı Release'ler, 7 kart ve kullanıcı cihazı güncellemesi | Anahtarı iki bağımsız yerde korumak; sonraki APK'larda Aşama 2 fotoğraf akışını test etmek |
 | 2 | Veri katmanı, görsel hattı, ekranlar, testler | Ölçülü cihaz testleri (uçak modu, iptal, konusuz soru, silme…) |
 | 3 | Yedek üretme/doğrulama/geri yükleme, testler | Drive'a kaydetme denemesi; temiz kurulumda geri yükleme; bozuk yedek denemesi |
 | 4 | Tekrar ekranı ve akışı | Günlük kullanım: "Bugün" listesini gerçekten çözmek |
@@ -374,5 +375,5 @@ edilecek" ayrımı yazılır. `docs/TEST_KONTROL_LISTESI.md` işaretlenir.
 ## 11. Bir sonraki oturum nasıl başlar?
 
 1. Bu belge + HANDOFF okunur; HANDOFF'taki "sıradaki somut adım" uygulanır.
-2. Şu an sıradaki iş **G5**: kullanıcı v1.0.0 → v1.0.1 üzerine kurulum testini yapar; başarıdan sonra Aşama 2'ye başlanır.
+2. **G5 geçti; sıradaki iş Aşama 2**: Room şeması, veri ilişkileri ve migration testleriyle yerel arşiv temelini kur; sonra soru/görsel akışına ilerle.
 3. Her görev sonunda HANDOFF güncellenir: yapılan, ölçülen, kalan, sürümler, son başarılı derleme.

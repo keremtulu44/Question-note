@@ -62,7 +62,7 @@ Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih 
 - **CI çalışıyor:** ilk iş akışı yazıldı ve push ile otomatik tetiklenerek **iki kez başarıyla** çalıştı.
 - **Ölçülen CI ortamı:** Temurin JDK 17 (8/11/21/25 de kurulu), Android SDK (build-tools 34→37.0.0,
   platformlar android-34→37.2), apksigner 0.9, Gradle 9.8.1 hazır kurulu.
-- **Workflow token'ının yazma yetkisi doğrulandı** → ileride APK'yı Release olarak yayımlayabilir.
+- **Workflow token'ının yazma yetkisi doğrulandı**; G3/G4'te imzalı v1.0.0 ve v1.0.1 Releases başarıyla yayımlandı.
 - **Derleme logları indirilemiyor** (log sunucusu erişilemez) → CI artık ölçüm sonucunu repoya yazıyor
   (`docs/ORTAM_RAPORU.md`).
 - **İmzalama anahtarı üretildi:** RSA 2048, PKCS12, 30 yıl geçerli, alias `yanlisdefteri`;
@@ -78,4 +78,10 @@ Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih 
 
 - Tek modüllü Kotlin + Compose Android projesi, `libs.versions.toml` sürüm kataloğu ve Gradle 9.8.1 wrapper eklendi.
 - `applicationId=com.keremtulu.questionnote`, minSdk 26, compile/target API 37 sabitlendi.
-- Arayüzsüz `assembleRelease` CI'da başarıyla derlendi. APK henüz imzasızdır; cihazda kurulum testi yapılmadı.
+- Arayüzsüz `assembleRelease` CI'da başarıyla derlendi. O sürümde APK imzasızdı; imzalı v1.0.0 ve G5 testi daha sonra tamamlandı.
+
+### Aşama 1 / G5 — gerçek cihaz güncelleme testi — 2026-10-16
+
+- Kullanıcı v1.0.0'dan v1.0.1'e uygulamayı kaldırmadan güncellemenin başarılı olduğunu bildirdi.
+- Uygulama açıldı ve yedi ders kartı göründü. Bu, kullanıcı tarafından bildirilen cihaz testidir; CI testi değildir.
+- Aşama 1'in çıkış koşulu geçti; sıradaki aşama yerel soru arşividir.

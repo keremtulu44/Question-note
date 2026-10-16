@@ -25,13 +25,13 @@ cevaplamak ve çözümü öğrenme sürecinden ayrı saklamaktır.
 
 ## Durum
 
-**Aşama 1 — G2/G3/G4 tamamlandı.** CI'da imzasız iskelet derlemesi, sabit anahtarla imzalama,
-sertifika parmak izi ve GitHub Release doğrulandı. [v1.0.1](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.1)
-açık/koyu temalı 7 ders kartını içeriyor. Telefonda kurulum ve kaldırmadan güncelleme testi (G5)
-kullanıcı tarafından yapılmayı bekliyor.
+**Aşama 1 tamamlandı.** CI'da derleme, sabit anahtarla imzalama, sertifika parmak izi ve Releases
+başarılı oldu. Kullanıcı cihazında G5 güncellemesi de geçti: v1.0.0'dan v1.0.1'e uygulamayı
+kaldırmadan güncellendi; uygulama açıldı ve 7 ders kartı göründü. v1.0.1 açık/koyu temalı ana
+ekrandır; soru kaydetme henüz eklenmedi.
 
-Sıradaki adım: v1.0.0'ı kurup v1.0.1'e uygulamayı kaldırmadan güncellemek; ayrıntı
-[BUILDING.md](BUILDING.md) içinde.
+**Sıradaki: Aşama 2 — yerel soru arşivi.** Önce Room şeması, veri ilişkileri ve migration testleri;
+ardından soru/görsel ekleme ve listeleme akışı.
 
 ---
 
@@ -56,8 +56,8 @@ Sıradaki adım: v1.0.0'ı kurup v1.0.1'e uygulamayı kaldırmadan güncellemek;
 ## Kullanım / APK erişimi
 
 İmzalı APK'lar GitHub [Releases](https://github.com/keremtulu44/Question-note/releases) bölümünde:
-v1.0.0 güncelleme başlangıç sürümü, v1.0.1 ise 7 ders kartlı arayüzdür. G5 telefon testi için
-[BUILDING.md](BUILDING.md) adımlarını izle.
+v1.0.0 güncelleme başlangıç sürümü, v1.0.1 ise 7 ders kartlı arayüzdür. İndirme ve kurulum
+ayrıntıları [BUILDING.md](BUILDING.md) içinde.
 
 ---
 

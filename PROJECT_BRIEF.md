@@ -4,7 +4,7 @@ Bu belge projenin **karar kaydıdır**. Yeni bir geliştirme oturumu (insan veya
 belgeyi, sonra [HANDOFF.md](HANDOFF.md) dosyasını okur.
 
 - Son güncelleme: 2026-10-16
-- Durum: Aşama 1 — G2/G3/G4 tamamlandı; imzalı v1.0.0 ve 7 dersli v1.0.1 Release'leri hazır, G5 cihaz testi kullanıcıda
+- Durum: **Aşama 1 tamamlandı** — G5'te kullanıcı v1.0.0 → v1.0.1 güncellemesini telefonda doğruladı; uygulama açıldı ve 7 ders göründü. Sıradaki: Aşama 2 (yerel soru arşivi).
 
 ---
 
