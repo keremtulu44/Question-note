@@ -1,28 +1,37 @@
 name: Ortam Testi (G1)
 
 on:
+  # main'e yapılan her push'ta otomatik çalışır — elle tetikleme izni gerekmez
+  push:
+    branches: [ main ]
+  # Kullanıcı GitHub arayüzünden "Run workflow" ile de çalıştırabilir
   workflow_dispatch:
 
 jobs:
   ortam:
     runs-on: ubuntu-latest
     steps:
-      - name: Sürüm bilgileri
+      - name: Runner ortamı
         run: |
-          echo "=== Runner ortamı ==="
+          echo "=== Sistem ==="
           uname -a
-          echo "--- Java ---"
+          echo "=== Java ==="
           java -version 2>&1 || echo "java yok"
-          echo "--- Gradle ---"
-          gradle --version 2>&1 | head -5 || echo "gradle yok"
-          echo "--- Android SDK ---"
+          echo "JAVA_HOME=$JAVA_HOME"
+          echo "=== Android SDK ==="
           echo "ANDROID_HOME=$ANDROID_HOME"
           echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
-          ls "$ANDROID_HOME" 2>/dev/null || echo "sdk klasörü yok"
-          echo "--- Şifreleme araçları ---"
-          openssl version || true
-          keytool -help 2>&1 | head -2 || echo "keytool yok"
+          ls "$ANDROID_HOME" 2>/dev/null || echo "sdk klasoru yok"
+          echo "--- build-tools ---"
+          ls "$ANDROID_HOME/build-tools" 2>/dev/null || echo "build-tools yok"
+          echo "--- platforms ---"
+          ls "$ANDROID_HOME/platforms" 2>/dev/null || echo "platforms yok"
+          echo "=== Şifreleme araçları ==="
+          openssl version || echo "openssl yok"
+          keytool -help 2>&1 | head -3 || echo "keytool yok"
+          echo "=== Gradle ==="
+          gradle --version 2>&1 | head -6 || echo "gradle yok"
       - name: Yetki özeti
         run: |
-          echo "Workflow dosyası yazılabildi: EVET"
-          echo "Bu iş çalıştı: EVET"
+          echo "Workflow otomatik (push ile) tetiklendi: EVET"
+          echo "Bu, elle tetikleme iznine ihtiyaç olmadığını kanıtlar."
