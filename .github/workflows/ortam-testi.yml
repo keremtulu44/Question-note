@@ -1,37 +1,91 @@
 name: Ortam Testi (G1)
 
+# Bu iş akışı runner ortamını ölçer ve sonucu repoya yazar.
+# Log dosyaları dışarıdan indirilemediği için ölçüm sonucunu commit ile yayımlıyoruz.
+# Ayrıca workflow token'ının repoya yazma yetkisi olup olmadığını da test eder
+# (Release oluşturmak için ileride aynı yetki gerekecek).
+
 on:
-  # main'e yapılan her push'ta otomatik çalışır — elle tetikleme izni gerekmez
+  workflow_dispatch:
   push:
     branches: [ main ]
-  # Kullanıcı GitHub arayüzünden "Run workflow" ile de çalıştırabilir
-  workflow_dispatch:
+    paths:
+      - '.github/workflows/ortam-testi.yml'
+
+permissions:
+  contents: write
 
 jobs:
   ortam:
     runs-on: ubuntu-latest
     steps:
-      - name: Runner ortamı
+      - name: Depoyu al
+        uses: actions/checkout@v4
+
+      - name: Ölçüm yap ve raporu yaz
         run: |
-          echo "=== Sistem ==="
-          uname -a
-          echo "=== Java ==="
-          java -version 2>&1 || echo "java yok"
-          echo "JAVA_HOME=$JAVA_HOME"
-          echo "=== Android SDK ==="
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
-          ls "$ANDROID_HOME" 2>/dev/null || echo "sdk klasoru yok"
-          echo "--- build-tools ---"
-          ls "$ANDROID_HOME/build-tools" 2>/dev/null || echo "build-tools yok"
-          echo "--- platforms ---"
-          ls "$ANDROID_HOME/platforms" 2>/dev/null || echo "platforms yok"
-          echo "=== Şifreleme araçları ==="
-          openssl version || echo "openssl yok"
-          keytool -help 2>&1 | head -3 || echo "keytool yok"
-          echo "=== Gradle ==="
-          gradle --version 2>&1 | head -6 || echo "gradle yok"
-      - name: Yetki özeti
+          mkdir -p docs
+          {
+            echo "# CI Ortam Raporu"
+            echo ""
+            echo "> Bu dosya \`Ortam Testi (G1)\` iş akışı tarafından otomatik üretilir. Elle düzenlenmez."
+            echo ""
+            echo "- Oluşturma (UTC): $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "- Runner: $RUNNER_OS — image: ${ImageOS:-bilinmiyor}"
+            echo "- Commit: $GITHUB_SHA"
+            echo ""
+            echo "## Java"
+            echo '```'
+            java -version 2>&1 || echo "java yok"
+            echo "JAVA_HOME=$JAVA_HOME"
+            echo "Kurulu JDK'lar:"
+            ls /usr/lib/jvm 2>/dev/null || echo "  (liste alınamadı)"
+            echo '```'
+            echo ""
+            echo "## Android SDK"
+            echo '```'
+            echo "ANDROID_HOME=${ANDROID_HOME:-yok}"
+            echo "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-yok}"
+            echo "--- SDK kökü ---"
+            ls "${ANDROID_HOME:-/nonexistent}" 2>/dev/null || echo "  sdk klasörü yok"
+            echo "--- build-tools ---"
+            ls "${ANDROID_HOME:-/nonexistent}/build-tools" 2>/dev/null || echo "  build-tools yok"
+            echo "--- platforms ---"
+            ls "${ANDROID_HOME:-/nonexistent}/platforms" 2>/dev/null || echo "  platforms yok"
+            echo "--- cmdline-tools ---"
+            ls "${ANDROID_HOME:-/nonexistent}/cmdline-tools" 2>/dev/null || echo "  cmdline-tools yok"
+            echo '```'
+            echo ""
+            echo "## İmzalama araçları"
+            echo '```'
+            openssl version || echo "openssl yok"
+            keytool -help 2>&1 | head -2 || echo "keytool yok"
+            echo "--- apksigner (seçilen build-tools) ---"
+            BT=$(ls "${ANDROID_HOME:-/nonexistent}/build-tools" 2>/dev/null | sort -V | tail -1)
+            echo "seçilen: ${BT:-yok}"
+            "${ANDROID_HOME:-/nonexistent}/build-tools/${BT}/apksigner" --version 2>/dev/null || echo "  apksigner bulunamadı"
+            echo '```'
+            echo ""
+            echo "## Gradle"
+            echo '```'
+            gradle --version 2>&1 | head -8 || echo "gradle yok"
+            echo '```'
+            echo ""
+            echo "## Yazma yetkisi testi"
+            echo '```'
+            echo "Bu dosya depoya commit edilebildiyse workflow token'ının contents:write yetkisi VAR."
+            echo '```'
+          } > docs/ORTAM_RAPORU.md
+          cat docs/ORTAM_RAPORU.md
+
+      - name: Raporu depoya yaz
         run: |
-          echo "Workflow otomatik (push ile) tetiklendi: EVET"
-          echo "Bu, elle tetikleme iznine ihtiyaç olmadığını kanıtlar."
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/ORTAM_RAPORU.md
+          if git diff --cached --quiet; then
+            echo "Değişiklik yok, commit atlanıyor."
+          else
+            git commit -m "docs: CI ortam raporu [skip ci]"
+            git push
+          fi
