@@ -78,16 +78,24 @@ reddedildi.
 - Depo: `keremtulu44/Question-note`, **public**, geçmişte tek commit (`Initial commit`), workflow yok.
 - Yapay zekâ ortamı: Java/Android SDK **yok**; `maven.google.com`, `repo1.maven.org`,
   `plugins.gradle.org`, `dl.google.com`, `services.gradle.org` erişimi **kapalı** (HTTP 000).
-  → Bu ortamda APK derlenemez.
-- GitHub bağlantısı: `keremtulu44` olarak kimliği doğrulanmış token mevcut. Ancak
-  `GET /repos/.../actions/permissions` isteği **403** döndü; **workflow yazma ve Secret ekleme
-  yetkisi doğrulanamadı**.
+  → Bu ortamda APK derlenemez. **Buna karşılık `openssl 3.0.20` var** → imzalama anahtarı (PKCS12)
+  sandbox'ta üretilebilir; Java/keytool gerekmez.
+- GitHub bağlantısı: `keremtulu44` olarak kimliği doğrulanmış token mevcut; depoda **admin: true**.
+  Ancak Actions Secrets erişimi **403** (bkz. E1). Actions workflow listesi okunabiliyor
+  (`total_count: 0`), yani derleme loglarını izleyebiliyorum.
+- Aday sürümler (bu oturumda araştırıldı, **doğrulanmadı**): AGP 9.2.x, Kotlin 2.4.x,
+  Compose BOM 2026.09.00, activity-compose 1.13.0, lifecycle 2.11.0. Doğrulama Aşama 1, G2'de
+  derleme loguyla yapılacak.
 
 ## Bilinen hatalar / engeller
 
-- **E1 (engel, Aşama 1'i etkiler):** GitHub Actions ve Secret yazma yetkisi doğrulanamadı.
-  Aşama 1'in ilk işi bunu denemek. Gerekirse kullanıcıdan repo Ayarlar'ından Actions'ı etkinleştirmesi
-  veya Arena'daki GitHub bağlantısına izin eklemesi istenecek.
+- **E1 (engel, Aşama 1'i etkiler):** GitHub token'ında depo **admin** yetkisi var
+  (`{"admin":true,...}`) ancak **Actions Secrets erişimi yok**: `gh secret list` → **403
+  "Resource not accessible by integration"**. Yani secret'ları ben ekleyemiyorum.
+  **Üç yol** (bkz. KODLAMA_PLANI §3.3): **A** Arena GitHub bağlantısına izin eklenmesi ·
+  **B** kullanıcının 4 secret'ı GitHub web arayüzünden eklemesi · **C** geçici olarak imzasız debug
+  ile ilerlemek (üzerine güncelleme çalışmaz, gerçek arşiv başlamadan çözülmeli).
+  Workflow dosyası yazma yetkisi ayrıca **henüz denenmedi** (Aşama 1, G1'in ilk işi).
 - **E2 (kısıt, çözümü yok):** Yapay zekâ ortamında derleme/test yapılamaz. Cihaz testleri kullanıcıya ait.
 - **E3 (izlenecek):** `hasFragileUserData` davranışı gerçek cihazda doğrulanmadı.
 - **E4 (izlenecek):** Android Auto Backup, uygulama başına **25 MB** ile sınırlıdır; fotoğraf arşivi bu
@@ -96,11 +104,16 @@ reddedildi.
 
 ## Sıradaki somut adım
 
-**Aşama 1, adım 1:** Kullanıcıdan "Aşama 1'e başla" onayı alındıktan sonra:
+**Aşama 1, G1:** Kullanıcıdan "Aşama 1'e başla" onayı alındıktan sonra, kod yazmadan önce **yetki
+ölçümü** yapılır (en küçük workflow dosyası eklenir, tetiklenir, log okunur; başarısızsa geri alınır).
+Sonuç HANDOFF'a yazılır.
 
-1. GitHub Actions + Secret yazma yetkisini dene (küçük bir deneme workflow'u ile).
-2. Yetki yoksa kullanıcıya tek ve net bir adım söyle.
-3. Yetki varsa: proje iskeleti + imzalama + Release dağıtımı ve ilk APK.
+Ayrıntılı sıra: [docs/KODLAMA_PLANI.md](docs/KODLAMA_PLANI.md) §4 (G1…G6).
+
+**Bekleyen iki karar:**
+
+1. **Uygulama kimliği (`applicationId`)** — sonradan değiştirilemez; Aşama 1'de sabitlenecek.
+2. **Secret yolu (E1)** — §3.3'teki A / B / C seçeneklerinden hangisi.
 
 ## Kullanıcının yapacağı iş (Aşama 1)
 

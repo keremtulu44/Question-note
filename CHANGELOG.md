@@ -33,3 +33,13 @@ Bu dosya **kullanıcıya yansıyan** değişiklikleri içerir. Henüz yayımlanm
 - **"Çözümü kapat ve tekrar dene" düğmesi olmayacak.** Çözüm görüldükten sonra aynı gün yapılan
   çözüm gerçek hatırlama değildir; çözüm açılmışsa soru **1 gün sonra** yeniden karşımıza çıkar.
 - **Soruyu askıya alma ve "tamamlandı" işaretleme 1. sürümde olacak** (kayıt silinmez, geri alınır).
+
+### Kodlama planı — 2026-10-16
+
+- [docs/KODLAMA_PLANI.md](docs/KODLAMA_PLANI.md) eklendi: kodlama ilkeleri, sürüm sabitleme yöntemi,
+  imzalama kurulumu (openssl ile PKCS12), Aşama 1 görev sırası (G1–G6) ve hedef dosya ağacı,
+  Aşama 2 paket yapısı ve görev tablosu, test stratejisi, derleme bütçesi, riskler, iş bölümü.
+- [docs/IMZALAMA.md](docs/IMZALAMA.md) eklendi: anahtar prosedürü, sertifika parmak izi alanı,
+  CI doğrulaması, kullanıcı kontrol listesi (anahtar üretilmedi; Aşama 1 G3'te doldurulacak).
+- Ölçülen kısıtlar belgelendi: token'da depo admin'i var ama **Actions Secrets erişimi 403**;
+  sandbox'ta Java/keytool yok, **openssl var**; Maven/Gradle depoları erişilemez.

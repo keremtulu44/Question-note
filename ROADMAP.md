@@ -23,6 +23,8 @@ bildirimler → ek özellikler.**
 
 ## Aşama 1 — İlk kurulabilir APK
 
+- **Aşama 1'in ayrıntılı uygulama sırası:** [docs/KODLAMA_PLANI.md](docs/KODLAMA_PLANI.md)
+
 **Amaç:** Derleme → indirme → kurma → güncelleme zincirini doğrulamak. Bu zincir kırıkken
 uygulama geliştirmenin anlamı yok.
 
