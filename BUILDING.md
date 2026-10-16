@@ -101,7 +101,8 @@ yol değildir.
 
 ## 6. Sürümleme kuralları
 
-- Uygulama kimliği (applicationId) **sabit kalır**; Aşama 1'de belirlendikten sonra değiştirilmez.
+- Uygulama kimliği (applicationId) **sabit kalır**: `com.keremtulu.questionnote` (2026-10-16'da
+  sabitlendi). Sonradan değiştirilirse Android bunu **yeni bir uygulama** sayar; mevcut veri taşınamaz.
 - Her APK'da `versionCode` artırılır, `versionName` kullanıcıya gösterilir.
 - Veritabanı değişiklikleri **veri koruyan migration** ile yapılır; hatalı geçişte veritabanını
   otomatik silen yaklaşımlar normal güncelleme çözümü olarak kullanılmaz.

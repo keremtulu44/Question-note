@@ -112,17 +112,16 @@ Yol A başarısız olursa Yol B'ye geçilir; bu durum HANDOFF'a yazılır.
 
 ### 3.3 Secret yetkisi sorunu (E1) — karar gerekli
 
-Ölçülen durum: token'da depo admin'i var, **Actions Secrets erişimi yok** (`gh secret list` → 403).
-Üç yol var:
+Ölçülen durum: token'da depo admin'i var ama **Actions Secrets erişimi yok** (`gh secret list` ve
+`actions/secrets/public-key` → **403**; Actions okuma ise çalışıyor). Üç yol var:
 
 | Yol | Ne olur | Kimin işi |
 |---|---|---|
-| **A. Arena GitHub bağlantısını düzeltmek** | Bağlantıya Actions/Secrets izni eklenir; ben secret'ları komutla eklerim | Kullanıcı (Arena'da izin/yeniden bağlanma) |
-| **B. Kullanıcı secret'ları web arayüzünden ekler** | Ben anahtarı ve değerleri üretirim; kullanıcı GitHub web'den 4 secret alanını doldurur | Kullanıcı (telefondan ~5 dk, kopyala-yapıştır) |
-| **C. Şimdilik imzasız/debug ile ilerle** | İlk APK kurulur ama üzerine güncelleme **çalışmaz** (imza değişir) → gerçek arşiv başlamadan bir kez kaldırıp kurmak gerekir | Ben (kod) + kullanıcı (sonradan bir kez kaldır-kur) |
+| **A. Arena GitHub bağlantı iznini genişletmek** ✅ *(seçildi)* | Bağlantıya Actions/Secrets yazma izni eklenir; ben 4 secret'ı komutla eklerim | Kullanıcı (Arena'da izin) |
+| **B. Kullanıcı secret'ları web arayüzünden ekler** *(A olmazsa)* | Ben anahtarı ve değerleri üretirim; kullanıcı GitHub web'den 4 alanı doldurur | Kullanıcı (telefondan ~5 dk) |
+| **C. Şimdilik imzasız/debug ile ilerle** | İlk APK kurulur ama üzerine güncelleme **çalışmaz**; gerçek arşiv başlamadan bir kez kaldır-kur gerekir | Ben + kullanıcı |
 
-**Önerim: A → olmazsa B.** C yalnızca derleme zincirini test etmek için geçici çare olabilir; kullanıcı
-"gerçek arşiv" biriktirmeye başlamadan imzalama mutlaka çözülmüş olmalı.
+**Seçilen yol: A.** İzin gelmezse B'ye düşülür; C yalnızca son çare.
 
 ### 3.4 Yerel derleme anahtarı
 
@@ -193,7 +192,7 @@ Her görev: amaç → dosyalar → bitti ölçütü. Sıra, **en ucuz doğrulama
     └── src/
         ├── main/
         │   ├── AndroidManifest.xml
-        │   ├── java/com/keremtulu/yanlisdefteri/
+        │   ├── java/com/keremtulu/questionnote/
         │   │   ├── MainActivity.kt
         │   │   └── ui/theme/{Renk.kt, Tema.kt, Tipografi.kt}
         │   └── res/values/{strings.xml, themes.xml}
@@ -207,7 +206,7 @@ Her görev: amaç → dosyalar → bitti ölçütü. Sıra, **en ucuz doğrulama
 ### 5.1 Paket yapısı (hedef)
 
 ```
-com.keremtulu.yanlisdefteri/
+com.keremtulu.questionnote/       # applicationId (sabitlendi 2026-10-16)
 ├── AppContainer.kt            # elle bağımlılık kurulumu (DB, repository'ler, dosya yöneticisi)
 ├── MainActivity.kt
 ├── data/

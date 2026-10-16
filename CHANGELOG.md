@@ -43,3 +43,10 @@ Bu dosya **kullanıcıya yansıyan** değişiklikleri içerir. Henüz yayımlanm
   CI doğrulaması, kullanıcı kontrol listesi (anahtar üretilmedi; Aşama 1 G3'te doldurulacak).
 - Ölçülen kısıtlar belgelendi: token'da depo admin'i var ama **Actions Secrets erişimi 403**;
   sandbox'ta Java/keytool yok, **openssl var**; Maven/Gradle depoları erişilemez.
+
+### Kullanıcı kararları — 2026-10-16 (ikinci tur)
+
+- **Uygulama kimliği: `com.keremtulu.questionnote`** (A1 kapandı, değiştirilemez).
+- **İmzalama secret'ları için yol A seçildi:** Arena'daki GitHub bağlantısına Actions/Secrets yazma
+  izni eklenecek; ardından 4 secret komutla eklenecek. İzin gelmezse yol B'ye (web arayüzünden
+  ekleme) düşülecek. Ölçüm: `gh secret list` ve `actions/secrets/public-key` şu an **403**.

@@ -89,13 +89,13 @@ reddedildi.
 
 ## Bilinen hatalar / engeller
 
-- **E1 (engel, Aşama 1'i etkiler):** GitHub token'ında depo **admin** yetkisi var
-  (`{"admin":true,...}`) ancak **Actions Secrets erişimi yok**: `gh secret list` → **403
-  "Resource not accessible by integration"**. Yani secret'ları ben ekleyemiyorum.
-  **Üç yol** (bkz. KODLAMA_PLANI §3.3): **A** Arena GitHub bağlantısına izin eklenmesi ·
-  **B** kullanıcının 4 secret'ı GitHub web arayüzünden eklemesi · **C** geçici olarak imzasız debug
-  ile ilerlemek (üzerine güncelleme çalışmaz, gerçek arşiv başlamadan çözülmeli).
-  Workflow dosyası yazma yetkisi ayrıca **henüz denenmedi** (Aşama 1, G1'in ilk işi).
+- **E1 (engel, Aşama 1'i etkiler):** Token'da depo **admin** yetkisi var (`{"admin":true,...}`) ancak
+  **Actions Secrets erişimi yok** — `gh secret list` ve `repos/.../actions/secrets/public-key`
+  uçları **403 "Resource not accessible by integration"** (2026-10-16'da ölçüldü). Actions **okuma**
+  çalışıyor (`workflows`, `runs`). Kullanıcı **yol A**'yı seçti: Arena GitHub bağlantısına
+  Actions/Secrets yazma izni eklenecek. İzin geldiğinde ilk iş ölçüm, sonra 4 secret'ın eklenmesi.
+  İzin gelmezse **yol B** (kullanıcı secret'ları web arayüzünden ekler).
+  Ayrıntı: [KODLAMA_PLANI §3.3](docs/KODLAMA_PLANI.md).
 - **E2 (kısıt, çözümü yok):** Yapay zekâ ortamında derleme/test yapılamaz. Cihaz testleri kullanıcıya ait.
 - **E3 (izlenecek):** `hasFragileUserData` davranışı gerçek cihazda doğrulanmadı.
 - **E4 (izlenecek):** Android Auto Backup, uygulama başına **25 MB** ile sınırlıdır; fotoğraf arşivi bu
@@ -110,10 +110,15 @@ Sonuç HANDOFF'a yazılır.
 
 Ayrıntılı sıra: [docs/KODLAMA_PLANI.md](docs/KODLAMA_PLANI.md) §4 (G1…G6).
 
-**Bekleyen iki karar:**
+**Bekleyen karar:**
 
-1. **Uygulama kimliği (`applicationId`)** — sonradan değiştirilemez; Aşama 1'de sabitlenecek.
-2. **Secret yolu (E1)** — §3.3'teki A / B / C seçeneklerinden hangisi.
+- **Secret yolu (E1):** Kullanıcı **yol A**'yı seçti → Arena'daki GitHub bağlantısına Actions/Secrets
+  yazma izni eklenmesi bekleniyor. İzin geldikten sonra ilk iş: `gh secret list` ile **ölçmek**,
+  ardından 4 secret'ı eklemek. İzin gelmezse yol B'ye (kullanıcı web arayüzünden ekler) düşülecek.
+
+**Kapanan kararlar:**
+
+- **Uygulama kimliği (A1):** `com.keremtulu.questionnote` — sabitlendi (2026-10-16).
 
 ## Kullanıcının yapacağı iş (Aşama 1)
 
