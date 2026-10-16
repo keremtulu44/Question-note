@@ -2,20 +2,20 @@
 
 > Bu dosya Android CI tarafından otomatik üretilir. Keystore veya parola değerleri yazılmaz.
 
-- Zaman (UTC): 2026-10-16T15:49:11Z
-- Workflow commit'i: f36ff2a122d2f532653a5687b14ffd34f310f556
+- Zaman (UTC): 2026-10-16T15:52:11Z
+- Workflow commit'i: 5cfb7349999b77b9f789928d8ebd00fec77658a0
 - Dal: arena/0ec2226d-question-note
 - Uygulama sürümü: 1.0.0 (versionCode 1)
 - Android SDK: compileSdk/targetSdk 37, minSdk 26; build-tools 37.0.0
-- Genel sonuç: **BAŞARISIZ**
+- Genel sonuç: **BAŞARILI**
 - Wrapper çıkış kodu: 0
 - assembleRelease çıkış kodu: 0
 - İmzalama secret durumu: İki gerekli secret dolu (değerler gösterilmez)
-- İmzalama/verify durumu: İmza doğrulaması veya parmak izi kontrolü başarısız (kod: 1; apksigner verify: 0)
-- Sertifika parmak izi: bulunamadı (beklenen: FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54; durum: eşleşmedi veya okunamadı)
-- Release: Yayımlanmadı (kod: 125)
-- Release URL: yok
-- İmzalı APK SHA-256: bulunamadı
+- İmzalama/verify durumu: İmzalandı; apksigner doğruladı ve beklenen sertifika eşleşti (kod: 0; apksigner verify: 0)
+- Sertifika parmak izi: FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54 (beklenen: FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54; durum: eşleşti)
+- Release: Release oluşturuldu (kod: 0)
+- Release URL: https://github.com/keremtulu44/Question-note/releases/tag/v1.0.0
+- İmzalı APK SHA-256: 178990c051bd05c3a8829457a7f23a9cf4ba74d2a088fa1dc4dfa6e306534fbb
 
 ## Gradle sürümü
 
@@ -70,30 +70,30 @@ Unable to strip the following libraries, packaging them as they are: libandroidx
 > Task :app:processReleaseNavigationResources
 > Task :app:mergeReleaseNativeDebugMetadata NO-SOURCE
 > Task :app:javaPreCompileRelease
-> Task :app:mapReleaseSourceSetPaths
 > Task :app:parseReleaseLocalResources
 > Task :app:checkReleaseAarMetadata
-> Task :app:compileReleaseNavigationResources
+> Task :app:mapReleaseSourceSetPaths
 > Task :app:generateReleaseRFile
-> Task :app:mergeReleaseResources
+> Task :app:compileReleaseNavigationResources
 > Task :app:createReleaseCompatibleScreenManifests
 > Task :app:extractDeepLinksRelease
 > Task :app:processReleaseMainManifest
 > Task :app:processReleaseManifest
 > Task :app:desugarReleaseFileDependencies
 > Task :app:mergeReleaseStartupProfile
-> Task :app:compileReleaseKotlin
 > Task :app:processReleaseManifestForPackage
+> Task :app:mergeReleaseResources
+> Task :app:compileReleaseKotlin
 > Task :app:mergeExtDexRelease
 > Task :app:compileReleaseJavaWithJavac NO-SOURCE
-> Task :app:mergeReleaseArtProfile
 > Task :app:generateReleaseAssets UP-TO-DATE
+> Task :app:mergeReleaseArtProfile
 > Task :app:mergeReleaseAssets
 > Task :app:compressReleaseAssets
-> Task :app:extractReleaseVersionControlInfo
 > Task :app:processReleaseResources
-> Task :app:extractProguardFiles
+> Task :app:extractReleaseVersionControlInfo
 > Task :app:dexBuilderRelease
+> Task :app:extractProguardFiles
 > Task :app:mergeReleaseGlobalSynthetics
 > Task :app:generateReleaseLintVitalReportModel
 > Task :app:processReleaseJavaRes
@@ -120,7 +120,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 2m 23s
+BUILD SUCCESSFUL in 2m 17s
 47 actionable tasks: 47 executed
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 ```
@@ -156,11 +156,12 @@ V3.0 Signer: public key MD5 digest: efca2e07ac5a04473681ddaf5ff0157e
 ## Release çıktısı
 
 ```text
-Release oluşturulmadı.
+https://github.com/keremtulu44/Question-note/releases/tag/v1.0.0
 ```
 
 ## APK özeti
 
 ```text
-İmzalı APK yok.
+APK: app/build/outputs/apk/release/yanlis-defteri-1.0.0.apk
+SHA-256: 178990c051bd05c3a8829457a7f23a9cf4ba74d2a088fa1dc4dfa6e306534fbb
 ```
