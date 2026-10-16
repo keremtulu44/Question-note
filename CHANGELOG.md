@@ -1,8 +1,20 @@
 # CHANGELOG — Yanlış Defteri
 
-Bu dosya **kullanıcıya yansıyan** değişiklikleri içerir. Henüz yayımlanmış bir sürüm yoktur.
+Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
-## [Yayımlanmadı]
+## [1.0.1] — 2026-10-16
+
+- Açık/koyu tema ve 7 ders kartlı ana ekran eklendi: Edebiyat, Matematik, Biyoloji, Kimya, Fizik, Coğrafya, Tarih.
+- Bu sürüm arayüz iskeletidir; soru ekleme/veritabanı özellikleri henüz yoktur.
+- [GitHub Release v1.0.1](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.1) — versionCode 2.
+
+## [1.0.0] — 2026-10-16
+
+- Sabit anahtarla imzalanmış ilk kurulabilir iskelet sürümü; uygulama ekranı bilerek boştur.
+- CI, imzayı ve sertifika SHA-256 parmak izini doğruladı.
+- [GitHub Release v1.0.0](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.0) — versionCode 1.
+
+## Proje ve belge geçmişi
 
 ### Belgeler — 2026-10-16
 
@@ -40,7 +52,8 @@ Bu dosya **kullanıcıya yansıyan** değişiklikleri içerir. Henüz yayımlanm
   imzalama kurulumu (openssl ile PKCS12), Aşama 1 görev sırası (G1–G6) ve hedef dosya ağacı,
   Aşama 2 paket yapısı ve görev tablosu, test stratejisi, derleme bütçesi, riskler, iş bölümü.
 - [docs/IMZALAMA.md](docs/IMZALAMA.md) eklendi: anahtar prosedürü, sertifika parmak izi alanı,
-  CI doğrulaması, kullanıcı kontrol listesi (anahtar üretilmedi; Aşama 1 G3'te doldurulacak).
+  CI doğrulaması ve kullanıcı kontrol listesi. İlk taslakta anahtar henüz üretilmemişti; sonradan
+  fingerprint eklendi ve G3/G4 CI imza doğrulaması başarılı oldu.
 - Ölçülen kısıtlar belgelendi: token'da depo admin'i var ama **Actions Secrets erişimi 403**;
   sandbox'ta Java/keytool yok, **openssl var**; Maven/Gradle depoları erişilemez.
 
@@ -54,12 +67,12 @@ Bu dosya **kullanıcıya yansıyan** değişiklikleri içerir. Henüz yayımlanm
   (`docs/ORTAM_RAPORU.md`).
 - **İmzalama anahtarı üretildi:** RSA 2048, PKCS12, 30 yıl geçerli, alias `yanlisdefteri`;
   parmak izi `FA:13:DE:D7:…:89:DE:54`. Anahtar git dışı `anahtar/` klasöründe.
-- **Kalan tek engel:** 2 secret'ın GitHub'a eklenmesi (yalnızca kullanıcı yapabilir).
+- G1 sırasında secret'lar doğrulanmamıştı; kullanıcı daha sonra iki secret ekledi ve G3 CI imzalama/parmak izi kontrolüyle doğrulandı.
 
 ### Kullanıcı kararları — 2026-10-16 (ikinci tur)
 
 - **Uygulama kimliği: `com.keremtulu.questionnote`** (A1 kapandı, değiştirilemez).
-- **İmzalama secret'ları:** Arena secret uçları **403** verdi; kullanıcı iki gerekli secret'ı web arayüzünden eklediğini bildirdi. Değerler görünmediği için G3 imza doğrulaması bekleniyor.
+- **İmzalama secret'ları:** Arena secret uçları **403** verdi; kullanıcı iki secret'ı web arayüzünden ekledi. G3 CI keystore'u çözerek APK'yı imzaladı ve beklenen sertifika SHA-256 parmak izini doğruladı.
 
 ### Aşama 1 / G2 — Android proje iskeleti — 2026-10-16
 

@@ -4,7 +4,7 @@ Bu belge projenin **karar kaydıdır**. Yeni bir geliştirme oturumu (insan veya
 belgeyi, sonra [HANDOFF.md](HANDOFF.md) dosyasını okur.
 
 - Son güncelleme: 2026-10-16
-- Durum: Aşama 1 — G2 iskeleti CI'da başarıyla derlendi; G3 imzalama/Release doğrulaması sıradaki iş
+- Durum: Aşama 1 — G2/G3/G4 tamamlandı; imzalı v1.0.0 ve 7 dersli v1.0.1 Release'leri hazır, G5 cihaz testi kullanıcıda
 
 ---
 
@@ -166,7 +166,7 @@ Ayrıca v1'de yok: otomatik yedekleme, Drive API/OAuth bağlantısı, yedek şif
 | A5 | Yedek şifreleme | Gerekirse konuşulacak; parola kaybı = veri kaybı riski |
 | A6 | Doğrudan Drive bağlantısı | Aşama 6'da, önce SAF kalıcı izni + Drive klasörü yolu denenerek |
 | A7 | Aralık değerlerinin kullanıcı tarafından ayarlanması | Aşama 4'te değerlendirilecek |
-| A8 | GitHub Actions/Secret yazma yetkisi | **Secret uçları 403**; kullanıcı iki secret'ı eklediğini bildirdi, değerler görünmediği için doğrulama G3 imzalama iş akışında yapılacak |
+| A8 | GitHub Actions/Secret yazma yetkisi | Arena secret uçları **403** olmaya devam ediyor; kullanıcı iki secret'ı ekledi, G3 CI imzası ve sertifika parmak izi eşleşmesi değerlerin doğru olduğunu doğruladı |
 | ~~A9~~ | ~~Görsel kalite varsayılanı~~ | **Kapandı (2026-10-16): K21 — otomatik optimize** (uzun kenar ~3000 px, JPEG ~%90; ölçüt okunabilirlik) |
 | A10 | Depolama dolduğunda "eski görselleri yeniden sıkıştır" aracı | Aşama 5'te değerlendirilecek |
 | A11 | Önizleme stratejisi (Coil önbelleği yeterli mi) | Aşama 5'te ölçümle karar verilecek |

@@ -18,8 +18,8 @@
 | `maven.google.com`, `repo1.maven.org`, `plugins.gradle.org`, `services.gradle.org` erişilemez | Ölçüldü (HTTP 000) | Bağımlılık çözümleme ve Gradle dağıtımı sandbox'ta yapılamaz |
 | Sandbox'ta **openssl var**, `keytool` yok | Ölçüldü | Anahtar PKCS12 olarak burada üretilir (**üretildi**) |
 | Arena token: depo içeriği / workflow dosyası yazma / PR | ✅ Var | Kod ve belge akışı doğrudan yürütülebilir |
-| Arena token: **elle tetikleme (dispatch)** ve **secrets** | ❌ 403 | Elle tetikleme **gerekmiyor** (push ile otomatik); secrets'ı kullanıcı ekler |
-| Workflow'un **kendi token'ı**: repoya commit atma | ✅ Var (kanıtlandı) | Release oluşturma da aynı yetkiyle yapılabilir |
+| Arena token: **elle tetikleme (dispatch)** ve **secrets** | ❌ 403 | Dispatch gereksiz; kullanıcı secret'ları ekledi, G3/G4 CI ile doğrulandı |
+| Workflow'un **kendi token'ı**: repoya commit / Release oluşturma | ✅ Var (G3/G4'te kanıtlandı) | İmzalı v1.0.0 ve v1.0.1 Release'leri yayımlandı |
 | Derleme **loglarını indirme** | ❌ Engelli (log sunucusu erişilemez) | **Desen:** CI ölçüm/raporu repoya yazar, ben repodan okurum |
 | CI ortamı | Ölçüldü: JDK 17 (8/11/21/25 de var), SDK build-tools ≤37.0.0, platforms ≤android-37.2, apksigner 0.9, Gradle 9.8.1 hazır | Sürüm seçimi bu aralığa göre yapılır |
 
@@ -133,22 +133,23 @@ desteklenmeyen eski JDK'lar dâhil); ilk CI derlemesinde imzalama açıkça doğ
 **Neden 2 secret yeterli:** takma ad (`yanlisdefteri`) gizli bilgi değil → workflow'da sabit yazılır;
 PKCS12'de store ve key parolası aynı → tek parola secret'ı yeterlidir.
 
-### 3.3 Secret yetkisi sorunu (E1) — karar gerekli
+### 3.3 Secret yetkisi sorunu (E1) — çözüm ve doğrulama
 
-Ölçülen durum: token'da depo admin'i var ama **Actions Secrets erişimi yok** (`gh secret list` ve
-`actions/secrets/public-key` → **403**; Actions okuma ise çalışıyor). Üç yol var:
+Arena token'ı depo için `viewerPermission=ADMIN` gösterse de `gh secret list` **403** verdi; bu uç
+tekrar denenmeyecek. Kullanıcı `SIGNING_KEYSTORE_BASE64` ve `SIGNING_PASSWORD` secret'larını GitHub
+web arayüzünden ekledi. Değerler rapora/komut çıktısına yazılmadı.
 
-| Yol | Ne olur | Kimin işi |
-|---|---|---|
 | Yol | Ölçülen durum |
 |---|---|
-| Arena token'ıyla secret API | `gh secret list` → 403; bu uç tekrar denenmeyecek |
-| GitHub web arayüzü | Kullanıcı `SIGNING_KEYSTORE_BASE64` ve `SIGNING_PASSWORD` secret'larını eklediğini bildirdi; değerler görünmez |
-| İmzasız APK ile ilerlemek | Güncelleme zincirini doğrulamayacağı için kalıcı testte kullanılmayacak |
+| Arena token'ıyla secret API | 403; secret isim/değerlerini okuyamıyor |
+| GitHub web arayüzü | Kullanıcı iki secret'ı ekledi; CI bunlarla keystore'u açıp imzaladı |
+| İmzasız APK ile ilerlemek | Kalıcı test için kullanılmadı; update zinciri imzalı APK ile doğrulanıyor |
 
-**G3 doğrulaması:** CI secret değerlerini rapora/komut çıktısına yazmadan keystore'u çözer, APK'yı
-imzalar ve sertifika SHA-256 parmak izini bu belgedeki değerle karşılaştırır. Eşleşme olmadan Release
-yayımlanmaz. Secret'ları workflow kendisi oluşturamaz.
+**G3 sonucu (2026-10-16):** CI keystore'u çözdü, APK'yı `apksigner` ile imzaladı ve sertifika SHA-256
+parmak izini bu belgedeki değerle eşleştirdi; Release v1.0.0 oluşturuldu. İlk G3 koşusunda sertifika
+satırını ayrıştıran betikte hata vardı; sonraki koşuda düzeltildi. G4 koşusu da aynı anahtarla geçti
+ve v1.0.1 Release oluşturdu. Ayrıntılar `docs/DERLEME_RAPORU.md` ve HANDOFF'tadır. Secret'ları
+workflow kendisi oluşturamaz ve hiçbir secret değeri repoya yazılmaz.
 
 ### 3.4 G2/G3 imza ayrımı
 
@@ -166,37 +167,37 @@ Her görev: amaç → dosyalar → bitti ölçütü. Sıra, **en ucuz doğrulama
 - Push ile otomatik CI iki kez çalıştı; workflow token'ının `contents:write` ile raporu repoya
   commit edebildiği doğrulandı. `workflow_dispatch` ve secret uçları 403 verdi; elle tetikleme
   gerekmediği için bu engel G2/G3 akışını durdurmuyor.
-- Kullanıcı iki imzalama secret'ını eklediğini bildirdi; secret değerleri/isimleri Arena token'ından
-  okunamıyor. Doğrulama G3 imzalama iş akışında yapılacak.
+- Kullanıcı iki imzalama secret'ını web'den ekledi; secret değerleri Arena token'ından okunamıyor.
+  G3 CI imza ve parmak izi eşleşmesiyle doğrulandı.
 
 ### G2. Proje iskeleti (yalnızca derleme, arayüz yok) ✅ (2026-10-16)
 - **Dosyalar:** `settings.gradle.kts`, `build.gradle.kts`, `gradle.properties`,
   `gradle/libs.versions.toml`, wrapper dosyaları, `app/build.gradle.kts`,
-  `app/src/main/AndroidManifest.xml` ve arayüz içermeyen `MainActivity.kt`. `ui/theme/` G4'te eklenir.
-- **Neden arayüz yok:** İlk CI derlemesinde tek sorun kaynağı olsun. Arayüz G4'te eklenir.
+  `app/src/main/AndroidManifest.xml` ve G2'de arayüz içermeyen `MainActivity.kt`. Tema ve G4 arayüz dosyaları sonradan eklendi.
+- **Neden arayüz yok:** İlk CI derlemesinde tek sorun kaynağı olsun; arayüz G4 aşamasında eklendi.
 - **Bitti ölçütü:** CI yeşil; `assembleRelease` çıktısı üretiliyor; log temiz.
 - **Ölçülen sonuç:** `assembleRelease` başarılı; imzasız APK ve SHA-256 raporu `docs/DERLEME_RAPORU.md` içinde. Wrapper CI'da gerçek Gradle 9.8.1 ile üretildi ve repoya commit edildi. İlk denemedeki built-in Kotlin çakışması yukarıda kayıtlıdır.
 
-### G3. İmzalama + Release akışı
-- **Yapı:** CI, base64 secret'tan keystore'u çözer → `assembleRelease` → `apksigner verify
-  --print-certs` → parmak izi `docs/IMZALAMA.md` ile karşılaştırılır → SHA-256 hesaplanır →
-  artifact yüklenir → (release tetiklenmişse) Release oluşturulur.
-- **Workflow girdileri:** `version_name` (isteğe bağlı), `make_release` (true/false).
-- **Bitti ölçütü:** İmzalı APK indirilebilir; parmak izi doğrulanmış; release notunda sürüm + commit
-  + SHA-256 var.
+### G3. İmzalama + Release akışı ✅ (2026-10-16)
+- **Yapı:** CI, base64 secret'tan keystore'u çözer → `assembleRelease` → `zipalign` + `apksigner`
+  → `apksigner verify --print-certs` → parmak izi karşılaştırması → SHA-256 → GitHub Release.
+- `versionName`/`versionCode`, `app/build.gradle.kts` içinden alınır. Her izlenen push derlenir;
+  ilgili `v<versionName>` etiketi henüz yoksa Release oluşturulur (var olan tag yeniden yayımlanmaz).
+- **Ölçülen sonuç:** v1.0.0 (run `38927072038`) ve v1.0.1 (run `38927750387`) imzalı Release'leri
+  oluşturuldu; sertifika parmak izi eşleşti. Release notunda sürüm + commit + APK SHA-256 bulunuyor.
 
-### G4. Ekran iskeleti ve 7 ders kartı
+### G4. Ekran iskeleti ve 7 ders kartı ✅ CI (2026-10-16)
 - **Dosyalar:** `MainActivity.kt`, `ui/DerslerEkrani.kt`, `ui/bilesenler/DersKarti.kt`,
-  `res/values/strings.xml`, tema; gezinme için tek `Scaffold` + alt/üst yapı kararı.
-- **Karar:** Gezinme kütüphanesi v1'de kullanılmayacak — 5 sekme için Compose içi basit durum
-  yönetimi yeterli. İhtiyaç doğarsa sonra eklenir (gereksiz bağımlılık eklememe ilkesi).
-- **Bitti ölçütü:** Kullanıcı APK'yı kurup 7 ders kartını görüyor; açık/koyu tema çalışıyor.
+  `res/values/strings.xml`, tema; tek `Scaffold`, adaptive grid.
+- **Karar:** Gezinme kütüphanesi v1'de kullanılmıyor; bu aşamada tek ekran yeterli.
+- **Ölçülen:** v1.0.1 `assembleRelease`, imza/parmak izi kontrolü ve Release CI'da başarılı.
+  Açık/koyu tema ve gerçek cihaz görünümü kullanıcı tarafından G5'te doğrulanacak.
 
-### G5. Güncelleme zinciri testi
-- **Yöntem:** `versionCode` artırılmış ikinci APK üretilir; kullanıcı **kaldırmadan** kurar.
-- **Bitti ölçütü:** Kurulum reddedilmiyor ve uygulama açılıyor. Zincir doğrulanmadan Aşama 2 başlamaz.
+### G5. Güncelleme zinciri testi (kullanıcıda bekliyor)
+- **Yöntem:** v1.0.0 (`versionCode=1`) kurulur; v1.0.1 (`versionCode=2`) uygulama **kaldırılmadan** üzerine kurulur.
+- **Bitti ölçütü:** Android güncellemeyi kabul eder; v1.0.1 açılır ve 7 ders kartını gösterir. Zincir doğrulanmadan Aşama 2 başlamaz.
 
-### G6. Belge güncellemesi
+### G6. Belge güncellemesi ✅ (G2–G4)
 - **Dosyalar:** HANDOFF (ne yapıldı, hangi sürümler sabitlendi, son başarılı derleme), BUILDING
   (secret adları ve prosedür doğrulandı mı), CHANGELOG (sürüm notu), ROADMAP (Aşama 1 durumu).
 - **Bitti ölçütü:** Yeni bir oturum yalnızca belgeleri okuyarak devam edebiliyor.
@@ -346,7 +347,7 @@ edilecek" ayrımı yazılır. `docs/TEST_KONTROL_LISTESI.md` işaretlenir.
 
 | Risk | Etki | Önlem |
 |---|---|---|
-| Token'ın workflow/secrets yetkisi yok (E1) | Aşama 1 durur | G1'de ölçülür; §3.3 A/B/C yolu |
+| Arena token'ının Actions/Secrets yetkisi yok (E1) | Secret değerleri okunamaz | Kullanıcı web arayüzünden ekledi; G3/G4 CI imza ve parmak izi doğrulaması başarılı |
 | Aday sürümler uyumsuz çıkar | CI kırmızı, zaman kaybı | Sürümler tek tek düşürülür; en küçük iskeletle başlanır |
 | PKCS12 (OpenSSL 3) imzalamayı JDK'da desteklemez | İmzalama adımı başarısız | G3'te açık doğrulama; gerekirse JKS'e çevrilir |
 | Wrapper jar'ı oluşturulamaz | İlk derleme yapılamaz | Yol A/B (§2) |
@@ -361,7 +362,7 @@ edilecek" ayrımı yazılır. `docs/TEST_KONTROL_LISTESI.md` işaretlenir.
 
 | Aşama | Ben (yapay zekâ) | Kullanıcı |
 |---|---|---|
-| 1 | Yetki ölçümü, iskelet, imzalama, CI workflow, ekran iskeleti, belgeler | Anahtarı iki yerde saklamak; (gerekirse) 4 secret'ı web'den eklemek; APK kurmak; 2. APK ile üzerine kurulum testi |
+| 1 | G1–G4 CI/Release/arayüz, belgeler | Anahtarı iki yerde saklamak; G5'te v1.0.0'ı kurup v1.0.1'i kaldırmadan yükleyerek zinciri doğrulamak |
 | 2 | Veri katmanı, görsel hattı, ekranlar, testler | Ölçülü cihaz testleri (uçak modu, iptal, konusuz soru, silme…) |
 | 3 | Yedek üretme/doğrulama/geri yükleme, testler | Drive'a kaydetme denemesi; temiz kurulumda geri yükleme; bozuk yedek denemesi |
 | 4 | Tekrar ekranı ve akışı | Günlük kullanım: "Bugün" listesini gerçekten çözmek |
@@ -373,5 +374,5 @@ edilecek" ayrımı yazılır. `docs/TEST_KONTROL_LISTESI.md` işaretlenir.
 ## 11. Bir sonraki oturum nasıl başlar?
 
 1. Bu belge + HANDOFF okunur; HANDOFF'taki "sıradaki somut adım" uygulanır.
-2. Kullanıcıdan Aşama 1 onayı zaten varsa **G1 (yetki denemesi)** ile başlanır.
+2. Şu an sıradaki iş **G5**: kullanıcı v1.0.0 → v1.0.1 üzerine kurulum testini yapar; başarıdan sonra Aşama 2'ye başlanır.
 3. Her görev sonunda HANDOFF güncellenir: yapılan, ölçülen, kalan, sürümler, son başarılı derleme.

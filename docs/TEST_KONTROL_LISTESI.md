@@ -11,7 +11,7 @@
 > ZIP yol güvenliği) ve **Robolectric** (şema/migration testleri). Emülatör yalnızca gerçekten
 > gerekirse kullanılır; asıl kabul testleri gerçek cihazda yapılır.
 
-Son güncelleme: 2026-10-16 (G2 CI derlemesi doğrulandı)
+Son güncelleme: 2026-10-16 (G3/G4 CI geçti; G5 cihaz testi kullanıcıda)
 
 ---
 
@@ -21,12 +21,13 @@ Son güncelleme: 2026-10-16 (G2 CI derlemesi doğrulandı)
 |---|---|---|---|
 | 1.1 | Actions workflow'u yazılabiliyor ve push ile otomatik çalışıyor | YZ | [x] |
 | 1.2 | G2 arayüzsüz `assembleRelease` derlemesi başarılı | YZ | [x] |
-| 1.3 | İmzalı APK Release'e ekleniyor | YZ | [ ] |
-| 1.4 | Release notlarında sürüm, commit kimliği ve APK SHA-256 bulunuyor | YZ | [ ] |
-| 1.5 | APK telefondan indirilip kuruluyor | KULLANICI | [ ] |
-| 1.6 | Uygulama açılıyor, 7 ders kartı görünüyor | KULLANICI | [ ] |
-| 1.7 | İkinci APK **kaldırmadan** üzerine kuruluyor | KULLANICI | [ ] |
+| 1.3 | v1.0.0/v1.0.1 imzalı APK Release'e eklendi; sertifika parmak izi eşleşti | YZ | [x] |
+| 1.4 | İki Release notunda sürüm, commit kimliği ve APK SHA-256 bulunuyor | YZ | [x] |
+| 1.5 | v1.0.0 APK telefona indirilip kuruluyor ve açılıyor | KULLANICI | [ ] |
+| 1.6 | v1.0.1 güncellemesinden sonra uygulama açılıyor ve 7 ders kartı görünüyor | KULLANICI | [ ] |
+| 1.7 | v1.0.1, v1.0.0 üzerine **uygulamayı kaldırmadan** kuruluyor | KULLANICI | [ ] |
 | 1.8 | CI derleme özeti, hata çıktısı ve APK SHA-256 repoda okunabiliyor | YZ | [x] |
+| 1.9 | VersionCode 1 → 2 artışı ve v1.0.1 Release CI'da doğrulandı | YZ | [x] |
 
 ## Aşama 2 — Yerel arşiv
 
@@ -110,7 +111,7 @@ Son güncelleme: 2026-10-16 (G2 CI derlemesi doğrulandı)
 
 | # | Test | Sorumlu | Durum |
 |---|---|---|---|
-| G.1 | Hiçbir gizli anahtar, parola veya token repoda değil | YZ | [ ] |
+| G.1 | Hiçbir gizli anahtar, parola veya token repoda değil | YZ | [x] |
 | G.2 | Yedek dosyası repoya işlenmiyor (`.gitignore`) | YZ | [ ] |
 | G.3 | İmzalama anahtarının iki ayrı yedek kopyası kullanıcıda mevcut | KULLANICI | [ ] |
 | G.4 | Uygulama kaldırılırsa verilerin kaybolacağı kullanıcı tarafından biliniyor | KULLANICI | [ ] |

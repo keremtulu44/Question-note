@@ -4,9 +4,9 @@
 > GitHub Secret'larında ve kullanıcının kendi yedeklerinde bulunur.
 
 - Son güncelleme: 2026-10-16
-- Durum: **Anahtar üretildi** (2026-10-16). Kullanıcı iki GitHub Secret'ını eklediğini bildirdi;
-  secret uçları 403 verdiği için doğrulanmadı. G3 imzalama iş akışı bunları kullanıp parmak izini
-  karşılaştıracak; sonuç bu belgedeki parmak izine göre değerlendirilecek.
+- Durum: **Doğrulandı** (2026-10-16). G3/G4 CI secret'lardan keystore'u çözdü, APK'ları imzaladı;
+  `apksigner verify` geçti ve sertifika SHA-256 parmak izi bu belgedeki değerle eşleşti. İmzalı
+  Release'ler v1.0.0 ve v1.0.1 olarak yayımlandı.
 
 ---
 

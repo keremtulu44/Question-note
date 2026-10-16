@@ -25,12 +25,13 @@ cevaplamak ve çözümü öğrenme sürecinden ayrı saklamaktır.
 
 ## Durum
 
-**Aşama 1 — ilk APK zinciri.** Arayüzsüz Android/Compose iskeleti ve Gradle wrapper eklendi;
-G2 `assembleRelease` CI derlemesi başarılı oldu. İmzalı APK ve Release henüz doğrulanmadı; 7 dersli
-arayüz G4'te eklenecek.
+**Aşama 1 — G2/G3/G4 tamamlandı.** CI'da imzasız iskelet derlemesi, sabit anahtarla imzalama,
+sertifika parmak izi ve GitHub Release doğrulandı. [v1.0.1](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.1)
+açık/koyu temalı 7 ders kartını içeriyor. Telefonda kurulum ve kaldırmadan güncelleme testi (G5)
+kullanıcı tarafından yapılmayı bekliyor.
 
-Sıradaki adım: G3 — sabit anahtarla imzalama, sertifika parmak izi kontrolü ve ilk Release
-(bkz. [ROADMAP.md](ROADMAP.md)).
+Sıradaki adım: v1.0.0'ı kurup v1.0.1'e uygulamayı kaldırmadan güncellemek; ayrıntı
+[BUILDING.md](BUILDING.md) içinde.
 
 ---
 
@@ -54,8 +55,9 @@ Sıradaki adım: G3 — sabit anahtarla imzalama, sertifika parmak izi kontrolü
 
 ## Kullanım / APK erişimi
 
-İlk APK henüz yayımlanmadı. Aşama 1 tamamlandığında APK, GitHub **Releases** bölümünden doğrudan
-telefondan indirilip kurulabilecektir. Ayrıntılar [BUILDING.md](BUILDING.md) içinde olacaktır.
+İmzalı APK'lar GitHub [Releases](https://github.com/keremtulu44/Question-note/releases) bölümünde:
+v1.0.0 güncelleme başlangıç sürümü, v1.0.1 ise 7 ders kartlı arayüzdür. G5 telefon testi için
+[BUILDING.md](BUILDING.md) adımlarını izle.
 
 ---
 

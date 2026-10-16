@@ -17,7 +17,7 @@ bildirimler → ek özellikler.**
 - [x] Dış inceleme (ikinci görüş) alınması ve önerilerin gerekçeyle değerlendirilmesi
 - [x] Bekleme: kullanıcının Aşama 1 için açık onayı
 
-**Çıktı:** Kararlar ve uygulama planı; Aşama 1 kodlaması başladı (G2 ayrıntıları aşağıda).
+**Çıktı:** Kararlar ve uygulama planı. Aşama 1'de G2/G3/G4 tamamlandı; G5 cihaz testi aşağıda bekliyor.
 
 ---
 
@@ -31,12 +31,11 @@ uygulama geliştirmenin anlamı yok.
 - [x] G1: push ile otomatik çalışan GitHub Actions ve `contents:write` yetkisi ölçüldü
 - [x] G2: tek Android modülü, Kotlin + Compose, sabit sürüm kataloğu ve Gradle wrapper; arayüzsüz `assembleRelease` CI'da başarılı
 - [x] `applicationId=com.keremtulu.questionnote`, `minSdk=26`, API 37 compile/target sabitlendi
-- [x] Sabit release anahtarı üretildi; kullanıcı iki secret'ı eklediğini bildirdi (değer/parmak izi G3 iş akışında doğrulanacak)
-- [x] Push ile otomatik Android derleme workflow'u (elle tetikleme gerekmiyor)
-- [ ] G3: APK'yı sabit anahtarla imzalama, sertifika parmak izi kontrolü ve GitHub Release
-- [ ] G4: açık/koyu tema, ekran iskeleti ve 7 ders kartı
-- [ ] **Kullanıcı testi:** ilk imzalı APK'yı indirip kur; arayüz ve 7 ders kartını gör
-- [ ] **Kullanıcı testi:** ikinci imzalı APK'yı (v2) **kaldırmadan** üzerine kur — güncelleme zinciri çalışıyor mu
+- [x] Sabit release anahtarı üretildi; kullanıcı secret'ları ekledi; G3'te imzalama ve SHA-256 parmak izi eşleşti
+- [x] Push ile otomatik Android derleme, imzalama ve Release workflow'u (elle tetikleme gerekmiyor)
+- [x] G3: imzalı v1.0.0 APK + sertifika doğrulaması + Release
+- [x] G4: açık/koyu tema ve 7 ders kartı; imzalı v1.0.1 APK + Release
+- [ ] **KULLANICI / G5:** v1.0.0'ı kur; v1.0.1'i uygulamayı kaldırmadan yükle; 7 kartı gördüğünü bildir
 
 **Çıkış kriteri:** Kullanıcı, telefonda kaldırma yapmadan yeni APK ile güncelleme yapabiliyor.
 

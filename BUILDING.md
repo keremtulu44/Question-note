@@ -4,7 +4,7 @@
 > Hiçbir anahtar, parola veya token bu depoya yazılmaz.
 
 - Son güncelleme: 2026-10-16
-- Durum: G2 iskeleti CI'da derlendi; G3 imzalı APK/Release doğrulaması sürüyor.
+- Durum: G3 imzalı Release ve G4 arayüzü CI'da doğrulandı; G5 gerçek cihaz güncelleme testi kullanıcıda.
 
 ---
 
@@ -28,7 +28,7 @@ Kullanıcının telefonunda Android SDK, Gradle veya Termux kurması **gerekmez*
 
 - Tek Gradle modülü, Kotlin + Jetpack Compose.
 - Sürümler `gradle/libs.versions.toml` içinde sabitlenir; Gradle wrapper depoda tutulur.
-- minSdk 26, compileSdk/targetSdk 37, versionCode 1. Bu yapılandırma G2 CI derlemesinde doğrulandı.
+- minSdk 26, compileSdk/targetSdk 37; G2 sürüm kodu 1, güncel v1.0.1 sürüm kodu 2. G2/G4 CI derlemeleri başarılı.
 - Yapay zekâ ortamında Java/Android SDK ve Maven erişimi yoktur → derleme **yalnızca** Actions'ta olur.
 
 ## 3. İmzalama düzeni (kritik)
@@ -52,8 +52,8 @@ Takma ad (`yanlisdefteri`) gizli bilgi olmadığı için workflow içinde sabit 
 Secret'lar **yalnızca kullanıcı** tarafından eklenebilir: Settings → Secrets and variables → Actions →
 New repository secret. Adımlar `anahtar/KURULUM_ADIMLARI.md` içinde (git dışı). Yapay zekânın token'ı
 secret uçlarına erişemiyor (403) ve **bir workflow kendi secret'ını oluşturamaz** (GitHub güvenlik
-kuralı) — bu yüzden bu adım elle yapılır. Kullanıcı iki secret'ı eklediğini bildirdi; G3'te keystore
-secret'tan çözülüp imzalı APK parmak izi kontrol edilmeden doğru kabul edilmeyecek.
+kuralı) — bu yüzden bu adım elle yapılır. Kullanıcı iki secret'ı ekledi; G3 CI keystore'u çözdü,
+APK'yı imzaladı ve beklenen sertifika SHA-256 parmak izinin aynısını doğruladı.
 
 **Kullanıcının sorumluluğu:** Anahtar dosyası ve parolası, telefondan bağımsız **iki ayrı yerde**
 saklanır (ör. şifre yöneticisi + Drive'da bir klasör). Anahtar kaybedilirse:
@@ -66,14 +66,13 @@ için uygun değildir.
 
 ## 4. Actions kullanımı
 
-- Derleme **push ile otomatik** çalışır (`main` ve geliştirme dalı). Elle tetikleme (`workflow_dispatch`)
-  izni 403 olsa da gerekmez. G1'de push ile çalıştığı iki kez doğrulandı; G2 arayüzsüz APK derlemesi
-  de push sonrası başarıyla tamamlandı.
-- Workflow'un **kendi token'ı** `permissions: contents: write` ile repoya yazabiliyor; bu yetki
-  **Release oluşturmak için yeterlidir** (G1'de commit atarak kanıtlandı).
-- **Log okuma deseni:** derleme logları dışarıdan indirilemiyor; bu yüzden her iş akışı ölçüm/özet
-  çıktısını (sürümler, dosya listesi, APK SHA-256, hata metni) **repoya yazar**
-  (ör. `docs/ORTAM_RAPORU.md`, ileride `docs/DERLEME_RAPORU.md`).
+- Derleme **push ile otomatik** çalışır (`main` ve bu oturumun geliştirme dalı; yalnızca workflow'da
+  izlenen dosyalar değişince). Elle tetikleme (`workflow_dispatch`) izni 403 olsa da gerekmez.
+  G2/G3/G4 derlemeleri push ile çalıştı.
+- Workflow'un **kendi token'ı** `permissions: contents: write` ile rapor commit edebiliyor; aynı izinle
+  v1.0.0 ve v1.0.1 GitHub Release'leri oluşturuldu.
+- **Log okuma deseni:** derleme logları dışarıdan indirilemiyor; her iş akışı ölçüm/özet çıktısını
+  (sürümler, APK SHA-256, imza/parmak izi ve hata metni) **`docs/DERLEME_RAPORU.md` dosyasına yazar**.
 - Kotlin/Compose derlemesi hatasız bitmeden "APK hazır" denmez; başarısız derleme için Release
   oluşturulmaz.
 - GitHub Actions kotası ve kullanım koşulları kurulum sırasında kontrol edilir; sınırsız/ücretsiz
@@ -92,6 +91,7 @@ Her Release'de şunlar bulunur:
 - `versionName` ve `versionCode`
 - Derlenen Git commit kimliği
 - APK'nın **SHA-256** özeti (indirilen dosyanın gerçekten üretilen sürüm olduğu doğrulanabilir)
+- Sertifikanın **SHA-256** parmak izi (imzalama kimliği doğrulanabilir)
 
 **Debug ve release APK'ları karıştırılmaz.** Günlük kullanımda her zaman sabit anahtarla imzalanmış
 release APK kullanılır; Actions'ın ürettiği test/debug çıktıları yalnızca geliştirme amaçlıdır ve
@@ -99,20 +99,27 @@ günlük arşivin kurulu olduğu telefonun üzerine kurulmaz.
 
 ## 5. APK'ya telefondan erişim
 
-> Not: İlk CI denemelerinde APK, Actions **artifact** olarak da üretilir (indirmek için ZIP'ten
-> çıkarmak gerekir). Kalıcı yol her zaman **Releases**'tir.
+G3/G4 Release'leri:
 
-1. GitHub'da deponun **Releases** bölümü açılır.
-2. En son sürümdeki `.apk` dosyasına dokunulur (bu doğrudan APK'dır, ZIP değildir).
-3. İndirme tamamlanınca dosya açılarak kurulum yapılır. Android ilk seferde "bilinmeyen kaynaklardan
-   kurulum izni" isteyebilir; bu izin yalnızca kullanılan tarayıcı/dosya yöneticisi için verilir.
-4. Mevcut uygulama **kaldırılmaz**; kurulum doğrudan üzerine yapılır ve veriler korunur.
-5. Depo public olduğu sürece Release dosyalarını bağlantıya sahip herkes görebilir; depo private
-   yapılırsa yalnızca yetkili hesaplar erişir.
+- **v1.0.0 (versionCode 1):** [Release v1.0.0](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.0) — G2'nin arayüzsüz ilk imzalı sürümü.
+- **v1.0.1 (versionCode 2):** [Release v1.0.1](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.1) — açık/koyu temalı 7 ders kartı.
 
-**Artifact indirme (yalnızca gerekirse):** Actions çalıştırmasının altındaki artifact bir **ZIP**
-olarak iner ve içinden APK çıkarılması gerekir. Telefonda bu ek adım zahmetli olduğu için birincil
-yol değildir.
+### G5 — telefonda güncelleme zinciri (kullanıcı testi bekliyor)
+
+1. v1.0.0 Release sayfasından `.apk` dosyasını indirip kur; uygulamayı bir kez aç. Bu ilk sürüm
+   bilerek arayüzsüzdür ve yalnızca güncelleme zincirinin başlangıcıdır.
+2. **Uygulamayı kaldırma.** v1.0.1 Release sayfasından `yanlis-defteri-1.0.1.apk` dosyasını indirip
+   aç; Android'in güncelleme onayını ver.
+3. Kurulum tamamlandıktan sonra uygulamayı aç: **7 ders kartını** ve açık/koyu tema görünümünü
+   kontrol et. Kurulum reddedilirse uygulamayı kaldırma; hata mesajını bildir.
+4. Sonucu (v1.0.1 kuruldu mu, 7 kart göründü mü) ilet. G5 şu ana kadar cihazda **test edilmedi**.
+
+Android ilk kurulumda "bilinmeyen kaynaklardan kurulum izni" isteyebilir; izni yalnızca kullandığın
+indiriciye ver. Release APK doğrudan `.apk` dosyasıdır, ZIP değildir. Depo public olduğu sürece
+Release dosyalarını bağlantıya sahip herkes görebilir.
+
+**Artifact indirme (yalnızca gerekirse):** Actions artifact'i ZIP olarak iner; içinden APK çıkarmak
+gerekir. Telefonda ek adım gerektirdiği için birincil yol Releases'tir.
 
 ## 6. Sürümleme kuralları
 
