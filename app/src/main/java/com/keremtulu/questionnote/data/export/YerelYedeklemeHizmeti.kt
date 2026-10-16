@@ -258,7 +258,7 @@ class YerelYedeklemeHizmeti(
         )
         writeJournal(journal)
 
-        try {
+        return try {
             verified.data.images.forEach { image ->
                 val source = File(payloadDirectory, image.zipFileName)
                 val destinationName = image.permanentFileName(preview.id)
@@ -388,11 +388,11 @@ class YerelYedeklemeHizmeti(
         destination.parentFile?.mkdirs()
         val temp = File(destination.parentFile, "${destination.name}.pending")
         temp.delete()
-        try {
+        return try {
             val snapshot = snapshotOverride ?: currentSnapshot()
             val backupData = snapshot.toBackupData()
             validateBackupData(backupData, null)
-            val jsonBytes = dataJson(backupData).toByteArray(Charsets.UTF_8)
+            val jsonBytes = dataJson(backupData).toString().toByteArray(Charsets.UTF_8)
             if (jsonBytes.size.toLong() > MAX_JSON_BYTES) throw IOException("Yedek JSON dosyası üst sınırı aşıyor.")
             val csvBytes = csvFiles(backupData)
             val payloads = mutableListOf<ArchivePayload>()
