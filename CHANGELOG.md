@@ -2,6 +2,20 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.0.10] — 2026-10-17
+
+- Filtreli oturum bitince **sonuç karnesi** açılır: "%1$d sorudan %2$d tanesini bağımsız çözdün" başlığı, oran halkası ve dört kova (bağımsız / yarım / çözemedi / çözümle). Çözümü açılan soru, RAHAT işaretlense bile bağımsız sayılmaz.
+- 5 sorunun altındaki kısa oturumlarda kart sadeleşir ve teşvik edici bir cümle gösterilir; üzgün animasyon hiç kullanılmaz.
+- Karnede "En çok şundan" (en az 2 kez geçen yanlış nedenleri, en çok 3 satır), "En çok zorlandığın konular" ve **"Bu konudan çalış"** kısayolu eklendi; kısayol yalnız o konuyu filtreleyip filtreli çalışmayı açar.
+- **Haftalık karşılaştırma**: bu hafta (Pzt–Paz) ile önceki takvim haftası; "Bu hafta %85 · geçen hafta %76 (+9 puan)". Geçen hafta 5'ten az tekrar içeriyorsa satır gizlenir ve açıklama gösterilir.
+- **Günlük hedef 10 soru** (sabit) ve **gün serisi** karnede ve Bugün ekranında görünür; Bugün ekranına hedef halkası eklendi. Hedef seçimi/ayar ekranı ileri sürümde.
+- **11 rozet** eklendi (İlk adım, Kusursuz tur, Onluk, Yirmilik, Kendi başına, İstikrar, Üç gün, Haftalık seri, Otuz gün, Yüz, Beş yüz). Rozetler cihaz-yerel `SharedPreferences` içinde tutulur, ZIP yedeğine girmez; kazanım idempotenttir ve karnede yalnız yeni kazanılanlar (en çok 2) gösterilir.
+- Animasyonlar: başlık sayıları 0'dan sayar, halka dolar, ≥%70 bağımsızda tek seferlik konfeti, rozet 0.6→1.0 ölçeklenir. Hareket azaltma açıksa (`ANIMATOR_DURATION_SCALE = 0`) tüm animasyonlar atlanır; yeni bağımlılık yoktur.
+- Karne verileri `tekrarlar` tablosundan anlık hesaplanır; **Room şeması değişmedi (v3)** ve yedek biçimi değişmedi.
+- 28 yeni birim testi eklendi (karne kovaları/oran/eşikler, seri, hafta penceresi, haftalık fark, rozet kuralları): toplam **72 test**.
+- CI run `39051284547`: 72 test, `assembleRelease`, imza/apksigner ve sertifika fingerprint doğrulaması geçti; [v1.0.10 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.10) yayımlandı.
+- CI raporundaki APK SHA-256: `dfb7fdbcceb792e568f4f5d1cf4d5844be138460098ccb325e510cdbb0cfd8a7`. Fiziksel cihaz kabulü bekliyor.
+
 ## [1.0.9] — 2026-10-17
 
 - Ekran döndürmede uygulama durumu (açık ekran, filtre seçimleri, süren filtreli oturum) korunur; yedek alma döndürme sırasında yarıda kesilmez.

@@ -11,7 +11,7 @@
 > ZIP yol güvenliği) ve **Robolectric** (şema/migration testleri). Emülatör yalnızca gerçekten
 > gerekirse kullanılır; asıl kabul testleri gerçek cihazda yapılır.
 
-Son güncelleme: 2026-10-17. v1.0.9 (versionCode 10) yayımlandı; CI run `39048703584` 44 testi, Release derlemesini, imzayı ve sertifika fingerprint'ini doğruladı. Filtreli çalışma ile v1.0.5–v1.0.8 özelliklerinin cihaz kabulü ayrı ve henüz kullanıcı tarafından bildirilmedi. v1.0.4 tekrar geçmişi, SAF/Drive yedek-geri yükleme ve fotoğraf okunabilirliği de cihazda bekliyor. “3. turu denemedim” ifadesinin checklist eşlemesi teyitsizdir. v1.0.9 düzeltmeleri CI'da doğrulandı; cihaz kabulü aşağıdaki ayrı bölümde bekliyor.
+Son güncelleme: 2026-10-17. v1.0.10 (versionCode 11) yayımlandı; CI run `39051284547` 72 testi, Release derlemesini, imzayı ve sertifika fingerprint'ini doğruladı (44 → 72; karne/seri/hafta/rozet birim testleri eklendi). Filtreli çalışma, karne ekranı ve v1.0.5–v1.0.9 özelliklerinin cihaz kabulü ayrı ve henüz kullanıcı tarafından bildirilmedi. v1.0.4 tekrar geçmişi, SAF/Drive yedek-geri yükleme ve fotoğraf okunabilirliği de cihazda bekliyor. “3. turu denemedim” ifadesinin checklist eşlemesi teyitsizdir. Karne, rozet ve hedef animasyonları CI'da derlendi; cihaz kabulü aşağıdaki ayrı bölümde bekliyor.
 
 ---
 
@@ -43,7 +43,9 @@ Son güncelleme: 2026-10-17. v1.0.9 (versionCode 10) yayımlandı; CI run `39048
 | 1.22 | VersionCode 8 → 9; v1.0.8 Release, APK imzası ve fingerprint CI'da doğrulandı | YZ (CI run `39044777998`) | [x] |
 | 1.23 | v1.0.8 mevcut uygulamanın üstüne kaldırmadan kurulur; önceki veriler korunur | KULLANICI | [ ] |
 | 1.24 | VersionCode 9 → 10; v1.0.9 Release, APK imzası ve fingerprint CI'da doğrulandı | YZ (CI run `39048703584`) | [x] |
-| 1.25 | v1.0.9 mevcut uygulamanın üstüne kaldırmadan kurulur; önceki veriler korunur | KULLANICI | [ ] |
+| 1.26 | VersionCode 10 → 11; v1.0.10 Release, APK imzası ve fingerprint CI'da doğrulandı | YZ (CI run `39051284547`) | [x] |
+| 1.25 | v1.0.9 mevcut uygulamanın üstüne kaldırmadan kurulur; önceki veriler korunur | KULLANICI | [x] |
+| 1.27 | v1.0.10 mevcut uygulamanın üstüne kaldırmadan kurulur; önceki veriler korunur | KULLANICI | [ ] |
 
 ## Aşama 2 — Yerel arşiv
 
@@ -171,6 +173,27 @@ Son güncelleme: 2026-10-17. v1.0.9 (versionCode 10) yayımlandı; CI run `39048
 | D.7 | Yedek yazımı başarısız olduğunda hedefte yarım ZIP kalmaz | KULLANICI | [ ] |
 | D.8 | CSV'de `=`, `+`, `@` ile başlayan hücreler formülsüz görünür; `data.json` değeri değişmez | YZ (CI run `39048703584`) | [x] |
 | D.9 | Soru bulunamadı/hata ekranındaki geri düğmesi “Geri” etiketini kullanır | KULLANICI (CI derlemesi geçti) | [ ] |
+
+## v1.0.10 sonuç karnesi, rozet ve hedef
+
+> v1.0.10 (versionCode 11) CI run `39051284547` ile derlendi (72 test). **Cihaz kabulü henüz yapılmadı.**
+
+| # | Test | Sorumlu | Durum |
+|---|---|---|---|
+| E.1 | Karne kovaları: RAHAT→bağımsız, ZORLANDIM→yarım, ÇÖZEMEDİM→çözemedi, çözüm açıldı→çözümle; oran yukarı yuvarlanır | YZ (birim testi) | [x] |
+| E.2 | Kısa oturum (5'in altı) sadeleşmiş kart gösterir; 5 ve üzeri tam karne | YZ (birim testi) | [x] |
+| E.3 | Seri: bugün veya dün başlar; iki gün boşlukta sıfırlanır; hafta penceresi Pzt–Paz | YZ (birim testi) | [x] |
+| E.4 | Haftalık fark: geçen hafta <5 tekrarda gizlenir; bu hafta boşsa “—” | YZ (birim testi) | [x] |
+| E.5 | Rozet kuralları idempotent; zaten sahip olunan rozet yeniden verilmez | YZ (birim testi) | [x] |
+| E.6 | Filtreli oturum tamamlanınca karne otomatik açılır; başlıkta “X sorudan Y tanesini bağımsız çözdün” yazar | KULLANICI | [ ] |
+| E.7 | Karne geri düğmesi filtre ekranına, “Bugün” düğmesi Bugün ekranına gider | KULLANICI | [ ] |
+| E.8 | “Bu konudan çalış” yalnız o konuyu filtreler, diğer filtreleri temizler ve filtreli çalışmayı açar | KULLANICI | [ ] |
+| E.9 | Konusuz/arşivli konu satırında “Bu konudan çalış” düğmesi görünmez | KULLANICI | [ ] |
+| E.10 | ≥%70 bağımsız oturumda konfeti bir kez oynar; <%70'te üzgün animasyon yok | KULLANICI | [ ] |
+| E.11 | Hareket azaltma açıkken (Ayarlar → Animasyon süresi 0) animasyonlar atlanır, içerik doğrudan görünür | KULLANICI | [ ] |
+| E.12 | Yeni rozet karnede en çok 2 adet gösterilir; “Kazandığın rozetler: N/11” satırı doğru | KULLANICI | [ ] |
+| E.13 | Bugün ekranında hedef halkası (x/10) ve seri doğru; hedef dolunca metin değişir | KULLANICI | [ ] |
+| E.14 | Karne verileri uygulama yeniden açıldığında da tutarlı (tekrarlar tablosundan hesaplanır) | KULLANICI | [ ] |
 
 ## Genel / sürekli
 

@@ -220,7 +220,7 @@ zaten varsa animasyon gösterilmez.
 | `ON_BAGIMSIZ` | Onluk | Tek oturumda ≥10 bağımsız | A |
 | `YIRMI_SORU` | Yirmilik | Tek oturumda ≥20 soru | A |
 | `COZUMSUZ` | Kendi başına | ≥5 soruluk oturumda hiç çözüm açmamak | A |
-| `ISTIKRAR` | İstikrar | Üst üste 5 oturumda ≥%70 bağımsız | A |
+| `ISTIKRAR` | İstikrar | Üst üste 5 gün, her gün ≥5 soru ve ≥%70 bağımsız | A |
 | `SERI_3` | Üç gün | Üst üste 3 gün en az 1 tekrar | A |
 | `SERI_7` | Haftalık seri | Üst üste 7 gün | A |
 | `SERI_30` | Otuz gün | Üst üste 30 gün | A |

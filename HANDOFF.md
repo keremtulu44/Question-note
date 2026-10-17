@@ -209,10 +209,10 @@ reddedildi.
 ## Sıradaki somut adım
 
 1. `docs/DERLEME_RAPORU.md` v1.0.9 CI/Release çıktısı doğrulandı (run `39048703584`); 44 test geçti. Yerel Gradle testi Java bulunmadığı için çalışmadı.
-2. Sıradaki somut adım kullanıcı cihaz kabulü: [v1.0.9 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.9)'i mevcut uygulamanın üzerine **kaldırmadan** kur; eski veriyi doğrula, filtreli çalışmada filtreleri/adet alanını/sıralı ilerlemeyi/bitiş ekranını dene; `+ Konu` ile ilgili dersteki listelerin korunduğunu kontrol et.
-3. Kullanıcı sonucu gelince checklist'i güncelle; v1.0.9 düzeltmeleri, v1.0.8 filtreli çalışma, v1.0.7 `+ Konu`, v1.0.6 formu, v1.0.5 katalog/locator/ZIP v3, v1.0.4 tekrar geçmişi, SAF/Drive/başka cihaz ve fotoğraf okunabilirliği ayrı bekleyen testlerdir.
-4. v1.0.9 `arena/59c6570d-question-note` dalından yayımlandı; workflow artık bu dalı da tetikliyor. CI yeşil (run `39048703584`). Yerel Java olmadığı için derleme/test yalnızca CI'da yapılabilir.
-5. Sıradaki geliştirme: **v1.0.10 — sonuç karnesi + kutlama/rozet + günlük hedef (sabit 10) + seri + haftalık özet.** Tasarım ve formüller `docs/SONUC_KARNESI_VE_ILERLEME.md` içinde; kullanıcı kararları K25–K30, tasarım kararları S1–S11. Açık soru kalmadı; kodlamaya hazır. Kod henüz yazılmadı; bu adım Room migration gerektirmez.
+2. Sıradaki somut adım kullanıcı cihaz kabulü: [v1.0.10 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.10)'u mevcut uygulamanın üzerine **kaldırmadan** kur; eski veriyi doğrula, filtreli bir oturum tamamlayıp karne ekranını incele (başlık, halka, kovalar, neden/konu listeleri, "Bu konudan çalış", haftalık karşılaştırma, seri, rozet), Bugün ekranındaki hedef halkasını ve seriyi kontrol et. Animasyonların cihazda açık/kapalı davranışını da dene.
+3. Kullanıcı sonucu gelince checklist'i güncelle; v1.0.10 karne, v1.0.9 düzeltmeleri, v1.0.8 filtreli çalışma, v1.0.7 `+ Konu`, v1.0.6 formu, v1.0.5 katalog/locator/ZIP v3, v1.0.4 tekrar geçmişi, SAF/Drive/başka cihaz ve fotoğraf okunabilirliği ayrı bekleyen testlerdir.
+4. v1.0.10 `arena/59c6570d-question-note` dalından yayımlandı; CI yeşil (run `39051284547`, 72 test). Yerel Java olmadığı için derleme/test yalnızca CI'da yapılabilir.
+5. Sıradaki geliştirme: **v1.0.11 — soru çözdürme algoritması v2** (zorlandım ilerlemesi, kolaylık çarpanı, gecikme cezası, zor soru etiketi) + Room v3→v4 veri koruyan migration + yedek biçimi v4. Tasarım `docs/SONUC_KARNESI_VE_ILERLEME.md` §7; uygulama başlamadı.
 6. Algoritma v2 (v1.0.11) ayrı sürümde: Room v3→v4 veri koruyan migration + yedek biçimi v4 gerektirir; `docs/YEDEK_FORMATI.md` aynı sürümde güncellenecek.
 
 Detaylı kabul ölçütleri `ROADMAP.md` ve `docs/TEST_KONTROL_LISTESI.md` içindedir. `fallbackToDestructiveMigration` yasaktır; her Room şema değişikliği veri koruyan migration + otomatik test gerektirir.
