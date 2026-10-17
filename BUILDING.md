@@ -4,7 +4,8 @@
 > Hiçbir anahtar, parola veya token bu depoya yazılmaz.
 
 - Son güncelleme: 2026-10-17
-- Son yayımlanan sürüm: **v1.0.4 (versionCode 5)**, CI run `39033698686`. **v1.0.5 (versionCode 6)** kaynak/katalog ve Room/backup v3 geliştirmesi hazırlanıyor; CI, imza, Release ve cihaz kabulü henüz doğrulanmadı. v1.0.4 tekrar geçmişi ile SAF/Drive yedek/geri yükleme ve fotoğraf okunabilirliği de cihaz kabulü bekliyor.
+- Son yayımlanan sürüm: **v1.0.5 (versionCode 6)**. CI run `39037429421`: 36 test geçti; Release derlemesi, imza doğrulaması ve sertifika fingerprint kontrolü başarılı. [Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.5); CI raporundaki APK SHA-256 `00f0b3b33f1efa81156043ef38a31640f57ce3ba34cf608505eb3164e0a8bedb`.
+- v1.0.5 güncelleme/migration ve yeni katalog akışı henüz fiziksel cihazda kabul edilmedi. v1.0.4 tekrar geçmişi, SAF/Drive yedek/geri yükleme ve fotoğraf okunabilirliği de cihaz testi bekliyor.
 
 ---
 
@@ -28,7 +29,7 @@ Kullanıcının telefonunda Android SDK, Gradle veya Termux kurması **gerekmez*
 
 - Tek Gradle modülü, Kotlin + Jetpack Compose.
 - Sürümler `gradle/libs.versions.toml` içinde sabitlenir; Gradle wrapper depoda tutulur.
-- minSdk 26, compileSdk/targetSdk 37; yayımlanmış v1.0.4 `versionCode=5`; geliştirilmekte olan v1.0.5 `versionCode=6`. v1.0.5 için CI derlemesi bekleniyor.
+- minSdk 26, compileSdk/targetSdk 37; yayımlanmış v1.0.5 `versionCode=6` (önceki v1.0.4: `versionCode=5`). v1.0.5 CI sonucu yukarıda kayıtlı.
 - Yapay zekâ ortamında Java/Android SDK ve Maven erişimi yoktur → derleme **yalnızca** Actions'ta olur.
 
 ## 3. İmzalama düzeni (kritik)

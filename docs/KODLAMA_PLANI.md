@@ -1,7 +1,7 @@
 # KODLAMA PLANI (Aşama 1 ve sonrası)
 
 > Bu belge **nasıl kodlayacağımızı** ve ölçülen sonuçları kaydeder: görev sırası, dosya yapısı,
-> sürüm sabitleme, imzalama kurulumu, derleme bütçesi, test stratejisi. v1.0.5 kaynak/neden kataloğu ve Room/ZIP v3 değişiklikleri hazırlanıyor; CI/Release ve cihaz kabulü bekleniyor.
+> sürüm sabitleme, imzalama kurulumu, derleme bütçesi, test stratejisi. v1.0.5 kaynak/neden kataloğu ve Room/ZIP v3 CI run `39037429421` ile doğrulandı ve yayımlandı; fiziksel cihaz kabulü bekleniyor.
 >
 > İlgili belgeler: [PROJECT_BRIEF.md](../PROJECT_BRIEF.md) (kararlar) · [ROADMAP.md](../ROADMAP.md)
 > (aşamalar) · [BUILDING.md](../BUILDING.md) (derleme/imzalama) · [docs/VERI_MODELI.md](VERI_MODELI.md)
@@ -253,13 +253,13 @@ com.keremtulu.questionnote/
 
 ### 5.2 Tamamlanan kod ve CI ölçütleri
 
-- Room v3 ve v2→v3 veri koruyan migration: `kaynak_konumu`, global kaynak/neden katalog tablosu, önceki soru alanları korunur. v1→v2→v3 ve doğrudan v2→v3 testleri eklendi; v1.0.5 CI sonucu bekleniyor.
+- Room v3 ve v2→v3 veri koruyan migration: `kaynak_konumu`, global kaynak/neden katalog tablosu, önceki soru alanları korunur. v1→v2→v3 ve doğrudan v2→v3 testleri CI run `39037429421` içinde geçti; schema 3 JSON üretildi.
 - Ders/konu yönetimi; soru CRUD, liste/filtre/ayrıntı; tekrar plan kuralları.
 - Soru girişinde ortak kaynak seçimi, soru konumu, hazır/özel nedenlerden tek seçim; soru notu UI'den kaldırıldı, eski DB/backup verisi korunuyor.
 - Kamera/galeri çoklu görselleri, EXIF yönü, JPEG uzun kenar ~3000 px/kalite 90, SHA-256, staging→kalıcı alan ve kontrollü bakım.
-- ZIP v3/SAF yedekleme: katalog ve locator içeren manifest/JSON/6 CSV/görsel payload'ları; v2 ZIP içe aktarımı; doğrulama sınırları, güvenlik kopyası ve journal/Room marker kurtarması. v1.0.5 CI sonucu bekleniyor.
-- Önceki yayımlanmış v1.0.4 CI run `39033698686`: 33 test, `assembleRelease`, sabit anahtarla imza ve fingerprint doğrulaması başarılı. v1.0.5 henüz Release değil.
-- Kullanıcı v1.0.3'teki Bugün/yan menü/tekrar kaydı cihaz adımlarını geçti bildirdi. v1.0.4 tekrar geçmişi UI'si, yeni v1.0.5 katalog akışı, SAF/Drive, temiz kurulum/başka cihaz ve fotoğraf okunabilirliği cihaz testi bekliyor.
+- ZIP v3/SAF yedekleme: katalog ve locator içeren manifest/JSON/6 CSV/görsel payload'ları; v2 ZIP içe aktarımı; doğrulama sınırları, güvenlik kopyası ve journal/Room marker kurtarması. CI run `39037429421` içindeki v3/v2 yedek testleri geçti.
+- v1.0.5 CI run `39037429421`: 36 test, `assembleRelease`, imza/apksigner doğrulaması ve sertifika fingerprint eşleşmesi başarılı; Release yayımlandı. CI raporu `docs/DERLEME_RAPORU.md`; CI raporundaki APK SHA-256 `00f0b3b33f1efa81156043ef38a31640f57ce3ba34cf608505eb3164e0a8bedb`.
+- Kullanıcı v1.0.3'teki Bugün/yan menü/tekrar kaydı cihaz adımlarını geçti bildirdi. v1.0.4 tekrar geçmişi UI'si, v1.0.5 güncelleme/migration ve katalog akışı, SAF/Drive, temiz kurulum/başka cihaz ve fotoğraf okunabilirliği cihaz testi bekliyor.
 
 ### 5.3 Dosya ↔ veritabanı tutarlılığı (yazma sırası)
 
@@ -282,7 +282,7 @@ yalnızca kullanıcı onayıyla ve raporla yapılır.
 
 ## 6. Aşama 3–6 — güncel durum
 
-**Aşama 3 (tam ZIP yedek):** `data/export/YerelYedeklemeHizmeti.kt` içinde; v1.0.5 biçim v3, kaynak/neden kataloğu ve locator'ı yedekler; önceki v2 biçimini içe alır. CI testi/raporu bekleniyor; SAF sağlayıcı/Drive ve başka cihazdaki kabul kullanıcı testini bekliyor.
+**Aşama 3 (tam ZIP yedek):** `data/export/YerelYedeklemeHizmeti.kt` içinde; v1.0.5 biçim v3, kaynak/neden kataloğu ve locator'ı yedekler; önceki v2 biçimini içe alır. CI run `39037429421` testleri geçti; SAF sağlayıcı/Drive ve başka cihazdaki kabul kullanıcı testini bekliyor.
 
 **Aşama 4 (tekrar arayüzü):** Bugün/gecikmiş ekran, yan menü ve tekrar sonucu kaydı v1.0.3'te; planlanan/gerçekleşen tarih, sonuç ve çözüm açma gösteren tekrar geçmişi v1.0.4'te uygulandı. v1.0.4 history UI cihaz testi ve elle tarih arayüzü açık.
 
@@ -350,6 +350,6 @@ edilecek" ayrımı yazılır. `docs/TEST_KONTROL_LISTESI.md` işaretlenir.
 ## 11. Bir sonraki oturum nasıl başlar?
 
 1. Bu belge + HANDOFF okunur; HANDOFF'taki "sıradaki somut adım" uygulanır.
-2. v1.0.5'te Room v3 / ZIP v3 ve global kaynak/neden kataloğu kodlandı; önce branch'e gönderip CI testleri, Release derlemesi/imzası ve fingerprint raporunu doğrula. Java/Gradle olmadığı için yerel Android testi yapılmış gibi sunma.
-3. APK yayımlandıktan sonra ancak o zaman mevcut uygulamanın üzerine kurma, katalogların dersler arası kullanımı, locator, özel neden, eski not koruması ve ZIP geri yükleme cihaz kabulini iste. v1.0.4 history UI ve SAF/Drive testleri de beklemede; v1.0.2 “3. tur” eşlemesini teyitsiz tut.
-3. Her görev sonunda HANDOFF güncellenir: yapılan, ölçülen, kalan, sürümler, son başarılı derleme.
+2. v1.0.5 CI ve Release tamamlandı; rapor `docs/DERLEME_RAPORU.md`, run `39037429421`. Yerel ortamda Java olmadığı için yerel Gradle testinin çalıştırılamadığını ayrıca belirt.
+3. Sıradaki iş kullanıcı cihaz kabulidir: APK'yı uygulamayı kaldırmadan güncelle, eski veriyi, katalog/locator ve ZIP v3 geri yüklemeyi dene. v1.0.4 history UI ve SAF/Drive testleri de beklemede; v1.0.2 “3. tur” eşlemesini teyitsiz tut.
+4. Her görev sonunda HANDOFF güncellenir: yapılan, ölçülen, kalan, sürümler, son başarılı derleme.

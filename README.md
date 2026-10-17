@@ -25,20 +25,19 @@ cevaplamak ve çözümü öğrenme sürecinden ayrı saklamaktır.
 
 ## Durum
 
-**v1.0.5 geliştirmesi sürüyor (versionCode 6); CI/Release ve cihaz kabulü henüz yok.** Soru ekleme
-akışında dersler arası ortak kaynak listesi, her soruya özel sayfa/test/soru konumu, hazır ve özel tek
-yanlış nedeni eklendi. Soru notu UI alanı kaldırılırken eski not verisi korunuyor. Room v3 migration'ı
-veri korur; yeni tam ZIP yedeği v3'tür ve eski v2 yedeklerini de içe alır. Ürün lise odağındadır;
-TYT/AYT ayrımı yoktur.
+**v1.0.5 (versionCode 6) yayımlandı.** Ortak kaynak kataloğu, soru başına sayfa/test/soru konumu,
+hazır/özel tek yanlış nedeni ve soru notu UI'sinin kaldırılması eklendi. Eski not verisi korunur.
+Room v3 migration'ı veriyi korur; yeni tam ZIP yedeği v3'tür ve v2 yedeklerini içe alır. Ürün lise
+odağındadır; TYT/AYT ayrımı yoktur.
 
-Önceki yayımlanmış sürüm **v1.0.4 (versionCode 5)**: CI run `39033698686` 33 testi, Release
-build/imzayı ve beklenen sertifika parmak izini geçti. [v1.0.4 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.4)
-APK SHA-256: `bf6978a506a472834d7c7a952ac59818d69b0d9c205772d4c02ce2767cc27468`.
+CI run `39037429421` **36 testi** geçti; Release derlemesi, imza doğrulaması ve beklenen sertifika
+parmak izi eşleşti. [v1.0.5 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.5)
+CI raporundaki APK SHA-256: `00f0b3b33f1efa81156043ef38a31640f57ce3ba34cf608505eb3164e0a8bedb`.
 
 **Cihaz kabulü ayrıdır:** v1.0.3 ana akış adımlarını kullanıcı geçti bildirdi. v1.0.4 tekrar geçmişi,
-v1.0.5 kaynak/katalog akışı ve SAF/Drive yedek-geri yükleme ile fotoğraf okunabilirliği cihazda
-henüz kabul edilmedi. v1.0.2 “3. turu denemedim” ifadesinin checklist eşlemesi hâlâ teyitsiz; ayrıntı
-[TEST_KONTROL_LISTESI.md](docs/TEST_KONTROL_LISTESI.md) içinde.
+v1.0.5 güncelleme/migration, katalog akışı ve v3 yedek/geri yükleme henüz cihazda kabul edilmedi.
+SAF/Drive ve fotoğraf okunabilirliği de bekliyor. v1.0.2 “3. turu denemedim” ifadesinin checklist
+eşlemesi hâlâ teyitsiz; ayrıntı [TEST_KONTROL_LISTESI.md](docs/TEST_KONTROL_LISTESI.md) içinde.
 
 ---
 
@@ -63,10 +62,10 @@ henüz kabul edilmedi. v1.0.2 “3. turu denemedim” ifadesinin checklist eşle
 ## Kullanım / APK erişimi
 
 İmzalı APK'lar GitHub [Releases](https://github.com/keremtulu44/Question-note/releases) bölümünde.
-[Son yayımlanan v1.0.4 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.0.4/yanlis-defteri-1.0.4.apk).
-v1.0.5 yeni sürüm olarak hazırlanıyor; CI ve Release tamamlanmadan yükleme adımı istemiyorum. Yeni APK
-hazır olduğunda mevcut uygulamayı **kaldırmadan** üzerine kurup bu belgede listelenen akışları dene.
-İndirme/kurulum ayrıntıları [BUILDING.md](BUILDING.md) içinde.
+[v1.0.5 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.0.5/yanlis-defteri-1.0.5.apk).
+Mevcut uygulamayı **kaldırmadan** üzerine kur; önce güncelleme sonrası eski kayıtların korunduğunu,
+sonra yeni kaynak/neden akışını ve v3 yedek/geri yüklemeyi dene. İndirme/kurulum ayrıntıları
+[BUILDING.md](BUILDING.md) içinde.
 
 ---
 

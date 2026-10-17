@@ -4,7 +4,7 @@ Bu belge projenin **karar kaydıdır**. Yeni bir geliştirme oturumu (insan veya
 belgeyi, sonra [HANDOFF.md](HANDOFF.md) dosyasını okur.
 
 - Son güncelleme: 2026-10-17
-- Durum: v1.0.4 (versionCode 5) yayımlandı; v1.0.5 (versionCode 6) geliştirmesi CI/Release bekliyor. Onaylanan yeni kapsam: dersler arası ortak kaynak kataloğu, soru başına isteğe bağlı sayfa/test/soru konumu, hazır nedenlerden tek ana yanlış nedeni + özel neden ekleme ve soru notu UI'sinin kaldırılması. Eski not/kaynak/neden verisi korunacak. Her şema değişikliği için veri koruyan migration ve test şart; migration fallback'i yasak. Kullanıcı cihaz kabulü CI'dan ayrı tutulur.
+- Durum: v1.0.5 (versionCode 6) yayımlandı. CI run `39037429421` 36 testi, Release derlemesini/imzayı ve sertifika fingerprint doğrulamasını geçti. Onaylanan kapsam dersler arası ortak kaynak kataloğu, soru başına isteğe bağlı sayfa/test/soru konumu, hazır nedenlerden tek ana yanlış nedeni + özel neden ekleme ve soru notu UI'sinin kaldırılmasıdır. Eski not/kaynak/neden verisi korunur; Room v2→v3 migration'ı veri korur. Cihaz kabulü CI'dan ayrı tutulur ve henüz kullanıcı tarafından bildirilmedi.
 
 ---
 

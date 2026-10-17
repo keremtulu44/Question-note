@@ -11,7 +11,7 @@
 > ZIP yol güvenliği) ve **Robolectric** (şema/migration testleri). Emülatör yalnızca gerçekten
 > gerekirse kullanılır; asıl kabul testleri gerçek cihazda yapılır.
 
-Son güncelleme: 2026-10-17. Son yayımlanan sürüm v1.0.4'tür (CI run `39033698686`, 33 test, Release/imza başarılı). v1.0.5 kaynak/katalog, Room v3 ve ZIP v3 kodu ile test tanımları eklendi; testler henüz çalıştırılmadı, CI sonucu ve Release yok. Kullanıcı v1.0.3 ana akış cihaz adımlarını geçti bildirdi. v1.0.4 tekrar geçmişi ve v1.0.5 katalog akışı cihazda test edilmedi. SAF/Drive yedek-geri yükleme cihaz kabulü hâlâ bekliyor; “3. turu denemedim” ifadesinin önceki checklist eşlemesi teyitsizdir.
+Son güncelleme: 2026-10-17. v1.0.5 (versionCode 6) yayımlandı; CI run `39037429421` 36 testi, Release derlemesini, imzayı ve sertifika fingerprint'ini doğruladı. v1.0.5 migration, katalog ve ZIP v3 otomatik testleri geçti; cihaz kabulü ayrı ve henüz kullanıcı tarafından bildirilmedi. v1.0.4 tekrar geçmişi, SAF/Drive yedek-geri yükleme ve fotoğraf okunabilirliği de cihazda bekliyor. “3. turu denemedim” ifadesinin checklist eşlemesi teyitsizdir.
 
 ---
 
@@ -34,7 +34,7 @@ Son güncelleme: 2026-10-17. Son yayımlanan sürüm v1.0.4'tür (CI run `390336
 | 1.13 | VersionCode 3 → 4; v1.0.3 Release, APK imzası ve fingerprint CI'da doğrulandı | YZ (CI run `39030667492`) | [x] |
 | 1.14 | v1.0.4 mevcut uygulamanın üzerine yükleniyor; veri ve tekrar geçmişi korunuyor/görünüyor | KULLANICI | [ ] |
 | 1.15 | VersionCode 4 → 5; v1.0.4 Release, APK imzası ve fingerprint CI'da doğrulandı | YZ (CI run `39033698686`) | [x] |
-| 1.16 | VersionCode 5 → 6; v1.0.5 Release ve imza doğrulaması | YZ (CI) | [ ] |
+| 1.16 | VersionCode 5 → 6; v1.0.5 Release ve imza doğrulaması | YZ (CI run `39037429421`) | [x] |
 | 1.17 | v1.0.5 mevcut uygulamanın üstüne kaldırmadan kurulur; eski soru/not/veri kaybolmaz | KULLANICI | [ ] |
 
 ## Aşama 2 — Yerel arşiv
@@ -59,7 +59,7 @@ Son güncelleme: 2026-10-17. Son yayımlanan sürüm v1.0.4'tür (CI run `390336
 | 2.16 | Kullanılmayan dosya temizliği onaysız/yıkıcı biçimde çalışmıyor, ne sildiğini bildiriyor | YZ + KULLANICI | [ ] |
 | 2.17 | Eksik görsel (dosya yok) durumunda kayıt kırılmıyor, anlaşılır mesaj gösteriliyor | YZ + KULLANICI | [ ] |
 | 2.18 | Sıkıştırma testi: 30–50 gerçek soru fotoğrafında küçük formüller/kök içi ifadeler okunuyor | KULLANICI (v1.0.2 bildirimi 2026-10-17) | [x] |
-| 2.19 | Room v3 şeması, v1 fixture'ı v1→v2→v3 zinciriyle ve v2 fixture'ı v2→v3 ile veri kaybetmeden taşınıyor | YZ (Robolectric) | [ ] |
+| 2.19 | Room v3 şeması, v1 fixture'ı v1→v2→v3 zinciriyle ve v2 fixture'ı v2→v3 ile veri kaybetmeden taşınıyor | YZ (CI run `39037429421`, Robolectric) | [x] |
 | 2.20 | Yeni veritabanında yedi ders, sabit sırada ve arşivsiz oluşturuluyor | YZ (Robolectric) | [x] |
 | 2.21 | Soru/ders/konu yabancı anahtarları ve görsel/geçmiş CASCADE kuralları açık | YZ (Robolectric) | [x] |
 | 2.22 | Repository yalnızca etkin dersleri, sabit sırada ve doğru soru sayılarıyla yayımlıyor | YZ (Robolectric) | [x] |
@@ -77,17 +77,17 @@ Son güncelleme: 2026-10-17. Son yayımlanan sürüm v1.0.4'tür (CI run `390336
 | 2.34 | Tekrar sonucu kaydediliyor; uygulama Bugün'e dönüyor ve tamamlanan soru bugünkü listeden çıkıyor | KULLANICI (2026-10-17, v1.0.3) | [x] |
 | 2.35 | Tekrar geçmişi boş durumu, newest-first sırası ve planlanan/gerçekleşen gün/sonuç/çözüm alanları repository'den doğru geliyor | YZ (CI run `39033698686`) | [x] |
 | 2.36 | v1.0.4 soru ayrıntısında tekrar geçmişi cihazda okunaklı ve güncel gösteriliyor | KULLANICI (v1.0.4) | [ ] |
-| 2.37 | Kaynak kataloğu derslerden bağımsız, yeni kaynak bir derste eklenince diğer derste listeleniyor | YZ (CI) | [ ] |
-| 2.38 | Her soru için kaynak seçimi ve isteğe bağlı sayfa/test/soru konumu kaydedilip tekrar açılıyor | YZ (CI) | [ ] |
-| 2.39 | Hazır/özel yanlış nedeni tek seçim; özel neden katalogda kalıcı ve global | YZ (CI) | [ ] |
-| 2.40 | Soru notu form/detay UI'sinde yok; eski not Room ve ZIP yedeğinde korunuyor, düzenleme sırasında silinmiyor | YZ (kod incelemesi + CI) | [ ] |
+| 2.37 | Kaynak kataloğu derslerden bağımsız, yeni kaynak bir derste eklenince diğer derste listeleniyor | YZ (CI run `39037429421`) | [x] |
+| 2.38 | Her soru için kaynak seçimi ve isteğe bağlı sayfa/test/soru konumu kaydedilip tekrar açılıyor | YZ (CI run `39037429421`) | [x] |
+| 2.39 | Hazır/özel yanlış nedeni tek seçim; özel neden katalogda kalıcı ve global | YZ (CI run `39037429421`) | [x] |
+| 2.40 | Soru notu form/detay UI'sinde yok; eski not Room ve ZIP yedeğinde korunuyor, düzenleme sırasında silinmiyor | YZ (kod incelemesi + CI run `39037429421`) | [x] |
 | 2.41 | v1.0.5 kaynak/katalog akışı ve locator gerçek cihazda anlaşılır, seçilebilir ve kalıcı | KULLANICI | [ ] |
 
 ## Aşama 3 — Yedek ve geri yükleme
 
 | # | Test | Sorumlu | Durum |
 |---|---|---|---|
-| 3.1 | ZIP v3: manifest/6 CSV/JSON, katalog sayısı ve tüm envanter SHA-256/uzunluk doğrulaması | YZ (CI) | [ ] |
+| 3.1 | ZIP v3: manifest/6 CSV/JSON, katalog sayısı ve tüm envanter SHA-256/uzunluk doğrulaması | YZ (CI run `39037429421`) | [x] |
 | 3.2 | Yedek cihazdaki bir klasöre kaydediliyor | KULLANICI | [ ] |
 | 3.3 | Yedek Drive'a kaydediliyor (dosya seçici akışı) | KULLANICI | [ ] |
 | 3.4 | Temiz kurulumda yedekten geri yükleme çalışıyor | KULLANICI | [ ] |
@@ -105,8 +105,8 @@ Son güncelleme: 2026-10-17. Son yayımlanan sürüm v1.0.4'tür (CI run `390336
 | 3.16 | Anlamsız/boş yedek seçilince kullanıcı onayı olmadan hiçbir şey değişmiyor | YZ + KULLANICI | [ ] |
 | 3.17 | Son yedek bilgisi (tarih, boyut, dosya adı) doğru gösteriliyor | KULLANICI | [ ] |
 | 3.18 | Gerçek cihazda geri yükleme sırasında uygulama kapatılır; sonraki açılışın kurtarması doğrulanır | KULLANICI | [ ] |
-| 3.19 | ZIP v3 tam geri yüklemesi global kaynak/neden kataloğunu ve soruya özel konumu saklar; eski kataloğu tam değiştirir | YZ (CI) | [ ] |
-| 3.20 | Format v2 ZIP'i içe alınır; eski kaynak/özel neden kataloğa eklenir, not korunur, olmayan locator null kalır | YZ (CI) | [ ] |
+| 3.19 | ZIP v3 tam geri yüklemesi global kaynak/neden kataloğunu ve soruya özel konumu saklar; eski kataloğu tam değiştirir | YZ (CI run `39037429421`) | [x] |
+| 3.20 | Format v2 ZIP'i içe alınır; eski kaynak/özel neden kataloğa eklenir, not korunur, olmayan locator null kalır | YZ (CI run `39037429421`) | [x] |
 | 3.21 | Temiz cihazda v3 yedeği geri yüklenince kaynak ve neden seçenekleri sonraki sorularda yeniden kullanılabilir | KULLANICI | [ ] |
 
 ## Aşama 4 — Tekrar sistemi

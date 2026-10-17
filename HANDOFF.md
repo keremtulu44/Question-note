@@ -3,21 +3,22 @@
 > Yeni bir geliştirme oturumu önce [PROJECT_BRIEF.md](PROJECT_BRIEF.md) ve bu belgeyi okur.
 
 - Son güncelleme: 2026-10-17
-- Aktif iş: **v1.0.5 özellik kodu ve test tanımları eklendi; yerel/CI çalıştırması ve Release bekliyor.** Onaylanan kapsam global kaynak kataloğu, soruya özel locator, hazır/özel tek yanlış nedeni ve soru notu UI'sinin kaldırılmasıdır; eski not verisi korunur.
-- Son başarılı CI: run `39033698686`, kaynak commit `3d3cfd5d103c1a3f3f578e4e197722d12ab347e2` — 33 test geçti; Release derlemesi, imza ve beklenen sertifika parmak izi doğrulandı. v1.0.4 Release yayımlandı.
-- APK: [v1.0.4 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.4), [doğrudan indir](https://github.com/keremtulu44/Question-note/releases/download/v1.0.4/yanlis-defteri-1.0.4.apk), CI-reported SHA-256 `bf6978a506a472834d7c7a952ac59818d69b0d9c205772d4c02ce2767cc27468`.
-- Şu an yeni APK kurma adımı yok: v1.0.5 henüz CI'dan geçmedi ve yayımlanmadı. Hazır olduğunda mevcut uygulamanın üzerine kaldırmadan kurulum ve katalog/yedek kabulü istenecek.
+- Aktif iş: **v1.0.5 yayımlandı; fiziksel cihaz kabulü bekliyor.** Onaylanan kapsam global kaynak kataloğu, soruya özel locator, hazır/özel tek yanlış nedeni ve soru notu UI'sinin kaldırılmasıdır; eski not verisi korunur.
+- Son başarılı CI: run `39037429421`, kaynak commit `7383897c6a1303df6329dbb55bacde16f98ed6f1` — 36 test geçti; Release derlemesi, imza doğrulaması ve beklenen sertifika fingerprint eşleşti. Room v3 şeması CI'da üretildi.
+- APK: [v1.0.5 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.5), [doğrudan indir](https://github.com/keremtulu44/Question-note/releases/download/v1.0.5/yanlis-defteri-1.0.5.apk), CI-reported SHA-256 `00f0b3b33f1efa81156043ef38a31640f57ce3ba34cf608505eb3164e0a8bedb`.
+- Somut kullanıcı adımı: v1.0.5'i Samsung Galaxy S24 FE'ye mevcut uygulamayı **kaldırmadan** kur; eski kayıtları, ortak kaynak/neden seçimini, locator'ı ve ZIP v3 yedek/geri yüklemeyi dene. Henüz cihaz kabulü bildirilmedi.
 - v1.0.3 için kullanıcı cihaz adımlarının tümünü geçti bildirdi (2026-10-17). Önceki v1.0.2 “3. tur” ifadesinin checklist bölüm 3 (yedek/geri yükleme) anlamına geldiği teyit edilmedi; ayrıntı `docs/TEST_KONTROL_LISTESI.md`.
 - Tam ZIP biçimi: `docs/YEDEK_FORMATI.md`; test ayrımı ve bekleyenler: `docs/TEST_KONTROL_LISTESI.md`; CI kanıtı: `docs/DERLEME_RAPORU.md`.
 
 ---
 
-## Güncel teslim — v1.0.5 geliştirmesi (Aşamalar 2/3/4)
+## Güncel teslim — v1.0.5 (Aşamalar 2/3/4)
 
-- v1.0.4 son yayımlanmış sürüm olarak kalıyor: CI run `39033698686` 33 testi, Release derlemesini, imza ve sertifika fingerprint kontrolünü geçti. Kanıt `docs/DERLEME_RAPORU.md` içinde.
-- v1.0.5 kaynak değişiklikleri: Room şema v3; v2→v3 veri koruyan migration; global kaynak/neden tablosu; `kaynak_konumu`; formda tek yanlış nedeni + özel seçenek ekleme; soru notu UI'si kaldırıldı ama eski değer korunuyor.
-- ZIP formatı v3: kaynak kataloğu ve locator JSON/CSV yedeğine girer; önceki v2 ZIP içe aktarımları desteklenir.
-- Yeni testler eklenmiş olsa da v1.0.5 CI, Release/imza ve fiziksel cihaz kabulü henüz yapılmadı. v1.0.4 history UI, SAF/Drive geri yükleme ve fotoğraf okunabilirliği de cihaz kabulü bekliyor.
+- v1.0.5 CI run `39037429421`: 36 test, `assembleRelease`, imza/apksigner doğrulaması ve beklenen sertifika fingerprint'i geçti; Release yayımlandı. Kanıt `docs/DERLEME_RAPORU.md` içinde.
+- Room v3 şeması `app/schemas/com.keremtulu.questionnote.data.local.YanlisDefteriDatabase/3.json` olarak CI tarafından üretildi. v2→v3 migration eski soru notu/kaynak/neden verisini korur ve katalog seçeneklerini doldurur.
+- Global kaynak/neden kataloğu, soruya özel `kaynak_konumu`, tek neden seçimi ve yeni özel seçenek ekleme uygulandı; soru notu UI'si kaldırıldı, eski not repository düzenlemesinde korunur.
+- ZIP formatı v3 katalog ve locator bilgisini JSON/CSV içinde saklar. Otomatik testler v2 ZIP içe aktarımını ve eski source/reason değerlerinden katalog kurulumunu doğruladı.
+- Fiziksel cihaz kabulü henüz bildirilmedi: v1.0.5 üzerine güncelleme/migration, yeni katalog/locator, v3 backup/restore bekliyor. v1.0.4 tekrar geçmişi UI'si, SAF/Drive ve fotoğraf okunabilirliği de bekliyor.
 
 ## Önceki aşama geçmişi (tarihsel)
 
@@ -199,16 +200,12 @@ reddedildi.
 
 ## Sıradaki somut adım
 
-1. `git diff --check`, kaynak/XML kontrollerini tamamla; yerel ortamda Java/Gradle bulunmadığından Android testi başarı diye sunma.
-2. v1.0.5 değişikliklerini `arena/0ec2226d-question-note` dalına gönder; CI birim testleri, Room şeması, Release derleme/imza ve fingerprint sonucunu `docs/DERLEME_RAPORU.md` üzerinden doğrula.
-3. CI başarısızsa düzeltip yeniden çalıştır; başarılı olduğunda CI'ın `app/schemas/.../3.json` dosyasını kaydettiğini ve v1.0.5 Release varlığını doğrula.
-4. Ancak APK yayımlandıktan sonra kullanıcıdan mevcut uygulamayı kaldırmadan güncellemesini; yeni kaynağı bir derste ekleyip başka derste seçmesini, locator ve özel neden eklemesini, eski notun silinmediğini ve v3 yedek/geri yüklemeyi kontrol etmesini iste. v2 yedek uyumluluğu ayrıca otomatik testle doğrulanır.
+1. `docs/DERLEME_RAPORU.md`, v1.0.5 Release ve Room schema 3 CI çıktısı doğrulandı (run `39037429421`); yerel Gradle testi Java bulunmadığı için çalışmadı.
+2. Sıradaki somut adım kullanıcı cihaz kabulü: APK'yı mevcut uygulamanın üzerine kaldırmadan kur; migration/veri, dersler arası katalog, locator, özel neden ve ZIP v3 geri yükleme kontrol edilsin.
+3. Kullanıcı sonucu gelince checklist'i güncelle; v1.0.4 tekrar geçmişi, SAF/Drive/başka cihaz ve fotoğraf okunabilirliği ayrı bekleyen testlerdir.
 
 Detaylı kabul ölçütleri `ROADMAP.md` ve `docs/TEST_KONTROL_LISTESI.md` içindedir. `fallbackToDestructiveMigration` yasaktır; her Room şema değişikliği veri koruyan migration + otomatik test gerektirir.
 
 ## Kullanıcının yapacağı iş
 
-Şimdilik yeni APK kurman gerekmiyor. Aşama 2'de görsel kaliteyi gerçek içerikle doğrulamak için
-30–50 örnek soru fotoğrafını (özellikle küçük formül, köklü ifade ve grafik etiketleri içerenleri)
-telefonunda hazır tut; bu görselleri sohbete yüklemen gerekmiyor. Yeni test APK'sı hazır olduğunda
-fotoğraflarla kayıt/listeleme akışını denemeni isteyeceğim.
+v1.0.5 APK'yı [GitHub Release'ten indir](https://github.com/keremtulu44/Question-note/releases/download/v1.0.5/yanlis-defteri-1.0.5.apk) ve mevcut uygulamayı **kaldırmadan** üzerine kur. Önce eski ders/soru/not verilerinin korunduğunu; sonra yeni kaynağı bir derste ekleyip başka derste seçmeyi, locator ve özel neden eklemeyi dene. Son olarak ZIP v3 yedeği oluşturup geri yükle. Gerçek cihaz sonucu bildirilmeden checklist'te cihaz adımlarını geçme işaretleme.

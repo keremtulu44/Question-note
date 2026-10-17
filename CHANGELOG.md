@@ -2,13 +2,14 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
-## [1.0.5] — 2026-10-17 (geliştirme; CI/cihaz kabulü bekliyor)
+## [1.0.5] — 2026-10-17
 
 - Kaynaklar tüm derslerde ortak katalogdan seçilir; kaynak bir kez `+ Kaynak` ile eklenebilir ve her soruya isteğe bağlı sayfa/test/soru konumu yazılır.
 - Yanlış nedeni hazır listeden tek seçimdir; `+ Yeni neden` ile özel seçenek eklenebilir.
 - Soru notu giriş/gösterim alanı kaldırıldı. Eski not değerleri veritabanında ve ZIP yedeğinde korunur; soru düzenleme bunları silmez.
 - Room v3 için v2→v3 veri koruyan migration eklendi. ZIP biçimi v3'e yükseltildi; eski v2 ZIP yedekleri de içe alınır ve eski kaynak/neden metinlerinden katalog oluşturulur.
-- Birim testleri, Release derlemesi/imza ve fiziksel cihaz kabulü henüz raporlanmadı.
+- CI run `39037429421`: 36 test, Release derlemesi, imza/apksigner ve sertifika parmak izi doğrulaması geçti. [v1.0.5 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.5).
+- CI raporundaki APK SHA-256: `00f0b3b33f1efa81156043ef38a31640f57ce3ba34cf608505eb3164e0a8bedb`. Fiziksel cihaz kabulü ayrıca bekliyor.
 
 ## [1.0.4] — 2026-10-17
 

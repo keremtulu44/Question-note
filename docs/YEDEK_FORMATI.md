@@ -96,9 +96,9 @@ gösterir.
 Robolectric/JVM testleri ZIP üretimini, her envanter SHA/uzunluğunu, katalog ve kaynak konumu
 dahil tam geri yüklemeyi, eski v2 yedeği geri yüklemeyi, dosya adı yeniden üretimini, mevcut verinin
 güvenlik kopyasını, checksum bozulmasını, path-traversal reddini, kesinti kurtarmasında
-commit/rollback ayrımını, Room v1→v2→v3 migration zincirini ve mevcut soru verisinin korunmasını kapsar. Bunlar
-CI'da gerçek çalıştırılmadan geçilmiş sayılmaz. CI testi fiziksel cihaz/SAF sağlayıcı davranışını
-kanıtlamaz.
+commit/rollback ayrımını, Room v1→v2→v3 migration zincirini ve mevcut soru verisinin korunmasını kapsar.
+CI run `39037429421` toplam 36 testi başarıyla çalıştırdı. CI testi fiziksel cihaz/SAF sağlayıcı
+davranışını kanıtlamaz.
 
 Kullanıcı kabulü ayrıca gerekir: cihazda seçilen Downloads/Drive hedefi, uygulama kapanıp açılması,
 yedek seçme-önizleme-onay/iptal akışları ve başka/temiz kurulumda geri yükleme kontrol edilmelidir.

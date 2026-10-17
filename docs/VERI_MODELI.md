@@ -2,7 +2,8 @@
 
 > Room v3; soru kaynak konumu, global kaynak/yanlış nedeni kataloğu ve kesintiye dayanıklı geri
 > yükleme işaretini içerir. v1→v2→v3 zinciri mevcut soru/not verisini korur; v2→v3 kaynakları ve özel
-> nedenleri kataloğa taşır. Yeni migration CI doğrulaması bekliyor. Son güncelleme: 2026-10-17.
+> nedenleri kataloğa taşır. CI run `39037429421` migration testlerini geçti ve v3 schema JSON üretti.
+> Son güncelleme: 2026-10-17.
 
 Veritabanı: **Room / SQLite**. Yerel veri tek doğruluk kaynağıdır.
 
@@ -216,5 +217,5 @@ Veritabanı işlemi ile dosya sistemi işlemi tek atomik işlem değildir. Bu y�
   güncelleme çözümü değildir.
 - Şema JSON'ları sürüm kontrolünde saklanır (Room `exportSchema`).
 - **Her migration için otomatik test yazılır**; şema ve veri koruması test edilir. `MIGRATION_1_2` yalnızca `geri_yukleme_isaretleri` tablosunu ekler. `MIGRATION_2_3`, `kaynak_konumu` kolonunu ve global katalog tablosunu ekler; mevcut soru notu/kaynak/neden değerleri korunur, kaynak ve özel nedenler yeniden kullanılabilir kataloğa alınır.
-- Room v3 şeması `app/schemas/com.keremtulu.questionnote.data.local.YanlisDefteriDatabase/3.json` dosyasına CI tarafından aktarılır. v1→v2→v3 zinciri ve doğrudan v2→v3 veri koruması otomatik test edilir; CI henüz bekleniyor.
+- Room v3 şeması `app/schemas/com.keremtulu.questionnote.data.local.YanlisDefteriDatabase/3.json` dosyasına CI tarafından aktarıldı. v1→v2→v3 zinciri ve doğrudan v2→v3 veri koruması CI run `39037429421` içinde geçti.
 - Testler JVM/Robolectric üzerinde çalışır; CI sonucu fiziksel cihaz güncelleme kabulü değildir.
