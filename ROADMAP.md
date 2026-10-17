@@ -20,7 +20,7 @@ Durum işaretleri: `[ ]` yapılmadı · `[~]` kod mevcut; bu sürümün CI/Relea
 
 ## Aşama 2 — Yerel soru arşivi [~]
 
-> v1.0.8 CI run `39044777998` (42 test) geçti ve Release yayımlandı. Filtreli çalışma akışı repository testlerinden geçti; `+ Konu`, v1.0.6 formu, kamera/galeri ve katalog/migration akışlarının fiziksel cihaz kabulü ile fotoğraf okunabilirliği hâlâ kullanıcı testini bekliyor. Dal üzerindeki yayımlanmamış düzeltmeler CI/cihaz doğrulaması bekliyor.
+> v1.0.8 CI run `39044777998` (42 test) ve v1.0.9 CI run `39048703584` (44 test) geçti; Release yayımlandı. Filtreli çalışma akışı repository testlerinden geçti; `+ Konu`, v1.0.6 formu, kamera/galeri ve katalog/migration akışlarının fiziksel cihaz kabulü ile fotoğraf okunabilirliği hâlâ kullanıcı testini bekliyor. v1.0.9 düzeltmeleri CI'da doğrulandı, cihaz kabulü bekliyor.
 
 - [x] Room şema v3 JSON üretildi; v1→v2→v3 ve doğrudan v2→v3 veri koruyan migration testleri CI run `39037429421` içinde geçti. Yıkıcı migration fallback'i yok.
 - [x] Yedi lise dersi; kullanıcı arayüzünde ders listesi sabit, ders yönetimi/arsiv akışı ana ekrandan çıkarıldı.
@@ -57,7 +57,7 @@ Durum işaretleri: `[ ]` yapılmadı · `[~]` kod mevcut; bu sürümün CI/Relea
 
 ## Aşama 4 — Tekrar deneyimi ve günlük akış [~]
 
-> Bugün/menü/sonuç akışı v1.0.3'te yayımlandı ve kullanıcı tarafından cihazda geçti bildirildi. Tekrar geçmişi v1.0.4, katalog/ZIP özellikleri v1.0.5, form yenilemesi v1.0.6, per-course `+ Konu` v1.0.7 ve filtreli çalışma v1.0.8 CI'da doğrulandı; v1.0.4 history UI ve v1.0.5–v1.0.8 cihaz kabulü bekliyor.
+> Bugün/menü/sonuç akışı v1.0.3'te yayımlandı ve kullanıcı tarafından cihazda geçti bildirildi. Tekrar geçmişi v1.0.4, katalog/ZIP özellikleri v1.0.5, form yenilemesi v1.0.6, per-course `+ Konu` v1.0.7, filtreli çalışma v1.0.8 ve düzeltmeler v1.0.9 CI'da doğrulandı; v1.0.4 history UI ve v1.0.5–v1.0.9 cihaz kabulü bekliyor.
 
 - [x] Tekrar aralığı kuralı ve repository seviyesinde plan/tekrar davranışları CI'da test edildi.
 - [x] Bugün/gecikmiş soruları dersler arası listeleyen ana ekran, belirgin “Soru ekle” eylemi ve ikincil alanlar için yan menü.
@@ -65,7 +65,7 @@ Durum işaretleri: `[ ]` yapılmadı · `[~]` kod mevcut; bu sürümün CI/Relea
 - [x] v1.0.3'te mevcut uygulamayı koruyarak güncelleme, Bugün/menü ve tekrar kaydı adımlarının cihazda geçtiği kullanıcı tarafından bildirildi.
 - [x] Tekrar geçmişi: soru ayrıntısında planlanan/gerçekleşen gün, sonuç, çözüm açma ve aralık; CI run `39033698686` 33 testle geçti.
 - [~] v1.0.8 filtreli çalışma: konu/kaynak/ana neden filtreleri, en uzun süredir çalışılmayandan sıralama ve sıralı oturum; CI run `39044777998` 42 testle geçti, cihaz kabulü bekliyor.
-- [~] v1.0.9 düzeltmeleri: döndürmede durum koruma, oturumdan çıkış onayı, sayı alanı, görsel belleği, arşivli konu çakışması, yedek yazımı ve CSV formül nötrleştirmesi; CI/cihaz doğrulaması bekliyor.
+- [~] v1.0.9 düzeltmeleri: döndürmede durum koruma, oturumdan çıkış onayı, sayı alanı, görsel belleği, arşivli konu çakışması, yedek yazımı ve CSV formül nötrleştirmesi; CI run `39048703584` 44 testle geçti, cihaz kabulü bekliyor.
 - [ ] v1.0.4'te tekrar geçmişinin gerçek cihazda okunaklı/güncel gösterildiğinin kabulü.
 - [ ] Elle tarih atama ve kullanıcıya görünür plan akışları.
 - [ ] Saat dilimi ve uzun dönemli gerçek kullanım kabul testleri.

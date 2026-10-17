@@ -11,7 +11,7 @@
 > ZIP yol güvenliği) ve **Robolectric** (şema/migration testleri). Emülatör yalnızca gerçekten
 > gerekirse kullanılır; asıl kabul testleri gerçek cihazda yapılır.
 
-Son güncelleme: 2026-10-17. v1.0.8 (versionCode 9) yayımlandı; CI run `39044777998` 42 testi, Release derlemesini, imzayı ve sertifika fingerprint'ini doğruladı. Filtreli çalışma ile v1.0.5–v1.0.8 özelliklerinin cihaz kabulü ayrı ve henüz kullanıcı tarafından bildirilmedi. v1.0.4 tekrar geçmişi, SAF/Drive yedek-geri yükleme ve fotoğraf okunabilirliği de cihazda bekliyor. “3. turu denemedim” ifadesinin checklist eşlemesi teyitsizdir. Dal üzerindeki yayımlanmamış düzeltmeler için CI/cihaz doğrulaması yapılmadı; ilgili satırlar aşağıda ayrı bölümdedir.
+Son güncelleme: 2026-10-17. v1.0.9 (versionCode 10) yayımlandı; CI run `39048703584` 44 testi, Release derlemesini, imzayı ve sertifika fingerprint'ini doğruladı. Filtreli çalışma ile v1.0.5–v1.0.8 özelliklerinin cihaz kabulü ayrı ve henüz kullanıcı tarafından bildirilmedi. v1.0.4 tekrar geçmişi, SAF/Drive yedek-geri yükleme ve fotoğraf okunabilirliği de cihazda bekliyor. “3. turu denemedim” ifadesinin checklist eşlemesi teyitsizdir. v1.0.9 düzeltmeleri CI'da doğrulandı; cihaz kabulü aşağıdaki ayrı bölümde bekliyor.
 
 ---
 
@@ -42,6 +42,8 @@ Son güncelleme: 2026-10-17. v1.0.8 (versionCode 9) yayımlandı; CI run `390447
 | 1.21 | v1.0.7 mevcut uygulamanın üstüne kaldırmadan kurulur; önceki veriler korunur | KULLANICI | [ ] |
 | 1.22 | VersionCode 8 → 9; v1.0.8 Release, APK imzası ve fingerprint CI'da doğrulandı | YZ (CI run `39044777998`) | [x] |
 | 1.23 | v1.0.8 mevcut uygulamanın üstüne kaldırmadan kurulur; önceki veriler korunur | KULLANICI | [ ] |
+| 1.24 | VersionCode 9 → 10; v1.0.9 Release, APK imzası ve fingerprint CI'da doğrulandı | YZ (CI run `39048703584`) | [x] |
+| 1.25 | v1.0.9 mevcut uygulamanın üstüne kaldırmadan kurulur; önceki veriler korunur | KULLANICI | [ ] |
 
 ## Aşama 2 — Yerel arşiv
 
@@ -154,9 +156,9 @@ Son güncelleme: 2026-10-17. v1.0.8 (versionCode 9) yayımlandı; CI run `390447
 | 5.8 | Sistem çubukları ve ekran boşlukları düzgün (çentik, gezinme çubuğu) | KULLANICI | [ ] |
 | 5.9 | Açık/koyu tema okunaklı | KULLANICI | [ ] |
 
-## Yayımlanmamış düzeltmeler (v1.0.9 adayı)
+## v1.0.9 düzeltmeleri
 
-> v1.0.9 (versionCode 10) olarak sürümlendi ve CI'ya gönderildi; **CI ve cihaz doğrulaması henüz tamamlanmadı**. Sonuç gelene kadar hiçbir satır yeşil işaretlenmemelidir.
+> v1.0.9 (versionCode 10) CI run `39048703584` ile derlendi (44 test). **Cihaz kabulü henüz yapılmadı.**
 
 | # | Test | Sorumlu | Durum |
 |---|---|---|---|
@@ -164,11 +166,11 @@ Son güncelleme: 2026-10-17. v1.0.8 (versionCode 9) yayımlandı; CI run `390447
 | D.2 | Filtreli oturumdan geri/menüyle çıkışta kalan soru sayısını gösteren onay çıkar; “Devam et” oturumda kalır | KULLANICI | [ ] |
 | D.3 | “Kaç soru?” alanı yazılan değeri ezmez; eşleşenden büyük değerde tüm eşleşenler çalışır ve bilgi metni görünür | KULLANICI | [ ] |
 | D.4 | Soru ayrıntısında çok sayfalı görseller bellek hatası olmadan açılır; tam ekran yakınlaştırma okunaklı kalır | KULLANICI | [ ] |
-| D.5 | Arşivli konuyla aynı ad denenince “arşivden etkinleştir” açıklaması görünür | YZ (CI bekliyor) | [ ] |
-| D.6 | Arşivli konu çakışması repository testi geçer (yeni test eklendi) | YZ (CI bekliyor) | [ ] |
-| D.7 | Yedek yazımı başarısız olduğunda hedefte yarım ZIP kalmaz | YZ/KULLANICI (CI bekliyor) | [ ] |
-| D.8 | CSV'de `=`, `+`, `@` ile başlayan hücreler formülsüz görünür; `data.json` değeri değişmez | YZ (CI bekliyor) | [ ] |
-| D.9 | Soru bulunamadı/hata ekranındaki geri düğmesi “Geri” etiketini kullanır | YZ (CI bekliyor) | [ ] |
+| D.5 | Arşivli konuyla aynı ad denenince “arşivden etkinleştir” açıklaması görünür | KULLANICI (CI derlemesi geçti) | [ ] |
+| D.6 | Arşivli konu çakışması repository testi geçer (yeni test eklendi) | YZ (CI run `39048703584`) | [x] |
+| D.7 | Yedek yazımı başarısız olduğunda hedefte yarım ZIP kalmaz | KULLANICI | [ ] |
+| D.8 | CSV'de `=`, `+`, `@` ile başlayan hücreler formülsüz görünür; `data.json` değeri değişmez | YZ (CI run `39048703584`) | [x] |
+| D.9 | Soru bulunamadı/hata ekranındaki geri düğmesi “Geri” etiketini kullanır | KULLANICI (CI derlemesi geçti) | [ ] |
 
 ## Genel / sürekli
 

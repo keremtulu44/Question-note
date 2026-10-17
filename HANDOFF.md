@@ -3,22 +3,22 @@
 > Yeni bir geliştirme oturumu önce [PROJECT_BRIEF.md](PROJECT_BRIEF.md) ve bu belgeyi okur.
 
 - Son güncelleme: 2026-10-17
-- Aktif iş: **v1.0.9 (versionCode 10) CI'da.** Ekran döndürmede durum koruma, filtreli oturum çıkış onayı, “Kaç soru?” alanı, görsel çözme belleği, arşivli konu adı çakışması, yarım yedek dosyası, CSV formül nötrleştirmesi ve bağlama uygun geri etiketi düzeltmeleri bu sürümde. Push sonrası CI sonucu bekleniyor; son yayımlanmış sürüm v1.0.8.
-- Son başarılı CI: run `39044777998`, kaynak commit `bef4bd4191b5b265a4ff8e61052e0ef969a175f6` — 42 test geçti; Release derlemesi, imza/apksigner ve beklenen sertifika fingerprint eşleşti. İlk koşu `39044614950` yanlış `layout.weight` import'uyla derlenemedi; düzeltme sonrası run başarılı.
-- APK: [v1.0.8 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.8), [doğrudan indir](https://github.com/keremtulu44/Question-note/releases/download/v1.0.8/yanlis-defteri-1.0.8.apk), CI raporundaki SHA-256 `66563dc1b04ffe632ec5285baaefa92fbd9f5a068e8fab2726c4b85480b76b3e`.
-- Somut kullanıcı adımı: v1.0.8'i Samsung Galaxy S24 FE'ye mevcut uygulamayı **kaldırmadan** kur; eski verinin korunduğunu doğrula. Filtreli çalışmada konu/kaynak/neden seçimini, “Kaç soru?” alanını, sıralı ilerlemeyi ve bitiş ekranını dene. `+ Konu`, soru formu ve ZIP v3 yedek/geri yükleme de bekliyor. Henüz cihaz kabulü bildirilmedi.
+- Aktif iş: **v1.0.9 (versionCode 10) yayımlandı; fiziksel cihaz kabulü bekliyor.** Ekran döndürmede durum koruma, filtreli oturum çıkış onayı, “Kaç soru?” alanı, görsel çözme belleği, arşivli konu adı çakışması, yarım yedek dosyası, CSV formül nötrleştirmesi ve bağlama uygun geri etiketi düzeltmeleri bu sürümde. CI run `39048703584` 44 testle geçti; Release, imza ve fingerprint doğrulandı.
+- Son başarılı CI: run `39048703584`, kaynak commit `54f42df2c1fe889544144b63f74e037ee12e1347` — 44 test geçti; Release derlemesi, imza/apksigner ve beklenen sertifika fingerprint eşleşti.
+- APK: [v1.0.9 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.9), [doğrudan indir](https://github.com/keremtulu44/Question-note/releases/download/v1.0.9/yanlis-defteri-1.0.9.apk), CI raporundaki SHA-256 `c6f1fd47b1bfae06e77758e91ed33ec69ad81262208e541080477269191b0f38`.
+- Somut kullanıcı adımı: v1.0.9'u Samsung Galaxy S24 FE'ye mevcut uygulamayı **kaldırmadan** kur; eski verinin korunduğunu doğrula. Filtreli çalışmada konu/kaynak/neden seçimini, “Kaç soru?” alanını, sıralı ilerlemeyi ve bitiş ekranını dene. Ekranı döndürüp oturumun/filtrelerin korunduğunu, oturumdan çıkışta onay çıktığını kontrol et. `+ Konu`, soru formu ve ZIP v3 yedek/geri yükleme de bekliyor. Henüz cihaz kabulü bildirilmedi.
 - v1.0.3 için kullanıcı cihaz adımlarının tümünü geçti bildirdi (2026-10-17). Önceki v1.0.2 “3. tur” ifadesinin checklist bölüm 3 (yedek/geri yükleme) anlamına geldiği teyit edilmedi; ayrıntı `docs/TEST_KONTROL_LISTESI.md`.
 - Tam ZIP biçimi: `docs/YEDEK_FORMATI.md`; test ayrımı ve bekleyenler: `docs/TEST_KONTROL_LISTESI.md`; CI kanıtı: `docs/DERLEME_RAPORU.md`.
 
 ---
 
-## Güncel teslim — v1.0.8 (Aşamalar 2/3/4)
+## Güncel teslim — v1.0.9 (Aşamalar 2/3/4)
 
-- v1.0.8 CI run `39044777998`: 42 test, `assembleRelease`, imza/apksigner doğrulaması ve beklenen sertifika fingerprint'i geçti; Release yayımlandı. Kanıt `docs/DERLEME_RAPORU.md` içinde.
+- v1.0.9 CI run `39048703584`: 44 test, `assembleRelease`, imza/apksigner doğrulaması ve beklenen sertifika fingerprint'i geçti; Release yayımlandı. Kanıt `docs/DERLEME_RAPORU.md` içinde.
 - Filtreli çalışma eklendi: konu, kaynak ve ana yanlış nedeni AND ile birleşir; arşivli ders, `AKTIF` olmayan plan ve bugün çözülmüş sorular dışlanır; sıra en uzun süredir çalışılmayandan başlar. Filtreler uygulama kabuğunda tutulur, soru açıp dönünce korunur. Oturum ilerlemesi ve bitiş ekranı vardır.
 - v1.0.7 `+ Konu`, v1.0.6 form hiyerarşisi/kartları/sabit kaydetme alanı ve v1.0.5 global kaynak/neden kataloğu, locator, eski not verisi koruma, Room v3 ve ZIP v3/v2 uyumluluğu korunur.
-- Dal üzerinde yayımlanmamış düzeltmeler var: döndürmede durum koruma, filtreli oturum çıkış onayı, “Kaç soru?” alanı, görsel çözme belleği, arşivli konu adı çakışması, yarım yedek dosyası, CSV formül nötrleştirmesi, bağlama uygun geri etiketi. Bunlar için CI/Release çalışmadı, APK yok.
-- Fiziksel cihaz kabulü henüz bildirilmedi: v1.0.8 üzerine güncelleme ve filtreli çalışma; v1.0.7 `+ Konu`; v1.0.6 formu; v1.0.5 katalog/locator ve ZIP v3 yedek/geri yükleme; v1.0.4 tekrar geçmişi; SAF/Drive ve fotoğraf okunabilirliği bekliyor.
+- v1.0.9 düzeltmeleri: döndürmede durum koruma, filtreli oturum çıkış onayı, “Kaç soru?” alanı, görsel çözme belleği, arşivli konu adı çakışması, yarım yedek dosyası, CSV formül nötrleştirmesi, bağlama uygun geri etiketi. CI ve Release doğrulandı; cihaz kabulü bekliyor.
+- Fiziksel cihaz kabulü henüz bildirilmedi: v1.0.9 üzerine güncelleme, döndürme ve oturum çıkışı; v1.0.8 filtreli çalışma; v1.0.7 `+ Konu`; v1.0.6 formu; v1.0.5 katalog/locator ve ZIP v3 yedek/geri yükleme; v1.0.4 tekrar geçmişi; SAF/Drive ve fotoğraf okunabilirliği bekliyor.
 
 ## Önceki aşama geçmişi (tarihsel)
 
@@ -208,13 +208,13 @@ reddedildi.
 
 ## Sıradaki somut adım
 
-1. `docs/DERLEME_RAPORU.md` v1.0.8 CI/Release çıktısı doğrulandı (run `39044777998`); 42 test geçti. Yerel Gradle testi Java bulunmadığı için çalışmadı.
-2. Sıradaki somut adım kullanıcı cihaz kabulü: [v1.0.8 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.8)'i mevcut uygulamanın üzerine **kaldırmadan** kur; eski veriyi doğrula, filtreli çalışmada filtreleri/adet alanını/sıralı ilerlemeyi/bitiş ekranını dene; `+ Konu` ile ilgili dersteki listelerin korunduğunu kontrol et.
-3. Kullanıcı sonucu gelince checklist'i güncelle; v1.0.8 filtreli çalışma, v1.0.7 `+ Konu`, v1.0.6 formu, v1.0.5 katalog/locator/ZIP v3, v1.0.4 tekrar geçmişi, SAF/Drive/başka cihaz ve fotoğraf okunabilirliği ayrı bekleyen testlerdir.
-4. v1.0.9 (versionCode 10) olarak sürümlendi ve `arena/59c6570d-question-note` dalına push edildi; workflow bu dalı da tetikliyor. CI sonucu yeşilse `docs/DERLEME_RAPORU.md`, Release bağlantısı ve APK SHA-256 bu belgeye eklenecek. Yerel Java olmadığı için derleme/test yalnızca CI'da.
+1. `docs/DERLEME_RAPORU.md` v1.0.9 CI/Release çıktısı doğrulandı (run `39048703584`); 44 test geçti. Yerel Gradle testi Java bulunmadığı için çalışmadı.
+2. Sıradaki somut adım kullanıcı cihaz kabulü: [v1.0.9 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.9)'i mevcut uygulamanın üzerine **kaldırmadan** kur; eski veriyi doğrula, filtreli çalışmada filtreleri/adet alanını/sıralı ilerlemeyi/bitiş ekranını dene; `+ Konu` ile ilgili dersteki listelerin korunduğunu kontrol et.
+3. Kullanıcı sonucu gelince checklist'i güncelle; v1.0.9 düzeltmeleri, v1.0.8 filtreli çalışma, v1.0.7 `+ Konu`, v1.0.6 formu, v1.0.5 katalog/locator/ZIP v3, v1.0.4 tekrar geçmişi, SAF/Drive/başka cihaz ve fotoğraf okunabilirliği ayrı bekleyen testlerdir.
+4. v1.0.9 `arena/59c6570d-question-note` dalından yayımlandı; workflow artık bu dalı da tetikliyor. CI yeşil (run `39048703584`). Yerel Java olmadığı için derleme/test yalnızca CI'da yapılabilir.
 
 Detaylı kabul ölçütleri `ROADMAP.md` ve `docs/TEST_KONTROL_LISTESI.md` içindedir. `fallbackToDestructiveMigration` yasaktır; her Room şema değişikliği veri koruyan migration + otomatik test gerektirir.
 
 ## Kullanıcının yapacağı iş
 
-v1.0.8 APK'yı [GitHub Release'ten indir](https://github.com/keremtulu44/Question-note/releases/download/v1.0.8/yanlis-defteri-1.0.8.apk) ve mevcut uygulamayı **kaldırmadan** üzerine kur. Eski verinin kaldığını doğrula. Filtreli çalışmada konu/kaynak/neden seç, “Kaç soru?” yaz, oturumu ilerlet ve bitiş ekranını gör; ara sıra geri dönüp seçimlerin korunduğunu kontrol et. `+ Konu` ile yeni konu ekleyip diğer derslerin listelerinin değişmediğini dene. Gerçek cihaz sonucu bildirilmeden checklist'te cihaz adımlarını geçme işaretleme.
+v1.0.9 APK'yı [GitHub Release'ten indir](https://github.com/keremtulu44/Question-note/releases/download/v1.0.9/yanlis-defteri-1.0.9.apk) ve mevcut uygulamayı **kaldırmadan** üzerine kur. Eski verinin kaldığını doğrula. Filtreli çalışmada konu/kaynak/neden seç, “Kaç soru?” yaz, oturumu ilerlet ve bitiş ekranını gör; ara sıra geri dönüp seçimlerin korunduğunu kontrol et. `+ Konu` ile yeni konu ekleyip diğer derslerin listelerinin değişmediğini dene. Gerçek cihaz sonucu bildirilmeden checklist'te cihaz adımlarını geçme işaretleme.

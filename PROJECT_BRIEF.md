@@ -4,7 +4,7 @@ Bu belge projenin **karar kaydıdır**. Yeni bir geliştirme oturumu (insan veya
 belgeyi, sonra [HANDOFF.md](HANDOFF.md) dosyasını okur.
 
 - Son güncelleme: 2026-10-17
-- Durum: v1.0.9 (versionCode 10) CI'da derleniyor; son yayımlanmış sürüm v1.0.8 (versionCode 9, CI run `39044777998`, 42 test). v1.0.9; döndürmede durum koruma, filtreli oturum çıkış onayı, sayı alanı, görsel belleği, arşivli konu çakışması, yedek yazımı ve CSV formülü düzeltmelerini içerir. v1.0.8 filtreli çalışma ve önceki sürüm özellikleri korunur; eski veri silinmez ve Room v2→v3 migration veri korur. v1.0.5–v1.0.8 cihaz kabulü CI'dan ayrı tutulur ve henüz kullanıcı tarafından bildirilmedi.
+- Durum: v1.0.9 (versionCode 10) yayımlandı; CI run `39048703584` 44 testi, Release/imza ve sertifika fingerprint doğrulamasını geçti. v1.0.9; döndürmede durum koruma, filtreli oturum çıkış onayı, sayı alanı, görsel belleği, arşivli konu çakışması, yedek yazımı ve CSV formülü düzeltmelerini içerir. v1.0.8 filtreli çalışma ve önceki sürüm özellikleri korunur; eski veri silinmez ve Room v2→v3 migration veri korur. v1.0.5–v1.0.9 cihaz kabulü CI'dan ayrı tutulur ve henüz kullanıcı tarafından bildirilmedi.
 
 ---
 

@@ -4,8 +4,6 @@ Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih 
 
 ## [1.0.9] — 2026-10-17
 
-> `versionCode 10`. Bu sürümün CI derlemesi/Release doğrulaması bekleniyor; sonuç gelince run kimliği ve APK SHA-256 buraya eklenecek.
-
 - Ekran döndürmede uygulama durumu (açık ekran, filtre seçimleri, süren filtreli oturum) korunur; yedek alma döndürme sırasında yarıda kesilmez.
 - Filtreli oturumdan geri/menüyle çıkarken kalan soru sayısını gösteren onay istenir; yanlışlıkla oturum atılmaz.
 - “Kaç soru?” alanı kullanıcının yazdığını ezmez; istenen sayı eşleşenden büyükse tüm eşleşenlerin çalışılacağı yazılır ve “Başlat” etkin kalır.
@@ -14,7 +12,9 @@ Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih 
 - Yedek yazımı başarısız olursa hedefteki yarım dosya silinir; geçerli yedek sanılması önlenir.
 - ZIP içindeki CSV dosyalarında `=`, `+`, `@` ile başlayan hücreler formül olarak çalışmayacak biçimde nötrleştirilir; `data.json` değişmez.
 - Soru bulunamadı/hata ekranındaki geri düğmesi bağlama uygun “Geri” etiketini kullanır.
-- Arşivli konu adı çakışması için repository testi eklendi; toplam test sayısı CI'da doğrulanacak.
+- Arşivli konu adı çakışması için repository testi ve CSV formül nötrleştirme testi eklendi (toplam 44 test).
+- CI run `39048703584`: 44 test, `assembleRelease`, imza/apksigner ve sertifika fingerprint doğrulaması geçti; [v1.0.9 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.9) yayımlandı.
+- CI raporundaki APK SHA-256: `c6f1fd47b1bfae06e77758e91ed33ec69ad81262208e541080477269191b0f38`. Fiziksel cihaz kabulü ayrıca bekliyor.
 
 ## [1.0.8] — 2026-10-17
 

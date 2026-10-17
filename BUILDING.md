@@ -4,9 +4,9 @@
 > Hiçbir anahtar, parola veya token bu depoya yazılmaz.
 
 - Son güncelleme: 2026-10-17
-- Son yayımlanan sürüm: **v1.0.8 (versionCode 9)**. CI run `39044777998`: 42 test geçti; Release derlemesi, imza/apksigner doğrulaması ve sertifika fingerprint kontrolü başarılı. [Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.8); CI raporundaki APK SHA-256 `66563dc1b04ffe632ec5285baaefa92fbd9f5a068e8fab2726c4b85480b76b3e`.
-- v1.0.8 filtreli çalışma; v1.0.7 `+ Konu`, v1.0.6 form yenilemesi ve v1.0.5 katalog/migration fiziksel cihazda henüz kabul edilmedi. v1.0.4 tekrar geçmişi, SAF/Drive yedek/geri yükleme ve fotoğraf okunabilirliği de cihaz testi bekliyor.
-- **v1.0.9 (versionCode 10) hazırlanıyor:** döndürme durumu, oturum çıkış onayı, sayı alanı, görsel belleği, arşivli konu çakışması, yedek yazımı ve CSV formülü düzeltmeleri bu sürümde. CI push ile tetiklenir; sonuç `docs/DERLEME_RAPORU.md` ve Release sayfasında görünür.
+- Son yayımlanan sürüm: **v1.0.9 (versionCode 10)**. CI run `39048703584`: 44 test geçti; Release derlemesi, imza/apksigner doğrulaması ve sertifika fingerprint kontrolü başarılı. [Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.9); CI raporundaki APK SHA-256 `c6f1fd47b1bfae06e77758e91ed33ec69ad81262208e541080477269191b0f38`.
+- v1.0.9 düzeltmeleri ve v1.0.8 filtreli çalışma; v1.0.7 `+ Konu`, v1.0.6 form yenilemesi ve v1.0.5 katalog/migration fiziksel cihazda henüz kabul edilmedi. v1.0.4 tekrar geçmişi, SAF/Drive yedek/geri yükleme ve fotoğraf okunabilirliği de cihaz testi bekliyor.
+- **v1.0.9 yayımlandı:** döndürme durumu, oturum çıkış onayı, sayı alanı, görsel belleği, arşivli konu çakışması, yedek yazımı ve CSV formülü düzeltmelerini içerir; CI push ile `arena/59c6570d-question-note` dalında çalıştı.
 
 ---
 
@@ -30,7 +30,7 @@ Kullanıcının telefonunda Android SDK, Gradle veya Termux kurması **gerekmez*
 
 - Tek Gradle modülü, Kotlin + Jetpack Compose.
 - Sürümler `gradle/libs.versions.toml` içinde sabitlenir; Gradle wrapper depoda tutulur.
-- minSdk 26, compileSdk/targetSdk 37; yayımlanmış v1.0.8 `versionCode=9`; **v1.0.9 `versionCode=10` CI'da derleniyor**. v1.0.8 CI sonucu yukarıda kayıtlı.
+- minSdk 26, compileSdk/targetSdk 37; yayımlanmış v1.0.9 `versionCode=10` (önceki v1.0.8: `versionCode=9`). v1.0.9 CI sonucu yukarıda kayıtlı.
 - Yapay zekâ ortamında Java/Android SDK ve Maven erişimi yoktur → derleme **yalnızca** Actions'ta olur.
 
 ## 3. İmzalama düzeni (kritik)
