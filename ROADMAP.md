@@ -31,7 +31,7 @@ Durum işaretleri: `[ ]` yapılmadı · `[~]` kod/CI hazır, kullanıcı kabulü
 - [x] Görsel optimizasyonu: uzun kenar en çok ~3000 px, JPEG kalite 90; metadata ve tutarlılık kontrolü.
 - [x] Bakım ekranında denetim, yaş ve veritabanı referansı yeniden kontrol edilerek onaylı yetim temizliği.
 - [x] Dışa aktarma akışı tam ZIP yedekleme hizmetine yükseltildi; geri uyumlu eski API adı korunuyor.
-- [x] CI run `39026644131`: toplam 31 birim/Robolectric testi geçti; Release derlemesi, imza ve sertifika parmak izi başarılı.
+- [x] CI run `39027221270`: toplam 31 birim/Robolectric testi geçti; Release derlemesi, imza ve sertifika parmak izi başarılı; v1.0.2 test Release'i yayımlandı.
 - [ ] Kullanıcı cihazında uçak modunda kayıt, yeniden başlatma, izin/iptal, düzenleme/silme ve fotoğraf görüntüleme kabulü.
 - [ ] 30–50 gerçek fotoğrafta küçük formül, kök ve grafik etiketlerinin okunabilirliği.
 
@@ -45,7 +45,7 @@ Durum işaretleri: `[ ]` yapılmadı · `[~]` kod/CI hazır, kullanıcı kabulü
 - [x] İçe aktarmadan önce mevcut/yedek soru-görsel sayısı önizlemesi ve açık tam-değiştirme onayı.
 - [x] Geri yükleme öncesi doğrulanmış güvenlik ZIP'i; görseller yeni kalıcı adlarla kopyalanıyor; Room değişimi transaction içinde.
 - [x] Room işareti + app-private günlükle kesinti sonrası commit/rollback kurtarması; v1→v2 migration ve test.
-- [x] CI'da checksum bozulması, desteklenmeyen format, path traversal, tam geri yükleme, güvenlik kopyası ve commit/rollback kurtarma testleri geçti (run `39026644131`).
+- [x] CI'da checksum bozulması, desteklenmeyen format, path traversal, tam geri yükleme, güvenlik kopyası ve commit/rollback kurtarma testleri geçti (run `39027221270`).
 - [ ] Gerçek cihazda Downloads/Drive'a kaydetme, Drive yüklemesini ayrıca doğrulama.
 - [ ] Temiz kurulumda/başka cihazda soru, görsel, tekrar geçmişi ve planın tam geri yüklenmesi.
 - [ ] Cihazda iptal, bozuk yedek ve geri yükleme sırasında uygulama kapatma senaryoları.

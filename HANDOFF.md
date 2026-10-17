@@ -4,8 +4,8 @@
 
 - Son güncelleme: 2026-10-17
 - Aktif aşama: **Aşama 2/3 kodu CI'da tamamlandı; gerçek cihaz kabulü bekliyor.** Kullanıcı, Aşama 2 biter bitmez Aşama 3'ün de yapılmasını istemişti; ikisi de uygulandı.
-- Son başarılı CI: run `39026644131`, commit `b7e803ba4a64fb0895be9f8e2934d7c2416fe013` — 31 test geçti; `assembleRelease`, imza ve sertifika parmak izi doğrulandı. Bu run mevcut v1.0.1 tag'i nedeniyle yeni Release yayımlamadı.
-- Mevcut kaynak sürümü: v1.0.2 / versionCode 3 (kabul testi adayı); bir sonraki push'ta yeni tag olmadığı için CI imzalı Release oluşturur.
+- Son başarılı CI: run `39027221270`, kaynak commit `c4514b52ad6643a993843b06c484733db2207618` — 31 test geçti; `assembleRelease`, imza ve sertifika parmak izi doğrulandı. v1.0.2 Release yayımlandı.
+- APK: [v1.0.2 test Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.2), SHA-256 `264a15082587d3ed4883c783d3d94fea964d0472cf857e802fac1276f77729ac`.
 - Kullanıcı eylemi: v1.0.2 APK'yı Samsung Galaxy S24 FE'ye **uygulamayı kaldırmadan** kur; checklist'teki uçak modu/kamera/galeri/geri yükleme testlerini ve 30–50 gerçek fotoğraf okunabilirliğini dene. Bu cihaz testleri yapılmış gibi işaretlenmemeli.
 - Tam ZIP biçimi: `docs/YEDEK_FORMATI.md`; test ayrımı ve bekleyenler: `docs/TEST_KONTROL_LISTESI.md`; CI kanıtı: `docs/DERLEME_RAPORU.md`.
 
@@ -16,7 +16,7 @@
 - Aşama 2: ders/konu yönetimi, soru CRUD/liste/filtre/ayrıntı, kamera/galeri çoklu görsel, atomik kalıcı saklama, görsel bakımı, tekrar kuralları ve minimum dışa aktarma tamamlandı.
 - Aşama 3: biçim v2 tam ZIP (manifest + JSON + CSV + JPEG), checksum/ilişki/yol/alan doğrulaması, SAF önizleme/onay, önceki arşivin güvenlik kopyası ve kesinti kurtarması tamamlandı.
 - Room şeması v2'ye yükseltildi; migration 1→2 veri koruma testi CI'da geçti. Destructive migration fallback kullanılmıyor.
-- CI run `39026644131`: 31 test, Release assembly, imza ve sertifika fingerprint geçti. Rapordaki APK hash'i `docs/DERLEME_RAPORU.md` içinde. v1.0.2 sürümü versionCode 3'e yükseltildi; kullanıcı cihazı ve fotoğraf okunabilirliği doğrulanmadı.
+- CI run `39027221270`: 31 test, Release assembly, imza ve sertifika fingerprint geçti; v1.0.2 test Release'i yayımlandı. APK SHA-256 ve tam kanıt `docs/DERLEME_RAPORU.md` içinde. Kullanıcı cihazı ve fotoğraf okunabilirliği doğrulanmadı.
 - Açık kabul: yeni v1.0.2 sürümünü cihaza mevcut kurulumun üzerine yükle; uçak modu/kamera/galeri, SAF/Drive, temiz kurulum/geri yükleme/kurtarma ve 30–50 fotoğraf testlerini yap. Bulut sağlayıcısındaki yüklemeyi ayrıca doğrula.
 
 ## Önceki aşama geçmişi (tarihsel)

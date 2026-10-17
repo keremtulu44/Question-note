@@ -1,6 +1,6 @@
 # Veri Modeli (Room şema v2)
 
-> Room v2, ders/konu/soru/görsel/tekrar tablolarını ve kesintiye dayanıklı geri yükleme işaretini içerir. v1→v2 migration'ı veriyi korur ve CI'da test edildi. Son güncelleme: 2026-10-17 (run `39026644131`).
+> Room v2, ders/konu/soru/görsel/tekrar tablolarını ve kesintiye dayanıklı geri yükleme işaretini içerir. v1→v2 migration'ı veriyi korur ve CI'da test edildi. Son güncelleme: 2026-10-17 (run `39027221270`).
 
 Veritabanı: **Room / SQLite**. Yerel veri tek doğruluk kaynağıdır.
 
@@ -195,5 +195,5 @@ Veritabanı işlemi ile dosya sistemi işlemi tek atomik işlem değildir. Bu y�
   güncelleme çözümü değildir.
 - Şema JSON'ları sürüm kontrolünde saklanır (Room `exportSchema`).
 - **Her migration için otomatik test yazılır**; şema ve veri koruması test edilir. `MIGRATION_1_2`, yalnızca `geri_yukleme_isaretleri` tablosunu ekler ve mevcut ders/soru/görsel/tekrar verisini değiştirmez.
-- CI'da Room v1 fixture'ı açılıp v2'ye taşınır; v2 şeması ve v1 satırlarının korunması test edildi (run `39026644131`).
+- CI'da Room v1 fixture'ı açılıp v2'ye taşınır; v2 şeması ve v1 satırlarının korunması test edildi (run `39027221270`).
 - Testler JVM/Robolectric üzerinde çalışır; bu CI sonucu fiziksel cihaz güncelleme kabulü değildir.

@@ -4,7 +4,7 @@ Bu belge projenin **karar kaydıdır**. Yeni bir geliştirme oturumu (insan veya
 belgeyi, sonra [HANDOFF.md](HANDOFF.md) dosyasını okur.
 
 - Son güncelleme: 2026-10-17
-- Durum: **Aşama 2/3 kod ve CI tamam; gerçek cihaz kabulü bekliyor.** CI run `39026644131` 31 testi, Release derlemesini, imzayı ve sertifika doğrulamasını geçti. Sürüm adayı v1.0.2 / versionCode 3. Cihaz, SAF/Drive, temiz kurulum/başka cihaz ve 30–50 fotoğraf okunabilirliği henüz doğrulanmadı. Her şema değişikliği için veri koruyan migration ve test şart; migration fallback'i yasak.
+- Durum: **Aşama 2/3 kod ve CI tamam; gerçek cihaz kabulü bekliyor.** CI run `39027221270` 31 testi, Release derlemesini, imzayı ve sertifika doğrulamasını geçti; [v1.0.2 test Release'i](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.2) yayımlandı (versionCode 3). Cihaz, SAF/Drive, temiz kurulum/başka cihaz ve 30–50 fotoğraf okunabilirliği henüz doğrulanmadı. Her şema değişikliği için veri koruyan migration ve test şart; migration fallback'i yasak.
 
 ---
 

@@ -7,7 +7,9 @@ Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih 
 - Ders/konu yönetimi, soru ekleme-düzenleme-silme, filtre/liste/ayrıntı, çoklu kamera/galeri görselleri ve kalıcı görsel bakımı eklendi.
 - Room şeması v1→v2 veri koruyan migration ile güncellendi; migration ve veri akışı testleri eklendi.
 - Tam ZIP yedekleme/geri yükleme: JSON + beş CSV + JPEG görseller, SHA-256 doğrulama, SAF hedefi, önizleme/onay, güvenlik kopyası ve kesinti kurtarma eklendi.
-- CI run `39026644131`: 31 test, Release derlemesi, imza ve sertifika parmak izi doğrulaması başarılı. Gerçek cihaz/Drive ve 30–50 fotoğraf kabulü hâlâ kullanıcıda bekliyor.
+- CI run `39027221270`: 31 test, Release derlemesi, imza ve sertifika parmak izi doğrulaması başarılı; [v1.0.2 test Release'i](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.2) yayımlandı.
+- APK SHA-256: `264a15082587d3ed4883c783d3d94fea964d0472cf857e802fac1276f77729ac`.
+- Gerçek cihaz/Drive, temiz kurulum ve 30–50 fotoğraf okunabilirlik kabulü hâlâ bekliyor.
 
 ## [1.0.1] — 2026-10-16
 

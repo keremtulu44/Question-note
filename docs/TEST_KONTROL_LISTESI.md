@@ -11,7 +11,7 @@
 > ZIP yol güvenliği) ve **Robolectric** (şema/migration testleri). Emülatör yalnızca gerçekten
 > gerekirse kullanılır; asıl kabul testleri gerçek cihazda yapılır.
 
-Son güncelleme: 2026-10-17 (CI run `39026644131`: 31 test geçti; Release derlemesi, imza ve parmak izi doğrulandı. Cihaz kabul testleri hâlâ bekliyor.)
+Son güncelleme: 2026-10-17 (CI run `39027221270`: 31 test geçti; v1.0.2 imzalı Release/derleme doğrulandı. Cihaz kabul testleri hâlâ bekliyor.)
 
 ---
 
@@ -21,13 +21,14 @@ Son güncelleme: 2026-10-17 (CI run `39026644131`: 31 test geçti; Release derle
 |---|---|---|---|
 | 1.1 | Actions workflow'u yazılabiliyor ve push ile otomatik çalışıyor | YZ | [x] |
 | 1.2 | G2 arayüzsüz `assembleRelease` derlemesi başarılı | YZ | [x] |
-| 1.3 | v1.0.0/v1.0.1 imzalı APK Release'e eklendi; sertifika parmak izi eşleşti | YZ | [x] |
-| 1.4 | İki Release notunda sürüm, commit kimliği ve APK SHA-256 bulunuyor | YZ | [x] |
+| 1.3 | v1.0.0/v1.0.1/v1.0.2 imzalı APK Release'e eklendi; her sürümde sertifika parmak izi eşleşti | YZ | [x] |
+| 1.4 | Yayımlanan her Release notunda sürüm, commit kimliği ve APK SHA-256 bulunuyor | YZ | [x] |
 | 1.5 | v1.0.0 APK telefona indirilip kuruluyor ve açılıyor | KULLANICI | [x] |
 | 1.6 | v1.0.1 güncellemesinden sonra uygulama açılıyor ve 7 ders kartı görünüyor | KULLANICI | [x] |
 | 1.7 | v1.0.1, v1.0.0 üzerine **uygulamayı kaldırmadan** kuruluyor | KULLANICI | [x] |
 | 1.8 | CI derleme özeti, hata çıktısı ve APK SHA-256 repoda okunabiliyor | YZ | [x] |
 | 1.9 | VersionCode 1 → 2 artışı ve v1.0.1 Release CI'da doğrulandı | YZ | [x] |
+| 1.10 | VersionCode 2 → 3; v1.0.2 Release, APK imzası ve fingerprint CI'da doğrulandı | YZ (CI run `39027221270`) | [x] |
 
 ## Aşama 2 — Yerel arşiv
 
@@ -69,24 +70,24 @@ Son güncelleme: 2026-10-17 (CI run `39026644131`: 31 test geçti; Release derle
 
 | # | Test | Sorumlu | Durum |
 |---|---|---|---|
-| 3.1 | Tam ZIP oluşturma, manifest/CSV/JSON ve tüm envanter SHA-256/uzunluk doğrulaması | YZ (CI run `39026644131`) | [x] |
+| 3.1 | Tam ZIP oluşturma, manifest/CSV/JSON ve tüm envanter SHA-256/uzunluk doğrulaması | YZ (CI run `39027221270`) | [x] |
 | 3.2 | Yedek cihazdaki bir klasöre kaydediliyor | KULLANICI | [ ] |
 | 3.3 | Yedek Drive'a kaydediliyor (dosya seçici akışı) | KULLANICI | [ ] |
 | 3.4 | Temiz kurulumda yedekten geri yükleme çalışıyor | KULLANICI | [ ] |
 | 3.5 | Yedek görselleri kapsıyor (geri yükleme sonrası görseller açılıyor) | KULLANICI | [ ] |
 | 3.6 | Yedek tekrar geçmişini ve plan durumunu kapsıyor | KULLANICI | [ ] |
-| 3.7 | Checksum'u bozulmuş ZIP önizleme aşamasında reddediliyor; DB/görsel kayıtları değişmiyor | YZ (CI run `39026644131`) | [x] |
-| 3.8 | Desteklenmeyen format sürümü reddediliyor; DB değişmiyor | YZ (CI run `39026644131`) | [x] |
+| 3.7 | Checksum'u bozulmuş ZIP önizleme aşamasında reddediliyor; DB/görsel kayıtları değişmiyor | YZ (CI run `39027221270`) | [x] |
+| 3.8 | Desteklenmeyen format sürümü reddediliyor; DB değişmiyor | YZ (CI run `39027221270`) | [x] |
 | 3.9 | Başarısız yedek işlemi başarı gibi gösterilmiyor | YZ | [ ] |
-| 3.10 | Tam geri yükleme öncesi doğrulanmış güvenlik ZIP'i oluşuyor, eski not/görsel verisi korunuyor | YZ (CI run `39026644131`) | [x] |
+| 3.10 | Tam geri yükleme öncesi doğrulanmış güvenlik ZIP'i oluşuyor, eski not/görsel verisi korunuyor | YZ (CI run `39027221270`) | [x] |
 | 3.11 | Uygulama güncellemesi mevcut verileri koruyor (gerçek veriyle) | KULLANICI | [ ] |
-| 3.12 | ZIP içi yol güvenliği: `..` içeren ZIP hiçbir dosya çıkarmadan reddediliyor | YZ (CI run `39026644131`) | [x] |
-| 3.13 | Günlük/Room işareti simülasyonunda transaction öncesi rollback ve commit sonrası tamamlatma doğru çalışıyor | YZ (CI run `39026644131`) | [x] |
-| 3.18 | Gerçek cihazda geri yükleme sırasında uygulama kapatılır; sonraki açılışın kurtarması doğrulanır | KULLANICI | [ ] |
+| 3.12 | ZIP içi yol güvenliği: `..` içeren ZIP hiçbir dosya çıkarmadan reddediliyor | YZ (CI run `39027221270`) | [x] |
+| 3.13 | Günlük/Room işareti simülasyonunda transaction öncesi rollback ve commit sonrası tamamlatma doğru çalışıyor | YZ (CI run `39027221270`) | [x] |
 | 3.14 | ZIP bomb / aşırı büyüme / çok fazla dosya içeren arşiv açılmadan reddediliyor | YZ | [ ] |
 | 3.15 | Yedek **başka bir cihazda** (cihaz bağlılığı olmadan) eksiksiz geri yükleniyor | KULLANICI | [ ] |
 | 3.16 | Anlamsız/boş yedek seçilince kullanıcı onayı olmadan hiçbir şey değişmiyor | YZ + KULLANICI | [ ] |
 | 3.17 | Son yedek bilgisi (tarih, boyut, dosya adı) doğru gösteriliyor | KULLANICI | [ ] |
+| 3.18 | Gerçek cihazda geri yükleme sırasında uygulama kapatılır; sonraki açılışın kurtarması doğrulanır | KULLANICI | [ ] |
 
 ## Aşama 4 — Tekrar sistemi
 
@@ -129,7 +130,7 @@ Son güncelleme: 2026-10-17 (CI run `39026644131`: 31 test geçti; Release derle
 | G.2 | ZIP/APK kullanıcı yedekleri repoya işlenmiyor (`.gitignore` + `git check-ignore`) | YZ | [x] |
 | G.3 | İmzalama anahtarının iki ayrı yedek kopyası kullanıcıda mevcut | KULLANICI | [ ] |
 | G.4 | Uygulama kaldırılırsa verilerin kaybolacağı kullanıcı tarafından biliniyor | KULLANICI | [ ] |
-| G.5 | Room v1→v2 migration ve veri koruması otomatik test edildi; gelecek migration'larda zincir korunacak | YZ (CI run `39026644131`) | [x] |
+| G.5 | Room v1→v2 migration ve veri koruması otomatik test edildi; gelecek migration'larda zincir korunacak | YZ (CI run `39027221270`) | [x] |
 | G.6 | Debug ve release APK'ları karıştırılmıyor; günlük kullanımda hep release APK | KULLANICI | [ ] |
 | G.7 | Derleme, sabitlenmiş sürümlerle tekrar edilebiliyor (bir yıl sonra da) | YZ | [ ] |
 

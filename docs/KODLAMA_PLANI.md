@@ -257,7 +257,7 @@ com.keremtulu.questionnote/
 - Ders/konu yönetimi; soru CRUD, liste/filtre/ayrıntı; tekrar plan kuralları.
 - Kamera/galeri çoklu görselleri, EXIF yönü, JPEG uzun kenar ~3000 px/kalite 90, SHA-256, staging→kalıcı alan ve kontrollü bakım.
 - Tam ZIP/SAF yedekleme ve geri yükleme: manifest, JSON, 5 CSV, görsel payload'ları, doğrulama sınırları, güvenlik kopyası ve journal/Room marker kurtarması.
-- CI run `39026644131`: 31 test geçti; `assembleRelease`, sabit anahtarla imza ve fingerprint doğrulandı.
+- CI run `39027221270`: 31 test geçti; `assembleRelease`, sabit anahtarla imza ve fingerprint doğrulandı.
 - Cihaz kabulü hâlâ bekliyor: gerçek kamera/galeri/SAF/Drive, temiz kurulum/başka cihaz ve 30–50 fotoğrafta okunabilirlik.
 
 ### 5.3 Dosya ↔ veritabanı tutarlılığı (yazma sırası)
