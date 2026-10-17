@@ -68,6 +68,9 @@ Android telefonda kullanılacak, tek kişilik bir dijital yanlış defteri:
 | K22 | Ana ekranın odağı **Bugün**: bugünkü ve gecikmiş tekrarlar sade listede görünür; “Soru ekle” belirgin düğmedir. Yedekleme, görsel bakımı ve derslere göre gezinme yan menüde kalır. |
 | K23 | Şimdiki sürüm lise odağındadır; ders listesi sabit ve TYT/AYT ayrımı yoktur. Gelecekte Ayarlar'da öğrenim seviyesi (ortaokul/lise) ile sınav hedefi (ör. LGS) ayrı seçenekler olarak değerlendirilebilir. |
 | K24 | Kaynak kataloğu dersler arasında ortaktır; yeni kaynak `+` ile kaydedilir. Her soru için isteğe bağlı sayfa/test/soru konumu tutulur. Yanlış nedeni hazır listeden **tek ana seçim** veya kullanıcı tarafından eklenen özel seçenektir. Soru notu giriş/gösterim alanı kaldırılır; önceki `soru_notu` verisi migration, düzenleme ve ZIP yedeklerinde korunur. |
+| K25 | **Sonuç → karne eşlemesi:** `Rahat` = bağımsız çözüm, `Zorlandım` = yarım (destekli), `Çözemedim` = çözemedi. Çözüm açıldıysa hangi sonuç seçilirse seçilsin soru bağımsız sayılmaz. Ayrıntı: `docs/SONUC_KARNESI_VE_ILERLEME.md`. |
+| K26 | **Kutlama tonu:** karne ekranı animasyonlu ve rozetli olacak; tebrik cümlesi skora göre değişir, olumsuz/cezalandırıcı dil ve üzgün animasyon kullanılmaz. |
+| K27 | **Günlük hedef şimdilik sabit 10'dur.** İlk kurulumda hedef seçimi ve Ayarlar'dan değiştirme ileri sürüme bırakıldı; kodda sabit değer + `GunlukHedefDeposu` okuma arayüzü kullanılır. Mola günü hakkı da ileri sürümdedir. |
 
 ### Soru kaydındaki alanlar
 
