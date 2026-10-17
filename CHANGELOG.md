@@ -2,6 +2,12 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.0.6] — 2026-10-17
+
+- Soru ekleme/düzenleme formu; belirgin başlık, numaralı yuvarlak kart bölümleri, daha okunaklı konu/kaynak seçicileri ve kamera/galeri aksiyonlarıyla yenilendi.
+- Kaydet düğmesi ekranda sabit kalır; form hatası kaydetme alanında görünür ve klavye açıldığında düğme erişilebilir kalır.
+- CI doğrulaması ve Release sonucu bekleniyor.
+
 ## [1.0.5] — 2026-10-17
 
 - Kaynaklar tüm derslerde ortak katalogdan seçilir; kaynak bir kez `+ Kaynak` ile eklenebilir ve her soruya isteğe bağlı sayfa/test/soru konumu yazılır.

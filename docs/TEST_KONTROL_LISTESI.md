@@ -11,7 +11,7 @@
 > ZIP yol güvenliği) ve **Robolectric** (şema/migration testleri). Emülatör yalnızca gerçekten
 > gerekirse kullanılır; asıl kabul testleri gerçek cihazda yapılır.
 
-Son güncelleme: 2026-10-17. v1.0.5 (versionCode 6) yayımlandı; CI run `39037429421` 36 testi, Release derlemesini, imzayı ve sertifika fingerprint'ini doğruladı. v1.0.5 migration, katalog ve ZIP v3 otomatik testleri geçti; cihaz kabulü ayrı ve henüz kullanıcı tarafından bildirilmedi. v1.0.4 tekrar geçmişi, SAF/Drive yedek-geri yükleme ve fotoğraf okunabilirliği de cihazda bekliyor. “3. turu denemedim” ifadesinin checklist eşlemesi teyitsizdir.
+Son güncelleme: 2026-10-17. v1.0.6 (versionCode 7) form arayüzü değişikliği hazırlanıyor; CI doğrulaması bekleniyor. v1.0.5 (versionCode 6) yayımlandı; CI run `39037429421` 36 testi, Release derlemesini, imzayı ve sertifika fingerprint'ini doğruladı. v1.0.5 migration, katalog ve ZIP v3 otomatik testleri geçti; cihaz kabulü ayrı ve henüz kullanıcı tarafından bildirilmedi. v1.0.4 tekrar geçmişi, SAF/Drive yedek-geri yükleme ve fotoğraf okunabilirliği de cihazda bekliyor. “3. turu denemedim” ifadesinin checklist eşlemesi teyitsizdir.
 
 ---
 
@@ -36,6 +36,7 @@ Son güncelleme: 2026-10-17. v1.0.5 (versionCode 6) yayımlandı; CI run `390374
 | 1.15 | VersionCode 4 → 5; v1.0.4 Release, APK imzası ve fingerprint CI'da doğrulandı | YZ (CI run `39033698686`) | [x] |
 | 1.16 | VersionCode 5 → 6; v1.0.5 Release ve imza doğrulaması | YZ (CI run `39037429421`) | [x] |
 | 1.17 | v1.0.5 mevcut uygulamanın üstüne kaldırmadan kurulur; eski soru/not/veri kaybolmaz | KULLANICI | [ ] |
+| 1.18 | VersionCode 6 → 7; v1.0.6 Release, APK imzası ve fingerprint CI'da doğrulanır | YZ (CI) | [ ] |
 
 ## Aşama 2 — Yerel arşiv
 
@@ -82,6 +83,7 @@ Son güncelleme: 2026-10-17. v1.0.5 (versionCode 6) yayımlandı; CI run `390374
 | 2.39 | Hazır/özel yanlış nedeni tek seçim; özel neden katalogda kalıcı ve global | YZ (CI run `39037429421`) | [x] |
 | 2.40 | Soru notu form/detay UI'sinde yok; eski not Room ve ZIP yedeğinde korunuyor, düzenleme sırasında silinmiyor | YZ (kod incelemesi + CI run `39037429421`) | [x] |
 | 2.41 | v1.0.5 kaynak/katalog akışı ve locator gerçek cihazda anlaşılır, seçilebilir ve kalıcı | KULLANICI | [ ] |
+| 2.42 | v1.0.6 ekleme/düzenleme formu; kartlar, kamera/galeri, görsel sıralama/silme ve sabit kaydetme alanı cihazda anlaşılır çalışır | KULLANICI | [ ] |
 
 ## Aşama 3 — Yedek ve geri yükleme
 

@@ -3,7 +3,7 @@
 > Yeni bir geliştirme oturumu önce [PROJECT_BRIEF.md](PROJECT_BRIEF.md) ve bu belgeyi okur.
 
 - Son güncelleme: 2026-10-17
-- Aktif iş: **v1.0.5 yayımlandı; fiziksel cihaz kabulü bekliyor.** Onaylanan kapsam global kaynak kataloğu, soruya özel locator, hazır/özel tek yanlış nedeni ve soru notu UI'sinin kaldırılmasıdır; eski not verisi korunur.
+- Aktif iş: **v1.0.6 soru ekleme/düzenleme formu görsel yenilemesi; CI sonucu bekleniyor.** v1.0.5 fiziksel cihaz kabulü de kullanıcı bildirimini bekliyor; önceki sürüm davranışı ve veriyi koruma kapsamı değişmedi.
 - Son başarılı CI: run `39037429421`, kaynak commit `7383897c6a1303df6329dbb55bacde16f98ed6f1` — 36 test geçti; Release derlemesi, imza doğrulaması ve beklenen sertifika fingerprint eşleşti. Room v3 şeması CI'da üretildi.
 - APK: [v1.0.5 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.5), [doğrudan indir](https://github.com/keremtulu44/Question-note/releases/download/v1.0.5/yanlis-defteri-1.0.5.apk), CI-reported SHA-256 `00f0b3b33f1efa81156043ef38a31640f57ce3ba34cf608505eb3164e0a8bedb`.
 - Somut kullanıcı adımı: v1.0.5'i Samsung Galaxy S24 FE'ye mevcut uygulamayı **kaldırmadan** kur; eski kayıtları, ortak kaynak/neden seçimini, locator'ı ve ZIP v3 yedek/geri yüklemeyi dene. Henüz cihaz kabulü bildirilmedi.
