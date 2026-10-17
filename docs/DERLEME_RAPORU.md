@@ -2,22 +2,22 @@
 
 > Bu dosya Android CI tarafından otomatik üretilir. Keystore veya parola değerleri yazılmaz.
 
-- Zaman (UTC): 2026-10-17T15:27:23Z
-- Workflow commit'i: bef4bd4191b5b265a4ff8e61052e0ef969a175f6
-- Dal: arena/0ec2226d-question-note
-- Uygulama sürümü: 1.0.8 (versionCode 9)
+- Zaman (UTC): 2026-10-17T16:21:42Z
+- Workflow commit'i: 54f42df2c1fe889544144b63f74e037ee12e1347
+- Dal: arena/59c6570d-question-note
+- Uygulama sürümü: 1.0.9 (versionCode 10)
 - Android SDK: compileSdk/targetSdk 37, minSdk 26; build-tools 37.0.0
 - Genel sonuç: **BAŞARILI**
 - Wrapper çıkış kodu: 0
 - testDebugUnitTest çıkış kodu: 0
-- Birim test özeti: 42 test; 0 başarısız; 0 hata; 0 atlandı
+- Birim test özeti: 44 test; 0 başarısız; 0 hata; 0 atlandı
 - assembleRelease çıkış kodu: 0
 - İmzalama secret durumu: İki gerekli secret dolu (değerler gösterilmez)
 - İmzalama/verify durumu: İmzalandı; apksigner doğruladı ve beklenen sertifika eşleşti (kod: 0; apksigner verify: 0)
 - Sertifika parmak izi: FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54 (beklenen: FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54; durum: eşleşti)
 - Release: Release oluşturuldu (kod: 0)
-- Release URL: https://github.com/keremtulu44/Question-note/releases/tag/v1.0.8
-- İmzalı APK SHA-256: 66563dc1b04ffe632ec5285baaefa92fbd9f5a068e8fab2726c4b85480b76b3e
+- Release URL: https://github.com/keremtulu44/Question-note/releases/tag/v1.0.9
+- İmzalı APK SHA-256: c6f1fd47b1bfae06e77758e91ed33ec69ad81262208e541080477269191b0f38
 
 ## Gradle sürümü
 
@@ -55,6 +55,9 @@ OS:            Linux 6.17.0-1022-azure amd64
 -- Derleyici/Gradle hata satırları --
 
 -- İlk 100 satır --
+Fetching distribution.
+Downloading https://services.gradle.org/distributions/gradle-9.8.1-bin.zip
+..............10%..............20%...............30%..............40%...............50%..............60%...............70%..............80%...............90%..............100%
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
 Daemon will be stopped at the end of the build 
 > Task :app:preBuild UP-TO-DATE
@@ -72,10 +75,10 @@ Daemon will be stopped at the end of the build
 > Task :app:extractDeepLinksDebug
 > Task :app:processDebugMainManifest
 > Task :app:processDebugManifest
-> Task :app:processDebugManifestForPackage
 > Task :app:preDebugUnitTestBuild UP-TO-DATE
-> Task :app:generateDebugAssets UP-TO-DATE
 > Task :app:javaPreCompileDebugUnitTest
+> Task :app:processDebugManifestForPackage
+> Task :app:generateDebugAssets UP-TO-DATE
 > Task :app:mergeDebugAssets
 > Task :app:mergeDebugResources
 > Task :app:processDebugUnitTestManifest
@@ -102,14 +105,14 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/local/YanlisDefteriMigrations.kt:25:30 The corresponding parameter in the supertype 'Migration' is named 'db'. This may cause problems when calling this function with named arguments.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/BugunEkrani.kt:90:66 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/BugunEkrani.kt:91:46 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/SoruDetayEkrani.kt:551:89 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/YanlisDefteriUygulamasi.kt:428:57 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/SoruDetayEkrani.kt:552:89 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/YanlisDefteriUygulamasi.kt:461:57 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/bilesenler/SoruGorselBileseni.kt:96:26 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
 
 > Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:bundleDebugClassesToRuntimeJar
 > Task :app:bundleDebugClassesToCompileJar
 > Task :app:processDebugJavaRes
-> Task :app:bundleDebugClassesToRuntimeJar
 > Task :app:kspDebugUnitTestKotlin
 
 > Task :app:compileDebugUnitTestKotlin
@@ -130,11 +133,13 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 2m 13s
+BUILD SUCCESSFUL in 2m 25s
 30 actionable tasks: 30 executed
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 
 -- Son 80 satır --
+Downloading https://services.gradle.org/distributions/gradle-9.8.1-bin.zip
+..............10%..............20%...............30%..............40%...............50%..............60%...............70%..............80%...............90%..............100%
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
 Daemon will be stopped at the end of the build 
 > Task :app:preBuild UP-TO-DATE
@@ -152,10 +157,10 @@ Daemon will be stopped at the end of the build
 > Task :app:extractDeepLinksDebug
 > Task :app:processDebugMainManifest
 > Task :app:processDebugManifest
-> Task :app:processDebugManifestForPackage
 > Task :app:preDebugUnitTestBuild UP-TO-DATE
-> Task :app:generateDebugAssets UP-TO-DATE
 > Task :app:javaPreCompileDebugUnitTest
+> Task :app:processDebugManifestForPackage
+> Task :app:generateDebugAssets UP-TO-DATE
 > Task :app:mergeDebugAssets
 > Task :app:mergeDebugResources
 > Task :app:processDebugUnitTestManifest
@@ -182,14 +187,14 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/local/YanlisDefteriMigrations.kt:25:30 The corresponding parameter in the supertype 'Migration' is named 'db'. This may cause problems when calling this function with named arguments.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/BugunEkrani.kt:90:66 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/BugunEkrani.kt:91:46 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/SoruDetayEkrani.kt:551:89 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/YanlisDefteriUygulamasi.kt:428:57 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/SoruDetayEkrani.kt:552:89 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/YanlisDefteriUygulamasi.kt:461:57 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/bilesenler/SoruGorselBileseni.kt:96:26 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
 
 > Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:bundleDebugClassesToRuntimeJar
 > Task :app:bundleDebugClassesToCompileJar
 > Task :app:processDebugJavaRes
-> Task :app:bundleDebugClassesToRuntimeJar
 > Task :app:kspDebugUnitTestKotlin
 
 > Task :app:compileDebugUnitTestKotlin
@@ -210,7 +215,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 2m 13s
+BUILD SUCCESSFUL in 2m 25s
 30 actionable tasks: 30 executed
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 ```
@@ -244,9 +249,9 @@ Unable to strip the following libraries, packaging them as they are: libandroidx
 > Task :app:generateReleaseRFile FROM-CACHE
 > Task :app:kspReleaseKotlin FROM-CACHE
 > Task :app:javaPreCompileRelease FROM-CACHE
+> Task :app:checkReleaseAarMetadata
 > Task :app:mapReleaseSourceSetPaths
 > Task :app:compileReleaseNavigationResources FROM-CACHE
-> Task :app:checkReleaseAarMetadata
 > Task :app:createReleaseCompatibleScreenManifests
 > Task :app:extractDeepLinksRelease FROM-CACHE
 > Task :app:processReleaseMainManifest
@@ -277,21 +282,21 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/local/YanlisDefteriMigrations.kt:25:30 The corresponding parameter in the supertype 'Migration' is named 'db'. This may cause problems when calling this function with named arguments.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/BugunEkrani.kt:90:66 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/BugunEkrani.kt:91:46 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/SoruDetayEkrani.kt:551:89 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/YanlisDefteriUygulamasi.kt:428:57 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/SoruDetayEkrani.kt:552:89 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/YanlisDefteriUygulamasi.kt:461:57 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/bilesenler/SoruGorselBileseni.kt:96:26 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
 
-> Task :app:mergeReleaseArtProfile
 > Task :app:compileReleaseJavaWithJavac NO-SOURCE
+> Task :app:mergeReleaseArtProfile
 > Task :app:generateReleaseAssets UP-TO-DATE
 > Task :app:mergeReleaseAssets
 > Task :app:compressReleaseAssets
-> Task :app:processReleaseResources
 > Task :app:extractReleaseVersionControlInfo
+> Task :app:extractProguardFiles
+> Task :app:processReleaseResources
+> Task :app:generateReleaseLintVitalReportModel
 > Task :app:dexBuilderRelease
 > Task :app:mergeReleaseGlobalSynthetics
-> Task :app:extractProguardFiles
-> Task :app:generateReleaseLintVitalReportModel
 > Task :app:processReleaseJavaRes
 > Task :app:optimizeReleaseResources
 > Task :app:collectReleaseDependencies
@@ -316,7 +321,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 2m 9s
+BUILD SUCCESSFUL in 2m 13s
 48 actionable tasks: 40 executed, 8 from cache
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 ```
@@ -352,12 +357,12 @@ V3.0 Signer: public key MD5 digest: efca2e07ac5a04473681ddaf5ff0157e
 ## Release çıktısı
 
 ```text
-https://github.com/keremtulu44/Question-note/releases/tag/v1.0.8
+https://github.com/keremtulu44/Question-note/releases/tag/v1.0.9
 ```
 
 ## APK özeti
 
 ```text
-APK: app/build/outputs/apk/release/yanlis-defteri-1.0.8.apk
-SHA-256: 66563dc1b04ffe632ec5285baaefa92fbd9f5a068e8fab2726c4b85480b76b3e
+APK: app/build/outputs/apk/release/yanlis-defteri-1.0.9.apk
+SHA-256: c6f1fd47b1bfae06e77758e91ed33ec69ad81262208e541080477269191b0f38
 ```
