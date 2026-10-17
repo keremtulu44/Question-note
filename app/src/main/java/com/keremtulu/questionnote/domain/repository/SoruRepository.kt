@@ -1,6 +1,7 @@
 package com.keremtulu.questionnote.domain.repository
 
 import com.keremtulu.questionnote.domain.model.Soru
+import com.keremtulu.questionnote.domain.model.SoruCalismaFiltresi
 import com.keremtulu.questionnote.domain.model.SoruSecenekTuru
 import com.keremtulu.questionnote.domain.model.SoruSecenegi
 import com.keremtulu.questionnote.domain.model.SoruSecenegiEklemeSonucu
@@ -13,6 +14,8 @@ import kotlinx.coroutines.flow.Flow
 
 interface SoruRepository {
     fun sorulariIzle(dersId: String, konuId: String? = null, konusuz: Boolean = false): Flow<List<Soru>>
+
+    fun filtreliCalismaSorulariniIzle(filtre: SoruCalismaFiltresi): Flow<List<Soru>>
 
     fun bugunTekrarlanacaklariIzle(bugun: Int): Flow<List<Soru>>
 

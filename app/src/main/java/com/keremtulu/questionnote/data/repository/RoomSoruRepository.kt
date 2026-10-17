@@ -9,6 +9,7 @@ import com.keremtulu.questionnote.data.local.entity.TekrarEntity
 import com.keremtulu.questionnote.domain.model.GorselTuru
 import com.keremtulu.questionnote.domain.model.OgrenmeDurumu
 import com.keremtulu.questionnote.domain.model.Soru
+import com.keremtulu.questionnote.domain.model.SoruCalismaFiltresi
 import com.keremtulu.questionnote.domain.model.SoruGorselGirdisi
 import com.keremtulu.questionnote.domain.model.SoruGorseli
 import com.keremtulu.questionnote.domain.model.SoruIslemSonucu
@@ -49,6 +50,17 @@ class RoomSoruRepository(
         konusuz: Boolean,
     ): Flow<List<Soru>> = soruDao.sorulariIzle(dersId, konuId, konusuz)
         .map { rows -> rows.map { row -> row.soru.toDomain(row.gorseller.map { it.toDomain() }) } }
+
+    override fun filtreliCalismaSorulariniIzle(filtre: SoruCalismaFiltresi): Flow<List<Soru>> =
+        soruDao.filtreliCalismaSorulariniIzle(
+            bugun = LocalDate.now(saat).toEpochDay().toInt(),
+            konuId = filtre.konuId,
+            konusuz = filtre.konusuz,
+            kaynak = filtre.kaynak,
+            kaynakBelirtilmemis = filtre.kaynakBelirtilmemis,
+            yanlisNedeni = filtre.yanlisNedeni,
+            yanlisNedeniBelirtilmemis = filtre.yanlisNedeniBelirtilmemis,
+        ).map { rows -> rows.map { row -> row.soru.toDomain(row.gorseller.map { it.toDomain() }) } }
 
     override fun bugunTekrarlanacaklariIzle(bugun: Int): Flow<List<Soru>> =
         soruDao.bugunTekrarlanacaklariIzle(bugun)

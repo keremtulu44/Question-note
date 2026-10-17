@@ -22,6 +22,9 @@ class RoomKonuRepository(
             konular.map { it.toDomain() }
         }
 
+    override fun tumunuIzle(): Flow<List<Konu>> =
+        konuDao.tumunuIzle().map { konular -> konular.map { it.toDomain() } }
+
     override suspend fun konuEkle(dersId: String, ad: String): KonuIslemSonucu {
         val temizAd = ad.trim()
         if (temizAd.isEmpty()) return KonuIslemSonucu.BosAd

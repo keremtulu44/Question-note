@@ -19,6 +19,9 @@ interface KonuDao {
     )
     fun konulariIzle(dersId: String, arsivli: Boolean): Flow<List<KonuEntity>>
 
+    @Query("SELECT * FROM konular ORDER BY ders_id ASC, sira ASC, ad COLLATE NOCASE ASC, id ASC")
+    fun tumunuIzle(): Flow<List<KonuEntity>>
+
     @Query("SELECT * FROM konular WHERE ders_id = :dersId")
     suspend fun dersinKonulariniGetir(dersId: String): List<KonuEntity>
 

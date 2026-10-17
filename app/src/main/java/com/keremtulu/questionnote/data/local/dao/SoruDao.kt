@@ -47,6 +47,33 @@ interface SoruDao {
     @Transaction
     fun bugunTekrarlanacaklariIzle(bugun: Int): Flow<List<SoruVeGorsellerEntity>>
 
+    @Query(
+        """
+        SELECT sorular.* FROM sorular
+        INNER JOIN dersler ON dersler.id = sorular.ders_id
+        WHERE dersler.arsivli = 0
+          AND sorular.plan_durumu = 'AKTIF'
+          AND (sorular.son_tekrar_gun IS NULL OR sorular.son_tekrar_gun < :bugun)
+          AND (:konuId IS NULL OR sorular.konu_id = :konuId)
+          AND (:konusuz = 0 OR sorular.konu_id IS NULL)
+          AND (:kaynak IS NULL OR sorular.kaynak = :kaynak)
+          AND (:kaynakBelirtilmemis = 0 OR COALESCE(TRIM(sorular.kaynak), '') = '')
+          AND (:yanlisNedeni IS NULL OR sorular.yanlis_nedeni = :yanlisNedeni)
+          AND (:yanlisNedeniBelirtilmemis = 0 OR COALESCE(TRIM(sorular.yanlis_nedeni), '') = '')
+        ORDER BY sorular.son_tekrar_gun ASC, sorular.olusturma ASC, sorular.id ASC
+        """,
+    )
+    @Transaction
+    fun filtreliCalismaSorulariniIzle(
+        bugun: Int,
+        konuId: String?,
+        konusuz: Boolean,
+        kaynak: String?,
+        kaynakBelirtilmemis: Boolean,
+        yanlisNedeni: String?,
+        yanlisNedeniBelirtilmemis: Boolean,
+    ): Flow<List<SoruVeGorsellerEntity>>
+
     @Query("SELECT * FROM sorular WHERE id = :id LIMIT 1")
     suspend fun idIleGetir(id: String): SoruEntity?
 

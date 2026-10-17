@@ -48,6 +48,7 @@ import com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti
 import com.keremtulu.questionnote.data.images.GorselTutarliligiHizmeti
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
 import com.keremtulu.questionnote.domain.model.Ders
+import com.keremtulu.questionnote.domain.model.Soru
 import com.keremtulu.questionnote.domain.repository.DersRepository
 import com.keremtulu.questionnote.domain.repository.KonuRepository
 import com.keremtulu.questionnote.domain.repository.SoruRepository
@@ -62,13 +63,25 @@ private sealed interface UygulamaEkrani {
     data class DersSecimi(val soruEkleModu: Boolean) : UygulamaEkrani
     data class DersAlani(val ders: Ders, val geri: UygulamaEkrani) : UygulamaEkrani
     data class Konular(val ders: Ders, val geri: UygulamaEkrani) : UygulamaEkrani
-    data class SoruAyrintisi(val ders: Ders, val soruId: String, val geri: UygulamaEkrani) : UygulamaEkrani
+    data class SoruAyrintisi(
+        val ders: Ders,
+        val soruId: String,
+        val geri: UygulamaEkrani,
+        val tekrarOturumunda: Boolean = false,
+    ) : UygulamaEkrani
     data class SoruFormu(val ders: Ders, val soruId: String?, val geri: UygulamaEkrani) : UygulamaEkrani
+    data object FiltreliCalisma : UygulamaEkrani
+    data class FiltreliOturum(
+        val sorular: List<Soru>,
+        val dersler: Map<String, Ders>,
+        val sira: Int,
+    ) : UygulamaEkrani
+    data class FiltreliCalismaTamamlandi(val tamamlananSoruSayisi: Int) : UygulamaEkrani
     data object GorselBakimi : UygulamaEkrani
 }
 
 private enum class KurtarmaDurumu { YUKLENIYOR, HAZIR, HATA }
-private enum class MenuEylemi { BUGUN, DERSLER, YEDEK_OLUSTUR, YEDEK_GERI_YUKLE, GORSEL_BAKIMI }
+private enum class MenuEylemi { BUGUN, DERSLER, FILTRELI_CALISMA, YEDEK_OLUSTUR, YEDEK_GERI_YUKLE, GORSEL_BAKIMI }
 
 @Composable
 fun YanlisDefteriUygulamasi(
@@ -80,6 +93,7 @@ fun YanlisDefteriUygulamasi(
     disaAktarmaHizmeti: YerelYedeklemeHizmeti,
 ) {
     var ekran by remember { mutableStateOf<UygulamaEkrani>(UygulamaEkrani.Bugun) }
+    var filtreliCalismaAyar by remember { mutableStateOf(FiltreliCalismaEkraniAyar()) }
     var kurtarma by remember { mutableStateOf(KurtarmaDurumu.YUKLENIYOR) }
     var yedeklemeIslemde by remember { mutableStateOf(false) }
     var geriYuklemeOnizlemesi by remember { mutableStateOf<GeriYuklemeOnizlemesi?>(null) }
@@ -150,6 +164,7 @@ fun YanlisDefteriUygulamasi(
             when (eylem) {
                 MenuEylemi.BUGUN -> ekran = UygulamaEkrani.Bugun
                 MenuEylemi.DERSLER -> ekran = UygulamaEkrani.DersSecimi(soruEkleModu = false)
+                MenuEylemi.FILTRELI_CALISMA -> ekran = UygulamaEkrani.FiltreliCalisma
                 MenuEylemi.YEDEK_OLUSTUR -> if (!yedeklemeIslemde) {
                     exportLauncher.launch("yanlis-defteri-yedek.zip")
                 }
@@ -248,6 +263,67 @@ fun YanlisDefteriUygulamasi(
                             ekran = current.geri
                             scope.launch { snackbarHostState.showSnackbar(context.getString(R.string.review_saved)) }
                         },
+                        tekrarOturumunda = current.tekrarOturumunda,
+                    )
+                    UygulamaEkrani.FiltreliCalisma -> FiltreliCalismaEkrani(
+                        dersRepository = dersRepository,
+                        konuRepository = konuRepository,
+                        soruRepository = soruRepository,
+                        ayar = filtreliCalismaAyar,
+                        onAyarDegisti = { filtreliCalismaAyar = it },
+                        onGeri = { ekran = UygulamaEkrani.Bugun },
+                        onSoruAc = { ders, soruId ->
+                            ekran = UygulamaEkrani.SoruAyrintisi(
+                                ders = ders,
+                                soruId = soruId,
+                                geri = UygulamaEkrani.FiltreliCalisma,
+                                tekrarOturumunda = true,
+                            )
+                        },
+                        onOturumBaslat = { questions, lessons ->
+                            ekran = UygulamaEkrani.FiltreliOturum(questions, lessons, sira = 0)
+                        },
+                    )
+                    is UygulamaEkrani.FiltreliOturum -> {
+                        val question = current.sorular.getOrNull(current.sira)
+                        val lesson = question?.let { current.dersler[it.dersId] }
+                        if (question == null || lesson == null) {
+                            UygulamaDurumEkrani(
+                                metin = stringResource(R.string.filtered_practice_question_unavailable),
+                                yukleniyor = false,
+                                tekrarDene = { ekran = UygulamaEkrani.FiltreliCalisma },
+                            )
+                        } else {
+                            SoruDetayEkrani(
+                                soruId = question.id,
+                                ders = lesson,
+                                dersArsivli = false,
+                                soruRepository = soruRepository,
+                                konuRepository = konuRepository,
+                                gorselDeposu = gorselDeposu,
+                                onGeri = { ekran = UygulamaEkrani.FiltreliCalisma },
+                                onDuzenle = { id -> ekran = UygulamaEkrani.SoruFormu(lesson, id, current) },
+                                onTekrarTamamlandi = {
+                                    val nextIndex = current.sira + 1
+                                    ekran = if (nextIndex < current.sorular.size) {
+                                        current.copy(sira = nextIndex)
+                                    } else {
+                                        UygulamaEkrani.FiltreliCalismaTamamlandi(current.sorular.size)
+                                    }
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(context.getString(R.string.review_saved))
+                                    }
+                                },
+                                tekrarOturumunda = true,
+                                oturumSira = current.sira + 1,
+                                oturumToplam = current.sorular.size,
+                            )
+                        }
+                    }
+                    is UygulamaEkrani.FiltreliCalismaTamamlandi -> FiltreliCalismaTamamlandiEkrani(
+                        tamamlananSoruSayisi = current.tamamlananSoruSayisi,
+                        onFiltrelereDon = { ekran = UygulamaEkrani.FiltreliCalisma },
+                        onBugun = { ekran = UygulamaEkrani.Bugun },
                     )
                     is UygulamaEkrani.SoruFormu -> SoruFormuEkrani(
                         ders = current.ders,
@@ -397,6 +473,17 @@ private fun YanMenuIcerigi(
             onClick = { onEylem(MenuEylemi.DERSLER) },
             icon = { Text("▦", fontSize = 20.sp) },
         )
+        NavigationDrawerItem(
+            label = { Text(stringResource(R.string.menu_filtered_practice)) },
+            selected = ekran == UygulamaEkrani.FiltreliCalisma ||
+                ekran is UygulamaEkrani.FiltreliOturum ||
+                ekran is UygulamaEkrani.FiltreliCalismaTamamlandi ||
+                (ekran is UygulamaEkrani.SoruAyrintisi && ekran.geri == UygulamaEkrani.FiltreliCalisma) ||
+                (ekran is UygulamaEkrani.SoruFormu &&
+                    (ekran.geri == UygulamaEkrani.FiltreliCalisma || ekran.geri is UygulamaEkrani.FiltreliOturum)),
+            onClick = { onEylem(MenuEylemi.FILTRELI_CALISMA) },
+            icon = { Text("⌕", fontSize = 20.sp) },
+        )
         HorizontalDivider(Modifier.padding(vertical = 8.dp))
         Text(
             text = stringResource(R.string.menu_tools_heading),
@@ -473,6 +560,9 @@ private fun UygulamaEkrani.geriHedefi(): UygulamaEkrani = when (this) {
     is UygulamaEkrani.Konular -> geri
     is UygulamaEkrani.SoruAyrintisi -> geri
     is UygulamaEkrani.SoruFormu -> geri
+    UygulamaEkrani.FiltreliCalisma -> UygulamaEkrani.Bugun
+    is UygulamaEkrani.FiltreliOturum -> UygulamaEkrani.FiltreliCalisma
+    is UygulamaEkrani.FiltreliCalismaTamamlandi -> UygulamaEkrani.FiltreliCalisma
     UygulamaEkrani.GorselBakimi -> UygulamaEkrani.Bugun
 }
 

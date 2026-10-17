@@ -86,6 +86,9 @@ fun SoruDetayEkrani(
     onGeri: () -> Unit,
     onDuzenle: (String) -> Unit,
     onTekrarTamamlandi: () -> Unit,
+    tekrarOturumunda: Boolean = false,
+    oturumSira: Int? = null,
+    oturumToplam: Int? = null,
 ) {
     var yenileme by remember(soruId) { mutableIntStateOf(0) }
     var cozumAcik by remember(soruId) { mutableStateOf(false) }
@@ -188,6 +191,14 @@ fun SoruDetayEkrani(
                     item {
                         Column {
                             TextButton(onClick = onGeri) { Text(stringResource(R.string.question_back)) }
+                            if (oturumSira != null && oturumToplam != null) {
+                                Text(
+                                    text = stringResource(R.string.filtered_practice_session_progress, oturumSira, oturumToplam),
+                                    color = MaterialTheme.colorScheme.primary,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.SemiBold,
+                                )
+                            }
                             Text(
                                 text = stringResource(R.string.question_photo_only),
                                 style = MaterialTheme.typography.headlineSmall,
@@ -339,7 +350,7 @@ fun SoruDetayEkrani(
                     val today = LocalDate.now().toEpochDay().toInt()
                     if (
                         !dersArsivli && soru.planDurumu == SoruPlanDurumu.AKTIF &&
-                        soru.sonrakiTekrarGun?.let { it <= today } == true
+                        (tekrarOturumunda || soru.sonrakiTekrarGun?.let { it <= today } == true)
                     ) {
                         item {
                             Card(
@@ -360,7 +371,10 @@ fun SoruDetayEkrani(
                                         fontWeight = FontWeight.SemiBold,
                                     )
                                     Text(
-                                        stringResource(R.string.review_record_subtitle),
+                                        stringResource(
+                                            if (tekrarOturumunda) R.string.filtered_practice_result_note
+                                            else R.string.review_record_subtitle,
+                                        ),
                                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.78f),
                                         style = MaterialTheme.typography.bodySmall,
                                     )

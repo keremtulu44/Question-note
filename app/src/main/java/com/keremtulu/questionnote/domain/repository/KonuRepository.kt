@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.Flow
 interface KonuRepository {
     fun konulariIzle(dersId: String, arsivli: Boolean): Flow<List<Konu>>
 
+    fun tumunuIzle(): Flow<List<Konu>>
+
     suspend fun konuEkle(dersId: String, ad: String): KonuIslemSonucu
 
     suspend fun konuYenidenAdlandir(konuId: String, ad: String): KonuIslemSonucu

@@ -7,6 +7,7 @@ import com.keremtulu.questionnote.data.local.entity.TekrarEntity
 import com.keremtulu.questionnote.domain.model.GorselTuru
 import com.keremtulu.questionnote.domain.model.KonuIslemSonucu
 import com.keremtulu.questionnote.domain.model.SoruGorselGirdisi
+import com.keremtulu.questionnote.domain.model.SoruCalismaFiltresi
 import com.keremtulu.questionnote.domain.model.SoruIslemSonucu
 import com.keremtulu.questionnote.domain.model.SoruKaydetmeIstegi
 import com.keremtulu.questionnote.domain.model.SoruPlanDurumu
@@ -98,6 +99,70 @@ class RoomSoruRepositoryTest {
         assertEquals("Polinom sorusu", repository.soruGetir(created.id)?.soruNotu)
         assertTrue(repository.sorulariIzle(dersId, konusuz = true).first().isEmpty())
         assertEquals("Önce çarpanlara ayır.", repository.soruGetir(created.id)?.cozumNotu)
+    }
+
+    @Test
+    fun filteredStudyFeedCombinesTopicSourceAndReasonAndExcludesPausedQuestions() = runBlocking {
+        val topicRepository = RoomKonuRepository(database)
+        assertEquals(KonuIslemSonucu.Basarili, topicRepository.konuEkle(dersId, "Fonksiyonlar"))
+        assertEquals(KonuIslemSonucu.Basarili, topicRepository.konuEkle(dersId, "Üslü sayılar"))
+        val topics = topicRepository.konulariIzle(dersId, arsivli = false).first().associateBy { it.ad }
+        val topicId = requireNotNull(topics["Fonksiyonlar"]).id
+        val anotherTopicId = requireNotNull(topics["Üslü sayılar"]).id
+
+        val matching = newQuestionFor(dersId, topicId, "Kitap A", "İşlem hatası")
+        newQuestionFor(dersId, topicId, "Kitap B", "İşlem hatası")
+        newQuestionFor(dersId, topicId, "Kitap A", "Kavram yanılgısı")
+        newQuestionFor(dersId, anotherTopicId, "Kitap A", "İşlem hatası")
+        val paused = newQuestionFor(dersId, topicId, "Kitap A", "İşlem hatası")
+        assertEquals(SoruIslemSonucu.Basarili, repository.planDurumunuAyarla(paused.id, SoruPlanDurumu.ASKIDA))
+
+        val result = repository.filtreliCalismaSorulariniIzle(
+            SoruCalismaFiltresi(konuId = topicId, kaynak = "Kitap A", yanlisNedeni = "İşlem hatası"),
+        ).first()
+
+        assertEquals(listOf(matching.id), result.map { it.id })
+
+        val archivedLessonId = database.dersDao().tumunuGetir().first { it.id != dersId }.id
+        assertEquals(KonuIslemSonucu.Basarili, topicRepository.konuEkle(archivedLessonId, "Arşiv konusu"))
+        val archivedTopicId = topicRepository.konulariIzle(archivedLessonId, arsivli = false).first().single().id
+        newQuestionFor(archivedLessonId, archivedTopicId, "Kitap A", "İşlem hatası")
+        assertEquals(
+            com.keremtulu.questionnote.domain.model.DersIslemSonucu.Basarili,
+            RoomDersRepository(database).dersArsivDurumunuDegistir(archivedLessonId, true),
+        )
+        assertTrue(
+            repository.filtreliCalismaSorulariniIzle(
+                SoruCalismaFiltresi(konuId = archivedTopicId, kaynak = "Kitap A", yanlisNedeni = "İşlem hatası"),
+            ).first().isEmpty(),
+        )
+    }
+
+    @Test
+    fun filteredStudyFeedCanSelectUnassignedTopicAndMissingSourceAndReason() = runBlocking {
+        val missingValues = newQuestionFor(dersId, topicId = null, kaynak = "", yanlisNedeni = "")
+        newQuestionFor(dersId, topicId = null, kaynak = "Kitap A", yanlisNedeni = "")
+        newQuestionFor(dersId, topicId = null, kaynak = "", yanlisNedeni = "İşlem hatası")
+
+        val result = repository.filtreliCalismaSorulariniIzle(
+            SoruCalismaFiltresi(konusuz = true, kaynakBelirtilmemis = true, yanlisNedeniBelirtilmemis = true),
+        ).first()
+
+        assertEquals(listOf(missingValues.id), result.map { it.id })
+    }
+
+    @Test
+    fun filteredStudyFeedDoesNotOfferQuestionsAlreadyReviewedToday() = runBlocking {
+        val reviewedToday = newQuestionFor(dersId)
+        val notReviewedToday = newQuestionFor(dersId)
+        assertEquals(
+            SoruIslemSonucu.Basarili,
+            repository.tekrarKaydet(reviewedToday.id, TekrarSonucu.RAHAT, cozumAcildi = false),
+        )
+
+        val result = repository.filtreliCalismaSorulariniIzle(SoruCalismaFiltresi()).first()
+
+        assertEquals(listOf(notReviewedToday.id), result.map { it.id })
     }
 
     @Test
@@ -292,13 +357,24 @@ class RoomSoruRepositoryTest {
         assertTrue(!history.last().cozumAcildi)
     }
 
-    private suspend fun newQuestionFor(lessonId: String): com.keremtulu.questionnote.domain.model.Soru {
+    private suspend fun newQuestionFor(
+        lessonId: String,
+        topicId: String? = null,
+        kaynak: String = "",
+        yanlisNedeni: String = "",
+    ): com.keremtulu.questionnote.domain.model.Soru {
         val existingIds = repository.sorulariIzle(lessonId).first().map { it.id }.toSet()
         val image = imageFiles.yeniGorsel(GorselTuru.SORU, 0)
         assertEquals(
             SoruIslemSonucu.Basarili,
             repository.soruKaydet(
-                SoruKaydetmeIstegi(dersId = lessonId, gorseller = listOf(image)),
+                SoruKaydetmeIstegi(
+                    dersId = lessonId,
+                    konuId = topicId,
+                    kaynak = kaynak,
+                    yanlisNedeni = yanlisNedeni,
+                    gorseller = listOf(image),
+                ),
             ),
         )
         val saved = repository.sorulariIzle(lessonId).first().first { it.id !in existingIds }
