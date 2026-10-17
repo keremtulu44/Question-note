@@ -22,3 +22,6 @@ captures/
 *.iml
 .idea/
 .kotlin/
+
+# Generated working assets and local tooling
+.cache/

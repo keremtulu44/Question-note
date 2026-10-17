@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.data.ilerleme.IlerlemeHizmeti
+import com.keremtulu.questionnote.data.ilerleme.RozetHizmeti
 import com.keremtulu.questionnote.data.prefs.GunlukHedefDeposu
 import com.keremtulu.questionnote.data.prefs.RozetDeposu
 import com.keremtulu.questionnote.domain.ilerleme.IlerlemeOzeti
@@ -106,6 +107,7 @@ fun KarneEkrani(
     sonuclar: List<OturumSonucu>,
     ilerlemeHizmeti: IlerlemeHizmeti,
     rozetDeposu: RozetDeposu,
+    rozetHizmeti: RozetHizmeti,
     gunlukHedefDeposu: GunlukHedefDeposu,
     onKonudanCalis: (String) -> Unit,
     onFiltrelereDon: () -> Unit,
@@ -134,16 +136,7 @@ fun KarneEkrani(
         value = try {
             val ozet = ilerlemeHizmeti.ozet()
             val sahip = rozetDeposu.sahipOlanlar()
-            val yeni = RozetKurallari.kazanilanlar(
-                RozetGirdisi(
-                    oturum = sayilar,
-                    seri = ozet.seri,
-                    toplamBagimsiz = ozet.toplamBagimsiz,
-                    sonBesGun = ozet.sonBesGun,
-                ),
-                sahip,
-            )
-            rozetDeposu.kaydet(yeni)
+            val yeni = rozetHizmeti.degerlendir(sonuclar)
             KarneVerisi(
                 sayilar = sayilar,
                 ozet = ozet,
@@ -652,26 +645,14 @@ private fun RozetBolumu(rozetler: List<Rozet>, toplamRozet: Int, animasyonAcik: 
             )
         }
         Text(
-            stringResource(R.string.karne_badge_total, toplamRozet),
+            stringResource(R.string.karne_badge_total, toplamRozet, Rozet.entries.size),
             color = colors.onSurfaceVariant,
             style = MaterialTheme.typography.bodySmall,
         )
     }
 }
 
-private fun rozetMetni(rozet: Rozet): Int = when (rozet) {
-    Rozet.ILK_KARNE -> R.string.badge_ilk_karne
-    Rozet.KUSURSUZ_TUR -> R.string.badge_kusursuz_tur
-    Rozet.ON_BAGIMSIZ -> R.string.badge_on_bagimsiz
-    Rozet.YIRMI_SORU -> R.string.badge_yirmi_soru
-    Rozet.COZUMSUZ -> R.string.badge_cozumsuz
-    Rozet.ISTIKRAR -> R.string.badge_istikrar
-    Rozet.SERI_3 -> R.string.badge_seri_3
-    Rozet.SERI_7 -> R.string.badge_seri_7
-    Rozet.SERI_30 -> R.string.badge_seri_30
-    Rozet.YUZ_BAGIMSIZ -> R.string.badge_yuz_bagimsiz
-    Rozet.BES_YUZ -> R.string.badge_bes_yuz
-}
+private fun rozetMetni(rozet: Rozet): Int = rozetAdi(rozet)
 
 private data class KonfetiParcasi(
     val x: Float,

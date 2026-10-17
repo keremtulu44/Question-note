@@ -33,18 +33,37 @@ data class BagimsizGunEntity(
 
 @Dao
 interface IlerlemeDao {
+    @Query("SELECT COUNT(DISTINCT s.ders_id) FROM tekrarlar t JOIN sorular s ON s.id = t.soru_id WHERE t.gun = :gun")
+    suspend fun gunDersSayisi(gun: Int): Int
+
+    @Query("SELECT COUNT(DISTINCT s.ders_id) FROM tekrarlar t JOIN sorular s ON s.id = t.soru_id")
+    suspend fun calisilanDersSayisi(): Int
+
+    @Query(
+        """
+        SELECT EXISTS(
+            SELECT 1 FROM tekrarlar basari
+            WHERE basari.sonuc = 'RAHAT' AND basari.cozum_acildi = 0
+              AND (SELECT COUNT(*) FROM tekrarlar eski
+                   WHERE eski.soru_id = basari.soru_id AND eski.gun < basari.gun
+                     AND eski.sonuc = 'COZEMEDIM' AND eski.cozum_acildi = 0) >= 3
+        )
+        """,
+    )
+    suspend fun donusumVar(): Boolean
+
     @Query("SELECT COUNT(*) FROM sorular")
     suspend fun soruSayisi(): Int
 
     @Query("SELECT COUNT(*) FROM tekrarlar")
     suspend fun tekrarSayisi(): Int
 
-    @Query("SELECT COUNT(*) FROM tekrarlar WHERE sonuc != 'COZEMEDIM' AND cozum_acildi = 0")
+    @Query("SELECT COUNT(*) FROM tekrarlar WHERE sonuc = 'RAHAT' AND cozum_acildi = 0")
     suspend fun bagimsizTekrarSayisi(): Int
 
     @Query(
         """
-        SELECT gun, SUM(CASE WHEN sonuc != 'COZEMEDIM' AND cozum_acildi = 0 THEN 1 ELSE 0 END) AS adet
+        SELECT gun, SUM(CASE WHEN sonuc = 'RAHAT' AND cozum_acildi = 0 THEN 1 ELSE 0 END) AS adet
         FROM tekrarlar
         GROUP BY gun
         ORDER BY gun ASC

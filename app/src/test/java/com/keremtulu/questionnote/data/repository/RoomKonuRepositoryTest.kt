@@ -4,6 +4,8 @@ import androidx.room.Room
 import com.keremtulu.questionnote.data.local.VarsayilanDersleriEkle
 import com.keremtulu.questionnote.data.local.YanlisDefteriDatabase
 import com.keremtulu.questionnote.domain.model.KonuIslemSonucu
+import com.keremtulu.questionnote.domain.model.KonuSilmeSonucu
+import com.keremtulu.questionnote.data.local.entity.SoruEntity
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -151,6 +153,23 @@ class RoomKonuRepositoryTest {
             listOf("Limit"),
             repository.konulariIzle(dersId, arsivli = false).first().map { it.ad },
         )
+    }
+
+    @Test
+    fun unusedTopicCanBeDeletedButUsedTopicKeepsQuestionRelationship() = runBlocking {
+        val ders = database.dersDao().tumunuGetir().first().id
+        repository.konuEkle(ders, "Boş konu")
+        val bos = repository.konulariIzle(ders, false).first().single()
+        assertEquals(KonuSilmeSonucu.Basarili, repository.konuSil(bos.id))
+        assertTrue(repository.konulariIzle(ders, false).first().isEmpty())
+        assertEquals(KonuSilmeSonucu.Bulunamadi, repository.konuSil(bos.id))
+        repository.konuEkle(ders, "Kullanılan konu")
+        val kullanilan = repository.konulariIzle(ders, false).first().single()
+        database.soruDao().ekle(SoruEntity("q", ders, konuId = kullanilan.id, olusturma = 1, guncelleme = 1))
+        assertEquals(KonuSilmeSonucu.Kullanimda(1), repository.konuSil(kullanilan.id))
+        assertEquals(kullanilan.id, database.soruDao().idIleGetir("q")?.konuId)
+        assertEquals(KonuIslemSonucu.Basarili, repository.konuArsivle(kullanilan.id))
+        assertEquals(KonuSilmeSonucu.Kullanimda(1), repository.konuSil(kullanilan.id))
     }
 
     private fun soruKonuId(soruId: String): String {

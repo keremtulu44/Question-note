@@ -20,7 +20,6 @@ object SeviyeHesabi {
 
     /** Level 1 starts at 0 XP; thresholds are open-ended. */
     const val ILK_SEVIYE = 1
-    private const val AZAMI_SEVIYE = 200
 
     fun ad(seviye: Int): String = Rutbe.seviyeIcin(seviye).ad
 
@@ -31,39 +30,34 @@ object SeviyeHesabi {
      * 100, 250, 450, 700, 1000… (the increment grows by 50 each level).
      */
     fun seviyeAraligi(seviye: Int): Int {
-        val n = (seviye - ILK_SEVIYE).coerceAtLeast(0).toLong()
-        return (100 + 100 * n + 25 * n * (n + 1)).toInt()
+        val n = (seviye.toLong() - ILK_SEVIYE).coerceIn(0, 10_000)
+        return (100 + 100 * n + 25 * n * (n + 1)).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
     }
 
-    /** Total XP required to *reach* [seviye]; level 1 requires 0. */
+    /** Saturates only at the storage type's limit, not at a product-level cap. */
     fun seviyeEsigi(seviye: Int): Int {
         var toplam = 0L
-        var mevcut = ILK_SEVIYE
-        while (mevcut < seviye && mevcut < AZAMI_SEVIYE) {
+        for (mevcut in 1 until seviye.coerceAtMost(10_000)) {
             toplam += seviyeAraligi(mevcut)
-            mevcut++
+            if (toplam >= Int.MAX_VALUE) return Int.MAX_VALUE
         }
-        return toplam.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+        return toplam.toInt()
     }
 
     fun durum(xp: Int): SeviyeDurumu {
         val guvenliXp = xp.coerceAtLeast(0)
         var seviye = ILK_SEVIYE
-        var esik = seviyeEsigi(seviye)
-        while (seviye < AZAMI_SEVIYE && guvenliXp >= esik + seviyeAraligi(seviye)) {
+        var esik = 0L
+        while (guvenliXp.toLong() >= esik + seviyeAraligi(seviye).toLong()) {
             esik += seviyeAraligi(seviye)
             seviye++
         }
         val aralik = seviyeAraligi(seviye)
-        val buSeviyede = (guvenliXp - esik).coerceAtLeast(0)
+        val buSeviyede = (guvenliXp.toLong() - esik).toInt()
         return SeviyeDurumu(
-            seviye = seviye,
-            ad = ad(seviye),
-            rutbe = rutbe(seviye),
-            toplamXp = guvenliXp,
-            seviyeBaslangicXp = esik,
-            sonrakiSeviyeXp = aralik,
-            buSeviyedeXp = buSeviyede,
+            seviye = seviye, ad = ad(seviye), rutbe = rutbe(seviye),
+            toplamXp = guvenliXp, seviyeBaslangicXp = esik.toInt(),
+            sonrakiSeviyeXp = aralik, buSeviyedeXp = buSeviyede,
             kalanXp = (aralik - buSeviyede).coerceAtLeast(0),
             oran = (buSeviyede.toFloat() / aralik).coerceIn(0f, 1f),
         )
@@ -90,7 +84,8 @@ data class XpKirilimi(
     val seri: Int,
     val rozet: Int,
 ) {
-    val toplam: Int get() = ekleme + tekrar + bagimsiz + hedef + seri + rozet
+    val toplam: Int get() = (ekleme.toLong() + tekrar + bagimsiz + hedef + seri + rozet)
+        .coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
 }
 
 object XpHesabi {
@@ -102,12 +97,12 @@ object XpHesabi {
         seriBonusu: Int,
         rozetSayisi: Int,
     ): XpKirilimi = XpKirilimi(
-        ekleme = soruSayisi.coerceAtLeast(0) * SeviyeHesabi.SORU_EKLEME_XP,
-        tekrar = tekrarSayisi.coerceAtLeast(0) * SeviyeHesabi.TEKRAR_XP,
-        bagimsiz = bagimsizTekrarSayisi.coerceAtLeast(0) * SeviyeHesabi.BAGIMSIZ_BONUS_XP,
-        hedef = hedefTamamGunSayisi.coerceAtLeast(0) * SeviyeHesabi.HEDEF_BONUS_XP,
+        ekleme = (soruSayisi.toLong().coerceAtLeast(0) * SeviyeHesabi.SORU_EKLEME_XP).coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
+        tekrar = (tekrarSayisi.toLong().coerceAtLeast(0) * SeviyeHesabi.TEKRAR_XP).coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
+        bagimsiz = (bagimsizTekrarSayisi.toLong().coerceAtLeast(0) * SeviyeHesabi.BAGIMSIZ_BONUS_XP).coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
+        hedef = (hedefTamamGunSayisi.toLong().coerceAtLeast(0) * SeviyeHesabi.HEDEF_BONUS_XP).coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
         seri = seriBonusu.coerceAtLeast(0),
-        rozet = rozetSayisi.coerceAtLeast(0) * SeviyeHesabi.ROZET_BONUS_XP,
+        rozet = (rozetSayisi.toLong().coerceAtLeast(0) * SeviyeHesabi.ROZET_BONUS_XP).coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
     )
 
     /** Every time the running streak reaches 3, 7 or 30 days the milestone bonus is added again. */

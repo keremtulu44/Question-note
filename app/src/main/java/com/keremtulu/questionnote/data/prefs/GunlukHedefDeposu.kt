@@ -2,11 +2,7 @@ package com.keremtulu.questionnote.data.prefs
 
 import android.content.Context
 
-/**
- * Daily review target. Fixed for now (design decision K27/S6): onboarding selection and a settings
- * screen arrive in a later release. Keeping the read behind this interface means only the
- * implementation changes later.
- */
+/** Daily review target. The settings-backed implementation supports 5/10/15/20/30. */
 interface GunlukHedefDeposu {
     fun hedef(): Int
 }

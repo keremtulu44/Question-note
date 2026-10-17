@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -57,6 +58,7 @@ import com.keremtulu.questionnote.domain.repository.DersRepository
 import com.keremtulu.questionnote.domain.repository.KonuRepository
 import com.keremtulu.questionnote.domain.repository.SoruRepository
 import java.time.ZoneId
+import java.time.LocalDate
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
@@ -65,6 +67,7 @@ import kotlinx.coroutines.flow.combine
 data class FiltreliCalismaEkraniAyar(
     val filtre: SoruCalismaFiltresi = SoruCalismaFiltresi(),
     val soruSayisi: String = "10",
+    val akilliSira: Boolean = true,
 )
 
 private sealed interface EkranYukleme<out T> {
@@ -101,6 +104,7 @@ fun FiltreliCalismaEkrani(
     onGeri: () -> Unit,
     onSoruAc: (Ders, String) -> Unit,
     onOturumBaslat: (List<Soru>, Map<String, Ders>) -> Unit,
+    onDevam: (() -> Unit)? = null,
 ) {
     var yenileme by remember { mutableIntStateOf(0) }
 
@@ -216,11 +220,12 @@ fun FiltreliCalismaEkrani(
     }
 
     val sorular: List<Soru> = when (val state = soruDurumu) {
-        is EkranYukleme.Hazir -> state.deger
+        is EkranYukleme.Hazir -> state.deger.filter { it.dersId in dersHaritasi }
         else -> emptyList()
     }
-    val siraliSorular = remember(sorular) {
-        CalismaSorulariniSirala.enUzunSureCalisilmayanlar(sorular, ZoneId.systemDefault())
+    val siraliSorular = remember(sorular, ayar.akilliSira) {
+        if (ayar.akilliSira) CalismaSorulariniSirala.akilliOncelik(sorular, LocalDate.now().toEpochDay().toInt())
+        else CalismaSorulariniSirala.enUzunSureCalisilmayanlar(sorular, ZoneId.systemDefault())
     }
     // Kullanıcının yazdığı sayı korunur; istenen sayı eşleşenden büyükse altındaki bilgi metni
     // ve "Başlat" düğmesi tüm eşleşenleri çalıştırır. Alan geri yazılarak kullanıcı düzeltilmez.
@@ -337,6 +342,27 @@ fun FiltreliCalismaEkrani(
                 }
             }
 
+            if (onDevam != null) item {
+                OutlinedButton(onClick = onDevam, modifier = Modifier.fillMaxWidth()) {
+                    Text(androidx.compose.ui.res.stringResource(R.string.focus_continue_session))
+                }
+            }
+            item {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(ayar.akilliSira, { onAyarDegisti(ayar.copy(akilliSira = true)) },
+                        label = { Text(androidx.compose.ui.res.stringResource(R.string.focus_smart)) })
+                    FilterChip(!ayar.akilliSira, { onAyarDegisti(ayar.copy(akilliSira = false)) },
+                        label = { Text(androidx.compose.ui.res.stringResource(R.string.focus_oldest)) })
+                }
+                Text(androidx.compose.ui.res.stringResource(R.string.focus_order_note), style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    listOf(5, 10, 20).forEach { adet ->
+                        FilterChip(ayar.soruSayisi == adet.toString(), { onAyarDegisti(ayar.copy(soruSayisi = adet.toString())) },
+                            label = { Text("$adet soru") })
+                    }
+                }
+            }
             when (val current = soruDurumu) {
                 EkranYukleme.Yukleniyor -> item {
                     Row(

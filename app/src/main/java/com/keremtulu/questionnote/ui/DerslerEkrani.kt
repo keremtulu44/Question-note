@@ -78,7 +78,7 @@ private val varsayilanDersKartStili = DersKartStili(
 fun DerslerEkrani(
     repository: DersRepository,
     soruEkleModu: Boolean,
-    onMenu: () -> Unit,
+    profilAdi: String,
     onDersSecildi: (Ders) -> Unit,
 ) {
     var yenileme by remember { mutableIntStateOf(0) }
@@ -89,7 +89,6 @@ fun DerslerEkrani(
     }.value
     val koyuTema = isSystemInDarkTheme()
     val colors = MaterialTheme.colorScheme
-    val menuDescription = stringResource(R.string.nav_settings)
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -118,18 +117,7 @@ fun DerslerEkrani(
                         fontWeight = FontWeight.Bold,
                     )
                 }
-                Surface(
-                    shape = androidx.compose.foundation.shape.CircleShape,
-                    color = colors.surface,
-                    border = androidx.compose.foundation.BorderStroke(1.dp, colors.outlineVariant),
-                ) {
-                    IconButton(
-                        onClick = onMenu,
-                        modifier = Modifier.size(48.dp).semantics { contentDescription = menuDescription },
-                    ) {
-                        Text("⚙", color = colors.onSurface, style = MaterialTheme.typography.titleLarge)
-                    }
-                }
+
             }
             Text(
                 text = stringResource(if (soruEkleModu) R.string.lessons_choose_subtitle else R.string.lessons_browse_subtitle),
@@ -143,7 +131,7 @@ fun DerslerEkrani(
                 color = colors.secondaryContainer,
             ) {
                 Text(
-                    text = stringResource(R.string.lessons_high_school_badge),
+                    text = profilAdi,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
                     color = colors.onSecondaryContainer,
                     style = MaterialTheme.typography.labelMedium,

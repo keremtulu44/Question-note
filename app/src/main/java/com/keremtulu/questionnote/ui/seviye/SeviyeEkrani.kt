@@ -23,6 +23,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.material3.TextButton
+import kotlinx.coroutines.flow.collect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -66,13 +70,11 @@ fun SeviyeEkrani(
     seviyeHizmeti: SeviyeHizmeti,
     rozetDeposu: RozetDeposu,
 ) {
-    val durum = produceState<SeviyeDurumuUi>(SeviyeDurumuUi.Yukleniyor, seviyeHizmeti) {
-        value = try {
-            SeviyeDurumuUi.Hazir(seviyeHizmeti.ozet(), rozetDeposu.sahipOlanlar())
-        } catch (iptal: CancellationException) {
-            throw iptal
-        } catch (_: Exception) {
-            SeviyeDurumuUi.Hata
+    var yenileme by remember { mutableIntStateOf(0) }
+    val durum = produceState<SeviyeDurumuUi>(SeviyeDurumuUi.Yukleniyor, seviyeHizmeti, yenileme) {
+        value = SeviyeDurumuUi.Yukleniyor
+        seviyeHizmeti.ozetIzle().catch { value = SeviyeDurumuUi.Hata }.collect {
+            value = SeviyeDurumuUi.Hazir(it, rozetDeposu.sahipOlanlar())
         }
     }.value
 
@@ -88,18 +90,18 @@ fun SeviyeEkrani(
                 Modifier.fillMaxSize().padding(insets),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(
-                    stringResource(R.string.level_error),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(stringResource(R.string.level_error), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    TextButton(onClick = { yenileme++ }) { Text(stringResource(R.string.level_retry)) }
+                }
             }
-            is SeviyeDurumuUi.Hazir -> Icerik(durum.ozet, durum.rozetler, insets)
+            is SeviyeDurumuUi.Hazir -> Icerik(durum.ozet, durum.rozetler, rozetDeposu, insets)
         }
     }
 }
 
 @Composable
-private fun Icerik(ozet: SeviyeOzeti, sahip: Set<Rozet>, insets: PaddingValues) {
+private fun Icerik(ozet: SeviyeOzeti, sahip: Set<Rozet>, depo: RozetDeposu, insets: PaddingValues) {
     val durum = ozet.durum
     val colors = MaterialTheme.colorScheme
     LazyColumn(
@@ -108,7 +110,7 @@ private fun Icerik(ozet: SeviyeOzeti, sahip: Set<Rozet>, insets: PaddingValues) 
             start = 20.dp,
             top = insets.calculateTopPadding() + 12.dp,
             end = 20.dp,
-            bottom = insets.calculateBottomPadding() + 96.dp,
+            bottom = insets.calculateBottomPadding() + 24.dp,
         ),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
@@ -130,7 +132,8 @@ private fun Icerik(ozet: SeviyeOzeti, sahip: Set<Rozet>, insets: PaddingValues) 
         item { RutbeKarti(durum.rutbe, durum.seviye, durum.toplamXp, durum.buSeviyedeXp, durum.sonrakiSeviyeXp, durum.kalanXp, durum.oran) }
         item { IstatistikKarti(ozet) }
         item { XpKirilimKarti(ozet) }
-        item { RozetGalerisi(sahip) }
+        item { RutbeYolculugu(durum) }
+        item { RozetKoleksiyonu(sahip, ozet.rozetGirdisi, depo) }
         if (ozet.dersler.isNotEmpty()) {
             item { PekismeKarti(ozet.dersler) }
         }
@@ -321,68 +324,6 @@ private fun XpSatiri(etiket: String, xp: Int) {
             color = if (xp > 0) colors.primary else colors.onSurfaceVariant,
             style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.SemiBold,
-        )
-    }
-}
-
-@Composable
-private fun RozetGalerisi(sahip: Set<Rozet>) {
-    val colors = MaterialTheme.colorScheme
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(containerColor = colors.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-    ) {
-        Column(Modifier.padding(16.dp)) {
-            Text(
-                stringResource(R.string.level_badges_title, sahip.size),
-                color = colors.onSurface,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
-            )
-            Spacer(Modifier.height(12.dp))
-            Rozet.entries.chunked(3).forEach { satir ->
-                Row(
-                    Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
-                    satir.forEach { rozet ->
-                        RozetHucre(rozet, rozet in sahip, Modifier.weight(1f))
-                    }
-                    repeat(3 - satir.size) { Spacer(Modifier.weight(1f)) }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun RozetHucre(rozet: Rozet, kazanildi: Boolean, modifier: Modifier = Modifier) {
-    val colors = MaterialTheme.colorScheme
-    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        RozetGorseli(
-            rozet = rozet,
-            kazanildi = kazanildi,
-            modifier = Modifier.size(66.dp),
-        )
-        Text(
-            stringResource(rozetAdi(rozet)),
-            modifier = Modifier.padding(top = 6.dp),
-            color = if (kazanildi) colors.onSurface else colors.onSurfaceVariant,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = if (kazanildi) FontWeight.SemiBold else FontWeight.Normal,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-        )
-        Text(
-            text = if (kazanildi) {
-                stringResource(rozetAciklamasi(rozet))
-            } else {
-                stringResource(R.string.level_badges_locked)
-            },
-            color = colors.onSurfaceVariant,
-            style = MaterialTheme.typography.labelSmall,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
         )
     }
 }

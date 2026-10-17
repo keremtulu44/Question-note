@@ -9,7 +9,9 @@ import com.keremtulu.questionnote.domain.seviye.XpKirilimi
 import com.keremtulu.questionnote.domain.seviye.XpHesabi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.conflate
-import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.map
+import com.keremtulu.questionnote.data.ilerleme.RozetHizmeti
+import com.keremtulu.questionnote.domain.karne.RozetGirdisi
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import java.time.Clock
@@ -23,6 +25,7 @@ class SeviyeHizmeti(
     private val database: YanlisDefteriDatabase,
     private val rozetDeposu: RozetDeposu,
     private val gunlukHedefDeposu: GunlukHedefDeposu,
+    private val rozetHizmeti: RozetHizmeti,
     private val saat: Clock = Clock.systemDefaultZone(),
 ) {
     private val ilerlemeDao = database.ilerlemeDao()
@@ -52,6 +55,7 @@ class SeviyeHizmeti(
             hedef = hedef,
             dersler = dersDagilimi(),
             tahmin = tahmin(bugun),
+            rozetGirdisi = rozetHizmeti.girdi(),
         )
     }
 
@@ -89,10 +93,10 @@ class SeviyeHizmeti(
      * always agree with each other.
      */
     fun ozetIzle(): Flow<SeviyeOzeti> =
-        merge(ilerlemeDao.soruSayisiIzle(), ilerlemeDao.tekrarSayisiIzle())
+        merge(ilerlemeDao.soruSayisiIzle(), ilerlemeDao.tekrarSayisiIzle(), rozetDeposu.sahipIzle.map { it.size })
             .onStart { emit(0) }
             .conflate()
-            .mapLatest { ozet() }
+            .map { ozet() }
 }
 
 data class SeviyeOzeti(
@@ -105,6 +109,7 @@ data class SeviyeOzeti(
     val hedef: Int,
     val dersler: List<DersIlerlemesi>,
     val tahmin: List<GunTahmini>,
+    val rozetGirdisi: RozetGirdisi,
 )
 
 data class DersIlerlemesi(

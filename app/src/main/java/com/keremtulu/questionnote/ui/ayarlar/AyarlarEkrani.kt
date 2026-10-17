@@ -20,6 +20,15 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.TextButton
+import com.keremtulu.questionnote.data.prefs.SinavProfiliDeposu
+import com.keremtulu.questionnote.domain.model.SinavProfili
+import com.keremtulu.questionnote.domain.repository.DersRepository
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -42,14 +51,21 @@ import java.util.Locale
 @Composable
 fun AyarlarEkrani(
     gunlukHedefDeposu: TercihGunlukHedefDeposu,
+    profilDeposu: SinavProfiliDeposu,
+    dersRepository: DersRepository,
     sonYedek: SonYedekBilgisi?,
     yedeklemeIslemde: Boolean,
     onYedekOlustur: () -> Unit,
     onYedekGeriYukle: () -> Unit,
     onGorselBakimi: () -> Unit,
     onKatalog: () -> Unit,
+    onKonular: () -> Unit,
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val secim by profilDeposu.secimIzle.collectAsState()
+    var profilKaydediliyor by remember { mutableStateOf(false) }
+    var profilHatasi by remember { mutableStateOf(false) }
     var hedef by remember { mutableIntStateOf(gunlukHedefDeposu.hedef()) }
     val sonYedekMetni = sonYedek?.let { backup ->
         val tarih = SimpleDateFormat("d MMM yyyy HH:mm", Locale("tr", "TR"))
@@ -71,7 +87,7 @@ fun AyarlarEkrani(
                 start = 20.dp,
                 top = insets.calculateTopPadding() + 12.dp,
                 end = 20.dp,
-                bottom = insets.calculateBottomPadding() + 96.dp,
+                bottom = insets.calculateBottomPadding() + 24.dp,
             ),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
@@ -89,6 +105,48 @@ fun AyarlarEkrani(
                     color = MaterialTheme.colorScheme.onBackground,
                     style = MaterialTheme.typography.displaySmall,
                 )
+            }
+            item {
+                Bolum(stringResource(R.string.settings_profile_title)) {
+                    Text(stringResource(R.string.settings_profile_note), style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    SinavProfili.entries.forEach { profil ->
+                        TextButton(
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = !profilKaydediliyor && !yedeklemeIslemde,
+                            onClick = {
+                                if (secim.profil != profil) {
+                                    profilKaydediliyor = true
+                                    profilHatasi = false
+                                    scope.launch {
+                                        try {
+                                            dersRepository.sinavProfiliniUygula(profil)
+                                        } catch (iptal: CancellationException) {
+                                            throw iptal
+                                        } catch (_: Exception) {
+                                            profilHatasi = true
+                                        } finally {
+                                            profilKaydediliyor = false
+                                        }
+                                    }
+                                }
+                            },
+                        ) {
+                            Column(Modifier.weight(1f)) {
+                                Text(profil.ad, fontWeight = FontWeight.SemiBold)
+                                Text(profil.aciklama, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    style = MaterialTheme.typography.bodySmall)
+                            }
+                            Text(if (secim.profil == profil) "✓" else "›", style = MaterialTheme.typography.titleLarge)
+                        }
+                    }
+                    if (secim.profil.dersAdlari.isNotEmpty()) {
+                        Text(secim.profil.dersAdlari.joinToString(" · "), style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    if (profilKaydediliyor) Text(stringResource(R.string.settings_profile_saving))
+                    if (profilHatasi) Text(stringResource(R.string.settings_profile_error), color = MaterialTheme.colorScheme.error)
+                }
             }
             item {
                 Bolum(stringResource(R.string.settings_category_goal)) {
@@ -191,12 +249,20 @@ fun AyarlarEkrani(
                             Text(stringResource(R.string.settings_open))
                         }
                     }
-                    Text(
-                        stringResource(R.string.settings_education_note),
-                        modifier = Modifier.padding(top = 12.dp),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.bodySmall,
-                    )
+                    Row(
+                        Modifier.fillMaxWidth().padding(top = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Column(Modifier.weight(1f)) {
+                            Text(stringResource(R.string.settings_topics), style = MaterialTheme.typography.bodyMedium)
+                            Text(stringResource(R.string.settings_topics_note), style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        OutlinedButton(onClick = onKonular, enabled = !yedeklemeIslemde) {
+                            Text(stringResource(R.string.settings_open))
+                        }
+                    }
                 }
             }
             item {

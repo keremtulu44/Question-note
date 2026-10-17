@@ -104,6 +104,8 @@ data class TekrarKaydi(
     val oncekiAralik: Int?,
     val sonrakiAralik: Int?,
     val elleAtandi: Boolean,
+    val algoritmaSurumu: Int = 1,
+    val zaman: Long = 0L,
 )
 
 data class TekrarPlani(

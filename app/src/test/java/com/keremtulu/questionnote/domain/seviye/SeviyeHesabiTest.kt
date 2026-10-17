@@ -63,7 +63,33 @@ class SeviyeHesabiTest {
         assertEquals(Rutbe.ODAKLI, Rutbe.seviyeIcin(11))
         assertEquals(Rutbe.USTA, Rutbe.seviyeIcin(13))
         assertEquals(Rutbe.SAMPION, Rutbe.seviyeIcin(15))
-        assertEquals(Rutbe.SAMPION, Rutbe.seviyeIcin(40))
+        assertEquals(Rutbe.EFSANE, Rutbe.seviyeIcin(40))
+        assertEquals(Rutbe.KASIF, Rutbe.seviyeIcin(18))
+        assertEquals(Rutbe.STRATEJIST, Rutbe.seviyeIcin(22))
+        assertEquals(Rutbe.BILGE, Rutbe.seviyeIcin(28))
+        assertEquals(Rutbe.KOZMIK, Rutbe.seviyeIcin(50))
+        assertEquals(Rutbe.SONSUZ, Rutbe.seviyeIcin(75))
+        assertEquals(Rutbe.SONSUZ, Rutbe.seviyeIcin(1000))
+    }
+
+    @Test
+    fun `ust seviyeler 200de durmaz ve buyuk xp tasmaz`() {
+        val buyuk = SeviyeHesabi.durum(Int.MAX_VALUE)
+        assertTrue(buyuk.seviye > 200)
+        assertTrue(buyuk.kalanXp > 0)
+        assertTrue(buyuk.oran in 0f..1f)
+        assertEquals(Int.MAX_VALUE, SeviyeHesabi.seviyeEsigi(Int.MAX_VALUE))
+        assertEquals(Int.MAX_VALUE, XpHesabi.kirilim(Int.MAX_VALUE, Int.MAX_VALUE, Int.MAX_VALUE, 0, 0, 0).toplam)
+    }
+
+    @Test
+    fun `tum rutbe esikleri alt ve ust sinirlarda tutarli`() {
+        assertEquals(15, Rutbe.entries.size)
+        Rutbe.entries.forEach { rutbe ->
+            val xp = SeviyeHesabi.seviyeEsigi(rutbe.baslangicSeviye)
+            assertEquals(rutbe, SeviyeHesabi.durum(xp).rutbe)
+            if (xp > 0) assertTrue(SeviyeHesabi.durum(xp - 1).seviye < rutbe.baslangicSeviye)
+        }
     }
 
     @Test

@@ -357,6 +357,35 @@ class RoomSoruRepositoryTest {
         assertTrue(!history.last().cozumAcildi)
     }
 
+    @Test
+    fun adaptivePreviewAndStoredV2PlanMatchWhileHistoryIsPreserved() = runBlocking {
+        val soru = newQuestionFor(dersId)
+        val once = database.soruDao().idIleGetir(soru.id)
+        val bugun = LocalDate.of(2026, 10, 16)
+        val preview = com.keremtulu.questionnote.domain.repeat.AkilliTekrarKurali.hesapla(
+            emptyList(), TekrarSonucu.ZORLANDIM, false, bugun, soru.sonrakiTekrarGun,
+        )
+        assertEquals(SoruIslemSonucu.Basarili, repository.tekrarKaydet(soru.id, TekrarSonucu.ZORLANDIM, false))
+        val tekrar = database.tekrarDao().sorununTekrarlariniGetir(soru.id).single()
+        assertEquals(2, tekrar.algoritmaSurumu)
+        assertEquals(preview.sonrakiAralik, tekrar.sonrakiAralik)
+        assertEquals(2, tekrar.sonrakiAralik)
+        assertEquals(preview.sonrakiGun, database.soruDao().idIleGetir(soru.id)?.sonrakiTekrarGun)
+        assertEquals(once?.dersId, repository.soruGetir(soru.id)?.dersId)
+        assertEquals(2, repository.tekrarGecmisiniIzle(soru.id).first().single().algoritmaSurumu)
+    }
+
+    @Test
+    fun catalogueDeletionProtectsDefaultsAndUsedCustomChoices() = runBlocking {
+        val default = repository.secenekleriIzle(SoruSecenekTuru.KAYNAK).first().first { it.varsayilan }
+        assertEquals(com.keremtulu.questionnote.domain.model.SoruSecenegiSilmeSonucu.VarsayilanSilinemez, repository.secenekSil(default.id))
+        val yeni = repository.secenekEkle(SoruSecenekTuru.KAYNAK, "Özel deneme") as SoruSecenegiEklemeSonucu.Basarili
+        newQuestionFor(dersId, kaynak = yeni.secenek.ad)
+        assertEquals(com.keremtulu.questionnote.domain.model.SoruSecenegiSilmeSonucu.Kullanimda(1), repository.secenekSil(yeni.secenek.id))
+        val bos = repository.secenekEkle(SoruSecenekTuru.YANLIS_NEDENI, "Kullanılmayan neden") as SoruSecenegiEklemeSonucu.Basarili
+        assertEquals(com.keremtulu.questionnote.domain.model.SoruSecenegiSilmeSonucu.Basarili, repository.secenekSil(bos.secenek.id))
+    }
+
     private suspend fun newQuestionFor(
         lessonId: String,
         topicId: String? = null,

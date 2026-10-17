@@ -25,6 +25,7 @@ import com.keremtulu.questionnote.domain.model.normalizeSoruSecenegiAdi
 import com.keremtulu.questionnote.domain.model.TekrarKaydi
 import com.keremtulu.questionnote.domain.model.TekrarSonucu
 import com.keremtulu.questionnote.domain.repeat.TekrarKurali
+import com.keremtulu.questionnote.domain.repeat.AkilliTekrarKurali
 import com.keremtulu.questionnote.domain.repository.GorselDosyaYonetimi
 import com.keremtulu.questionnote.domain.repository.SoruRepository
 import java.time.Clock
@@ -265,8 +266,8 @@ class RoomSoruRepository(
         val bugun = LocalDate.now(saat)
         val gun = bugun.toEpochDay().toInt()
         if (tekrarDao.ayniGunTekrarVar(soruId, gun)) return@withTransaction SoruIslemSonucu.AyniGunTekrarVar
-        val onceki = tekrarDao.sorununTekrarlariniGetir(soruId).firstOrNull()?.sonrakiAralik ?: 1
-        val plan = TekrarKurali.hesapla(onceki, sonuc, cozumAcildi, bugun)
+        val gecmis = tekrarDao.sorununTekrarlariniGetir(soruId).map { it.toDomain() }
+        val plan = AkilliTekrarKurali.hesapla(gecmis, sonuc, cozumAcildi, bugun, soru.sonrakiTekrarGun)
         val now = System.currentTimeMillis()
         tekrarDao.ekle(
             TekrarEntity(
@@ -279,7 +280,7 @@ class RoomSoruRepository(
                 cozumAcildi = cozumAcildi,
                 oncekiAralik = plan.oncekiAralik,
                 sonrakiAralik = plan.sonrakiAralik,
-                algoritmaSurumu = TekrarKurali.ALGORITMA_SURUMU,
+                algoritmaSurumu = AkilliTekrarKurali.ALGORITMA_SURUMU,
                 elleAtandi = false,
             ),
         )
@@ -369,6 +370,8 @@ class RoomSoruRepository(
         oncekiAralik = oncekiAralik,
         sonrakiAralik = sonrakiAralik,
         elleAtandi = elleAtandi,
+        algoritmaSurumu = algoritmaSurumu,
+        zaman = zaman,
     )
 
     private inline fun <reified T : Enum<T>> enumOrDefault(value: String, default: T): T =

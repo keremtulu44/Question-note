@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -19,6 +21,21 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.key
+import com.keremtulu.questionnote.data.ilerleme.RozetHizmeti
+import com.keremtulu.questionnote.data.prefs.SinavProfiliDeposu
+import com.keremtulu.questionnote.data.prefs.OdakOturumuDeposu
+import com.keremtulu.questionnote.domain.calisma.OdakOturumu
+import com.keremtulu.questionnote.ui.ayarlar.KonuMerkeziEkrani
+import com.keremtulu.questionnote.ui.calisma.OdakOturumuEkrani
+import com.keremtulu.questionnote.ui.karne.RozetKutlamaHost
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
+import java.util.UUID
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -70,9 +87,11 @@ private sealed interface UygulamaEkrani {
     data class FiltreliOturum(
         val sorular: List<Soru>,
         val dersler: Map<String, Ders>,
-        val sira: Int,
-        val sonuclar: List<OturumSonucu> = emptyList(),
-    ) : UygulamaEkrani
+        val oturum: OdakOturumu,
+    ) : UygulamaEkrani {
+        val sira: Int get() = oturum.sira
+        val sonuclar: List<OturumSonucu> get() = oturum.sonuclar
+    }
     data class FiltreliCalismaTamamlandi(
         val sorular: List<Soru>,
         val dersler: Map<String, Ders>,
@@ -80,6 +99,7 @@ private sealed interface UygulamaEkrani {
     ) : UygulamaEkrani
     data object GorselBakimi : UygulamaEkrani
     data object Katalog : UygulamaEkrani
+    data object KonuMerkezi : UygulamaEkrani
     data object Seviye : UygulamaEkrani
     data object Ayarlar : UygulamaEkrani
 }
@@ -97,10 +117,15 @@ fun YanlisDefteriUygulamasi(
     ilerlemeHizmeti: IlerlemeHizmeti,
     seviyeHizmeti: SeviyeHizmeti,
     rozetDeposu: RozetDeposu,
+    rozetHizmeti: RozetHizmeti,
+    profilDeposu: SinavProfiliDeposu,
+    oturumDeposu: OdakOturumuDeposu,
     gunlukHedefDeposu: GunlukHedefDeposu,
     tercihHedefDeposu: TercihGunlukHedefDeposu,
 ) {
     var ekran by remember { mutableStateOf<UygulamaEkrani>(UygulamaEkrani.Bugun) }
+    val profilSecimi by profilDeposu.secimIzle.collectAsState()
+    var bekleyenOturum by remember { mutableStateOf<UygulamaEkrani.FiltreliOturum?>(null) }
     var filtreliCalismaAyar by remember { mutableStateOf(FiltreliCalismaEkraniAyar()) }
     // Filtreli oturum sürerken başka bir ekrana geçilirse önce onay istenir.
     var oturumCikisHedefi by remember { mutableStateOf<UygulamaEkrani?>(null) }
@@ -112,12 +137,49 @@ fun YanlisDefteriUygulamasi(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    fun oturumGoster(sorular: List<Soru>, dersler: Map<String, Ders>, oturum: OdakOturumu) {
+        // Reviews are already committed in Room; a checkpoint failure must not undo that fact.
+        runCatching { oturumDeposu.kaydet(oturum) }.onFailure {
+            scope.launch { snackbarHostState.showSnackbar(context.getString(R.string.focus_checkpoint_error)) }
+        }
+        bekleyenOturum = null
+        ekran = if (oturum.bitti) {
+            UygulamaEkrani.FiltreliCalismaTamamlandi(sorular, dersler, oturum.sonuclar)
+        } else {
+            UygulamaEkrani.FiltreliOturum(sorular, dersler, oturum)
+        }
+    }
+
+    fun oturumBaslat(sorular: List<Soru>, dersler: Map<String, Ders>, bugunden: Boolean = false) {
+        if (sorular.isEmpty()) return
+        val benzersiz = sorular.distinctBy { it.id }
+        oturumGoster(benzersiz, dersler, OdakOturumu(UUID.randomUUID().toString(), benzersiz.map { it.id },
+            System.currentTimeMillis(), bugunden))
+    }
+
+    fun karneyiKapat(hedef: UygulamaEkrani) {
+        runCatching { oturumDeposu.temizle() }
+        ekran = hedef
+    }
+
     suspend fun kurtarmayiCalistir() {
         kurtarma = KurtarmaDurumu.YUKLENIYOR
         try {
             disaAktarmaHizmeti.kesintiliGeriYuklemeyiTamamla()
             runCatching { gorselDeposu.eskiGecicileriTemizle() }
             sonYedek = disaAktarmaHizmeti.sonYedekBilgisiGetir()
+            val kayit = withContext(Dispatchers.IO) { oturumDeposu.oku() }
+            if (kayit != null) {
+                val dersler = dersRepository.dersleriIzle(false).first().associateBy { it.id }
+                val sorular = kayit.soruIdleri.mapNotNull { soruRepository.soruGetir(it) }
+                    .filter { it.dersId in dersler }
+                val gecmis = sorular.mapNotNull { soru ->
+                    soruRepository.tekrarGecmisiniIzle(soru.id).first().firstOrNull()?.let { soru.id to it }
+                }.toMap()
+                val kurtarilan = kayit.kurtar(sorular.map { it.id }.toSet(), gecmis)
+                if (kurtarilan.soruIdleri.isNotEmpty()) oturumGoster(sorular, dersler, kurtarilan)
+                else withContext(Dispatchers.IO) { oturumDeposu.temizle() }
+            }
             kurtarma = KurtarmaDurumu.HAZIR
         } catch (cancel: CancellationException) {
             throw cancel
@@ -127,6 +189,24 @@ fun YanlisDefteriUygulamasi(
     }
 
     LaunchedEffect(disaAktarmaHizmeti) { kurtarmayiCalistir() }
+    LaunchedEffect(profilSecimi.profil) { filtreliCalismaAyar = FiltreliCalismaEkraniAyar() }
+    LaunchedEffect(ekran, kurtarma, yedeklemeIslemde) {
+        if (kurtarma == KurtarmaDurumu.HAZIR && !yedeklemeIslemde &&
+            (ekran == UygulamaEkrani.Seviye || ekran == UygulamaEkrani.Bugun)) {
+            try {
+                rozetHizmeti.degerlendir()
+            } catch (iptal: CancellationException) {
+                throw iptal
+            } catch (_: Exception) {
+                snackbarHostState.showSnackbar(context.getString(R.string.level_error))
+            }
+        }
+    }
+    LaunchedEffect(kurtarma, yedeklemeIslemde, rozetHizmeti) {
+        if (kurtarma == KurtarmaDurumu.HAZIR && !yedeklemeIslemde) {
+            rozetHizmeti.degisiklikleriIzle().catch { /* Gallery has its own visible retry state. */ }.collect { }
+        }
+    }
 
     val exportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/zip"),
@@ -170,6 +250,8 @@ fun YanlisDefteriUygulamasi(
     fun ekranSec(hedef: UygulamaEkrani) {
         if (ekran is UygulamaEkrani.FiltreliOturum) {
             oturumCikisHedefi = hedef
+        } else if (ekran is UygulamaEkrani.FiltreliCalismaTamamlandi) {
+            karneyiKapat(hedef)
         } else {
             ekran = hedef
         }
@@ -196,13 +278,14 @@ fun YanlisDefteriUygulamasi(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             if (altMenuGorunur) {
                 AltMenu(secili = ekran.aktifSekme(), onSec = ::sekmeSec)
             }
         },
     ) { insets ->
-        Box(Modifier.fillMaxSize().padding(bottom = insets.calculateBottomPadding())) {
+        Box(Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets)) {
             when (kurtarma) {
                 KurtarmaDurumu.YUKLENIYOR -> UygulamaDurumEkrani(
                     metin = stringResource(R.string.backup_restore_working),
@@ -219,8 +302,9 @@ fun YanlisDefteriUygulamasi(
                         dersRepository = dersRepository,
                         ilerlemeHizmeti = ilerlemeHizmeti,
                         gunlukHedefDeposu = gunlukHedefDeposu,
-                        onMenu = { ekranSec(UygulamaEkrani.Ayarlar) },
                         onSoruEkle = { ekran = UygulamaEkrani.DersSecimi(soruEkleModu = true) },
+                        onOturumBaslat = { sorular, dersler -> oturumBaslat(sorular, dersler, bugunden = true) },
+                        onDevam = bekleyenOturum?.let { onceki -> { ekran = onceki; bekleyenOturum = null } },
                         onSoruAc = { ders, soruId ->
                             ekran = UygulamaEkrani.SoruAyrintisi(ders, soruId, UygulamaEkrani.Bugun)
                         },
@@ -228,7 +312,7 @@ fun YanlisDefteriUygulamasi(
                     is UygulamaEkrani.DersSecimi -> DerslerEkrani(
                         repository = dersRepository,
                         soruEkleModu = current.soruEkleModu,
-                        onMenu = { ekranSec(UygulamaEkrani.Ayarlar) },
+                        profilAdi = profilSecimi.profil.ad,
                         onDersSecildi = { ders ->
                             ekran = if (current.soruEkleModu) {
                                 UygulamaEkrani.SoruFormu(ders, null, current)
@@ -288,49 +372,30 @@ fun YanlisDefteriUygulamasi(
                                 tekrarOturumunda = true,
                             )
                         },
-                        onOturumBaslat = { questions, lessons ->
-                            ekran = UygulamaEkrani.FiltreliOturum(questions, lessons, sira = 0)
-                        },
+                        onOturumBaslat = { questions, lessons -> oturumBaslat(questions, lessons) },
+                        onDevam = bekleyenOturum?.let { onceki -> { ekran = onceki; bekleyenOturum = null } },
                     )
                     is UygulamaEkrani.FiltreliOturum -> {
-                        val question = current.sorular.getOrNull(current.sira)
+                        val question = current.sorular.firstOrNull { it.id == current.oturum.simdikiId }
                         val lesson = question?.let { current.dersler[it.dersId] }
                         if (question == null || lesson == null) {
                             UygulamaDurumEkrani(
-                                metin = stringResource(R.string.filtered_practice_question_unavailable),
-                                yukleniyor = false,
-                                tekrarDene = { ekran = UygulamaEkrani.FiltreliCalisma },
+                                metin = stringResource(R.string.filtered_practice_question_unavailable), yukleniyor = false,
+                                tekrarDene = { oturumGoster(current.sorular, current.dersler, current.oturum.atla()) },
                             )
-                        } else {
-                            SoruDetayEkrani(
-                                soruId = question.id,
-                                ders = lesson,
-                                dersArsivli = false,
-                                soruRepository = soruRepository,
-                                konuRepository = konuRepository,
-                                gorselDeposu = gorselDeposu,
-                                onGeri = { ekranSec(UygulamaEkrani.FiltreliCalisma) },
-                                onDuzenle = { id -> ekran = UygulamaEkrani.SoruFormu(lesson, id, current) },
-                                onTekrarTamamlandi = { sonuc, cozumAcildi ->
-                                    val nextIndex = current.sira + 1
-                                    val guncelSonuclar = current.sonuclar +
-                                        OturumSonucu(question.id, sonuc, cozumAcildi)
-                                    ekran = if (nextIndex < current.sorular.size) {
-                                        current.copy(sira = nextIndex, sonuclar = guncelSonuclar)
-                                    } else {
-                                        UygulamaEkrani.FiltreliCalismaTamamlandi(
-                                            sorular = current.sorular,
-                                            dersler = current.dersler,
-                                            sonuclar = guncelSonuclar,
-                                        )
-                                    }
-                                    scope.launch {
-                                        snackbarHostState.showSnackbar(context.getString(R.string.review_saved))
-                                    }
+                        } else key(current.oturum.id, question.id) {
+                            OdakOturumuEkrani(
+                                soru = question, ders = lesson, repository = soruRepository, gorselDeposu = gorselDeposu,
+                                sira = current.sira + 1, toplam = current.oturum.soruIdleri.size, sonuclar = current.sonuclar,
+                                cozumOnceAcildi = question.id in current.oturum.cozumAcilanlar,
+                                onCozumAcildi = { oturumGoster(current.sorular, current.dersler, current.oturum.cozumuAc()) },
+                                onGeri = { ekranSec(current.geriHedefi()) },
+                                onSonuc = { sonuc, cozum ->
+                                    val yeni = current.oturum.cevapla(OturumSonucu(question.id, sonuc, cozum))
+                                    oturumGoster(current.sorular, current.dersler, yeni)
                                 },
-                                tekrarOturumunda = true,
-                                oturumSira = current.sira + 1,
-                                oturumToplam = current.sorular.size,
+                                onSonaBirak = { oturumGoster(current.sorular, current.dersler, current.oturum.sonaBirak()) },
+                                onAtla = { oturumGoster(current.sorular, current.dersler, current.oturum.atla()) },
                             )
                         }
                     }
@@ -341,15 +406,16 @@ fun YanlisDefteriUygulamasi(
                         sonuclar = current.sonuclar,
                         ilerlemeHizmeti = ilerlemeHizmeti,
                         rozetDeposu = rozetDeposu,
+                        rozetHizmeti = rozetHizmeti,
                         gunlukHedefDeposu = gunlukHedefDeposu,
                         onKonudanCalis = { konuId ->
                             filtreliCalismaAyar = FiltreliCalismaEkraniAyar(
                                 filtre = SoruCalismaFiltresi(konuId = konuId),
                             )
-                            ekran = UygulamaEkrani.FiltreliCalisma
+                            karneyiKapat(UygulamaEkrani.FiltreliCalisma)
                         },
-                        onFiltrelereDon = { ekran = UygulamaEkrani.FiltreliCalisma },
-                        onBugun = { ekran = UygulamaEkrani.Bugun },
+                        onFiltrelereDon = { karneyiKapat(UygulamaEkrani.FiltreliCalisma) },
+                        onBugun = { karneyiKapat(UygulamaEkrani.Bugun) },
                     )
                     is UygulamaEkrani.SoruFormu -> SoruFormuEkrani(
                         ders = current.ders,
@@ -363,6 +429,11 @@ fun YanlisDefteriUygulamasi(
                         service = gorselTutarliligi,
                         onGeri = { ekran = UygulamaEkrani.Ayarlar },
                     )
+                    UygulamaEkrani.KonuMerkezi -> KonuMerkeziEkrani(
+                        dersRepository = dersRepository, konuRepository = konuRepository,
+                        onDers = { ekran = UygulamaEkrani.Konular(it, UygulamaEkrani.KonuMerkezi) },
+                        onGeri = { ekran = UygulamaEkrani.Ayarlar },
+                    )
                     UygulamaEkrani.Katalog -> KatalogYonetimiEkrani(
                         soruRepository = soruRepository,
                         onGeri = { ekran = UygulamaEkrani.Ayarlar },
@@ -373,6 +444,7 @@ fun YanlisDefteriUygulamasi(
                     )
                     UygulamaEkrani.Ayarlar -> AyarlarEkrani(
                         gunlukHedefDeposu = tercihHedefDeposu,
+                        profilDeposu = profilDeposu, dersRepository = dersRepository,
                         sonYedek = sonYedek,
                         yedeklemeIslemde = yedeklemeIslemde,
                         onYedekOlustur = {
@@ -385,11 +457,18 @@ fun YanlisDefteriUygulamasi(
                         },
                         onGorselBakimi = { ekranSec(UygulamaEkrani.GorselBakimi) },
                         onKatalog = { ekranSec(UygulamaEkrani.Katalog) },
+                        onKonular = { ekranSec(UygulamaEkrani.KonuMerkezi) },
                     )
                 }
             }
         }
     }
+
+    RozetKutlamaHost(rozetDeposu,
+        goster = kurtarma == KurtarmaDurumu.HAZIR && !yedeklemeIslemde &&
+            ekran !is UygulamaEkrani.FiltreliOturum && ekran !is UygulamaEkrani.SoruFormu &&
+            ekran !is UygulamaEkrani.SoruAyrintisi && oturumCikisHedefi == null && geriYuklemeOnizlemesi == null,
+    )
 
     oturumCikisHedefi?.let { hedef ->
         val oturum = ekran as? UygulamaEkrani.FiltreliOturum
@@ -401,6 +480,7 @@ fun YanlisDefteriUygulamasi(
             confirmButton = {
                 TextButton(
                     onClick = {
+                        bekleyenOturum = oturum
                         oturumCikisHedefi = null
                         ekran = hedef
                     },
@@ -452,6 +532,8 @@ fun YanlisDefteriUygulamasi(
                         scope.launch {
                             yedeklemeIslemde = true
                             try {
+                                withContext(Dispatchers.IO) { oturumDeposu.temizle() }
+                                bekleyenOturum = null
                                 val result = disaAktarmaHizmeti.geriYukle(preview)
                                 geriYuklemeOnizlemesi = null
                                 ekran = UygulamaEkrani.Bugun
@@ -495,7 +577,7 @@ private fun UygulamaEkrani.aktifSekme(): AltSekme = when (this) {
     is UygulamaEkrani.FiltreliCalismaTamamlandi,
     -> AltSekme.FILTRELI
     UygulamaEkrani.Seviye -> AltSekme.SEVIYE
-    UygulamaEkrani.Ayarlar, UygulamaEkrani.Katalog, UygulamaEkrani.GorselBakimi -> AltSekme.AYARLAR
+    UygulamaEkrani.Ayarlar, UygulamaEkrani.Katalog, UygulamaEkrani.GorselBakimi, UygulamaEkrani.KonuMerkezi -> AltSekme.AYARLAR
     is UygulamaEkrani.SoruAyrintisi -> if (tekrarOturumunda) AltSekme.FILTRELI else AltSekme.DERSLER
     is UygulamaEkrani.SoruFormu -> if (geri is UygulamaEkrani.FiltreliOturum) {
         AltSekme.FILTRELI
@@ -523,9 +605,10 @@ private fun UygulamaEkrani.geriHedefi(): UygulamaEkrani = when (this) {
     is UygulamaEkrani.SoruAyrintisi -> geri
     is UygulamaEkrani.SoruFormu -> geri
     UygulamaEkrani.FiltreliCalisma -> UygulamaEkrani.Bugun
-    is UygulamaEkrani.FiltreliOturum -> UygulamaEkrani.FiltreliCalisma
+    is UygulamaEkrani.FiltreliOturum -> if (oturum.bugunden) UygulamaEkrani.Bugun else UygulamaEkrani.FiltreliCalisma
     is UygulamaEkrani.FiltreliCalismaTamamlandi -> UygulamaEkrani.FiltreliCalisma
     UygulamaEkrani.GorselBakimi -> UygulamaEkrani.Ayarlar
+    UygulamaEkrani.KonuMerkezi -> UygulamaEkrani.Ayarlar
     UygulamaEkrani.Katalog -> UygulamaEkrani.Ayarlar
     UygulamaEkrani.Seviye -> UygulamaEkrani.Bugun
     UygulamaEkrani.Ayarlar -> UygulamaEkrani.Bugun

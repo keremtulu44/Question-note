@@ -16,6 +16,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
+import com.keremtulu.questionnote.domain.repeat.CalismaSorulariniSirala
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -81,9 +84,10 @@ fun BugunEkrani(
     dersRepository: DersRepository,
     ilerlemeHizmeti: IlerlemeHizmeti,
     gunlukHedefDeposu: GunlukHedefDeposu,
-    onMenu: () -> Unit,
     onSoruEkle: () -> Unit,
     onSoruAc: (Ders, String) -> Unit,
+    onOturumBaslat: (List<Soru>, Map<String, Ders>) -> Unit,
+    onDevam: (() -> Unit)? = null,
 ) {
     val today by produceState(initialValue = LocalDate.now()) {
         while (true) {
@@ -94,7 +98,6 @@ fun BugunEkrani(
             value = LocalDate.now()
         }
     }
-    val menuDescription = stringResource(R.string.nav_settings)
     val dateText = remember(today) {
         today.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", Locale("tr", "TR")))
             .replaceFirstChar { it.titlecase(Locale("tr", "TR")) }
@@ -180,27 +183,7 @@ fun BugunEkrani(
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     }
-                    Surface(
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.surface,
-                        border = androidx.compose.foundation.BorderStroke(
-                            1.dp,
-                            MaterialTheme.colorScheme.outlineVariant,
-                        ),
-                    ) {
-                        IconButton(
-                            onClick = onMenu,
-                            modifier = Modifier.size(48.dp).semantics {
-                                contentDescription = menuDescription
-                            },
-                        ) {
-                            Text(
-                                text = "⚙",
-                                color = MaterialTheme.colorScheme.onSurface,
-                                style = MaterialTheme.typography.titleLarge,
-                            )
-                        }
-                    }
+
                 }
             }
             item {
@@ -211,6 +194,24 @@ fun BugunEkrani(
                     dateText = dateText,
                     state = state,
                 )
+            }
+            if (onDevam != null) item {
+                OutlinedButton(onClick = onDevam, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.focus_continue_session))
+                }
+            }
+            (state as? BugunDurumu.Hazir)?.takeIf { it.sorular.isNotEmpty() }?.let { ready ->
+                item {
+                    val dersler = ready.sorular.associate { it.ders.id to it.ders }
+                    val sorular = CalismaSorulariniSirala.akilliOncelik(ready.sorular.map { it.soru }, bugunGun)
+                        .take((hedef - gunluk).coerceIn(5, 30))
+                    Button(onClick = { onOturumBaslat(sorular, dersler) }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp)) {
+                        Column(Modifier.padding(vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(stringResource(R.string.focus_start_today), fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.focus_start_count, sorular.size), style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                }
             }
             item {
                 Row(

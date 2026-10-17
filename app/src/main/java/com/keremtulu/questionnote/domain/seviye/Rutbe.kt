@@ -6,7 +6,7 @@ import com.keremtulu.questionnote.R
  * Ranks are the named levels of the progression system. Each rank is a span of levels, so the
  * system stays endless while still having recognisable badges.
  *
- * Artwork lives in the drawable folders as rank_*.png (generated, white background removed, 104dp).
+ * Artwork lives in the drawable folders as WebP rank artwork (generated, white background removed, 96dp).
  */
 enum class Rutbe(
     val anahtar: String,
@@ -23,10 +23,16 @@ enum class Rutbe(
     ODAKLI("odakli", "Odaklı", 10, R.drawable.rank_odakli),
     USTA("usta", "Usta", 12, R.drawable.rank_usta),
     SAMPION("sampiyon", "Şampiyon", 15, R.drawable.rank_sampiyon),
+    KASIF("kasif", "Kâşif", 18, R.drawable.rank_kasif),
+    STRATEJIST("stratejist", "Stratejist", 22, R.drawable.rank_stratejist),
+    BILGE("bilge", "Bilge", 28, R.drawable.rank_bilge),
+    EFSANE("efsane", "Efsane", 35, R.drawable.rank_efsane),
+    KOZMIK("kozmik", "Kozmik", 50, R.drawable.rank_kozmik),
+    SONSUZ("sonsuz", "Sonsuz", 75, R.drawable.rank_sonsuz),
     ;
 
-    /** After the last named rank the level keeps growing and shows the champion emblem. */
-    val sonMu: Boolean get() = this == SAMPION
+    /** After the last named rank the level keeps growing and shows the infinity emblem. */
+    val sonMu: Boolean get() = this == SONSUZ
 
     companion object {
         fun seviyeIcin(seviye: Int): Rutbe =

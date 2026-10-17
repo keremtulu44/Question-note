@@ -6,6 +6,9 @@ import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
 import com.keremtulu.questionnote.data.images.GorselTutarliligiHizmeti
 import com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti
 import com.keremtulu.questionnote.data.ilerleme.IlerlemeHizmeti
+import com.keremtulu.questionnote.data.ilerleme.RozetHizmeti
+import com.keremtulu.questionnote.data.prefs.SinavProfiliDeposu
+import com.keremtulu.questionnote.data.prefs.OdakOturumuDeposu
 import com.keremtulu.questionnote.data.prefs.GunlukHedefDeposu
 import com.keremtulu.questionnote.data.prefs.RozetDeposu
 import com.keremtulu.questionnote.data.prefs.TercihGunlukHedefDeposu
@@ -21,7 +24,9 @@ class AppContainer(context: Context) {
     private val database = YanlisDefteriDatabaseProvider.getInstance(context)
 
     val gorselDeposu = LocalSoruGorselDeposu(context)
-    val dersRepository: DersRepository = RoomDersRepository(database)
+    val profilDeposu = SinavProfiliDeposu(context)
+    val oturumDeposu = OdakOturumuDeposu(context)
+    val dersRepository: DersRepository = RoomDersRepository(database, profilDeposu)
     val konuRepository: KonuRepository = RoomKonuRepository(database)
     val soruRepository: SoruRepository = RoomSoruRepository(database, gorselDeposu)
     val gorselTutarliligi = GorselTutarliligiHizmeti(database, gorselDeposu)
@@ -30,5 +35,6 @@ class AppContainer(context: Context) {
     val rozetDeposu = RozetDeposu(context)
     val gunlukHedefDeposu: GunlukHedefDeposu = TercihGunlukHedefDeposu(context)
     val tercihHedefDeposu = gunlukHedefDeposu as TercihGunlukHedefDeposu
-    val seviyeHizmeti = SeviyeHizmeti(database, rozetDeposu, gunlukHedefDeposu)
+    val rozetHizmeti = RozetHizmeti(database, rozetDeposu, gunlukHedefDeposu)
+    val seviyeHizmeti = SeviyeHizmeti(database, rozetDeposu, gunlukHedefDeposu, rozetHizmeti)
 }

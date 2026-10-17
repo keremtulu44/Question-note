@@ -43,6 +43,17 @@ class CalismaSorulariniSiralaTest {
         assertEquals(listOf("a", "c", "b"), ordered.map { it.id })
     }
 
+    @Test
+    fun smartOrderingPrioritizesDueWorkThenWeakerQuestionsAtSameDate() {
+        val day = day("2026-10-17")
+        val strong = soru("strong", null, "2026-10-01").copy(sonrakiTekrarGun = day, ogrenmeDurumu = OgrenmeDurumu.SAGLAM)
+        val weak = strong.copy(id = "weak", ogrenmeDurumu = OgrenmeDurumu.OGRENIYOR)
+        val future = weak.copy(id = "future", sonrakiTekrarGun = day + 1)
+        val overdue = strong.copy(id = "overdue", sonrakiTekrarGun = day - 4)
+        assertEquals(listOf("overdue", "weak", "strong", "future"),
+            CalismaSorulariniSirala.akilliOncelik(listOf(future, strong, weak, overdue), day).map { it.id })
+    }
+
     private fun soru(id: String, sonTekrar: String?, olusturuldu: String): Soru = Soru(
         id = id,
         dersId = "lesson",
