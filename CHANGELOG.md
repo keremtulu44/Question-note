@@ -2,7 +2,7 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
-## [1.2.0 — hazırlık] — 2026-10-17
+## [1.2.0] — 2026-10-17
 
 - **İlerleme büyüdü:** 11 → **30 rozet**, 9 → **15 rütbe**. Altı yeni, saydam WebP amblem; tüm rütbeleri ve XP eşiklerini gösteren yolculuk galerisi. Eski 200-seviye sınırı ve yüksek XP taşma riski kaldırıldı.
 - Rozet kartları/detayları kazanma koşulunu ve birikimli ilerlemeyi gösterir. **5 gizli rozetin adı, koşulu ve çizimi kazanılana kadar saklıdır.** Tümü/Kazanılan/Kilitli/Gizli filtreleri eklendi.
@@ -15,7 +15,8 @@ Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih 
 - Yarım oturum kapanma sonrası kurtarılır. Room kaydı ile devam noktası arasındaki kesinti uzlaştırılır; çözüm açma işareti sona bırakmada kaybolmaz, aynı gün ikinci tekrar/XP engellenir.
 - **Tutarlılık düzeltmesi:** XP/haftalık özet/rozet sorgularında yalnız `RAHAT + çözüm açılmamış` bağımsızdır. `ZORLANDIM` için normal emek XP'si korunur; eski tekrar kayıtları yeniden yazılmaz.
 - **Room v3 ve ZIP v3 korunur.** Algoritma durumu mevcut tekrar geçmişinden türetildiği için v4 migration gerekmez. Yeni kayıtların `algoritma_surumu = 2` değeri mevcut yedek biçimiyle taşınır.
-- CI ve imzalı v1.2.0 Release doğrulaması bekliyor. Cihaz gezinme/kutlama/odak kabulü ayrıca açık tutuldu.
+- CI `39067624050`: **130 test geçti** (0 başarısız/hata/atlanan); Release, apksigner ve beklenen sertifika doğrulandı. Üç yeni Compose/Robolectric testi sentetik sistem boşluğu/büyük yazı, gizli rozet maskeleme ve kazanım/kapatmayı kapsar.
+- [İmzalı v1.2.0 APK](https://github.com/keremtulu44/Question-note/releases/tag/v1.2.0), 10.524.895 bayt; SHA-256 `eb8ab5b3e678a6015c54c7597b8bc93508f82ab3291a6dd06a290c7f4fabcea1` (CI ve GitHub asset digest eşleşti). Fiziksel cihaz gezinme/kutlama/odak kabulü ayrıca açık tutuldu.
 
 ## [1.1.1] — 2026-10-17
 

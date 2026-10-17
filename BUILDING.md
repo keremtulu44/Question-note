@@ -4,9 +4,15 @@
 > Hiçbir anahtar, parola veya token bu depoya yazılmaz.
 
 - Son güncelleme: 2026-10-17
-- Son yayımlanan sürüm: **v1.0.9 (versionCode 10)**. CI run `39048703584`: 44 test geçti; Release derlemesi, imza/apksigner doğrulaması ve sertifika fingerprint kontrolü başarılı. [Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.9); CI raporundaki APK SHA-256 `c6f1fd47b1bfae06e77758e91ed33ec69ad81262208e541080477269191b0f38`.
-- v1.0.9 düzeltmeleri ve v1.0.8 filtreli çalışma; v1.0.7 `+ Konu`, v1.0.6 form yenilemesi ve v1.0.5 katalog/migration fiziksel cihazda henüz kabul edilmedi. v1.0.4 tekrar geçmişi, SAF/Drive yedek/geri yükleme ve fotoğraf okunabilirliği de cihaz testi bekliyor.
-- **v1.0.9 yayımlandı:** döndürme durumu, oturum çıkış onayı, sayı alanı, görsel belleği, arşivli konu çakışması, yedek yazımı ve CSV formülü düzeltmelerini içerir; CI push ile `arena/59c6570d-question-note` dalında çalıştı.
+- Son yayımlanan sürüm: **v1.2.0 (versionCode 14)**. CI run `39067624050`: **130 test** geçti;
+  Release derlemesi, apksigner ve beklenen sertifika eşleşmesi başarılı.
+- [Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.2.0) ·
+  [APK indir](https://github.com/keremtulu44/Question-note/releases/download/v1.2.0/yanlis-defteri-1.2.0.apk).
+  APK 10.524.895 bayt; SHA-256 `eb8ab5b3e678a6015c54c7597b8bc93508f82ab3291a6dd06a290c7f4fabcea1`.
+  CI raporu ile GitHub asset digest eşleşir; derlenen commit `baf7bea4269c8970c0102ea46442cc12563f5d0f`.
+- 30 rozet/15 rütbe, sınav profilleri, alt menü inset düzeltmesi ve Odak Stüdyosu yayımlandı.
+  **Fiziksel cihaz kabulü ayrıdır**; otomatik testlerin yeşil olması gerçek cihaz testi yapıldığı
+  anlamına gelmez. Ayrıntı `docs/TEST_KONTROL_LISTESI.md`.
 
 ---
 
@@ -30,7 +36,7 @@ Kullanıcının telefonunda Android SDK, Gradle veya Termux kurması **gerekmez*
 
 - Tek Gradle modülü, Kotlin + Jetpack Compose.
 - Sürümler `gradle/libs.versions.toml` içinde sabitlenir; Gradle wrapper depoda tutulur.
-- minSdk 26, compileSdk/targetSdk 37; yayımlanmış v1.0.9 `versionCode=10` (önceki v1.0.8: `versionCode=9`). v1.0.9 CI sonucu yukarıda kayıtlı.
+- minSdk 26, compileSdk/targetSdk 37; yayımlanmış v1.2.0 `versionCode=14` (önceki v1.1.1: `versionCode=13`).
 - Yapay zekâ ortamında Java/Android SDK ve Maven erişimi yoktur → derleme **yalnızca** Actions'ta olur.
 
 ## 3. İmzalama düzeni (kritik)
@@ -101,7 +107,10 @@ günlük arşivin kurulu olduğu telefonun üzerine kurulmaz.
 
 ## 5. APK'ya telefondan erişim
 
-Yayımlanan Release'ler:
+**Güncel:** [v1.2.0 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.2.0/yanlis-defteri-1.2.0.apk).
+Mevcut uygulamayı kaldırmadan üzerine kur; güncelleme öncesi Ayarlar'dan ZIP yedeği almak önerilir.
+
+İlk sürümlerin tarihsel Release kayıtları:
 
 - **v1.0.0 (versionCode 1):** [Release v1.0.0](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.0) — G2'nin arayüzsüz ilk imzalı sürümü.
 - **v1.0.1 (versionCode 2):** [Release v1.0.1](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.1) — açık/koyu temalı 7 ders kartı.

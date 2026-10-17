@@ -1,7 +1,7 @@
 # Test Kontrol Listesi
 
-> **v1.2.0:** çekirdek CI `39067149944` 127 testle başarılı. Son sürümde üç ek Compose UI testi
-> ve Release doğrulaması bekliyor. Aşağıdaki fiziksel cihaz satırları otomatik olarak işaretlenmez.
+> **v1.2.0:** CI `39067624050` **130 testle başarılı**; Release ve imza doğrulandı. Üç yeni
+> Compose UI testi dahil. Aşağıdaki fiziksel cihaz satırları otomatik olarak işaretlenmez.
 
 
 > Her testte **kim** yaptığı açıkça yazılır. Yapay zekâ, çalıştırmadığı bir testi "geçti" olarak
@@ -15,7 +15,11 @@
 > ZIP yol güvenliği) ve **Robolectric** (şema/migration testleri). Emülatör yalnızca gerçekten
 > gerekirse kullanılır; asıl kabul testleri gerçek cihazda yapılır.
 
-Son güncelleme: 2026-10-17. v1.1.0 (versionCode 12) yayımlandı, v1.1.1 yalnız WebP optimizasyonudur; CI run `39053319900` 86 testi, Release derlemesini, imzayı ve sertifika fingerprint'ini doğruladı (72 → 86; seviye/rütbe/XP birim testleri eklendi). Filtreli çalışma, karne ekranı ve v1.0.5–v1.0.9 özelliklerinin cihaz kabulü ayrı ve henüz kullanıcı tarafından bildirilmedi. v1.0.4 tekrar geçmişi, SAF/Drive yedek-geri yükleme ve fotoğraf okunabilirliği de cihazda bekliyor. “3. turu denemedim” ifadesinin checklist eşlemesi teyitsizdir. Karne, rozet ve hedef animasyonları CI'da derlendi; cihaz kabulü aşağıdaki ayrı bölümde bekliyor.
+Son güncelleme: 2026-10-17. **v1.2.0 (versionCode 14)** yayımlandı. CI `39067624050`: 130 test,
+0 başarısız/hata/atlanan; Release/apksigner/sertifika ve asset SHA-256 eşleşmesi doğrulandı.
+Fiziksel cihaz kabulü henüz tamamlanmadı. Aşağıdaki tarihsel kullanıcı işaretleri korunur;
+yeni testlerin yeşil olması geçmişteki cihaz bekleyenlerini tamamlanmış yapmaz.
+
 
 ---
 
@@ -254,8 +258,8 @@ Her geliştirme adımının sonunda şu ayrım yazılır:
 | G.5 | Adaptif v2, 1–180 gün sınırı, gecikme, kolaylık; önizleme ve Room planı aynı | CI | [x] |
 | G.6 | Bağımsız sorgular yalnız RAHAT + açılmamış çözüm; v2 tekrar ZIP v3 turunda korunur | CI | [x] |
 | G.7 | Sona bırakmada çözüm işareti korunur; commit-checkpoint arası kesinti uzlaştırılır, eski/silinmiş kayıtlar doğru ele alınır | CI | [x] |
-| G.8 | Compose: büyük yazı + sentetik alt/yatay insets ile beş sekme sistem alanının dışında; dokunma hedefi ≥48 px | CI UI (son koşu bekliyor) | [ ] |
-| G.9 | Compose: gizli galeri/detay gerçek adı ve koşulu sızdırmaz; kazanımda açılır, kapatınca sahiplik kalır | CI UI (son koşu bekliyor) | [ ] |
+| G.8 | Compose: büyük yazı + sentetik alt/yatay insets ile beş sekme sistem alanının dışında; dokunma hedefi ≥48 dp (test yoğunluğu 1) | CI UI `39067624050` | [x] |
+| G.9 | Compose: gizli galeri/detay gerçek adı ve koşulu sızdırmaz; kazanımda açılır, kapatınca sahiplik kalır | CI UI `39067624050` | [x] |
 | G.10 | S24 FE üç düğmeli gezinmede alt menünün tamamı görünür ve tıklanır; sistem çubuğuyla çakışmaz | Cihaz | [ ] |
 | G.11 | Jest modu, yatay ekran, büyük yazı, açık/koyu tema; üst sağda Ayarlar tekrarı yok | Cihaz | [ ] |
 | G.12 | LGS → TYT → AYT → KPSS → Tümü; ders listesi/bugün/filtreli güncellenir, önceki veriler durur | Cihaz | [ ] |

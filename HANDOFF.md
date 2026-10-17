@@ -4,13 +4,14 @@ Son güncelleme: **2026-10-17**. Önce bu belge, `PROJECT_BRIEF.md`, `docs/DERLE
 
 ## Güncel durum
 
-- **v1.2.0 (versionCode 14) hazırlanıyor.** Özellik kodunun CI run `39067149944` doğrulaması
-  başarılı: **127 test**, Release derlemesi, imza ve beklenen sertifika eşleşti. Bu doğrulama
-  sürüm artırılmadan yapıldığı için eski v1.1.1 Release dosyası değiştirilmedi.
-- Son adım: 3 Compose/Robolectric UI testi (inset/büyük yazı, gizli rozet detayları, kutlama kuyruğu)
-  ve v1.2.0 sürüm artışı ile son CI/Release. Henüz yayımlandı kabul edilmez.
-- Son yayımlanan sürüm: [v1.1.1](https://github.com/keremtulu44/Question-note/releases/tag/v1.1.1),
-  APK SHA-256 `6ea54b9c378936be5d184e6fc2b3f93037050a81306cc6a5dadd5f968e0cb015`.
+- **v1.2.0 (versionCode 14) yayımlandı.** CI run
+  [`39067624050`](https://github.com/keremtulu44/Question-note/actions/runs/39067624050):
+  **130 test, 0 başarısız/hata/atlanan**, Release, apksigner ve beklenen sertifika eşleşmesi başarılı.
+- Release commit: `baf7bea4269c8970c0102ea46442cc12563f5d0f`; CI rapor botu: `014ffb2`.
+- [Release v1.2.0](https://github.com/keremtulu44/Question-note/releases/tag/v1.2.0) ·
+  [APK indir](https://github.com/keremtulu44/Question-note/releases/download/v1.2.0/yanlis-defteri-1.2.0.apk).
+  APK **10.524.895 bayt**, SHA-256 `eb8ab5b3e678a6015c54c7597b8bc93508f82ab3291a6dd06a290c7f4fabcea1`.
+  GitHub asset `651554160` digest'i CI ile ayrıca karşılaştırıldı ve aynı.
 - **Dal:** `arena/59c6570d-question-note`. Kullanıcı açıkça merge/PR istemiyor; main'e dokunulmaz.
   Her adım için onay istenmez. Bash çağrılarına kısa timeout konur; uzun `gh run watch` yerine
   aralıklı `gh run view --json status,conclusion` kullanılır.
@@ -63,13 +64,27 @@ Son güncelleme: **2026-10-17**. Önce bu belge, `PROJECT_BRIEF.md`, `docs/DERLE
 
 ## Test durumu ve sıradaki işler
 
-- 127 JVM/Room/Robolectric testi CI'da geçti (run `39067149944`). Testler yeni profil/katalog
+- 130 JVM/Room/Robolectric/Compose testi son CI'da geçti (run `39067624050`). Testler yeni profil/katalog
   silme, rozet eşiği/sahiplik, algoritma, ZIP'te v2 kayıt, devam noktası ve bağımsız sayımı kapsar.
 - İlk genişletilmiş koşuda bir yeni test hazır **kaynak** bekliyordu; hazırlar yalnız **yanlış
   nedenleri** olduğu için test fixture'ı düzeltildi. Ürün davranışı gevşetilmedi.
-- Son CI'da 3 UI testi ve imzalı **v1.2.0** Release tamamlanacak; ardından bu başlık ve SHA güncellenecek.
+- Üç UI testi geçti: büyük yazı + sentetik inset; gizli galeri/detay; kazanılan sırrın açılıp
+  kutlamasının kapatılması ve sahipliğin kalması. Ön kontrol run `39067149944` 127 testti.
+- `python3 tools/statik_kontrol.py` kaynak/drawable ve 15 amblemin beş yoğunluğunu kontrol eder;
+  derleme veya cihaz kabulü yerine geçmez.
 - Cihaz kabulü **ayrı ve bekliyor**: S24 FE üzerinde 3-düğmeli/jest nav, yatay ekran, büyük yazı,
   gerçek fotoğraflar, gizli rozet popup, arka plan/süreç kaybı ve eski sürüm üzerine güncelleme.
 - Geçmiş karneler, mola günü jetonu ve bildirimler yapılmış sayılmaz. Şu an aktif molalı oturum
   vardır; bu seri koruyan "mola günü jetonu" değildir.
 - Tarihsel sürüm/CI kanıtları `CHANGELOG.md`, kabul kayıtları `docs/TEST_KONTROL_LISTESI.md` içinde.
+
+
+## Bilinen sınırlar / takip notları
+
+- Geri yükleme girişimi başlamadan eski devam noktası temizlenir; restore başarısız olsa da bu
+  devam noktası geri gelmez. Bu, soru/tekrar arşivini silmek değildir; güvenlik yedeği akışı ayrıdır.
+- Rozet gözlem akışı hata halinde snackbar gösterip sonlanır; Bugün/İlerleme ekranına giriş yeniden
+  değerlendirme yapar. Arka planda otomatik retry henüz yoktur.
+- Karne toplam rozet sayısı tek seferlik bir snapshot'tır. Eşzamanlı bir yaşam-boyu ödülü eklenirse
+  karnenin sayacı geçici geride kalabilir; kalıcı sahiplik ve İlerleme akışı doğru kaynaktır.
+- Karne geçmişi ve mola günü jetonları henüz yoktur; mevcut molayı bu özelliklerle karıştırmayın.

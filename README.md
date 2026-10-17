@@ -25,7 +25,7 @@ cevaplamak ve çözümü öğrenme sürecinden ayrı saklamaktır.
 
 ## Durum
 
-**Son yayımlanan sürüm v1.1.1. v1.2.0 kodu hazır, CI/Release doğrulaması sürüyor.**
+**v1.2.0 yayımlandı** (versionCode 14). [CI `39067624050`](https://github.com/keremtulu44/Question-note/actions/runs/39067624050): **130 test geçti**, Release derlemesi, imza ve sertifika doğrulaması başarılı.
 
 - **İlerleme:** 30 rozet (5 gizli), kazanma açıklamaları, ilerleme çubukları, 15 rütbe ve 6 yeni
   saydam amblem. Yeni rozetler tam ekran kutlanır; kutlama kuyruğu kapanmada kaybolmaz.
@@ -71,7 +71,9 @@ turu denemedim” ifadesinin checklist eşlemesi hâlâ teyitsiz; ayrıntı
 ## Kullanım / APK erişimi
 
 İmzalı APK'lar GitHub [Releases](https://github.com/keremtulu44/Question-note/releases) bölümünde.
-[v1.1.1 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.1.1/yanlis-defteri-1.1.1.apk).
+[v1.2.0 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.2.0/yanlis-defteri-1.2.0.apk).
+
+APK: 10.524.895 bayt. SHA-256: `eb8ab5b3e678a6015c54c7597b8bc93508f82ab3291a6dd06a290c7f4fabcea1`. CI raporu ile GitHub asset digest eşleşiyor.
 Mevcut uygulamayı **kaldırmadan** üzerine kur; eski kayıtların korunduğunu doğrula. Alt menüdeki beş
 sekmeyi gez; **Seviye** sekmesinde rütbe amblemini, XP çubuğunu, rozet galerisini ve tahmini kontrol et.
 **Ayarlar**'da günlük hedefi değiştir, yedek al. Konu ve kaynak/neden silmeyi dene (kullanımdaysa

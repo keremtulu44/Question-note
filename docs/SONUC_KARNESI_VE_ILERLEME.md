@@ -300,16 +300,16 @@ patladığı günü önceden görmek. Günlük kota (faz D) bu tahminle birlikte
 | 2 | Unutma sayısı tutulmuyor | 90→1 düşen soru ile ilk kez yanlış yapılan soru aynı muameleyi görür |
 | 3 | `planlanan_gun` var ama gecikme cezalandırılmıyor | 40 gün gecikmiş soruya “rahat” demek, zamanında çözmekle aynı ödülü alır |
 
-### 7.2 Yeni durum (soru başına)
+### 7.2 Hesaplanan durum (soru başına)
 
 | Alan | Tip | Aralık | Varsayılan |
 |---|---|---|---|
-| `aralik_gun` | INTEGER | 1–180 | 1 |
-| `kolaylik_yuz` | INTEGER (×100) | 130–280 | 250 |
-| `unutma_sayisi` | INTEGER | ≥0 | 0 |
+| Aralık | Int | 1–180 | 1 |
+| Kolaylık | Int (×100) | 130–280 | 250 |
+| Unutma sayısı | Int | ≥0 | 0 |
 
-`kolaylik` ondalık yerine **100 ile çarpılmış tam sayı** olarak tutulur: yedek/CSV/JSON turunda
-kayan nokta kayması olmaz, testler birebir karşılaştırılabilir.
+Bunlar DB kolonları değil, geçmişten türetilen domain değerleridir. `kolaylik` ondalık yerine
+**100 ile çarpılmış tam sayı** olarak hesaplanır; testler birebir karşılaştırılabilir.
 
 ### 7.3 Formül
 

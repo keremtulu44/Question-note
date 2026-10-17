@@ -8,12 +8,14 @@ Durum işaretleri: `[ ]` yapılmadı · `[~]` kod mevcut; bu sürümün CI/Relea
 
 ## Güncel — v1.2.0
 
+Aşağıdaki `[~]` özelliklerin kodu/otomatik testleri yayımlandı; fiziksel cihaz kabulü bekliyor.
+
 - [~] 30 rozet/5 sır, koşul ve ilerleme açıklamaları, tam ekran kalıcı kutlama kuyruğu.
 - [~] 15 rütbe, 6 yeni saydam amblem, rütbe galerisi ve 200-seviye sınırının kaldırılması.
 - [~] Sistem gezinme çubuğu inset düzeltmesi; üst sağ Ayarlar kısayollarının kaldırılması.
 - [~] LGS/TYT/AYT/KPSS/Tümü profilleri ve Ayarlar'da bütün derslere erişen konu silme.
 - [~] Odak Stüdyosu, akıllı sıralama, adaptif tekrar v2, sona bırak/mola, kalıcı oturum kurtarma.
-- [~] Genişletilmiş JVM/Room/Robolectric testleri; CI ve imzalı v1.2.0 Release doğrulaması sürüyor.
+- [x] **v1.2.0 yayımlandı**: CI `39067624050`, 130 JVM/Room/Robolectric/Compose testi, Release ve imza doğrulaması başarılı.
 - [ ] Üç düğmeli/jest gezinme, büyük yazı, yatay ekran, gizli rozet kutlaması ve odak akışı cihaz kabulü.
 - [ ] Geçmiş karneler arşivi, mola günü jetonu, bildirimler. Bu sürümde tamamlandı diye işaretlenmez.
 
