@@ -71,6 +71,9 @@ Android telefonda kullanılacak, tek kişilik bir dijital yanlış defteri:
 | K25 | **Sonuç → karne eşlemesi:** `Rahat` = bağımsız çözüm, `Zorlandım` = yarım (destekli), `Çözemedim` = çözemedi. Çözüm açıldıysa hangi sonuç seçilirse seçilsin soru bağımsız sayılmaz. Ayrıntı: `docs/SONUC_KARNESI_VE_ILERLEME.md`. |
 | K26 | **Kutlama tonu:** karne ekranı animasyonlu ve rozetli olacak; tebrik cümlesi skora göre değişir, olumsuz/cezalandırıcı dil ve üzgün animasyon kullanılmaz. |
 | K27 | **Günlük hedef şimdilik sabit 10'dur.** İlk kurulumda hedef seçimi ve Ayarlar'dan değiştirme ileri sürüme bırakıldı; kodda sabit değer + `GunlukHedefDeposu` okuma arayüzü kullanılır. Mola günü hakkı da ileri sürümdedir. |
+| K28 | Karne karşılaştırması **önceki takvim haftasına** (Pzt–Paz) göre yapılır; geçen haftada yeterli kayıt yoksa satır gizlenir. |
+| K29 | Kısa oturum eşiği **şimdilik 5**, tek sabitten (`KISA_OTURUM_ESIGI`) okunur; ileride değişken olacak. Karne oturum bitince **otomatik** açılır. |
+| K30 | “Bu konudan çalış” düğmesi filtreyi yalnız seçilen konuya kurar, diğer filtreleri temizler ve Filtreli çalışma ekranını açar. |
 
 ### Soru kaydındaki alanlar
 

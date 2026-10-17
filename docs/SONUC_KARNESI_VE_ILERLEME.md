@@ -6,6 +6,9 @@
 >
 > Bu belgede ölçüm iddiası yoktur. Performans/animasyon maliyeti ancak cihazda ölçüldükten sonra
 > yazılır (`docs/KODLAMA_PLANI.md` kural 8).
+>
+> Revizyon: 2026-10-17 — açık sorular kapandı (S7–S11); önceki hafta karşılaştırması, 5 soru eşiği,
+> otomatik karne ve “Bu konudan çalış” davranışı eklendi. §11 karar kaydıdır.
 
 ---
 
@@ -32,6 +35,11 @@ Kapsam dışı: sosyal paylaşım, çok kullanıcı, sunucu, bildirim (ayrı de�
 | S4 | **En çok zorlanılan yanlış nedeni** ve **en çok zorlanılan ders/konu** karnede listelenir. |
 | S5 | Kutlama **animasyonlu ve rozetli**, skora göre değişen, zevkli ama abartısız olacak. |
 | S6 | **Günlük hedef şimdilik sabit 10.** İlk kurulumda seçim ve Ayarlar'dan değiştirme **ileri sürüme** bırakıldı; şimdi yalnızca sabit değer ve okuma arayüzü yazılacak. |
+| S7 | **Rozet adları onaylandı** (§5.2'deki ton kullanılacak). |
+| S8 | **Karşılaştırma penceresi: önceki takvim haftası** (Pazartesi–Pazar). Oturum sonucu, içinde bulunulan haftanın oranıyla birlikte önceki haftaya kıyaslanır. Ayrıntı §4.5. |
+| S9 | **“Bu konudan çalış”** düğmesi filtreyi otomatik kurup Filtreli çalışma ekranına götürür. Ayrıntı §4.6. |
+| S10 | **Kısa oturum eşiği şimdilik 5**; ileride değişken (ayar/tercih) olacak. Kodda tek sabit (`KISA_OTURUM_ESIGI`) ve tek okuma noktası; sihirli sayı kullanılmaz. |
+| S11 | **Karne otomatik açılır:** oturumun son sorusu kaydedilince doğrudan karne gösterilir; “Karnemi gör” ara adımı yok. |
 
 ---
 
@@ -83,7 +91,8 @@ Kurallar:
 │   Fizik · Kuvvet                 3       │
 │   [Bu konudan çalış]                     │
 │                                          │
-│   📈 Geçen haftaya göre +9 puan          │
+│   📈 Bu hafta %85 · geçen hafta %76      │
+│      (+9 puan)                           │
 │   🔥 6 günlük seri  ·  5/10 hedef        │
 │   📅 Yarın 8 soru geliyor                │
 │   [Yarınkileri gör]                      │
@@ -100,14 +109,14 @@ Kurallar:
 |---|---|---|
 | Başlık | `toplam` ve `bağımsız` her zaman yazıyla; sayılar 0'dan yukarı sayarak gelir | oturum listesi (bellek) |
 | Oran halkası | Bağımsız oran; hedef varsa ince bir hedef çizgisi | hesap |
-| Dört kova | Toplam < 3 ise yalnız `bağımsız / çözemedi` gösterilir; sadeleşir | hesap |
+| Dört kova | Toplam < `KISA_OTURUM_ESIGI` (şimdilik 5) ise yalnız `bağımsız / çözemedi` gösterilir; sadeleşir | hesap |
 | Neden listesi | En çok 3 satır, **en az 2 kez** geçen nedenler; hiçbiri yoksa bölüm gizlenir | `sorular.yanlis_nedeni` |
 | Konu listesi | En çok 3 satır, **en az 2 kez**; konusuz sorular “Konusuz” olarak gruplanır | `sorular.ders_id/konu_id` |
-| Karşılaştırma | Yalnızca **≥5 soruluk önceki oturum** varsa (öneri; bkz. §11); yoksa gizlenir | önceki karne özeti |
+| Karşılaştırma | **Önceki takvim haftası** ≥ `KISA_OTURUM_ESIGI` tekrar içeriyorsa gösterilir; yoksa gizlenir (§4.5) | `tekrarlar` (haftalık) |
 | Seri / hedef | Her zaman görünür | `tekrarlar.gun` + hedef |
 | Tahmin | `sonraki_tekrar_gun = yarın` sayısı; 0 ise “Yarın planlı soru yok” | `sorular` |
 | Rozet | Yalnız **bu oturumda yeni kazanılan** rozet; yoksa bölüm gizlenir | rozet deposu |
-| Düğmeler | “Filtrelere dön” (filtre ekranı), “Bugün” | — |
+| Düğmeler | “Filtrelere dön” (filtre ekranı), “Bugün”; konu satırında “Bu konudan çalış” (§4.6) | — |
 
 ### 4.3 Tebrik cümlesi (bağımsız orana göre)
 
@@ -117,7 +126,7 @@ Kurallar:
 | %70–89 | “Sağlam bir tur. Kalan {n} soru yarın tekrar gelecek.” |
 | %50–69 | “Yarısı oturdu. {konu} için kısa bir tur iyi gelir.” |
 | %0–49 | “Bugün zor bir gündü. Yarın 1'er soruyla başlayalım.” |
-| toplam < 5 | “Kısa bir ısınma turu.” (karşılaştırma ve tebrik atlanır) |
+| toplam < 5 (`KISA_OTURUM_ESIGI`) | “Kısa bir ısınma turu.” (karşılaştırma ve tebrik atlanır; kova/kova sayıları korunur) |
 
 Kurallar: **olumsuz/cezalandırıcı dil yok**, “başarısız” kelimesi kullanılmaz, ünlem işareti en çok
 bir kez, kullanıcıya emir kipi yok (“çalışmalısın” değil “iyi gelir”).
@@ -134,6 +143,48 @@ Karne **oturum bitişinde, bellekteki listeden** hesaplanır:
   Bu bilinçli kabuldür (geçmiş karneler ileri sürümde `tekrarlar` üzerinden üretilebilir).
 
 ---
+
+
+### 4.5 Haftalık karşılaştırma (S8)
+
+**Pencere tanımı:** hafta **Pazartesi 00:00 – Pazar 23:59** (cihazın yerel takvimi).
+`tekrarlar.gun` zaten yerel takvim günü (epoch gün) olduğu için ek dönüşüm gerekmez.
+
+| Kavram | Hesap |
+|---|---|
+| Bu hafta | Bu haftanın Pazartesi'sinden **bugüne kadar** (bugün dâhil) tüm tekrarlar |
+| Geçen hafta | Bir önceki Pazartesi–Pazar aralığındaki tüm tekrarlar |
+| Oran | Aynı bağımsızlık tanımı (§3): `sonuc != COZEMEDIM AND cozum_acildi = 0` |
+
+**Gösterim:** `Bu hafta %85 · geçen hafta %76 (+9 puan)`. Fark 0 ise “(aynı)”, negatifse “(−4 puan)”
+biçiminde yazılır; eksi işareti kırmızıya boyanmaz (cezalandırıcı görünüm yok, K26).
+
+**Gizleme kuralı:** geçen haftada `KISA_OTURUM_ESIGI`'den az tekrar varsa satır gizlenir; yerine
+“Karşılaştırma için geçen hafta yeterli kayıt yok.” tek satırı gösterilir (ilk kurulumda yanıltıcı
+“+0 puan” görünmesin).
+
+**Sınır durumlar:**
+
+- Hafta sınırı cihaz saatine göredir; saat dilimi değişirse geçmiş `gun` değerleri değişmez
+  (VERI_MODELI §1 kuralı).
+- Yılbaşı/hafta numarası hesabı yapılmaz; yalnız tarih aritmetiği (`LocalDate.minusWeeks(1)`) kullanılır.
+- Bu hafta hiç tekrar yoksa oran yerine “—” gösterilir (0'a bölme yok).
+
+### 4.6 “Bu konudan çalış” davranışı (S9)
+
+Konu satırındaki düğme şunları yapar:
+
+1. `SoruCalismaFiltresi(konuId = <seçilen konu>)` kurulur; **diğer filtreler temizlenir**
+   (kaynak/neden/konusuz seçimleri sıfırlanır).
+2. Soru sayısı alanı varsayılana döner (boş = tümü).
+3. `UygulamaEkrani.FiltreliCalisma` açılır; karne ekranı geri yığından çıkar (kullanıcı “geri”
+   dediğinde karneye değil filtre ekranına döner).
+4. Konu **arşivliyse** veya ders arşivliyse bu yol gösterilmez; düğme yerine kısa bilgi yazılır.
+   (Karne yalnız etkin derslerden soru çalıştığı için pratikte oluşmaz; savunma amaçlı kontrol.)
+5. Konusuz sorular için düğme gizlenir (filtrelenecek konu yok).
+
+Not: Bu davranış yeni bir ekran veya sorgu gerektirmez; mevcut `onOturumBaslat`/filtre durumu
+kullanılır.
 
 ## 5. Kutlama: animasyon ve rozet
 
@@ -359,7 +410,7 @@ Kurallar: şema JSON'u `app/schemas/.../4.json` olarak CI'da üretilir; v3→v4 
 
 | Sürüm | İçerik | Migration | Kabul ölçütü |
 |---|---|---|---|
-| **v1.0.10** | Karne ekranı (§4), animasyonlar (§5.1), rozetler (§5.2, A fazı 11 rozet), günlük hedef sabit 10 + seri (§6.1–6.2), haftalık özet (§6.3) | **Yok** | 4 yeni birim testi + cihazda bir oturum sonu karne görüntüsü |
+| **v1.0.10** | Karne ekranı otomatik açılır (§4, S11), animasyonlar (§5.1), rozetler (§5.2, A fazı 11 rozet), günlük hedef sabit 10 + seri (§6.1–6.2), haftalık özet ve önceki hafta karşılaştırması (§4.5, §6.3) | **Yok** | §9'daki T-1…T-6, T-12, T-13 + cihazda oturum sonu karne görüntüsü |
 | **v1.0.11** | Algoritma v2 (§7), zor soru etiketi | **Var (v4)** + yedek v4 | Migration/backfill testi + 50 gün gecikme örneği + v3 yedek içe alma |
 | **v1.0.12** | Pekişme halkaları, 7 günlük tahmin, günlük kota (§6.4–6.5) | Yok | Cihazda ders kartı ve tahmin ekranı |
 | **Sonra** | Onboarding'de hedef seçimi + Ayarlar, mola günü, geçmiş karneler | Prefs | Kullanıcı onayı |
@@ -386,6 +437,8 @@ Saf fonksiyonlar ayrı sınıflarda tutulur ki JVM testi hızlı olsun (Compose'
 | T-9 | v3→v4 migration şemayı ve satırları korur; backfill doğru | C |
 | T-10 | v3 yedeği v4'e geri yüklenir; yeni alanlar varsayılanla dolar | C |
 | T-11 | v4 yedeği gidiş-dönüş (export → import) alanları birebir korur | C |
+| T-12 | Hafta penceresi Pazartesi'den başlar; sınır günlerinde (Pazar/Pazartesi) geçen hafta doğru hesaplanır; geçen hafta < 5 tekrarda karşılaştırma gizlenir | A |
+| T-13 | `KISA_OTURUM_ESIGI` tek kaynaktan okunur; 4 soruluk oturumda sadeleşmiş karne, 5'te tam karne üretir | A |
 
 Cihaz (KULLANICI) satırları: karne görünümü, animasyon akıcılığı, rozet bildirimi, seri sayacı.
 
@@ -411,12 +464,21 @@ Bu iki madde cihaz kabulünde not edilmeden “hızlı/akıcı” ifadesi kullan
 
 ---
 
-## 11. Açık sorular (karar bekliyor)
+## 11. Karar kaydı
 
-1. **Rozet tonu:** isimler yukarıdaki gibi mi (ör. “İnatçıyı yendin”)? Daha resmî ton istenir mi?
-2. **Karşılaştırma penceresi:** “geçen haftaya göre” mi, yoksa “önceki oturuma göre” mi? (Öneri:
-   önceki ≥5 soruluk oturum; haftalık ortalama faz B'de eklenebilir.)
-3. **“Bu konudan çalış” düğmesi** filtreyi otomatik kurup Filtreli çalışma ekranına atsın mı? (Öneri: evet.)
-4. **Kısa oturum eşiği** 5 soru doğru mu, 3 mü olmalı?
-5. Karne ekranı oturum bittiğinde **her zaman** mı açılsın, yoksa “Karnemi gör” düğmesiyle mi?
-   (Öneri: her zaman; 3 soru altında sadeleşmiş hâli.)
+### 11.1 Kapatılan sorular (2026-10-17)
+
+| Soru | Karar | Nerede |
+|---|---|---|
+| Rozet tonu | Onaylandı; §5.2'deki adlar kullanılacak | S7 |
+| Karşılaştırma penceresi | **Önceki takvim haftası** (Pazartesi–Pazar) | S8, §4.5 |
+| “Bu konudan çalış” | Evet; filtreyi kurup Filtreli çalışmaya götürür | S9, §4.6 |
+| Kısa oturum eşiği | **Şimdilik 5**, ileride değişken; tek sabit `KISA_OTURUM_ESIGI` | S10 |
+| Karne ne zaman açılır | Oturum bitince **otomatik** | S11 |
+
+### 11.2 Hâlâ açık (v1.0.10'u engellemez)
+
+1. **Mola günü jetonu** (seriyi 1 gün koruma): ileri sürüm; `SharedPreferences` gerektirir.
+2. **Geçmiş karneler**: şimdilik saklanmıyor; ileride `tekrarlar` üzerinden üretilebilir.
+3. **Günlük hedefin değiştirilebilir olması**: onboarding + Ayarlar ile birlikte yapılacak.
+4. Rozetlerin ayrı “Rozetler” ekranında gösterimi.
