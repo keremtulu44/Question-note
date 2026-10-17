@@ -1,5 +1,6 @@
 package com.keremtulu.questionnote.ui
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,6 +34,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -42,6 +47,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.keremtulu.questionnote.R
+import com.keremtulu.questionnote.data.ilerleme.IlerlemeHizmeti
+import com.keremtulu.questionnote.data.prefs.GunlukHedefDeposu
 import com.keremtulu.questionnote.domain.model.Ders
 import com.keremtulu.questionnote.domain.model.GorselTuru
 import com.keremtulu.questionnote.domain.model.Soru
@@ -72,6 +79,8 @@ private sealed interface BugunDurumu {
 fun BugunEkrani(
     soruRepository: SoruRepository,
     dersRepository: DersRepository,
+    ilerlemeHizmeti: IlerlemeHizmeti,
+    gunlukHedefDeposu: GunlukHedefDeposu,
     onMenu: () -> Unit,
     onSoruEkle: () -> Unit,
     onSoruAc: (Ders, String) -> Unit,
@@ -107,6 +116,18 @@ fun BugunEkrani(
         homeFlow.catch { value = BugunDurumu.Hata }
             .collect { value = BugunDurumu.Hazir(it) }
     }.value
+    val bugunGun = today.toEpochDay().toInt()
+    val bugunAkisi = remember(ilerlemeHizmeti, bugunGun) {
+        ilerlemeHizmeti.bugunSayisiIzle(bugunGun)
+    }
+    val seriAkisi = remember(ilerlemeHizmeti, bugunGun) { ilerlemeHizmeti.seriIzle(bugunGun) }
+    val gunluk by produceState(0, bugunAkisi) {
+        bugunAkisi.catch { emit(0) }.collect { value = it }
+    }
+    val seri by produceState(0, seriAkisi) {
+        seriAkisi.catch { emit(0) }.collect { value = it }
+    }
+    val hedef = remember(gunlukHedefDeposu) { gunlukHedefDeposu.hedef() }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -183,6 +204,9 @@ fun BugunEkrani(
                 }
             }
             item {
+                BugunIlerlemeKarti(hedef = hedef, yapilan = gunluk, seri = seri)
+            }
+            item {
                 BugunOdakKarti(
                     dateText = dateText,
                     state = state,
@@ -237,6 +261,85 @@ fun BugunEkrani(
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BugunIlerlemeKarti(hedef: Int, yapilan: Int, seri: Int) {
+    val colors = MaterialTheme.colorScheme
+    val guvenliHedef = hedef.coerceAtLeast(1)
+    val oran = (yapilan.toFloat() / guvenliHedef).coerceIn(0f, 1f)
+    val tamamlandi = yapilan >= guvenliHedef
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = colors.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Box(Modifier.size(72.dp), contentAlignment = Alignment.Center) {
+                Canvas(Modifier.fillMaxSize()) {
+                    val kalinlik = 8.dp.toPx()
+                    val inset = kalinlik / 2f
+                    val boyut = Size(size.width - kalinlik, size.height - kalinlik)
+                    drawArc(
+                        color = colors.surfaceVariant,
+                        startAngle = -90f,
+                        sweepAngle = 360f,
+                        useCenter = false,
+                        topLeft = Offset(inset, inset),
+                        size = boyut,
+                        style = Stroke(width = kalinlik),
+                    )
+                    drawArc(
+                        color = if (tamamlandi) colors.primary else colors.secondary,
+                        startAngle = -90f,
+                        sweepAngle = 360f * oran,
+                        useCenter = false,
+                        topLeft = Offset(inset, inset),
+                        size = boyut,
+                        style = Stroke(width = kalinlik, cap = StrokeCap.Round),
+                    )
+                }
+                Text(
+                    text = "$yapilan/$guvenliHedef",
+                    color = colors.onSurface,
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = stringResource(R.string.today_goal_title),
+                    color = colors.onBackground,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    text = if (tamamlandi) {
+                        stringResource(R.string.today_goal_done)
+                    } else {
+                        stringResource(R.string.today_goal_remaining, guvenliHedef - yapilan)
+                    },
+                    color = colors.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                Text(
+                    text = if (seri > 0) {
+                        stringResource(R.string.today_streak, seri)
+                    } else {
+                        stringResource(R.string.today_streak_start)
+                    },
+                    color = colors.primary,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
             }
         }
     }

@@ -46,12 +46,18 @@ import com.keremtulu.questionnote.data.export.GeriYuklemeOnizlemesi
 import com.keremtulu.questionnote.data.export.SonYedekBilgisi
 import com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti
 import com.keremtulu.questionnote.data.images.GorselTutarliligiHizmeti
+import com.keremtulu.questionnote.data.ilerleme.IlerlemeHizmeti
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
+import com.keremtulu.questionnote.data.prefs.GunlukHedefDeposu
+import com.keremtulu.questionnote.data.prefs.RozetDeposu
+import com.keremtulu.questionnote.domain.karne.OturumSonucu
 import com.keremtulu.questionnote.domain.model.Ders
 import com.keremtulu.questionnote.domain.model.Soru
+import com.keremtulu.questionnote.domain.model.SoruCalismaFiltresi
 import com.keremtulu.questionnote.domain.repository.DersRepository
 import com.keremtulu.questionnote.domain.repository.KonuRepository
 import com.keremtulu.questionnote.domain.repository.SoruRepository
+import com.keremtulu.questionnote.ui.karne.KarneEkrani
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -75,8 +81,13 @@ private sealed interface UygulamaEkrani {
         val sorular: List<Soru>,
         val dersler: Map<String, Ders>,
         val sira: Int,
+        val sonuclar: List<OturumSonucu> = emptyList(),
     ) : UygulamaEkrani
-    data class FiltreliCalismaTamamlandi(val tamamlananSoruSayisi: Int) : UygulamaEkrani
+    data class FiltreliCalismaTamamlandi(
+        val sorular: List<Soru>,
+        val dersler: Map<String, Ders>,
+        val sonuclar: List<OturumSonucu>,
+    ) : UygulamaEkrani
     data object GorselBakimi : UygulamaEkrani
 }
 
@@ -91,6 +102,9 @@ fun YanlisDefteriUygulamasi(
     gorselDeposu: LocalSoruGorselDeposu,
     gorselTutarliligi: GorselTutarliligiHizmeti,
     disaAktarmaHizmeti: YerelYedeklemeHizmeti,
+    ilerlemeHizmeti: IlerlemeHizmeti,
+    rozetDeposu: RozetDeposu,
+    gunlukHedefDeposu: GunlukHedefDeposu,
 ) {
     var ekran by remember { mutableStateOf<UygulamaEkrani>(UygulamaEkrani.Bugun) }
     var filtreliCalismaAyar by remember { mutableStateOf(FiltreliCalismaEkraniAyar()) }
@@ -223,6 +237,8 @@ fun YanlisDefteriUygulamasi(
                     UygulamaEkrani.Bugun -> BugunEkrani(
                         soruRepository = soruRepository,
                         dersRepository = dersRepository,
+                        ilerlemeHizmeti = ilerlemeHizmeti,
+                        gunlukHedefDeposu = gunlukHedefDeposu,
                         onMenu = { scope.launch { drawerState.open() } },
                         onSoruEkle = { ekran = UygulamaEkrani.DersSecimi(soruEkleModu = true) },
                         onSoruAc = { ders, soruId ->
@@ -269,7 +285,7 @@ fun YanlisDefteriUygulamasi(
                         gorselDeposu = gorselDeposu,
                         onGeri = { ekran = current.geri },
                         onDuzenle = { id -> ekran = UygulamaEkrani.SoruFormu(current.ders, id, current) },
-                        onTekrarTamamlandi = {
+                        onTekrarTamamlandi = { _, _ ->
                             ekran = current.geri
                             scope.launch { snackbarHostState.showSnackbar(context.getString(R.string.review_saved)) }
                         },
@@ -313,12 +329,18 @@ fun YanlisDefteriUygulamasi(
                                 gorselDeposu = gorselDeposu,
                                 onGeri = { ekranSec(UygulamaEkrani.FiltreliCalisma) },
                                 onDuzenle = { id -> ekran = UygulamaEkrani.SoruFormu(lesson, id, current) },
-                                onTekrarTamamlandi = {
+                                onTekrarTamamlandi = { sonuc, cozumAcildi ->
                                     val nextIndex = current.sira + 1
+                                    val guncelSonuclar = current.sonuclar +
+                                        OturumSonucu(question.id, sonuc, cozumAcildi)
                                     ekran = if (nextIndex < current.sorular.size) {
-                                        current.copy(sira = nextIndex)
+                                        current.copy(sira = nextIndex, sonuclar = guncelSonuclar)
                                     } else {
-                                        UygulamaEkrani.FiltreliCalismaTamamlandi(current.sorular.size)
+                                        UygulamaEkrani.FiltreliCalismaTamamlandi(
+                                            sorular = current.sorular,
+                                            dersler = current.dersler,
+                                            sonuclar = guncelSonuclar,
+                                        )
                                     }
                                     scope.launch {
                                         snackbarHostState.showSnackbar(context.getString(R.string.review_saved))
@@ -330,8 +352,20 @@ fun YanlisDefteriUygulamasi(
                             )
                         }
                     }
-                    is UygulamaEkrani.FiltreliCalismaTamamlandi -> FiltreliCalismaTamamlandiEkrani(
-                        tamamlananSoruSayisi = current.tamamlananSoruSayisi,
+                    is UygulamaEkrani.FiltreliCalismaTamamlandi -> KarneEkrani(
+                        sorular = current.sorular,
+                        dersler = current.dersler,
+                        konuRepository = konuRepository,
+                        sonuclar = current.sonuclar,
+                        ilerlemeHizmeti = ilerlemeHizmeti,
+                        rozetDeposu = rozetDeposu,
+                        gunlukHedefDeposu = gunlukHedefDeposu,
+                        onKonudanCalis = { konuId ->
+                            filtreliCalismaAyar = FiltreliCalismaEkraniAyar(
+                                filtre = SoruCalismaFiltresi(konuId = konuId),
+                            )
+                            ekran = UygulamaEkrani.FiltreliCalisma
+                        },
                         onFiltrelereDon = { ekran = UygulamaEkrani.FiltreliCalisma },
                         onBugun = { ekran = UygulamaEkrani.Bugun },
                     )

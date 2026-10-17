@@ -93,9 +93,6 @@
     <string name="filtered_practice_reason_value">Ana neden: %1$s</string>
     <string name="filtered_practice_session_progress">Filtreli çalışma · %1$d / %2$d</string>
     <string name="filtered_practice_result_note">Sonucu kaydedince tekrar geçmişi ve sonraki plan tarihi güncellenir.</string>
-    <string name="filtered_practice_complete_title">Çalışma tamamlandı</string>
-    <string name="filtered_practice_complete_description">%1$d soruyu tamamladın.</string>
-    <string name="filtered_practice_return">Filtrelere dön</string>
     <string name="filtered_practice_count_capped">Eşleşen %1$d sorunun tamamı çalışılacak.</string>
     <string name="filtered_practice_exit_title">Oturumdan çıkılsın mı?</string>
     <string name="filtered_practice_exit_message">Bu oturumda %1$d soru kaldı. Çıkarsan bu sorular çalışılmadan atlanır; kaydettiğin sonuçlar korunur.</string>
@@ -316,4 +313,65 @@
         <item quantity="one">%d gün gecikti</item>
         <item quantity="other">%d gün gecikti</item>
     </plurals>
+
+    <!-- Sonuç karnesi (v1.0.10) -->
+    <string name="karne_kicker">OTURUM KARNESİ</string>
+    <string name="karne_headline">%1$d sorudan %2$d tanesini bağımsız çözdün</string>
+    <string name="karne_short_title">Kısa oturum</string>
+    <string name="karne_short_description">%1$d sorudan %2$d tanesi bağımsız. Yine de kayda geçti.</string>
+    <string name="karne_greeting_high">Böyle devam: ritim oturmuş.</string>
+    <string name="karne_greeting_good">İyi bir oturum; birkaç soru daha tekrar ister.</string>
+    <string name="karne_greeting_mid">Yarısından çoğu sende; eksikleri birlikte kapatacağız.</string>
+    <string name="karne_greeting_low">Zor bir oturumdu. Yanlış defteri tam da bunun için var.</string>
+    <string name="karne_greeting_short">Kısa ama kayıt oldu; seri bozulmadı.</string>
+    <string name="karne_rate">%%%1$d</string>
+    <string name="karne_rate_caption">bağımsız çözüm</string>
+    <string name="karne_partial_explainer">Bağımsız = çözümü açmadan kendin çözdüğün sorular.</string>
+    <string name="karne_symbol_independent">✓</string>
+    <string name="karne_symbol_partial">±</string>
+    <string name="karne_symbol_failed">✗</string>
+    <string name="karne_symbol_solution">◎</string>
+    <string name="karne_bucket_independent">%1$d bağımsız</string>
+    <string name="karne_bucket_partial">%1$d yarım</string>
+    <string name="karne_bucket_failed">%1$d çözemedi</string>
+    <string name="karne_bucket_solution">%1$d çözümle</string>
+    <string name="karne_reasons_title">En çok şundan</string>
+    <string name="karne_topics_title">En çok zorlandığın konular</string>
+    <string name="karne_topic_count">%1$d soru</string>
+    <string name="karne_topic_study">Bu konudan çalış</string>
+    <string name="karne_no_topic">Konusuz</string>
+    <string name="karne_week_title">Haftalık karşılaştırma</string>
+    <string name="karne_week_compare">Bu hafta %1$d%% · geçen hafta %2$d%% (%3$s)</string>
+    <string name="karne_week_diff_plus">+%1$d puan</string>
+    <string name="karne_week_diff_minus">−%1$d puan</string>
+    <string name="karne_week_diff_same">aynı</string>
+    <string name="karne_week_no_data">Bu hafta henüz tekrar yok.</string>
+    <string name="karne_week_not_enough">Karşılaştırma için geçen hafta yeterli kayıt yok.</string>
+    <string name="karne_progress_title">İlerleme</string>
+    <string name="karne_streak">%1$d günlük seri</string>
+    <string name="karne_daily_goal">Bugün %1$d/%2$d soru</string>
+    <string name="karne_tomorrow">Yarın planlı: %1$d soru</string>
+    <string name="karne_tomorrow_none">Yarın için planlı soru yok.</string>
+    <string name="karne_last_seven_title">Son 7 gün</string>
+    <string name="karne_badges_title">Yeni rozet</string>
+    <string name="karne_badge_more">+%1$d rozet daha</string>
+    <string name="karne_badge_total">Kazandığın rozetler: %1$d/11</string>
+    <string name="karne_to_filters">Filtrelere dön</string>
+    <string name="symbol_rozet">★</string>
+    <string name="badge_ilk_karne">İlk adım</string>
+    <string name="badge_kusursuz_tur">Kusursuz tur</string>
+    <string name="badge_on_bagimsiz">Onluk</string>
+    <string name="badge_yirmi_soru">Yirmilik</string>
+    <string name="badge_cozumsuz">Kendi başına</string>
+    <string name="badge_istikrar">İstikrar</string>
+    <string name="badge_seri_3">Üç gün</string>
+    <string name="badge_seri_7">Haftalık seri</string>
+    <string name="badge_seri_30">Otuz gün</string>
+    <string name="badge_yuz_bagimsiz">Yüz</string>
+    <string name="badge_bes_yuz">Beş yüz</string>
+    <string name="today_goal_title">Günlük hedef</string>
+    <string name="today_goal_done">Hedef tamam. Bugünkü kayıtlar işlendi.</string>
+    <string name="today_goal_remaining">%1$d soru daha çözünce hedef tamam.</string>
+    <string name="today_streak">%1$d günlük seri</string>
+    <string name="today_streak_start">Bugün bir soru çöz, seri başlasın.</string>
 </resources>

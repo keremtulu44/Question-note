@@ -74,6 +74,17 @@ interface SoruDao {
         yanlisNedeniBelirtilmemis: Boolean,
     ): Flow<List<SoruVeGorsellerEntity>>
 
+    @Query(
+        """
+        SELECT COUNT(*) FROM sorular
+        INNER JOIN dersler ON dersler.id = sorular.ders_id
+        WHERE dersler.arsivli = 0
+          AND sorular.plan_durumu = 'AKTIF'
+          AND sorular.sonraki_tekrar_gun = :gun
+        """,
+    )
+    suspend fun planliSoruSayisi(gun: Int): Int
+
     @Query("SELECT * FROM sorular WHERE id = :id LIMIT 1")
     suspend fun idIleGetir(id: String): SoruEntity?
 

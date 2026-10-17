@@ -86,7 +86,7 @@ fun SoruDetayEkrani(
     gorselDeposu: LocalSoruGorselDeposu,
     onGeri: () -> Unit,
     onDuzenle: (String) -> Unit,
-    onTekrarTamamlandi: () -> Unit,
+    onTekrarTamamlandi: (TekrarSonucu, Boolean) -> Unit,
     tekrarOturumunda: Boolean = false,
     oturumSira: Int? = null,
     oturumToplam: Int? = null,
@@ -145,7 +145,7 @@ fun SoruDetayEkrani(
             }
             tekrarKaydediliyor = false
             if (result == SoruIslemSonucu.Basarili) {
-                onTekrarTamamlandi()
+                onTekrarTamamlandi(sonuc, cozumAcildi)
             } else {
                 snackbarHostState.showSnackbar(context.getString(errorResource(result)))
             }
