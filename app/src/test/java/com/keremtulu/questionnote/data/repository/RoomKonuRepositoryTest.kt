@@ -59,6 +59,34 @@ class RoomKonuRepositoryTest {
     }
 
     @Test
+    fun addingTopicKeepsExistingTopicsInEachLesson() = runBlocking {
+        val dersler = database.dersDao().tumunuGetir().first()
+        val eskiKonular = dersler.mapIndexed { index, ders ->
+            assertEquals(
+                KonuIslemSonucu.Basarili,
+                repository.konuEkle(ders.id, "Eski konu $index"),
+            )
+            ders.id to repository.konulariIzle(ders.id, arsivli = false).first().single()
+        }.toMap()
+
+        assertEquals(
+            KonuIslemSonucu.Basarili,
+            repository.konuEkle(dersler.first().id, "Yeni konu"),
+        )
+
+        dersler.forEachIndexed { index, ders ->
+            val konular = repository.konulariIzle(ders.id, arsivli = false).first()
+            val expectedNames = if (index == 0) {
+                listOf("Eski konu 0", "Yeni konu")
+            } else {
+                listOf("Eski konu $index")
+            }
+            assertEquals(expectedNames, konular.map { it.ad })
+            assertEquals(eskiKonular.getValue(ders.id).id, konular.first().id)
+        }
+    }
+
+    @Test
     fun renamingRejectsBlankAndDuplicateNamesAndKeepsOrder() = runBlocking {
         val dersId = database.dersDao().tumunuGetir().first().id
         assertEquals(KonuIslemSonucu.Basarili, repository.konuEkle(dersId, "Fonksiyonlar"))

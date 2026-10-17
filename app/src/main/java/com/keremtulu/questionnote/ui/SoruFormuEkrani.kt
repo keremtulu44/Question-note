@@ -50,6 +50,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -72,6 +73,7 @@ import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
 import com.keremtulu.questionnote.domain.model.Ders
 import com.keremtulu.questionnote.domain.model.GorselTuru
 import com.keremtulu.questionnote.domain.model.Konu
+import com.keremtulu.questionnote.domain.model.KonuIslemSonucu
 import com.keremtulu.questionnote.domain.model.SoruGorselGirdisi
 import com.keremtulu.questionnote.domain.model.SoruIslemSonucu
 import com.keremtulu.questionnote.domain.model.SoruKaydetmeIstegi
@@ -132,6 +134,12 @@ fun SoruFormuEkrani(
     var soruGorselleri by remember(soruId) { mutableStateOf<List<SoruGorselGirdisi>>(emptyList()) }
     var cozumGorselleri by remember(soruId) { mutableStateOf<List<SoruGorselGirdisi>>(emptyList()) }
     var konuMenu by remember { mutableStateOf(false) }
+    var konuEklemeDialogu by remember { mutableStateOf(false) }
+    var yeniKonuAdi by remember { mutableStateOf("") }
+    var konuEklemeHatasi by remember { mutableStateOf<Int?>(null) }
+    var konuKaydediliyor by remember { mutableStateOf(false) }
+    var yeniEklenenKonuAdi by remember { mutableStateOf<String?>(null) }
+    var konuAkisiYenileme by remember { mutableIntStateOf(0) }
     var kameraCekimi by remember { mutableStateOf<KameraCekimi?>(null) }
     var kameraTuru by remember { mutableStateOf(GorselTuru.SORU) }
     var galeriTuru by remember { mutableStateOf(GorselTuru.SORU) }
@@ -139,7 +147,7 @@ fun SoruFormuEkrani(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    val topicsFlow = remember(konuRepository, ders.id) {
+    val topicsFlow = remember(konuRepository, ders.id, konuAkisiYenileme) {
         combine(
             konuRepository.konulariIzle(ders.id, arsivli = false),
             konuRepository.konulariIzle(ders.id, arsivli = true),
@@ -150,6 +158,15 @@ fun SoruFormuEkrani(
             .collect { value = KonuSecenekleriDurumu.Hazir(it) }
     }.value
     val allTopics = (topicsState as? KonuSecenekleriDurumu.Hazir)?.topics.orEmpty()
+
+    LaunchedEffect(yeniEklenenKonuAdi, allTopics) {
+        val yeniAd = yeniEklenenKonuAdi ?: return@LaunchedEffect
+        val yeniKonu = allTopics.firstOrNull {
+            it.dersId == ders.id && !it.arsivli && it.ad == yeniAd
+        } ?: return@LaunchedEffect
+        konuId = yeniKonu.id
+        yeniEklenenKonuAdi = null
+    }
     val catalogFlow = remember(soruRepository) {
         combine(
             soruRepository.secenekleriIzle(SoruSecenekTuru.KAYNAK),
@@ -282,6 +299,42 @@ fun SoruFormuEkrani(
         when (tur) {
             SoruSecenekTuru.KAYNAK -> kaynak = ad
             SoruSecenekTuru.YANLIS_NEDENI -> yanlisNedeni = ad
+        }
+    }
+
+    fun openTopicDialog() {
+        yeniKonuAdi = ""
+        konuEklemeHatasi = null
+        konuEklemeDialogu = true
+    }
+
+    fun saveTopic() {
+        if (konuKaydediliyor) return
+        konuKaydediliyor = true
+        konuEklemeHatasi = null
+        val ad = yeniKonuAdi.trim()
+        scope.launch {
+            val result = try {
+                konuRepository.konuEkle(ders.id, ad)
+            } catch (cancel: CancellationException) {
+                throw cancel
+            } catch (_: Exception) {
+                null
+            }
+            when (result) {
+                KonuIslemSonucu.Basarili -> {
+                    yeniEklenenKonuAdi = ad
+                    konuEklemeDialogu = false
+                    yeniKonuAdi = ""
+                    if (topicsState is KonuSecenekleriDurumu.Hata) konuAkisiYenileme++
+                    snackbarHostState.showSnackbar(context.getString(R.string.topic_added))
+                }
+                KonuIslemSonucu.BosAd -> konuEklemeHatasi = R.string.topic_error_empty_name
+                KonuIslemSonucu.AyniAdVar -> konuEklemeHatasi = R.string.topic_error_duplicate_name
+                KonuIslemSonucu.Bulunamadi -> konuEklemeHatasi = R.string.topic_not_found
+                null -> konuEklemeHatasi = R.string.topic_save_error
+            }
+            konuKaydediliyor = false
         }
     }
 
@@ -503,6 +556,23 @@ fun SoruFormuEkrani(
                         aciklama = stringResource(R.string.question_form_section_details_hint),
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            if (topicsState is KonuSecenekleriDurumu.Hata) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    Text(
+                                        stringResource(R.string.topic_load_error),
+                                        modifier = Modifier.weight(1f),
+                                        color = MaterialTheme.colorScheme.error,
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
+                                    TextButton(
+                                        enabled = !kaydediliyor,
+                                        onClick = { konuAkisiYenileme++ },
+                                    ) { Text(stringResource(R.string.topic_retry)) }
+                                }
+                            }
                             FormKonuSecicisi(
                                 topics = allTopics,
                                 selectedTopicId = konuId,
@@ -510,6 +580,7 @@ fun SoruFormuEkrani(
                                 menuExpanded = konuMenu,
                                 onMenuExpandedChange = { konuMenu = it },
                                 onTopicSelect = { konuId = it },
+                                onAddTopic = ::openTopicDialog,
                             )
                             if (catalogState is SoruKatalogDurumu.Hata) {
                                 Surface(
@@ -628,6 +699,60 @@ fun SoruFormuEkrani(
                 }
             }
         }
+    }
+
+    if (konuEklemeDialogu) {
+        AlertDialog(
+            onDismissRequest = { if (!konuKaydediliyor) konuEklemeDialogu = false },
+            title = { Text(stringResource(R.string.topic_dialog_add_title)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        stringResource(R.string.question_form_topic_lesson_hint, ders.ad),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    OutlinedTextField(
+                        value = yeniKonuAdi,
+                        onValueChange = {
+                            yeniKonuAdi = it
+                            konuEklemeHatasi = null
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !konuKaydediliyor,
+                        singleLine = true,
+                        label = { Text(stringResource(R.string.topic_name_label)) },
+                        isError = konuEklemeHatasi != null,
+                        shape = RoundedCornerShape(16.dp),
+                    )
+                    konuEklemeHatasi?.let { errorId ->
+                        Text(
+                            stringResource(errorId),
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = !konuKaydediliyor,
+                    onClick = ::saveTopic,
+                ) {
+                    Text(
+                        stringResource(
+                            if (konuKaydediliyor) R.string.topic_saving else R.string.topic_save,
+                        ),
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    enabled = !konuKaydediliyor,
+                    onClick = { konuEklemeDialogu = false },
+                ) { Text(stringResource(R.string.topic_cancel)) }
+            },
+        )
     }
 
     katalogDialogTuru?.let { tur ->
@@ -757,6 +882,7 @@ private fun FormKonuSecicisi(
     menuExpanded: Boolean,
     onMenuExpandedChange: (Boolean) -> Unit,
     onTopicSelect: (String?) -> Unit,
+    onAddTopic: () -> Unit,
 ) {
     val selectedTopic = topics.firstOrNull { it.id == selectedTopicId }
     val selectedLabel = selectedTopic?.let { topic ->
@@ -765,59 +891,70 @@ private fun FormKonuSecicisi(
 
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(stringResource(R.string.question_form_topic_label), style = MaterialTheme.typography.labelLarge)
-        Box(Modifier.fillMaxWidth()) {
-            OutlinedButton(
-                onClick = { onMenuExpandedChange(true) },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = enabled,
-                shape = RoundedCornerShape(16.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 13.dp),
-            ) {
-                Row(
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Box(Modifier.weight(1f)) {
+                OutlinedButton(
+                    onClick = { onMenuExpandedChange(true) },
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    enabled = enabled,
+                    shape = RoundedCornerShape(16.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 13.dp),
                 ) {
-                    Text(
-                        selectedLabel,
-                        modifier = Modifier.weight(1f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Text(
-                        "⌄",
-                        modifier = Modifier.padding(start = 12.dp),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.titleMedium,
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text(
+                            selectedLabel,
+                            modifier = Modifier.weight(1f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Text(
+                            "⌄",
+                            modifier = Modifier.padding(start = 12.dp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                    }
                 }
-            }
-            DropdownMenu(
-                expanded = menuExpanded,
-                onDismissRequest = { onMenuExpandedChange(false) },
-            ) {
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.question_form_no_topic)) },
-                    onClick = {
-                        onTopicSelect(null)
-                        onMenuExpandedChange(false)
-                    },
-                )
-                topics.filter { !it.arsivli || it.id == selectedTopicId }.forEach { topic ->
+                DropdownMenu(
+                    expanded = menuExpanded,
+                    onDismissRequest = { onMenuExpandedChange(false) },
+                ) {
                     DropdownMenuItem(
-                        text = {
-                            Text(
-                                if (topic.arsivli) stringResource(R.string.topic_name_archived, topic.ad)
-                                else topic.ad,
-                            )
-                        },
-                        enabled = !topic.arsivli,
+                        text = { Text(stringResource(R.string.question_form_no_topic)) },
                         onClick = {
-                            onTopicSelect(topic.id)
+                            onTopicSelect(null)
                             onMenuExpandedChange(false)
                         },
                     )
+                    topics.filter { !it.arsivli || it.id == selectedTopicId }.forEach { topic ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    if (topic.arsivli) stringResource(R.string.topic_name_archived, topic.ad)
+                                    else topic.ad,
+                                )
+                            },
+                            enabled = !topic.arsivli,
+                            onClick = {
+                                onTopicSelect(topic.id)
+                                onMenuExpandedChange(false)
+                            },
+                        )
+                    }
                 }
+            }
+            TextButton(onClick = onAddTopic, enabled = enabled) {
+                Text(
+                    stringResource(R.string.question_form_add_topic),
+                    maxLines = 1,
+                )
             }
         }
     }

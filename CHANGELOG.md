@@ -2,6 +2,12 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.0.7] — 2026-10-17
+
+- Soru formundaki konu seçicisine kaynak/neden seçicileriyle aynı tarzda `+ Konu` eklendi; yeni konu seçili derse eklenir ve o dersin/diğer derslerin mevcut konu kayıtları korunur.
+- Konu ekleme başarılı olunca yeni konu seçilir; yinelenen ad hatası gösterilir ve konu listesi yüklenemezse yeniden deneme sunulur.
+- CI doğrulaması ve Release sonucu bekleniyor.
+
 ## [1.0.6] — 2026-10-17
 
 - Soru ekleme/düzenleme formu; belirgin başlık, numaralı yuvarlak kart bölümleri, daha okunaklı konu/kaynak seçicileri ve kamera/galeri aksiyonlarıyla yenilendi.

@@ -11,7 +11,7 @@
 > ZIP yol güvenliği) ve **Robolectric** (şema/migration testleri). Emülatör yalnızca gerçekten
 > gerekirse kullanılır; asıl kabul testleri gerçek cihazda yapılır.
 
-Son güncelleme: 2026-10-17. v1.0.6 (versionCode 7) yayımlandı; CI run `39039791751` 36 testi, Release derlemesini, imzayı ve sertifika fingerprint'ini doğruladı. v1.0.6 formunun ve v1.0.5 migration/katalog/ZIP v3 akışlarının cihaz kabulü ayrı ve henüz kullanıcı tarafından bildirilmedi. v1.0.4 tekrar geçmişi, SAF/Drive yedek-geri yükleme ve fotoğraf okunabilirliği de cihazda bekliyor. “3. turu denemedim” ifadesinin checklist eşlemesi teyitsizdir.
+Son güncelleme: 2026-10-17. v1.0.7 (versionCode 8) konu ekleme düzeltmesi hazırlanıyor; CI doğrulaması bekleniyor. v1.0.6 (versionCode 7) yayımlandı; CI run `39039791751` 36 testi, Release derlemesini, imzayı ve sertifika fingerprint'ini doğruladı. v1.0.6 formunun ve v1.0.5 migration/katalog/ZIP v3 akışlarının cihaz kabulü ayrı ve henüz kullanıcı tarafından bildirilmedi. v1.0.4 tekrar geçmişi, SAF/Drive yedek-geri yükleme ve fotoğraf okunabilirliği de cihazda bekliyor. “3. turu denemedim” ifadesinin checklist eşlemesi teyitsizdir.
 
 ---
 
@@ -38,6 +38,7 @@ Son güncelleme: 2026-10-17. v1.0.6 (versionCode 7) yayımlandı; CI run `390397
 | 1.17 | v1.0.5 mevcut uygulamanın üstüne kaldırmadan kurulur; eski soru/not/veri kaybolmaz | KULLANICI | [ ] |
 | 1.18 | VersionCode 6 → 7; v1.0.6 Release, APK imzası ve fingerprint CI'da doğrulandı | YZ (CI run `39039791751`) | [x] |
 | 1.19 | v1.0.6 mevcut uygulamanın üstüne kaldırmadan kurulur; önceki veriler korunur | KULLANICI | [ ] |
+| 1.20 | VersionCode 7 → 8; v1.0.7 Release, APK imzası ve fingerprint CI'da doğrulanır | YZ (CI) | [ ] |
 
 ## Aşama 2 — Yerel arşiv
 
@@ -85,6 +86,7 @@ Son güncelleme: 2026-10-17. v1.0.6 (versionCode 7) yayımlandı; CI run `390397
 | 2.40 | Soru notu form/detay UI'sinde yok; eski not Room ve ZIP yedeğinde korunuyor, düzenleme sırasında silinmiyor | YZ (kod incelemesi + CI run `39037429421`) | [x] |
 | 2.41 | v1.0.5 kaynak/katalog akışı ve locator gerçek cihazda anlaşılır, seçilebilir ve kalıcı | KULLANICI | [ ] |
 | 2.42 | v1.0.6 ekleme/düzenleme formu; kartlar, kamera/galeri, görsel sıralama/silme ve sabit kaydetme alanı cihazda anlaşılır çalışır | KULLANICI | [ ] |
+| 2.43 | Soru formundaki `+ Konu` yalnızca seçili derse ekler; o dersin ve diğer derslerin mevcut konuları korunur | KULLANICI | [ ] |
 
 ## Aşama 3 — Yedek ve geri yükleme
 
