@@ -230,7 +230,37 @@ class LocalSoruGorselDeposu(context: Context) : GorselDosyaYonetimi {
         (staleStages + staleCamera).count { it.delete() }
     }
 
+    private fun bilinenGorselImzasiVar(file: File): Boolean {
+        val header = ByteArray(16)
+        val read = file.inputStream().use { input ->
+            var total = 0
+            while (total < header.size) {
+                val count = input.read(header, total, header.size - total)
+                if (count < 0) break
+                total += count
+            }
+            total
+        }
+        fun startsWith(vararg signature: Int): Boolean =
+            read >= signature.size && signature.indices.all { (header[it].toInt() and 0xff) == signature[it] }
+
+        if (startsWith(0xff, 0xd8, 0xff) ||
+            startsWith(0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a) ||
+            startsWith(0x47, 0x49, 0x46, 0x38, 0x37, 0x61) ||
+            startsWith(0x47, 0x49, 0x46, 0x38, 0x39, 0x61) ||
+            startsWith(0x42, 0x4d)
+        ) return true
+        if (read >= 12 && String(header, 0, 4, Charsets.US_ASCII) == "RIFF" &&
+            String(header, 8, 4, Charsets.US_ASCII) == "WEBP"
+        ) return true
+        if (read >= 12 && String(header, 4, 4, Charsets.US_ASCII) == "ftyp") {
+            return String(header, 8, 4, Charsets.US_ASCII) in setOf("heic", "heix", "hevc", "hevx", "mif1", "msf1", "avif", "avis")
+        }
+        return false
+    }
+
     private fun optimizeEt(kaynak: File, hedef: File) {
+        if (!bilinenGorselImzasiVar(kaynak)) throw IOException("Dosya geçerli bir görsel değil.")
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeFile(kaynak.absolutePath, bounds)
         if (bounds.outWidth <= 0 || bounds.outHeight <= 0) throw IOException("Dosya geçerli bir görsel değil.")
