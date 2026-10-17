@@ -2,8 +2,8 @@
 
 > Bu dosya Android CI tarafından otomatik üretilir. Keystore veya parola değerleri yazılmaz.
 
-- Zaman (UTC): 2026-10-17T17:16:44Z
-- Workflow commit'i: bb1dc1d6ec72cb6cf2b01ae8efbc7572e91a23ba
+- Zaman (UTC): 2026-10-17T17:19:41Z
+- Workflow commit'i: 7d6b71dd2e8cc7c70035e6a20cffcd187abe5ac7
 - Dal: arena/59c6570d-question-note
 - Uygulama sürümü: 1.1.0 (versionCode 12)
 - Android SDK: compileSdk/targetSdk 37, minSdk 26; build-tools 37.0.0
@@ -53,30 +53,12 @@ OS:            Linux 6.17.0-1022-azure amd64
 
 ```text
 -- Derleyici/Gradle hata satırları --
-32:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:25 Syntax error: Expecting a top level declaration.
-33:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:30 Syntax error: Expecting a top level declaration.
-34:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:31 Syntax error: Expecting a top level declaration.
-35:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:32 Syntax error: Expecting a top level declaration.
-36:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:35 Syntax error: Expecting a top level declaration.
-37:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:37 Syntax error: Expecting a top level declaration.
-38:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:38 Syntax error: Expecting a top level declaration.
-39:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:47 Syntax error: Expecting a top level declaration.
-40:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:49 Syntax error: Expecting a top level declaration.
-41:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:55 Syntax error: Expecting a top level declaration.
-42:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:66 Syntax error: Expecting a top level declaration.
-43:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:73 Syntax error: Expecting a top level declaration.
-44:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:75 Syntax error: Expecting a top level declaration.
-45:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:78 Syntax error: Expecting a top level declaration.
-46:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:80 Syntax error: Expecting a top level declaration.
-47:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:81 Syntax error: Expecting a top level declaration.
-48:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:10:2 Syntax error: Expecting a top level declaration.
-49:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:10:3 Syntax error: Expecting a top level declaration.
-50:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/AltMenu.kt:39:5 Unresolved reference 'NavigationBarItem'.
-51:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/AltMenu.kt:43:13 @Composable invocations can only happen from the context of a @Composable function
-52:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/AltMenu.kt:46:13 @Composable invocations can only happen from the context of a @Composable function
-60:* What went wrong:
-63:   > Compilation error. See log for more details
-219:Caused by: org.jetbrains.kotlin.gradle.tasks.CompilationErrorException: Compilation error. See log for more details
+32:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/AltMenu.kt:39:5 Unresolved reference 'NavigationBarItem'.
+33:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/AltMenu.kt:43:13 @Composable invocations can only happen from the context of a @Composable function
+34:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/AltMenu.kt:46:13 @Composable invocations can only happen from the context of a @Composable function
+40:* What went wrong:
+43:   > Compilation error. See log for more details
+229:Caused by: org.jetbrains.kotlin.gradle.tasks.CompilationErrorException: Compilation error. See log for more details
 
 -- İlk 100 satır --
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
@@ -96,43 +78,23 @@ Daemon will be stopped at the end of the build
 > Task :app:createDebugCompatibleScreenManifests
 > Task :app:extractDeepLinksDebug
 > Task :app:processDebugMainManifest
+> Task :app:mergeDebugResources
 > Task :app:processDebugManifest
 > Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest
 > Task :app:processDebugManifestForPackage
 > Task :app:generateDebugAssets UP-TO-DATE
-> Task :app:javaPreCompileDebugUnitTest
 > Task :app:mergeDebugAssets
-> Task :app:mergeDebugResources
-> Task :app:processDebugUnitTestManifest
 > Task :app:processDebugResources
+> Task :app:processDebugUnitTestManifest
 > Task :app:packageDebugUnitTestForUnitTest
 > Task :app:generateDebugUnitTestConfig
 > Task :app:kspDebugKotlin
 
-> Task :app:compileDebugKotlin
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:25 Syntax error: Expecting a top level declaration.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:30 Syntax error: Expecting a top level declaration.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:31 Syntax error: Expecting a top level declaration.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:32 Syntax error: Expecting a top level declaration.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:35 Syntax error: Expecting a top level declaration.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:37 Syntax error: Expecting a top level declaration.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:38 Syntax error: Expecting a top level declaration.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:47 Syntax error: Expecting a top level declaration.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:49 Syntax error: Expecting a top level declaration.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:55 Syntax error: Expecting a top level declaration.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:66 Syntax error: Expecting a top level declaration.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:73 Syntax error: Expecting a top level declaration.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:75 Syntax error: Expecting a top level declaration.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:78 Syntax error: Expecting a top level declaration.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:80 Syntax error: Expecting a top level declaration.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:9:81 Syntax error: Expecting a top level declaration.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:10:2 Syntax error: Expecting a top level declaration.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/domain/seviye/Rutbe.kt:10:3 Syntax error: Expecting a top level declaration.
+> Task :app:compileDebugKotlin FAILED
 e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/AltMenu.kt:39:5 Unresolved reference 'NavigationBarItem'.
 e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/AltMenu.kt:43:13 @Composable invocations can only happen from the context of a @Composable function
 e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/AltMenu.kt:46:13 @Composable invocations can only happen from the context of a @Composable function
-
-> Task :app:compileDebugKotlin FAILED
 
 [Incubating] Problems report is available at: file:///home/runner/work/Question-note/Question-note/build/reports/problems/problems-report.html
 
@@ -176,9 +138,29 @@ org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':app:com
 	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:85)
 	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.execute(DefaultPlanExecutor.java:475)
 	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.run(DefaultPlanExecutor.java:392)
-	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:65)
-	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:47)
-Caused by: org.gradle.workers.internal.DefaultWorkerExecutor$WorkExecutionException: A failure occurred while executing org.jetbrains.kotlin.compilerRunner.btapi.BuildToolsApiCompilationWork
+	at org.gradle.execution.plan.DefaultPlanExecutor.process(DefaultPlanExecutor.java:118)
+	at org.gradle.execution.DefaultBuildWorkExecutor.executePlan(DefaultBuildWorkExecutor.java:143)
+	at org.gradle.execution.DefaultBuildWorkExecutor.displayOrExecutePlan(DefaultBuildWorkExecutor.java:128)
+	at org.gradle.execution.DefaultBuildWorkExecutor$1.call(DefaultBuildWorkExecutor.java:79)
+	at org.gradle.execution.DefaultBuildWorkExecutor$1.call(DefaultBuildWorkExecutor.java:75)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
+	at org.gradle.execution.DefaultBuildWorkExecutor.execute(DefaultBuildWorkExecutor.java:75)
+	at org.gradle.internal.build.DefaultBuildLifecycleController.lambda$executeTasks$0(DefaultBuildLifecycleController.java:323)
+	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:324)
+	at org.gradle.internal.model.StateTransitionController.lambda$tryTransition$0(StateTransitionController.java:235)
+	at org.gradle.internal.work.DefaultSynchronizer.withLock(DefaultSynchronizer.java:45)
+	at org.gradle.internal.model.StateTransitionController.tryTransition(StateTransitionController.java:235)
+	at org.gradle.internal.build.DefaultBuildLifecycleController.executeTasks(DefaultBuildLifecycleController.java:314)
+	at org.gradle.internal.build.DefaultBuildWorkGraphController$DefaultBuildWorkGraph.runWork(DefaultBuildWorkGraphController.java:207)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.lambda$runAndReleaseLocks$0(DefaultWorkerLeaseService.java:296)
+	at org.gradle.internal.work.ResourceLockStatistics$1.measure(ResourceLockStatistics.java:43)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.runAndReleaseLocks(DefaultWorkerLeaseService.java:294)
 
 -- Son 80 satır --
 	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
@@ -216,7 +198,7 @@ Caused by: org.gradle.workers.internal.DefaultWorkerExecutor$WorkExecutionExcept
 	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:38)
 	at org.gradle.internal.execution.impl.DefaultExecutionEngine$1.execute(DefaultExecutionEngine.java:68)
 	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.doExecute(DefaultTaskNodeExecutor.java:364)
-	... 25 more
+	... 55 more
 Caused by: org.jetbrains.kotlin.gradle.tasks.CompilationErrorException: Compilation error. See log for more details
 	at org.jetbrains.kotlin.gradle.tasks.TasksUtilsKt.throwExceptionIfCompilationFailed(tasksUtils.kt:21)
 	at org.jetbrains.kotlin.compilerRunner.btapi.BuildToolsApiCompilationWork.execute(BuildToolsApiCompilationWork.kt:320)
@@ -259,7 +241,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD FAILED in 1m 38s
+BUILD FAILED in 1m 44s
 24 actionable tasks: 24 executed
 ```
 
