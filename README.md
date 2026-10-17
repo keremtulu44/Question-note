@@ -25,21 +25,26 @@ cevaplamak ve çözümü öğrenme sürecinden ayrı saklamaktır.
 
 ## Durum
 
-**v1.0.10 (versionCode 11) yayımlandı.** Filtreli oturum bitince **sonuç karnesi** açılır: kaç
-sorudan kaçını bağımsız çözdüğün, dört kova (bağımsız / yarım / çözemedi / çözümle), oran halkası,
-en çok zorlandığın nedenler ve konular, "Bu konudan çalış" kısayolu, haftalık karşılaştırma, günlük
-hedef (10) ve seri. Kısa oturumlar (5'in altı) sadeleşmiş kart gösterir. 11 rozet cihaz-yerel olarak
-saklanır; yeni kazanılanlar karne üzerinde animasyonla gösterilir. Konfeti yalnız ≥%70 bağımsızda ve
-animasyonlar kapalıysa hiç oynamaz. Bugün ekranına günlük hedef halkası ve seri eklendi. Room
-değişmedi (v3); yedek biçimi değişmedi. v1.0.9 düzeltmeleri ve önceki sürümlerin tamamı korunur.
+**v1.1.1 (versionCode 13) yayımlandı.** Yan menü kaldırıldı; gezinme artık alt menüde: Bugün ·
+Dersler · Filtreli çalışma · **Seviye** · **Ayarlar**. Seviye sekmesi XP tabanlı ilerleme getirir:
+soru ekleme +10, her tekrar +5, bağımsız çözüm +5, günlük hedef +25, seri kilometre taşları ve rozet
+başına +50 XP. Eşikler sonsuz ve artan (100 · 250 · 450 · 700 · 1000…), 9 rütbe (Başlangıç → Şampiyon).
+Amblemler uygulama için üretilip saydam logo olarak eklendi; rozetler Canvas ile çizilir. Seviye
+sekmesinde rütbe amblemi, XP çubuğu, XP kırılımı, toplam istatistik, 11 rozet galerisi, ders bazında
+pekişme halkaları ve 7 günlük tekrar yükü var. Geçmiş XP'si geriye dönük hesaplanır; ayrı XP tablosu
+yoktur. Ayarlar'a günlük hedef seçimi (5/10/15/20/30), yedek al/geri yükle (Drive/Downloads SAF hedefi),
+görsel bakımı ve kaynak/neden yönetimi taşındı. **Silme eklendi:** konu ve kaynak/neden kayıtları
+kullanımdayken silinmez (uyarı + arşivleme önerisi), hazır seçenekler silinemez. v1.0.10 karne/rozet/
+hedef akışı ve önceki sürümler korunur. Room v3 ve yedek biçimi değişmedi.
 
-CI run `39051284547` **72 testi** geçti; Release derlemesi, imza doğrulaması ve beklenen sertifika
-parmak izi eşleşti. [v1.0.10 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.10)
-CI raporundaki APK SHA-256: `dfb7fdbcceb792e568f4f5d1cf4d5844be138460098ccb325e510cdbb0cfd8a7`.
+CI run `39053319900` **86 testi** geçti; Release derlemesi, imza doğrulaması ve beklenen sertifika
+parmak izi eşleşti. [v1.1.0 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.1.0)
+v1.1.1 aynı özelliklerle yalnız görsel boyutu küçültür; release bağlantısı aşağıdadır.
 
 **Cihaz kabulü ayrıdır:** v1.0.3 ana akış adımlarını kullanıcı geçti bildirdi. v1.0.4 tekrar geçmişi,
 v1.0.5 katalog/ZIP akışı, v1.0.6 form yenilemesi, v1.0.7 ders bazında konu ekleme, v1.0.8 filtreli
-çalışma, v1.0.9 düzeltmeleri ve v1.0.10 karne/rozet/hedef akışı henüz cihazda kabul edilmedi. SAF/Drive ve fotoğraf okunabilirliği de bekliyor. v1.0.2 “3.
+çalışma, v1.0.9 düzeltmeleri, v1.0.10 karne/rozet/hedef akışı ve v1.1.x alt menü/seviye/ayarlar/silme
+henüz cihazda kabul edilmedi. SAF/Drive ve fotoğraf okunabilirliği de bekliyor. v1.0.2 “3.
 turu denemedim” ifadesinin checklist eşlemesi hâlâ teyitsiz; ayrıntı
 [TEST_KONTROL_LISTESI.md](docs/TEST_KONTROL_LISTESI.md) içinde.
 ---
@@ -66,12 +71,11 @@ turu denemedim” ifadesinin checklist eşlemesi hâlâ teyitsiz; ayrıntı
 ## Kullanım / APK erişimi
 
 İmzalı APK'lar GitHub [Releases](https://github.com/keremtulu44/Question-note/releases) bölümünde.
-[v1.0.10 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.0.10/yanlis-defteri-1.0.10.apk).
-Mevcut uygulamayı **kaldırmadan** üzerine kur; eski kayıtların korunduğunu doğrula. Filtreli
-çalışmayı tamamla ve karne ekranını incele: başlık sayıları, oran halkası, kovalar, neden/konu
-listeleri, "Bu konudan çalış", haftalık karşılaştırma, seri ve varsa rozet. Bugün ekranındaki hedef
-halkasını kontrol et. Ardından `+ Konu`, soru ekleme/düzenleme, kamera/galeri ve v3 yedek/geri
-yüklemeyi dene.
+[v1.1.1 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.1.1/yanlis-defteri-1.1.1.apk).
+Mevcut uygulamayı **kaldırmadan** üzerine kur; eski kayıtların korunduğunu doğrula. Alt menüdeki beş
+sekmeyi gez; **Seviye** sekmesinde rütbe amblemini, XP çubuğunu, rozet galerisini ve tahmini kontrol et.
+**Ayarlar**'da günlük hedefi değiştir, yedek al. Konu ve kaynak/neden silmeyi dene (kullanımdaysa
+uyarı çıkmalı). Ardından filtreli bir oturum tamamlayıp karnenin hâlâ çalıştığını doğrula.
 İndirme/kurulum ayrıntıları [BUILDING.md](BUILDING.md) içinde.
 
 ---

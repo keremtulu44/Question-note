@@ -74,6 +74,9 @@ Android telefonda kullanılacak, tek kişilik bir dijital yanlış defteri:
 | K28 | Karne karşılaştırması **önceki takvim haftasına** (Pzt–Paz) göre yapılır; geçen haftada yeterli kayıt yoksa satır gizlenir. |
 | K29 | Kısa oturum eşiği **şimdilik 5**, tek sabitten (`KISA_OTURUM_ESIGI`) okunur; ileride değişken olacak. Karne oturum bitince **otomatik** açılır. |
 | K30 | “Bu konudan çalış” düğmesi filtreyi yalnız seçilen konuya kurar, diğer filtreleri temizler ve Filtreli çalışma ekranını açar. |
+| K32 | **Gezinme alt menüdedir** (v1.1.0): Bugün · Dersler · Filtreli çalışma · Seviye · Ayarlar. Yan menü kaldırıldı; yedek/görsel bakımı/katalog Ayarlar altına taşındı. |
+| K33 | **Seviye/XP gerçek emekten türetilir:** soru ekleme +10, tekrar +5, bağımsız çözüm +5, günlük hedef +25, seri 3/7/30 gün +30/+70/+300, rozet +50. Ayrı XP tablosu yoktur; geçmiş geriye dönük hesaplanır. Eşikler sonsuz ve artan (100/250/450/700/1000…), 9 rütbe; son rütbeden sonra seviye artmaya devam eder. |
+| K34 | **Silme kuralları:** konu, soruda kullanılıyorsa silinmez (uyarı + arşivleme önerisi); kaynak/yanlış nedeni kullanımdaysa silinmez; hazır katalog seçenekleri hiçbir zaman silinemez. Sessiz veri kaybı yoktur. |
 | K31 | **Karne uygulama notları (v1.0.10):** kova/oran hesabı `KarneHesabi`; seri ve hafta penceresi `SeriHesabi`/`HaftaPenceresi`; ilerleme rakamları `IlerlemeHizmeti` ile `tekrarlar` tablosundan anlık hesaplanır (yeni tablo yok). Rozetler `SharedPreferences` (`karne_rozetleri/kazanilanlar`) içinde tutulur ve ZIP yedeğine girmez; kazanım idempotenttir. İstikrar rozeti üst üste 5 **gün** (her gün ≥5 soru ve ≥%70 bağımsız) olarak uygulanır. Haftalık karşılaştırma eşiği `KISA_OTURUM_ESIGI` ile aynı sabitten okunur. |
 
 ### Soru kaydındaki alanlar

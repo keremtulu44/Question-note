@@ -67,6 +67,7 @@ Durum işaretleri: `[ ]` yapılmadı · `[~]` kod mevcut; bu sürümün CI/Relea
 - [~] v1.0.8 filtreli çalışma: konu/kaynak/ana neden filtreleri, en uzun süredir çalışılmayandan sıralama ve sıralı oturum; CI run `39044777998` 42 testle geçti, cihaz kabulü bekliyor.
 - [~] v1.0.9 düzeltmeleri: döndürmede durum koruma, oturumdan çıkış onayı, sayı alanı, görsel belleği, arşivli konu çakışması, yedek yazımı ve CSV formül nötrleştirmesi; CI run `39048703584` 44 testle geçti, cihaz kabulü bekliyor.
 - [x] v1.0.10: sonuç karnesi, animasyon/rozet, günlük hedef (sabit 10), seri ve haftalık özet — yayımlandı; CI run `39051284547`, 72 test. Cihaz kabulü bekliyor.
+- [x] v1.1.0/v1.1.1: alt menü (yan menü kaldırıldı), XP/seviye/rütbe, rozet galerisi, Ayarlar ekranı (hedef seçimi + yedek + bakım + katalog), konu/kaynak/neden silme — yayımlandı; CI run `39053319900`, 86 test. Cihaz kabulü bekliyor.
 - [ ] v1.0.11: tekrar algoritması v2 (zorlandım ilerlemesi, kolaylık, gecikme cezası, zor soru) + Room v4 migration + yedek biçimi v4.
 - [ ] v1.0.12: pekişme halkaları, 7 günlük tahmin, günlük kota.
 - [ ] v1.0.4'te tekrar geçmişinin gerçek cihazda okunaklı/güncel gösterildiğinin kabulü.

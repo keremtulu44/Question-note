@@ -2,6 +2,24 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.1.1] — 2026-10-17
+
+- Rank görselleri WebP'ye çevrildi ve 96 dp'ye ölçeklendi: drawable boyutu 2.487 KB → 626 KB, APK ~11,8 MB → ~9,9 MB.
+- Sürüm numarası dışında v1.1.0 ile aynı özellikler.
+
+## [1.1.0] — 2026-10-17
+
+- **Yan menü kaldırıldı, alt menü geldi:** Bugün · Dersler · Filtreli çalışma · Seviye · Ayarlar. Alt menü yalnız sekme köklerinde görünür; soru formu/ayrıntı ve filtreli oturum tam ekran kalır.
+- **Seviye / XP sistemi:** XP gerçek emekten hesaplanır — soru ekleme +10, her tekrar +5, bağımsız çözüm +5, tamamlanan günlük hedef +25, seri kilometre taşları (3 gün +30, 7 gün +70, 30 gün +300), rozet başına +50.
+- Seviye eşikleri sonsuz ve artan: 100, 250, 450, 700, 1000 XP… (fark her seviyede +50). Seviye 1'den itibaren 9 rütbe: Başlangıç, Meraklı, Düzenli, Kararlı, Disiplinli, Azimli, Odaklı, Usta, Şampiyon; son rütbeden sonra seviye artmaya devam eder.
+- **Rütbe amblemleri uygulama için üretildi**, beyaz arka planı temizlenip saydam logo olarak eklendi (`rank_*.webp`, 5 yoğunluk).
+- **Seviye sekmesi:** rütbe amblemi + seviye + XP çubuğu + sonraki seviyeye kalan XP; XP kırılımı; toplam istatistik (soru, tekrar, bağımsız, en uzun seri); **11 rozetin galerisi** (kendi çizdiğimiz rozet görselleri, kazanılan/kilitli); ders bazında pekişme halkaları; 7 günlük tekrar yükü tahmini.
+- **Geçmiş geriye dönük hesaplanır:** mevcut sorular ve tekrarlar aynı kurallarla XP'ye çevrilir; kullanıcı 1. seviyeden değil hak ettiği yerden başlar. Ayrı XP tablosu yoktur, her şey `sorular`/`tekrarlar` tablolarından anlık hesaplanır.
+- **Ayarlar ekranı:** günlük hedef seçimi (5/10/15/20/30), yedek oluştur/geri yükle + son yedek bilgisi (Drive/Downloads dahil SAF hedefi), görsel bakımı, kaynak/neden yönetimi, sürüm ve veri bilgisi.
+- **Silme eklendi:** konu silme (soruda kullanılıyorsa engellenir ve arşivleme önerilir), kaynak/yanlış nedeni silme (kullanımdaysa engellenir; hazır seçenekler silinemez). Hiçbir durumda sessiz veri kaybı yoktur.
+- Rozet görselleri karnede de kullanılıyor; rozetler ayrı bir "Rozetler" ekranı yerine Seviye sekmesindeki galeride.
+- 14 yeni birim testi (seviye eşikleri, rütbe seçimi, XP kırılımı, seri bonusu, en uzun seri) — toplam **86 test**.
+
 ## [1.0.10] — 2026-10-17
 
 - Filtreli oturum bitince **sonuç karnesi** açılır: "%1$d sorudan %2$d tanesini bağımsız çözdün" başlığı, oran halkası ve dört kova (bağımsız / yarım / çözemedi / çözümle). Çözümü açılan soru, RAHAT işaretlense bile bağımsız sayılmaz.

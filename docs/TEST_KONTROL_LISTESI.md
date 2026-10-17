@@ -11,7 +11,7 @@
 > ZIP yol güvenliği) ve **Robolectric** (şema/migration testleri). Emülatör yalnızca gerçekten
 > gerekirse kullanılır; asıl kabul testleri gerçek cihazda yapılır.
 
-Son güncelleme: 2026-10-17. v1.0.10 (versionCode 11) yayımlandı; CI run `39051284547` 72 testi, Release derlemesini, imzayı ve sertifika fingerprint'ini doğruladı (44 → 72; karne/seri/hafta/rozet birim testleri eklendi). Filtreli çalışma, karne ekranı ve v1.0.5–v1.0.9 özelliklerinin cihaz kabulü ayrı ve henüz kullanıcı tarafından bildirilmedi. v1.0.4 tekrar geçmişi, SAF/Drive yedek-geri yükleme ve fotoğraf okunabilirliği de cihazda bekliyor. “3. turu denemedim” ifadesinin checklist eşlemesi teyitsizdir. Karne, rozet ve hedef animasyonları CI'da derlendi; cihaz kabulü aşağıdaki ayrı bölümde bekliyor.
+Son güncelleme: 2026-10-17. v1.1.0 (versionCode 12) yayımlandı, v1.1.1 yalnız WebP optimizasyonudur; CI run `39053319900` 86 testi, Release derlemesini, imzayı ve sertifika fingerprint'ini doğruladı (72 → 86; seviye/rütbe/XP birim testleri eklendi). Filtreli çalışma, karne ekranı ve v1.0.5–v1.0.9 özelliklerinin cihaz kabulü ayrı ve henüz kullanıcı tarafından bildirilmedi. v1.0.4 tekrar geçmişi, SAF/Drive yedek-geri yükleme ve fotoğraf okunabilirliği de cihazda bekliyor. “3. turu denemedim” ifadesinin checklist eşlemesi teyitsizdir. Karne, rozet ve hedef animasyonları CI'da derlendi; cihaz kabulü aşağıdaki ayrı bölümde bekliyor.
 
 ---
 
@@ -44,8 +44,10 @@ Son güncelleme: 2026-10-17. v1.0.10 (versionCode 11) yayımlandı; CI run `3905
 | 1.23 | v1.0.8 mevcut uygulamanın üstüne kaldırmadan kurulur; önceki veriler korunur | KULLANICI | [ ] |
 | 1.24 | VersionCode 9 → 10; v1.0.9 Release, APK imzası ve fingerprint CI'da doğrulandı | YZ (CI run `39048703584`) | [x] |
 | 1.26 | VersionCode 10 → 11; v1.0.10 Release, APK imzası ve fingerprint CI'da doğrulandı | YZ (CI run `39051284547`) | [x] |
+| 1.28 | VersionCode 11 → 12; v1.1.0 Release, APK imzası ve fingerprint CI'da doğrulandı | YZ (CI run `39053319900`) | [x] |
 | 1.25 | v1.0.9 mevcut uygulamanın üstüne kaldırmadan kurulur; önceki veriler korunur | KULLANICI | [x] |
 | 1.27 | v1.0.10 mevcut uygulamanın üstüne kaldırmadan kurulur; önceki veriler korunur | KULLANICI | [ ] |
+| 1.29 | v1.1.x mevcut uygulamanın üstüne kaldırmadan kurulur; önceki veriler korunur | KULLANICI | [ ] |
 
 ## Aşama 2 — Yerel arşiv
 
@@ -194,6 +196,25 @@ Son güncelleme: 2026-10-17. v1.0.10 (versionCode 11) yayımlandı; CI run `3905
 | E.12 | Yeni rozet karnede en çok 2 adet gösterilir; “Kazandığın rozetler: N/11” satırı doğru | KULLANICI | [ ] |
 | E.13 | Bugün ekranında hedef halkası (x/10) ve seri doğru; hedef dolunca metin değişir | KULLANICI | [ ] |
 | E.14 | Karne verileri uygulama yeniden açıldığında da tutarlı (tekrarlar tablosundan hesaplanır) | KULLANICI | [ ] |
+
+## v1.1.x alt menü, seviye, ayarlar ve silme
+
+> v1.1.0 (versionCode 12) CI run `39053319900` ile derlendi (86 test). **Cihaz kabulü henüz yapılmadı.**
+
+| # | Test | Sorumlu | Durum |
+|---|---|---|---|
+| F.1 | Seviye eşikleri ve rütbe seçimi: 100/250/450/700 XP, 9 rütbe, son rütbeden sonra seviye artar | YZ (birim testi) | [x] |
+| F.2 | XP kırılımı ve seri bonusu (3/7/30 gün) doğru hesaplanır; geçmiş geriye dönük sayılır | YZ (birim testi) | [x] |
+| F.3 | Alt menüde 5 sekme var; yan menü açılmıyor; sekme köklerinde alt menü görünür | KULLANICI | [ ] |
+| F.4 | Seviye sekmesinde rütbe amblemi, seviye numarası, XP çubuğu ve kalan XP doğru | KULLANICI | [ ] |
+| F.5 | 11 rozetin tamamı galeride görünür; kazanılanlar renkli, kazanılmayanlar soluk/kilitli | KULLANICI | [ ] |
+| F.6 | Ders bazında pekişme halkaları ve 7 günlük tekrar yükü grafiği doğru | KULLANICI | [ ] |
+| F.7 | Ayarlar'da günlük hedef 5/10/15/20/30 arasında değişir; Bugün halkası yeni hedefi kullanır | KULLANICI | [ ] |
+| F.8 | Ayarlar'dan yedek alınır, geri yüklenir; son yedek bilgisi görünür | KULLANICI | [ ] |
+| F.9 | Konu silme boş konuda çalışır; kullanımdaki konuda "kullanımda" uyarısı ve arşivleme seçeneği çıkar | KULLANICI | [ ] |
+| F.10 | Kaynak/neden silme kullanıcı kaydında çalışır; hazır seçenekte "silinemez" uyarısı çıkar | KULLANICI | [ ] |
+| F.11 | Soru formu/ayrıntısı ve filtreli oturumda alt menü gizlenir, geri düğmesi doğru yere döner | KULLANICI | [ ] |
+| F.12 | Karne ekranı v1.0.10'daki gibi çalışmaya devam eder; rozet görselleri görünür | KULLANICI | [ ] |
 
 ## Genel / sürekli
 
