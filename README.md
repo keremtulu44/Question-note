@@ -25,20 +25,23 @@ cevaplamak ve çözümü öğrenme sürecinden ayrı saklamaktır.
 
 ## Durum
 
-**v1.0.6 (versionCode 7) yayımlandı.** Soru ekleme/düzenleme formu; numaralı yuvarlak kartlar,
-daha okunaklı seçim kontrolleri ve ekranda sabit kalan kaydetme alanıyla yenilendi. v1.0.5 ile ortak
-kaynak kataloğu, soru başına sayfa/test/soru konumu, tek ana yanlış nedeni ve soru notu alanının
-kaldırılması gelmişti; eski not verisi korunur. Room v3 migration'ı veriyi korur; tam ZIP yedeği v3'tür
-ve v2 yedeklerini içe alır. Ürün lise odağındadır; TYT/AYT ayrımı yoktur.
+**v1.0.7 (versionCode 8) yayımlandı.** Soru formundaki konu alanına, kaynak/neden seçimleriyle
+aynı biçimde `+ Konu` eklendi. Yeni konu yalnızca seçili derse kaydedilir; o dersin eski konuları ve
+diğer derslerin konu listeleri korunur. Başarılı eklemeden sonra yeni konu seçilir; aynı addaki konu
+ikinci kez oluşturulamaz. v1.0.6 formun numaralı kartlarını, belirgin seçim kontrollerini ve sabit
+kaydetme alanını getirmişti. v1.0.5 ortak kaynak kataloğu, soru başına sayfa/test/soru konumu, tek
+ana yanlış nedeni ve eski not verisini koruyarak not UI'sinin kaldırılmasını içerir. Room v3
+migration'ı veriyi korur; tam ZIP yedeği v3'tür ve v2 yedeklerini içe alır. Ürün lise odağındadır;
+TYT/AYT ayrımı yoktur.
 
-CI run `39039791751` **36 testi** geçti; Release derlemesi, imza doğrulaması ve beklenen sertifika
-parmak izi eşleşti. [v1.0.6 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.6)
-CI raporundaki APK SHA-256: `dde5f837a926bf906e164c202a77a85c6bf2ffadce1c16b98cf8d8c8bbc5332a`.
+CI run `39041684003` **37 testi** geçti; Release derlemesi, imza doğrulaması ve beklenen sertifika
+parmak izi eşleşti. [v1.0.7 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.7)
+CI raporundaki APK SHA-256: `3d10f48d7c6db6ff246d0942fa958df974ac3c87e182b2627855f192035f99c4`.
 
 **Cihaz kabulü ayrıdır:** v1.0.3 ana akış adımlarını kullanıcı geçti bildirdi. v1.0.4 tekrar geçmişi,
-v1.0.5 güncelleme/katalog/ZIP akışı ve v1.0.6 yeni form arayüzü henüz cihazda kabul edilmedi.
-SAF/Drive ve fotoğraf okunabilirliği de bekliyor. v1.0.2 “3. turu denemedim” ifadesinin checklist
-eşlemesi hâlâ teyitsiz; ayrıntı [TEST_KONTROL_LISTESI.md](docs/TEST_KONTROL_LISTESI.md) içinde.
+v1.0.5 katalog/ZIP akışı, v1.0.6 form yenilemesi ve v1.0.7 ders bazında konu ekleme henüz cihazda
+kabul edilmedi. SAF/Drive ve fotoğraf okunabilirliği de bekliyor. v1.0.2 “3. turu denemedim”
+ifadesinin checklist eşlemesi hâlâ teyitsiz; ayrıntı [TEST_KONTROL_LISTESI.md](docs/TEST_KONTROL_LISTESI.md) içinde.
 ---
 
 ## Belgeler
@@ -62,10 +65,11 @@ eşlemesi hâlâ teyitsiz; ayrıntı [TEST_KONTROL_LISTESI.md](docs/TEST_KONTROL
 ## Kullanım / APK erişimi
 
 İmzalı APK'lar GitHub [Releases](https://github.com/keremtulu44/Question-note/releases) bölümünde.
-[v1.0.6 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.0.6/yanlis-defteri-1.0.6.apk).
-Mevcut uygulamayı **kaldırmadan** üzerine kur; eski kayıtların korunduğunu ve yeni soru formunda
-ekleme/düzenleme, kamera/galeri, görsel sıralama ve kaydetme akışını dene. Ardından kaynak/neden
-seçimini ve v3 yedek/geri yüklemeyi kontrol et. İndirme/kurulum ayrıntıları
+[v1.0.7 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.0.7/yanlis-defteri-1.0.7.apk).
+Mevcut uygulamayı **kaldırmadan** üzerine kur; eski kayıtların korunduğunu, `+ Konu` ile seçili
+ders için konu eklenip eski konuların tüm derslerde kaldığını doğrula. Soru ekleme/düzenleme, kamera/
+galeri, görsel sıralama ve kaydetmeyi de dene; ardından kaynak/neden seçimini ve v3 yedek/geri
+yüklemeyi kontrol et. İndirme/kurulum ayrıntıları
 [BUILDING.md](BUILDING.md) içinde.
 
 ---

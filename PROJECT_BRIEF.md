@@ -4,7 +4,7 @@ Bu belge projenin **karar kaydıdır**. Yeni bir geliştirme oturumu (insan veya
 belgeyi, sonra [HANDOFF.md](HANDOFF.md) dosyasını okur.
 
 - Son güncelleme: 2026-10-17
-- Durum: v1.0.6 (versionCode 7) yayımlandı. CI run `39039791751` 36 testi, Release derlemesini/imzayı ve sertifika fingerprint doğrulamasını geçti. Bu sürüm soru ekleme/düzenleme formunu numaralı kartlar, belirgin seçim kontrolleri ve sabit kaydetme alanıyla yeniler. v1.0.5 kapsamındaki ortak kaynak kataloğu, soru başına isteğe bağlı sayfa/test/soru konumu, tek ana yanlış nedeni ve soru notu UI'sinin kaldırılması korunur; eski not/kaynak/neden verisi silinmez, Room v2→v3 migration veri korur. v1.0.5 özellikleri ve v1.0.6 formunun fiziksel cihaz kabulü CI'dan ayrı tutulur ve henüz kullanıcı tarafından bildirilmedi.
+- Durum: v1.0.7 (versionCode 8) yayımlandı. CI run `39041684003` 37 testi, Release derlemesini/imzayı ve sertifika fingerprint doğrulamasını geçti. `+ Konu`, soru formundan yeni konuyu seçili derse ekler ve yeni kaydı seçer; aynı dersin mevcut konuları ve diğer derslerin listeleri korunur. v1.0.6 form kartları/sabit kaydetme alanı ile v1.0.5 ortak kaynak kataloğu, soru başına locator, tek ana yanlış nedeni ve soru notu UI'sinin kaldırılması da korunur; eski veri silinmez ve Room v2→v3 migration veri korur. v1.0.5–v1.0.7 cihaz kabulü CI'dan ayrı tutulur ve henüz kullanıcı tarafından bildirilmedi.
 
 ---
 

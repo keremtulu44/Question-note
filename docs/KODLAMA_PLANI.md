@@ -1,7 +1,7 @@
 # KODLAMA PLANI (Aşama 1 ve sonrası)
 
 > Bu belge **nasıl kodlayacağımızı** ve ölçülen sonuçları kaydeder: görev sırası, dosya yapısı,
-> sürüm sabitleme, imzalama kurulumu, derleme bütçesi, test stratejisi. v1.0.6 soru formu yenilemesi CI run `39039791751` ile doğrulandı ve yayımlandı; form ile önceki v1.0.5 özelliklerinin fiziksel cihaz kabulü bekleniyor.
+> sürüm sabitleme, imzalama kurulumu, derleme bütçesi, test stratejisi. v1.0.7 `+ Konu` akışı CI run `39041684003` ile doğrulandı ve yayımlandı; seçili ders/konu koruması ile v1.0.5–v1.0.7 özelliklerinin fiziksel cihaz kabulü bekleniyor.
 >
 > İlgili belgeler: [PROJECT_BRIEF.md](../PROJECT_BRIEF.md) (kararlar) · [ROADMAP.md](../ROADMAP.md)
 > (aşamalar) · [BUILDING.md](../BUILDING.md) (derleme/imzalama) · [docs/VERI_MODELI.md](VERI_MODELI.md)
@@ -259,8 +259,9 @@ com.keremtulu.questionnote/
 - Kamera/galeri çoklu görselleri, EXIF yönü, JPEG uzun kenar ~3000 px/kalite 90, SHA-256, staging→kalıcı alan ve kontrollü bakım.
 - ZIP v3/SAF yedekleme: katalog ve locator içeren manifest/JSON/6 CSV/görsel payload'ları; v2 ZIP içe aktarımı; doğrulama sınırları, güvenlik kopyası ve journal/Room marker kurtarması. CI run `39037429421` içindeki v3/v2 yedek testleri geçti.
 - v1.0.5 CI run `39037429421`: 36 test, `assembleRelease`, imza/apksigner doğrulaması ve sertifika fingerprint eşleşmesi başarılı; Release yayımlandı. CI raporu `docs/DERLEME_RAPORU.md`; CI raporundaki APK SHA-256 `00f0b3b33f1efa81156043ef38a31640f57ce3ba34cf608505eb3164e0a8bedb`.
-- v1.0.6 CI run `39039791751`: form yenilemesi dahil kod 36 testle derlendi; `assembleRelease`, imza ve fingerprint doğrulandı, v1.0.6 Release yayımlandı. APK SHA-256 `dde5f837a926bf906e164c202a77a85c6bf2ffadce1c16b98cf8d8c8bbc5332a`; gerçek cihaz kabulü bekliyor.
-- Kullanıcı v1.0.3'teki Bugün/yan menü/tekrar kaydı cihaz adımlarını geçti bildirdi. v1.0.4 tekrar geçmişi UI'si, v1.0.5 güncelleme/migration ve katalog akışı, v1.0.6 form yenilemesi, SAF/Drive, temiz kurulum/başka cihaz ve fotoğraf okunabilirliği cihaz testi bekliyor.
+- v1.0.6 CI run `39039791751`: form yenilemesi dahil kod 36 testle derlendi; `assembleRelease`, imza ve fingerprint doğrulandı, v1.0.6 Release yayımlandı. APK SHA-256 `dde5f837a926bf906e164c202a77a85c6bf2ffadce1c16b98cf8d8c8bbc5332a`.
+- v1.0.7 CI run `39041684003`: `+ Konu` eklemesi ve yedi dersin eski konu listelerini koruma testi dahil 37 test geçti; Release/imza/fingerprint doğrulandı. APK SHA-256 `3d10f48d7c6db6ff246d0942fa958df974ac3c87e182b2627855f192035f99c4`; gerçek cihaz kabulü bekliyor.
+- Kullanıcı v1.0.3'teki Bugün/yan menü/tekrar kaydı cihaz adımlarını geçti bildirdi. v1.0.4 tekrar geçmişi UI'si, v1.0.5 güncelleme/migration ve katalog akışı, v1.0.6 form yenilemesi, v1.0.7 `+ Konu`, SAF/Drive, temiz kurulum/başka cihaz ve fotoğraf okunabilirliği cihaz testi bekliyor.
 
 ### 5.3 Dosya ↔ veritabanı tutarlılığı (yazma sırası)
 
@@ -351,6 +352,6 @@ edilecek" ayrımı yazılır. `docs/TEST_KONTROL_LISTESI.md` işaretlenir.
 ## 11. Bir sonraki oturum nasıl başlar?
 
 1. Bu belge + HANDOFF okunur; HANDOFF'taki "sıradaki somut adım" uygulanır.
-2. v1.0.6 CI ve Release tamamlandı; rapor `docs/DERLEME_RAPORU.md`, run `39039791751` (36 test). Yerel ortamda Java olmadığı için yerel Gradle testi çalıştırılamadı.
-3. Sıradaki iş kullanıcı cihaz kabulidir: v1.0.6 APK'yı uygulamayı kaldırmadan güncelle, eski veriyi koruduğunu ve yeni formun ekleme/düzenleme, kamera/galeri, görsel sıralama/silme ve kaydetme akışını dene; katalog/locator ve ZIP v3 geri yüklemeyi de kontrol et. v1.0.4 history UI ve SAF/Drive testleri beklemede; v1.0.2 “3. tur” eşlemesi teyitsiz.
+2. v1.0.7 CI ve Release tamamlandı; rapor `docs/DERLEME_RAPORU.md`, run `39041684003` (37 test). Yerel ortamda Java olmadığı için yerel Gradle testi çalıştırılamadı.
+3. Sıradaki iş kullanıcı cihaz kabulidir: v1.0.7 APK'yı kaldırmadan güncelle, eski veriyi ve her dersteki konuları doğrula, `+ Konu` ile yalnızca seçili derse yeni konu ekle ve diğer derslerin listelerinin değişmediğini dene. Soru ekleme/düzenleme formunu, katalog/locator ve ZIP v3 geri yüklemeyi de kontrol et. v1.0.4 history UI ve SAF/Drive testleri beklemede; v1.0.2 “3. tur” eşlemesi teyitsiz.
 4. Her görev sonunda HANDOFF güncellenir: yapılan, ölçülen, kalan, sürümler, son başarılı derleme.

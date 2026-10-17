@@ -20,13 +20,14 @@ Durum işaretleri: `[ ]` yapılmadı · `[~]` kod mevcut; bu sürümün CI/Relea
 
 ## Aşama 2 — Yerel soru arşivi [~]
 
-> v1.0.6 CI run `39039791751` (36 test) geçti ve Release yayımlandı. Form yenilemesinin, kamera/galerinin, katalog/migration akışlarının fiziksel cihaz kabulü ile gerçek fotoğraf okunabilirliği hâlâ kullanıcı testini bekliyor.
+> v1.0.7 CI run `39041684003` (37 test) geçti ve Release yayımlandı. `+ Konu` per-course persistence testten geçti; konu ekleme, v1.0.6 formu, kamera/galeri ve katalog/migration akışlarının fiziksel cihaz kabulü ile fotoğraf okunabilirliği hâlâ kullanıcı testini bekliyor.
 
 - [x] Room şema v3 JSON üretildi; v1→v2→v3 ve doğrudan v2→v3 veri koruyan migration testleri CI run `39037429421` içinde geçti. Yıkıcı migration fallback'i yok.
 - [x] Yedi lise dersi; kullanıcı arayüzünde ders listesi sabit, ders yönetimi/arsiv akışı ana ekrandan çıkarıldı.
 - [x] Konu ekleme/düzenleme/arşivleme/geri getirme; arşiv ilişkiyi silmiyor.
 - [x] Soru ekleme/düzenleme/silme, ders/konu/konusuz/plan filtreleri, ayrıntı ve görsellerin ilişkilendirilmesi.
-- [~] v1.0.6 soru formu hiyerarşi/kartları, seçim kontrolleri ve sabit kaydetme alanıyla yenilendi; CI run `39039791751` derlemeyi doğruladı, fiziksel kullanılabilirlik kabulü bekliyor.
+- [~] v1.0.6 soru formu hiyerarşi/kartları, seçim kontrolleri ve sabit kaydetme alanıyla yenilendi; fiziksel kullanılabilirlik kabulü bekliyor.
+- [~] v1.0.7 formdaki `+ Konu` yeni konuyu seçili derse ekler ve seçer; yedi ders için repository testi eski konu listesinin korunduğunu doğruladı (CI run `39041684003`); cihaz kabulü bekliyor.
 - [~] Dersler arası ortak kaynak kataloğu, soruya özel sayfa/test/soru konumu ve hazır/özel nedenlerden tek ana yanlış nedeni; soru notu UI alanı kaldırılırken eski değerler korunuyor. v1.0.5 CI geçti; fiziksel cihaz kabulü bekliyor.
 - [x] Tekrar/plan kuralları ve birim testleri (soru arşivinden bağımsız `TekrarKurali`).
 - [x] Kamera ve sistem fotoğraf seçicisi; soru/çözüm için çoklu görsel; staging→kalıcı alan, SHA-256 ve atomik dosya yazımı.
@@ -56,7 +57,7 @@ Durum işaretleri: `[ ]` yapılmadı · `[~]` kod mevcut; bu sürümün CI/Relea
 
 ## Aşama 4 — Tekrar deneyimi ve günlük akış [~]
 
-> Bugün/menü/sonuç akışı v1.0.3'te yayımlandı ve kullanıcı tarafından cihazda geçti bildirildi. Tekrar geçmişi v1.0.4, katalog/ZIP özellikleri v1.0.5 ve form yenilemesi v1.0.6 CI'da doğrulandı; v1.0.4 history UI ile v1.0.5/v1.0.6 güncelleme ve form cihaz kabulü bekliyor.
+> Bugün/menü/sonuç akışı v1.0.3'te yayımlandı ve kullanıcı tarafından cihazda geçti bildirildi. Tekrar geçmişi v1.0.4, katalog/ZIP özellikleri v1.0.5, form yenilemesi v1.0.6 ve per-course `+ Konu` v1.0.7 CI'da doğrulandı; v1.0.4 history UI ve v1.0.5–v1.0.7 cihaz kabulü bekliyor.
 
 - [x] Tekrar aralığı kuralı ve repository seviyesinde plan/tekrar davranışları CI'da test edildi.
 - [x] Bugün/gecikmiş soruları dersler arası listeleyen ana ekran, belirgin “Soru ekle” eylemi ve ikincil alanlar için yan menü.

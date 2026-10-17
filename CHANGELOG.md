@@ -6,7 +6,8 @@ Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih 
 
 - Soru formundaki konu seçicisine kaynak/neden seçicileriyle aynı tarzda `+ Konu` eklendi; yeni konu seçili derse eklenir ve o dersin/diğer derslerin mevcut konu kayıtları korunur.
 - Konu ekleme başarılı olunca yeni konu seçilir; yinelenen ad hatası gösterilir ve konu listesi yüklenemezse yeniden deneme sunulur.
-- CI doğrulaması ve Release sonucu bekleniyor.
+- CI run `39041684003`: 37 test, `assembleRelease`, imza/apksigner ve sertifika fingerprint doğrulaması geçti; [v1.0.7 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.7) yayımlandı.
+- CI raporundaki APK SHA-256: `3d10f48d7c6db6ff246d0942fa958df974ac3c87e182b2627855f192035f99c4`. Fiziksel cihaz kabulü ayrıca bekliyor.
 
 ## [1.0.6] — 2026-10-17
 
