@@ -13,6 +13,7 @@ import com.keremtulu.questionnote.domain.model.SoruGorseli
 import com.keremtulu.questionnote.domain.model.SoruIslemSonucu
 import com.keremtulu.questionnote.domain.model.SoruKaydetmeIstegi
 import com.keremtulu.questionnote.domain.model.SoruPlanDurumu
+import com.keremtulu.questionnote.domain.model.TekrarKaydi
 import com.keremtulu.questionnote.domain.model.TekrarSonucu
 import com.keremtulu.questionnote.domain.repeat.TekrarKurali
 import com.keremtulu.questionnote.domain.repository.GorselDosyaYonetimi
@@ -44,6 +45,9 @@ class RoomSoruRepository(
     override fun bugunTekrarlanacaklariIzle(bugun: Int): Flow<List<Soru>> =
         soruDao.bugunTekrarlanacaklariIzle(bugun)
             .map { rows -> rows.map { row -> row.soru.toDomain(row.gorseller.map { it.toDomain() }) } }
+
+    override fun tekrarGecmisiniIzle(soruId: String): Flow<List<TekrarKaydi>> =
+        tekrarDao.sorununTekrarGecmisiniIzle(soruId).map { records -> records.map { it.toDomain() } }
 
     override suspend fun soruGetir(soruId: String): Soru? {
         val row = soruDao.idIleGetir(soruId) ?: return null
@@ -273,6 +277,17 @@ class RoomSoruRepository(
         yukseklik = yukseklik,
         boyut = boyut,
         sha256 = sha256,
+    )
+
+    private fun TekrarEntity.toDomain() = TekrarKaydi(
+        id = id,
+        gun = gun,
+        planlananGun = planlananGun,
+        sonuc = enumOrDefault(sonuc, TekrarSonucu.COZEMEDIM),
+        cozumAcildi = cozumAcildi,
+        oncekiAralik = oncekiAralik,
+        sonrakiAralik = sonrakiAralik,
+        elleAtandi = elleAtandi,
     )
 
     private inline fun <reified T : Enum<T>> enumOrDefault(value: String, default: T): T =

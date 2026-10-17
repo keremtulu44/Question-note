@@ -93,6 +93,17 @@ enum class TekrarSonucu {
     RAHAT,
 }
 
+data class TekrarKaydi(
+    val id: String,
+    val gun: Int,
+    val planlananGun: Int?,
+    val sonuc: TekrarSonucu,
+    val cozumAcildi: Boolean,
+    val oncekiAralik: Int?,
+    val sonrakiAralik: Int?,
+    val elleAtandi: Boolean,
+)
+
 data class TekrarPlani(
     val oncekiAralik: Int,
     val sonrakiAralik: Int,

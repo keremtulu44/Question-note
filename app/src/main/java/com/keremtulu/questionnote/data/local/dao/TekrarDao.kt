@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.keremtulu.questionnote.data.local.entity.TekrarEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TekrarDao {
@@ -13,6 +14,9 @@ interface TekrarDao {
 
     @Query("SELECT * FROM tekrarlar WHERE soru_id = :soruId ORDER BY gun DESC, zaman DESC")
     suspend fun sorununTekrarlariniGetir(soruId: String): List<TekrarEntity>
+
+    @Query("SELECT * FROM tekrarlar WHERE soru_id = :soruId ORDER BY gun DESC, zaman DESC, id ASC")
+    fun sorununTekrarGecmisiniIzle(soruId: String): Flow<List<TekrarEntity>>
 
     @Query("SELECT EXISTS(SELECT 1 FROM tekrarlar WHERE soru_id = :soruId AND gun = :gun)")
     suspend fun ayniGunTekrarVar(soruId: String, gun: Int): Boolean

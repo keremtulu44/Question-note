@@ -3,6 +3,7 @@ package com.keremtulu.questionnote.data.repository
 import androidx.room.Room
 import com.keremtulu.questionnote.data.local.VarsayilanDersleriEkle
 import com.keremtulu.questionnote.data.local.YanlisDefteriDatabase
+import com.keremtulu.questionnote.data.local.entity.TekrarEntity
 import com.keremtulu.questionnote.domain.model.GorselTuru
 import com.keremtulu.questionnote.domain.model.KonuIslemSonucu
 import com.keremtulu.questionnote.domain.model.SoruGorselGirdisi
@@ -203,6 +204,55 @@ class RoomSoruRepositoryTest {
             SoruIslemSonucu.PlanDurumuKapali,
             repository.tekrarKaydet(soru.id, TekrarSonucu.RAHAT, false),
         )
+    }
+
+    @Test
+    fun reviewHistoryIsNewestFirstAndPreservesPlannedActualAndSolutionDetails() = runBlocking {
+        val question = newQuestionFor(dersId)
+        val plannedDay = LocalDate.of(2026, 10, 15).toEpochDay().toInt()
+        val earlierActualDay = LocalDate.of(2026, 10, 16).toEpochDay().toInt()
+        val laterActualDay = LocalDate.of(2026, 10, 17).toEpochDay().toInt()
+        assertTrue(repository.tekrarGecmisiniIzle(question.id).first().isEmpty())
+        database.tekrarDao().ekle(
+            listOf(
+                TekrarEntity(
+                    id = "older-review",
+                    soruId = question.id,
+                    zaman = 100L,
+                    gun = earlierActualDay,
+                    planlananGun = plannedDay,
+                    sonuc = TekrarSonucu.COZEMEDIM.name,
+                    cozumAcildi = false,
+                    oncekiAralik = 1,
+                    sonrakiAralik = 1,
+                ),
+                TekrarEntity(
+                    id = "newer-review",
+                    soruId = question.id,
+                    zaman = 200L,
+                    gun = laterActualDay,
+                    planlananGun = earlierActualDay,
+                    sonuc = TekrarSonucu.RAHAT.name,
+                    cozumAcildi = true,
+                    oncekiAralik = 7,
+                    sonrakiAralik = 1,
+                    elleAtandi = true,
+                ),
+            ),
+        )
+
+        val history = repository.tekrarGecmisiniIzle(question.id).first()
+
+        assertEquals(listOf("newer-review", "older-review"), history.map { it.id })
+        assertEquals(laterActualDay, history.first().gun)
+        assertEquals(earlierActualDay, history.first().planlananGun)
+        assertEquals(TekrarSonucu.RAHAT, history.first().sonuc)
+        assertTrue(history.first().cozumAcildi)
+        assertEquals(7, history.first().oncekiAralik)
+        assertEquals(1, history.first().sonrakiAralik)
+        assertTrue(history.first().elleAtandi)
+        assertEquals(TekrarSonucu.COZEMEDIM, history.last().sonuc)
+        assertTrue(!history.last().cozumAcildi)
     }
 
     private suspend fun newQuestionFor(lessonId: String): com.keremtulu.questionnote.domain.model.Soru {

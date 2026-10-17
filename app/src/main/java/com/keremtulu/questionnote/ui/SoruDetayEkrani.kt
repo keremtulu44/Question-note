@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
@@ -46,6 +47,7 @@ import com.keremtulu.questionnote.domain.model.Soru
 import com.keremtulu.questionnote.domain.model.SoruGorseli
 import com.keremtulu.questionnote.domain.model.SoruIslemSonucu
 import com.keremtulu.questionnote.domain.model.SoruPlanDurumu
+import com.keremtulu.questionnote.domain.model.TekrarKaydi
 import com.keremtulu.questionnote.domain.model.TekrarSonucu
 import com.keremtulu.questionnote.domain.repository.KonuRepository
 import com.keremtulu.questionnote.domain.repository.SoruRepository
@@ -67,6 +69,12 @@ private sealed interface SoruDetayDurumu {
     data object Hata : SoruDetayDurumu
 }
 
+private sealed interface TekrarGecmisiDurumu {
+    data object Yukleniyor : TekrarGecmisiDurumu
+    data class Hazir(val kayitlar: List<TekrarKaydi>) : TekrarGecmisiDurumu
+    data object Hata : TekrarGecmisiDurumu
+}
+
 @Composable
 fun SoruDetayEkrani(
     soruId: String,
@@ -86,6 +94,17 @@ fun SoruDetayEkrani(
     var silmeOnayi by remember { mutableStateOf(false) }
     var durumMenusu by remember { mutableStateOf(false) }
     var tamEkranGorsel by remember { mutableStateOf<SoruGorseli?>(null) }
+    var tekrarGecmisiYenileme by remember(soruId) { mutableIntStateOf(0) }
+    val tekrarGecmisiFlow = remember(soruRepository, soruId, tekrarGecmisiYenileme) {
+        soruRepository.tekrarGecmisiniIzle(soruId)
+    }
+    val tekrarGecmisi = produceState<TekrarGecmisiDurumu>(
+        TekrarGecmisiDurumu.Yukleniyor,
+        tekrarGecmisiFlow,
+    ) {
+        tekrarGecmisiFlow.catch { value = TekrarGecmisiDurumu.Hata }
+            .collect { value = TekrarGecmisiDurumu.Hazir(it) }
+    }.value
     val detail = produceState<SoruDetayDurumu>(SoruDetayDurumu.Yukleniyor, soruId, yenileme) {
         value = try {
             soruRepository.soruGetir(soruId)?.let(SoruDetayDurumu::Hazir) ?: SoruDetayDurumu.Bulunamadi
@@ -267,6 +286,51 @@ fun SoruDetayEkrani(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
+                    item {
+                        Text(
+                            text = stringResource(R.string.question_review_history_title),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
+                    when (val history = tekrarGecmisi) {
+                        TekrarGecmisiDurumu.Yukleniyor -> item {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                                Text(stringResource(R.string.question_review_history_loading))
+                            }
+                        }
+                        TekrarGecmisiDurumu.Hata -> item {
+                            Column {
+                                Text(
+                                    stringResource(R.string.question_review_history_load_error),
+                                    color = MaterialTheme.colorScheme.error,
+                                )
+                                TextButton(onClick = { tekrarGecmisiYenileme++ }) {
+                                    Text(stringResource(R.string.question_review_history_retry))
+                                }
+                            }
+                        }
+                        is TekrarGecmisiDurumu.Hazir -> {
+                            if (history.kayitlar.isEmpty()) {
+                                item {
+                                    Text(
+                                        stringResource(R.string.question_review_history_empty),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                    )
+                                }
+                            } else {
+                                items(history.kayitlar, key = { it.id }) { record ->
+                                    TekrarGecmisiKarti(record)
+                                }
+                            }
+                        }
+                    }
                     val today = LocalDate.now().toEpochDay().toInt()
                     if (
                         !dersArsivli && soru.planDurumu == SoruPlanDurumu.AKTIF &&
@@ -390,6 +454,68 @@ fun SoruDetayEkrani(
             )
         } else {
             tamEkranGorsel = null
+        }
+    }
+}
+
+@Composable
+private fun TekrarGecmisiKarti(record: TekrarKaydi) {
+    val resultLabel = when (record.sonuc) {
+        TekrarSonucu.COZEMEDIM -> R.string.review_result_not_solved
+        TekrarSonucu.ZORLANDIM -> R.string.review_result_struggled
+        TekrarSonucu.RAHAT -> R.string.review_result_easy
+    }
+    val plannedDay = record.planlananGun?.let(::gunTarihi)
+        ?: stringResource(R.string.question_review_history_no_planned_day)
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(18.dp),
+        colors = androidx.compose.material3.CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        ),
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(5.dp),
+        ) {
+            Text(
+                text = stringResource(resultLabel),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                stringResource(R.string.review_history_actual_day, gunTarihi(record.gun)),
+                style = MaterialTheme.typography.bodySmall,
+            )
+            Text(
+                stringResource(R.string.review_history_planned_day, plannedDay),
+                style = MaterialTheme.typography.bodySmall,
+            )
+            Text(
+                stringResource(
+                    if (record.cozumAcildi) R.string.review_history_solution_opened
+                    else R.string.review_history_solution_not_opened,
+                ),
+                style = MaterialTheme.typography.bodySmall,
+            )
+            if (record.oncekiAralik != null && record.sonrakiAralik != null) {
+                Text(
+                    stringResource(
+                        R.string.review_history_interval,
+                        record.oncekiAralik,
+                        record.sonrakiAralik,
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+            if (record.elleAtandi) {
+                Text(
+                    stringResource(R.string.review_history_manual),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
         }
     }
 }

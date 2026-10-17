@@ -11,7 +11,7 @@
 > ZIP yol güvenliği) ve **Robolectric** (şema/migration testleri). Emülatör yalnızca gerçekten
 > gerekirse kullanılır; asıl kabul testleri gerçek cihazda yapılır.
 
-Son güncelleme: 2026-10-17. v1.0.3 CI run `39030667492` 32 testi, Release derlemesini ve imza doğrulamasını geçti; yeni UI'nin cihaz kontrolü bekliyor. Kullanıcı v1.0.2 için “3. turu denemedim, onun dışında hepsi geçti” dedi. Önceki checklist kaydı bunu 1/2/4. bölümler geçti, 3. bölüm (yedek/geri yükleme) denenmedi diye yorumladı; kullanıcı bu bölüm eşlemesini açıkça teyit etmedi. Bu nedenle ilgili kullanıcı işaretlerini bu belirsizlik notuyla birlikte okuyun.
+Son güncelleme: 2026-10-17. v1.0.3 CI run `39030667492` 32 testi, Release derlemesini ve imza doğrulamasını geçti. Kullanıcı, v1.0.3'ü mevcut uygulamanın üzerine kurup burada sıralanan cihaz kabul adımlarının tümünü geçtiğini bildirdi (2026-10-17); yeni Bugün/menü/tekrar akışı ve mevcut verinin güncelleme sonrası korunması bu rapora göre geçti. Yedek menüsünü açma ve geri yüklemeyi iptal etme, tam yedek/geri yükleme turu değildir; Aşama 3 cihaz kabulü hâlâ bekliyor. v1.0.2 için “3. turu denemedim” ifadesinin önceki checklist'te 1/2/4 geçti ve 3. bölüm denenmedi şeklinde eşlenmesi ise hâlâ teyitsizdir.
 
 ---
 
@@ -30,7 +30,7 @@ Son güncelleme: 2026-10-17. v1.0.3 CI run `39030667492` 32 testi, Release derle
 | 1.9 | VersionCode 1 → 2 artışı ve v1.0.1 Release CI'da doğrulandı | YZ | [x] |
 | 1.10 | VersionCode 2 → 3; v1.0.2 Release, APK imzası ve fingerprint CI'da doğrulandı | YZ (CI run `39027221270`) | [x] |
 | 1.11 | v1.0.2 mevcut kurulumun üzerine yüklendi; kullanıcı uygulamanın açıldığını bildirdi | KULLANICI (2026-10-17) | [x] |
-| 1.12 | v1.0.3 güncellemesi mevcut uygulamanın üzerine yükleniyor; yeni Bugün ekranı ve yan menü gerçek cihazda doğrulanıyor | KULLANICI | [ ] |
+| 1.12 | v1.0.3 mevcut uygulamanın üzerine kuruldu; kullanıcı açılışı, önceki verilerin korunmasını, Bugün ekranı ve menü adımlarını geçti bildirdi | KULLANICI (2026-10-17) | [x] |
 | 1.13 | VersionCode 3 → 4; v1.0.3 Release, APK imzası ve fingerprint CI'da doğrulandı | YZ (CI run `39030667492`) | [x] |
 
 ## Aşama 2 — Yerel arşiv
@@ -69,8 +69,8 @@ Son güncelleme: 2026-10-17. v1.0.3 CI run `39030667492` 32 testi, Release derle
 | 2.30 | JPEG optimizasyonu, EXIF yönü, SHA-256, bozuk/non-image girdi ve geçici dosya yaşı testleri | YZ (Robolectric) | [x] |
 | 2.31 | Onaylı yetim temizliği, dosya yaşı ve DB referansını silme öncesi yeniden denetleme testleri | YZ (Robolectric) | [x] |
 | 2.32 | Repository Bugün akışı dersler arası gecikmiş/vadesi gelen aktif soruları içeriyor; gelecek tarihli, askıdaki ve arşiv ders sorularını dışlıyor | YZ (CI run `39030667492`) | [x] |
-| 2.33 | Yeni Bugün ekranı, soru eklerken ders seçimi ve yan menü akışı gerçek cihazda çalışıyor | KULLANICI (v1.0.3) | [ ] |
-| 2.34 | Tekrar sonucu/çözüm açma kaydı UI üzerinden saklanıyor ve sonraki tarih doğru gösteriliyor | KULLANICI (v1.0.3) | [ ] |
+| 2.33 | Yeni Bugün/gecikenler ekranı, ders seçerek soru ekleme ve yan menü adımları gerçek cihazda geçti | KULLANICI (2026-10-17, v1.0.3) | [x] |
+| 2.34 | Tekrar sonucu kaydediliyor; uygulama Bugün'e dönüyor ve tamamlanan soru bugünkü listeden çıkıyor | KULLANICI (2026-10-17, v1.0.3) | [x] |
 
 ## Aşama 3 — Yedek ve geri yükleme
 
@@ -86,7 +86,7 @@ Son güncelleme: 2026-10-17. v1.0.3 CI run `39030667492` 32 testi, Release derle
 | 3.8 | Desteklenmeyen format sürümü reddediliyor; DB değişmiyor | YZ (CI run `39030667492`) | [x] |
 | 3.9 | Başarısız yedek işlemi başarı gibi gösterilmiyor | YZ | [ ] |
 | 3.10 | Tam geri yükleme öncesi doğrulanmış güvenlik ZIP'i oluşuyor, eski not/görsel verisi korunuyor | YZ (CI run `39030667492`) | [x] |
-| 3.11 | Uygulama güncellemesi mevcut verileri koruyor (gerçek veriyle) | KULLANICI | [ ] |
+| 3.11 | v1.0.3 güncellemesi mevcut verileri koruyor (gerçek cihaz verisiyle) | KULLANICI (2026-10-17) | [x] |
 | 3.12 | ZIP içi yol güvenliği: `..` içeren ZIP hiçbir dosya çıkarmadan reddediliyor | YZ (CI run `39030667492`) | [x] |
 | 3.13 | Günlük/Room işareti simülasyonunda transaction öncesi rollback ve commit sonrası tamamlatma doğru çalışıyor | YZ (CI run `39030667492`) | [x] |
 | 3.14 | ZIP bomb / aşırı büyüme / çok fazla dosya içeren arşiv açılmadan reddediliyor | YZ | [ ] |
@@ -99,8 +99,8 @@ Son güncelleme: 2026-10-17. v1.0.3 CI run `39030667492` 32 testi, Release derle
 
 | # | Test | Sorumlu | Durum |
 |---|---|---|---|
-| 4.1 | "Bugün" listesi doğru soruları gösteriyor | KULLANICI | [ ] |
-| 4.2 | Gecikmiş tekrarlar ayrı görünüyor | KULLANICI | [ ] |
+| 4.1 | "Bugün" listesi vadesi gelen soruları gösteriyor | KULLANICI (2026-10-17, v1.0.3) | [x] |
+| 4.2 | Gecikmiş sorular gün sayısı/etiketiyle doğru gösteriliyor | KULLANICI (2026-10-17, v1.0.3) | [x] |
 | 4.3 | Birim testinde "Çözemedim" sonrası aralık 1 güne dönüyor | YZ (CI run `39030667492`) | [x] |
 | 4.4 | Birim testinde "Rahat çözdüm" sonrası aralık büyüyor ve 180 günde sınırlanıyor | YZ (CI run `39030667492`) | [x] |
 | 4.5 | Çözüm açıldığında bu bilgi gerçek cihazdaki tekrar akışında kaydediliyor | KULLANICI (v1.0.3) | [ ] |

@@ -4,6 +4,7 @@ import com.keremtulu.questionnote.domain.model.Soru
 import com.keremtulu.questionnote.domain.model.SoruIslemSonucu
 import com.keremtulu.questionnote.domain.model.SoruKaydetmeIstegi
 import com.keremtulu.questionnote.domain.model.SoruPlanDurumu
+import com.keremtulu.questionnote.domain.model.TekrarKaydi
 import com.keremtulu.questionnote.domain.model.TekrarSonucu
 import kotlinx.coroutines.flow.Flow
 
@@ -11,6 +12,8 @@ interface SoruRepository {
     fun sorulariIzle(dersId: String, konuId: String? = null, konusuz: Boolean = false): Flow<List<Soru>>
 
     fun bugunTekrarlanacaklariIzle(bugun: Int): Flow<List<Soru>>
+
+    fun tekrarGecmisiniIzle(soruId: String): Flow<List<TekrarKaydi>>
 
     suspend fun soruGetir(soruId: String): Soru?
 
