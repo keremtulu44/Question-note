@@ -500,6 +500,8 @@ private fun KonuSatiri(
 private fun HaftaBolumu(ozet: IlerlemeOzeti) {
     val colors = MaterialTheme.colorScheme
     val hafta = ozet.hafta
+    val buOran = hafta.buHaftaOran
+    val gecenOran = hafta.gecenHaftaOran
     val fark = hafta.fark
     BolumKarti(baslik = stringResource(R.string.karne_week_title)) {
         when {
@@ -508,24 +510,19 @@ private fun HaftaBolumu(ozet: IlerlemeOzeti) {
                 color = colors.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyMedium,
             )
-            hafta.buHaftaOran == null -> Text(
+            buOran == null || gecenOran == null -> Text(
                 stringResource(R.string.karne_week_no_data),
                 color = colors.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyMedium,
             )
-            fark != null && hafta.gecenHaftaOran != null -> {
+            fark != null -> {
                 val isaret = when {
                     fark > 0 -> stringResource(R.string.karne_week_diff_plus, fark)
                     fark < 0 -> stringResource(R.string.karne_week_diff_minus, -fark)
                     else -> stringResource(R.string.karne_week_diff_same)
                 }
                 Text(
-                    text = stringResource(
-                        R.string.karne_week_compare,
-                        hafta.buHaftaOran,
-                        hafta.gecenHaftaOran,
-                        isaret,
-                    ),
+                    text = stringResource(R.string.karne_week_compare, buOran, gecenOran, isaret),
                     color = colors.onSurface,
                     style = MaterialTheme.typography.bodyMedium,
                 )
