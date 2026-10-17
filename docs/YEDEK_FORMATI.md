@@ -110,3 +110,15 @@ kamera/galeri testleri de gerçek cihazda bekliyor.
 v3 (ve geriye uyumlu v2) yedeği şifrelenmez. ZIP; soru/çözüm notları, kaynak kataloğu ve soru fotoğrafları içerebilir. Yedeği
 kullanıcının seçtiği saklama yerinde koruması gerekir. İleride şifreleme eklenirse parola kaybı riski,
 CSV'nin incelenebilirliği ve olgun bir standart kullanımı ayrıca kararlaştırılmalıdır.
+
+
+## v1.2.0 uyumluluk notu
+
+- Room ve ZIP biçimi **3** olarak kalır; v2 ZIP içe alma devam eder.
+- Yeni tekrarlar `algorithm_version = 2` yazar. Sürüm, aralık, çözüm açma ve zaman alanları zaten
+  mevcut biçimdedir; v2 algoritma kaydının tam export → restore turu test edilir.
+- Kolaylık ve unutma sayısı geçmişten türetilir; ayrı kolon/backfill veya ZIP v4 alanı yoktur.
+- Sınav profili dersleri normal `lessons` kayıtlarıdır ve yedeğe girer; hangi profilin seçili olduğu
+  cihaz-yerel tercihtir. Aynı şekilde rozetler, kutlama kuyruğu, günlük hedef ve oturum devam noktası
+  ZIP'e dahil değildir. Yeni cihaz Tümü / özel görünümüyle başlayabilir.
+- Tam geri yükleme başlatılınca eski odak devam noktası temizlenir; eski oturum ile yeni veri karışmaz.

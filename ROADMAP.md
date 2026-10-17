@@ -6,6 +6,22 @@ Durum işaretleri: `[ ]` yapılmadı · `[~]` kod mevcut; bu sürümün CI/Relea
 
 ---
 
+## Güncel — v1.2.0
+
+- [~] 30 rozet/5 sır, koşul ve ilerleme açıklamaları, tam ekran kalıcı kutlama kuyruğu.
+- [~] 15 rütbe, 6 yeni saydam amblem, rütbe galerisi ve 200-seviye sınırının kaldırılması.
+- [~] Sistem gezinme çubuğu inset düzeltmesi; üst sağ Ayarlar kısayollarının kaldırılması.
+- [~] LGS/TYT/AYT/KPSS/Tümü profilleri ve Ayarlar'da bütün derslere erişen konu silme.
+- [~] Odak Stüdyosu, akıllı sıralama, adaptif tekrar v2, sona bırak/mola, kalıcı oturum kurtarma.
+- [~] Genişletilmiş JVM/Room/Robolectric testleri; CI ve imzalı v1.2.0 Release doğrulaması sürüyor.
+- [ ] Üç düğmeli/jest gezinme, büyük yazı, yatay ekran, gizli rozet kutlaması ve odak akışı cihaz kabulü.
+- [ ] Geçmiş karneler arşivi, mola günü jetonu, bildirimler. Bu sürümde tamamlandı diye işaretlenmez.
+
+**Mimari revizyon:** Algoritma v2 mevcut tekrar geçmişinden türetiliyor. Room v4/ZIP v4 migration
+önceki öneriydi, bu uygulama için gerekli değil. Detay `docs/ODAK_STUDYOSU.md`.
+
+Aşağıdaki Aşama 0–4 kayıtları önceki sürümlerin tarihsel durumudur.
+
 ## Aşama 0 — Konuşma ve plan ✅
 
 - [x] Gereksinimler, teknoloji ve ürün kararları netleştirildi.

@@ -1,5 +1,9 @@
 # Test Kontrol Listesi
 
+> **v1.2.0:** çekirdek CI `39067149944` 127 testle başarılı. Son sürümde üç ek Compose UI testi
+> ve Release doğrulaması bekliyor. Aşağıdaki fiziksel cihaz satırları otomatik olarak işaretlenmez.
+
+
 > Her testte **kim** yaptığı açıkça yazılır. Yapay zekâ, çalıştırmadığı bir testi "geçti" olarak
 > işaretleyemez.
 >
@@ -237,3 +241,30 @@ Her geliştirme adımının sonunda şu ayrım yazılır:
 1. **Gerçekten çalıştırılan testler** (komut/çıktı ile),
 2. **Yalnızca gözden geçirilenler** (kod okuması, statik değerlendirme),
 3. **Kullanıcının cihazında test etmesi gerekenler**.
+
+
+## v1.2.0 — odak, format, gizli rozet ve sistem çubuğu
+
+| # | Kontrol | Sorumlu | Durum |
+|---|---|---|---|
+| G.1 | 30 benzersiz rozet, 5 sır, tüm eşikler, idempotent kazanım; 15 rütbe sınırları ve yüksek XP taşması | CI (çekirdek run `39067149944`) | [x] |
+| G.2 | Sahiplik + kutlama kuyruğu store yeniden yaratılınca korunur; paralel kazanım çift ödül oluşturmaz | CI | [x] |
+| G.3 | LGS altı ders; profil geçişi mevcut soru/konu/ID'yi korur, Tümü eski dersleri gösterir | CI | [x] |
+| G.4 | Kullanılan konu/katalog seçeneği silinmez, varsayılan neden korunur; boş kayıt silinebilir | CI | [x] |
+| G.5 | Adaptif v2, 1–180 gün sınırı, gecikme, kolaylık; önizleme ve Room planı aynı | CI | [x] |
+| G.6 | Bağımsız sorgular yalnız RAHAT + açılmamış çözüm; v2 tekrar ZIP v3 turunda korunur | CI | [x] |
+| G.7 | Sona bırakmada çözüm işareti korunur; commit-checkpoint arası kesinti uzlaştırılır, eski/silinmiş kayıtlar doğru ele alınır | CI | [x] |
+| G.8 | Compose: büyük yazı + sentetik alt/yatay insets ile beş sekme sistem alanının dışında; dokunma hedefi ≥48 px | CI UI (son koşu bekliyor) | [ ] |
+| G.9 | Compose: gizli galeri/detay gerçek adı ve koşulu sızdırmaz; kazanımda açılır, kapatınca sahiplik kalır | CI UI (son koşu bekliyor) | [ ] |
+| G.10 | S24 FE üç düğmeli gezinmede alt menünün tamamı görünür ve tıklanır; sistem çubuğuyla çakışmaz | Cihaz | [ ] |
+| G.11 | Jest modu, yatay ekran, büyük yazı, açık/koyu tema; üst sağda Ayarlar tekrarı yok | Cihaz | [ ] |
+| G.12 | LGS → TYT → AYT → KPSS → Tümü; ders listesi/bugün/filtreli güncellenir, önceki veriler durur | Cihaz | [ ] |
+| G.13 | Ayarlar → Konu yönetimi → ders ara → boş konu sil; kullanılanda uyarı + arşivleme, geri gezinme doğru | Cihaz | [ ] |
+| G.14 | 30 rozetin açıklaması/filtreleri, 5 gizlinin maskesi, 15 amblem ve eşik detayı doğru | Cihaz | [ ] |
+| G.15 | Yeni rozet tam ekran; birden fazla ödül sırayla, geri/Devam ile kapanır; yeniden açmada tekrar kutlanmaz | Cihaz | [ ] |
+| G.16 | Animasyon sistemde kapalıyken kutlama hareket etmez, içerik ve kapatma hâlâ kullanılabilir | Cihaz | [ ] |
+| G.17 | Tek soru/5/10/20/özel tur, değerlendirme seçimleri, aralık önizlemesi, ayrı Kaydet, karne | Cihaz | [ ] |
+| G.18 | Çözümü aç → sona bırak → geri gelen soruyu Rahat seç: bağımsız bonus almamalı | Cihaz | [ ] |
+| G.19 | Mola/arka plan/görselde süre durur; devamda soru ve seçim korunur | Cihaz | [ ] |
+| G.20 | Süreç kapat → aç: doğru soruya/karneye dön; aynı günlük tekrar veya XP ikinci kez yazılmasın | Cihaz | [ ] |
+| G.21 | v1.1.1 üzerine kaldırmadan v1.2.0 kurulumu ve gerçek ZIP/Drive restore sonrası veri/format/odak kontrolü | Cihaz | [ ] |

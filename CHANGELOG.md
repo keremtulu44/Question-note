@@ -2,6 +2,21 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.2.0 — hazırlık] — 2026-10-17
+
+- **İlerleme büyüdü:** 11 → **30 rozet**, 9 → **15 rütbe**. Altı yeni, saydam WebP amblem; tüm rütbeleri ve XP eşiklerini gösteren yolculuk galerisi. Eski 200-seviye sınırı ve yüksek XP taşma riski kaldırıldı.
+- Rozet kartları/detayları kazanma koşulunu ve birikimli ilerlemeyi gösterir. **5 gizli rozetin adı, koşulu ve çizimi kazanılana kadar saklıdır.** Tümü/Kazanılan/Kilitli/Gizli filtreleri eklendi.
+- Yeni rozetlerde **tam ekran kutlama**: büyük madalyon, koşul açıklaması, +50 XP ve sonlu konfeti. Kalıcı kutlama kuyruğu kapanma/yeniden açılmada korunur; eski rozetler tekrar verilmez. Sistem hareket ayarına uyulur.
+- **Alt menü sistem gezinme çubuğunun üstüne alındı:** gerçek `navigationBars`/çentik inset'leri kullanılır ve iç ekranlarda çift boşluk tüketimi engellenir. Sekmeler esnek genişliklidir. Üst sağdaki Ayarlar kısayolları kaldırıldı.
+- **Sınav formatları:** Ayarlar → LGS, TYT, AYT, KPSS (Genel Yetenek/Genel Kültür), Tümü / özel. Eksik dersler eklenir; eski ders, konu, soru ve tekrarlar silinmez. Bugün/Dersler/Filtreli seçili formata uyar.
+- **Ayarlar → Konu yönetimi ve silme:** tüm derslerde arama, konu ekleme/düzenleme/arşivleme/silme. Kullanılan konu silinmez; arşivleme alternatifi sunulur. Kaynak/neden korumaları da sürer.
+- **Odak Stüdyosu:** Bugün ve Filtreli için tek/sıralı soru akışı, hazır 5/10/20 seçimleri, akıllı/en eski sıra, soru başına aktif süre, mola, görsel yakınlaştırma, sona bırak, çözüm açmadan değerlendirme, seçimden sonra ayrı kaydetme ve otomatik karne.
+- **Adaptif tekrar v2:** Zorlandım artık aralığı artırır (ilkinde 2 gün); kolaylık geçmişe göre 130–280 arasında değişir, gecikme hesaba katılır, 4 unutma sonrası destekleyici açıklama gösterilir. Önizleme ile kaydetme aynı kuralı kullanır; otomatik cevap doğrulama yoktur.
+- Yarım oturum kapanma sonrası kurtarılır. Room kaydı ile devam noktası arasındaki kesinti uzlaştırılır; çözüm açma işareti sona bırakmada kaybolmaz, aynı gün ikinci tekrar/XP engellenir.
+- **Tutarlılık düzeltmesi:** XP/haftalık özet/rozet sorgularında yalnız `RAHAT + çözüm açılmamış` bağımsızdır. `ZORLANDIM` için normal emek XP'si korunur; eski tekrar kayıtları yeniden yazılmaz.
+- **Room v3 ve ZIP v3 korunur.** Algoritma durumu mevcut tekrar geçmişinden türetildiği için v4 migration gerekmez. Yeni kayıtların `algoritma_surumu = 2` değeri mevcut yedek biçimiyle taşınır.
+- CI ve imzalı v1.2.0 Release doğrulaması bekliyor. Cihaz gezinme/kutlama/odak kabulü ayrıca açık tutuldu.
+
 ## [1.1.1] — 2026-10-17
 
 - Rank görselleri WebP'ye çevrildi ve 96 dp'ye ölçeklendi: drawable boyutu 2.487 KB → 626 KB, APK ~11,8 MB → ~9,9 MB.

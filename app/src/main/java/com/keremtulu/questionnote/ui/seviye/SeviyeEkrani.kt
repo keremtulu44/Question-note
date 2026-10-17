@@ -414,7 +414,7 @@ private fun PekismeHalkasi(oran: Int, modifier: Modifier = Modifier) {
 private fun TahminKarti(tahmin: List<GunTahmini>) {
     val colors = MaterialTheme.colorScheme
     val enYuksek = tahmin.maxOfOrNull { it.adet } ?: 0
-    val formatter = remember { DateTimeFormatter.ofPattern("EEE", Locale("tr", "TR")) }
+    val formatter = remember { DateTimeFormatter.ofPattern("EEE", Locale.forLanguageTag("tr-TR")) }
     val bugun = remember { LocalDate.now().toEpochDay().toInt() }
     Card(
         modifier = Modifier.fillMaxWidth(),

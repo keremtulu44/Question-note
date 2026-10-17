@@ -25,26 +25,24 @@ cevaplamak ve çözümü öğrenme sürecinden ayrı saklamaktır.
 
 ## Durum
 
-**v1.1.1 (versionCode 13) yayımlandı.** Yan menü kaldırıldı; gezinme artık alt menüde: Bugün ·
-Dersler · Filtreli çalışma · **Seviye** · **Ayarlar**. Seviye sekmesi XP tabanlı ilerleme getirir:
-soru ekleme +10, her tekrar +5, bağımsız çözüm +5, günlük hedef +25, seri kilometre taşları ve rozet
-başına +50 XP. Eşikler sonsuz ve artan (100 · 250 · 450 · 700 · 1000…), 9 rütbe (Başlangıç → Şampiyon).
-Amblemler uygulama için üretilip saydam logo olarak eklendi; rozetler Canvas ile çizilir. Seviye
-sekmesinde rütbe amblemi, XP çubuğu, XP kırılımı, toplam istatistik, 11 rozet galerisi, ders bazında
-pekişme halkaları ve 7 günlük tekrar yükü var. Geçmiş XP'si geriye dönük hesaplanır; ayrı XP tablosu
-yoktur. Ayarlar'a günlük hedef seçimi (5/10/15/20/30), yedek al/geri yükle (Drive/Downloads SAF hedefi),
-görsel bakımı ve kaynak/neden yönetimi taşındı. **Silme eklendi:** konu ve kaynak/neden kayıtları
-kullanımdayken silinmez (uyarı + arşivleme önerisi), hazır seçenekler silinemez. v1.0.10 karne/rozet/
-hedef akışı ve önceki sürümler korunur. Room v3 ve yedek biçimi değişmedi.
+**Son yayımlanan sürüm v1.1.1. v1.2.0 kodu hazır, CI/Release doğrulaması sürüyor.**
 
-CI run `39053319900` **86 testi** geçti; Release derlemesi, imza doğrulaması ve beklenen sertifika
-parmak izi eşleşti. [v1.1.0 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.1.0)
-v1.1.1 aynı özelliklerle yalnız görsel boyutu küçültür; release bağlantısı aşağıdadır.
+- **İlerleme:** 30 rozet (5 gizli), kazanma açıklamaları, ilerleme çubukları, 15 rütbe ve 6 yeni
+  saydam amblem. Yeni rozetler tam ekran kutlanır; kutlama kuyruğu kapanmada kaybolmaz.
+- **Gezinme:** alt menü Android sistem çubuğu/çentiğine göre yerleşir. Sağ üst Ayarlar kısayolları kaldırıldı.
+- **Sınav formatı:** Ayarlar → LGS / TYT / AYT / KPSS / Tümü. İlgili dersler hazırlanır; eski veriler
+  silinmez. Ayarlar'da tüm dersleri kapsayan **konu yönetimi ve silme** bulunur.
+- **Odak Stüdyosu:** akıllı sıra, 5/10/20 soruluk hazır turlar, mola, sona bırak, kapanma sonrası
+  devam ve bir sonraki tekrarın önizlemesi. Çözümü açmak zorunlu değildir.
+- **Adaptif tekrar v2:** geçmişten kolaylık hesabı, ilerleyen Zorlandım aralığı, gecikme düzeltmesi
+  ve zor soruda destekleyici yönlendirme. Bu öz değerlendirmedir; otomatik cevap doğrulama değildir.
+- XP ekleme ve çözme emeğinden gelir. Bağımsız = yalnız **Rahat + çözüm açılmamış**.
+- Room **v3** ve ZIP **v3** değişmedi. Hesap/sunucu/abonelik yok; çevrimdışı çalışır.
 
 **Cihaz kabulü ayrıdır:** v1.0.3 ana akış adımlarını kullanıcı geçti bildirdi. v1.0.4 tekrar geçmişi,
 v1.0.5 katalog/ZIP akışı, v1.0.6 form yenilemesi, v1.0.7 ders bazında konu ekleme, v1.0.8 filtreli
 çalışma, v1.0.9 düzeltmeleri, v1.0.10 karne/rozet/hedef akışı ve v1.1.x alt menü/seviye/ayarlar/silme
-henüz cihazda kabul edilmedi. SAF/Drive ve fotoğraf okunabilirliği de bekliyor. v1.0.2 “3.
+ile v1.2.0 odak/profil/rozet yenilemesi henüz cihazda kabul edilmedi. SAF/Drive ve fotoğraf okunabilirliği de bekliyor. v1.0.2 “3.
 turu denemedim” ifadesinin checklist eşlemesi hâlâ teyitsiz; ayrıntı
 [TEST_KONTROL_LISTESI.md](docs/TEST_KONTROL_LISTESI.md) içinde.
 ---
@@ -59,6 +57,7 @@ turu denemedim” ifadesinin checklist eşlemesi hâlâ teyitsiz; ayrıntı
 | [BUILDING.md](BUILDING.md) | Derleme yöntemi, GitHub Actions, imzalama düzeni, APK'ya erişim |
 | [CHANGELOG.md](CHANGELOG.md) | Kullanıcıya yansıyan sürüm değişiklikleri |
 | [docs/SEVIYE_SISTEMI.md](docs/SEVIYE_SISTEMI.md) | Seviye, rütbe, XP, rozet, Ayarlar ve silme kuralları |
+| [docs/ODAK_STUDYOSU.md](docs/ODAK_STUDYOSU.md) | Adaptif tekrar v2, odak akışı ve oturum kurtarma |
 | [docs/VERI_MODELI.md](docs/VERI_MODELI.md) | Veritabanı şeması ve kuralları |
 | [docs/SONUC_KARNESI_VE_ILERLEME.md](docs/SONUC_KARNESI_VE_ILERLEME.md) | Sonuç karnesi, kutlama/rozet ve ilerleme tasarımı; tekrar algoritması v2 |
 | [docs/YEDEK_FORMATI.md](docs/YEDEK_FORMATI.md) | Yedek ZIP yapısı, manifest, geri yükleme kuralları |

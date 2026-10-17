@@ -48,13 +48,16 @@ enum class AltSekme { BUGUN, DERSLER, FILTRELI, SEVIYE, AYARLAR }
 
 /** System insets belong to the bar, not to a hard-coded screen padding. Works with 3-button nav. */
 @Composable
-fun AltMenu(secili: AltSekme, onSec: (AltSekme) -> Unit) {
+fun AltMenu(
+    secili: AltSekme,
+    onSec: (AltSekme) -> Unit,
+    systemInsets: WindowInsets = WindowInsets.navigationBars.union(WindowInsets.displayCutout),
+) {
     val colors = MaterialTheme.colorScheme
     Surface(color = colors.surface, tonalElevation = 2.dp) {
         Column(
             Modifier.windowInsetsPadding(
-                WindowInsets.navigationBars.union(WindowInsets.displayCutout)
-                    .only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal),
+                systemInsets.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal),
             ),
         ) {
             HorizontalDivider(color = colors.outlineVariant.copy(alpha = 0.5f))

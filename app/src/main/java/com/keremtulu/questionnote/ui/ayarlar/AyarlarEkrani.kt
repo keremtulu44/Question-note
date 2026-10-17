@@ -68,7 +68,7 @@ fun AyarlarEkrani(
     var profilHatasi by remember { mutableStateOf(false) }
     var hedef by remember { mutableIntStateOf(gunlukHedefDeposu.hedef()) }
     val sonYedekMetni = sonYedek?.let { backup ->
-        val tarih = SimpleDateFormat("d MMM yyyy HH:mm", Locale("tr", "TR"))
+        val tarih = SimpleDateFormat("d MMM yyyy HH:mm", Locale.forLanguageTag("tr-TR"))
             .format(Date(backup.olusturmaZamani))
         val boyut = Formatter.formatShortFileSize(context, backup.boyutBayt)
         context.getString(

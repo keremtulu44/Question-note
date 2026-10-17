@@ -45,7 +45,7 @@ Android telefonda kullanılacak, tek kişilik bir dijital yanlış defteri:
 | # | Karar |
 |---|---|
 | K1 | Başlangıçta 7 ders: Edebiyat, Matematik, Biyoloji, Kimya, Fizik, Coğrafya, Tarih. |
-| K2 | TYT–AYT ayrımı **yok**. Yapı: **Ders → Konu → Soru**. |
+| K2 | TYT/AYT/LGS/KPSS **görünüm profilleri** vardır (v1.2.0). Temel ilişki hâlâ Ders → Konu → Soru; profil değişimi hiçbir kaydı silmez veya taşımaya zorlamaz. |
 | K3 | Konu seçimi **zorunlu değil**. Sadece ders seçerek hızlı kayıt yapılabilir; konu sonradan eklenip değiştirilebilir. |
 | K4 | Konusuz sorular kaybolmaz; "Konusuz" olarak açıkça listelenir ve erişilebilir. |
 | K5 | v1'de yedi lise dersi sabittir; ders ekleme/yeniden adlandırma/arşivleme arayüzü olmayacak. Ders seçimi yalnızca soruları düzenlemek içindir. |
@@ -65,19 +65,22 @@ Android telefonda kullanılacak, tek kişilik bir dijital yanlış defteri:
 | K19 | Çözüm açılarak yapılan tekrar **bağımsız deneme sayılmaz**. Aynı gün ikinci deneme yapılmaz (çözüm görüldüğü için bu gerçek hatırlama olmaz); soru **1 gün sonra** yeniden karşımıza çıkar ve bu kez bağımsız olarak çözülür. |
 | K20 | Uzun bir aradan sonra **hiçbir soru otomatik olarak sıfırlanmaz**; gecikmiş sorular tek listede toplanır ve kullanıcı ne yapacağını kendisi seçer. |
 | K21 | **Görsel kalite politikası:** fotoğraflar kaydedilirken otomatik optimize edilir (uzun kenar ~3000 piksel, JPEG kalitesi ~%90). Tek ölçüt **okunabilirliktir**: küçük formüller, kök içi ifadeler ve grafik etiketleri okunur kalmalı. Bu, Aşama 2'de gerçek fotoğraflarla doğrulanır. |
-| K22 | Ana ekranın odağı **Bugün**: bugünkü ve gecikmiş tekrarlar sade listede görünür; “Soru ekle” belirgin düğmedir. Yedekleme, görsel bakımı ve derslere göre gezinme yan menüde kalır. |
-| K23 | Şimdiki sürüm lise odağındadır; ders listesi sabit ve TYT/AYT ayrımı yoktur. Gelecekte Ayarlar'da öğrenim seviyesi (ortaokul/lise) ile sınav hedefi (ör. LGS) ayrı seçenekler olarak değerlendirilebilir. |
+| K22 | Ana ekranın odağı **Bugün**. Gezinti beş alt sekmededir; yedekleme, bakım ve katalog Ayarlar içindedir. Üst sağda tekrar eden Ayarlar kısayolu yoktur. |
+| K23 | **Sınav formatı seçimi Ayarlar'da:** LGS, TYT, AYT, KPSS Genel Yetenek/Genel Kültür ve Tümü / özel. Eksik dersler eklenir; mevcut ders ID'leri ve kayıtlar korunur. Tümü seçimi tüm aktif dersleri geri gösterir. |
 | K24 | Kaynak kataloğu dersler arasında ortaktır; yeni kaynak `+` ile kaydedilir. Her soru için isteğe bağlı sayfa/test/soru konumu tutulur. Yanlış nedeni hazır listeden **tek ana seçim** veya kullanıcı tarafından eklenen özel seçenektir. Soru notu giriş/gösterim alanı kaldırılır; önceki `soru_notu` verisi migration, düzenleme ve ZIP yedeklerinde korunur. |
 | K25 | **Sonuç → karne eşlemesi:** `Rahat` = bağımsız çözüm, `Zorlandım` = yarım (destekli), `Çözemedim` = çözemedi. Çözüm açıldıysa hangi sonuç seçilirse seçilsin soru bağımsız sayılmaz. Ayrıntı: `docs/SONUC_KARNESI_VE_ILERLEME.md`. |
 | K26 | **Kutlama tonu:** karne ekranı animasyonlu ve rozetli olacak; tebrik cümlesi skora göre değişir, olumsuz/cezalandırıcı dil ve üzgün animasyon kullanılmaz. |
-| K27 | **Günlük hedef şimdilik sabit 10'dur.** İlk kurulumda hedef seçimi ve Ayarlar'dan değiştirme ileri sürüme bırakıldı; kodda sabit değer + `GunlukHedefDeposu` okuma arayüzü kullanılır. Mola günü hakkı da ileri sürümdedir. |
+| K27 | **Günlük hedef 5/10/15/20/30 seçilebilir** (v1.1.0+), varsayılan 10. Hedef tercihi cihaz-yereldir; mola günü jetonu ve ilk-kurulum sihirbazı bu sürümde yoktur. |
 | K28 | Karne karşılaştırması **önceki takvim haftasına** (Pzt–Paz) göre yapılır; geçen haftada yeterli kayıt yoksa satır gizlenir. |
 | K29 | Kısa oturum eşiği **şimdilik 5**, tek sabitten (`KISA_OTURUM_ESIGI`) okunur; ileride değişken olacak. Karne oturum bitince **otomatik** açılır. |
 | K30 | “Bu konudan çalış” düğmesi filtreyi yalnız seçilen konuya kurar, diğer filtreleri temizler ve Filtreli çalışma ekranını açar. |
 | K32 | **Gezinme alt menüdedir** (v1.1.0): Bugün · Dersler · Filtreli çalışma · Seviye · Ayarlar. Yan menü kaldırıldı; yedek/görsel bakımı/katalog Ayarlar altına taşındı. |
-| K33 | **Seviye/XP gerçek emekten türetilir:** soru ekleme +10, tekrar +5, bağımsız çözüm +5, günlük hedef +25, seri 3/7/30 gün +30/+70/+300, rozet +50. Ayrı XP tablosu yoktur; geçmiş geriye dönük hesaplanır. Eşikler sonsuz ve artan (100/250/450/700/1000…), 9 rütbe; son rütbeden sonra seviye artmaya devam eder. |
+| K33 | **XP gerçek emekten türetilir:** soru +10, tekrar +5, bağımsız +5, günlük hedef +25, seri 3/7/30 +30/+70/+300, rozet +50. Yalnız RAHAT ve çözüm açılmamış kayıt bağımsızdır. Eşikler artar; **15 rütbe** sonrası da seviye büyür. Ayrı XP tablosu yoktur. |
 | K34 | **Silme kuralları:** konu, soruda kullanılıyorsa silinmez (uyarı + arşivleme önerisi); kaynak/yanlış nedeni kullanımdaysa silinmez; hazır katalog seçenekleri hiçbir zaman silinemez. Sessiz veri kaybı yoktur. |
 | K31 | **Karne uygulama notları (v1.0.10):** kova/oran hesabı `KarneHesabi`; seri ve hafta penceresi `SeriHesabi`/`HaftaPenceresi`; ilerleme rakamları `IlerlemeHizmeti` ile `tekrarlar` tablosundan anlık hesaplanır (yeni tablo yok). Rozetler `SharedPreferences` (`karne_rozetleri/kazanilanlar`) içinde tutulur ve ZIP yedeğine girmez; kazanım idempotenttir. İstikrar rozeti üst üste 5 **gün** (her gün ≥5 soru ve ≥%70 bağımsız) olarak uygulanır. Haftalık karşılaştırma eşiği `KISA_OTURUM_ESIGI` ile aynı sabitten okunur. |
+| K35 | **30 rozet, 5 gizli:** açık koşul/ilerleme, gizli rozetlerde kazanılana kadar ad+çizim+koşul kapalı. Sahiplik ve tam ekran kutlama kuyruğu atomik kaydedilir; yeni rozet +50 yalnız bir kez verilir. |
+| K36 | **Odak Stüdyosu** öz değerlendirmedir; otomatik doğrulama/AI cevap üretimi yapmaz. Mola, sona bırak, çözüm açmadan sonuç seçme, ayrı Kaydet ve ilerle eylemi, karne ve kalıcı devam noktası vardır. |
+| K37 | **Adaptif v2** yeni tekrarları sürüm 2 yazar; eski kayıtları değiştirmez. Kolaylık/aralık/unutma mevcut geçmişten türetildiği için Room v3 / ZIP v3 korunur; eski v4 kolon önerisi bu uygulamada gerekli değildir. |
 
 ### Soru kaydındaki alanlar
 

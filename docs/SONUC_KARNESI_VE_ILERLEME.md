@@ -1,14 +1,14 @@
 # Sonuç Karnesi, Kutlama ve İlerleme Sistemi — Tasarım Şartnamesi
 
-> Durum: **tasarım onaylandı, kod henüz yazılmadı.** Bu belge v1.0.10 ve sonrasında yapılacak
-> çalışmanın tek kaynağıdır. Kararlar kullanıcı tarafından 2026-10-17'de onaylandı; ilgili karar
-> kayıtları `PROJECT_BRIEF.md` içindeki K25–K27'dir.
+> **Uygulama durumu (2026-10-17):** Karne v1.0.10, ilerleme/ayarlar v1.1.x ile uygulandı.
+> v1.2.0, 30 rozet/15 rütbe, gizli rozet kutlaması, sınav profili ve adaptif odak oturumunu ekler.
+> Güncel kurallar `SEVIYE_SISTEMI.md` ve `ODAK_STUDYOSU.md` içindedir. Aşağıdaki faz adları
+> özgün tasarım geçmişidir; uygulama farkları burada açıkça belirtilir.
 >
-> Bu belgede ölçüm iddiası yoktur. Performans/animasyon maliyeti ancak cihazda ölçüldükten sonra
-> yazılır (`docs/KODLAMA_PLANI.md` kural 8).
->
-> Revizyon: 2026-10-17 — açık sorular kapandı (S7–S11); önceki hafta karşılaştırması, 5 soru eşiği,
-> otomatik karne ve “Bu konudan çalış” davranışı eklendi. §11 karar kaydıdır.
+> **§7 revizyonu:** v2 kolaylık/aralık/unutma durumunu mevcut tekrar geçmişinden türetir.
+> Yeni kolon, Room v4 ve ZIP v4 gerekmez. Eski v1 kayıtları değiştirilmez.
+> Mola günü jetonu ve kalıcı geçmiş karne arşivi henüz uygulanmadı.
+> Fiziksel cihaz performansı ölçülmüş kabul edilmez.
 
 ---
 
@@ -368,41 +368,21 @@ güncellenir.
 
 - `TekrarKurali.ALGORITMA_SURUMU = 2`; eski kayıtlar `algoritma_surumu = 1` olarak kalır ve
   yorumlanırken v1 kuralı kullanılır (geçmiş yeniden yazılmaz — K18).
-- Yeni alanlar **yalnız** yeni kayıtlarda güncellenir; v1 kaydı olan sorular `aralik_gun` ve
-  `unutma_sayisi` backfill ile doldurulur, `kolaylik_yuz` 250 kalır.
+- v1.2.0 uygulamasında yeni kolon/backfill yoktur; aralık ve unutma geçmişten türetilir, kolaylık
+  250 başlangıcından yalnız v2 kayıtlarıyla güncellenir.
 
-### 7.7 Room v3 → v4 migration (veri koruyan, fallback yok)
+### 7.7 Uygulanan mimari revizyon: geçmişten türetme
 
-```sql
-ALTER TABLE sorular ADD COLUMN aralik_gun INTEGER NOT NULL DEFAULT 1;
-ALTER TABLE sorular ADD COLUMN kolaylik_yuz INTEGER NOT NULL DEFAULT 250;
-ALTER TABLE sorular ADD COLUMN unutma_sayisi INTEGER NOT NULL DEFAULT 0;
+Özgün v3→v4 / üç kolon önerisi uygulanmadı. `aralik_gun`, `kolaylik_yuz`, `unutma_sayisi`
+karşılıkları `AkilliTekrarKurali.hafiza` ile mevcut `tekrarlar` kayıtlarından hesaplanır. Eski
+v1 kayıtlarının aralıkları korunur; kolaylık değişimi yalnız v2 kayıtlarıyla başlar. Ayrı backfill
+ve çifte tutulan durum yoktur. Detay ve örnekler: `ODAK_STUDYOSU.md`.
 
-UPDATE sorular SET aralik_gun = COALESCE((
-    SELECT t.sonraki_aralik FROM tekrarlar t
-    WHERE t.soru_id = sorular.id AND t.sonraki_aralik IS NOT NULL
-    ORDER BY t.gun DESC, t.zaman DESC LIMIT 1), 1);
+### 7.8 Yedek biçimi değişmedi
 
-UPDATE sorular SET unutma_sayisi = (
-    SELECT COUNT(*) FROM tekrarlar t
-    WHERE t.soru_id = sorular.id AND t.sonuc = 'COZEMEDIM');
-```
-
-Kurallar: şema JSON'u `app/schemas/.../4.json` olarak CI'da üretilir; v3→v4 testi hem şemayı hem
-**veri korunduğunu** doğrular; `migrate` parametre adı uyarısı da bu sırada düzeltilir.
-
-### 7.8 Yedek biçimi v4
-
-| Değişiklik | Kural |
-|---|---|
-| `format_version` | 4; `schema_version` 4 |
-| Kabul edilen | **v4, v3, v2** (v1 reddedilir — mevcut davranış) |
-| `data.json` soru alanları | `interval_days`, `ease_hundredths`, `lapse_count` eklenir |
-| `csv/questions.csv` | Aynı üç kolon **sona** eklenir (v3 sütun sırası bozulmaz) |
-| v3 yedeği geri yüklenirse | Yeni alanlar varsayılanla doldurulur (1 / 250 / 0) + §7.7 backfill |
-| Doğrulama | `1 ≤ interval_days ≤ 180`, `130 ≤ ease_hundredths ≤ 280`, `lapse_count ≥ 0` |
-
-`docs/YEDEK_FORMATI.md` bu bölümle birlikte güncellenecek; **kod ile belge aynı sürümde** yazılır.
+Room v3 / ZIP v3, v2 ZIP içe alma ve mevcut migration zinciri korunur. `algorithm_version`,
+`previous_interval_days`, `next_interval_days` zaten yedektedir; algoritma v2 kaydının ZIP
+export → restore turu yeni testle doğrulanır. Bu sürüm için v4 biçimi oluşturulmaz.
 
 ---
 
@@ -411,8 +391,8 @@ Kurallar: şema JSON'u `app/schemas/.../4.json` olarak CI'da üretilir; v3→v4 
 | Sürüm | İçerik | Migration | Kabul ölçütü |
 |---|---|---|---|
 | **v1.0.10** | Karne ekranı otomatik açılır (§4, S11), animasyonlar (§5.1), rozetler (§5.2, A fazı 11 rozet), günlük hedef sabit 10 + seri (§6.1–6.2), haftalık özet ve önceki hafta karşılaştırması (§4.5, §6.3) | **Yok** | §9'daki T-1…T-6, T-12, T-13 + cihazda oturum sonu karne görüntüsü |
-| **v1.0.11** | Algoritma v2 (§7), zor soru etiketi | **Var (v4)** + yedek v4 | Migration/backfill testi + 50 gün gecikme örneği + v3 yedek içe alma |
-| **v1.0.12** | Pekişme halkaları, 7 günlük tahmin, günlük kota (§6.4–6.5) | Yok | Cihazda ders kartı ve tahmin ekranı |
+| **v1.2.0** | Algoritma v2, odak oturumu, gizli rozetler, sınav profilleri | **Yok**; durum geçmişten türetilir | Gecikme/eşik/ZIP v3 turu, oturum kurtarma ve UI testleri |
+| **v1.1.0** | Pekişme halkaları, 7 günlük tahmin, seçilebilir hedef | Yok | Seviye/Ayarlar ekranları; cihaz kabulü ayrı |
 | **Sonra** | Onboarding'de hedef seçimi + Ayarlar, mola günü, geçmiş karneler | Prefs | Kullanıcı onayı |
 
 Her fazda: `docs/TEST_KONTROL_LISTESI.md`'ye satır eklenir, cihaz adımları **boş** bırakılır;
@@ -420,7 +400,7 @@ CI yeşil olmadan sürüm numarası artırılmaz.
 
 ---
 
-## 9. Test planı (v1.0.10 ve v1.0.11)
+## 9. Test planı (karne ve adaptif v2)
 
 Saf fonksiyonlar ayrı sınıflarda tutulur ki JVM testi hızlı olsun (Compose'a bağımlı olmasın).
 
@@ -434,9 +414,9 @@ Saf fonksiyonlar ayrı sınıflarda tutulur ki JVM testi hızlı olsun (Compose'
 | T-6 | Seri: boşluk, tek gün, bugün henüz çözülmemiş, 30 gün kesintisiz | A |
 | T-7 | v2 formülü: §7.4 tablosunun **her satırı** (gecikme satırı dâhil) | C |
 | T-8 | Kolaylık 130/280 sınırlarında kırpılır | C |
-| T-9 | v3→v4 migration şemayı ve satırları korur; backfill doğru | C |
-| T-10 | v3 yedeği v4'e geri yüklenir; yeni alanlar varsayılanla dolar | C |
-| T-11 | v4 yedeği gidiş-dönüş (export → import) alanları birebir korur | C |
+| T-9 | v2 hafıza durumu mevcut geçmişten türetilir; eski kayıtlar değişmez | C |
+| T-10 | Mevcut v3/v2 ZIP uyumluluğu korunur | C |
+| T-11 | v3 ZIP içindeki algoritma v2 kaydı gidiş-dönüşte korunur | C |
 | T-12 | Hafta penceresi Pazartesi'den başlar; sınır günlerinde (Pazar/Pazartesi) geçen hafta doğru hesaplanır; geçen hafta < 5 tekrarda karşılaştırma gizlenir | A |
 | T-13 | `KISA_OTURUM_ESIGI` tek kaynaktan okunur; 4 soruluk oturumda sadeleşmiş karne, 5'te tam karne üretir | A |
 
@@ -448,11 +428,11 @@ Cihaz (KULLANICI) satırları: karne görünümü, animasyon akıcılığı, roz
 
 | Risk | Karar |
 |---|---|
-| Karne yalnız oturum belleğinden gelir; uygulama kapanırsa gösterilemez | Kabul. Tekrar kayıtları kaybolmaz; geçmiş karne ileri sürüm |
+| Geçmiş karne arşivi yok | v1.2.0 yalnız son oturumu/bitmiş karnesini çıkılana kadar kurtarır; tam arşiv ileri sürüm |
 | Rozetler yedeğe girmez | Kabul. Cihaz değişince yeniden kazanılır; yedek biçimi büyümez |
 | Konfeti düşük donanımda takılabilir | Parçacık sayısı sabit ve küçük; `ANIMATOR_DURATION_SCALE = 0` ile tamamen kapanır |
 | “Yarım” kovası kullanıcıya karışık gelebilir | Karne altında tek satır açıklama: “Zorlanarak = yardımla/uzun sürede çözdün” |
-| v2'de aralıklar v1 merdiveninden sapar | Beklenen davranış; sapma ±%15 içinde kalacak şekilde testle sabitlenir |
+| v2 aralıkları v1 merdiveninden sapar | Beklenen; 1–180 gün sınırı ve belgelenen örnekler test edilir. Sabit bir yüzde yakınlığı iddiası yoktur. |
 | Kolaylık backfill edilmez | Kabul: eski sorular 2.50 ile başlar; unutma sayısı geçmişten hesaplandığı için zor soru doğru çalışır |
 
 ### Ölçülmemiş varsayımlar

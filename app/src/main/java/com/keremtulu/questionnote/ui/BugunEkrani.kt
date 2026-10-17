@@ -98,8 +98,8 @@ fun BugunEkrani(
         }
     }
     val dateText = remember(today) {
-        today.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", Locale("tr", "TR")))
-            .replaceFirstChar { it.titlecase(Locale("tr", "TR")) }
+        today.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", Locale.forLanguageTag("tr-TR")))
+            .replaceFirstChar { it.titlecase(Locale.forLanguageTag("tr-TR")) }
     }
     var yenileme by remember { mutableIntStateOf(0) }
     val questionsFlow = remember(soruRepository, today.toEpochDay(), yenileme) {

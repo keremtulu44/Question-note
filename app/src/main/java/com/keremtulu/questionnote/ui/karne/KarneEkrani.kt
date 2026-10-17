@@ -561,7 +561,7 @@ private fun SonYediGunBolumu(ozet: IlerlemeOzeti) {
     val gunler = ozet.sonYediGun
     if (gunler.all { it.toplam == 0 }) return
     val enYuksek = gunler.maxOf { it.toplam }.coerceAtLeast(1)
-    val formatter = remember { DateTimeFormatter.ofPattern("EEEEE", Locale("tr", "TR")) }
+    val formatter = remember { DateTimeFormatter.ofPattern("EEEEE", Locale.forLanguageTag("tr-TR")) }
     BolumKarti(baslik = stringResource(R.string.karne_last_seven_title)) {
         Row(
             modifier = Modifier.fillMaxWidth(),

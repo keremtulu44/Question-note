@@ -526,11 +526,20 @@ fun YanlisDefteriUygulamasi(
                                 withContext(Dispatchers.IO) { oturumDeposu.temizle() }
                                 bekleyenOturum = null
                                 val result = disaAktarmaHizmeti.geriYukle(preview)
+                                val profilHazir = try {
+                                    dersRepository.sinavProfiliniUygula(profilDeposu.secili())
+                                    true
+                                } catch (iptal: CancellationException) {
+                                    throw iptal
+                                } catch (_: Exception) {
+                                    false
+                                }
                                 geriYuklemeOnizlemesi = null
                                 ekran = UygulamaEkrani.Bugun
                                 sonYedek = disaAktarmaHizmeti.sonYedekBilgisiGetir()
                                 snackbarHostState.showSnackbar(
-                                    context.getString(R.string.backup_restore_success, result.guvenlikYedegiAdi),
+                                    context.getString(R.string.backup_restore_success, result.guvenlikYedegiAdi) +
+                                        if (profilHazir) "" else "\n" + context.getString(R.string.settings_profile_error),
                                 )
                             } catch (cancel: CancellationException) {
                                 throw cancel

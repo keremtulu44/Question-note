@@ -221,3 +221,14 @@ Veritabanı işlemi ile dosya sistemi işlemi tek atomik işlem değildir. Bu y�
 - **Her migration için otomatik test yazılır**; şema ve veri koruması test edilir. `MIGRATION_1_2` yalnızca `geri_yukleme_isaretleri` tablosunu ekler. `MIGRATION_2_3`, `kaynak_konumu` kolonunu ve global katalog tablosunu ekler; mevcut soru notu/kaynak/neden değerleri korunur, kaynak ve özel nedenler yeniden kullanılabilir kataloğa alınır.
 - Room v3 şeması `app/schemas/com.keremtulu.questionnote.data.local.YanlisDefteriDatabase/3.json` dosyasına CI tarafından aktarıldı. v1→v2→v3 zinciri ve doğrudan v2→v3 veri koruması CI run `39037429421` içinde geçti.
 - Testler JVM/Robolectric üzerinde çalışır; CI sonucu fiziksel cihaz güncelleme kabulü değildir.
+
+
+## v1.2.0: şema değiştirmeden adaptif tekrar ve profiller
+
+`AkilliTekrarKurali` hafıza durumunu `tekrarlar` tablosundaki mevcut aralık/sonuç/algoritma sürümü
+alanlarından türetir. Yeni kayıtlar sürüm 2, eski kayıtlar özgün sürümde kalır. Domain `TekrarKaydi`
+artık mevcut `zaman` ve `algoritma_surumu` değerlerini de taşır; bunlar yeni DB kolonları değildir.
+
+Sınav formatları eksik dersleri normal `dersler` satırları olarak ekler, ad eşleşen ID'yi tekrar
+kullanır. Profil tercihi, rozet sahipliği/kutlama kuyruğu ve son oturum devam noktası prefs'tedir.
+Bağımsız çözüm sorguları `sonuc = 'RAHAT' AND cozum_acildi = 0` kullanır.
