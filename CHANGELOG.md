@@ -2,6 +2,16 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.0.3] — 2026-10-17
+
+- Ana ekran sadeleştirilip **Bugün** odağına alındı: tüm derslerden bugünkü ve gecikmiş tekrarlar tek akışta listelenir; “Soru ekle” belirgindir.
+- İkincil alanlar (ders/konu gezinmesi, yedekleme/geri yükleme, görsel bakımı) yan menüye taşındı; soru eklerken ders seçimi korunur.
+- Soru ayrıntısında çözüm açma ve tekrar sonucu (Çözemedim / Zorlanarak çözdüm / Rahat çözdüm) kaydedilir.
+- Mevcut ürün lise içindir; TYT/AYT ayrımı yok. Ortaokul/LGS ancak gelecekteki Ayarlar seçenekleri olarak değerlendirilebilir.
+- CI run `39030667492`: 32 test geçti; Release derlemesi, imza ve beklenen sertifika parmak izi doğrulandı. [v1.0.3 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.3) yayımlandı.
+- APK SHA-256: `4641aff60fb38aeb114c765a9721d50849156e9f094b9b99662807cc41724108`.
+- Yeni ana ekran/tekrar akışı gerçek cihazda henüz denenmedi; CI başarısı cihaz kabulü değildir.
+
 ## [1.0.2] — 2026-10-17
 
 - Ders/konu yönetimi, soru ekleme-düzenleme-silme, filtre/liste/ayrıntı, çoklu kamera/galeri görselleri ve kalıcı görsel bakımı eklendi.
@@ -9,7 +19,7 @@ Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih 
 - Tam ZIP yedekleme/geri yükleme: JSON + beş CSV + JPEG görseller, SHA-256 doğrulama, SAF hedefi, önizleme/onay, güvenlik kopyası ve kesinti kurtarma eklendi.
 - CI run `39027221270`: 31 test, Release derlemesi, imza ve sertifika parmak izi doğrulaması başarılı; [v1.0.2 test Release'i](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.2) yayımlandı.
 - APK SHA-256: `264a15082587d3ed4883c783d3d94fea964d0472cf857e802fac1276f77729ac`.
-- Gerçek cihaz/Drive, temiz kurulum ve 30–50 fotoğraf okunabilirlik kabulü hâlâ bekliyor.
+- Cihaz kabulü hakkında kullanıcı “3. turu denemedim, onun dışında hepsi geçti” dedi; bunun bölüm 3 yedek/geri yükleme testinin denenmediği ve diğer checklist bölümlerinin geçtiği anlamına geldiği yorum teyit edilmedi.
 
 ## [1.0.1] — 2026-10-16
 

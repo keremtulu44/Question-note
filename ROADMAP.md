@@ -31,9 +31,10 @@ Durum işaretleri: `[ ]` yapılmadı · `[~]` kod/CI hazır, kullanıcı kabulü
 - [x] Görsel optimizasyonu: uzun kenar en çok ~3000 px, JPEG kalite 90; metadata ve tutarlılık kontrolü.
 - [x] Bakım ekranında denetim, yaş ve veritabanı referansı yeniden kontrol edilerek onaylı yetim temizliği.
 - [x] Dışa aktarma akışı tam ZIP yedekleme hizmetine yükseltildi; geri uyumlu eski API adı korunuyor.
-- [x] CI run `39027221270`: toplam 31 birim/Robolectric testi geçti; Release derlemesi, imza ve sertifika parmak izi başarılı; v1.0.2 test Release'i yayımlandı.
-- [ ] Kullanıcı cihazında uçak modunda kayıt, yeniden başlatma, izin/iptal, düzenleme/silme ve fotoğraf görüntüleme kabulü.
-- [ ] 30–50 gerçek fotoğrafta küçük formül, kök ve grafik etiketlerinin okunabilirliği.
+- [x] CI run `39030667492`: toplam 32 birim/Robolectric testi geçti; v1.0.3 Release derlemesi, imza ve sertifika parmak izi başarılı.
+- [~] Kullanıcı v1.0.2 için “3. turu denemedim, onun dışında hepsi geçti” bildirdi; bunun checklist'teki 1/2/4 geçti, 3 (yedek/geri yükleme) denenmedi anlamına geldiği yorumu henüz teyit edilmedi. Bkz. `docs/TEST_KONTROL_LISTESI.md`.
+- [ ] v1.0.3 ana ekranı ve tekrar akışını gerçek cihazda kabul; uçak modu, izin/iptal, düzenleme/silme ve fotoğraf görüntüleme kontrollerini gerektiğinde tekrar et.
+- [ ] 30–50 gerçek fotoğrafta küçük formül, kök ve grafik etiketlerinin okunabilirliğini doğrula.
 
 ## Aşama 3 — Tam yedek ve geri yükleme [~]
 
@@ -45,17 +46,21 @@ Durum işaretleri: `[ ]` yapılmadı · `[~]` kod/CI hazır, kullanıcı kabulü
 - [x] İçe aktarmadan önce mevcut/yedek soru-görsel sayısı önizlemesi ve açık tam-değiştirme onayı.
 - [x] Geri yükleme öncesi doğrulanmış güvenlik ZIP'i; görseller yeni kalıcı adlarla kopyalanıyor; Room değişimi transaction içinde.
 - [x] Room işareti + app-private günlükle kesinti sonrası commit/rollback kurtarması; v1→v2 migration ve test.
-- [x] CI'da checksum bozulması, desteklenmeyen format, path traversal, tam geri yükleme, güvenlik kopyası ve commit/rollback kurtarma testleri geçti (run `39027221270`).
+- [x] CI'da checksum bozulması, desteklenmeyen format, path traversal, tam geri yükleme, güvenlik kopyası ve commit/rollback kurtarma testleri geçti (son başarılı run `39030667492`).
 - [ ] Gerçek cihazda Downloads/Drive'a kaydetme, Drive yüklemesini ayrıca doğrulama.
 - [ ] Temiz kurulumda/başka cihazda soru, görsel, tekrar geçmişi ve planın tam geri yüklenmesi.
 - [ ] Cihazda iptal, bozuk yedek ve geri yükleme sırasında uygulama kapatma senaryoları.
 
-## Aşama 4 — Tekrar deneyimi ve günlük akış
+## Aşama 4 — Tekrar deneyimi ve günlük akış [~]
 
-- [x] Tekrar aralığı kuralı ve repository seviyesinde plan/tekrar davranışları Aşama 2'de yazıldı ve test edildi.
-- [ ] Bugün/gecikmiş tekrar ekranı ve tekrar geçmişi arayüzü.
-- [ ] Elle tarih atama ve kullanıcıya görünür plan akışları.
-- [ ] Saat dilimi ve gerçek kullanım kabul testleri.
+> Bugün ekranı, yan menü ve sonuç kaydı v1.0.3'te yayımlandı; CI başarılı. Cihaz kabulü bekliyor.
+
+- [x] Tekrar aralığı kuralı ve repository seviyesinde plan/tekrar davranışları Aşama 2'de yazıldı ve CI'da test edildi.
+- [x] Bugün/gecikmiş soruları dersler arası listeleyen ana ekran, belirgin “Soru ekle” eylemi ve ikincil alanlar için yan menü.
+- [x] Çözümün açıldığını ve tekrar sonucunu kaydetme akışı; CI'da derleme ve birim testleri geçti.
+- [ ] v1.0.3'te Bugün listesi, menü hedefleri ve tekrar sonucunun gerçek cihazda doğrulanması.
+- [ ] Tekrar geçmişi için kullanıcıya görünür ekran, elle tarih atama ve kullanıcıya görünür plan akışları.
+- [ ] Saat dilimi ve uzun dönemli gerçek kullanım kabul testleri.
 
 ## Aşama 5 — Kullanılabilirlik ve sağlamlaştırma
 

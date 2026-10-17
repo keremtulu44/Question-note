@@ -1,7 +1,7 @@
 # KODLAMA PLANI (Aşama 1 ve sonrası)
 
 > Bu belge **nasıl kodlayacağımızı** ve ölçülen sonuçları kaydeder: görev sırası, dosya yapısı,
-> sürüm sabitleme, imzalama kurulumu, derleme bütçesi, test stratejisi. Aşama 1 tamamlandı; Aşama 2/3 kodu CI'da doğrulandı, cihaz kabulü bekliyor.
+> sürüm sabitleme, imzalama kurulumu, derleme bütçesi, test stratejisi. v1.0.3'te Aşama 2/3/4 kodu CI'da doğrulandı; Bugün/tekrar arayüzü ve yedek akışının cihaz kabulü bekliyor.
 >
 > İlgili belgeler: [PROJECT_BRIEF.md](../PROJECT_BRIEF.md) (kararlar) · [ROADMAP.md](../ROADMAP.md)
 > (aşamalar) · [BUILDING.md](../BUILDING.md) (derleme/imzalama) · [docs/VERI_MODELI.md](VERI_MODELI.md)
@@ -247,7 +247,7 @@ com.keremtulu.questionnote/
 ├── data/images/                # JPEG optimizasyonu, kalıcı depo, bütünlük/temizlik hizmeti
 ├── data/export/                # YerelYedeklemeHizmeti + eski export API adı için typealias
 ├── domain/                     # modeller, repository sözleşmeleri, tekrar kuralı
-├── ui/                         # ders/konu, soru formu/ayrıntı/liste, görsel bakımı, yedek akışı
+├── ui/                         # Bugün, yan menü, ders/konu, soru akışları, görsel bakımı ve yedek
 └── AppContainer.kt / MainActivity.kt
 ```
 
@@ -257,8 +257,8 @@ com.keremtulu.questionnote/
 - Ders/konu yönetimi; soru CRUD, liste/filtre/ayrıntı; tekrar plan kuralları.
 - Kamera/galeri çoklu görselleri, EXIF yönü, JPEG uzun kenar ~3000 px/kalite 90, SHA-256, staging→kalıcı alan ve kontrollü bakım.
 - Tam ZIP/SAF yedekleme ve geri yükleme: manifest, JSON, 5 CSV, görsel payload'ları, doğrulama sınırları, güvenlik kopyası ve journal/Room marker kurtarması.
-- CI run `39027221270`: 31 test geçti; `assembleRelease`, sabit anahtarla imza ve fingerprint doğrulandı.
-- Cihaz kabulü hâlâ bekliyor: gerçek kamera/galeri/SAF/Drive, temiz kurulum/başka cihaz ve 30–50 fotoğrafta okunabilirlik.
+- CI run `39030667492`: 32 test geçti; `assembleRelease`, sabit anahtarla imza ve fingerprint doğrulandı; v1.0.3 yayımlandı.
+- Cihaz kabulü hâlâ bekliyor: Bugün/yan menü/tekrar kaydı, gerçek kamera/galeri/SAF/Drive, temiz kurulum/başka cihaz ve 30–50 fotoğrafta okunabilirlik.
 
 ### 5.3 Dosya ↔ veritabanı tutarlılığı (yazma sırası)
 
@@ -283,7 +283,7 @@ yalnızca kullanıcı onayıyla ve raporla yapılır.
 
 **Aşama 3 (tam ZIP yedek):** `data/export/YerelYedeklemeHizmeti.kt` içinde uygulandı; biçim ve kurtarma protokolü [docs/YEDEK_FORMATI.md](YEDEK_FORMATI.md)'nde. Otomatik testlerin durumu `docs/TEST_KONTROL_LISTESI.md` içindedir. SAF sağlayıcı/Drive ve başka cihazdaki kabul kullanıcı testini bekliyor.
 
-**Aşama 4 (tekrar arayüzü):** Aralık kuralı ve repository davranışı Aşama 2'de uygulandı; Bugün/gecikmiş ekranı, geçmiş görünümü ve elle tarih arayüzü açık.
+**Aşama 4 (tekrar arayüzü):** Bugün/gecikmiş Bugün ekranı, yan menü ve tekrar sonucu/çözüm açma kaydı v1.0.3'te uygulandı ve CI'da doğrulandı. Gerçek cihaz kabulü, tekrar geçmişi ekranı ve elle tarih arayüzü hâlâ açık.
 
 **Aşama 5 (sağlamlaştırma):** Büyük arşiv ölçümü, önizleme stratejisi, kırpma ekranı, erişilebilirlik ve depolama göstergesi açık.
 
@@ -349,5 +349,5 @@ edilecek" ayrımı yazılır. `docs/TEST_KONTROL_LISTESI.md` işaretlenir.
 ## 11. Bir sonraki oturum nasıl başlar?
 
 1. Bu belge + HANDOFF okunur; HANDOFF'taki "sıradaki somut adım" uygulanır.
-2. **Aşama 2 sürüyor:** Room/ders ekranı/konu CRUD CI'da geçti. Sıradaki adım ders yönetimi; ardından soru kaydetme/listeleme ve görsel dosya yaşam döngüsü. Minimum dışa aktarma Aşama 2 bitmeden zorunlu. Migration henüz yok; her sonraki şema değişikliği veri koruyan migration ve test içermeli.
+2. **v1.0.3 cihaz kabulü bekliyor:** Bugün listesi/yan menü/tekrar sonucu ve ders seçimi gerçek cihazda denenmeli. Kullanıcının v1.0.2 “3. tur” sözünün bölüm 3 yedek/geri yüklemeye karşılık geldiği teyit edilmeden diğer cihaz testleri geçti sayılmamalı.
 3. Her görev sonunda HANDOFF güncellenir: yapılan, ölçülen, kalan, sürümler, son başarılı derleme.

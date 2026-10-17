@@ -25,17 +25,20 @@ cevaplamak ve çözümü öğrenme sürecinden ayrı saklamaktır.
 
 ## Durum
 
-**Aşama 1 tamamlandı.** Kullanıcı v1.0.0'dan v1.0.1'e kaldırmadan güncellemenin başarılı olduğunu,
-uygulamanın açıldığını ve yedi ders kartını doğruladı.
+**v1.0.3 (versionCode 4) yayımlandı.** Ana ekran bugün yapılacak ve gecikmiş tekrarları
+farklı derslerden tek listede toplar; “Soru ekle” akışında ders seçimi korunur. Yedekleme, görsel
+bakımı ve derslere göre gezinme yan menüdedir. Tekrar sonucu/çözüm açma kaydedilir. Ürün şu an lise
+odağındadır; TYT/AYT ayrımı yoktur.
 
-**Aşama 2 ve Aşama 3 kod/CI kapsamı tamamlandı; cihaz kabulü bekliyor.** Aşama 2'de ders/konu ve
-soru akışları, çoklu kamera/galeri görselleri, kalıcı depolama, tekrar kuralları, tutarlılık bakımı ve
-Room v1→v2 migration; Aşama 3'te tam ZIP/SAF yedekleme, doğrulama, güvenlik kopyası ve kurtarma
-uygulandı. CI run `39027221270` 31 testi, Release derlemesini, imzayı ve sertifika parmak izini geçti;
-[v1.0.2 test Release'i](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.2) yayımlandı.
-APK SHA-256: `264a15082587d3ed4883c783d3d94fea964d0472cf857e802fac1276f77729ac`.
-**Gerçek cihaz, Drive/temiz kurulum ve 30–50 fotoğraf okunabilirlik testleri yapılmadı.** Release,
-bu kabul testleri için hazırdır; sonuçlar bu README'de ve `docs/TEST_KONTROL_LISTESI.md`'nde ayrı tutulur.
+CI run `39030667492` (kaynak commit `0f512c8945913565f8e3145ecc6c0cecaede2bef`) 32 testi,
+Release derlemesini, imzayı ve beklenen sertifika parmak izini geçti. [v1.0.3 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.3)
+yayımlandı. APK SHA-256: `4641aff60fb38aeb114c765a9721d50849156e9f094b9b99662807cc41724108`.
+
+**Cihaz kabulü ayrı ve hâlâ bekliyor:** yeni v1.0.3 ana ekranı/tekrar akışı gerçek cihazda denenmedi;
+SAF/Drive yedek-geri yükleme ve fotoğraf okunabilirliği için de CI sonucu cihaz testinin yerine geçmez.
+Kullanıcının v1.0.2 için “3. turu denemedim, onun dışında hepsi geçti” bildiriminin önceki
+checklist'teki bölüm 1/2/4 geçti, bölüm 3 denenmedi eşlemesi henüz teyit edilmedi; ayrıntı
+[TEST_KONTROL_LISTESI.md](docs/TEST_KONTROL_LISTESI.md) içinde.
 
 ---
 
@@ -60,9 +63,9 @@ bu kabul testleri için hazırdır; sonuçlar bu README'de ve `docs/TEST_KONTROL
 ## Kullanım / APK erişimi
 
 İmzalı APK'lar GitHub [Releases](https://github.com/keremtulu44/Question-note/releases) bölümünde.
-[v1.0.2 test Release'ini indir](https://github.com/keremtulu44/Question-note/releases/download/v1.0.2/yanlis-defteri-1.0.2.apk);
-cihaz kabulü henüz yapılmadı. İndirme/kurulum ve mevcut uygulamanın üzerine güncelleme ayrıntıları
-[BUILDING.md](BUILDING.md) içinde.
+[v1.0.3 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.0.3/yanlis-defteri-1.0.3.apk).
+Gerçek cihaz testi için mevcut uygulamayı **kaldırmadan** üzerine kur; yeni Bugün ekranı, menü ve
+tekrar kayıt akışını dene. İndirme/kurulum ayrıntıları [BUILDING.md](BUILDING.md) içinde.
 
 ---
 

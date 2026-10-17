@@ -11,7 +11,7 @@
 > ZIP yol güvenliği) ve **Robolectric** (şema/migration testleri). Emülatör yalnızca gerçekten
 > gerekirse kullanılır; asıl kabul testleri gerçek cihazda yapılır.
 
-Son güncelleme: 2026-10-17. Kullanıcı, v1.0.2'de sade cihaz listesinin 1, 2 ve 4. bölümlerini geçtiğini bildirdi; 3. bölüm (yedek/geri yükleme) denenmedi. v1.0.3 ana ekran ve tekrar akışı için cihaz kontrolü ayrıca bekliyor.
+Son güncelleme: 2026-10-17. v1.0.3 CI run `39030667492` 32 testi, Release derlemesini ve imza doğrulamasını geçti; yeni UI'nin cihaz kontrolü bekliyor. Kullanıcı v1.0.2 için “3. turu denemedim, onun dışında hepsi geçti” dedi. Önceki checklist kaydı bunu 1/2/4. bölümler geçti, 3. bölüm (yedek/geri yükleme) denenmedi diye yorumladı; kullanıcı bu bölüm eşlemesini açıkça teyit etmedi. Bu nedenle ilgili kullanıcı işaretlerini bu belirsizlik notuyla birlikte okuyun.
 
 ---
 
@@ -21,7 +21,7 @@ Son güncelleme: 2026-10-17. Kullanıcı, v1.0.2'de sade cihaz listesinin 1, 2 v
 |---|---|---|---|
 | 1.1 | Actions workflow'u yazılabiliyor ve push ile otomatik çalışıyor | YZ | [x] |
 | 1.2 | G2 arayüzsüz `assembleRelease` derlemesi başarılı | YZ | [x] |
-| 1.3 | v1.0.0/v1.0.1/v1.0.2 imzalı APK Release'e eklendi; her sürümde sertifika parmak izi eşleşti | YZ | [x] |
+| 1.3 | v1.0.0/v1.0.1/v1.0.2/v1.0.3 imzalı APK Release'e eklendi; her sürümde sertifika parmak izi eşleşti | YZ | [x] |
 | 1.4 | Yayımlanan her Release notunda sürüm, commit kimliği ve APK SHA-256 bulunuyor | YZ | [x] |
 | 1.5 | v1.0.0 APK telefona indirilip kuruluyor ve açılıyor | KULLANICI | [x] |
 | 1.6 | v1.0.1 güncellemesinden sonra uygulama açılıyor ve 7 ders kartı görünüyor | KULLANICI | [x] |
@@ -30,7 +30,8 @@ Son güncelleme: 2026-10-17. Kullanıcı, v1.0.2'de sade cihaz listesinin 1, 2 v
 | 1.9 | VersionCode 1 → 2 artışı ve v1.0.1 Release CI'da doğrulandı | YZ | [x] |
 | 1.10 | VersionCode 2 → 3; v1.0.2 Release, APK imzası ve fingerprint CI'da doğrulandı | YZ (CI run `39027221270`) | [x] |
 | 1.11 | v1.0.2 mevcut kurulumun üzerine yüklendi; kullanıcı uygulamanın açıldığını bildirdi | KULLANICI (2026-10-17) | [x] |
-| 1.12 | v1.0.3 güncellemesi, yeni Bugün ekranı ve yan menü gerçek cihazda doğrulanıyor | KULLANICI | [ ] |
+| 1.12 | v1.0.3 güncellemesi mevcut uygulamanın üzerine yükleniyor; yeni Bugün ekranı ve yan menü gerçek cihazda doğrulanıyor | KULLANICI | [ ] |
+| 1.13 | VersionCode 3 → 4; v1.0.3 Release, APK imzası ve fingerprint CI'da doğrulandı | YZ (CI run `39030667492`) | [x] |
 
 ## Aşama 2 — Yerel arşiv
 
@@ -67,26 +68,27 @@ Son güncelleme: 2026-10-17. Kullanıcı, v1.0.2'de sade cihaz listesinin 1, 2 v
 | 2.29 | Soru oluştur/düzenle/filtrele/arşivle/sil, ders-konu ilişkisi ve tekrar planı testleri | YZ (Robolectric) | [x] |
 | 2.30 | JPEG optimizasyonu, EXIF yönü, SHA-256, bozuk/non-image girdi ve geçici dosya yaşı testleri | YZ (Robolectric) | [x] |
 | 2.31 | Onaylı yetim temizliği, dosya yaşı ve DB referansını silme öncesi yeniden denetleme testleri | YZ (Robolectric) | [x] |
-| 2.32 | Yeni ana ekranda bugünün/gecikenlerin listesi, soru ekleme ve yan menü akışı çalışıyor | KULLANICI (v1.0.3) | [ ] |
-| 2.33 | Tekrar sonucu kaydediliyor; çözüm açma kuralı sonraki tarihi doğru belirliyor | KULLANICI (v1.0.3) | [ ] |
+| 2.32 | Repository Bugün akışı dersler arası gecikmiş/vadesi gelen aktif soruları içeriyor; gelecek tarihli, askıdaki ve arşiv ders sorularını dışlıyor | YZ (CI run `39030667492`) | [x] |
+| 2.33 | Yeni Bugün ekranı, soru eklerken ders seçimi ve yan menü akışı gerçek cihazda çalışıyor | KULLANICI (v1.0.3) | [ ] |
+| 2.34 | Tekrar sonucu/çözüm açma kaydı UI üzerinden saklanıyor ve sonraki tarih doğru gösteriliyor | KULLANICI (v1.0.3) | [ ] |
 
 ## Aşama 3 — Yedek ve geri yükleme
 
 | # | Test | Sorumlu | Durum |
 |---|---|---|---|
-| 3.1 | Tam ZIP oluşturma, manifest/CSV/JSON ve tüm envanter SHA-256/uzunluk doğrulaması | YZ (CI run `39027221270`) | [x] |
+| 3.1 | Tam ZIP oluşturma, manifest/CSV/JSON ve tüm envanter SHA-256/uzunluk doğrulaması | YZ (CI run `39030667492`) | [x] |
 | 3.2 | Yedek cihazdaki bir klasöre kaydediliyor | KULLANICI | [ ] |
 | 3.3 | Yedek Drive'a kaydediliyor (dosya seçici akışı) | KULLANICI | [ ] |
 | 3.4 | Temiz kurulumda yedekten geri yükleme çalışıyor | KULLANICI | [ ] |
 | 3.5 | Yedek görselleri kapsıyor (geri yükleme sonrası görseller açılıyor) | KULLANICI | [ ] |
 | 3.6 | Yedek tekrar geçmişini ve plan durumunu kapsıyor | KULLANICI | [ ] |
-| 3.7 | Checksum'u bozulmuş ZIP önizleme aşamasında reddediliyor; DB/görsel kayıtları değişmiyor | YZ (CI run `39027221270`) | [x] |
-| 3.8 | Desteklenmeyen format sürümü reddediliyor; DB değişmiyor | YZ (CI run `39027221270`) | [x] |
+| 3.7 | Checksum'u bozulmuş ZIP önizleme aşamasında reddediliyor; DB/görsel kayıtları değişmiyor | YZ (CI run `39030667492`) | [x] |
+| 3.8 | Desteklenmeyen format sürümü reddediliyor; DB değişmiyor | YZ (CI run `39030667492`) | [x] |
 | 3.9 | Başarısız yedek işlemi başarı gibi gösterilmiyor | YZ | [ ] |
-| 3.10 | Tam geri yükleme öncesi doğrulanmış güvenlik ZIP'i oluşuyor, eski not/görsel verisi korunuyor | YZ (CI run `39027221270`) | [x] |
+| 3.10 | Tam geri yükleme öncesi doğrulanmış güvenlik ZIP'i oluşuyor, eski not/görsel verisi korunuyor | YZ (CI run `39030667492`) | [x] |
 | 3.11 | Uygulama güncellemesi mevcut verileri koruyor (gerçek veriyle) | KULLANICI | [ ] |
-| 3.12 | ZIP içi yol güvenliği: `..` içeren ZIP hiçbir dosya çıkarmadan reddediliyor | YZ (CI run `39027221270`) | [x] |
-| 3.13 | Günlük/Room işareti simülasyonunda transaction öncesi rollback ve commit sonrası tamamlatma doğru çalışıyor | YZ (CI run `39027221270`) | [x] |
+| 3.12 | ZIP içi yol güvenliği: `..` içeren ZIP hiçbir dosya çıkarmadan reddediliyor | YZ (CI run `39030667492`) | [x] |
+| 3.13 | Günlük/Room işareti simülasyonunda transaction öncesi rollback ve commit sonrası tamamlatma doğru çalışıyor | YZ (CI run `39030667492`) | [x] |
 | 3.14 | ZIP bomb / aşırı büyüme / çok fazla dosya içeren arşiv açılmadan reddediliyor | YZ | [ ] |
 | 3.15 | Yedek **başka bir cihazda** (cihaz bağlılığı olmadan) eksiksiz geri yükleniyor | KULLANICI | [ ] |
 | 3.16 | Anlamsız/boş yedek seçilince kullanıcı onayı olmadan hiçbir şey değişmiyor | YZ + KULLANICI | [ ] |
@@ -99,10 +101,10 @@ Son güncelleme: 2026-10-17. Kullanıcı, v1.0.2'de sade cihaz listesinin 1, 2 v
 |---|---|---|---|
 | 4.1 | "Bugün" listesi doğru soruları gösteriyor | KULLANICI | [ ] |
 | 4.2 | Gecikmiş tekrarlar ayrı görünüyor | KULLANICI | [ ] |
-| 4.3 | "Çözemedim" sonrası tarih 1 güne dönüyor | YZ + KULLANICI | [ ] |
-| 4.4 | "Rahat çözdüm" sonrası aralık büyüyor | YZ + KULLANICI | [ ] |
-| 4.5 | Çözüm açıldığında bu bilgi kaydediliyor | YZ + KULLANICI | [ ] |
-| 4.6 | **Çözüm açılarak yapılan tekrar bağımsız sayılmıyor**; sonraki tekrar 1 gün sonraya planlanıyor | YZ + KULLANICI | [ ] |
+| 4.3 | Birim testinde "Çözemedim" sonrası aralık 1 güne dönüyor | YZ (CI run `39030667492`) | [x] |
+| 4.4 | Birim testinde "Rahat çözdüm" sonrası aralık büyüyor ve 180 günde sınırlanıyor | YZ (CI run `39030667492`) | [x] |
+| 4.5 | Çözüm açıldığında bu bilgi gerçek cihazdaki tekrar akışında kaydediliyor | KULLANICI (v1.0.3) | [ ] |
+| 4.6 | Birim testinde çözüm açılmış tekrarın sonraki tarihi 1 gün sonrası oluyor | YZ (CI run `39030667492`) | [x] |
 | 4.7 | Çözüm açıldıktan sonra aynı gün ikinci deneme kaydı oluşmuyor | YZ | [ ] |
 | 4.8 | Tekrar geçmişi görüntülenebiliyor (planlanan gün ile gerçekleşen gün ayrı) | KULLANICI | [ ] |
 | 4.9 | Bildirim izni verilmese de "Bugün" listesi çalışıyor | KULLANICI | [ ] |
@@ -110,7 +112,7 @@ Son güncelleme: 2026-10-17. Kullanıcı, v1.0.2'de sade cihaz listesinin 1, 2 v
 | 4.11 | Saat dilimi değişiminde gün hesabı bozulmuyor (kayıtlı gün değişmiyor) | YZ + KULLANICI | [ ] |
 | 4.12 | `ASKIDA` / `TAMAMLANDI` sorular "Bugün" listesinden çıkıyor, kayıt silinmiyor, geri alınabiliyor | KULLANICI | [ ] |
 | 4.13 | Uzun aradan sonra hiçbir soru otomatik sıfırlanmıyor; gecikmişler tek listede toplanıyor | YZ + KULLANICI | [ ] |
-| 4.14 | Aralık hesabı birim testleri (tüm sonuç × çözüm açıldı/açılmadı kombinasyonları) | YZ | [ ] |
+| 4.14 | Aralık hesabı unit testleri (kolayda artış/üst sınır, zorlanma/başarısızlık ve çözüm açmada yarına planlama) | YZ (CI run `39030667492`) | [x] |
 
 ## Aşama 5 — Dayanıklılık
 
@@ -134,7 +136,7 @@ Son güncelleme: 2026-10-17. Kullanıcı, v1.0.2'de sade cihaz listesinin 1, 2 v
 | G.2 | ZIP/APK kullanıcı yedekleri repoya işlenmiyor (`.gitignore` + `git check-ignore`) | YZ | [x] |
 | G.3 | İmzalama anahtarının iki ayrı yedek kopyası kullanıcıda mevcut | KULLANICI | [ ] |
 | G.4 | Uygulama kaldırılırsa verilerin kaybolacağı kullanıcı tarafından biliniyor | KULLANICI | [ ] |
-| G.5 | Room v1→v2 migration ve veri koruması otomatik test edildi; gelecek migration'larda zincir korunacak | YZ (CI run `39027221270`) | [x] |
+| G.5 | Room v1→v2 migration ve veri koruması otomatik test edildi; gelecek migration'larda zincir korunacak | YZ (son CI run `39030667492`) | [x] |
 | G.6 | Debug ve release APK'ları karıştırılmıyor; günlük kullanımda hep release APK | KULLANICI | [ ] |
 | G.7 | Derleme, sabitlenmiş sürümlerle tekrar edilebiliyor (bir yıl sonra da) | YZ | [ ] |
 

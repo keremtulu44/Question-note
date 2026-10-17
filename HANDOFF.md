@@ -3,21 +3,22 @@
 > Yeni bir geliştirme oturumu önce [PROJECT_BRIEF.md](PROJECT_BRIEF.md) ve bu belgeyi okur.
 
 - Son güncelleme: 2026-10-17
-- Aktif aşama: **Aşama 2/3 kodu CI'da tamamlandı; gerçek cihaz kabulü bekliyor.** Kullanıcı, Aşama 2 biter bitmez Aşama 3'ün de yapılmasını istemişti; ikisi de uygulandı.
-- Son başarılı CI: run `39027221270`, kaynak commit `c4514b52ad6643a993843b06c484733db2207618` — 31 test geçti; `assembleRelease`, imza ve sertifika parmak izi doğrulandı. v1.0.2 Release yayımlandı.
-- APK: [v1.0.2 test Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.2), SHA-256 `264a15082587d3ed4883c783d3d94fea964d0472cf857e802fac1276f77729ac`.
-- Kullanıcı eylemi: v1.0.2 APK'yı Samsung Galaxy S24 FE'ye **uygulamayı kaldırmadan** kur; checklist'teki uçak modu/kamera/galeri/geri yükleme testlerini ve 30–50 gerçek fotoğraf okunabilirliğini dene. Bu cihaz testleri yapılmış gibi işaretlenmemeli.
+- Aktif aşama: **v1.0.3 yayımlandı; yeni Bugün ekranı ve tekrar akışının gerçek cihaz kabulü bekliyor.** Aşama 2/3/4 kodu CI'da geçti.
+- Son başarılı CI: run `39030667492`, kaynak commit `0f512c8945913565f8e3145ecc6c0cecaede2bef` — 32 test geçti; Release derlemesi, imza ve beklenen sertifika parmak izi doğrulandı. v1.0.3 Release yayımlandı.
+- APK: [v1.0.3 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.3), [doğrudan indir](https://github.com/keremtulu44/Question-note/releases/download/v1.0.3/yanlis-defteri-1.0.3.apk), SHA-256 `4641aff60fb38aeb114c765a9721d50849156e9f094b9b99662807cc41724108`.
+- Kullanıcı eylemi: APK'yı Samsung Galaxy S24 FE'ye **mevcut uygulamayı kaldırmadan** kur. Bugün/gecikenler, soru ekleme sırasında ders seçimi, yan menü hedefleri ve çözüm açma/tekrar sonucu dene; yedek/geri yükleme adımlarını da ancak cihazda deneyince geçti say. Yeni v1.0.3 UI henüz kullanıcı tarafından doğrulanmadı.
+- v1.0.2 için kullanıcının “3. turu denemedim, onun dışında hepsi geçti” sözünün checklist'teki 1/2/4 geçti ve 3. bölüm yedek/geri yükleme denenmedi yorumuna denk geldiği henüz teyit edilmedi. Kaydın ihtiyatlı yorumu: `docs/TEST_KONTROL_LISTESI.md`.
 - Tam ZIP biçimi: `docs/YEDEK_FORMATI.md`; test ayrımı ve bekleyenler: `docs/TEST_KONTROL_LISTESI.md`; CI kanıtı: `docs/DERLEME_RAPORU.md`.
 
 ---
 
-## Güncel teslim — Aşama 2/3 kodu
+## Güncel teslim — v1.0.3 (Aşamalar 2/3/4)
 
-- Aşama 2: ders/konu yönetimi, soru CRUD/liste/filtre/ayrıntı, kamera/galeri çoklu görsel, atomik kalıcı saklama, görsel bakımı, tekrar kuralları ve minimum dışa aktarma tamamlandı.
-- Aşama 3: biçim v2 tam ZIP (manifest + JSON + CSV + JPEG), checksum/ilişki/yol/alan doğrulaması, SAF önizleme/onay, önceki arşivin güvenlik kopyası ve kesinti kurtarması tamamlandı.
-- Room şeması v2'ye yükseltildi; migration 1→2 veri koruma testi CI'da geçti. Destructive migration fallback kullanılmıyor.
-- CI run `39027221270`: 31 test, Release assembly, imza ve sertifika fingerprint geçti; v1.0.2 test Release'i yayımlandı. APK SHA-256 ve tam kanıt `docs/DERLEME_RAPORU.md` içinde. Kullanıcı cihazı ve fotoğraf okunabilirliği doğrulanmadı.
-- Açık kabul: yeni v1.0.2 sürümünü cihaza mevcut kurulumun üzerine yükle; uçak modu/kamera/galeri, SAF/Drive, temiz kurulum/geri yükleme/kurtarma ve 30–50 fotoğraf testlerini yap. Bulut sağlayıcısındaki yüklemeyi ayrıca doğrula.
+- Aşama 2: soru/konu akışları, çoklu görsel, kalıcı saklama, görsel bakımı ve tekrar kuralları; Room v1→v2 veri koruyan migration.
+- Aşama 3: biçim v2 tam ZIP (manifest + JSON + CSV + JPEG), doğrulama, SAF önizleme/onay, güvenlik yedeği ve kesinti kurtarması.
+- Aşama 4: bugün/gecikmiş sorular için dersler arası Bugün ana ekranı, yan menüde ikincil hedefler, ders seçimini koruyan soru ekleme ve tekrar sonucu/çözüm açma kaydı. Ders/lise kapsamı sabit; TYT/AYT ayrımı yok.
+- CI run `39030667492`: 32 test, Release derlemesi, imza ve beklenen sertifika fingerprint geçti; v1.0.3 yayımlandı. Tam kanıt `docs/DERLEME_RAPORU.md` içinde.
+- Gerçek cihaz kabulü bekliyor: yeni ana ekran/menü/tekrar akışı; SAF/Drive, temiz kurulum/geri yükleme/kurtarma ve 30–50 fotoğraf okunabilirliği ayrıca denenmeli. v1.0.2 cihaz bildiriminin bölüm eşlemesi teyit edilmediğinden, yedek kabulü kesin geçmiş sayılmıyor.
 
 ## Önceki aşama geçmişi (tarihsel)
 

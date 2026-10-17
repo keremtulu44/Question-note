@@ -4,7 +4,7 @@
 > Hiçbir anahtar, parola veya token bu depoya yazılmaz.
 
 - Son güncelleme: 2026-10-17
-- Durum: **Aşama 1 tamamlandı; Aşama 2/3 kodu CI'da doğrulandı.** 31 test, Release derlemesi, imza ve sertifika parmak izi geçti (run `39027221270`). v1.0.2 imzalı test Release'i yayımlandı; gerçek cihaz/Drive/okunabilirlik testleri henüz yapılmadı.
+- Durum: **v1.0.3 (versionCode 4) yayımlandı.** CI run `39030667492` 32 testi, Release derlemesini, imzayı ve beklenen sertifika parmak izini geçti. Yeni Bugün ekranı/tekrar akışı, SAF/Drive ve görsel okunabilirliği için gerçek cihaz kabulü bekliyor.
 
 ---
 
@@ -28,7 +28,7 @@ Kullanıcının telefonunda Android SDK, Gradle veya Termux kurması **gerekmez*
 
 - Tek Gradle modülü, Kotlin + Jetpack Compose.
 - Sürümler `gradle/libs.versions.toml` içinde sabitlenir; Gradle wrapper depoda tutulur.
-- minSdk 26, compileSdk/targetSdk 37; yayımlanan v1.0.2 `versionCode=3`. G2/G4 ve A2/A3 CI derlemeleri başarılı.
+- minSdk 26, compileSdk/targetSdk 37; yayımlanan v1.0.3 `versionCode=4`. G2/G4, A2/A3 ve Bugün/tekrar UI CI derlemeleri başarılı.
 - Yapay zekâ ortamında Java/Android SDK ve Maven erişimi yoktur → derleme **yalnızca** Actions'ta olur.
 
 ## 3. İmzalama düzeni (kritik)
@@ -70,7 +70,7 @@ için uygun değildir.
   izlenen dosyalar değişince). Elle tetikleme (`workflow_dispatch`) izni 403 olsa da gerekmez.
   G2/G3/G4 derlemeleri push ile çalıştı.
 - Workflow'un **kendi token'ı** `permissions: contents: write` ile rapor commit edebiliyor; aynı izinle
-  v1.0.0, v1.0.1 ve v1.0.2 GitHub Release'leri oluşturuldu.
+  v1.0.0, v1.0.1, v1.0.2 ve v1.0.3 GitHub Release'leri oluşturuldu.
 - **Log okuma deseni:** derleme logları dışarıdan indirilemiyor; her iş akışı ölçüm/özet çıktısını
   (sürümler, APK SHA-256, imza/parmak izi ve hata metni) **`docs/DERLEME_RAPORU.md` dosyasına yazar**.
 - Kotlin/Compose derlemesi hatasız bitmeden "APK hazır" denmez; başarısız derleme için Release
@@ -103,7 +103,8 @@ Yayımlanan Release'ler:
 
 - **v1.0.0 (versionCode 1):** [Release v1.0.0](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.0) — G2'nin arayüzsüz ilk imzalı sürümü.
 - **v1.0.1 (versionCode 2):** [Release v1.0.1](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.1) — açık/koyu temalı 7 ders kartı.
-- **v1.0.2 (versionCode 3):** [Test Release v1.0.2](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.2) · [APK indir](https://github.com/keremtulu44/Question-note/releases/download/v1.0.2/yanlis-defteri-1.0.2.apk) — Aşama 2/3 kodu; cihaz kabulü bekliyor. APK SHA-256: `264a15082587d3ed4883c783d3d94fea964d0472cf857e802fac1276f77729ac`.
+- **v1.0.2 (versionCode 3):** [Release v1.0.2](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.2) — Aşama 2/3 kodu. APK SHA-256: `264a15082587d3ed4883c783d3d94fea964d0472cf857e802fac1276f77729ac`.
+- **v1.0.3 (versionCode 4):** [Release v1.0.3](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.3) · [APK indir](https://github.com/keremtulu44/Question-note/releases/download/v1.0.3/yanlis-defteri-1.0.3.apk) — Bugün ana ekranı, yan menü ve tekrar sonucu kaydı; cihaz kabulü bekliyor. APK SHA-256: `4641aff60fb38aeb114c765a9721d50849156e9f094b9b99662807cc41724108`.
 
 ### G5 — telefonda güncelleme zinciri (**GEÇTİ**, kullanıcı bildirimi 2026-10-16)
 
