@@ -4,7 +4,7 @@
 > Hiçbir anahtar, parola veya token bu depoya yazılmaz.
 
 - Son güncelleme: 2026-10-17
-- Durum: **v1.0.4 (versionCode 5) yayımlandı.** CI run `39033698686` 33 testi, Release derlemesini, imzayı ve beklenen sertifika parmak izini geçti. Kullanıcı v1.0.3 Bugün/menü/sonuç adımlarını cihazda geçti bildirdi; v1.0.4 tekrar geçmişi, yedek/geri yükleme ve fotoğraf okunabilirliği cihaz testi bekliyor.
+- Son yayımlanan sürüm: **v1.0.4 (versionCode 5)**, CI run `39033698686`. **v1.0.5 (versionCode 6)** kaynak/katalog ve Room/backup v3 geliştirmesi hazırlanıyor; CI, imza, Release ve cihaz kabulü henüz doğrulanmadı. v1.0.4 tekrar geçmişi ile SAF/Drive yedek/geri yükleme ve fotoğraf okunabilirliği de cihaz kabulü bekliyor.
 
 ---
 
@@ -28,7 +28,7 @@ Kullanıcının telefonunda Android SDK, Gradle veya Termux kurması **gerekmez*
 
 - Tek Gradle modülü, Kotlin + Jetpack Compose.
 - Sürümler `gradle/libs.versions.toml` içinde sabitlenir; Gradle wrapper depoda tutulur.
-- minSdk 26, compileSdk/targetSdk 37; yayımlanan v1.0.4 `versionCode=5`. G2/G4, A2/A3, Bugün/tekrar ve tekrar geçmişi CI derlemeleri başarılı.
+- minSdk 26, compileSdk/targetSdk 37; yayımlanmış v1.0.4 `versionCode=5`; geliştirilmekte olan v1.0.5 `versionCode=6`. v1.0.5 için CI derlemesi bekleniyor.
 - Yapay zekâ ortamında Java/Android SDK ve Maven erişimi yoktur → derleme **yalnızca** Actions'ta olur.
 
 ## 3. İmzalama düzeni (kritik)

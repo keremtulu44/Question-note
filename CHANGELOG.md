@@ -2,6 +2,14 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.0.5] — 2026-10-17 (geliştirme; CI/cihaz kabulü bekliyor)
+
+- Kaynaklar tüm derslerde ortak katalogdan seçilir; kaynak bir kez `+ Kaynak` ile eklenebilir ve her soruya isteğe bağlı sayfa/test/soru konumu yazılır.
+- Yanlış nedeni hazır listeden tek seçimdir; `+ Yeni neden` ile özel seçenek eklenebilir.
+- Soru notu giriş/gösterim alanı kaldırıldı. Eski not değerleri veritabanında ve ZIP yedeğinde korunur; soru düzenleme bunları silmez.
+- Room v3 için v2→v3 veri koruyan migration eklendi. ZIP biçimi v3'e yükseltildi; eski v2 ZIP yedekleri de içe alınır ve eski kaynak/neden metinlerinden katalog oluşturulur.
+- Birim testleri, Release derlemesi/imza ve fiziksel cihaz kabulü henüz raporlanmadı.
+
 ## [1.0.4] — 2026-10-17
 
 - Soru ayrıntısına tekrar geçmişi eklendi: en yeni kayıt üstte; gerçekleşen/planlanan gün, sonuç, çözüm açılıp açılmadığı ve aralık görünür.

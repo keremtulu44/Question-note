@@ -1,6 +1,9 @@
 package com.keremtulu.questionnote.domain.repository
 
 import com.keremtulu.questionnote.domain.model.Soru
+import com.keremtulu.questionnote.domain.model.SoruSecenekTuru
+import com.keremtulu.questionnote.domain.model.SoruSecenegi
+import com.keremtulu.questionnote.domain.model.SoruSecenegiEklemeSonucu
 import com.keremtulu.questionnote.domain.model.SoruIslemSonucu
 import com.keremtulu.questionnote.domain.model.SoruKaydetmeIstegi
 import com.keremtulu.questionnote.domain.model.SoruPlanDurumu
@@ -16,6 +19,10 @@ interface SoruRepository {
     fun tekrarGecmisiniIzle(soruId: String): Flow<List<TekrarKaydi>>
 
     suspend fun soruGetir(soruId: String): Soru?
+
+    fun secenekleriIzle(tur: SoruSecenekTuru): Flow<List<SoruSecenegi>>
+
+    suspend fun secenekEkle(tur: SoruSecenekTuru, ad: String): SoruSecenegiEklemeSonucu
 
     suspend fun soruKaydet(istek: SoruKaydetmeIstegi): SoruIslemSonucu
 

@@ -1,6 +1,6 @@
 # ROADMAP — Yanlış Defteri
 
-Durum işaretleri: `[ ]` yapılmadı · `[~]` kod/CI hazır, kullanıcı kabulü bekliyor · `[x]` tamamlandı · `[!]` engellendi
+Durum işaretleri: `[ ]` yapılmadı · `[~]` kod mevcut; bu sürümün CI/Release ve/veya cihaz kabulü bekliyor (madde metnini izle) · `[x]` tamamlandı · `[!]` engellendi
 
 Öncelik: veri güvenliği → görsel işlemleri → günlük tekrar akışı → arama/filtreler → bildirimler → ek özellikler.
 
@@ -22,10 +22,11 @@ Durum işaretleri: `[ ]` yapılmadı · `[~]` kod/CI hazır, kullanıcı kabulü
 
 > Kod ve CI kapsamı hazır. Kamera/galeri, kalıcı veri, gerçek fotoğraf okunabilirliği ve cihaz kabulü kullanıcı testini bekliyor.
 
-- [x] Room şema v2; `exportSchema`; yabancı anahtarlar ve v1→v2 veri koruyan migration + Robolectric testi. Yıkıcı migration fallback'i yok.
+- [~] Room şema v3; `exportSchema`; v1→v2→v3 ve doğrudan v2→v3 veri koruyan migration testleri eklendi. v1.0.5 CI doğrulaması bekleniyor; yıkıcı migration fallback'i yok.
 - [x] Yedi lise dersi; kullanıcı arayüzünde ders listesi sabit, ders yönetimi/arsiv akışı ana ekrandan çıkarıldı.
 - [x] Konu ekleme/düzenleme/arşivleme/geri getirme; arşiv ilişkiyi silmiyor.
 - [x] Soru ekleme/düzenleme/silme, ders/konu/konusuz/plan filtreleri, ayrıntı ve görsellerin ilişkilendirilmesi.
+- [~] Dersler arası ortak kaynak kataloğu, soruya özel sayfa/test/soru konumu ve hazır/özel nedenlerden tek ana yanlış nedeni; soru notu UI alanı kaldırılırken eski değerler korunuyor. v1.0.5 CI ve cihaz kabulü bekliyor.
 - [x] Tekrar/plan kuralları ve birim testleri (soru arşivinden bağımsız `TekrarKurali`).
 - [x] Kamera ve sistem fotoğraf seçicisi; soru/çözüm için çoklu görsel; staging→kalıcı alan, SHA-256 ve atomik dosya yazımı.
 - [x] Görsel optimizasyonu: uzun kenar en çok ~3000 px, JPEG kalite 90; metadata ve tutarlılık kontrolü.
@@ -41,20 +42,20 @@ Durum işaretleri: `[ ]` yapılmadı · `[~]` kod/CI hazır, kullanıcı kabulü
 
 > ZIP üretimi, doğrulaması, geri yüklemesi ve CI testleri hazır. Gerçek SAF/Drive, temiz kurulum ve başka cihaz testi yapılmadı.
 
-- [x] Sürüm kontrollü ZIP: `manifest.json`, kanonik `data.json`, 5 CSV ve soru/çözüm JPEG'leri.
+- [~] Sürüm kontrollü ZIP v3: `manifest.json`, kanonik `data.json`, 6 CSV (katalog seçenekleri dâhil) ve soru/çözüm JPEG'leri; eski v2 ZIP'leri içe alınır. v1.0.5 CI doğrulaması bekleniyor.
 - [x] Dosya listesi, uzunluk, SHA-256, ilişki, görsel metadata, şema/format sürümü, yol kaçışı ve ZIP büyüme sınırları doğrulanıyor.
 - [x] SAF `CreateDocument` / `OpenDocument` akışları; Drive/bulut yüklemesinin ayrıca doğrulanması gerektiği kullanıcıya bildiriliyor.
 - [x] İçe aktarmadan önce mevcut/yedek soru-görsel sayısı önizlemesi ve açık tam-değiştirme onayı.
 - [x] Geri yükleme öncesi doğrulanmış güvenlik ZIP'i; görseller yeni kalıcı adlarla kopyalanıyor; Room değişimi transaction içinde.
-- [x] Room işareti + app-private günlükle kesinti sonrası commit/rollback kurtarması; v1→v2 migration ve test.
-- [x] CI'da checksum bozulması, desteklenmeyen format, path traversal, tam geri yükleme, güvenlik kopyası ve commit/rollback kurtarma testleri geçti (son başarılı run `39030667492`).
+- [x] Room işareti + app-private günlükle kesinti sonrası commit/rollback kurtarması; v1→v2→v3 migration zinciri.
+- [~] CI test paketi katalog/kaynak konumu tam geri yüklemesini ve v2 ZIP içe aktarmasını içeriyor; v1.0.5 CI sonucu bekleniyor. Önceki run `39033698686` checksum/path traversal/tam geri yükleme/kurtarma testlerini geçti.
 - [ ] Gerçek cihazda Downloads/Drive'a kaydetme, Drive yüklemesini ayrıca doğrulama.
 - [ ] Temiz kurulumda/başka cihazda soru, görsel, tekrar geçmişi ve planın tam geri yüklenmesi.
 - [ ] Cihazda iptal, bozuk yedek ve geri yükleme sırasında uygulama kapatma senaryoları.
 
 ## Aşama 4 — Tekrar deneyimi ve günlük akış [~]
 
-> Bugün/menü/sonuç akışı v1.0.3'te yayımlandı ve kullanıcı tarafından cihazda geçti bildirildi. Tekrar geçmişi v1.0.4'te CI'da doğrulandı; yeni history UI cihaz testi bekliyor.
+> Bugün/menü/sonuç akışı v1.0.3'te yayımlandı ve kullanıcı tarafından cihazda geçti bildirildi. Tekrar geçmişi v1.0.4'te CI'da doğrulandı; v1.0.4 history UI cihaz testi ve v1.0.5 yeni katalog akışının CI/cihaz kabulü bekliyor.
 
 - [x] Tekrar aralığı kuralı ve repository seviyesinde plan/tekrar davranışları CI'da test edildi.
 - [x] Bugün/gecikmiş soruları dersler arası listeleyen ana ekran, belirgin “Soru ekle” eylemi ve ikincil alanlar için yan menü.

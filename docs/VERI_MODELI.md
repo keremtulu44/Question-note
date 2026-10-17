@@ -1,6 +1,8 @@
-# Veri Modeli (Room şema v2)
+# Veri Modeli (Room şema v3)
 
-> Room v2, ders/konu/soru/görsel/tekrar tablolarını ve kesintiye dayanıklı geri yükleme işaretini içerir. v1→v2 migration'ı veriyi korur ve CI'da test edildi. Son güncelleme: 2026-10-17 (run `39027221270`).
+> Room v3; soru kaynak konumu, global kaynak/yanlış nedeni kataloğu ve kesintiye dayanıklı geri
+> yükleme işaretini içerir. v1→v2→v3 zinciri mevcut soru/not verisini korur; v2→v3 kaynakları ve özel
+> nedenleri kataloğa taşır. Yeni migration CI doğrulaması bekliyor. Son güncelleme: 2026-10-17.
 
 Veritabanı: **Room / SQLite**. Yerel veri tek doğruluk kaynağıdır.
 
@@ -50,10 +52,11 @@ Başlangıç verisi: Edebiyat, Matematik, Biyoloji, Kimya, Fizik, Coğrafya, Tar
 | `id` | TEXT PK | UUID |
 | `ders_id` | TEXT FK → `dersler.id` | **Zorunlu** |
 | `konu_id` | TEXT FK → `konular.id`, NULL olabilir | NULL = "Konusuz" — geçerli bir durumdur, eksik veri sayılmaz |
-| `soru_notu` | TEXT, NULL | |
+| `soru_notu` | TEXT, NULL | Eski kayıtlarla uyumluluk ve yedek için korunur; yeni soru arayüzünde alan gösterilmez. Düzenleme eski değeri silmez |
 | `cozum_notu` | TEXT, NULL | Çözüm açıklaması |
-| `kaynak` | TEXT, NULL | Kitap / sayfa / soru no |
-| `yanlis_nedeni` | TEXT, NULL | |
+| `kaynak` | TEXT, NULL | Katalogdan seçilen kaynak adı (eski serbest metin değerleri korunur) |
+| `kaynak_konumu` | TEXT, NULL | Bu soruya özel sayfa / test / soru numarası |
+| `yanlis_nedeni` | TEXT, NULL | Tek ana neden; hazır veya kullanıcı eklemesi |
 | `favori` | INTEGER | 0/1 |
 | `plan_durumu` | TEXT | **Kullanıcı kontrolünde**: `AKTIF` (tekrar planında), `ASKIDA` (geçici olarak çıkarıldı), `TAMAMLANDI` (artık tekrar planlanmıyor) |
 | `ogrenme_durumu` | TEXT | **Türetilmiş önbellek**: `YENI`, `OGRENIYOR`, `PEKISIYOR`, `SAGLAM` |
@@ -68,6 +71,23 @@ Başlangıç verisi: Edebiyat, Matematik, Biyoloji, Kimya, Fizik, Coğrafya, Tar
 > - `ogrenme_durumu` **türetilmiştir**; gerçek kaynak `tekrarlar` tablosudur ve her zaman yeniden
 >   hesaplanabilir. `son_tekrar_gun` / `sonraki_tekrar_gun` de yalnızca hız için tutulan özet
 >   alanlardır; ham geçmişin yerini almazlar.
+
+### `soru_secenekleri` (derslerden bağımsız global katalog)
+| Kolon | Tip | Not |
+|---|---|---|
+| `id` | TEXT PK | UUID ya da sabit hazır neden kimliği |
+| `tur` | TEXT | `KAYNAK` veya `YANLIS_NEDENI` |
+| `ad` | TEXT | Kullanıcıya gösterilen ad |
+| `normalize_ad` | TEXT | Türkçe küçük harf/boşluk normalizasyonu; `tur` ile birlikte benzersiz |
+| `varsayilan` | INTEGER | 0/1; hazır nedenlerde 1 |
+| `sira` | INTEGER | Hazır yanlış nedenlerinin sabit sırası; diğer kayıtlar ada göre sıralanır |
+| `olusturma` | INTEGER | epoch ms |
+
+Kaynak kataloğu tüm derslerde ortaktır. Soruda seçilen ad `sorular.kaynak` içinde, o soruya özel
+konum ise `kaynak_konumu` içinde saklanır. Yanlış nedeni tek seçimdir; başlangıç listesi Yanlış
+okuma, Soruyu yanlış anlama, Bilgi eksiği, Kural/formül karışıklığı, İşlem/hesap hatası,
+Dikkat/acele, Zaman baskısı ve Hatırlayamama seçeneklerini içerir. Kullanıcı yeni kaynak ve neden
+ekleyebilir. Katalog satırları soru silinse bile bağımsız kalır ve tam ZIP yedeğine girer.
 
 ### `gorseller`
 | Kolon | Tip | Not |
@@ -124,6 +144,7 @@ Bu tablo, app-private işlem günlüğüyle birlikte kesinti sonrası commit/rol
 - `sorular(ders_id)`, `sorular(konu_id)`, `sorular(sonraki_tekrar_gun)`, `sorular(plan_durumu)`,
   `sorular(guncelleme)`
 - `konular(ders_id)`, `gorseller(soru_id)`, `tekrarlar(soru_id, gun)`
+- `soru_secenekleri(tur, normalize_ad)` **UNIQUE**; ayrıca liste sıralaması için `(tur, varsayilan, sira)`
 
 "Bugün" sorgusu: `plan_durumu = 'AKTIF' AND sonraki_tekrar_gun <= <bugün>` — gecikmişler aynı
 sorgudan gelir, ayrıca işaretlenir.
@@ -194,6 +215,6 @@ Veritabanı işlemi ile dosya sistemi işlemi tek atomik işlem değildir. Bu y�
 - `fallbackToDestructiveMigration` **kullanılmaz**. Hatalı geçişte veritabanını silmek normal
   güncelleme çözümü değildir.
 - Şema JSON'ları sürüm kontrolünde saklanır (Room `exportSchema`).
-- **Her migration için otomatik test yazılır**; şema ve veri koruması test edilir. `MIGRATION_1_2`, yalnızca `geri_yukleme_isaretleri` tablosunu ekler ve mevcut ders/soru/görsel/tekrar verisini değiştirmez.
-- CI'da Room v1 fixture'ı açılıp v2'ye taşınır; v2 şeması ve v1 satırlarının korunması test edildi (run `39027221270`).
-- Testler JVM/Robolectric üzerinde çalışır; bu CI sonucu fiziksel cihaz güncelleme kabulü değildir.
+- **Her migration için otomatik test yazılır**; şema ve veri koruması test edilir. `MIGRATION_1_2` yalnızca `geri_yukleme_isaretleri` tablosunu ekler. `MIGRATION_2_3`, `kaynak_konumu` kolonunu ve global katalog tablosunu ekler; mevcut soru notu/kaynak/neden değerleri korunur, kaynak ve özel nedenler yeniden kullanılabilir kataloğa alınır.
+- Room v3 şeması `app/schemas/com.keremtulu.questionnote.data.local.YanlisDefteriDatabase/3.json` dosyasına CI tarafından aktarılır. v1→v2→v3 zinciri ve doğrudan v2→v3 veri koruması otomatik test edilir; CI henüz bekleniyor.
+- Testler JVM/Robolectric üzerinde çalışır; CI sonucu fiziksel cihaz güncelleme kabulü değildir.

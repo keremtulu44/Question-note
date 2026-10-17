@@ -10,6 +10,8 @@ import com.keremtulu.questionnote.domain.model.SoruGorselGirdisi
 import com.keremtulu.questionnote.domain.model.SoruIslemSonucu
 import com.keremtulu.questionnote.domain.model.SoruKaydetmeIstegi
 import com.keremtulu.questionnote.domain.model.SoruPlanDurumu
+import com.keremtulu.questionnote.domain.model.SoruSecenekTuru
+import com.keremtulu.questionnote.domain.model.SoruSecenegiEklemeSonucu
 import com.keremtulu.questionnote.domain.model.TekrarSonucu
 import com.keremtulu.questionnote.domain.repository.GorselDosyaYonetimi
 import java.time.Clock
@@ -63,7 +65,7 @@ class RoomSoruRepositoryTest {
     }
 
     @Test
-    fun createEditAndFilterQuestionsKeepsLessonAndTopicRelationships() = runBlocking {
+    fun createEditAndFilterQuestionsKeepsRelationshipsAndPreservesLegacyNote() = runBlocking {
         val konuRepo = RoomKonuRepository(database)
         assertEquals(
             com.keremtulu.questionnote.domain.model.KonuIslemSonucu.Basarili,
@@ -93,9 +95,44 @@ class RoomSoruRepositoryTest {
             gorseller = listOf(existingImage.asGirdi()),
         )
         assertEquals(SoruIslemSonucu.Basarili, repository.soruKaydet(edit))
-        assertEquals("Güncellendi", repository.soruGetir(created.id)?.soruNotu)
+        assertEquals("Polinom sorusu", repository.soruGetir(created.id)?.soruNotu)
         assertTrue(repository.sorulariIzle(dersId, konusuz = true).first().isEmpty())
         assertEquals("Önce çarpanlara ayır.", repository.soruGetir(created.id)?.cozumNotu)
+    }
+
+    @Test
+    fun sharedCatalogOptionsAreReusableAndQuestionStoresItsOwnSourceLocation() = runBlocking {
+        val source = repository.secenekEkle(SoruSecenekTuru.KAYNAK, " Test Kitabı A ")
+        assertTrue(source is SoruSecenegiEklemeSonucu.Basarili)
+        val sourceOption = (source as SoruSecenegiEklemeSonucu.Basarili).secenek
+        val duplicateSource = repository.secenekEkle(SoruSecenekTuru.KAYNAK, "test kitabı a")
+        assertTrue(duplicateSource is SoruSecenegiEklemeSonucu.ZatenVar)
+        assertEquals(sourceOption.id, (duplicateSource as SoruSecenegiEklemeSonucu.ZatenVar).secenek.id)
+
+        val reason = repository.secenekEkle(SoruSecenekTuru.YANLIS_NEDENI, "Grafiği yanlış yorumladım")
+        assertTrue(reason is SoruSecenegiEklemeSonucu.Basarili)
+        val reasonOption = (reason as SoruSecenegiEklemeSonucu.Basarili).secenek
+        val image = imageFiles.yeniGorsel(GorselTuru.SORU, 0)
+        assertEquals(
+            SoruIslemSonucu.Basarili,
+            repository.soruKaydet(
+                SoruKaydetmeIstegi(
+                    dersId = dersId,
+                    soruNotu = "Eski not verisi",
+                    kaynak = sourceOption.ad,
+                    kaynakKonumu = "Sayfa 42, test 3, soru 8",
+                    yanlisNedeni = reasonOption.ad,
+                    gorseller = listOf(image),
+                ),
+            ),
+        )
+        val question = repository.sorulariIzle(dersId).first().single()
+        assertEquals(sourceOption.ad, question.kaynak)
+        assertEquals("Sayfa 42, test 3, soru 8", question.kaynakKonumu)
+        assertEquals(reasonOption.ad, question.yanlisNedeni)
+        assertEquals("Eski not verisi", question.soruNotu)
+        assertTrue(repository.secenekleriIzle(SoruSecenekTuru.KAYNAK).first().any { it.id == sourceOption.id })
+        assertTrue(repository.secenekleriIzle(SoruSecenekTuru.YANLIS_NEDENI).first().any { it.id == reasonOption.id })
     }
 
     @Test

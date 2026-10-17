@@ -189,8 +189,7 @@ fun SoruDetayEkrani(
                         Column {
                             TextButton(onClick = onGeri) { Text(stringResource(R.string.question_back)) }
                             Text(
-                                text = soru.soruNotu?.takeIf { it.isNotBlank() }
-                                    ?: stringResource(R.string.question_photo_only),
+                                text = stringResource(R.string.question_photo_only),
                                 style = MaterialTheme.typography.headlineSmall,
                                 color = MaterialTheme.colorScheme.onBackground,
                                 fontWeight = FontWeight.SemiBold,
@@ -214,9 +213,15 @@ fun SoruDetayEkrani(
                             }
                         }
                     }
-                    if (soru.kaynak != null) item { BilgiAlani(R.string.question_source, soru.kaynak) }
-                    if (soru.yanlisNedeni != null) item { BilgiAlani(R.string.question_reason, soru.yanlisNedeni) }
-                    if (soru.soruNotu != null) item { BilgiAlani(R.string.question_note, soru.soruNotu) }
+                    soru.kaynak?.takeIf { it.isNotBlank() }?.let { source ->
+                        item { BilgiAlani(R.string.question_source, source) }
+                    }
+                    soru.kaynakKonumu?.takeIf { it.isNotBlank() }?.let { location ->
+                        item { BilgiAlani(R.string.question_source_location, location) }
+                    }
+                    soru.yanlisNedeni?.takeIf { it.isNotBlank() }?.let { reason ->
+                        item { BilgiAlani(R.string.question_reason, reason) }
+                    }
                     item {
                         Text(
                             text = stringResource(R.string.question_prompt_images),

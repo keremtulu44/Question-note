@@ -4,7 +4,7 @@ Bu belge projenin **karar kaydıdır**. Yeni bir geliştirme oturumu (insan veya
 belgeyi, sonra [HANDOFF.md](HANDOFF.md) dosyasını okur.
 
 - Son güncelleme: 2026-10-17
-- Durum: **v1.0.4 yayımlandı; CI ve 33 otomatik test geçti.** CI run `39033698686` (kaynak commit `3d3cfd5d103c1a3f3f578e4e197722d12ab347e2`) Release derlemesini, imzayı ve sertifika doğrulamasını geçti; [v1.0.4 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.4) yayımlandı (versionCode 5). Kullanıcı, v1.0.3'teki update/Bugün/menü/tekrar sonucu cihaz adımlarının tümünü geçti bildirdi; v1.0.4 tekrar geçmişinin cihaz kabulü, SAF/Drive/temiz kurulum/başka cihaz ve fotoğraf okunabilirliği bekliyor. v1.0.2 için “3. turu denemedim” ifadesinin checklist bölümleriyle önceki eşlemesi teyitsiz; ayrıntı [TEST_KONTROL_LISTESI.md](docs/TEST_KONTROL_LISTESI.md) içinde. Her şema değişikliği için veri koruyan migration ve test şart; migration fallback'i yasak.
+- Durum: v1.0.4 (versionCode 5) yayımlandı; v1.0.5 (versionCode 6) geliştirmesi CI/Release bekliyor. Onaylanan yeni kapsam: dersler arası ortak kaynak kataloğu, soru başına isteğe bağlı sayfa/test/soru konumu, hazır nedenlerden tek ana yanlış nedeni + özel neden ekleme ve soru notu UI'sinin kaldırılması. Eski not/kaynak/neden verisi korunacak. Her şema değişikliği için veri koruyan migration ve test şart; migration fallback'i yasak. Kullanıcı cihaz kabulü CI'dan ayrı tutulur.
 
 ---
 
@@ -67,13 +67,15 @@ Android telefonda kullanılacak, tek kişilik bir dijital yanlış defteri:
 | K21 | **Görsel kalite politikası:** fotoğraflar kaydedilirken otomatik optimize edilir (uzun kenar ~3000 piksel, JPEG kalitesi ~%90). Tek ölçüt **okunabilirliktir**: küçük formüller, kök içi ifadeler ve grafik etiketleri okunur kalmalı. Bu, Aşama 2'de gerçek fotoğraflarla doğrulanır. |
 | K22 | Ana ekranın odağı **Bugün**: bugünkü ve gecikmiş tekrarlar sade listede görünür; “Soru ekle” belirgin düğmedir. Yedekleme, görsel bakımı ve derslere göre gezinme yan menüde kalır. |
 | K23 | Şimdiki sürüm lise odağındadır; ders listesi sabit ve TYT/AYT ayrımı yoktur. Gelecekte Ayarlar'da öğrenim seviyesi (ortaokul/lise) ile sınav hedefi (ör. LGS) ayrı seçenekler olarak değerlendirilebilir. |
+| K24 | Kaynak kataloğu dersler arasında ortaktır; yeni kaynak `+` ile kaydedilir. Her soru için isteğe bağlı sayfa/test/soru konumu tutulur. Yanlış nedeni hazır listeden **tek ana seçim** veya kullanıcı tarafından eklenen özel seçenektir. Soru notu giriş/gösterim alanı kaldırılır; önceki `soru_notu` verisi migration, düzenleme ve ZIP yedeklerinde korunur. |
 
 ### Soru kaydındaki alanlar
 
 Zorunlu: kalıcı benzersiz kimlik, ders, en az bir soru görseli, oluşturma/güncelleme tarihi.
 
-İsteğe bağlı: konu, ek soru görselleri, çözüm görsel(ler)i, soru notu, çözüm notu/açıklaması,
-kaynak (kitap/sayfa/soru no), yanlış yapma nedeni, favori/önemli işareti.
+İsteğe bağlı: konu, ek soru görselleri, çözüm görsel(ler)i, çözüm notu/açıklaması, ortak
+katalogdan kaynak seçimi ve soruya özel sayfa/test/soru konumu, tek ana yanlış nedeni, favori/önemli
+işareti. Soru notu alanı arayüzde yoktur; eski kayıtları silmeden saklamak/yedeklemek sürdürülür.
 
 ---
 

@@ -46,6 +46,8 @@ data class SoruEntity(
     val cozumNotu: String? = null,
     @ColumnInfo(name = "kaynak")
     val kaynak: String? = null,
+    @ColumnInfo(name = "kaynak_konumu")
+    val kaynakKonumu: String? = null,
     @ColumnInfo(name = "yanlis_nedeni")
     val yanlisNedeni: String? = null,
     @ColumnInfo(name = "favori", defaultValue = "0")

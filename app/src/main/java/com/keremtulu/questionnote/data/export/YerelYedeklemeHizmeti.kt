@@ -6,17 +6,24 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.room.withTransaction
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
+import com.keremtulu.questionnote.data.local.VarsayilanSoruNedenleri
+import com.keremtulu.questionnote.data.local.varsayilanSoruSecenekleri
 import com.keremtulu.questionnote.data.local.YanlisDefteriDatabase
 import com.keremtulu.questionnote.data.local.entity.DersEntity
 import com.keremtulu.questionnote.data.local.entity.GeriYuklemeIsaretiEntity
 import com.keremtulu.questionnote.data.local.entity.GorselEntity
 import com.keremtulu.questionnote.data.local.entity.KonuEntity
 import com.keremtulu.questionnote.data.local.entity.SoruEntity
+import com.keremtulu.questionnote.data.local.entity.SoruSecenegiEntity
 import com.keremtulu.questionnote.data.local.entity.TekrarEntity
 import com.keremtulu.questionnote.domain.model.GorselTuru
 import com.keremtulu.questionnote.domain.model.OgrenmeDurumu
 import com.keremtulu.questionnote.domain.model.SoruGorselGirdisi
 import com.keremtulu.questionnote.domain.model.SoruPlanDurumu
+import com.keremtulu.questionnote.domain.model.SoruSecenekTuru
+import com.keremtulu.questionnote.domain.model.SORU_SECENEGI_ADI_UST_SINIR
+import com.keremtulu.questionnote.domain.model.normalizeSoruSecenegiAdi
+import com.keremtulu.questionnote.domain.model.stableSoruSecenegiId
 import com.keremtulu.questionnote.domain.model.TekrarSonucu
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
@@ -286,11 +293,15 @@ class YerelYedeklemeHizmeti(
                 database.tekrarDao().tumunuSil()
                 database.gorselDao().tumunuSil()
                 database.soruDao().tumunuSil()
+                database.soruSecenegiDao().tumunuSil()
                 database.konuDao().tumunuSil()
                 database.dersDao().tumunuSil()
                 database.dersDao().ekle(verified.data.dersler)
                 if (verified.data.konular.isNotEmpty()) database.konuDao().ekle(verified.data.konular)
                 if (verified.data.sorular.isNotEmpty()) database.soruDao().ekle(verified.data.sorular)
+                if (verified.data.secenekler.isNotEmpty()) {
+                    database.soruSecenegiDao().topluEkle(verified.data.secenekler)
+                }
                 if (verified.data.images.isNotEmpty()) {
                     database.gorselDao().ekle(
                         verified.data.images.map { image ->
@@ -379,6 +390,7 @@ class YerelYedeklemeHizmeti(
             dersler = database.dersDao().tumunuGetir(),
             konular = database.konuDao().tumunuGetir(),
             sorular = database.soruDao().tumunuGetir(),
+            secenekler = database.soruSecenegiDao().tumunuGetir(),
             gorseller = database.gorselDao().tumunuGetir(),
             tekrarlar = database.tekrarDao().tumunuGetir(),
         )
@@ -415,7 +427,7 @@ class YerelYedeklemeHizmeti(
             }
             ensureFreeSpace(temp.parentFile ?: appContext.cacheDir, estimatedArchiveBytes(payloadSize))
             val createdAt = System.currentTimeMillis()
-            val manifestBytes = manifestJson(backupData.counts(), createdAt, payloads).toString(2)
+            val manifestBytes = manifestJson(backupData.counts(), backupData.secenekler.size, createdAt, payloads).toString(2)
                 .toByteArray(Charsets.UTF_8)
             if (manifestBytes.size > MAX_MANIFEST_BYTES) throw IOException("Yedek manifesti beklenenden büyük.")
 
@@ -477,6 +489,7 @@ class YerelYedeklemeHizmeti(
 
     private fun manifestJson(
         counts: YedekSayilari,
+        catalogOptionCount: Int,
         createdAt: Long,
         payloads: List<ArchivePayload>,
     ) = JSONObject()
@@ -492,7 +505,8 @@ class YerelYedeklemeHizmeti(
             .put("topics", counts.konuSayisi)
             .put("questions", counts.soruSayisi)
             .put("images", counts.gorselSayisi)
-            .put("reviews", counts.tekrarSayisi))
+            .put("reviews", counts.tekrarSayisi)
+            .put("catalog_options", catalogOptionCount))
         .put("files", JSONArray().apply {
             payloads.sortedBy { it.name }.forEach { item ->
                 put(JSONObject()
@@ -506,6 +520,7 @@ class YerelYedeklemeHizmeti(
         .put("lessons", JSONArray().apply { data.dersler.forEach { put(it.toJson()) } })
         .put("topics", JSONArray().apply { data.konular.forEach { put(it.toJson()) } })
         .put("questions", JSONArray().apply { data.sorular.forEach { put(it.toJson()) } })
+        .put("catalog_options", JSONArray().apply { data.secenekler.forEach { put(it.toJson()) } })
         .put("images", JSONArray().apply { data.images.forEach { put(it.toJson()) } })
         .put("reviews", JSONArray().apply { data.tekrarlar.forEach { put(it.toJson()) } })
 
@@ -519,8 +534,12 @@ class YerelYedeklemeHizmeti(
             data.konular.map { listOf(it.id, it.dersId, it.ad, it.sira, it.arsivli, it.olusturma, it.guncelleme) },
         ),
         "csv/questions.csv" to csv(
-            listOf("id", "lesson_id", "topic_id", "question_note", "solution_note", "source", "mistake_reason", "favorite", "plan_status", "learning_status", "last_review_day", "next_review_day", "created_at_epoch_ms", "updated_at_epoch_ms"),
-            data.sorular.map { listOf(it.id, it.dersId, it.konuId, it.soruNotu, it.cozumNotu, it.kaynak, it.yanlisNedeni, it.favori, it.planDurumu, it.ogrenmeDurumu, it.sonTekrarGun, it.sonrakiTekrarGun, it.olusturma, it.guncelleme) },
+            listOf("id", "lesson_id", "topic_id", "question_note", "solution_note", "source", "source_location", "mistake_reason", "favorite", "plan_status", "learning_status", "last_review_day", "next_review_day", "created_at_epoch_ms", "updated_at_epoch_ms"),
+            data.sorular.map { listOf(it.id, it.dersId, it.konuId, it.soruNotu, it.cozumNotu, it.kaynak, it.kaynakKonumu, it.yanlisNedeni, it.favori, it.planDurumu, it.ogrenmeDurumu, it.sonTekrarGun, it.sonrakiTekrarGun, it.olusturma, it.guncelleme) },
+        ),
+        "csv/catalog_options.csv" to csv(
+            listOf("id", "type", "name", "normalized_name", "is_default", "order", "created_at_epoch_ms"),
+            data.secenekler.map { listOf(it.id, it.tur, it.ad, it.normalizeAd, it.varsayilan, it.sira, it.olusturma) },
         ),
         "csv/images.csv" to csv(
             listOf("id", "question_id", "type", "order", "file", "mime_type", "width", "height", "size_bytes", "sha256", "created_at_epoch_ms"),
@@ -568,6 +587,7 @@ class YerelYedeklemeHizmeti(
         .putNullable("question_note", soruNotu)
         .putNullable("solution_note", cozumNotu)
         .putNullable("source", kaynak)
+        .putNullable("source_location", kaynakKonumu)
         .putNullable("mistake_reason", yanlisNedeni)
         .put("favorite", favori)
         .put("plan_status", planDurumu)
@@ -576,6 +596,15 @@ class YerelYedeklemeHizmeti(
         .putNullable("next_review_day", sonrakiTekrarGun)
         .put("created_at_epoch_ms", olusturma)
         .put("updated_at_epoch_ms", guncelleme)
+
+    private fun SoruSecenegiEntity.toJson() = JSONObject()
+        .put("id", id)
+        .put("type", tur)
+        .put("name", ad)
+        .put("normalized_name", normalizeAd)
+        .put("is_default", varsayilan)
+        .put("order", sira)
+        .put("created_at_epoch_ms", olusturma)
 
     private fun BackupImage.toJson() = JSONObject()
         .put("id", id)
@@ -623,7 +652,14 @@ class YerelYedeklemeHizmeti(
                 createdAt = row.olusturma,
             )
         }
-        return BackupData(dersler, konular, sorular, imageData, tekrarlar)
+        return BackupData(
+            dersler = dersler,
+            konular = konular,
+            sorular = sorular,
+            secenekler = secenekler,
+            images = imageData,
+            tekrarlar = tekrarlar,
+        )
     }
 
     private suspend fun verifyArchive(archive: File, payloadDirectory: File): VerifiedArchive {
@@ -648,10 +684,16 @@ class YerelYedeklemeHizmeti(
             val manifestBytes = readEntryBytes(zip, manifestEntry, MAX_MANIFEST_BYTES)
             if (manifestBytes.size.toLong() != manifestEntry.size) throw IOException("Manifest ZIP girdisi kesik veya bozuk.")
             val manifest = JSONObject(manifestBytes.toString(Charsets.UTF_8))
-            if (manifest.getString("format") != FORMAT_ID || manifest.getInt("format_version") != FORMAT_VERSION) {
+            val formatVersion = manifest.getInt("format_version")
+            if (manifest.getString("format") != FORMAT_ID || formatVersion !in SUPPORTED_FORMAT_VERSIONS) {
                 throw IOException("Bu ZIP yedek biçimi desteklenmiyor.")
             }
-            if (manifest.getInt("room_schema_version") != ROOM_SCHEMA_VERSION) {
+            val expectedSchemaVersion = if (formatVersion == LEGACY_FORMAT_VERSION) {
+                LEGACY_ROOM_SCHEMA_VERSION
+            } else {
+                ROOM_SCHEMA_VERSION
+            }
+            if (manifest.getInt("room_schema_version") != expectedSchemaVersion) {
                 throw IOException("Yedeğin Room şema sürümü desteklenmiyor.")
             }
             if (manifest.getString("data_file") != DATA_FILE || manifest.getString("image_directory") != IMAGE_DIRECTORY) {
@@ -659,14 +701,27 @@ class YerelYedeklemeHizmeti(
             }
             val createdAt = manifest.getLong("created_at_epoch_ms")
             if (createdAt <= 0L) throw IOException("Yedek tarihi geçersiz.")
-            val counts = manifest.getJSONObject("counts").toCounts()
+            val manifestCounts = manifest.getJSONObject("counts")
+            val counts = manifestCounts.toCounts()
+            val catalogOptionCount = if (formatVersion == FORMAT_VERSION) {
+                manifestCounts.getInt("catalog_options").also {
+                    if (it < 0) throw IOException("Manifest içindeki katalog sayısı negatif.")
+                }
+            } else {
+                null
+            }
             val inventory = parseInventory(manifest.getJSONArray("files"))
             val inventoryPaths = inventory.map { it.path }.toSet()
             if (inventory.size + 1 != entries.size || inventoryPaths + MANIFEST_FILE != entryNames.toSet()) {
                 throw IOException("ZIP girdileri manifest ile eşleşmiyor.")
             }
             val declaredCsv = manifest.getJSONArray("csv_files").toStringSet()
-            if (declaredCsv != REQUIRED_CSV_FILES || !inventoryPaths.containsAll(REQUIRED_CSV_FILES)) {
+            val expectedCsvFiles = if (formatVersion == LEGACY_FORMAT_VERSION) {
+                LEGACY_REQUIRED_CSV_FILES
+            } else {
+                REQUIRED_CSV_FILES
+            }
+            if (declaredCsv != expectedCsvFiles || !inventoryPaths.containsAll(expectedCsvFiles)) {
                 throw IOException("Yedek CSV tabloları eksik veya tanımsız.")
             }
             val imageEntries = inventoryPaths.filter { it.startsWith(IMAGE_DIRECTORY) }
@@ -698,9 +753,11 @@ class YerelYedeklemeHizmeti(
             }
             val dataFile = File(payloadDirectory, DATA_FILE)
             if (dataFile.length() > MAX_JSON_BYTES) throw IOException("data.json üst boyut sınırını aşıyor.")
-            val data = parseData(JSONObject(dataFile.readText(Charsets.UTF_8)))
+            val data = parseData(JSONObject(dataFile.readText(Charsets.UTF_8)), formatVersion)
             validateBackupData(data, payloadDirectory)
-            if (data.counts() != counts) throw IOException("Manifest sayıları içerikle uyuşmuyor.")
+            if (data.counts() != counts || catalogOptionCount?.let { it != data.secenekler.size } == true) {
+                throw IOException("Manifest sayıları içerikle uyuşmuyor.")
+            }
             val dataImagePaths = data.images.map { it.zipFileName }.toSet()
             if (dataImagePaths.size != data.images.size || dataImagePaths != imageEntries.toSet()) {
                 throw IOException("JSON görsel ilişkileri ZIP girdileriyle uyuşmuyor.")
@@ -732,7 +789,7 @@ class YerelYedeklemeHizmeti(
         return items
     }
 
-    private fun parseData(json: JSONObject): BackupData = try {
+    private fun parseData(json: JSONObject, formatVersion: Int): BackupData = try {
         val lessons = json.getJSONArray("lessons").toTypedList(MAX_ROWS_PER_TABLE) { item ->
             DersEntity(
                 id = item.getString("id"),
@@ -767,6 +824,7 @@ class YerelYedeklemeHizmeti(
                 soruNotu = item.nullableString("question_note"),
                 cozumNotu = item.nullableString("solution_note"),
                 kaynak = item.nullableString("source"),
+                kaynakKonumu = item.nullableString("source_location"),
                 yanlisNedeni = item.nullableString("mistake_reason"),
                 favori = item.getBoolean("favorite"),
                 planDurumu = plan,
@@ -776,6 +834,23 @@ class YerelYedeklemeHizmeti(
                 olusturma = item.getLong("created_at_epoch_ms"),
                 guncelleme = item.getLong("updated_at_epoch_ms"),
             )
+        }
+        val options = if (formatVersion == LEGACY_FORMAT_VERSION) {
+            legacyCatalogOptions(questions)
+        } else {
+            json.getJSONArray("catalog_options").toTypedList(MAX_ROWS_PER_TABLE) { item ->
+                val type = runCatching { SoruSecenekTuru.valueOf(item.getString("type")) }
+                    .getOrElse { throw IOException("Yedekte bilinmeyen katalog türü var.") }
+                SoruSecenegiEntity(
+                    id = item.getString("id"),
+                    tur = type.name,
+                    ad = item.getString("name"),
+                    normalizeAd = item.getString("normalized_name"),
+                    varsayilan = item.getBoolean("is_default"),
+                    sira = item.getInt("order"),
+                    olusturma = item.getLong("created_at_epoch_ms"),
+                )
+            }
         }
         val images = json.getJSONArray("images").toTypedList(MAX_IMAGES) { item ->
             val type = runCatching { GorselTuru.valueOf(item.getString("type")) }
@@ -813,11 +888,49 @@ class YerelYedeklemeHizmeti(
                 elleAtandi = item.getBoolean("manually_assigned"),
             )
         }
-        BackupData(lessons, topics, questions, images, reviews)
+        BackupData(
+            dersler = lessons,
+            konular = topics,
+            sorular = questions,
+            secenekler = options,
+            images = images,
+            tekrarlar = reviews,
+        )
     } catch (error: IOException) {
         throw error
     } catch (error: Exception) {
         throw IOException("data.json okunamadı veya alanları geçersiz.", error)
+    }
+
+    /** v2 backups had no catalog; rebuild reusable choices from their saved question labels. */
+    private fun legacyCatalogOptions(questions: List<SoruEntity>): List<SoruSecenegiEntity> {
+        val now = System.currentTimeMillis()
+        val options = linkedMapOf<Pair<String, String>, SoruSecenegiEntity>()
+        varsayilanSoruSecenekleri(now).forEach { option ->
+            options[option.tur to option.normalizeAd] = option
+        }
+        fun add(type: SoruSecenekTuru, name: String?) {
+            if (name.isNullOrBlank() || name.length > SORU_SECENEGI_ADI_UST_SINIR) return
+            val normalized = normalizeSoruSecenegiAdi(name)
+            if (normalized.isBlank()) return
+            val key = type.name to normalized
+            if (key !in options) {
+                options[key] = SoruSecenegiEntity(
+                    id = stableSoruSecenegiId(type, normalized),
+                    tur = type.name,
+                    ad = name,
+                    normalizeAd = normalized,
+                    varsayilan = false,
+                    sira = 0,
+                    olusturma = now,
+                )
+            }
+        }
+        questions.forEach { question ->
+            add(SoruSecenekTuru.KAYNAK, question.kaynak)
+            add(SoruSecenekTuru.YANLIS_NEDENI, question.yanlisNedeni)
+        }
+        return options.values.toList()
     }
 
     private fun validateBackupData(data: BackupData, extractedPayload: File?) {
@@ -827,7 +940,30 @@ class YerelYedeklemeHizmeti(
         val questionIds = uniqueIds(data.sorular.map { it.id }, "soru")
         uniqueIds(data.images.map { it.id }, "görsel")
         uniqueIds(data.tekrarlar.map { it.id }, "tekrar")
+        uniqueIds(data.secenekler.map { it.id }, "katalog seçeneği")
         if (data.images.size > MAX_IMAGES) throw IOException("Yedekte izin verilenden fazla görsel var.")
+        if (data.secenekler.size > MAX_ROWS_PER_TABLE) throw IOException("Yedekte katalog satırı sınırı aşıldı.")
+        val normalizedOptionNames = mutableSetOf<Pair<String, String>>()
+        data.secenekler.forEach { option ->
+            val type = runCatching { SoruSecenekTuru.valueOf(option.tur) }
+                .getOrElse { throw IOException("Yedekte bilinmeyen katalog türü var.") }
+            val normalized = normalizeSoruSecenegiAdi(option.ad)
+            if (option.ad.isBlank() || option.ad.length > SORU_SECENEGI_ADI_UST_SINIR || normalized.isBlank() ||
+                option.normalizeAd != normalized || option.sira < 0 || option.olusturma < 0L ||
+                (option.varsayilan && type != SoruSecenekTuru.YANLIS_NEDENI) ||
+                !normalizedOptionNames.add(type.name to normalized)
+            ) {
+                throw IOException("Yedekte geçersiz veya yinelenen katalog seçeneği var.")
+            }
+        }
+        val expectedDefaultReasons = VarsayilanSoruNedenleri.map(::normalizeSoruSecenegiAdi).toSet()
+        val actualDefaultReasons = data.secenekler
+            .filter { it.varsayilan }
+            .map { it.normalizeAd }
+            .toSet()
+        if (actualDefaultReasons != expectedDefaultReasons) {
+            throw IOException("Yedekte hazır yanlış nedeni listesi eksik veya geçersiz.")
+        }
         val lessons = data.dersler.associateBy { it.id }
         val topics = data.konular.associateBy { it.id }
 
@@ -1171,6 +1307,7 @@ class YerelYedeklemeHizmeti(
         val dersler: List<DersEntity>,
         val konular: List<KonuEntity>,
         val sorular: List<SoruEntity>,
+        val secenekler: List<SoruSecenegiEntity>,
         val gorseller: List<GorselEntity>,
         val tekrarlar: List<TekrarEntity>,
     )
@@ -1179,6 +1316,7 @@ class YerelYedeklemeHizmeti(
         val dersler: List<DersEntity>,
         val konular: List<KonuEntity>,
         val sorular: List<SoruEntity>,
+        val secenekler: List<SoruSecenegiEntity>,
         val images: List<BackupImage>,
         val tekrarlar: List<TekrarEntity>,
     )
@@ -1228,8 +1366,11 @@ class YerelYedeklemeHizmeti(
         const val DATA_FILE = "data.json"
         const val IMAGE_DIRECTORY = "images/"
         const val FORMAT_ID = "yanlis-defteri-backup"
-        const val FORMAT_VERSION = 2
-        const val ROOM_SCHEMA_VERSION = 2
+        const val LEGACY_FORMAT_VERSION = 2
+        const val LEGACY_ROOM_SCHEMA_VERSION = 2
+        const val FORMAT_VERSION = 3
+        const val ROOM_SCHEMA_VERSION = 3
+        val SUPPORTED_FORMAT_VERSIONS = setOf(LEGACY_FORMAT_VERSION, FORMAT_VERSION)
         const val STATE_PREPARED = "PREPARED"
         const val STATE_COMMITTED = "COMMITTED"
         const val JPEG_MIME = "image/jpeg"
@@ -1238,7 +1379,7 @@ class YerelYedeklemeHizmeti(
         const val MAX_ENTRY_BYTES = 128L * 1024L * 1024L
         const val MAX_JSON_BYTES = 64L * 1024L * 1024L
         const val MAX_MANIFEST_BYTES = 1 * 1024 * 1024
-        const val MAX_ARCHIVE_ENTRIES = 10_007
+        const val MAX_ARCHIVE_ENTRIES = 10_008
         const val MAX_IMAGES = 10_000
         const val MAX_ROWS_PER_TABLE = 200_000
         const val MAX_TEXT_FIELD = 200_000
@@ -1253,13 +1394,14 @@ class YerelYedeklemeHizmeti(
         val PERMANENT_IMAGE_PATH = Regex("img/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\.jpg")
         val SAFETY_NAME = Regex("safety-[0-9a-fA-F-]{36}\\.zip")
         val SHA256 = Regex("[0-9a-f]{64}")
-        val REQUIRED_CSV_FILES = setOf(
+        val LEGACY_REQUIRED_CSV_FILES = setOf(
             "csv/lessons.csv",
             "csv/topics.csv",
             "csv/questions.csv",
             "csv/images.csv",
             "csv/reviews.csv",
         )
+        val REQUIRED_CSV_FILES = LEGACY_REQUIRED_CSV_FILES + "csv/catalog_options.csv"
         val CSV_FILES = REQUIRED_CSV_FILES.sorted()
     }
 }

@@ -109,14 +109,14 @@ class YanlisDefteriDatabaseTest {
     }
 
     @Test
-    fun schemaCreatesAllPlannedTablesAtVersionTwo() {
+    fun schemaCreatesAllPlannedTablesAtVersionThree() = runBlocking {
         val sqlite = database.openHelper.readableDatabase
         val cursor = sqlite.query("PRAGMA user_version")
         val version = cursor.use {
             assertTrue(it.moveToFirst())
             it.getInt(0)
         }
-        assertEquals(2, version)
+        assertEquals(3, version)
 
         val namesCursor = sqlite.query("SELECT name FROM sqlite_master WHERE type = 'table'")
         val tableNames = namesCursor.use { rows ->
@@ -125,12 +125,15 @@ class YanlisDefteriDatabaseTest {
             }
         }
         assertTrue(tableNames.containsAll(setOf(
-            "dersler", "konular", "sorular", "gorseller", "tekrarlar", "geri_yukleme_isaretleri",
+            "dersler", "konular", "sorular", "gorseller", "tekrarlar", "geri_yukleme_isaretleri", "soru_secenekleri",
         )))
+        assertEquals(VarsayilanSoruNedenleri, database.soruSecenegiDao().tumunuGetir()
+            .filter { it.varsayilan }
+            .map { it.ad })
     }
 
     @Test
-    fun migrationOneToTwoAddsRecoveryMarkerWithoutLosingExistingRows() = runBlocking {
+    fun migrationOneToThreeAddsOptionsAndRecoveryMarkerWithoutLosingExistingRows() = runBlocking {
         val context = RuntimeEnvironment.getApplication()
         val databaseName = "migration-preserve-${System.nanoTime()}.db"
         val file = context.getDatabasePath(databaseName)
@@ -157,7 +160,7 @@ class YanlisDefteriDatabaseTest {
             YanlisDefteriDatabase::class.java,
             databaseName,
         )
-            .addMigrations(YanlisDefteriMigrations.MIGRATION_1_2)
+            .addMigrations(YanlisDefteriMigrations.MIGRATION_1_2, YanlisDefteriMigrations.MIGRATION_2_3)
             .allowMainThreadQueries()
             .build()
         try {
@@ -171,7 +174,82 @@ class YanlisDefteriDatabaseTest {
                 it.moveToFirst()
                 it.getInt(0)
             }
-            assertEquals(2, version)
+            assertEquals(3, version)
+            assertEquals(VarsayilanSoruNedenleri, migrated.soruSecenegiDao().tumunuGetir()
+                .filter { it.varsayilan }
+                .map { it.ad })
+        } finally {
+            migrated.close()
+            context.deleteDatabase(databaseName)
+        }
+    }
+
+    @Test
+    fun migrationTwoToThreeKeepsQuestionTextAndBackfillsGlobalChoices() = runBlocking {
+        val context = RuntimeEnvironment.getApplication()
+        val databaseName = "migration-v2-v3-${System.nanoTime()}.db"
+        val file = context.getDatabasePath(databaseName)
+        file.parentFile?.mkdirs()
+        val legacy = android.database.sqlite.SQLiteDatabase.openOrCreateDatabase(file, null)
+        try {
+            LEGACY_V1_SCHEMA.forEach { legacy.execSQL(it) }
+            legacy.execSQL(
+                "CREATE TABLE IF NOT EXISTS `geri_yukleme_isaretleri` (`id` TEXT NOT NULL, PRIMARY KEY(`id`))",
+            )
+            legacy.execSQL("CREATE TABLE room_master_table (id INTEGER PRIMARY KEY, identity_hash TEXT)")
+            legacy.execSQL(
+                "INSERT OR REPLACE INTO room_master_table (id, identity_hash) VALUES(42, ?)",
+                arrayOf("f351145897fa5e2e5c9197ee5f7a52b0"),
+            )
+            legacy.execSQL("PRAGMA user_version = 2")
+            legacy.execSQL(
+                "INSERT INTO dersler (id, ad, sira, arsivli, olusturma, guncelleme) VALUES (?, ?, ?, 0, ?, ?)",
+                arrayOf<Any?>("legacy-option-lesson", "Eski ders", 0, 1L, 1L),
+            )
+            legacy.execSQL(
+                "INSERT INTO sorular (id, ders_id, soru_notu, kaynak, yanlis_nedeni, olusturma, guncelleme) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                arrayOf<Any?>("legacy-option-question-1", "legacy-option-lesson", "Eski not", "  Test kitabı A  ", "Kendime özgü neden", 2L, 3L),
+            )
+            legacy.execSQL(
+                "INSERT INTO sorular (id, ders_id, kaynak, yanlis_nedeni, olusturma, guncelleme) " +
+                    "VALUES (?, ?, ?, ?, ?, ?)",
+                arrayOf<Any?>("legacy-option-question-2", "legacy-option-lesson", "test kitabı a", "Yanlış okuma", 4L, 5L),
+            )
+        } finally {
+            legacy.close()
+        }
+
+        val migrated = Room.databaseBuilder(
+            context,
+            YanlisDefteriDatabase::class.java,
+            databaseName,
+        )
+            .addMigrations(YanlisDefteriMigrations.MIGRATION_1_2, YanlisDefteriMigrations.MIGRATION_2_3)
+            .allowMainThreadQueries()
+            .build()
+        try {
+            val firstQuestion = migrated.soruDao().idIleGetir("legacy-option-question-1")!!
+            assertEquals("Eski not", firstQuestion.soruNotu)
+            assertEquals("  Test kitabı A  ", firstQuestion.kaynak)
+            assertEquals("Kendime özgü neden", firstQuestion.yanlisNedeni)
+            assertEquals(null, firstQuestion.kaynakKonumu)
+
+            val options = migrated.soruSecenegiDao().tumunuGetir()
+            val sourceOptions = options.filter { it.tur == "KAYNAK" }
+            assertEquals(1, sourceOptions.size)
+            assertTrue(sourceOptions.single().ad in setOf("  Test kitabı A  ", "test kitabı a"))
+            assertEquals(
+                "test kitabı a",
+                com.keremtulu.questionnote.domain.model.normalizeSoruSecenegiAdi(sourceOptions.single().ad),
+            )
+            assertTrue(options.any { it.tur == "YANLIS_NEDENI" && it.ad == "Kendime özgü neden" && !it.varsayilan })
+            assertEquals(VarsayilanSoruNedenleri, options.filter { it.varsayilan }.map { it.ad })
+            val version = migrated.openHelper.readableDatabase.query("PRAGMA user_version").use {
+                it.moveToFirst()
+                it.getInt(0)
+            }
+            assertEquals(3, version)
         } finally {
             migrated.close()
             context.deleteDatabase(databaseName)

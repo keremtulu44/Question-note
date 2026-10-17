@@ -11,8 +11,11 @@ import com.keremtulu.questionnote.data.local.YanlisDefteriDatabase
 import com.keremtulu.questionnote.data.local.entity.GeriYuklemeIsaretiEntity
 import com.keremtulu.questionnote.data.local.entity.GorselEntity
 import com.keremtulu.questionnote.data.local.entity.SoruEntity
+import com.keremtulu.questionnote.data.local.entity.SoruSecenegiEntity
 import com.keremtulu.questionnote.domain.model.GorselTuru
 import com.keremtulu.questionnote.domain.model.SoruGorselGirdisi
+import com.keremtulu.questionnote.domain.model.SoruSecenekTuru
+import com.keremtulu.questionnote.domain.model.normalizeSoruSecenegiAdi
 import java.io.File
 import java.io.FileOutputStream
 import java.util.UUID
@@ -74,9 +77,27 @@ class YerelYedeklemeHizmetiTest {
     @Test
     fun fullRestoreReplacesRowsRewritesImagePathsAndLeavesSafetyArchive() = runBlocking {
         val lessonId = database.dersDao().tumunuGetir().first().id
-        val stored = insertQuestionWithImage("restore-original-question", lessonId, "Yedekten gelen not")
+        val sourceName = "Geometri soru bankası"
+        val reasonName = "Soruyu hızlı okudum"
+        database.soruSecenegiDao().topluEkle(
+            listOf(
+                catalogOption("restore-source-option", SoruSecenekTuru.KAYNAK, sourceName),
+                catalogOption("restore-reason-option", SoruSecenekTuru.YANLIS_NEDENI, reasonName),
+            ),
+        )
+        val stored = insertQuestionWithImage(
+            "restore-original-question",
+            lessonId,
+            "Yedekten gelen not",
+            sourceName,
+            "s. 118, test 4, soru 7",
+            reasonName,
+        )
         val archive = service.zipOlustur().also(temporaryFiles::add)
         val preview = service.dosyadanOnizle(archive)
+        database.soruSecenegiDao().ekle(
+            catalogOption("not-in-backup-option", SoruSecenekTuru.KAYNAK, "Yedekten sonra eklenen"),
+        )
 
         val before = database.soruDao().idIleGetir("restore-original-question")!!
         database.soruDao().guncelle(before.copy(soruNotu = "Yedekten sonra değiştirildi"))
@@ -84,8 +105,16 @@ class YerelYedeklemeHizmetiTest {
         val result = service.geriYukle(preview)
         assertEquals(1, result.sayilar.soruSayisi)
         assertEquals(1, result.sayilar.gorselSayisi)
-        assertEquals("Yedekten gelen not", database.soruDao().idIleGetir("restore-original-question")?.soruNotu)
+        val restoredQuestion = database.soruDao().idIleGetir("restore-original-question")
+        assertEquals("Yedekten gelen not", restoredQuestion?.soruNotu)
+        assertEquals(sourceName, restoredQuestion?.kaynak)
+        assertEquals("s. 118, test 4, soru 7", restoredQuestion?.kaynakKonumu)
+        assertEquals(reasonName, restoredQuestion?.yanlisNedeni)
         assertEquals(1, database.soruDao().tumunuGetir().size)
+        val restoredOptions = database.soruSecenegiDao().tumunuGetir()
+        assertTrue(restoredOptions.any { it.tur == SoruSecenekTuru.KAYNAK.name && it.ad == sourceName })
+        assertTrue(restoredOptions.any { it.tur == SoruSecenekTuru.YANLIS_NEDENI.name && it.ad == reasonName })
+        assertFalse(restoredOptions.any { it.id == "not-in-backup-option" })
         val restoredImage = database.gorselDao().tumunuGetir().single()
         assertEquals(stored.id, restoredImage.id)
         assertNotEquals(stored.dosyaAdi, restoredImage.dosyaAdi)
@@ -114,6 +143,41 @@ class YerelYedeklemeHizmetiTest {
         assertEquals("Değişmemeli", database.soruDao().idIleGetir("tamper-check-question")?.soruNotu)
         assertEquals(existingImages, database.gorselDao().tumunuGetir())
         assertFalse(File(RuntimeEnvironment.getApplication().filesDir, "yedekler/geri-yukleme.json").exists())
+    }
+
+    @Test
+    fun versionTwoBackupRestoresLegacySourceReasonAndQuestionNote() = runBlocking {
+        val lessonId = database.dersDao().tumunuGetir().first().id
+        val sourceName = "Eski kaynak kitabı"
+        val reasonName = "Kendime özgü yanlış nedeni"
+        insertQuestionWithImage(
+            "legacy-backup-question",
+            lessonId,
+            "Yedekten korunacak not",
+            sourceName,
+            reason = reasonName,
+        )
+        val currentArchive = service.zipOlustur().also(temporaryFiles::add)
+        val oldArchive = File(currentArchive.parentFile, "v2-${System.nanoTime()}.zip").also(temporaryFiles::add)
+        convertV3ArchiveToV2(currentArchive, oldArchive)
+        ZipFile(oldArchive).use { zip ->
+            val legacyHeader = zip.getInputStream(zip.getEntry("csv/questions.csv")).bufferedReader().use { it.readLine() }
+            assertFalse(legacyHeader.contains("source_location"))
+            assertFalse(zip.entries().asSequence().any { it.name == "csv/catalog_options.csv" })
+        }
+
+        val preview = service.dosyadanOnizle(oldArchive)
+        service.geriYukle(preview)
+
+        val restored = database.soruDao().idIleGetir("legacy-backup-question")!!
+        assertEquals("Yedekten korunacak not", restored.soruNotu)
+        assertEquals(sourceName, restored.kaynak)
+        assertEquals(null, restored.kaynakKonumu)
+        assertEquals(reasonName, restored.yanlisNedeni)
+        val options = database.soruSecenegiDao().tumunuGetir()
+        assertTrue(options.any { it.tur == SoruSecenekTuru.KAYNAK.name && it.ad == sourceName })
+        assertTrue(options.any { it.tur == SoruSecenekTuru.YANLIS_NEDENI.name && it.ad == reasonName })
+        assertEquals(8, options.count { it.varsayilan })
     }
 
     @Test
@@ -177,7 +241,14 @@ class YerelYedeklemeHizmetiTest {
         assertFalse(File(RuntimeEnvironment.getApplication().filesDir, "yedekler/geri-yukleme.json").exists())
     }
 
-    private suspend fun insertQuestionWithImage(id: String, lessonId: String, note: String): SoruGorselGirdisi {
+    private suspend fun insertQuestionWithImage(
+        id: String,
+        lessonId: String,
+        note: String,
+        sourceName: String? = null,
+        sourceLocation: String? = null,
+        reason: String? = null,
+    ): SoruGorselGirdisi {
         val staged = store.dosyadanHazirla(source, GorselTuru.SORU, 0)
         stagedNames += staged.dosyaAdi
         val permanentName = requireNotNull(store.kaliciyaKopyala(staged.dosyaAdi))
@@ -189,6 +260,9 @@ class YerelYedeklemeHizmetiTest {
                 id = id,
                 dersId = lessonId,
                 soruNotu = note,
+                kaynak = sourceName,
+                kaynakKonumu = sourceLocation,
+                yanlisNedeni = reason,
                 olusturma = now,
                 guncelleme = now,
             ),
@@ -197,6 +271,14 @@ class YerelYedeklemeHizmetiTest {
         return permanent
     }
 
+    private fun catalogOption(id: String, type: SoruSecenekTuru, name: String) = SoruSecenegiEntity(
+        id = id,
+        tur = type.name,
+        ad = name,
+        normalizeAd = normalizeSoruSecenegiAdi(name),
+        olusturma = System.currentTimeMillis(),
+    )
+
     private fun createImage(directory: File): File {
         val file = File(directory, "backup-source-${System.nanoTime()}.png")
         val bitmap = Bitmap.createBitmap(96, 64, Bitmap.Config.ARGB_8888)
@@ -204,6 +286,95 @@ class YerelYedeklemeHizmetiTest {
         file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
         bitmap.recycle()
         return file
+    }
+
+    private fun convertV3ArchiveToV2(source: File, destination: File) {
+        ZipFile(source).use { zip ->
+            val manifest = zip.getInputStream(zip.getEntry("manifest.json")).use {
+                JSONObject(it.readBytes().toString(Charsets.UTF_8))
+            }
+            val sourceQuestions = zip.getInputStream(zip.getEntry("data.json")).use {
+                JSONObject(it.readBytes().toString(Charsets.UTF_8)).getJSONArray("questions")
+            }
+            val payloads = linkedMapOf<String, ByteArray>()
+            zip.entries().asSequence().forEach { entry ->
+                if (entry.name == "manifest.json" || entry.name == "csv/catalog_options.csv") return@forEach
+                var bytes = zip.getInputStream(entry).use { it.readBytes() }
+                when (entry.name) {
+                    "data.json" -> {
+                        val data = JSONObject(bytes.toString(Charsets.UTF_8))
+                        data.remove("catalog_options")
+                        val questions = data.getJSONArray("questions")
+                        for (index in 0 until questions.length()) {
+                            questions.getJSONObject(index).remove("source_location")
+                        }
+                        bytes = data.toString().toByteArray(Charsets.UTF_8)
+                    }
+                    "csv/questions.csv" -> bytes = versionTwoQuestionsCsv(sourceQuestions)
+                }
+                payloads[entry.name] = bytes
+            }
+
+            manifest.put("format_version", 2)
+            manifest.put("room_schema_version", 2)
+            manifest.put(
+                "csv_files",
+                JSONArray(listOf(
+                    "csv/lessons.csv",
+                    "csv/topics.csv",
+                    "csv/questions.csv",
+                    "csv/images.csv",
+                    "csv/reviews.csv",
+                )),
+            )
+            val counts = manifest.getJSONObject("counts")
+            counts.remove("catalog_options")
+            manifest.put("files", JSONArray().apply {
+                payloads.toSortedMap().forEach { (name, bytes) ->
+                    val hash = java.security.MessageDigest.getInstance("SHA-256").digest(bytes)
+                        .joinToString("") { "%02x".format(it.toInt() and 0xff) }
+                    put(JSONObject()
+                        .put("path", name)
+                        .put("size_bytes", bytes.size)
+                        .put("sha256", hash))
+                }
+            })
+
+            ZipOutputStream(FileOutputStream(destination)).use { output ->
+                output.putNextEntry(ZipEntry("manifest.json"))
+                output.write(manifest.toString().toByteArray(Charsets.UTF_8))
+                output.closeEntry()
+                payloads.toSortedMap().forEach { (name, bytes) ->
+                    output.putNextEntry(ZipEntry(name))
+                    output.write(bytes)
+                    output.closeEntry()
+                }
+            }
+        }
+    }
+
+    private fun versionTwoQuestionsCsv(questions: JSONArray): ByteArray {
+        val columns = listOf(
+            "id", "lesson_id", "topic_id", "question_note", "solution_note", "source", "mistake_reason",
+            "favorite", "plan_status", "learning_status", "last_review_day", "next_review_day",
+            "created_at_epoch_ms", "updated_at_epoch_ms",
+        )
+        fun csvRow(values: List<Any?>): String = values.joinToString(",") { value ->
+            val text = when (value) {
+                null -> ""
+                is Boolean -> if (value) "true" else "false"
+                else -> value.toString()
+            }
+            "\"${text.replace("\"", "\"\"")}\""
+        }
+        val rows = mutableListOf(csvRow(columns))
+        for (index in 0 until questions.length()) {
+            val question = questions.getJSONObject(index)
+            rows += csvRow(columns.map { column ->
+                if (question.isNull(column)) null else question.get(column)
+            })
+        }
+        return rows.joinToString("\r\n", postfix = "\r\n").toByteArray(Charsets.UTF_8)
     }
 
     private fun rewriteArchiveWithBadJson(source: File, destination: File) {

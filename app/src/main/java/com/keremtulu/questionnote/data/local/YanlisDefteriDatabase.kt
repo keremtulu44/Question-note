@@ -8,12 +8,14 @@ import com.keremtulu.questionnote.data.local.dao.KonuDao
 import com.keremtulu.questionnote.data.local.dao.GorselDao
 import com.keremtulu.questionnote.data.local.dao.GeriYuklemeIsaretiDao
 import com.keremtulu.questionnote.data.local.dao.SoruDao
+import com.keremtulu.questionnote.data.local.dao.SoruSecenegiDao
 import com.keremtulu.questionnote.data.local.dao.TekrarDao
 import com.keremtulu.questionnote.data.local.entity.DersEntity
 import com.keremtulu.questionnote.data.local.entity.GorselEntity
 import com.keremtulu.questionnote.data.local.entity.GeriYuklemeIsaretiEntity
 import com.keremtulu.questionnote.data.local.entity.KonuEntity
 import com.keremtulu.questionnote.data.local.entity.SoruEntity
+import com.keremtulu.questionnote.data.local.entity.SoruSecenegiEntity
 import com.keremtulu.questionnote.data.local.entity.TekrarEntity
 
 @Database(
@@ -24,14 +26,16 @@ import com.keremtulu.questionnote.data.local.entity.TekrarEntity
         GorselEntity::class,
         TekrarEntity::class,
         GeriYuklemeIsaretiEntity::class,
+        SoruSecenegiEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 abstract class YanlisDefteriDatabase : RoomDatabase() {
     abstract fun dersDao(): DersDao
     abstract fun konuDao(): KonuDao
     abstract fun soruDao(): SoruDao
+    abstract fun soruSecenegiDao(): SoruSecenegiDao
     abstract fun gorselDao(): GorselDao
     abstract fun tekrarDao(): TekrarDao
     abstract fun geriYuklemeIsaretiDao(): GeriYuklemeIsaretiDao
@@ -54,6 +58,25 @@ internal class VarsayilanDersleriEkle : RoomDatabase.Callback() {
         VarsayilanDersAdlari.forEachIndexed { index, ad ->
             val stableId = "00000000-0000-4000-8000-${(index + 1).toString().padStart(12, '0')}"
             db.execSQL(insertSql, arrayOf<Any?>(stableId, ad, index, now, now))
+        }
+
+        val insertOptionSql = """
+            INSERT INTO soru_secenekleri (id, tur, ad, normalize_ad, varsayilan, sira, olusturma)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """.trimIndent()
+        varsayilanSoruSecenekleri(now).forEach { option ->
+            db.execSQL(
+                insertOptionSql,
+                arrayOf<Any?>(
+                    option.id,
+                    option.tur,
+                    option.ad,
+                    option.normalizeAd,
+                    if (option.varsayilan) 1 else 0,
+                    option.sira,
+                    option.olusturma,
+                ),
+            )
         }
     }
 }

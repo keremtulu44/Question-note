@@ -9,8 +9,11 @@ import com.keremtulu.questionnote.data.local.VarsayilanDersleriEkle
 import com.keremtulu.questionnote.data.local.YanlisDefteriDatabase
 import com.keremtulu.questionnote.data.local.entity.GorselEntity
 import com.keremtulu.questionnote.data.local.entity.SoruEntity
+import com.keremtulu.questionnote.data.local.entity.SoruSecenegiEntity
 import com.keremtulu.questionnote.data.local.entity.TekrarEntity
 import com.keremtulu.questionnote.domain.model.GorselTuru
+import com.keremtulu.questionnote.domain.model.SoruSecenekTuru
+import com.keremtulu.questionnote.domain.model.normalizeSoruSecenegiAdi
 import java.io.File
 import java.util.zip.ZipFile
 import kotlinx.coroutines.runBlocking
@@ -53,6 +56,24 @@ class YerelDisaAktarmaHizmetiTest {
         val context = RuntimeEnvironment.getApplication()
         val ders = database.dersDao().tumunuGetir().first()
         val now = System.currentTimeMillis()
+        database.soruSecenegiDao().topluEkle(
+            listOf(
+                SoruSecenegiEntity(
+                    id = "export-source-option",
+                    tur = SoruSecenekTuru.KAYNAK.name,
+                    ad = "Test kitabı",
+                    normalizeAd = normalizeSoruSecenegiAdi("Test kitabı"),
+                    olusturma = now,
+                ),
+                SoruSecenegiEntity(
+                    id = "export-reason-option",
+                    tur = SoruSecenekTuru.YANLIS_NEDENI.name,
+                    ad = "Dikkatsizlik",
+                    normalizeAd = normalizeSoruSecenegiAdi("Dikkatsizlik"),
+                    olusturma = now,
+                ),
+            ),
+        )
         val topicResult = com.keremtulu.questionnote.data.repository.RoomKonuRepository(database)
             .konuEkle(ders.id, "Fonksiyonlar")
         assertEquals(com.keremtulu.questionnote.domain.model.KonuIslemSonucu.Basarili, topicResult)
@@ -77,7 +98,8 @@ class YerelDisaAktarmaHizmetiTest {
                     konuId = konu.id,
                     soruNotu = "Dışa aktarma test notu",
                     cozumNotu = "Kısa çözüm",
-                    kaynak = "Test kitabı, s. 10",
+                    kaynak = "Test kitabı",
+                    kaynakKonumu = "s. 10, soru 2",
                     yanlisNedeni = "Dikkatsizlik",
                     favori = true,
                     planDurumu = "AKTIF",
@@ -131,9 +153,9 @@ class YerelDisaAktarmaHizmetiTest {
                     JSONObject(it.readText())
                 }
                 assertEquals("yanlis-defteri-backup", manifest.getString("format"))
-                assertEquals(2, manifest.getInt("format_version"))
-                assertEquals(2, manifest.getInt("room_schema_version"))
-                assertTrue(manifest.getJSONArray("files").length() >= 7)
+                assertEquals(3, manifest.getInt("format_version"))
+                assertEquals(3, manifest.getInt("room_schema_version"))
+                assertTrue(manifest.getJSONArray("files").length() >= 8)
                 val inventory = manifest.getJSONArray("files")
                 for (index in 0 until inventory.length()) {
                     val item = inventory.getJSONObject(index)
@@ -144,14 +166,17 @@ class YerelDisaAktarmaHizmetiTest {
                     assertEquals(item.getString("sha256"), digest)
                 }
                 assertTrue(entryNames.containsAll(setOf(
-                    "csv/lessons.csv", "csv/topics.csv", "csv/questions.csv", "csv/images.csv", "csv/reviews.csv",
+                    "csv/lessons.csv", "csv/topics.csv", "csv/questions.csv", "csv/catalog_options.csv", "csv/images.csv", "csv/reviews.csv",
                 )))
                 assertEquals(1, manifest.getJSONObject("counts").getInt("questions"))
                 assertEquals(1, manifest.getJSONObject("counts").getInt("reviews"))
+                assertEquals(10, manifest.getJSONObject("counts").getInt("catalog_options"))
                 val data = zip.getInputStream(zip.getEntry("data.json")).bufferedReader().use {
                     JSONObject(it.readText())
                 }
                 assertEquals("Dışa aktarma test notu", data.getJSONArray("questions").getJSONObject(0).getString("question_note"))
+                assertEquals("s. 10, soru 2", data.getJSONArray("questions").getJSONObject(0).getString("source_location"))
+                assertEquals(10, data.getJSONArray("catalog_options").length())
                 assertEquals(7, data.getJSONArray("lessons").length())
                 assertEquals(1, data.getJSONArray("topics").length())
             }

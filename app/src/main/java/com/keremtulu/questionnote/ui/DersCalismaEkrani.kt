@@ -242,12 +242,21 @@ private fun SoruListeKarti(soru: Soru, onClick: () -> Unit) {
     Card(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(
-                text = soru.soruNotu?.takeIf { it.isNotBlank() } ?: stringResource(R.string.question_photo_only),
+                text = stringResource(R.string.question_photo_only),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface,
             )
-            soru.kaynak?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+            soru.kaynak?.takeIf { it.isNotBlank() }?.let {
+                Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            soru.kaynakKonumu?.takeIf { it.isNotBlank() }?.let {
+                Text(
+                    stringResource(R.string.question_source_location) + ": " + it,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = stringResource(

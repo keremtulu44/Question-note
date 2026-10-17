@@ -7,6 +7,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -20,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -45,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.data.images.KameraCekimi
@@ -56,6 +59,10 @@ import com.keremtulu.questionnote.domain.model.SoruGorselGirdisi
 import com.keremtulu.questionnote.domain.model.SoruIslemSonucu
 import com.keremtulu.questionnote.domain.model.SoruKaydetmeIstegi
 import com.keremtulu.questionnote.domain.model.SoruPlanDurumu
+import com.keremtulu.questionnote.domain.model.SoruSecenekTuru
+import com.keremtulu.questionnote.domain.model.SoruSecenegi
+import com.keremtulu.questionnote.domain.model.SoruSecenegiEklemeSonucu
+import com.keremtulu.questionnote.domain.model.normalizeSoruSecenegiAdi
 import com.keremtulu.questionnote.domain.repository.KonuRepository
 import com.keremtulu.questionnote.domain.repository.SoruRepository
 import com.keremtulu.questionnote.ui.bilesenler.SoruGorselResmi
@@ -71,6 +78,15 @@ private sealed interface KonuSecenekleriDurumu {
     data object Hata : KonuSecenekleriDurumu
 }
 
+private sealed interface SoruKatalogDurumu {
+    data object Yukleniyor : SoruKatalogDurumu
+    data class Hazir(
+        val kaynaklar: List<SoruSecenegi>,
+        val nedenler: List<SoruSecenegi>,
+    ) : SoruKatalogDurumu
+    data object Hata : SoruKatalogDurumu
+}
+
 @Composable
 fun SoruFormuEkrani(
     ders: Ders,
@@ -82,12 +98,17 @@ fun SoruFormuEkrani(
 ) {
     var yukleniyor by remember(soruId) { mutableStateOf(soruId != null) }
     var bulunamadi by remember(soruId) { mutableStateOf(false) }
+    var yuklemeBasarisiz by remember(soruId) { mutableStateOf(false) }
     var formHatasi by remember { mutableStateOf<Int?>(null) }
     var kaydediliyor by remember { mutableStateOf(false) }
-    var soruNotu by remember(soruId) { mutableStateOf("") }
     var cozumNotu by remember(soruId) { mutableStateOf("") }
     var kaynak by remember(soruId) { mutableStateOf("") }
+    var kaynakKonumu by remember(soruId) { mutableStateOf("") }
     var yanlisNedeni by remember(soruId) { mutableStateOf("") }
+    var katalogDialogTuru by remember { mutableStateOf<SoruSecenekTuru?>(null) }
+    var yeniSecenekAdi by remember { mutableStateOf("") }
+    var katalogDialogHatasi by remember { mutableStateOf<Int?>(null) }
+    var katalogKaydediliyor by remember { mutableStateOf(false) }
     var konuId by remember(soruId) { mutableStateOf<String?>(null) }
     var planDurumu by remember(soruId) { mutableStateOf(SoruPlanDurumu.AKTIF) }
     var favori by remember(soruId) { mutableStateOf(false) }
@@ -112,6 +133,17 @@ fun SoruFormuEkrani(
             .collect { value = KonuSecenekleriDurumu.Hazir(it) }
     }.value
     val allTopics = (topicsState as? KonuSecenekleriDurumu.Hazir)?.topics.orEmpty()
+    val catalogFlow = remember(soruRepository) {
+        combine(
+            soruRepository.secenekleriIzle(SoruSecenekTuru.KAYNAK),
+            soruRepository.secenekleriIzle(SoruSecenekTuru.YANLIS_NEDENI),
+        ) { sources, reasons -> SoruKatalogDurumu.Hazir(sources, reasons) }
+    }
+    val catalogState = produceState<SoruKatalogDurumu>(SoruKatalogDurumu.Yukleniyor, catalogFlow) {
+        catalogFlow.catch { value = SoruKatalogDurumu.Hata }
+            .collect { value = it }
+    }.value
+    val catalog = catalogState as? SoruKatalogDurumu.Hazir
 
     LaunchedEffect(soruId) {
         if (soruId == null) {
@@ -123,9 +155,9 @@ fun SoruFormuEkrani(
             if (current == null) {
                 bulunamadi = true
             } else {
-                soruNotu = current.soruNotu.orEmpty()
                 cozumNotu = current.cozumNotu.orEmpty()
                 kaynak = current.kaynak.orEmpty()
+                kaynakKonumu = current.kaynakKonumu.orEmpty()
                 yanlisNedeni = current.yanlisNedeni.orEmpty()
                 konuId = current.konuId
                 planDurumu = current.planDurumu
@@ -136,7 +168,7 @@ fun SoruFormuEkrani(
         } catch (cancel: CancellationException) {
             throw cancel
         } catch (_: Exception) {
-            formHatasi = R.string.question_error_generic
+            yuklemeBasarisiz = true
         } finally {
             yukleniyor = false
         }
@@ -223,6 +255,19 @@ fun SoruFormuEkrani(
         photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
     }
 
+    fun addCatalogOption(tur: SoruSecenekTuru) {
+        katalogDialogTuru = tur
+        yeniSecenekAdi = ""
+        katalogDialogHatasi = null
+    }
+
+    fun selectCatalogOption(tur: SoruSecenekTuru, ad: String) {
+        when (tur) {
+            SoruSecenekTuru.KAYNAK -> kaynak = ad
+            SoruSecenekTuru.YANLIS_NEDENI -> yanlisNedeni = ad
+        }
+    }
+
     BackHandler(enabled = true, onBack = ::cancelAndReturn)
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -243,6 +288,14 @@ fun SoruFormuEkrani(
                 Text(stringResource(R.string.question_not_found), color = MaterialTheme.colorScheme.error)
                 TextButton(onClick = onGeri) { Text(stringResource(R.string.question_back)) }
             }
+            yuklemeBasarisiz -> Column(
+                modifier = Modifier.fillMaxSize().padding(padding).padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Text(stringResource(R.string.question_error_generic), color = MaterialTheme.colorScheme.error)
+                TextButton(onClick = onGeri) { Text(stringResource(R.string.question_back)) }
+            }
             else -> LazyColumn(
                 modifier = Modifier.fillMaxSize().padding(padding),
                 contentPadding = PaddingValues(start = 20.dp, top = 8.dp, end = 20.dp, bottom = 32.dp),
@@ -260,16 +313,6 @@ fun SoruFormuEkrani(
                         )
                         Text(ders.ad, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
-                }
-                item {
-                    OutlinedTextField(
-                        value = soruNotu,
-                        onValueChange = { soruNotu = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = !kaydediliyor,
-                        label = { Text(stringResource(R.string.question_form_note_label)) },
-                        minLines = 2,
-                    )
                 }
                 item {
                     Column {
@@ -298,24 +341,52 @@ fun SoruFormuEkrani(
                         }
                     }
                 }
+                if (catalogState is SoruKatalogDurumu.Hata) {
+                    item {
+                        Text(
+                            stringResource(R.string.question_form_catalog_load_error),
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                }
                 item {
-                    OutlinedTextField(
-                        value = kaynak,
-                        onValueChange = { kaynak = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = !kaydediliyor,
-                        singleLine = true,
-                        label = { Text(stringResource(R.string.question_form_source_label)) },
+                    SoruSecenegiSecici(
+                        baslik = stringResource(R.string.question_form_source_label),
+                        secimYok = stringResource(R.string.question_form_source_choose),
+                        secimiTemizle = stringResource(R.string.question_form_source_clear),
+                        ekleEtiketi = stringResource(R.string.question_form_add_source),
+                        secenekler = catalog?.kaynaklar.orEmpty(),
+                        secilenAd = kaynak,
+                        etkin = !kaydediliyor,
+                        onSec = {
+                            kaynak = it
+                            if (it.isBlank()) kaynakKonumu = ""
+                        },
+                        onEkle = { addCatalogOption(SoruSecenekTuru.KAYNAK) },
                     )
                 }
                 item {
                     OutlinedTextField(
-                        value = yanlisNedeni,
-                        onValueChange = { yanlisNedeni = it },
+                        value = kaynakKonumu,
+                        onValueChange = { kaynakKonumu = it },
                         modifier = Modifier.fillMaxWidth(),
                         enabled = !kaydediliyor,
-                        minLines = 2,
-                        label = { Text(stringResource(R.string.question_form_reason_label)) },
+                        singleLine = true,
+                        label = { Text(stringResource(R.string.question_form_source_location_label)) },
+                    )
+                }
+                item {
+                    SoruSecenegiSecici(
+                        baslik = stringResource(R.string.question_form_reason_label),
+                        secimYok = stringResource(R.string.question_form_reason_choose),
+                        secimiTemizle = stringResource(R.string.question_form_reason_clear),
+                        ekleEtiketi = stringResource(R.string.question_form_add_reason),
+                        secenekler = catalog?.nedenler.orEmpty(),
+                        secilenAd = yanlisNedeni,
+                        etkin = !kaydediliyor,
+                        onSec = { yanlisNedeni = it },
+                        onEkle = { addCatalogOption(SoruSecenekTuru.YANLIS_NEDENI) },
                     )
                 }
                 item {
@@ -396,9 +467,9 @@ fun SoruFormuEkrani(
                                             id = soruId,
                                             dersId = ders.id,
                                             konuId = konuId,
-                                            soruNotu = soruNotu,
                                             cozumNotu = cozumNotu,
                                             kaynak = kaynak,
+                                            kaynakKonumu = kaynakKonumu,
                                             yanlisNedeni = yanlisNedeni,
                                             planDurumu = planDurumu,
                                             favori = favori,
@@ -426,6 +497,128 @@ fun SoruFormuEkrani(
                     }
                 }
             }
+        }
+    }
+
+    katalogDialogTuru?.let { tur ->
+        val title = if (tur == SoruSecenekTuru.KAYNAK) {
+            stringResource(R.string.question_form_add_source_title)
+        } else {
+            stringResource(R.string.question_form_add_reason_title)
+        }
+        AlertDialog(
+            onDismissRequest = { if (!katalogKaydediliyor) katalogDialogTuru = null },
+            title = { Text(title) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = yeniSecenekAdi,
+                        onValueChange = { yeniSecenekAdi = it },
+                        enabled = !katalogKaydediliyor,
+                        singleLine = true,
+                        label = { Text(stringResource(R.string.question_form_catalog_name)) },
+                    )
+                    katalogDialogHatasi?.let { errorId ->
+                        Text(stringResource(errorId), color = MaterialTheme.colorScheme.error)
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = !katalogKaydediliyor,
+                    onClick = {
+                        if (katalogKaydediliyor) return@TextButton
+                        katalogKaydediliyor = true
+                        katalogDialogHatasi = null
+                        scope.launch {
+                            val result = try {
+                                soruRepository.secenekEkle(tur, yeniSecenekAdi)
+                            } catch (_: Exception) {
+                                null
+                            }
+                            when (result) {
+                                is SoruSecenegiEklemeSonucu.Basarili -> {
+                                    selectCatalogOption(tur, result.secenek.ad)
+                                    katalogDialogTuru = null
+                                    yeniSecenekAdi = ""
+                                }
+                                is SoruSecenegiEklemeSonucu.ZatenVar -> {
+                                    selectCatalogOption(tur, result.secenek.ad)
+                                    katalogDialogTuru = null
+                                    yeniSecenekAdi = ""
+                                    snackbarHostState.showSnackbar(context.getString(R.string.question_form_catalog_duplicate))
+                                }
+                                SoruSecenegiEklemeSonucu.BosAd ->
+                                    katalogDialogHatasi = R.string.question_form_catalog_empty
+                                SoruSecenegiEklemeSonucu.CokUzunAd ->
+                                    katalogDialogHatasi = R.string.question_form_catalog_too_long
+                                null -> katalogDialogHatasi = R.string.question_form_catalog_error
+                            }
+                            katalogKaydediliyor = false
+                        }
+                    },
+                ) { Text(stringResource(R.string.question_form_catalog_save)) }
+            },
+            dismissButton = {
+                TextButton(
+                    enabled = !katalogKaydediliyor,
+                    onClick = { katalogDialogTuru = null },
+                ) { Text(stringResource(R.string.question_form_catalog_cancel)) }
+            },
+        )
+    }
+}
+
+@Composable
+private fun SoruSecenegiSecici(
+    baslik: String,
+    secimYok: String,
+    secimiTemizle: String,
+    ekleEtiketi: String,
+    secenekler: List<SoruSecenegi>,
+    secilenAd: String,
+    etkin: Boolean,
+    onSec: (String) -> Unit,
+    onEkle: () -> Unit,
+) {
+    var menuAcik by remember(baslik) { mutableStateOf(false) }
+    val secilenSecenek = secenekler.firstOrNull {
+        normalizeSoruSecenegiAdi(it.ad) == normalizeSoruSecenegiAdi(secilenAd)
+    }
+    val gorunenAd = secilenSecenek?.ad ?: secilenAd.takeIf { it.isNotBlank() } ?: secimYok
+
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(baslik, style = MaterialTheme.typography.labelLarge)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.weight(1f)) {
+                TextButton(
+                    onClick = { menuAcik = true },
+                    enabled = etkin,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        gorunenAd,
+                        modifier = Modifier.fillMaxWidth(),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                DropdownMenu(expanded = menuAcik, onDismissRequest = { menuAcik = false }) {
+                    if (secilenAd.isNotBlank()) {
+                        DropdownMenuItem(
+                            text = { Text(secimiTemizle) },
+                            onClick = { onSec(""); menuAcik = false },
+                        )
+                    }
+                    secenekler.forEach { option ->
+                        DropdownMenuItem(
+                            text = { Text(option.ad) },
+                            onClick = { onSec(option.ad); menuAcik = false },
+                        )
+                    }
+                }
+            }
+            TextButton(onClick = onEkle, enabled = etkin) { Text(ekleEtiketi) }
         }
     }
 }

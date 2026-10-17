@@ -4,6 +4,7 @@ import androidx.room.withTransaction
 import com.keremtulu.questionnote.data.local.YanlisDefteriDatabase
 import com.keremtulu.questionnote.data.local.entity.GorselEntity
 import com.keremtulu.questionnote.data.local.entity.SoruEntity
+import com.keremtulu.questionnote.data.local.entity.SoruSecenegiEntity
 import com.keremtulu.questionnote.data.local.entity.TekrarEntity
 import com.keremtulu.questionnote.domain.model.GorselTuru
 import com.keremtulu.questionnote.domain.model.OgrenmeDurumu
@@ -13,6 +14,12 @@ import com.keremtulu.questionnote.domain.model.SoruGorseli
 import com.keremtulu.questionnote.domain.model.SoruIslemSonucu
 import com.keremtulu.questionnote.domain.model.SoruKaydetmeIstegi
 import com.keremtulu.questionnote.domain.model.SoruPlanDurumu
+import com.keremtulu.questionnote.domain.model.SoruSecenekTuru
+import com.keremtulu.questionnote.domain.model.SoruSecenegi
+import com.keremtulu.questionnote.domain.model.SoruSecenegiEklemeSonucu
+import com.keremtulu.questionnote.domain.model.SORU_SECENEGI_ADI_UST_SINIR
+import com.keremtulu.questionnote.domain.model.canonicalSoruSecenegiAdi
+import com.keremtulu.questionnote.domain.model.normalizeSoruSecenegiAdi
 import com.keremtulu.questionnote.domain.model.TekrarKaydi
 import com.keremtulu.questionnote.domain.model.TekrarSonucu
 import com.keremtulu.questionnote.domain.repeat.TekrarKurali
@@ -32,6 +39,7 @@ class RoomSoruRepository(
     private val dersDao = database.dersDao()
     private val konuDao = database.konuDao()
     private val soruDao = database.soruDao()
+    private val soruSecenegiDao = database.soruSecenegiDao()
     private val gorselDao = database.gorselDao()
     private val tekrarDao = database.tekrarDao()
 
@@ -52,6 +60,33 @@ class RoomSoruRepository(
     override suspend fun soruGetir(soruId: String): Soru? {
         val row = soruDao.idIleGetir(soruId) ?: return null
         return row.toDomain(gorselDao.sorununGorselleriniGetir(soruId).map { it.toDomain() })
+    }
+
+    override fun secenekleriIzle(tur: SoruSecenekTuru): Flow<List<SoruSecenegi>> =
+        soruSecenegiDao.secenekleriIzle(tur.name).map { rows -> rows.map { it.toDomain() } }
+
+    override suspend fun secenekEkle(tur: SoruSecenekTuru, ad: String): SoruSecenegiEklemeSonucu {
+        val cleanName = canonicalSoruSecenegiAdi(ad)
+        if (cleanName.isBlank()) return SoruSecenegiEklemeSonucu.BosAd
+        if (cleanName.length > SORU_SECENEGI_ADI_UST_SINIR) return SoruSecenegiEklemeSonucu.CokUzunAd
+        val normalizedName = normalizeSoruSecenegiAdi(cleanName)
+        return database.withTransaction {
+            val existing = soruSecenegiDao.adaGoreGetir(tur.name, normalizedName)
+            if (existing != null) {
+                return@withTransaction SoruSecenegiEklemeSonucu.ZatenVar(existing.toDomain())
+            }
+            val row = SoruSecenegiEntity(
+                id = UUID.randomUUID().toString(),
+                tur = tur.name,
+                ad = cleanName,
+                normalizeAd = normalizedName,
+                varsayilan = false,
+                sira = 0,
+                olusturma = saat.millis(),
+            )
+            soruSecenegiDao.ekle(row)
+            SoruSecenegiEklemeSonucu.Basarili(row.toDomain())
+        }
     }
 
     override suspend fun soruKaydet(istek: SoruKaydetmeIstegi): SoruIslemSonucu {
@@ -106,9 +141,11 @@ class RoomSoruRepository(
                     id = soruId,
                     dersId = istek.dersId,
                     konuId = istek.konuId,
-                    soruNotu = istek.soruNotu.temizMetin(),
+                    // The note editor was removed from the UI; preserve legacy notes on every edit.
+                    soruNotu = guncelEskiSoru?.soruNotu ?: istek.soruNotu.temizMetin(),
                     cozumNotu = istek.cozumNotu.temizMetin(),
                     kaynak = istek.kaynak.temizMetin(),
+                    kaynakKonumu = istek.kaynakKonumu.temizMetin(),
                     yanlisNedeni = istek.yanlisNedeni.temizMetin(),
                     favori = istek.favori,
                     planDurumu = istek.planDurumu.name,
@@ -255,6 +292,7 @@ class RoomSoruRepository(
         soruNotu = soruNotu,
         cozumNotu = cozumNotu,
         kaynak = kaynak,
+        kaynakKonumu = kaynakKonumu,
         yanlisNedeni = yanlisNedeni,
         favori = favori,
         planDurumu = enumOrDefault<SoruPlanDurumu>(planDurumu, SoruPlanDurumu.AKTIF),
@@ -264,6 +302,14 @@ class RoomSoruRepository(
         olusturma = olusturma,
         guncelleme = guncelleme,
         gorseller = gorseller,
+    )
+
+    private fun SoruSecenegiEntity.toDomain() = SoruSecenegi(
+        id = id,
+        tur = SoruSecenekTuru.valueOf(tur),
+        ad = ad,
+        varsayilan = varsayilan,
+        sira = sira,
     )
 
     private fun GorselEntity.toDomain() = SoruGorseli(

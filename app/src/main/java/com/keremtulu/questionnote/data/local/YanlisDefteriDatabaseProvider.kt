@@ -15,7 +15,10 @@ object YanlisDefteriDatabaseProvider {
                 YanlisDefteriDatabase.DATABASE_NAME,
             )
                 .addCallback(VarsayilanDersleriEkle())
-                .addMigrations(YanlisDefteriMigrations.MIGRATION_1_2)
+                .addMigrations(
+                    YanlisDefteriMigrations.MIGRATION_1_2,
+                    YanlisDefteriMigrations.MIGRATION_2_3,
+                )
                 .build()
                 .also { instance = it }
         }

@@ -3,22 +3,21 @@
 > Yeni bir geliştirme oturumu önce [PROJECT_BRIEF.md](PROJECT_BRIEF.md) ve bu belgeyi okur.
 
 - Son güncelleme: 2026-10-17
-- Aktif aşama: **v1.0.4 yayımlandı; soru ayrıntısındaki yeni tekrar geçmişinin cihaz kabulü bekliyor.** v1.0.3 Bugün/menü/sonuç akışı kullanıcı tarafından geçti bildirildi; Aşama 2/3/4 CI doğrulandı.
+- Aktif iş: **v1.0.5 özellik kodu ve test tanımları eklendi; yerel/CI çalıştırması ve Release bekliyor.** Onaylanan kapsam global kaynak kataloğu, soruya özel locator, hazır/özel tek yanlış nedeni ve soru notu UI'sinin kaldırılmasıdır; eski not verisi korunur.
 - Son başarılı CI: run `39033698686`, kaynak commit `3d3cfd5d103c1a3f3f578e4e197722d12ab347e2` — 33 test geçti; Release derlemesi, imza ve beklenen sertifika parmak izi doğrulandı. v1.0.4 Release yayımlandı.
 - APK: [v1.0.4 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.4), [doğrudan indir](https://github.com/keremtulu44/Question-note/releases/download/v1.0.4/yanlis-defteri-1.0.4.apk), CI-reported SHA-256 `bf6978a506a472834d7c7a952ac59818d69b0d9c205772d4c02ce2767cc27468`.
-- Kullanıcı eylemi: APK'yı Samsung Galaxy S24 FE'ye **mevcut uygulamayı kaldırmadan** kur; eski verilerin korunduğunu ve soru ayrıntısındaki tekrar geçmişinin planlanan/gerçekleşen gün, sonuç, çözüm açma ve aralık bilgilerini gösterdiğini kontrol et. Gerçek yedek oluşturma/geri yükleme ve fotoğraf okunabilirliği hâlâ ayrıca denenmeli.
+- Şu an yeni APK kurma adımı yok: v1.0.5 henüz CI'dan geçmedi ve yayımlanmadı. Hazır olduğunda mevcut uygulamanın üzerine kaldırmadan kurulum ve katalog/yedek kabulü istenecek.
 - v1.0.3 için kullanıcı cihaz adımlarının tümünü geçti bildirdi (2026-10-17). Önceki v1.0.2 “3. tur” ifadesinin checklist bölüm 3 (yedek/geri yükleme) anlamına geldiği teyit edilmedi; ayrıntı `docs/TEST_KONTROL_LISTESI.md`.
 - Tam ZIP biçimi: `docs/YEDEK_FORMATI.md`; test ayrımı ve bekleyenler: `docs/TEST_KONTROL_LISTESI.md`; CI kanıtı: `docs/DERLEME_RAPORU.md`.
 
 ---
 
-## Güncel teslim — v1.0.4 (Aşamalar 2/3/4)
+## Güncel teslim — v1.0.5 geliştirmesi (Aşamalar 2/3/4)
 
-- Aşama 2: soru/konu akışları, çoklu görsel, kalıcı saklama, görsel bakımı ve tekrar kuralları; Room v1→v2 veri koruyan migration.
-- Aşama 3: biçim v2 tam ZIP (manifest + JSON + CSV + JPEG), doğrulama, SAF önizleme/onay, güvenlik yedeği ve kesinti kurtarması.
-- Aşama 4: Bugün/gecikmiş dersler arası ana ekran, ikincil alanlar için yan menü, soru eklerken ders seçimi, tekrar sonucu kaydı ve soru ayrıntısında canlı tekrar geçmişi.
-- CI run `39033698686`: 33 test, Release derlemesi, imza ve beklenen sertifika fingerprint geçti; v1.0.4 yayımlandı. Tam kanıt `docs/DERLEME_RAPORU.md` içinde.
-- Kullanıcı v1.0.3'teki güncelleme/Bugün/menü/tekrar kaydı cihaz testlerini geçti bildirdi. v1.0.4 geçmiş UI'si, SAF/Drive yedekleme/geri yükleme/kurtarma ve 30–50 fotoğraf okunabilirliği için cihaz kabulü bekliyor. v1.0.2 “3. tur” eşlemesi teyitsiz.
+- v1.0.4 son yayımlanmış sürüm olarak kalıyor: CI run `39033698686` 33 testi, Release derlemesini, imza ve sertifika fingerprint kontrolünü geçti. Kanıt `docs/DERLEME_RAPORU.md` içinde.
+- v1.0.5 kaynak değişiklikleri: Room şema v3; v2→v3 veri koruyan migration; global kaynak/neden tablosu; `kaynak_konumu`; formda tek yanlış nedeni + özel seçenek ekleme; soru notu UI'si kaldırıldı ama eski değer korunuyor.
+- ZIP formatı v3: kaynak kataloğu ve locator JSON/CSV yedeğine girer; önceki v2 ZIP içe aktarımları desteklenir.
+- Yeni testler eklenmiş olsa da v1.0.5 CI, Release/imza ve fiziksel cihaz kabulü henüz yapılmadı. v1.0.4 history UI, SAF/Drive geri yükleme ve fotoğraf okunabilirliği de cihaz kabulü bekliyor.
 
 ## Önceki aşama geçmişi (tarihsel)
 
@@ -200,26 +199,12 @@ reddedildi.
 
 ## Sıradaki somut adım
 
-**Aşama 2 — yerel soru arşivi.** Room, ders ekranı ve konu ekle/düzenle/arşivle/geri getir tamamlandı;
-8 Robolectric testi geçti. Sıradaki adım ders ad/sıra/arşiv yönetimi, ardından soru CRUD/listeleme ve
-görsel dosya yaşam döngüsü. Her yeni şema sürümü için veri koruyan migration + test şart;
-`fallbackToDestructiveMigration` yasak. Aşama 2 kapanmadan önce minimum dışa aktarma güvenlik ağı
-zorunlu; tam ZIP/geri yükleme Aşama 3'tedir.
+1. `git diff --check`, kaynak/XML kontrollerini tamamla; yerel ortamda Java/Gradle bulunmadığından Android testi başarı diye sunma.
+2. v1.0.5 değişikliklerini `arena/0ec2226d-question-note` dalına gönder; CI birim testleri, Room şeması, Release derleme/imza ve fingerprint sonucunu `docs/DERLEME_RAPORU.md` üzerinden doğrula.
+3. CI başarısızsa düzeltip yeniden çalıştır; başarılı olduğunda CI'ın `app/schemas/.../3.json` dosyasını kaydettiğini ve v1.0.5 Release varlığını doğrula.
+4. Ancak APK yayımlandıktan sonra kullanıcıdan mevcut uygulamayı kaldırmadan güncellemesini; yeni kaynağı bir derste ekleyip başka derste seçmesini, locator ve özel neden eklemesini, eski notun silinmediğini ve v3 yedek/geri yüklemeyi kontrol etmesini iste. v2 yedek uyumluluğu ayrıca otomatik testle doğrulanır.
 
-
-### Aşama 2'de kalan ana paketler: **5**
-
-1. Dersleri yeniden adlandırma/sıralama/arşivleme/geri getirme.
-2. Soru CRUD ve liste/filtre/ayrıntı akışı; plan durumları ve kurallarıyla.
-3. Kamera/galeri, çoklu görsel, kalıcı güvenli dosya yaşam döngüsü ve okunabilirlik doğrulaması.
-4. En az bir veri dışa aktarma güvenlik ağı.
-5. Bütünleşik gerçek cihaz kabul testi (veri kalıcılığı ve fotoğraflar dahil).
-
-Gelecek bir şema değişikliğinde veri koruyan migration ve testi ilgili pakete dahildir; şu anki topic işi şema v1'i değiştirmedi. Tam ZIP yedekleme/geri yükleme Aşama 3'tedir.
-
-Ayrıntılı kapsam: [ROADMAP.md](ROADMAP.md) Aşama 2 ve [docs/KODLAMA_PLANI.md](docs/KODLAMA_PLANI.md).
-
-**Kapananlar:** A1 (`com.keremtulu.questionnote`), G1–G5. **Aktif:** Aşama 2.
+Detaylı kabul ölçütleri `ROADMAP.md` ve `docs/TEST_KONTROL_LISTESI.md` içindedir. `fallbackToDestructiveMigration` yasaktır; her Room şema değişikliği veri koruyan migration + otomatik test gerektirir.
 
 ## Kullanıcının yapacağı iş
 

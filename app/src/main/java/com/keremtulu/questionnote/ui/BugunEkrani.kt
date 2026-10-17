@@ -352,8 +352,7 @@ private fun BugunSoruKarti(
                 }
             }
             Text(
-                text = row.soru.soruNotu?.takeIf { it.isNotBlank() }
-                    ?: stringResource(R.string.question_photo_only),
+                text = stringResource(R.string.question_photo_only),
                 color = colors.onSurface,
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = 2,
