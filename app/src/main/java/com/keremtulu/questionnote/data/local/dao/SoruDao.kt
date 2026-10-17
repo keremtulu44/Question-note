@@ -85,6 +85,15 @@ interface SoruDao {
     )
     suspend fun planliSoruSayisi(gun: Int): Int
 
+    @Query("SELECT COUNT(*) FROM sorular WHERE konu_id = :konuId")
+    suspend fun konudakiSoruSayisi(konuId: String): Int
+
+    @Query("SELECT COUNT(*) FROM sorular WHERE kaynak = :ad")
+    suspend fun kaynakKullanimSayisi(ad: String): Int
+
+    @Query("SELECT COUNT(*) FROM sorular WHERE yanlis_nedeni = :ad")
+    suspend fun nedenKullanimSayisi(ad: String): Int
+
     @Query("SELECT * FROM sorular WHERE id = :id LIMIT 1")
     suspend fun idIleGetir(id: String): SoruEntity?
 

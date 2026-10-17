@@ -18,3 +18,10 @@ sealed interface KonuIslemSonucu {
 
     data object Bulunamadi : KonuIslemSonucu
 }
+
+/** Outcome of deleting a topic. Topics still used by questions cannot be deleted. */
+sealed interface KonuSilmeSonucu {
+    data object Basarili : KonuSilmeSonucu
+    data object Bulunamadi : KonuSilmeSonucu
+    data class Kullanimda(val soruSayisi: Int) : KonuSilmeSonucu
+}

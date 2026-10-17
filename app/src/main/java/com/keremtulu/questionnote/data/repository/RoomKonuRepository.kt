@@ -5,6 +5,7 @@ import com.keremtulu.questionnote.data.local.YanlisDefteriDatabase
 import com.keremtulu.questionnote.data.local.entity.KonuEntity
 import com.keremtulu.questionnote.domain.model.Konu
 import com.keremtulu.questionnote.domain.model.KonuIslemSonucu
+import com.keremtulu.questionnote.domain.model.KonuSilmeSonucu
 import com.keremtulu.questionnote.domain.repository.KonuRepository
 import java.text.Normalizer
 import java.util.Locale
@@ -88,6 +89,17 @@ class RoomKonuRepository(
 
     override suspend fun konuYenidenEtkinlestir(konuId: String): KonuIslemSonucu =
         arsivDurumunuAyarla(konuId, arsivli = false)
+
+    /**
+     * Questions reference topics by id, so a topic that is still in use is never deleted.
+     * The caller offers archiving instead (design decision: no silent data loss).
+     */
+    override suspend fun konuSil(konuId: String): KonuSilmeSonucu = database.withTransaction {
+        konuDao.idIleGetir(konuId) ?: return@withTransaction KonuSilmeSonucu.Bulunamadi
+        val kullanim = database.soruDao().konudakiSoruSayisi(konuId)
+        if (kullanim > 0) return@withTransaction KonuSilmeSonucu.Kullanimda(kullanim)
+        if (konuDao.sil(konuId) == 1) KonuSilmeSonucu.Basarili else KonuSilmeSonucu.Bulunamadi
+    }
 
     private suspend fun arsivDurumunuAyarla(
         konuId: String,

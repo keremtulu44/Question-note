@@ -1,6 +1,5 @@
 package com.keremtulu.questionnote.ui
 
-import android.text.format.Formatter
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -10,23 +9,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,20 +27,20 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.data.export.GeriYuklemeOnizlemesi
 import com.keremtulu.questionnote.data.export.SonYedekBilgisi
 import com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti
 import com.keremtulu.questionnote.data.images.GorselTutarliligiHizmeti
-import com.keremtulu.questionnote.data.ilerleme.IlerlemeHizmeti
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
+import com.keremtulu.questionnote.data.ilerleme.IlerlemeHizmeti
 import com.keremtulu.questionnote.data.prefs.GunlukHedefDeposu
 import com.keremtulu.questionnote.data.prefs.RozetDeposu
+import com.keremtulu.questionnote.data.prefs.TercihGunlukHedefDeposu
+import com.keremtulu.questionnote.data.seviye.SeviyeHizmeti
 import com.keremtulu.questionnote.domain.karne.OturumSonucu
 import com.keremtulu.questionnote.domain.model.Ders
 import com.keremtulu.questionnote.domain.model.Soru
@@ -57,10 +48,9 @@ import com.keremtulu.questionnote.domain.model.SoruCalismaFiltresi
 import com.keremtulu.questionnote.domain.repository.DersRepository
 import com.keremtulu.questionnote.domain.repository.KonuRepository
 import com.keremtulu.questionnote.domain.repository.SoruRepository
+import com.keremtulu.questionnote.ui.ayarlar.AyarlarEkrani
 import com.keremtulu.questionnote.ui.karne.KarneEkrani
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import com.keremtulu.questionnote.ui.seviye.SeviyeEkrani
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
@@ -89,10 +79,12 @@ private sealed interface UygulamaEkrani {
         val sonuclar: List<OturumSonucu>,
     ) : UygulamaEkrani
     data object GorselBakimi : UygulamaEkrani
+    data object Katalog : UygulamaEkrani
+    data object Seviye : UygulamaEkrani
+    data object Ayarlar : UygulamaEkrani
 }
 
 private enum class KurtarmaDurumu { YUKLENIYOR, HAZIR, HATA }
-private enum class MenuEylemi { BUGUN, DERSLER, FILTRELI_CALISMA, YEDEK_OLUSTUR, YEDEK_GERI_YUKLE, GORSEL_BAKIMI }
 
 @Composable
 fun YanlisDefteriUygulamasi(
@@ -103,8 +95,10 @@ fun YanlisDefteriUygulamasi(
     gorselTutarliligi: GorselTutarliligiHizmeti,
     disaAktarmaHizmeti: YerelYedeklemeHizmeti,
     ilerlemeHizmeti: IlerlemeHizmeti,
+    seviyeHizmeti: SeviyeHizmeti,
     rozetDeposu: RozetDeposu,
     gunlukHedefDeposu: GunlukHedefDeposu,
+    tercihHedefDeposu: TercihGunlukHedefDeposu,
 ) {
     var ekran by remember { mutableStateOf<UygulamaEkrani>(UygulamaEkrani.Bugun) }
     var filtreliCalismaAyar by remember { mutableStateOf(FiltreliCalismaEkraniAyar()) }
@@ -113,10 +107,9 @@ fun YanlisDefteriUygulamasi(
     var kurtarma by remember { mutableStateOf(KurtarmaDurumu.YUKLENIYOR) }
     var yedeklemeIslemde by remember { mutableStateOf(false) }
     var geriYuklemeOnizlemesi by remember { mutableStateOf<GeriYuklemeOnizlemesi?>(null) }
-    var sonYedek by remember { mutableStateOf<com.keremtulu.questionnote.data.export.SonYedekBilgisi?>(null) }
+    var sonYedek by remember { mutableStateOf<SonYedekBilgisi?>(null) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val drawerState = rememberDrawerState(initialValue = androidx.compose.material3.DrawerValue.Closed)
     val snackbarHostState = remember { SnackbarHostState() }
 
     suspend fun kurtarmayiCalistir() {
@@ -182,47 +175,34 @@ fun YanlisDefteriUygulamasi(
         }
     }
 
-    fun menuEyleminiCalistir(eylem: MenuEylemi) {
-        scope.launch {
-            drawerState.close()
-            when (eylem) {
-                MenuEylemi.BUGUN -> ekranSec(UygulamaEkrani.Bugun)
-                MenuEylemi.DERSLER -> ekranSec(UygulamaEkrani.DersSecimi(soruEkleModu = false))
-                MenuEylemi.FILTRELI_CALISMA -> ekranSec(UygulamaEkrani.FiltreliCalisma)
-                MenuEylemi.YEDEK_OLUSTUR -> if (!yedeklemeIslemde) {
-                    exportLauncher.launch("yanlis-defteri-yedek.zip")
-                }
-                MenuEylemi.YEDEK_GERI_YUKLE -> if (!yedeklemeIslemde) {
-                    restoreLauncher.launch(arrayOf("application/zip", "application/octet-stream"))
-                }
-                MenuEylemi.GORSEL_BAKIMI -> ekranSec(UygulamaEkrani.GorselBakimi)
-            }
+    fun sekmeSec(sekme: AltSekme) {
+        val hedef = when (sekme) {
+            AltSekme.BUGUN -> UygulamaEkrani.Bugun
+            AltSekme.DERSLER -> UygulamaEkrani.DersSecimi(soruEkleModu = false)
+            AltSekme.FILTRELI -> UygulamaEkrani.FiltreliCalisma
+            AltSekme.SEVIYE -> UygulamaEkrani.Seviye
+            AltSekme.AYARLAR -> UygulamaEkrani.Ayarlar
         }
+        ekranSec(hedef)
     }
 
     BackHandler(
-        enabled = kurtarma == KurtarmaDurumu.HAZIR &&
-            drawerState.currentValue == androidx.compose.material3.DrawerValue.Closed &&
-            ekran != UygulamaEkrani.Bugun,
+        enabled = kurtarma == KurtarmaDurumu.HAZIR && ekran != UygulamaEkrani.Bugun,
     ) {
         ekranSec(ekran.geriHedefi())
     }
 
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        gesturesEnabled = kurtarma == KurtarmaDurumu.HAZIR,
-        drawerContent = {
-            ModalDrawerSheet {
-                YanMenuIcerigi(
-                    ekran = ekran,
-                    yedeklemeIslemde = yedeklemeIslemde,
-                    sonYedek = sonYedek,
-                    onEylem = ::menuEyleminiCalistir,
-                )
+    val altMenuGorunur = ekran.altMenuGorunur()
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        bottomBar = {
+            if (altMenuGorunur) {
+                AltMenu(secili = ekran.aktifSekme(), onSec = ::sekmeSec)
             }
         },
-    ) {
-        Box(Modifier.fillMaxSize()) {
+    ) { insets ->
+        Box(Modifier.fillMaxSize().padding(bottom = insets.calculateBottomPadding())) {
             when (kurtarma) {
                 KurtarmaDurumu.YUKLENIYOR -> UygulamaDurumEkrani(
                     metin = stringResource(R.string.backup_restore_working),
@@ -239,7 +219,7 @@ fun YanlisDefteriUygulamasi(
                         dersRepository = dersRepository,
                         ilerlemeHizmeti = ilerlemeHizmeti,
                         gunlukHedefDeposu = gunlukHedefDeposu,
-                        onMenu = { scope.launch { drawerState.open() } },
+                        onMenu = { ekranSec(UygulamaEkrani.Ayarlar) },
                         onSoruEkle = { ekran = UygulamaEkrani.DersSecimi(soruEkleModu = true) },
                         onSoruAc = { ders, soruId ->
                             ekran = UygulamaEkrani.SoruAyrintisi(ders, soruId, UygulamaEkrani.Bugun)
@@ -248,10 +228,10 @@ fun YanlisDefteriUygulamasi(
                     is UygulamaEkrani.DersSecimi -> DerslerEkrani(
                         repository = dersRepository,
                         soruEkleModu = current.soruEkleModu,
-                        onMenu = { scope.launch { drawerState.open() } },
+                        onMenu = { ekranSec(UygulamaEkrani.Ayarlar) },
                         onDersSecildi = { ders ->
                             ekran = if (current.soruEkleModu) {
-                                UygulamaEkrani.SoruFormu(ders, null, UygulamaEkrani.Bugun)
+                                UygulamaEkrani.SoruFormu(ders, null, current)
                             } else {
                                 UygulamaEkrani.DersAlani(ders, current)
                             }
@@ -287,7 +267,9 @@ fun YanlisDefteriUygulamasi(
                         onDuzenle = { id -> ekran = UygulamaEkrani.SoruFormu(current.ders, id, current) },
                         onTekrarTamamlandi = { _, _ ->
                             ekran = current.geri
-                            scope.launch { snackbarHostState.showSnackbar(context.getString(R.string.review_saved)) }
+                            scope.launch {
+                                snackbarHostState.showSnackbar(context.getString(R.string.review_saved))
+                            }
                         },
                         tekrarOturumunda = current.tekrarOturumunda,
                     )
@@ -379,14 +361,33 @@ fun YanlisDefteriUygulamasi(
                     )
                     UygulamaEkrani.GorselBakimi -> GorselBakimEkrani(
                         service = gorselTutarliligi,
-                        onGeri = { ekran = UygulamaEkrani.Bugun },
+                        onGeri = { ekran = UygulamaEkrani.Ayarlar },
+                    )
+                    UygulamaEkrani.Katalog -> KatalogYonetimiEkrani(
+                        soruRepository = soruRepository,
+                        onGeri = { ekran = UygulamaEkrani.Ayarlar },
+                    )
+                    UygulamaEkrani.Seviye -> SeviyeEkrani(
+                        seviyeHizmeti = seviyeHizmeti,
+                        rozetDeposu = rozetDeposu,
+                    )
+                    UygulamaEkrani.Ayarlar -> AyarlarEkrani(
+                        gunlukHedefDeposu = tercihHedefDeposu,
+                        sonYedek = sonYedek,
+                        yedeklemeIslemde = yedeklemeIslemde,
+                        onYedekOlustur = {
+                            if (!yedeklemeIslemde) exportLauncher.launch("yanlis-defteri-yedek.zip")
+                        },
+                        onYedekGeriYukle = {
+                            if (!yedeklemeIslemde) {
+                                restoreLauncher.launch(arrayOf("application/zip", "application/octet-stream"))
+                            }
+                        },
+                        onGorselBakimi = { ekranSec(UygulamaEkrani.GorselBakimi) },
+                        onKatalog = { ekranSec(UygulamaEkrani.Katalog) },
                     )
                 }
             }
-            SnackbarHost(
-                hostState = snackbarHostState,
-                modifier = Modifier.align(Alignment.BottomCenter),
-            )
         }
     }
 
@@ -424,7 +425,10 @@ fun YanlisDefteriUygulamasi(
             title = { Text(stringResource(R.string.backup_restore_title)) },
             text = {
                 if (yedeklemeIslemde) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
                         CircularProgressIndicator()
                         Text(stringResource(R.string.backup_restore_working))
                     }
@@ -482,142 +486,33 @@ fun YanlisDefteriUygulamasi(
     }
 }
 
-@Composable
-private fun YanMenuIcerigi(
-    ekran: UygulamaEkrani,
-    yedeklemeIslemde: Boolean,
-    sonYedek: SonYedekBilgisi?,
-    onEylem: (MenuEylemi) -> Unit,
-) {
-    val colors = MaterialTheme.colorScheme
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val sonYedekMetni = sonYedek?.let { backup ->
-        val date = SimpleDateFormat("d MMM yyyy HH:mm", Locale("tr", "TR")).format(Date(backup.olusturmaZamani))
-        val size = Formatter.formatShortFileSize(context, backup.boyutBayt)
-        context.getString(
-            R.string.backup_last_info,
-            backup.dosyaAdi,
-            date,
-            size,
-            context.getString(if (backup.guvenlikKopyasi) R.string.backup_safety_copy else R.string.backup_external_copy),
-        )
-    } ?: stringResource(R.string.backup_last_none)
-    Column(
-        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 12.dp, vertical = 14.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        Surface(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
-            shape = RoundedCornerShape(24.dp),
-            color = colors.primaryContainer,
-        ) {
-            Column(Modifier.padding(18.dp)) {
-                Text("✦", color = colors.primary, style = MaterialTheme.typography.headlineSmall)
-                Text(
-                    stringResource(R.string.today_menu_title),
-                    modifier = Modifier.padding(top = 6.dp),
-                    color = colors.onPrimaryContainer,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                )
-                Text(
-                    stringResource(R.string.today_menu_subtitle),
-                    modifier = Modifier.padding(top = 2.dp),
-                    color = colors.onPrimaryContainer.copy(alpha = 0.8f),
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-        }
-        NavigationDrawerItem(
-            label = { Text(stringResource(R.string.menu_today)) },
-            selected = ekran == UygulamaEkrani.Bugun,
-            onClick = { onEylem(MenuEylemi.BUGUN) },
-            icon = { Text("◷", fontSize = 20.sp) },
-        )
-        NavigationDrawerItem(
-            label = { Text(stringResource(R.string.menu_lessons)) },
-            selected = ekran is UygulamaEkrani.DersSecimi || ekran is UygulamaEkrani.DersAlani || ekran is UygulamaEkrani.Konular,
-            onClick = { onEylem(MenuEylemi.DERSLER) },
-            icon = { Text("▦", fontSize = 20.sp) },
-        )
-        NavigationDrawerItem(
-            label = { Text(stringResource(R.string.menu_filtered_practice)) },
-            selected = ekran == UygulamaEkrani.FiltreliCalisma ||
-                ekran is UygulamaEkrani.FiltreliOturum ||
-                ekran is UygulamaEkrani.FiltreliCalismaTamamlandi ||
-                (ekran is UygulamaEkrani.SoruAyrintisi && ekran.geri == UygulamaEkrani.FiltreliCalisma) ||
-                (ekran is UygulamaEkrani.SoruFormu &&
-                    (ekran.geri == UygulamaEkrani.FiltreliCalisma || ekran.geri is UygulamaEkrani.FiltreliOturum)),
-            onClick = { onEylem(MenuEylemi.FILTRELI_CALISMA) },
-            icon = { Text("⌕", fontSize = 20.sp) },
-        )
-        HorizontalDivider(Modifier.padding(vertical = 8.dp))
-        Text(
-            text = stringResource(R.string.menu_tools_heading),
-            modifier = Modifier.padding(start = 16.dp, bottom = 2.dp),
-            color = colors.onSurfaceVariant,
-            style = MaterialTheme.typography.labelMedium,
-            letterSpacing = 1.sp,
-        )
-        NavigationDrawerItem(
-            label = { Text(stringResource(R.string.menu_create_backup)) },
-            selected = false,
-            onClick = { if (!yedeklemeIslemde) onEylem(MenuEylemi.YEDEK_OLUSTUR) },
-            icon = { Text("↓", fontSize = 20.sp) },
-        )
-        NavigationDrawerItem(
-            label = { Text(stringResource(R.string.menu_restore_backup)) },
-            selected = false,
-            onClick = { if (!yedeklemeIslemde) onEylem(MenuEylemi.YEDEK_GERI_YUKLE) },
-            icon = { Text("↑", fontSize = 20.sp) },
-        )
-        Surface(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
-            shape = RoundedCornerShape(18.dp),
-            color = colors.surfaceVariant,
-        ) {
-            Column(Modifier.padding(14.dp)) {
-                Text(
-                    stringResource(R.string.menu_last_backup),
-                    color = colors.onSurfaceVariant,
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.SemiBold,
-                )
-                Text(
-                    sonYedekMetni,
-                    modifier = Modifier.padding(top = 4.dp),
-                    color = colors.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-        }
-        NavigationDrawerItem(
-            label = { Text(stringResource(R.string.menu_image_maintenance)) },
-            selected = ekran == UygulamaEkrani.GorselBakimi,
-            onClick = { onEylem(MenuEylemi.GORSEL_BAKIMI) },
-            icon = { Text("◇", fontSize = 20.sp) },
-        )
-        Surface(
-            modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
-            shape = RoundedCornerShape(20.dp),
-            color = colors.surfaceVariant,
-        ) {
-            Column(Modifier.padding(16.dp)) {
-                Text(
-                    stringResource(R.string.menu_education_title),
-                    color = colors.onSurface,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                )
-                Text(
-                    stringResource(R.string.menu_education_note),
-                    modifier = Modifier.padding(top = 5.dp),
-                    color = colors.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-        }
+/** Sub-screens open from a tab keep that tab highlighted. */
+private fun UygulamaEkrani.aktifSekme(): AltSekme = when (this) {
+    UygulamaEkrani.Bugun -> AltSekme.BUGUN
+    is UygulamaEkrani.DersSecimi, is UygulamaEkrani.DersAlani, is UygulamaEkrani.Konular -> AltSekme.DERSLER
+    UygulamaEkrani.FiltreliCalisma,
+    is UygulamaEkrani.FiltreliOturum,
+    is UygulamaEkrani.FiltreliCalismaTamamlandi,
+    -> AltSekme.FILTRELI
+    UygulamaEkrani.Seviye -> AltSekme.SEVIYE
+    UygulamaEkrani.Ayarlar, UygulamaEkrani.Katalog, UygulamaEkrani.GorselBakimi -> AltSekme.AYARLAR
+    is UygulamaEkrani.SoruAyrintisi -> if (tekrarOturumunda) AltSekme.FILTRELI else AltSekme.DERSLER
+    is UygulamaEkrani.SoruFormu -> if (geri is UygulamaEkrani.FiltreliOturum) {
+        AltSekme.FILTRELI
+    } else {
+        AltSekme.DERSLER
     }
+}
+
+/** Detail/form screens take the whole screen; the bar returns on tab roots. */
+private fun UygulamaEkrani.altMenuGorunur(): Boolean = when (this) {
+    UygulamaEkrani.Bugun,
+    UygulamaEkrani.FiltreliCalisma,
+    UygulamaEkrani.Seviye,
+    UygulamaEkrani.Ayarlar,
+    -> true
+    is UygulamaEkrani.DersSecimi -> !soruEkleModu
+    else -> false
 }
 
 private fun UygulamaEkrani.geriHedefi(): UygulamaEkrani = when (this) {
@@ -630,7 +525,10 @@ private fun UygulamaEkrani.geriHedefi(): UygulamaEkrani = when (this) {
     UygulamaEkrani.FiltreliCalisma -> UygulamaEkrani.Bugun
     is UygulamaEkrani.FiltreliOturum -> UygulamaEkrani.FiltreliCalisma
     is UygulamaEkrani.FiltreliCalismaTamamlandi -> UygulamaEkrani.FiltreliCalisma
-    UygulamaEkrani.GorselBakimi -> UygulamaEkrani.Bugun
+    UygulamaEkrani.GorselBakimi -> UygulamaEkrani.Ayarlar
+    UygulamaEkrani.Katalog -> UygulamaEkrani.Ayarlar
+    UygulamaEkrani.Seviye -> UygulamaEkrani.Bugun
+    UygulamaEkrani.Ayarlar -> UygulamaEkrani.Bugun
 }
 
 @Composable

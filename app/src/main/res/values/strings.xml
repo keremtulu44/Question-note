@@ -374,4 +374,98 @@
     <string name="today_goal_remaining">%1$d soru daha çözünce hedef tamam.</string>
     <string name="today_streak">%1$d günlük seri</string>
     <string name="today_streak_start">Bugün bir soru çöz, seri başlasın.</string>
+
+    <!-- Seviye, rütbe ve rozet açıklamaları (v1.1.0) -->
+    <string name="badge_desc_ilk_karne">İlk tamamlanan oturum</string>
+    <string name="badge_desc_kusursuz_tur">5+ soruda %100 bağımsız</string>
+    <string name="badge_desc_on_bagimsiz">Tek oturumda 10 bağımsız</string>
+    <string name="badge_desc_yirmi_soru">Tek oturumda 20 soru</string>
+    <string name="badge_desc_cozumsuz">5+ soruda hiç çözüm açmamak</string>
+    <string name="badge_desc_istikrar">5 gün üst üste %70+ bağımsız</string>
+    <string name="badge_desc_seri_3">3 gün üst üste çalışmak</string>
+    <string name="badge_desc_seri_7">7 gün üst üste çalışmak</string>
+    <string name="badge_desc_seri_30">30 gün üst üste çalışmak</string>
+    <string name="badge_desc_yuz_bagimsiz">Toplam 100 bağımsız çözüm</string>
+    <string name="badge_desc_bes_yuz">Toplam 500 bağımsız çözüm</string>
+
+    <string name="nav_today">Bugün</string>
+    <string name="nav_lessons">Dersler</string>
+    <string name="nav_practice">Filtreli</string>
+    <string name="nav_progress">Seviye</string>
+    <string name="nav_settings">Ayarlar</string>
+
+    <string name="level_kicker">İLERLEME</string>
+    <string name="level_title">Seviye</string>
+    <string name="level_error">İlerleme bilgisi yüklenemedi.</string>
+    <string name="level_rank_label">Rütbe</string>
+    <string name="level_number">Seviye %1$d</string>
+    <string name="level_total_xp">%1$d XP</string>
+    <string name="level_next_remaining">Sonraki seviyeye %1$d XP</string>
+    <string name="level_next_rank">Sıradaki rütbe: %1$s · Seviye %2$d</string>
+    <string name="level_next_rank_none">En yüksek rütbedesin; seviye artmaya devam ediyor.</string>
+    <string name="level_breakdown_title">XP nereden geldi?</string>
+    <string name="level_xp_questions">Soru ekleme · %1$d soru</string>
+    <string name="level_xp_reviews">Tekrarlar · %1$d tekrar</string>
+    <string name="level_xp_independent">Bağımsız çözüm bonusu · %1$d</string>
+    <string name="level_xp_goal">Günlük hedef bonusu · %1$d gün</string>
+    <string name="level_xp_streak">Seri kilometre taşları</string>
+    <string name="level_xp_badges">Rozetler · %1$d/11</string>
+    <string name="level_xp_value">+%1$d XP</string>
+    <string name="level_xp_zero">0 XP</string>
+
+    <string name="level_stats_title">Toplam istatistik</string>
+    <string name="level_stat_questions">Soru</string>
+    <string name="level_stat_reviews">Tekrar</string>
+    <string name="level_stat_independent">Bağımsız</string>
+    <string name="level_stat_best_streak">En uzun seri</string>
+    <string name="level_badges_title">Rozetler · %1$d/11</string>
+    <string name="level_badges_locked">Kilitli</string>
+
+    <string name="level_lessons_title">Ders bazında pekişme</string>
+    <string name="level_lesson_counts">%1$d sağlam · %2$d pekişiyor · %3$d öğreniyor · %4$d yeni</string>
+    <string name="level_forecast_title">7 günlük tekrar yükü</string>
+    <string name="level_forecast_empty">Planlı tekrar yok.</string>
+    <string name="level_forecast_day">%1$d soru</string>
+
+    <string name="settings_title">Ayarlar</string>
+    <string name="settings_kicker">AYARLAR</string>
+    <string name="settings_goal_title">Günlük hedef</string>
+    <string name="settings_goal_note">Bugün ekranındaki hedef halkası bu sayıyı kullanır.</string>
+    <string name="settings_goal_option">%1$d soru</string>
+    <string name="settings_backup_title">Yedekleme</string>
+    <string name="settings_backup_note">ZIP yedeği seçtiğin konuma (Downloads, Drive vb.) kaydedilir.</string>
+    <string name="settings_appearance_title">Görünüm ve bakım</string>
+    <string name="settings_about_title">Hakkında</string>
+    <string name="settings_about_version">Sürüm %1$s (%2$d)</string>
+    <string name="settings_about_data">Veriler yalnızca bu cihazda tutulur. Uygulamayı kaldırırsan yedek almadığın veriler silinir.</string>
+    <string name="settings_education_note">Şimdilik lise odağı. Ortaokul/LGS seçenekleri ileride buraya eklenecek.</string>
+    <string name="settings_open">Aç</string>
+    <string name="settings_category_goal">HEDEF</string>
+    <string name="settings_category_data">VERİ</string>
+    <string name="settings_category_other">DİĞER</string>
+    <string name="topic_delete">Sil</string>
+    <string name="topic_delete_title">Konu silinsin mi?</string>
+    <string name="topic_delete_message">“%1$s” kalıcı olarak silinecek. Bu işlem geri alınamaz.</string>
+    <string name="topic_delete_confirm">Sil</string>
+    <string name="topic_deleted">Konu silindi.</string>
+    <string name="topic_delete_in_use_title">Konu kullanımda</string>
+    <string name="topic_delete_in_use_message">Bu konu %1$d soruda kullanılıyor. Silmek yerine arşivleyebilirsin; sorular ve geçmişleri korunur.</string>
+    <string name="topic_delete_archive">Arşivle</string>
+    <string name="topic_delete_error">Konu silinemedi.</string>
+
+    <string name="catalog_manage_title">Kaynak ve nedenler</string>
+    <string name="catalog_manage_subtitle">Eklediğin kaynakları ve yanlış nedenlerini buradan yönetebilirsin. Hazır seçenekler silinemez.</string>
+    <string name="catalog_source_heading">KAYNAKLAR</string>
+    <string name="catalog_reason_heading">YANLIŞ NEDENLERİ</string>
+    <string name="catalog_default_label">Hazır</string>
+    <string name="catalog_delete">Sil</string>
+    <string name="catalog_delete_title">Kayıt silinsin mi?</string>
+    <string name="catalog_delete_message">“%1$s” katalogdan silinecek. Bu işlem geri alınamaz.</string>
+    <string name="catalog_deleted">Kayıt silindi.</string>
+    <string name="catalog_delete_in_use_title">Kayıt kullanımda</string>
+    <string name="catalog_delete_in_use_message">“%1$s” %2$d soruda kullanılıyor. Önce o sorularda başka bir kaynak/neden seçmelisin.</string>
+    <string name="catalog_delete_default_message">Hazır seçenekler silinemez; yalnızca kendi eklediklerin silinebilir.</string>
+    <string name="catalog_delete_error">Kayıt silinemedi.</string>
+    <string name="menu_catalog">Kaynak ve nedenler</string>
+    <string name="catalog_empty">Henüz kendi eklediğin kayıt yok.</string>
 </resources>

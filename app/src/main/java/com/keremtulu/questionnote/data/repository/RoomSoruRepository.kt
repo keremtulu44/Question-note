@@ -18,6 +18,7 @@ import com.keremtulu.questionnote.domain.model.SoruPlanDurumu
 import com.keremtulu.questionnote.domain.model.SoruSecenekTuru
 import com.keremtulu.questionnote.domain.model.SoruSecenegi
 import com.keremtulu.questionnote.domain.model.SoruSecenegiEklemeSonucu
+import com.keremtulu.questionnote.domain.model.SoruSecenegiSilmeSonucu
 import com.keremtulu.questionnote.domain.model.SORU_SECENEGI_ADI_UST_SINIR
 import com.keremtulu.questionnote.domain.model.canonicalSoruSecenegiAdi
 import com.keremtulu.questionnote.domain.model.normalizeSoruSecenegiAdi
@@ -100,6 +101,28 @@ class RoomSoruRepository(
             SoruSecenegiEklemeSonucu.Basarili(row.toDomain())
         }
     }
+
+    /**
+     * Removes a catalog entry. Question columns store the *text*, so deletion is blocked while any
+     * question still uses the value — otherwise the filter would lose the entry while the question
+     * kept the value. Built-in entries can never be deleted.
+     */
+    override suspend fun secenekSil(secenekId: String): SoruSecenegiSilmeSonucu =
+        database.withTransaction {
+            val secenek = soruSecenegiDao.idIleGetir(secenekId)
+                ?: return@withTransaction SoruSecenegiSilmeSonucu.Bulunamadi
+            if (secenek.varsayilan) return@withTransaction SoruSecenegiSilmeSonucu.VarsayilanSilinemez
+            val kullanim = when (SoruSecenekTuru.valueOf(secenek.tur)) {
+                SoruSecenekTuru.KAYNAK -> soruDao.kaynakKullanimSayisi(secenek.ad)
+                SoruSecenekTuru.YANLIS_NEDENI -> soruDao.nedenKullanimSayisi(secenek.ad)
+            }
+            if (kullanim > 0) return@withTransaction SoruSecenegiSilmeSonucu.Kullanimda(kullanim)
+            if (soruSecenegiDao.sil(secenekId) == 1) {
+                SoruSecenegiSilmeSonucu.Basarili
+            } else {
+                SoruSecenegiSilmeSonucu.Bulunamadi
+            }
+        }
 
     override suspend fun soruKaydet(istek: SoruKaydetmeIstegi): SoruIslemSonucu {
         if (!istek.gorseller.siraliVeGecerli()) return SoruIslemSonucu.GorselGecersiz

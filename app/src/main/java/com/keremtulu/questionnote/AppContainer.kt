@@ -8,7 +8,8 @@ import com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti
 import com.keremtulu.questionnote.data.ilerleme.IlerlemeHizmeti
 import com.keremtulu.questionnote.data.prefs.GunlukHedefDeposu
 import com.keremtulu.questionnote.data.prefs.RozetDeposu
-import com.keremtulu.questionnote.data.prefs.SabitGunlukHedefDeposu
+import com.keremtulu.questionnote.data.prefs.TercihGunlukHedefDeposu
+import com.keremtulu.questionnote.data.seviye.SeviyeHizmeti
 import com.keremtulu.questionnote.data.repository.RoomDersRepository
 import com.keremtulu.questionnote.data.repository.RoomKonuRepository
 import com.keremtulu.questionnote.data.repository.RoomSoruRepository
@@ -27,5 +28,7 @@ class AppContainer(context: Context) {
     val disaAktarmaHizmeti = YerelYedeklemeHizmeti(context, database, gorselDeposu)
     val ilerlemeHizmeti = IlerlemeHizmeti(database)
     val rozetDeposu = RozetDeposu(context)
-    val gunlukHedefDeposu: GunlukHedefDeposu = SabitGunlukHedefDeposu()
+    val gunlukHedefDeposu: GunlukHedefDeposu = TercihGunlukHedefDeposu(context)
+    val tercihHedefDeposu = gunlukHedefDeposu as TercihGunlukHedefDeposu
+    val seviyeHizmeti = SeviyeHizmeti(database, rozetDeposu, gunlukHedefDeposu)
 }

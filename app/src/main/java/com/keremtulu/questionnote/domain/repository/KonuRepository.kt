@@ -2,6 +2,7 @@ package com.keremtulu.questionnote.domain.repository
 
 import com.keremtulu.questionnote.domain.model.Konu
 import com.keremtulu.questionnote.domain.model.KonuIslemSonucu
+import com.keremtulu.questionnote.domain.model.KonuSilmeSonucu
 import kotlinx.coroutines.flow.Flow
 
 interface KonuRepository {
@@ -16,4 +17,6 @@ interface KonuRepository {
     suspend fun konuArsivle(konuId: String): KonuIslemSonucu
 
     suspend fun konuYenidenEtkinlestir(konuId: String): KonuIslemSonucu
+
+    suspend fun konuSil(konuId: String): KonuSilmeSonucu
 }

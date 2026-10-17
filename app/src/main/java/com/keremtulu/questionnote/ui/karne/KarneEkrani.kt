@@ -631,17 +631,11 @@ private fun RozetBolumu(rozetler: List<Rozet>, toplamRozet: Int, animasyonAcik: 
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Surface(
-                    shape = RoundedCornerShape(14.dp),
-                    color = colors.primaryContainer,
-                ) {
-                    Text(
-                        text = stringResource(R.string.symbol_rozet),
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                        color = colors.onPrimaryContainer,
-                        fontSize = (18 * olcek).sp,
-                    )
-                }
+                RozetGorseli(
+                    rozet = rozet,
+                    kazanildi = true,
+                    modifier = Modifier.size((52 * olcek).dp),
+                )
                 Text(
                     text = stringResource(rozetMetni(rozet)),
                     color = colors.onSurface,

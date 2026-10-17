@@ -43,6 +43,7 @@ import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.domain.model.Ders
 import com.keremtulu.questionnote.domain.model.Konu
 import com.keremtulu.questionnote.domain.model.KonuIslemSonucu
+import com.keremtulu.questionnote.domain.model.KonuSilmeSonucu
 import com.keremtulu.questionnote.domain.repository.KonuRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.catch
@@ -71,6 +72,8 @@ fun KonuYonetimiEkrani(
     var arsivlilerGosteriliyor by remember { mutableStateOf(false) }
     var akisYenileme by remember { mutableIntStateOf(0) }
     var konuFormu by remember { mutableStateOf<KonuFormu?>(null) }
+    var silinecekKonu by remember { mutableStateOf<Konu?>(null) }
+    var kullanimdakiKonu by remember { mutableStateOf<Pair<Konu, Int>?>(null) }
     val konularAkisi = remember(repository, ders.id, arsivlilerGosteriliyor, akisYenileme) {
         repository.konulariIzle(ders.id, arsivli = arsivlilerGosteriliyor)
     }
@@ -194,6 +197,7 @@ fun KonuYonetimiEkrani(
                             items(current.konular, key = { it.id }) { konu ->
                                 KonuListeSatiri(
                                     konu = konu,
+                                    onSil = { silinecekKonu = konu },
                                     onDuzenle = {
                                         konuFormu = KonuFormu(duzenlenenKonu = konu, ad = konu.ad)
                                     },
@@ -227,6 +231,85 @@ fun KonuYonetimiEkrani(
                 }
             }
         }
+    }
+
+    silinecekKonu?.let { konu ->
+        AlertDialog(
+            onDismissRequest = { silinecekKonu = null },
+            title = { Text(stringResource(R.string.topic_delete_title)) },
+            text = { Text(stringResource(R.string.topic_delete_message, konu.ad)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        silinecekKonu = null
+                        scope.launch {
+                            val sonuc = try {
+                                repository.konuSil(konu.id)
+                            } catch (iptal: CancellationException) {
+                                throw iptal
+                            } catch (_: Exception) {
+                                null
+                            }
+                            when (sonuc) {
+                                KonuSilmeSonucu.Basarili -> snackbarHostState.showSnackbar(
+                                    context.getString(R.string.topic_deleted),
+                                )
+                                is KonuSilmeSonucu.Kullanimda -> kullanimdakiKonu = konu to sonuc.soruSayisi
+                                KonuSilmeSonucu.Bulunamadi -> snackbarHostState.showSnackbar(
+                                    context.getString(R.string.topic_not_found),
+                                )
+                                null -> snackbarHostState.showSnackbar(
+                                    context.getString(R.string.topic_delete_error),
+                                )
+                            }
+                        }
+                    },
+                ) { Text(stringResource(R.string.topic_delete_confirm), color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = {
+                TextButton(onClick = { silinecekKonu = null }) {
+                    Text(stringResource(R.string.topic_cancel))
+                }
+            },
+        )
+    }
+
+    kullanimdakiKonu?.let { (konu, adet) ->
+        AlertDialog(
+            onDismissRequest = { kullanimdakiKonu = null },
+            title = { Text(stringResource(R.string.topic_delete_in_use_title)) },
+            text = { Text(stringResource(R.string.topic_delete_in_use_message, adet)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        kullanimdakiKonu = null
+                        scope.launch {
+                            val sonuc = try {
+                                repository.konuArsivle(konu.id)
+                            } catch (iptal: CancellationException) {
+                                throw iptal
+                            } catch (_: Exception) {
+                                null
+                            }
+                            snackbarHostState.showSnackbar(
+                                context.getString(
+                                    if (sonuc == KonuIslemSonucu.Basarili) {
+                                        R.string.topic_archived
+                                    } else {
+                                        R.string.topic_change_error
+                                    },
+                                ),
+                            )
+                        }
+                    },
+                ) { Text(stringResource(R.string.topic_delete_archive)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { kullanimdakiKonu = null }) {
+                    Text(stringResource(R.string.topic_cancel))
+                }
+            },
+        )
     }
 
     val form = konuFormu
@@ -318,6 +401,7 @@ fun KonuYonetimiEkrani(
 @Composable
 private fun KonuListeSatiri(
     konu: Konu,
+    onSil: () -> Unit,
     onDuzenle: () -> Unit,
     onArsivDurumunuDegistir: () -> Unit,
 ) {
@@ -353,6 +437,12 @@ private fun KonuListeSatiri(
                         text = stringResource(
                             if (konu.arsivli) R.string.topic_restore else R.string.topic_archive,
                         ),
+                    )
+                }
+                TextButton(onClick = onSil) {
+                    Text(
+                        text = stringResource(R.string.topic_delete),
+                        color = MaterialTheme.colorScheme.error,
                     )
                 }
             }

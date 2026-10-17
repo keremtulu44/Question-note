@@ -40,6 +40,9 @@ interface KonuDao {
     @Query("DELETE FROM konular")
     suspend fun tumunuSil()
 
+    @Query("DELETE FROM konular WHERE id = :id")
+    suspend fun sil(id: String): Int
+
     @Update
     suspend fun guncelle(konu: KonuEntity): Int
 }

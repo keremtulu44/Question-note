@@ -24,6 +24,15 @@ sealed interface SoruSecenegiEklemeSonucu {
     data object CokUzunAd : SoruSecenegiEklemeSonucu
 }
 
+/** Outcome of deleting a source / wrong-reason entry from the catalog. */
+sealed interface SoruSecenegiSilmeSonucu {
+    data object Basarili : SoruSecenegiSilmeSonucu
+    data object Bulunamadi : SoruSecenegiSilmeSonucu
+    /** Built-in entries ship with the app and must stay selectable. */
+    data object VarsayilanSilinemez : SoruSecenegiSilmeSonucu
+    data class Kullanimda(val soruSayisi: Int) : SoruSecenegiSilmeSonucu
+}
+
 const val SORU_SECENEGI_ADI_UST_SINIR = 120
 
 private val SECENEK_BOSLUKLARI = Regex("\\s+")

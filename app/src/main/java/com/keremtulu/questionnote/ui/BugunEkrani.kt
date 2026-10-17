@@ -94,7 +94,7 @@ fun BugunEkrani(
             value = LocalDate.now()
         }
     }
-    val menuDescription = stringResource(R.string.today_menu_description)
+    val menuDescription = stringResource(R.string.nav_settings)
     val dateText = remember(today) {
         today.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", Locale("tr", "TR")))
             .replaceFirstChar { it.titlecase(Locale("tr", "TR")) }
@@ -195,7 +195,7 @@ fun BugunEkrani(
                             },
                         ) {
                             Text(
-                                text = "☰",
+                                text = "⚙",
                                 color = MaterialTheme.colorScheme.onSurface,
                                 style = MaterialTheme.typography.titleLarge,
                             )

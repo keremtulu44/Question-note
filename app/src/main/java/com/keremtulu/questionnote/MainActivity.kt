@@ -25,8 +25,10 @@ class MainActivity : ComponentActivity() {
                     gorselTutarliligi = appContainer.gorselTutarliligi,
                     disaAktarmaHizmeti = appContainer.disaAktarmaHizmeti,
                     ilerlemeHizmeti = appContainer.ilerlemeHizmeti,
+                    seviyeHizmeti = appContainer.seviyeHizmeti,
                     rozetDeposu = appContainer.rozetDeposu,
                     gunlukHedefDeposu = appContainer.gunlukHedefDeposu,
+                    tercihHedefDeposu = appContainer.tercihHedefDeposu,
                 )
             }
         }

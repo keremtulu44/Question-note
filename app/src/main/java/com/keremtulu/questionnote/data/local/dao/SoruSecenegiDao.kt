@@ -18,6 +18,12 @@ interface SoruSecenegiDao {
     )
     fun secenekleriIzle(tur: String): Flow<List<SoruSecenegiEntity>>
 
+    @Query("SELECT * FROM soru_secenekleri WHERE id = :id LIMIT 1")
+    suspend fun idIleGetir(id: String): SoruSecenegiEntity?
+
+    @Query("DELETE FROM soru_secenekleri WHERE id = :id")
+    suspend fun sil(id: String): Int
+
     @Query("SELECT * FROM soru_secenekleri WHERE tur = :tur AND normalize_ad = :normalizeAd LIMIT 1")
     suspend fun adaGoreGetir(tur: String, normalizeAd: String): SoruSecenegiEntity?
 

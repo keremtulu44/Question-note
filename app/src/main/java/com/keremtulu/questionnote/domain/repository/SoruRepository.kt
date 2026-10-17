@@ -5,6 +5,7 @@ import com.keremtulu.questionnote.domain.model.SoruCalismaFiltresi
 import com.keremtulu.questionnote.domain.model.SoruSecenekTuru
 import com.keremtulu.questionnote.domain.model.SoruSecenegi
 import com.keremtulu.questionnote.domain.model.SoruSecenegiEklemeSonucu
+import com.keremtulu.questionnote.domain.model.SoruSecenegiSilmeSonucu
 import com.keremtulu.questionnote.domain.model.SoruIslemSonucu
 import com.keremtulu.questionnote.domain.model.SoruKaydetmeIstegi
 import com.keremtulu.questionnote.domain.model.SoruPlanDurumu
@@ -26,6 +27,8 @@ interface SoruRepository {
     fun secenekleriIzle(tur: SoruSecenekTuru): Flow<List<SoruSecenegi>>
 
     suspend fun secenekEkle(tur: SoruSecenekTuru, ad: String): SoruSecenegiEklemeSonucu
+
+    suspend fun secenekSil(secenekId: String): SoruSecenegiSilmeSonucu
 
     suspend fun soruKaydet(istek: SoruKaydetmeIstegi): SoruIslemSonucu
 

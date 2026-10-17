@@ -89,7 +89,7 @@ fun DerslerEkrani(
     }.value
     val koyuTema = isSystemInDarkTheme()
     val colors = MaterialTheme.colorScheme
-    val menuDescription = stringResource(R.string.today_menu_description)
+    val menuDescription = stringResource(R.string.nav_settings)
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -127,7 +127,7 @@ fun DerslerEkrani(
                         onClick = onMenu,
                         modifier = Modifier.size(48.dp).semantics { contentDescription = menuDescription },
                     ) {
-                        Text("☰", color = colors.onSurface, style = MaterialTheme.typography.titleLarge)
+                        Text("⚙", color = colors.onSurface, style = MaterialTheme.typography.titleLarge)
                     }
                 }
             }

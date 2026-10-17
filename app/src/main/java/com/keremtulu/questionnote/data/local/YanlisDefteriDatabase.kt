@@ -6,6 +6,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.keremtulu.questionnote.data.local.dao.DersDao
 import com.keremtulu.questionnote.data.local.dao.KonuDao
 import com.keremtulu.questionnote.data.local.dao.GorselDao
+import com.keremtulu.questionnote.data.local.dao.IlerlemeDao
 import com.keremtulu.questionnote.data.local.dao.GeriYuklemeIsaretiDao
 import com.keremtulu.questionnote.data.local.dao.SoruDao
 import com.keremtulu.questionnote.data.local.dao.SoruSecenegiDao
@@ -38,6 +39,7 @@ abstract class YanlisDefteriDatabase : RoomDatabase() {
     abstract fun soruSecenegiDao(): SoruSecenegiDao
     abstract fun gorselDao(): GorselDao
     abstract fun tekrarDao(): TekrarDao
+    abstract fun ilerlemeDao(): IlerlemeDao
     abstract fun geriYuklemeIsaretiDao(): GeriYuklemeIsaretiDao
 
     companion object {
