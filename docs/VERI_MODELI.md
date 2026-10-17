@@ -1,7 +1,6 @@
-# Veri Modeli (v1)
+# Veri Modeli (Room şema v2)
 
-> Şema v1 Room'da uygulanıp CI'da doğrulandı; bu belge veri sözleşmesidir. Uygulama akışları, kalıcı görsel yaşam döngüsü ve migration'lar henüz tamamlanmadı.
-> Son güncelleme: 2026-10-16 (Room v1 şema CI run `38944293610` ile doğrulandı)
+> Room v2, ders/konu/soru/görsel/tekrar tablolarını ve kesintiye dayanıklı geri yükleme işaretini içerir. v1→v2 migration'ı veriyi korur ve CI'da test edildi. Son güncelleme: 2026-10-17 (run `39026644131`).
 
 Veritabanı: **Room / SQLite**. Yerel veri tek doğruluk kaynağıdır.
 
@@ -78,7 +77,7 @@ Başlangıç verisi: Edebiyat, Matematik, Biyoloji, Kimya, Fizik, Coğrafya, Tar
 | `tur` | TEXT | `SORU` veya `COZUM` |
 | `sira` | INTEGER | Çok sayfalı görsellerde sıra |
 | `dosya_adi` | TEXT | Kalıcı klasöre **göreli** ad, ör. `img/3f2a….jpg` |
-| `mime_type` | TEXT | `image/jpeg`, `image/png`, `image/webp` — dönüştürme ve geri yükleme doğrulaması için |
+| `mime_type` | TEXT | Kaydetmeden önce JPEG'e dönüştürüldüğü için `image/jpeg` |
 | `genislik` / `yukseklik` | INTEGER | Önizleme ve yerleşim için |
 | `boyut` | INTEGER | Bayt — depolama kullanımı ve yedek doğrulaması için |
 | `sha256` | TEXT | Dosya içeriği özeti — bozulma/yanlış eşleşme tespiti için |
@@ -109,6 +108,14 @@ yazılmaz. Liste kaydırması ölçümde yetersiz kalırsa bu karar yeniden değ
 
 > `algoritma_surumu` sayesinde aralık kuralı ileride değiştirilse bile eski kayıtlar doğru
 > yorumlanır; geçmişi yeniden yazmak veya silmek gerekmez.
+
+### `geri_yukleme_isaretleri` (v2)
+
+| Kolon | Tip | Not |
+|---|---|---|
+| `id` | TEXT PK | Tek geri yükleme transaction'ının UUID işareti; dışa aktarılan kullanıcı verisi değildir |
+
+Bu tablo, app-private işlem günlüğüyle birlikte kesinti sonrası commit/rollback kararını verir.
 
 ---
 
@@ -187,8 +194,6 @@ Veritabanı işlemi ile dosya sistemi işlemi tek atomik işlem değildir. Bu y�
 - `fallbackToDestructiveMigration` **kullanılmaz**. Hatalı geçişte veritabanını silmek normal
   güncelleme çözümü değildir.
 - Şema JSON'ları sürüm kontrolünde saklanır (Room `exportSchema`).
-- **Her migration için otomatik test yazılır** (Room `MigrationTestHelper`); yalnızca uygulamanın
-  açılması değil, soru sayısı, görsel ilişkileri ve tekrar geçmişi de doğrulanır. Zincir testi
-  (`v1 → vN`) Aşama 2'den itibaren korunur.
-- Bu testler JVM üzerinde (Robolectric) çalıştırılır; hızlı geri bildirim için emülatör beklenmez.
-- Kullanıcı güncellemeden önce yedek alması konusunda uygulama içinde hatırlatılabilir (Aşama 5).
+- **Her migration için otomatik test yazılır**; şema ve veri koruması test edilir. `MIGRATION_1_2`, yalnızca `geri_yukleme_isaretleri` tablosunu ekler ve mevcut ders/soru/görsel/tekrar verisini değiştirmez.
+- CI'da Room v1 fixture'ı açılıp v2'ye taşınır; v2 şeması ve v1 satırlarının korunması test edildi (run `39026644131`).
+- Testler JVM/Robolectric üzerinde çalışır; bu CI sonucu fiziksel cihaz güncelleme kabulü değildir.

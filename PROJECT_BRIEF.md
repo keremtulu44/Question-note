@@ -3,8 +3,8 @@
 Bu belge projenin **karar kaydıdır**. Yeni bir geliştirme oturumu (insan veya yapay zekâ) önce bu
 belgeyi, sonra [HANDOFF.md](HANDOFF.md) dosyasını okur.
 
-- Son güncelleme: 2026-10-16
-- Durum: **Aşama 1 tamamlandı; Aşama 2 başladı.** Room repository/ders ekranına ek olarak konu CRUD ve arşivleme/geri getirme eklendi. CI run `38948106275` 8 Robolectric testi, release derlemesini ve imza doğrulamasını geçti. Cihaz testi yapılmadı; ders yönetimi, soru/görsel akışı ve minimum dışa aktarma açık. Her şema değişikliği için veri koruyan migration ve test şart; migration fallback'i yasak.
+- Son güncelleme: 2026-10-17
+- Durum: **Aşama 2/3 kod ve CI tamam; gerçek cihaz kabulü bekliyor.** CI run `39026644131` 31 testi, Release derlemesini, imzayı ve sertifika doğrulamasını geçti. Sürüm adayı v1.0.2 / versionCode 3. Cihaz, SAF/Drive, temiz kurulum/başka cihaz ve 30–50 fotoğraf okunabilirliği henüz doğrulanmadı. Her şema değişikliği için veri koruyan migration ve test şart; migration fallback'i yasak.
 
 ---
 

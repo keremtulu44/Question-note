@@ -1,140 +1,75 @@
 # ROADMAP — Yanlış Defteri
 
-Durum işaretleri: `[ ]` yapılmadı · `[~]` devam ediyor · `[x]` tamam · `[!]` engellendi
+Durum işaretleri: `[ ]` yapılmadı · `[~]` kod/CI hazır, kullanıcı kabulü bekliyor · `[x]` tamamlandı · `[!]` engellendi
 
-Öncelik sırası: **veri güvenliği → görsel işlemleri → günlük tekrar akışı → arama/filtreler →
-bildirimler → ek özellikler.**
+Öncelik: veri güvenliği → görsel işlemleri → günlük tekrar akışı → arama/filtreler → bildirimler → ek özellikler.
 
 ---
 
 ## Aşama 0 — Konuşma ve plan ✅
 
-- [x] Gereksinimlerin değerlendirilmesi
-- [x] Teknoloji seçiminin gözden geçirilmesi (native Android / Kotlin / Compose / Room)
-- [x] Açık soruların kullanıcıyla netleştirilmesi (görseller, ders/konu yönetimi, tekrar modeli,
-      geri yükleme politikası, imzalama)
-- [x] İlk sürüm kapsamının belirlenmesi
-- [x] Dış inceleme (ikinci görüş) alınması ve önerilerin gerekçeyle değerlendirilmesi
-- [x] Bekleme: kullanıcının Aşama 1 için açık onayı
+- [x] Gereksinimler, teknoloji ve ürün kararları netleştirildi.
+- [x] Dış inceleme önerileri gerekçeleriyle değerlendirildi.
+- [x] Aşama 1'in cihaz güncelleme kabulü kullanıcı tarafından bildirildi.
 
-**Çıktı:** Kararlar ve uygulama planı. Aşama 1'in kullanıcı cihazı G5 testi geçti. Aşama 2 başladı; Room v1, ders ekranı ve konu yönetimi CI'da doğrulandı. Ders düzenleme, soru/görsel akışları, dışa aktarma ve gerçek cihaz kabul testleri hâlâ açık.
+## Aşama 1 — İlk kurulabilir APK ✅
 
----
-
-## Aşama 1 — İlk kurulabilir APK
-
-- **Aşama 1'in ayrıntılı uygulama sırası:** [docs/KODLAMA_PLANI.md](docs/KODLAMA_PLANI.md)
-
-**Amaç:** Derleme → indirme → kurma → güncelleme zincirini doğrulamak. Bu zincir kırıkken
-uygulama geliştirmenin anlamı yok.
-
-- [x] G1: push ile otomatik çalışan GitHub Actions ve `contents:write` yetkisi ölçüldü
-- [x] G2: tek Android modülü, Kotlin + Compose, sabit sürüm kataloğu ve Gradle wrapper; arayüzsüz `assembleRelease` CI'da başarılı
-- [x] `applicationId=com.keremtulu.questionnote`, `minSdk=26`, API 37 compile/target sabitlendi
-- [x] Sabit release anahtarı üretildi; kullanıcı secret'ları ekledi; G3'te imzalama ve SHA-256 parmak izi eşleşti
-- [x] Push ile otomatik Android derleme, imzalama ve Release workflow'u (elle tetikleme gerekmiyor)
-- [x] G3: imzalı v1.0.0 APK + sertifika doğrulaması + Release
-- [x] G4: açık/koyu tema ve 7 ders kartı; imzalı v1.0.1 APK + Release
-- [x] **KULLANICI / G5 (2026-10-16):** Kullanıcı v1.0.0 → v1.0.1 güncellemesinin telefonda başarılı olduğunu, uygulamanın açıldığını ve 7 ders kartının göründüğünü bildirdi.
-
-**Çıkış kriteri: GEÇTİ (kullanıcı bildirimi, 2026-10-16):** APK kaldırmadan yeni sürüme güncellendi ve açıldı.
-
----
+- [x] Push ile Android CI, `contents:write`, rapor commit'i ve Release akışı doğrulandı.
+- [x] v1.0.0 (versionCode 1) ve v1.0.1 (versionCode 2) imzalı APK/Release üretildi; sertifika parmak izi doğrulandı.
+- [x] Kullanıcı v1.0.0 → v1.0.1 uygulamasını kaldırmadan güncelledi, açılışı ve 7 ders kartını doğruladı.
 
 ## Aşama 2 — Yerel soru arşivi [~]
 
-> Veri yaşam döngüsü baştan doğru kurulur: yedekleme sonradan "eklenen bir düğme" değil, veri
-> katmanının sınırlarından biri olarak tasarlanır. Room, ders ekranı ve konu yönetimi eklendi; Aşama 2
-> tamamlanmadı.
+> Kod ve CI kapsamı hazır. Kamera/galeri, kalıcı veri, gerçek fotoğraf okunabilirliği ve cihaz kabulü kullanıcı testini bekliyor.
 
-- [~] Paket ayrımı: `data/local`, `data/repository`, `domain` model/repository ve `ui` kullanılıyor;
-      tekrar kuralları, `images` ve `backup` katmanları henüz tamamlanmadı
-- [x] Room şema v1, `exportSchema` ve açık yabancı anahtar ilişkileri; şema testleri geçti
-- [ ] Sonraki her şema değişikliği için veri koruyan migration ve migration testi; yıkıcı fallback yok
-- [x] Yedi ders seed'i ilk açılışta yazılıyor; dosya tabanlı DB yeniden açılınca çoğalmıyor (Robolectric)
-- [x] Ders repository'si etkin dersleri/soru sayılarını Flow ile sunuyor; ana ekran Room'dan okuyor
-- [x] Konu ekleme, yeniden adlandırma, arşivleme ve geri getirme; arşiv ilişkiyi/soruları silmiyor
-- [ ] Ders (ad/sıra/arşiv) yönetimi
-- [ ] Soru ekleme, listeleme/filtreleme (ders/konu/plan durumu ve "konusuz"), ayrıntı, düzenleme ve silme
-- [ ] Tekrar/plan durumu kuralları ve JVM birim testleri (aktif / askıda / tamamlandı)
-- [ ] Kamera ile çekim ve sistem fotoğraf seçicisi ile galeriden seçim
-- [ ] Çok görsel: "bir sayfa daha ekle" (soru ve çözüm için); çözüm sonradan da eklenebilir
-- [ ] Görsellerin kalıcı dosya alanına alınması, atomik yazma, tutarlılık denetimi ve onaylı temizlik
-- [ ] Görsel kalite politikası: otomatik optimize (uzun kenar ~3000 px, JPEG ~%90) ve 30–50 gerçek
-      fotoğrafta küçük formül/kök/grafik etiketlerinin okunabilirliğini doğrulama
-- [ ] **Aşama sonu ek güvenlik ağı:** minimum "dışa aktar" (yedek özelliği tamamlanmasa bile veriyi
-      dışarı alabilme); doğrulama testleri dahil
-- [ ] Migration gerekirse veri koruyan migration + Robolectric zincir testi (şema henüz değişmedi)
-- [ ] Gerçek cihazda konu/ders/soru akışları, uygulamayı yeniden başlatma ve veri koruma kabul testi
+- [x] Room şema v2; `exportSchema`; yabancı anahtarlar ve v1→v2 veri koruyan migration + Robolectric testi. Yıkıcı migration fallback'i yok.
+- [x] Yedi seed dersi; ders ekleme/ad-sıra düzenleme/arşivleme/geri getirme ve dashboard Flow'u.
+- [x] Konu ekleme/düzenleme/arşivleme/geri getirme; arşiv ilişkiyi silmiyor.
+- [x] Soru ekleme/düzenleme/silme, ders/konu/konusuz/plan filtreleri, ayrıntı ve görsellerin ilişkilendirilmesi.
+- [x] Tekrar/plan kuralları ve birim testleri (soru arşivinden bağımsız `TekrarKurali`).
+- [x] Kamera ve sistem fotoğraf seçicisi; soru/çözüm için çoklu görsel; staging→kalıcı alan, SHA-256 ve atomik dosya yazımı.
+- [x] Görsel optimizasyonu: uzun kenar en çok ~3000 px, JPEG kalite 90; metadata ve tutarlılık kontrolü.
+- [x] Bakım ekranında denetim, yaş ve veritabanı referansı yeniden kontrol edilerek onaylı yetim temizliği.
+- [x] Dışa aktarma akışı tam ZIP yedekleme hizmetine yükseltildi; geri uyumlu eski API adı korunuyor.
+- [x] CI run `39026644131`: toplam 31 birim/Robolectric testi geçti; Release derlemesi, imza ve sertifika parmak izi başarılı.
+- [ ] Kullanıcı cihazında uçak modunda kayıt, yeniden başlatma, izin/iptal, düzenleme/silme ve fotoğraf görüntüleme kabulü.
+- [ ] 30–50 gerçek fotoğrafta küçük formül, kök ve grafik etiketlerinin okunabilirliği.
 
----
+## Aşama 3 — Tam yedek ve geri yükleme [~]
 
-## Aşama 3 — Veri güvenliği (yedeğin doğrulanması)
+> ZIP üretimi, doğrulaması, geri yüklemesi ve CI testleri hazır. Gerçek SAF/Drive, temiz kurulum ve başka cihaz testi yapılmadı.
 
-> Bu aşama doğrulanmadan uygulama, ciddi soru arşivi biriktirmek için güvenilir kabul edilmez.
+- [x] Sürüm kontrollü ZIP: `manifest.json`, kanonik `data.json`, 5 CSV ve soru/çözüm JPEG'leri.
+- [x] Dosya listesi, uzunluk, SHA-256, ilişki, görsel metadata, şema/format sürümü, yol kaçışı ve ZIP büyüme sınırları doğrulanıyor.
+- [x] SAF `CreateDocument` / `OpenDocument` akışları; Drive/bulut yüklemesinin ayrıca doğrulanması gerektiği kullanıcıya bildiriliyor.
+- [x] İçe aktarmadan önce mevcut/yedek soru-görsel sayısı önizlemesi ve açık tam-değiştirme onayı.
+- [x] Geri yükleme öncesi doğrulanmış güvenlik ZIP'i; görseller yeni kalıcı adlarla kopyalanıyor; Room değişimi transaction içinde.
+- [x] Room işareti + app-private günlükle kesinti sonrası commit/rollback kurtarması; v1→v2 migration ve test.
+- [x] CI'da checksum bozulması, desteklenmeyen format, path traversal, tam geri yükleme, güvenlik kopyası ve commit/rollback kurtarma testleri geçti (run `39026644131`).
+- [ ] Gerçek cihazda Downloads/Drive'a kaydetme, Drive yüklemesini ayrıca doğrulama.
+- [ ] Temiz kurulumda/başka cihazda soru, görsel, tekrar geçmişi ve planın tam geri yüklenmesi.
+- [ ] Cihazda iptal, bozuk yedek ve geri yükleme sırasında uygulama kapatma senaryoları.
 
-- [ ] Tam ZIP yedeği üretimi (manifest + JSON + CSV + görseller)
-- [ ] Dosya seçicisi ile dışa kaydetme; cihazda Drive'a kaydetme akışının denenmesi
-- [ ] Yedek doğrulama: manifest, dosya başına sha256, sayılar, ilişki tutarlılığı, sürüm kontrolü
-- [ ] ZIP güvenlik sınırları: yol kaçışı, dosya sayısı/boyut üst sınırları, zip bomb koruması
-- [ ] Geri yükleme: "tamamen değiştir" + öncesinde otomatik güvenlik kopyası
-- [ ] **Kesintiye dayanıklılık:** işlem sürerken uygulama kapanırsa sonraki açılışta tamamlama/geri alma
-- [ ] Geri yükleme öncesi özet (yedekteki soru/görsel sayısı ↔ mevcut arşiv) ve onay
-- [ ] Bozuk/eksik/anlamsız yedek mevcut arşivi bozmuyor testi
-- [ ] Temiz kurulumda ve **başka cihazda** gerçek yedekten geri yükleme testi
-- [ ] Güncellemede veri koruma testi (Aşama 1 zincirinin gerçek veriyle tekrarı)
-- [ ] Son yedek bilgisinin (tarih, boyut, dosya adı) gösterilmesi
-- [ ] Başarısız yedek işleminin başarı gibi gösterilmediğinin doğrulanması
+## Aşama 4 — Tekrar deneyimi ve günlük akış
 
----
-
-## Aşama 4 — Tekrar sistemi
-
-- [ ] Tekrar değerlendirmesi: Çözemedim / Zorlanarak çözdüm / Rahat çözdüm
-- [ ] "Çözüm açıldı" işaretinin kaydı; destekli tekrarın bağımsız sayılmaması (sonraki tekrar 1 gün)
-- [ ] Aynı gün ikinci deneme oluşturulmaması (kayıt tekilliği)
-- [ ] Aralık kuralının **sürümlü tek sınıfta** yazılması (`algoritma_surumu`)
-- [ ] Sonraki tekrar tarihi hesabı (1·3·7·21·45·90, üst sınır ~180)
-- [ ] Elle tarih atama
-- [ ] "Bugün" ekranı: bugün yapılacaklar + gecikmiş tekrarlar + boş durum mesajı
-- [ ] Uzun aradan sonra otomatik sıfırlama yapılmaması
-- [ ] Soru plan durumu: aktif / askıda / tamamlandı
-- [ ] Tekrar geçmişi görüntüleme (planlanan gün ↔ gerçekleşen gün)
-- [ ] Temel filtreler
-- [ ] Yerel takvim günü semantiği ve saat dilimi testleri
-
----
+- [x] Tekrar aralığı kuralı ve repository seviyesinde plan/tekrar davranışları Aşama 2'de yazıldı ve test edildi.
+- [ ] Bugün/gecikmiş tekrar ekranı ve tekrar geçmişi arayüzü.
+- [ ] Elle tarih atama ve kullanıcıya görünür plan akışları.
+- [ ] Saat dilimi ve gerçek kullanım kabul testleri.
 
 ## Aşama 5 — Kullanılabilirlik ve sağlamlaştırma
 
-- [ ] Büyük arşiv performansı (listeleme, görsel açma) — ölçüm yapılır
-- [ ] Önizleme stratejisinin gözden geçirilmesi (Coil önbelleği yeterli mi)
-- [ ] Depolama kullanımı göstergesi ve (depolama dolarsa) isteğe bağlı "eski görselleri yeniden
-      sıkıştır" aracı
-- [ ] Kırpma (crop) ekranı
-- [ ] Hata ve boş durum ekranları, yükleme göstergeleri
-- [ ] Görsel kalite / dosya boyutu dengesi
-- [ ] Erişilebilirlik (okunaklı yazı, dokunma alanları, içerik açıklamaları)
-- [ ] İzin reddi durumları
-- [ ] Düşük depolama alanı ve yarıda kesilen işlem senaryoları
-- [ ] Tema ve tasarım iyileştirmeleri
-
----
+- [ ] Büyük arşiv performansını ölçme; ölçmeden performans iddiası yok.
+- [ ] Depolama göstergesi, düşük depolama ve yarıda kesilen işlemler için cihaz testleri.
+- [ ] Önizleme stratejisi, kırpma ekranı, erişilebilirlik ve tema iyileştirmeleri.
 
 ## Aşama 6 — İsteğe bağlı geliştirmeler
 
-- [ ] Doğrudan Drive bağlantısı (önce SAF kalıcı izni + Drive klasörü yolu)
-- [ ] Otomatik/kolay yedekleme ("Şimdi yedekle" düğmesi dâhil)
-- [ ] Bildirimler (hatırlatma) — kesin alarm kullanılmaz; arka plan kısıtları nedeniyle tam saat
-      garantisi verilmez
-- [ ] Mini deneme oluşturma
-- [ ] PDF çalışma kâğıdı
-- [ ] Basit istatistikler
-- [ ] Yedek şifreleme (kullanıcı kararı ile)
+- [ ] Doğrudan Drive bağlantısı (SAF'ten ayrı; yalnızca gerekirse).
+- [ ] Otomatik/kolay yedekleme, bildirimler, mini deneme, PDF, istatistik.
+- [ ] Şifreleme ancak kullanıcı kararı ve olgun bir standartla.
 
----
+## Kapsam dışı
 
-## Kapsam dışı (kalıcı olarak değerlendirilmedi)
-
-Sosyal özellikler, çoklu cihaz canlı senkronizasyon, iOS, web paneli, reklam, abonelik, uzak
-veritabanı, OCR/yapay zekâ ile otomatik çözüm. Ayrıntı: [PROJECT_BRIEF.md](PROJECT_BRIEF.md) §7.
+Sosyal özellikler, çoklu cihaz canlı senkronizasyonu, iOS, web paneli, reklam, abonelik, uzak
+veritabanı ve OCR/yapay zekâ ile otomatik çözüm. Ayrıntı: [PROJECT_BRIEF.md](PROJECT_BRIEF.md) §7.

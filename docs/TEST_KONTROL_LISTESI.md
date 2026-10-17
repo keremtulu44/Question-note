@@ -11,7 +11,7 @@
 > ZIP yol güvenliği) ve **Robolectric** (şema/migration testleri). Emülatör yalnızca gerçekten
 > gerekirse kullanılır; asıl kabul testleri gerçek cihazda yapılır.
 
-Son güncelleme: 2026-10-16 (konu CRUD/arşiv akışı ve toplam 8 Robolectric testi CI'da geçti; run `38948106275`)
+Son güncelleme: 2026-10-17 (CI run `39026644131`: 31 test geçti; Release derlemesi, imza ve parmak izi doğrulandı. Cihaz kabul testleri hâlâ bekliyor.)
 
 ---
 
@@ -51,7 +51,7 @@ Son güncelleme: 2026-10-16 (konu CRUD/arşiv akışı ve toplam 8 Robolectric t
 | 2.16 | Kullanılmayan dosya temizliği onaysız/yıkıcı biçimde çalışmıyor, ne sildiğini bildiriyor | YZ + KULLANICI | [ ] |
 | 2.17 | Eksik görsel (dosya yok) durumunda kayıt kırılmıyor, anlaşılır mesaj gösteriliyor | YZ + KULLANICI | [ ] |
 | 2.18 | Sıkıştırma testi: 30–50 gerçek soru fotoğrafında küçük formüller/kök içi ifadeler okunuyor | YZ + KULLANICI | [ ] |
-| 2.19 | Room v1 oluşturuluyor; beş tablo ve sürüm 1 doğrulanıyor | YZ (Robolectric) | [x] |
+| 2.19 | Room v2 şeması, v1 fixture'ı ve v1→v2 veri koruyan migration zinciri doğrulanıyor | YZ (Robolectric) | [x] |
 | 2.20 | Yeni veritabanında yedi ders, sabit sırada ve arşivsiz oluşturuluyor | YZ (Robolectric) | [x] |
 | 2.21 | Soru/ders/konu yabancı anahtarları ve görsel/geçmiş CASCADE kuralları açık | YZ (Robolectric) | [x] |
 | 2.22 | Repository yalnızca etkin dersleri, sabit sırada ve doğru soru sayılarıyla yayımlıyor | YZ (Robolectric) | [x] |
@@ -60,24 +60,29 @@ Son güncelleme: 2026-10-16 (konu CRUD/arşiv akışı ve toplam 8 Robolectric t
 | 2.25 | Konu yeniden adlandırma boş/tekrarlı adı reddeder, geçerli adı ve sırayı korur | YZ (Robolectric) | [x] |
 | 2.26 | Konu arşivleme/geri getirme soruyu veya `konu_id` ilişkisini silmez | YZ (Robolectric) | [x] |
 | 2.27 | Konu ekle/düzenle/arşivle/geri getir akışı gerçek cihazda anlaşılır ve kalıcı çalışır | KULLANICI | [ ] |
+| 2.28 | Ders ekle/yeniden adlandır/sıra/arşivleme ve geri getirme repository testleri | YZ (Robolectric) | [x] |
+| 2.29 | Soru oluştur/düzenle/filtrele/arşivle/sil, ders-konu ilişkisi ve tekrar planı testleri | YZ (Robolectric) | [x] |
+| 2.30 | JPEG optimizasyonu, EXIF yönü, SHA-256, bozuk/non-image girdi ve geçici dosya yaşı testleri | YZ (Robolectric) | [x] |
+| 2.31 | Onaylı yetim temizliği, dosya yaşı ve DB referansını silme öncesi yeniden denetleme testleri | YZ (Robolectric) | [x] |
 
 ## Aşama 3 — Yedek ve geri yükleme
 
 | # | Test | Sorumlu | Durum |
 |---|---|---|---|
-| 3.1 | Yedek ZIP'i oluşturuluyor ve doğrulanıyor (manifest, sha256, sayılar) | YZ | [ ] |
+| 3.1 | Tam ZIP oluşturma, manifest/CSV/JSON ve tüm envanter SHA-256/uzunluk doğrulaması | YZ (CI run `39026644131`) | [x] |
 | 3.2 | Yedek cihazdaki bir klasöre kaydediliyor | KULLANICI | [ ] |
 | 3.3 | Yedek Drive'a kaydediliyor (dosya seçici akışı) | KULLANICI | [ ] |
 | 3.4 | Temiz kurulumda yedekten geri yükleme çalışıyor | KULLANICI | [ ] |
 | 3.5 | Yedek görselleri kapsıyor (geri yükleme sonrası görseller açılıyor) | KULLANICI | [ ] |
 | 3.6 | Yedek tekrar geçmişini ve plan durumunu kapsıyor | KULLANICI | [ ] |
-| 3.7 | Bozuk yedek mevcut arşivi bozmuyor (kasıtlı bozulmuş ZIP) | YZ + KULLANICI | [ ] |
-| 3.8 | Desteklenmeyen/eksik yedek anlaşılır hatayla reddediliyor | YZ | [ ] |
+| 3.7 | Checksum'u bozulmuş ZIP önizleme aşamasında reddediliyor; DB/görsel kayıtları değişmiyor | YZ (CI run `39026644131`) | [x] |
+| 3.8 | Desteklenmeyen format sürümü reddediliyor; DB değişmiyor | YZ (CI run `39026644131`) | [x] |
 | 3.9 | Başarısız yedek işlemi başarı gibi gösterilmiyor | YZ | [ ] |
-| 3.10 | Geri yükleme öncesi güvenlik kopyası oluşuyor | YZ + KULLANICI | [ ] |
+| 3.10 | Tam geri yükleme öncesi doğrulanmış güvenlik ZIP'i oluşuyor, eski not/görsel verisi korunuyor | YZ (CI run `39026644131`) | [x] |
 | 3.11 | Uygulama güncellemesi mevcut verileri koruyor (gerçek veriyle) | KULLANICI | [ ] |
-| 3.12 | ZIP içi yol güvenliği: `..` veya mutlak yol içeren ZIP reddediliyor | YZ | [ ] |
-| 3.13 | Geri yükleme sırasında uygulama kapatılırsa arşiv bozulmuyor; sonraki açılışta tamamlanıyor ya da geri alınıyor | YZ + KULLANICI | [ ] |
+| 3.12 | ZIP içi yol güvenliği: `..` içeren ZIP hiçbir dosya çıkarmadan reddediliyor | YZ (CI run `39026644131`) | [x] |
+| 3.13 | Günlük/Room işareti simülasyonunda transaction öncesi rollback ve commit sonrası tamamlatma doğru çalışıyor | YZ (CI run `39026644131`) | [x] |
+| 3.18 | Gerçek cihazda geri yükleme sırasında uygulama kapatılır; sonraki açılışın kurtarması doğrulanır | KULLANICI | [ ] |
 | 3.14 | ZIP bomb / aşırı büyüme / çok fazla dosya içeren arşiv açılmadan reddediliyor | YZ | [ ] |
 | 3.15 | Yedek **başka bir cihazda** (cihaz bağlılığı olmadan) eksiksiz geri yükleniyor | KULLANICI | [ ] |
 | 3.16 | Anlamsız/boş yedek seçilince kullanıcı onayı olmadan hiçbir şey değişmiyor | YZ + KULLANICI | [ ] |
@@ -121,10 +126,10 @@ Son güncelleme: 2026-10-16 (konu CRUD/arşiv akışı ve toplam 8 Robolectric t
 | # | Test | Sorumlu | Durum |
 |---|---|---|---|
 | G.1 | Hiçbir gizli anahtar, parola veya token repoda değil | YZ | [x] |
-| G.2 | Yedek dosyası repoya işlenmiyor (`.gitignore`) | YZ | [ ] |
+| G.2 | ZIP/APK kullanıcı yedekleri repoya işlenmiyor (`.gitignore` + `git check-ignore`) | YZ | [x] |
 | G.3 | İmzalama anahtarının iki ayrı yedek kopyası kullanıcıda mevcut | KULLANICI | [ ] |
 | G.4 | Uygulama kaldırılırsa verilerin kaybolacağı kullanıcı tarafından biliniyor | KULLANICI | [ ] |
-| G.5 | Her migration için otomatik test var; `v1 → vN` zinciri doğrulanıyor | YZ | [ ] |
+| G.5 | Room v1→v2 migration ve veri koruması otomatik test edildi; gelecek migration'larda zincir korunacak | YZ (CI run `39026644131`) | [x] |
 | G.6 | Debug ve release APK'ları karıştırılmıyor; günlük kullanımda hep release APK | KULLANICI | [ ] |
 | G.7 | Derleme, sabitlenmiş sürümlerle tekrar edilebiliyor (bir yıl sonra da) | YZ | [ ] |
 

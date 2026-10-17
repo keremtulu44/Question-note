@@ -1,12 +1,12 @@
 # KODLAMA PLANI (Aşama 1 ve sonrası)
 
 > Bu belge **nasıl kodlayacağımızı** ve ölçülen sonuçları kaydeder: görev sırası, dosya yapısı,
-> sürüm sabitleme, imzalama kurulumu, derleme bütçesi, test stratejisi. Aşama 1 tamamlandı; Aşama 2'nin Room şema temeli CI'da doğrulandı.
+> sürüm sabitleme, imzalama kurulumu, derleme bütçesi, test stratejisi. Aşama 1 tamamlandı; Aşama 2/3 kodu CI'da doğrulandı, cihaz kabulü bekliyor.
 >
 > İlgili belgeler: [PROJECT_BRIEF.md](../PROJECT_BRIEF.md) (kararlar) · [ROADMAP.md](../ROADMAP.md)
 > (aşamalar) · [BUILDING.md](../BUILDING.md) (derleme/imzalama) · [docs/VERI_MODELI.md](VERI_MODELI.md)
 >
-> Son güncelleme: 2026-10-16
+> Son güncelleme: 2026-10-17
 
 ---
 
@@ -238,48 +238,27 @@ Her görev: amaç → dosyalar → bitti ölçütü. Sıra, **en ucuz doğrulama
 
 ## 5. Aşama 2 — görev listesi (yerel arşiv)
 
-### 5.1 Paket yapısı (hedef)
+### 5.1 Uygulanan paket yapısı
 
 ```
-com.keremtulu.questionnote/       # applicationId (sabitlendi 2026-10-16)
-├── AppContainer.kt            # ✅ veritabanı ve repository bağlama noktası
-├── MainActivity.kt             # ✅ repository'yi ders ekranına verir
-├── data/
-│   ├── local/                  # ✅ v1 Room temeli
-│   │   ├── entity/{DersEntity.kt, KonuEntity.kt, SoruEntity.kt, GorselEntity.kt, TekrarEntity.kt}
-│   │   ├── dao/DersDao.kt      # etkin ders/soru sayısı Flow sorgusu
-│   │   ├── dao/KonuDao.kt  # etkin/arşiv konu Flow'u ve transaction işlemleri
-│   │   ├── YanlisDefteriDatabase.kt
-│   │   └── YanlisDefteriDatabaseProvider.kt
-│   └── repository/{RoomDersRepository.kt, RoomKonuRepository.kt}
-├── domain/
-│   ├── model/{Ders.kt, Konu.kt}
-│   └── repository/{DersRepository.kt, KonuRepository.kt}
-├── images/                     # kalıcı dosya yaşam döngüsü henüz eklenmedi
-├── ui/                         # ✅ ders/konu ekranları Room akışına bağlı
-└── backup/                     # Aşama 3'te ZIP/geri yükleme; Aşama 2 sonunda minimum export
+com.keremtulu.questionnote/
+├── data/local/                 # Room v2, entity/DAO/provider ve MIGRATION_1_2
+├── data/repository/            # ders, konu, soru repository'leri
+├── data/images/                # JPEG optimizasyonu, kalıcı depo, bütünlük/temizlik hizmeti
+├── data/export/                # YerelYedeklemeHizmeti + eski export API adı için typealias
+├── domain/                     # modeller, repository sözleşmeleri, tekrar kuralı
+├── ui/                         # ders/konu, soru formu/ayrıntı/liste, görsel bakımı, yedek akışı
+└── AppContainer.kt / MainActivity.kt
 ```
 
-### 5.2 Görev sırası
+### 5.2 Tamamlanan kod ve CI ölçütleri
 
-| # | Görev | Bitti ölçütü |
-|---|---|---|
-| 2.1 | ✅ Room şeması v1 + `exportSchema` + açık yabancı anahtarlar | `1.json` repoda; 3 Robolectric testi geçti; henüz migration yok |
-| 2.2 | 7 ders başlangıç verisi + Room repository/ana ekran bağlantısı | Seed, Flow sorgusu ve dosya tabanlı DB yeniden açılış testi geçti; gerçek cihaz kabul testi açık |
-| 2.3 | ✅ Konu CRUD: ekle, yeniden adlandır, arşivle, geri getir | Robolectric testleri 2.24–2.26 geçti; gerçek cihaz testi açık |
-| 2.4 | `Tarih.kt` + `TekrarKurali.kt` + birim testleri | Tüm sonuç × çözüm açıldı kombinasyonları testten geçer |
-| 2.5 | Görsel içe aktarma boru hattı (kamera + fotoğraf seçici) | Geçici→kalıcı akışı, iptal durumu, sha256, küçültme; Test 2.4/2.5/2.18 |
-| 2.6 | Tutarlılık denetimi ve onaylı temizlik | Test 2.16/2.17 |
-| 2.7 | Soru ekleme akışı (fotoğraf → ders → kaydet; diğer alanlar isteğe bağlı) | 3 dokunuşla kayıt yapılabiliyor |
-| 2.8 | Soru listesi + filtreler (ders/konu/plan durumu) + "Konusuz" | Konusuz sorular erişilebilir |
-| 2.9 | Soru görüntüleme: tam ekran, yakınlaştırma, çözüm gizli + "Çözümü göster" | Test 2.7/2.10 |
-| 2.10 | Düzenleme, silme (onay), plan durumu (aktif/askıda/tamamlandı) | Test 2.11/2.12/4.12 |
-| 2.11 | Migration testleri (Robolectric) + DAO testleri | Zincir testi `v1→vN` yeşil |
-| 2.12 | Minimum "dışa aktar" (veriyi dışarı alma güvenlik ağı) | Dosya seçiciye yazılabiliyor |
-| 2.13 | Ders yönetimi: adı/sırası düzenleme, arşivleme ve geri getirme | Test 2.13 ve veri koruma kontrolleri geçer |
-
-> **2.12 özellikle erken:** Tam yedekleme Aşama 3'te tamamlanır, ama gerçek arşiv birikmeye
-> başlamadan önce veriyi dışarı alabilme yeteneği olmalı.
+- Room v2, v1→v2 veri koruyan migration, seed dersleri ve açık foreign key/cascade kuralları.
+- Ders/konu yönetimi; soru CRUD, liste/filtre/ayrıntı; tekrar plan kuralları.
+- Kamera/galeri çoklu görselleri, EXIF yönü, JPEG uzun kenar ~3000 px/kalite 90, SHA-256, staging→kalıcı alan ve kontrollü bakım.
+- Tam ZIP/SAF yedekleme ve geri yükleme: manifest, JSON, 5 CSV, görsel payload'ları, doğrulama sınırları, güvenlik kopyası ve journal/Room marker kurtarması.
+- CI run `39026644131`: 31 test geçti; `assembleRelease`, sabit anahtarla imza ve fingerprint doğrulandı.
+- Cihaz kabulü hâlâ bekliyor: gerçek kamera/galeri/SAF/Drive, temiz kurulum/başka cihaz ve 30–50 fotoğrafta okunabilirlik.
 
 ### 5.3 Dosya ↔ veritabanı tutarlılığı (yazma sırası)
 
@@ -300,21 +279,15 @@ yalnızca kullanıcı onayıyla ve raporla yapılır.
 
 ---
 
-## 6. Aşama 3–6 — kısa plan
+## 6. Aşama 3–6 — güncel durum
 
-**Aşama 3 (yedek):** `backup/` paketi → `YedekOlusturucu`, `YedekDogrulayici`, `GeriYukleyici`,
-`YedekManifest`. Testler: manifest/sha256, yol kaçışı, zip bomb, kesintiye dayanıklılık (journal),
-temiz kurulumda geri yükleme, bozuk yedek. Ayrıntı: [docs/YEDEK_FORMATI.md](YEDEK_FORMATI.md).
+**Aşama 3 (tam ZIP yedek):** `data/export/YerelYedeklemeHizmeti.kt` içinde uygulandı; biçim ve kurtarma protokolü [docs/YEDEK_FORMATI.md](YEDEK_FORMATI.md)'nde. Otomatik testlerin durumu `docs/TEST_KONTROL_LISTESI.md` içindedir. SAF sağlayıcı/Drive ve başka cihazdaki kabul kullanıcı testini bekliyor.
 
-**Aşama 4 (tekrar):** `BugunEkrani` gerçek verilerle, tekrar değerlendirme akışı, geçmiş görünümü,
-elle tarih atama, plan durumu filtreleri. Aralık kuralı zaten 2.4'te yazıldığı için burada yalnızca
-arayüz ve akış eklenir.
+**Aşama 4 (tekrar arayüzü):** Aralık kuralı ve repository davranışı Aşama 2'de uygulandı; Bugün/gecikmiş ekranı, geçmiş görünümü ve elle tarih arayüzü açık.
 
-**Aşama 5 (sağlamlaştırma):** Büyük arşiv ölçümü, önizleme stratejisi kararı (A10), kırpma ekranı,
-boş/hata durumları, erişilebilirlik, depolama göstergesi.
+**Aşama 5 (sağlamlaştırma):** Büyük arşiv ölçümü, önizleme stratejisi, kırpma ekranı, erişilebilirlik ve depolama göstergesi açık.
 
-**Aşama 6 (isteğe bağlı):** SAF kalıcı izni ile Drive klasörü, "şimdi yedekle", bildirimler (kesin
-alarm yok), PDF çalışma kâğıdı, basit istatistikler, yedek şifreleme.
+**Aşama 6 (isteğe bağlı):** Doğrudan Drive entegrasyonu, otomatik yedekleme, bildirim, PDF, istatistik ve şifreleme; ayrı ürün kararı gerektirir.
 
 ---
 

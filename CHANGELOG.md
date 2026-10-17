@@ -2,6 +2,13 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.0.2] — 2026-10-17
+
+- Ders/konu yönetimi, soru ekleme-düzenleme-silme, filtre/liste/ayrıntı, çoklu kamera/galeri görselleri ve kalıcı görsel bakımı eklendi.
+- Room şeması v1→v2 veri koruyan migration ile güncellendi; migration ve veri akışı testleri eklendi.
+- Tam ZIP yedekleme/geri yükleme: JSON + beş CSV + JPEG görseller, SHA-256 doğrulama, SAF hedefi, önizleme/onay, güvenlik kopyası ve kesinti kurtarma eklendi.
+- CI run `39026644131`: 31 test, Release derlemesi, imza ve sertifika parmak izi doğrulaması başarılı. Gerçek cihaz/Drive ve 30–50 fotoğraf kabulü hâlâ kullanıcıda bekliyor.
+
 ## [1.0.1] — 2026-10-16
 
 - Açık/koyu tema ve 7 ders kartlı ana ekran eklendi: Edebiyat, Matematik, Biyoloji, Kimya, Fizik, Coğrafya, Tarih.

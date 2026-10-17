@@ -3,8 +3,8 @@
 > Bu belge **değerleri değil**, sırların nerede ve nasıl tutulduğunu anlatır.
 > Hiçbir anahtar, parola veya token bu depoya yazılmaz.
 
-- Son güncelleme: 2026-10-16
-- Durum: **Aşama 1 tamamlandı; Aşama 2 sürüyor.** Room, ders ekranı ve konu yönetimi CI'da 8 testle doğrulandı (run `38948106275`); release derlemesi/imzası başarılı. Yeni Release yayımlanmadı; kullanıcıya yayımlanan son sürüm v1.0.1'dir.
+- Son güncelleme: 2026-10-17
+- Durum: **Aşama 1 tamamlandı; Aşama 2/3 kodu CI'da doğrulandı.** 31 test, Release derlemesi, imza ve sertifika parmak izi geçti (run `39026644131`). v1.0.2, gerçek cihaz/Drive/okunabilirlik kabulü için test adayıdır; cihaz testleri henüz yapılmadı.
 
 ---
 
@@ -28,7 +28,7 @@ Kullanıcının telefonunda Android SDK, Gradle veya Termux kurması **gerekmez*
 
 - Tek Gradle modülü, Kotlin + Jetpack Compose.
 - Sürümler `gradle/libs.versions.toml` içinde sabitlenir; Gradle wrapper depoda tutulur.
-- minSdk 26, compileSdk/targetSdk 37; G2 sürüm kodu 1, güncel v1.0.1 sürüm kodu 2. G2/G4 CI derlemeleri başarılı.
+- minSdk 26, compileSdk/targetSdk 37; v1.0.2 sürüm adayı `versionCode=3`. G2/G4 ve A2/A3 CI derlemeleri başarılı.
 - Yapay zekâ ortamında Java/Android SDK ve Maven erişimi yoktur → derleme **yalnızca** Actions'ta olur.
 
 ## 3. İmzalama düzeni (kritik)

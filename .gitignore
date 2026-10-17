@@ -11,6 +11,7 @@ anahtar/
 
 # --- Yedek dosyaları (kullanıcı verisi) ---
 yanlis-defteri-*.zip
+*.zip
 *.apk
 
 # --- Android / Gradle derleme çıktıları ---

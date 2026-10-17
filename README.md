@@ -25,15 +25,16 @@ cevaplamak ve çözümü öğrenme sürecinden ayrı saklamaktır.
 
 ## Durum
 
-**Aşama 1 tamamlandı.** CI'da derleme, sabit anahtarla imzalama ve sertifika doğrulaması başarılı;
-kullanıcı v1.0.0'dan v1.0.1'e kaldırmadan güncellemeyi, uygulamanın açılmasını ve 7 ders kartını
-telefonda doğruladı. Son yayımlanan uygulama v1.0.1'dir; onda soru kaydı yoktur.
+**Aşama 1 tamamlandı.** Kullanıcı v1.0.0'dan v1.0.1'e kaldırmadan güncellemenin başarılı olduğunu,
+uygulamanın açıldığını ve yedi ders kartını doğruladı.
 
-**Aşama 2 başladı, tamamlanmadı.** Room v1 repository'si, DB'den beslenen ders ekranı ve konu ekleme/
-düzenleme/arşivleme/yeniden etkinleştirme akışı eklendi. CI run `38948106275` içinde 8 Robolectric
-testi geçti; derleme ve imza doğrulandı. Gerçek cihaz testi yapılmadı. Ders yönetimi, soru CRUD/listeleme,
-görsel dosyası yaşam döngüsü ve minimum dışa aktarma hâlâ açık. v1.0.1 Release mevcut olduğundan yeni
-Release/APK yayımlanmadı. Sonraki adım ders yönetimi, ardından soru ve görsel akışıdır.
+**Aşama 2 ve Aşama 3 kod/CI kapsamı tamamlandı; cihaz kabulü bekliyor.** Aşama 2'de ders/konu ve
+soru akışları, çoklu kamera/galeri görselleri, kalıcı depolama, tekrar kuralları, tutarlılık bakımı ve
+Room v1→v2 migration; Aşama 3'te tam ZIP/SAF yedekleme, doğrulama, güvenlik kopyası ve kurtarma
+uygulandı. CI run `39026644131` 31 testi, Release derlemesini, imzayı ve sertifika parmak izini geçti.
+**Gerçek cihaz, Drive/temiz kurulum ve 30–50 fotoğraf okunabilirlik testleri yapılmadı.** v1.0.2,
+bu kabul testleri için test adayıdır; sonuçlar bu README'de ve `docs/TEST_KONTROL_LISTESI.md`'nde
+ayrı tutulur.
 
 ---
 

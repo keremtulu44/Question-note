@@ -1,7 +1,7 @@
 # Tam ZIP yedek biçimi — v2
 
 > Uygulanan biçim: `yanlis-defteri-backup`, format sürümü **2**, Room şema sürümü **2**. Bu belge
-> kodla günceldir. Son güncelleme: 2026-10-16.
+> kodla günceldir. Son güncelleme: 2026-10-17.
 
 ## 1. Arşiv yapısı
 
