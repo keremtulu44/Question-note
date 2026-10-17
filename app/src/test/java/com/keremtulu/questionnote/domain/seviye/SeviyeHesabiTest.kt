@@ -1,7 +1,6 @@
 package com.keremtulu.questionnote.domain.seviye
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -96,7 +95,7 @@ class XpHesabiTest {
 
     @Test
     fun `seri bonusu her kilometre tasinda yeniden verilir`() {
-        // 3 gün + 7 gün (4-10) => 30 + 70
+        // 3. gün +30, 7. gün +70
         val gunler = (0 until 10).map { 100 + it }
         assertEquals(100, XpHesabi.seriBonusu(gunler))
     }
@@ -118,7 +117,7 @@ class XpHesabiTest {
     @Test
     fun `tekrarli gunler seriyi bozmaz`() {
         assertEquals(3, XpHesabi.enUzunSeri(listOf(1, 1, 2, 3)))
-        assertEquals(30, XpHesabi.seriBonusu((0 until 30).map { it }))
+        assertEquals(30, XpHesabi.enUzunSeri((0 until 30).map { it }))
     }
 
     @Test
@@ -131,6 +130,6 @@ class XpHesabiTest {
             onceki = seviye
             xp += 37
         }
-        assertNotEquals(1, onceki)
+        assertTrue(onceki > 1)
     }
 }

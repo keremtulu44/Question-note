@@ -6,7 +6,7 @@ import com.keremtulu.questionnote.R
  * Ranks are the named levels of the progression system. Each rank is a span of levels, so the
  * system stays endless while still having recognisable badges.
  *
- * Artwork: `drawable-*/rank_*.png` (generated, white background removed, 104dp).
+ * Artwork lives in the drawable folders as rank_*.png (generated, white background removed, 104dp).
  */
 enum class Rutbe(
     val anahtar: String,
