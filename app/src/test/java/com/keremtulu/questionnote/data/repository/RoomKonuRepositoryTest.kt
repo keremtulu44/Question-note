@@ -60,7 +60,7 @@ class RoomKonuRepositoryTest {
 
     @Test
     fun addingTopicKeepsExistingTopicsInEachLesson() = runBlocking {
-        val dersler = database.dersDao().tumunuGetir().first()
+        val dersler = database.dersDao().tumunuGetir()
         val eskiKonular = dersler.mapIndexed { index, ders ->
             assertEquals(
                 KonuIslemSonucu.Basarili,
