@@ -131,6 +131,26 @@ class YerelYedeklemeHizmetiTest {
     }
 
     @Test
+    fun csvExportNeutralizesSpreadsheetFormulasWithoutChangingJsonData() = runBlocking {
+        val lessonId = database.dersDao().tumunuGetir().first().id
+        insertQuestionWithImage("formula-question", lessonId, "not", "=2+2")
+
+        val archive = service.zipOlustur().also(temporaryFiles::add)
+        val (csv, json) = ZipFile(archive).use { zip ->
+            val csvText = zip.getInputStream(zip.getEntry("csv/questions.csv"))
+                .bufferedReader(Charsets.UTF_8).use { it.readText() }
+            val jsonText = zip.getInputStream(zip.getEntry("data.json"))
+                .bufferedReader(Charsets.UTF_8).use { it.readText() }
+            csvText to jsonText
+        }
+
+        assertFalse(csv.contains("\"=2+2\""))
+        assertTrue(csv.contains("\"'=2+2\""))
+        // CSV yalnızca insan içindir; geri yüklemenin okuduğu JSON değeri değişmez.
+        assertTrue(json.contains("=2+2"))
+    }
+
+    @Test
     fun changedPayloadIsRejectedBeforeDatabaseOrFilesAreTouched() = runBlocking {
         val lessonId = database.dersDao().tumunuGetir().first().id
         insertQuestionWithImage("tamper-check-question", lessonId, "Değişmemeli")

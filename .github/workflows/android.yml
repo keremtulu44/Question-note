@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - arena/0ec2226d-question-note
+      - arena/59c6570d-question-note
     paths:
       - 'app/**'
       - 'gradle/**'

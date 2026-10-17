@@ -32,7 +32,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -223,18 +222,20 @@ fun FiltreliCalismaEkrani(
     val siraliSorular = remember(sorular) {
         CalismaSorulariniSirala.enUzunSureCalisilmayanlar(sorular, ZoneId.systemDefault())
     }
-    LaunchedEffect(soruDurumu, siraliSorular.size) {
-        if (soruDurumu !is EkranYukleme.Hazir) return@LaunchedEffect
-        val uygunSayi = when {
-            siraliSorular.isEmpty() -> ""
-            else -> (ayar.soruSayisi.toIntOrNull() ?: minOf(10, siraliSorular.size))
-                .coerceIn(1, siraliSorular.size)
-                .toString()
-        }
-        if (uygunSayi != ayar.soruSayisi) onAyarDegisti(ayar.copy(soruSayisi = uygunSayi))
+    // Kullanıcının yazdığı sayı korunur; istenen sayı eşleşenden büyükse altındaki bilgi metni
+    // ve "Başlat" düğmesi tüm eşleşenleri çalıştırır. Alan geri yazılarak kullanıcı düzeltilmez.
+    // Boş alan "tümü" anlamına gelir; 0 gibi geçersiz girişte düğme kapalı kalır.
+    val girilenSoruSayisi = ayar.soruSayisi.toIntOrNull()
+    val istenenSoruSayisi = when {
+        ayar.soruSayisi.isBlank() -> siraliSorular.size
+        else -> girilenSoruSayisi?.takeIf { it >= 1 }
     }
-    val secilecekSoruSayisi = ayar.soruSayisi.toIntOrNull()
-        ?.takeIf { it in 1..siraliSorular.size }
+    val secilecekSoruSayisi = istenenSoruSayisi
+        ?.coerceAtMost(siraliSorular.size)
+        ?.takeIf { siraliSorular.isNotEmpty() }
+    val sayiAsimi = istenenSoruSayisi != null &&
+        siraliSorular.isNotEmpty() &&
+        istenenSoruSayisi > siraliSorular.size
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -402,6 +403,17 @@ fun FiltreliCalismaEkrani(
                             ) {
                                 Text(androidx.compose.ui.res.stringResource(R.string.filtered_practice_start))
                             }
+                        }
+                        if (sayiAsimi) {
+                            Text(
+                                text = androidx.compose.ui.res.stringResource(
+                                    R.string.filtered_practice_count_capped,
+                                    siraliSorular.size,
+                                ),
+                                modifier = Modifier.padding(top = 4.dp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.bodySmall,
+                            )
                         }
                     }
                 }

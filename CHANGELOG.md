@@ -2,6 +2,28 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.0.9] — 2026-10-17
+
+> `versionCode 10`. Bu sürümün CI derlemesi/Release doğrulaması bekleniyor; sonuç gelince run kimliği ve APK SHA-256 buraya eklenecek.
+
+- Ekran döndürmede uygulama durumu (açık ekran, filtre seçimleri, süren filtreli oturum) korunur; yedek alma döndürme sırasında yarıda kesilmez.
+- Filtreli oturumdan geri/menüyle çıkarken kalan soru sayısını gösteren onay istenir; yanlışlıkla oturum atılmaz.
+- “Kaç soru?” alanı kullanıcının yazdığını ezmez; istenen sayı eşleşenden büyükse tüm eşleşenlerin çalışılacağı yazılır ve “Başlat” etkin kalır.
+- Soru ayrıntısındaki görseller 1200 px'e küçültülerek çözülür; örnekleme hedefi aşmayacak biçimde düzeltildi (bellek kullanımı düşer, tam ekranda ayrıntı korunur).
+- Arşivli bir konuyla aynı adı kullanma denemesinde “arşivden etkinleştir” açıklaması gösterilir.
+- Yedek yazımı başarısız olursa hedefteki yarım dosya silinir; geçerli yedek sanılması önlenir.
+- ZIP içindeki CSV dosyalarında `=`, `+`, `@` ile başlayan hücreler formül olarak çalışmayacak biçimde nötrleştirilir; `data.json` değişmez.
+- Soru bulunamadı/hata ekranındaki geri düğmesi bağlama uygun “Geri” etiketini kullanır.
+- Arşivli konu adı çakışması için repository testi eklendi; toplam test sayısı CI'da doğrulanacak.
+
+## [1.0.8] — 2026-10-17
+
+- Yan menüye “Filtreli çalışma” eklendi: konu, kaynak ve ana yanlış nedenine göre seçim; tekrar planında etkin ve bugün çözülmemiş sorular en uzun süredir çalışılmayandan başlayarak sıralı oturumda sunulur.
+- Oturum ilerlemesi (`Filtreli çalışma · 1 / N`) ve bitiş ekranı eklendi; filtre seçimleri uygulama kabuğunda tutulduğu için soru açıp dönünce korunur.
+- Filtreler AND ile birleşir; “Belirtilmemiş” seçenekleri boş kaynak/neden alanlarını bulur. Sonuç kaydı mevcut tekrar akışını kullanır.
+- İlk CI koşusu `39044614950` yanlış `layout.weight` import'uyla derlenemedi; `bef4bd41` düzeltmesinden sonra run `39044777998` geçti: 42 test, `assembleRelease`, imza/apksigner ve sertifika fingerprint doğrulaması başarılı; [v1.0.8 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.8) yayımlandı.
+- CI raporundaki APK SHA-256: `66563dc1b04ffe632ec5285baaefa92fbd9f5a068e8fab2726c4b85480b76b3e`. Fiziksel cihaz kabulü ayrıca bekliyor.
+
 ## [1.0.7] — 2026-10-17
 
 - Soru formundaki konu seçicisine kaynak/neden seçicileriyle aynı tarzda `+ Konu` eklendi; yeni konu seçili derse eklenir ve o dersin/diğer derslerin mevcut konu kayıtları korunur.

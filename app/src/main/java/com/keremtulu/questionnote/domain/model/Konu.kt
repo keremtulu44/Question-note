@@ -12,5 +12,9 @@ sealed interface KonuIslemSonucu {
     data object Basarili : KonuIslemSonucu
     data object BosAd : KonuIslemSonucu
     data object AyniAdVar : KonuIslemSonucu
+
+    /** Aynı ad, arşivlenmiş bir konuya ait; kullanıcı önce onu etkinleştirmeli. */
+    data object ArsivliAyniAdVar : KonuIslemSonucu
+
     data object Bulunamadi : KonuIslemSonucu
 }

@@ -107,10 +107,12 @@ ekleyebilir. Katalog satırları soru silinse bile bağımsız kalır ve tam ZIP
 Bir soru için en az bir `tur = SORU` kaydı bulunmalıdır. Çözüm görselleri isteğe bağlıdır ve
 sonradan eklenebilir.
 
-**Önizlemeler (küçük görseller) veritabanında ve kalıcı klasörde tutulmaz.** Liste ekranlarındaki
-küçültülmüş görüntüler Coil'in bellek/disk önbelleğiyle asıl dosyadan üretilir; kaybolursa yeniden
-üretilebilir. Böylece yedek boyutu şişmez ve türetilmiş veri için ayrıca silme/geri getirme mantığı
-yazılmaz. Liste kaydırması ölçümde yetersiz kalırsa bu karar yeniden değerlendirilir (ROADMAP Aşama 5).
+**Önizlemeler (küçük görseller) veritabanında ve kalıcı klasörde tutulmaz.** Küçültülmüş görüntüler
+her gösterimde asıl JPEG dosyasından `BitmapFactory` ile `inSampleSize` kullanılarak üretilir ve
+composable ekrandan çıktığında `recycle()` ile bırakılır; ayrı bir önizleme dosyası/önbelleği yoktur.
+Böylece yedek boyutu şişmez ve türetilmiş veri için ayrıca silme/geri getirme mantığı yazılmaz.
+Liste kaydırması ölçümde yetersiz kalırsa bir görsel önbelleği eklenmesi yeniden değerlendirilir
+(ROADMAP Aşama 5).
 
 ### `tekrarlar` (tekrar geçmişi — ham veri, üzerine yazılmaz)
 | Kolon | Tip | Not |

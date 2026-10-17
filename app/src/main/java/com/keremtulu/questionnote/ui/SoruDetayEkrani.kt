@@ -26,6 +26,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -169,7 +170,7 @@ fun SoruDetayEkrani(
                 verticalArrangement = Arrangement.Center,
             ) {
                 Text(stringResource(R.string.question_not_found), color = MaterialTheme.colorScheme.error)
-                TextButton(onClick = onGeri) { Text(stringResource(R.string.topic_back_to_lessons)) }
+                TextButton(onClick = onGeri) { Text(stringResource(R.string.common_back)) }
             }
 
             SoruDetayDurumu.Hata -> Column(
@@ -247,7 +248,7 @@ fun SoruDetayEkrani(
                             contentDescription = stringResource(R.string.question_image_description),
                             modifier = Modifier.fillMaxWidth().height(250.dp),
                             contentScale = androidx.compose.ui.layout.ContentScale.Fit,
-                            maxDecodeEdge = 3_000,
+                            maxDecodeEdge = 1_200,
                             onClick = { if (file != null) tamEkranGorsel = image },
                         )
                     }
@@ -287,7 +288,7 @@ fun SoruDetayEkrani(
                                 contentDescription = stringResource(R.string.solution_image_description),
                                 modifier = Modifier.fillMaxWidth().height(250.dp),
                                 contentScale = androidx.compose.ui.layout.ContentScale.Fit,
-                                maxDecodeEdge = 3_000,
+                                maxDecodeEdge = 1_200,
                                 onClick = { if (file != null) tamEkranGorsel = image },
                             )
                         }
@@ -472,7 +473,7 @@ fun SoruDetayEkrani(
                 onDismiss = { tamEkranGorsel = null },
             )
         } else {
-            tamEkranGorsel = null
+            LaunchedEffect(image) { tamEkranGorsel = null }
         }
     }
 }

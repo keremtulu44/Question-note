@@ -331,6 +331,7 @@ fun SoruFormuEkrani(
                 }
                 KonuIslemSonucu.BosAd -> konuEklemeHatasi = R.string.topic_error_empty_name
                 KonuIslemSonucu.AyniAdVar -> konuEklemeHatasi = R.string.topic_error_duplicate_name
+                KonuIslemSonucu.ArsivliAyniAdVar -> konuEklemeHatasi = R.string.topic_error_archived_duplicate_name
                 KonuIslemSonucu.Bulunamadi -> konuEklemeHatasi = R.string.topic_not_found
                 null -> konuEklemeHatasi = R.string.topic_save_error
             }

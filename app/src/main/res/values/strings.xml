@@ -64,6 +64,7 @@
     <string name="image_missing">Görsel bulunamadı.</string>
     <string name="image_load_error">Görsel yüklenemedi.</string>
     <string name="common_close">Kapat</string>
+    <string name="common_back">Geri</string>
     <string name="question_screen_subtitle">Sorularını fotoğrafları ve konularıyla düzenle.</string>
     <string name="question_add">Soru ekle</string>
     <string name="question_filter_all">Tümü</string>
@@ -95,6 +96,11 @@
     <string name="filtered_practice_complete_title">Çalışma tamamlandı</string>
     <string name="filtered_practice_complete_description">%1$d soruyu tamamladın.</string>
     <string name="filtered_practice_return">Filtrelere dön</string>
+    <string name="filtered_practice_count_capped">Eşleşen %1$d sorunun tamamı çalışılacak.</string>
+    <string name="filtered_practice_exit_title">Oturumdan çıkılsın mı?</string>
+    <string name="filtered_practice_exit_message">Bu oturumda %1$d soru kaldı. Çıkarsan bu sorular çalışılmadan atlanır; kaydettiğin sonuçlar korunur.</string>
+    <string name="filtered_practice_exit_confirm">Çık</string>
+    <string name="filtered_practice_exit_cancel">Devam et</string>
     <string name="question_empty_filtered">Bu filtreyle eşleşen soru yok.</string>
     <string name="question_empty">Bu derste henüz soru yok. İlk sorunu ekleyebilirsin.</string>
     <string name="question_empty_unassigned">Bu derste konusuz soru yok.</string>
@@ -265,6 +271,7 @@
     <string name="topic_saving">Kaydediliyor…</string>
     <string name="topic_error_empty_name">Konu adı boş olamaz.</string>
     <string name="topic_error_duplicate_name">Bu derste aynı ada sahip bir konu var.</string>
+    <string name="topic_error_archived_duplicate_name">Bu adda arşivli bir konu var. Konular ekranındaki Arşiv sekmesinden etkinleştirebilirsin.</string>
     <string name="topic_not_found">Konu bulunamadı. Listeyi yenileyip tekrar deneyin.</string>
     <string name="topic_save_error">Konu kaydedilemedi. Tekrar deneyin.</string>
     <string name="topic_added">Konu eklendi.</string>

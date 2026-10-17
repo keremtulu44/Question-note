@@ -123,7 +123,7 @@ class RoomKonuRepositoryTest {
         assertEquals(KonuIslemSonucu.Basarili, repository.konuArsivle(konu.id))
         assertTrue(repository.konulariIzle(dersId, arsivli = false).first().isEmpty())
         assertEquals(listOf(konu.id), repository.konulariIzle(dersId, arsivli = true).first().map { it.id })
-        assertEquals(KonuIslemSonucu.AyniAdVar, repository.konuEkle(dersId, "Fonksiyonlar"))
+        assertEquals(KonuIslemSonucu.ArsivliAyniAdVar, repository.konuEkle(dersId, "Fonksiyonlar"))
         assertEquals(konu.id, soruKonuId(soruId))
 
         assertEquals(KonuIslemSonucu.Basarili, repository.konuYenidenEtkinlestir(konu.id))
@@ -131,6 +131,26 @@ class RoomKonuRepositoryTest {
         assertEquals(listOf(konu.id), aktifKonular.map { it.id })
         assertTrue(repository.konulariIzle(dersId, arsivli = true).first().isEmpty())
         assertEquals(konu.id, soruKonuId(soruId))
+    }
+
+    @Test
+    fun renamingToArchivedTopicNameExplainsArchivedConflict() = runBlocking {
+        val dersId = database.dersDao().tumunuGetir().first().id
+        assertEquals(KonuIslemSonucu.Basarili, repository.konuEkle(dersId, "Türev"))
+        assertEquals(KonuIslemSonucu.Basarili, repository.konuEkle(dersId, "Limit"))
+        val konular = repository.konulariIzle(dersId, arsivli = false).first()
+        val turev = konular.first { it.ad == "Türev" }
+        val limit = konular.first { it.ad == "Limit" }
+        assertEquals(KonuIslemSonucu.Basarili, repository.konuArsivle(turev.id))
+
+        assertEquals(
+            KonuIslemSonucu.ArsivliAyniAdVar,
+            repository.konuYenidenAdlandir(limit.id, "türev"),
+        )
+        assertEquals(
+            listOf("Limit"),
+            repository.konulariIzle(dersId, arsivli = false).first().map { it.ad },
+        )
     }
 
     private fun soruKonuId(soruId: String): String {

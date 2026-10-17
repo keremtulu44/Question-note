@@ -31,8 +31,13 @@ class RoomKonuRepository(
 
         return database.withTransaction {
             val konular = konuDao.dersinKonulariniGetir(dersId)
-            if (konular.any { it.ad.anahtar() == temizAd.anahtar() }) {
-                return@withTransaction KonuIslemSonucu.AyniAdVar
+            val ayniAdliKonu = konular.firstOrNull { it.ad.anahtar() == temizAd.anahtar() }
+            if (ayniAdliKonu != null) {
+                return@withTransaction if (ayniAdliKonu.arsivli) {
+                    KonuIslemSonucu.ArsivliAyniAdVar
+                } else {
+                    KonuIslemSonucu.AyniAdVar
+                }
             }
 
             val now = System.currentTimeMillis()
@@ -58,10 +63,16 @@ class RoomKonuRepository(
 
         return database.withTransaction {
             val konu = konuDao.idIleGetir(konuId) ?: return@withTransaction KonuIslemSonucu.Bulunamadi
-            val ayniAdKullananVar = konuDao.dersinKonulariniGetir(konu.dersId).any {
+            val ayniAdliKonu = konuDao.dersinKonulariniGetir(konu.dersId).firstOrNull {
                 it.id != konu.id && it.ad.anahtar() == temizAd.anahtar()
             }
-            if (ayniAdKullananVar) return@withTransaction KonuIslemSonucu.AyniAdVar
+            if (ayniAdliKonu != null) {
+                return@withTransaction if (ayniAdliKonu.arsivli) {
+                    KonuIslemSonucu.ArsivliAyniAdVar
+                } else {
+                    KonuIslemSonucu.AyniAdVar
+                }
+            }
 
             val guncelKonu = konu.copy(ad = temizAd, guncelleme = System.currentTimeMillis())
             if (konuDao.guncelle(guncelKonu) == 1) {

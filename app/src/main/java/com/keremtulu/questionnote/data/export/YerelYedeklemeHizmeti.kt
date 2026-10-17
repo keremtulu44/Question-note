@@ -107,11 +107,17 @@ class YerelYedeklemeHizmeti(
         try {
             val output = appContext.contentResolver.openOutputStream(destination, "w")
                 ?: throw IOException("Seçilen konuma yazılamadı.")
-            output.use { out ->
-                archive.inputStream().buffered().use { input ->
-                    input.copyTo(out, bufferSize = IO_BUFFER_SIZE)
+            try {
+                output.use { out ->
+                    archive.inputStream().buffered().use { input ->
+                        input.copyTo(out, bufferSize = IO_BUFFER_SIZE)
+                    }
+                    out.flush()
                 }
-                out.flush()
+            } catch (error: Exception) {
+                // Hedef açıldıktan sonra yazma yarıda kaldıysa yarım ZIP'i bırakma; geçerli yedek sanılmasın.
+                runCatching { appContext.contentResolver.delete(destination, null, null) }
+                throw error
             }
             val info = SonYedekBilgisi(
                 dosyaAdi = destination.lastPathSegment?.substringAfterLast('/')
@@ -559,9 +565,21 @@ class YerelYedeklemeHizmeti(
                     is Boolean -> if (value) "true" else "false"
                     else -> value.toString()
                 }
-                "\"${text.replace("\"", "\"\"")}\""
+                "\"${text.ciktisizMetin().replace("\"", "\"\"")}\""
             }
         }
+
+    /**
+     * CSV yalnızca insan içindir (geri yükleme data.json okur) ama tabloda açıldığında
+     * `=`, `+`, `@` gibi önekler formül olarak çalışabilir. Metin hücmesini nötrleştir.
+     */
+    private fun String.ciktisizMetin(): String {
+        if (isEmpty()) return this
+        val formulOnegi = this[0] == '=' || this[0] == '+' || this[0] == '@' ||
+            this[0] == '\t' || this[0] == '\r' ||
+            (this[0] == '-' && toDoubleOrNull() == null)
+        return if (formulOnegi) "'$this" else this
+    }
 
     private fun DersEntity.toJson() = JSONObject()
         .put("id", id)

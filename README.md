@@ -25,23 +25,29 @@ cevaplamak ve çözümü öğrenme sürecinden ayrı saklamaktır.
 
 ## Durum
 
-**v1.0.7 (versionCode 8) yayımlandı.** Soru formundaki konu alanına, kaynak/neden seçimleriyle
-aynı biçimde `+ Konu` eklendi. Yeni konu yalnızca seçili derse kaydedilir; o dersin eski konuları ve
-diğer derslerin konu listeleri korunur. Başarılı eklemeden sonra yeni konu seçilir; aynı addaki konu
-ikinci kez oluşturulamaz. v1.0.6 formun numaralı kartlarını, belirgin seçim kontrollerini ve sabit
-kaydetme alanını getirmişti. v1.0.5 ortak kaynak kataloğu, soru başına sayfa/test/soru konumu, tek
-ana yanlış nedeni ve eski not verisini koruyarak not UI'sinin kaldırılmasını içerir. Room v3
-migration'ı veriyi korur; tam ZIP yedeği v3'tür ve v2 yedeklerini içe alır. Ürün lise odağındadır;
-TYT/AYT ayrımı yoktur.
+**v1.0.8 (versionCode 9) yayımlandı.** Yan menüye “Filtreli çalışma” eklendi: konu, kaynak ve ana
+yanlış nedenine göre seçilen; tekrar planında etkin ve bugün çözülmemiş sorular en uzun süredir
+çalışılmayandan başlayarak sıralı bir oturumda çözülür. v1.0.7’nin soru formundaki `+ Konu` akışı,
+v1.0.6 form yenilemesi, v1.0.5 ortak kaynak kataloğu/soru başına konum/tek ana yanlış nedeni ve eski
+not verisini koruyan not UI’si kaldırması korunur. Room v3 migration’ı veriyi korur; tam ZIP yedeği
+v3’tür ve v2 yedeklerini içe alır. Ürün lise odağındadır; TYT/AYT ayrımı yoktur.
 
-CI run `39041684003` **37 testi** geçti; Release derlemesi, imza doğrulaması ve beklenen sertifika
-parmak izi eşleşti. [v1.0.7 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.7)
-CI raporundaki APK SHA-256: `3d10f48d7c6db6ff246d0942fa958df974ac3c87e182b2627855f192035f99c4`.
+CI run `39044777998` **42 testi** geçti; Release derlemesi, imza doğrulaması ve beklenen sertifika
+parmak izi eşleşti. [v1.0.8 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.8)
+CI raporundaki APK SHA-256: `66563dc1b04ffe632ec5285baaefa92fbd9f5a068e8fab2726c4b85480b76b3e`.
+
+**Yayımlanmamış düzeltmeler (v1.0.9 adayı, henüz CI/cihaz doğrulaması yok):** ekran döndürmede
+oturum/filtre durumunun korunması, filtreli oturumdan çıkışta onay, “Kaç soru?” alanının kullanıcı
+girdisini ezmemesi, görsel çözme belleğinin sınırlandırılması, arşivli konu adı çakışmasının
+açıklanması, yedek yazımı başarısızsa yarım dosyanın silinmesi ve CSV formül nötrleştirmesi.
+
+**v1.0.9 hazırlanıyor (versionCode 10):** Yukarıdaki “yayımlanmamış düzeltmeler” bu sürüme alındı; CI derlemesi ve Release doğrulaması bekleniyor. Sonuç gelene kadar v1.0.8 son yayımlanmış sürümdür.
 
 **Cihaz kabulü ayrıdır:** v1.0.3 ana akış adımlarını kullanıcı geçti bildirdi. v1.0.4 tekrar geçmişi,
-v1.0.5 katalog/ZIP akışı, v1.0.6 form yenilemesi ve v1.0.7 ders bazında konu ekleme henüz cihazda
-kabul edilmedi. SAF/Drive ve fotoğraf okunabilirliği de bekliyor. v1.0.2 “3. turu denemedim”
-ifadesinin checklist eşlemesi hâlâ teyitsiz; ayrıntı [TEST_KONTROL_LISTESI.md](docs/TEST_KONTROL_LISTESI.md) içinde.
+v1.0.5 katalog/ZIP akışı, v1.0.6 form yenilemesi, v1.0.7 ders bazında konu ekleme ve v1.0.8 filtreli
+çalışma henüz cihazda kabul edilmedi. SAF/Drive ve fotoğraf okunabilirliği de bekliyor. v1.0.2 “3.
+turu denemedim” ifadesinin checklist eşlemesi hâlâ teyitsiz; ayrıntı
+[TEST_KONTROL_LISTESI.md](docs/TEST_KONTROL_LISTESI.md) içinde.
 ---
 
 ## Belgeler
@@ -65,12 +71,11 @@ ifadesinin checklist eşlemesi hâlâ teyitsiz; ayrıntı [TEST_KONTROL_LISTESI.
 ## Kullanım / APK erişimi
 
 İmzalı APK'lar GitHub [Releases](https://github.com/keremtulu44/Question-note/releases) bölümünde.
-[v1.0.7 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.0.7/yanlis-defteri-1.0.7.apk).
-Mevcut uygulamayı **kaldırmadan** üzerine kur; eski kayıtların korunduğunu, `+ Konu` ile seçili
-ders için konu eklenip eski konuların tüm derslerde kaldığını doğrula. Soru ekleme/düzenleme, kamera/
-galeri, görsel sıralama ve kaydetmeyi de dene; ardından kaynak/neden seçimini ve v3 yedek/geri
-yüklemeyi kontrol et. İndirme/kurulum ayrıntıları
-[BUILDING.md](BUILDING.md) içinde.
+[v1.0.8 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.0.8/yanlis-defteri-1.0.8.apk).
+Mevcut uygulamayı **kaldırmadan** üzerine kur; eski kayıtların korunduğunu doğrula. Filtreli
+çalışmada konu/kaynak/neden seçimini, soru sayısını, sıralı ilerlemeyi ve bitiş ekranını dene.
+Ardından `+ Konu`, soru ekleme/düzenleme, kamera/galeri ve v3 yedek/geri yüklemeyi kontrol et.
+İndirme/kurulum ayrıntıları [BUILDING.md](BUILDING.md) içinde.
 
 ---
 

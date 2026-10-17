@@ -388,5 +388,6 @@ private fun KonuIslemSonucu.hataMetniKaynak(): Int =
         KonuIslemSonucu.Basarili -> R.string.topic_save
         KonuIslemSonucu.BosAd -> R.string.topic_error_empty_name
         KonuIslemSonucu.AyniAdVar -> R.string.topic_error_duplicate_name
+        KonuIslemSonucu.ArsivliAyniAdVar -> R.string.topic_error_archived_duplicate_name
         KonuIslemSonucu.Bulunamadi -> R.string.topic_not_found
     }

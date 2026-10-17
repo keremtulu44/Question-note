@@ -11,7 +11,7 @@
 > ZIP yol güvenliği) ve **Robolectric** (şema/migration testleri). Emülatör yalnızca gerçekten
 > gerekirse kullanılır; asıl kabul testleri gerçek cihazda yapılır.
 
-Son güncelleme: 2026-10-17. v1.0.7 (versionCode 8) yayımlandı; CI run `39041684003` 37 testi, Release derlemesini, imzayı ve sertifika fingerprint'ini doğruladı. Yeni `+ Konu` akışının ve v1.0.5–v1.0.7 özelliklerinin cihaz kabulü ayrı ve henüz kullanıcı tarafından bildirilmedi. v1.0.4 tekrar geçmişi, SAF/Drive yedek-geri yükleme ve fotoğraf okunabilirliği de cihazda bekliyor. “3. turu denemedim” ifadesinin checklist eşlemesi teyitsizdir.
+Son güncelleme: 2026-10-17. v1.0.8 (versionCode 9) yayımlandı; CI run `39044777998` 42 testi, Release derlemesini, imzayı ve sertifika fingerprint'ini doğruladı. Filtreli çalışma ile v1.0.5–v1.0.8 özelliklerinin cihaz kabulü ayrı ve henüz kullanıcı tarafından bildirilmedi. v1.0.4 tekrar geçmişi, SAF/Drive yedek-geri yükleme ve fotoğraf okunabilirliği de cihazda bekliyor. “3. turu denemedim” ifadesinin checklist eşlemesi teyitsizdir. Dal üzerindeki yayımlanmamış düzeltmeler için CI/cihaz doğrulaması yapılmadı; ilgili satırlar aşağıda ayrı bölümdedir.
 
 ---
 
@@ -40,6 +40,8 @@ Son güncelleme: 2026-10-17. v1.0.7 (versionCode 8) yayımlandı; CI run `390416
 | 1.19 | v1.0.6 mevcut uygulamanın üstüne kaldırmadan kurulur; önceki veriler korunur | KULLANICI | [ ] |
 | 1.20 | VersionCode 7 → 8; v1.0.7 Release, APK imzası ve fingerprint CI'da doğrulandı | YZ (CI run `39041684003`) | [x] |
 | 1.21 | v1.0.7 mevcut uygulamanın üstüne kaldırmadan kurulur; önceki veriler korunur | KULLANICI | [ ] |
+| 1.22 | VersionCode 8 → 9; v1.0.8 Release, APK imzası ve fingerprint CI'da doğrulandı | YZ (CI run `39044777998`) | [x] |
+| 1.23 | v1.0.8 mevcut uygulamanın üstüne kaldırmadan kurulur; önceki veriler korunur | KULLANICI | [ ] |
 
 ## Aşama 2 — Yerel arşiv
 
@@ -89,6 +91,9 @@ Son güncelleme: 2026-10-17. v1.0.7 (versionCode 8) yayımlandı; CI run `390416
 | 2.42 | v1.0.6 ekleme/düzenleme formu; kartlar, kamera/galeri, görsel sıralama/silme ve sabit kaydetme alanı cihazda anlaşılır çalışır | KULLANICI | [ ] |
 | 2.43 | Soru formundaki `+ Konu` yalnızca seçili derse ekler; o dersin ve diğer derslerin mevcut konuları korunur | KULLANICI | [ ] |
 | 2.44 | Yeni konu ekleme repository testi yedi dersin eski konularını korur; yeni konuyu yalnızca seçilen derse ekler | YZ (CI run `39041684003`) | [x] |
+| 2.45 | Filtreli çalışma sorgusu konu/kaynak/neden filtrelerini AND ile birleştirir; ASKIDA/TAMAMLANDI, arşivli ders ve bugün çözülmüş sorular dışlanır | YZ (CI run `39044777998`) | [x] |
+| 2.46 | Filtreli oturum sırası en uzun süredir çalışılmayandan başlar; eşitlikte sonraki plan günü/oluşturma/id kullanılır | YZ (CI run `39044777998`) | [x] |
+| 2.47 | v1.0.8 filtreli çalışma cihazda: filtre seçimleri, “Kaç soru?”, sıralı ilerleme, sonuç kaydı ve bitiş ekranı | KULLANICI | [ ] |
 
 ## Aşama 3 — Yedek ve geri yükleme
 
@@ -148,6 +153,22 @@ Son güncelleme: 2026-10-17. v1.0.7 (versionCode 8) yayımlandı; CI run `390416
 | 5.7 | Geri tuşu beklenen şekilde çalışıyor | KULLANICI | [ ] |
 | 5.8 | Sistem çubukları ve ekran boşlukları düzgün (çentik, gezinme çubuğu) | KULLANICI | [ ] |
 | 5.9 | Açık/koyu tema okunaklı | KULLANICI | [ ] |
+
+## Yayımlanmamış düzeltmeler (v1.0.9 adayı)
+
+> v1.0.9 (versionCode 10) olarak sürümlendi ve CI'ya gönderildi; **CI ve cihaz doğrulaması henüz tamamlanmadı**. Sonuç gelene kadar hiçbir satır yeşil işaretlenmemelidir.
+
+| # | Test | Sorumlu | Durum |
+|---|---|---|---|
+| D.1 | Ekran döndürüldüğünde açık ekran, filtre seçimleri ve süren oturum korunur; yedek alma kesilmez | KULLANICI | [ ] |
+| D.2 | Filtreli oturumdan geri/menüyle çıkışta kalan soru sayısını gösteren onay çıkar; “Devam et” oturumda kalır | KULLANICI | [ ] |
+| D.3 | “Kaç soru?” alanı yazılan değeri ezmez; eşleşenden büyük değerde tüm eşleşenler çalışır ve bilgi metni görünür | KULLANICI | [ ] |
+| D.4 | Soru ayrıntısında çok sayfalı görseller bellek hatası olmadan açılır; tam ekran yakınlaştırma okunaklı kalır | KULLANICI | [ ] |
+| D.5 | Arşivli konuyla aynı ad denenince “arşivden etkinleştir” açıklaması görünür | YZ (CI bekliyor) | [ ] |
+| D.6 | Arşivli konu çakışması repository testi geçer (yeni test eklendi) | YZ (CI bekliyor) | [ ] |
+| D.7 | Yedek yazımı başarısız olduğunda hedefte yarım ZIP kalmaz | YZ/KULLANICI (CI bekliyor) | [ ] |
+| D.8 | CSV'de `=`, `+`, `@` ile başlayan hücreler formülsüz görünür; `data.json` değeri değişmez | YZ (CI bekliyor) | [ ] |
+| D.9 | Soru bulunamadı/hata ekranındaki geri düğmesi “Geri” etiketini kullanır | YZ (CI bekliyor) | [ ] |
 
 ## Genel / sürekli
 

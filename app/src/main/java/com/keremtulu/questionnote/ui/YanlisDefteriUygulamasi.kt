@@ -94,6 +94,8 @@ fun YanlisDefteriUygulamasi(
 ) {
     var ekran by remember { mutableStateOf<UygulamaEkrani>(UygulamaEkrani.Bugun) }
     var filtreliCalismaAyar by remember { mutableStateOf(FiltreliCalismaEkraniAyar()) }
+    // Filtreli oturum sürerken başka bir ekrana geçilirse önce onay istenir.
+    var oturumCikisHedefi by remember { mutableStateOf<UygulamaEkrani?>(null) }
     var kurtarma by remember { mutableStateOf(KurtarmaDurumu.YUKLENIYOR) }
     var yedeklemeIslemde by remember { mutableStateOf(false) }
     var geriYuklemeOnizlemesi by remember { mutableStateOf<GeriYuklemeOnizlemesi?>(null) }
@@ -158,20 +160,28 @@ fun YanlisDefteriUygulamasi(
         }
     }
 
+    fun ekranSec(hedef: UygulamaEkrani) {
+        if (ekran is UygulamaEkrani.FiltreliOturum) {
+            oturumCikisHedefi = hedef
+        } else {
+            ekran = hedef
+        }
+    }
+
     fun menuEyleminiCalistir(eylem: MenuEylemi) {
         scope.launch {
             drawerState.close()
             when (eylem) {
-                MenuEylemi.BUGUN -> ekran = UygulamaEkrani.Bugun
-                MenuEylemi.DERSLER -> ekran = UygulamaEkrani.DersSecimi(soruEkleModu = false)
-                MenuEylemi.FILTRELI_CALISMA -> ekran = UygulamaEkrani.FiltreliCalisma
+                MenuEylemi.BUGUN -> ekranSec(UygulamaEkrani.Bugun)
+                MenuEylemi.DERSLER -> ekranSec(UygulamaEkrani.DersSecimi(soruEkleModu = false))
+                MenuEylemi.FILTRELI_CALISMA -> ekranSec(UygulamaEkrani.FiltreliCalisma)
                 MenuEylemi.YEDEK_OLUSTUR -> if (!yedeklemeIslemde) {
                     exportLauncher.launch("yanlis-defteri-yedek.zip")
                 }
                 MenuEylemi.YEDEK_GERI_YUKLE -> if (!yedeklemeIslemde) {
                     restoreLauncher.launch(arrayOf("application/zip", "application/octet-stream"))
                 }
-                MenuEylemi.GORSEL_BAKIMI -> ekran = UygulamaEkrani.GorselBakimi
+                MenuEylemi.GORSEL_BAKIMI -> ekranSec(UygulamaEkrani.GorselBakimi)
             }
         }
     }
@@ -181,7 +191,7 @@ fun YanlisDefteriUygulamasi(
             drawerState.currentValue == androidx.compose.material3.DrawerValue.Closed &&
             ekran != UygulamaEkrani.Bugun,
     ) {
-        ekran = ekran.geriHedefi()
+        ekranSec(ekran.geriHedefi())
     }
 
     ModalNavigationDrawer(
@@ -301,7 +311,7 @@ fun YanlisDefteriUygulamasi(
                                 soruRepository = soruRepository,
                                 konuRepository = konuRepository,
                                 gorselDeposu = gorselDeposu,
-                                onGeri = { ekran = UygulamaEkrani.FiltreliCalisma },
+                                onGeri = { ekranSec(UygulamaEkrani.FiltreliCalisma) },
                                 onDuzenle = { id -> ekran = UygulamaEkrani.SoruFormu(lesson, id, current) },
                                 onTekrarTamamlandi = {
                                     val nextIndex = current.sira + 1
@@ -344,6 +354,29 @@ fun YanlisDefteriUygulamasi(
                 modifier = Modifier.align(Alignment.BottomCenter),
             )
         }
+    }
+
+    oturumCikisHedefi?.let { hedef ->
+        val oturum = ekran as? UygulamaEkrani.FiltreliOturum
+        val kalanSoru = oturum?.let { (it.sorular.size - it.sira).coerceAtLeast(0) } ?: 0
+        AlertDialog(
+            onDismissRequest = { oturumCikisHedefi = null },
+            title = { Text(stringResource(R.string.filtered_practice_exit_title)) },
+            text = { Text(stringResource(R.string.filtered_practice_exit_message, kalanSoru)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        oturumCikisHedefi = null
+                        ekran = hedef
+                    },
+                ) { Text(stringResource(R.string.filtered_practice_exit_confirm)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { oturumCikisHedefi = null }) {
+                    Text(stringResource(R.string.filtered_practice_exit_cancel))
+                }
+            },
+        )
     }
 
     geriYuklemeOnizlemesi?.let { preview ->

@@ -137,7 +137,8 @@ private fun cozumle(file: File, maxEdge: Int): Bitmap? {
     BitmapFactory.decodeFile(file.absolutePath, bounds)
     if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
     var sample = 1
-    while (maxOf(bounds.outWidth, bounds.outHeight) / sample > maxEdge * 2) sample *= 2
+    // Hedef kenarı aşmayacak şekilde küçült; eski eşik hedefin 2 katına kadar izin veriyordu.
+    while (maxOf(bounds.outWidth, bounds.outHeight) / sample > maxEdge) sample *= 2
     return BitmapFactory.decodeFile(
         file.absolutePath,
         BitmapFactory.Options().apply {
