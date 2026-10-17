@@ -85,7 +85,6 @@ fun BugunEkrani(
     ilerlemeHizmeti: IlerlemeHizmeti,
     gunlukHedefDeposu: GunlukHedefDeposu,
     onSoruEkle: () -> Unit,
-    onSoruAc: (Ders, String) -> Unit,
     onOturumBaslat: (List<Soru>, Map<String, Ders>) -> Unit,
     onDevam: (() -> Unit)? = null,
 ) {
@@ -257,7 +256,7 @@ fun BugunEkrani(
                             BugunSoruKarti(
                                 row = row,
                                 today = today,
-                                onClick = { onSoruAc(row.ders, row.soru.id) },
+                                onClick = { onOturumBaslat(listOf(row.soru), mapOf(row.ders.id to row.ders)) },
                             )
                         }
                     }

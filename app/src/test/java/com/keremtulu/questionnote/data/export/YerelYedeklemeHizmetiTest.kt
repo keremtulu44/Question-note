@@ -4,6 +4,8 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import androidx.room.Room
+import com.keremtulu.questionnote.data.local.entity.TekrarEntity
+import java.time.LocalDate
 import androidx.room.withTransaction
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
 import com.keremtulu.questionnote.data.local.VarsayilanDersleriEkle
@@ -128,6 +130,26 @@ class YerelYedeklemeHizmetiTest {
         assertNotNull(last)
         assertTrue(last!!.guvenlikKopyasi)
         assertEquals(result.guvenlikYedegiAdi, last.dosyaAdi)
+    }
+
+    @Test
+    fun v2AlgorithmHistoryRoundTripsInExistingV3BackupWithoutNewColumns() = runBlocking {
+        val lesson = database.dersDao().tumunuGetir().first().id
+        insertQuestionWithImage("adaptive-question", lesson, "Adaptif tekrar notu")
+        val gun = LocalDate.of(2026, 10, 17).toEpochDay().toInt()
+        val record = TekrarEntity(
+            id = "adaptive-review", soruId = "adaptive-question", zaman = System.currentTimeMillis(),
+            gun = gun, planlananGun = gun - 1, sonuc = "RAHAT", cozumAcildi = false,
+            oncekiAralik = 7, sonrakiAralik = 18, algoritmaSurumu = 2,
+        )
+        database.tekrarDao().ekle(record)
+        val question = requireNotNull(database.soruDao().idIleGetir("adaptive-question"))
+        database.soruDao().guncelle(question.copy(sonTekrarGun = gun, sonrakiTekrarGun = gun + 18, ogrenmeDurumu = "PEKISIYOR"))
+        val archive = service.zipOlustur().also(temporaryFiles::add)
+        val preview = service.dosyadanOnizle(archive)
+        service.geriYukle(preview)
+        assertEquals(record, database.tekrarDao().tumunuGetir().single())
+        assertEquals(gun + 18, database.soruDao().idIleGetir("adaptive-question")?.sonrakiTekrarGun)
     }
 
     @Test

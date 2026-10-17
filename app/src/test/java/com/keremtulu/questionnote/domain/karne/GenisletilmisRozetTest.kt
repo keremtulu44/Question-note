@@ -40,7 +40,7 @@ class GenisletilmisRozetTest {
     }
 
     @Test fun secretsAreEarnableButNotAutomaticallyAwarded() {
-        val girdi = bos().copy(bugunDersSayisi = 3, toplamDersSayisi = 5, donusumVar = true)
+        val girdi = bos().copy(birGundeDersSayisi = 3, toplamDersSayisi = 5, donusumVar = true)
         val yeni = RozetKurallari.kazanilanlar(girdi, emptySet())
         assertTrue(yeni.containsAll(listOf(Rozet.UC_DERS, Rozet.BES_DERS, Rozet.DONUSUM)))
         assertFalse(Rozet.KUSURSUZ_20 in yeni)
@@ -61,7 +61,7 @@ class GenisletilmisRozetTest {
         val girdi = bos().copy(
             oturum = KarneSayilari(20, 20, 0, 0, 0), seri = 100, toplamBagimsiz = 1000,
             sonBesGun = (1..5).map { GunDenge(it, 10, 10) }, soruSayisi = 250,
-            tekrarSayisi = 1000, hedefGunSayisi = 30, bugunDersSayisi = 3, toplamDersSayisi = 5,
+            tekrarSayisi = 1000, hedefGunSayisi = 30, birGundeDersSayisi = 3, toplamDersSayisi = 5,
             donusumVar = true, bagimsizZincir = 20,
         )
         val yeni = RozetKurallari.kazanilanlar(girdi, emptySet())

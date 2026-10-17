@@ -36,6 +36,9 @@ interface IlerlemeDao {
     @Query("SELECT COUNT(DISTINCT s.ders_id) FROM tekrarlar t JOIN sorular s ON s.id = t.soru_id WHERE t.gun = :gun")
     suspend fun gunDersSayisi(gun: Int): Int
 
+    @Query("SELECT COALESCE(MAX(adet), 0) FROM (SELECT COUNT(DISTINCT s.ders_id) AS adet FROM tekrarlar t JOIN sorular s ON s.id = t.soru_id GROUP BY t.gun)")
+    suspend fun enCokGunDersSayisi(): Int
+
     @Query("SELECT COUNT(DISTINCT s.ders_id) FROM tekrarlar t JOIN sorular s ON s.id = t.soru_id")
     suspend fun calisilanDersSayisi(): Int
 
@@ -44,7 +47,7 @@ interface IlerlemeDao {
         SELECT EXISTS(
             SELECT 1 FROM tekrarlar basari
             WHERE basari.sonuc = 'RAHAT' AND basari.cozum_acildi = 0
-              AND (SELECT COUNT(*) FROM tekrarlar eski
+              AND (SELECT COUNT(DISTINCT eski.gun) FROM tekrarlar eski
                    WHERE eski.soru_id = basari.soru_id AND eski.gun < basari.gun
                      AND eski.sonuc = 'COZEMEDIM' AND eski.cozum_acildi = 0) >= 3
         )

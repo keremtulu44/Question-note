@@ -53,6 +53,15 @@ class IlerlemeSayimiTest {
         assertTrue(db.ilerlemeDao().donusumVar())
     }
 
+    @Test fun duplicateLegacyFailuresOnOneDayDoNotEarnThreeDayComeback() = runBlocking {
+        soru()
+        tekrar("f1", gun = 1, sonuc = "COZEMEDIM")
+        tekrar("f2", gun = 1, sonuc = "COZEMEDIM")
+        tekrar("f3", gun = 1, sonuc = "COZEMEDIM")
+        tekrar("r", gun = 2, sonuc = "RAHAT")
+        assertFalse(db.ilerlemeDao().donusumVar())
+    }
+
     @Test fun lessonDiversityCountsDistinctLessonsNotRepeatedQuestions() = runBlocking {
         soru("a", 0); soru("b", 1); soru("c", 2)
         tekrar("a1", "a", 1, "RAHAT"); tekrar("a2", "a", 2, "RAHAT")
@@ -60,6 +69,7 @@ class IlerlemeSayimiTest {
         assertEquals(3, db.ilerlemeDao().gunDersSayisi(1))
         assertEquals(1, db.ilerlemeDao().gunDersSayisi(2))
         assertEquals(3, db.ilerlemeDao().calisilanDersSayisi())
+        assertEquals(3, db.ilerlemeDao().enCokGunDersSayisi())
         assertEquals(1, db.ilerlemeDao().hedefTamamlananGunSayisi(3))
     }
 }

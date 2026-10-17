@@ -52,7 +52,7 @@ data class RozetGirdisi(
     val soruSayisi: Int = 0,
     val tekrarSayisi: Int = 0,
     val hedefGunSayisi: Int = 0,
-    val bugunDersSayisi: Int = 0,
+    val birGundeDersSayisi: Int = 0,
     val toplamDersSayisi: Int = 0,
     val donusumVar: Boolean = false,
     val bagimsizZincir: Int = 0,
@@ -99,7 +99,7 @@ object RozetKurallari {
             Rozet.HEDEF_1 -> girdi.hedefGunSayisi to 1
             Rozet.HEDEF_7 -> girdi.hedefGunSayisi to 7
             Rozet.HEDEF_30 -> girdi.hedefGunSayisi to 30
-            Rozet.UC_DERS -> girdi.bugunDersSayisi to 3
+            Rozet.UC_DERS -> girdi.birGundeDersSayisi to 3
             Rozet.BES_DERS -> girdi.toplamDersSayisi to 5
             Rozet.DONUSUM -> (if (girdi.donusumVar) 1 else 0) to 1
             Rozet.ZINCIR_10 -> girdi.bagimsizZincir to 10

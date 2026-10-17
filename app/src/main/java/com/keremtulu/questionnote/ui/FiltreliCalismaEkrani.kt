@@ -102,7 +102,6 @@ fun FiltreliCalismaEkrani(
     ayar: FiltreliCalismaEkraniAyar,
     onAyarDegisti: (FiltreliCalismaEkraniAyar) -> Unit,
     onGeri: () -> Unit,
-    onSoruAc: (Ders, String) -> Unit,
     onOturumBaslat: (List<Soru>, Map<String, Ders>) -> Unit,
     onDevam: (() -> Unit)? = null,
 ) {
@@ -484,7 +483,7 @@ fun FiltreliCalismaEkrani(
                         soru = question,
                         ders = lesson,
                         konu = topic,
-                        onClick = { onSoruAc(lesson, question.id) },
+                        onClick = { onOturumBaslat(listOf(question), mapOf(lesson.id to lesson)) },
                     )
                 }
             }

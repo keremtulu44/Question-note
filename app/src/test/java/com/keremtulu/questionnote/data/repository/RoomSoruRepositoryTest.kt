@@ -377,7 +377,7 @@ class RoomSoruRepositoryTest {
 
     @Test
     fun catalogueDeletionProtectsDefaultsAndUsedCustomChoices() = runBlocking {
-        val default = repository.secenekleriIzle(SoruSecenekTuru.KAYNAK).first().first { it.varsayilan }
+        val default = repository.secenekleriIzle(SoruSecenekTuru.YANLIS_NEDENI).first().first { it.varsayilan }
         assertEquals(com.keremtulu.questionnote.domain.model.SoruSecenegiSilmeSonucu.VarsayilanSilinemez, repository.secenekSil(default.id))
         val yeni = repository.secenekEkle(SoruSecenekTuru.KAYNAK, "Özel deneme") as SoruSecenegiEklemeSonucu.Basarili
         newQuestionFor(dersId, kaynak = yeni.secenek.ad)

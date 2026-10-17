@@ -43,7 +43,7 @@ class RozetHizmeti(
             soruSayisi = dao.soruSayisi(),
             tekrarSayisi = dao.tekrarSayisi(),
             hedefGunSayisi = dao.hedefTamamlananGunSayisi(hedefDeposu.hedef()),
-            bugunDersSayisi = dao.gunDersSayisi(gun),
+            birGundeDersSayisi = dao.enCokGunDersSayisi(),
             toplamDersSayisi = dao.calisilanDersSayisi(),
             donusumVar = dao.donusumVar(),
             bagimsizZincir = RozetKurallari.enUzunBagimsizZincir(sonuclar),

@@ -204,7 +204,9 @@ fun YanlisDefteriUygulamasi(
     }
     LaunchedEffect(kurtarma, yedeklemeIslemde, rozetHizmeti) {
         if (kurtarma == KurtarmaDurumu.HAZIR && !yedeklemeIslemde) {
-            rozetHizmeti.degisiklikleriIzle().catch { /* Gallery has its own visible retry state. */ }.collect { }
+            rozetHizmeti.degisiklikleriIzle().catch {
+                snackbarHostState.showSnackbar(context.getString(R.string.level_error))
+            }.collect { }
         }
     }
 
@@ -305,9 +307,6 @@ fun YanlisDefteriUygulamasi(
                         onSoruEkle = { ekran = UygulamaEkrani.DersSecimi(soruEkleModu = true) },
                         onOturumBaslat = { sorular, dersler -> oturumBaslat(sorular, dersler, bugunden = true) },
                         onDevam = bekleyenOturum?.let { onceki -> { ekran = onceki; bekleyenOturum = null } },
-                        onSoruAc = { ders, soruId ->
-                            ekran = UygulamaEkrani.SoruAyrintisi(ders, soruId, UygulamaEkrani.Bugun)
-                        },
                     )
                     is UygulamaEkrani.DersSecimi -> DerslerEkrani(
                         repository = dersRepository,
@@ -364,14 +363,6 @@ fun YanlisDefteriUygulamasi(
                         ayar = filtreliCalismaAyar,
                         onAyarDegisti = { filtreliCalismaAyar = it },
                         onGeri = { ekran = UygulamaEkrani.Bugun },
-                        onSoruAc = { ders, soruId ->
-                            ekran = UygulamaEkrani.SoruAyrintisi(
-                                ders = ders,
-                                soruId = soruId,
-                                geri = UygulamaEkrani.FiltreliCalisma,
-                                tekrarOturumunda = true,
-                            )
-                        },
                         onOturumBaslat = { questions, lessons -> oturumBaslat(questions, lessons) },
                         onDevam = bekleyenOturum?.let { onceki -> { ekran = onceki; bekleyenOturum = null } },
                     )
