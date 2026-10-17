@@ -6,7 +6,8 @@ Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih 
 
 - Soru ekleme/düzenleme formu; belirgin başlık, numaralı yuvarlak kart bölümleri, daha okunaklı konu/kaynak seçicileri ve kamera/galeri aksiyonlarıyla yenilendi.
 - Kaydet düğmesi ekranda sabit kalır; form hatası kaydetme alanında görünür ve klavye açıldığında düğme erişilebilir kalır.
-- CI doğrulaması ve Release sonucu bekleniyor.
+- CI run `39039791751`: 36 test, `assembleRelease`, imza/apksigner ve sertifika fingerprint doğrulaması geçti; [v1.0.6 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.6) yayımlandı.
+- CI raporundaki APK SHA-256: `dde5f837a926bf906e164c202a77a85c6bf2ffadce1c16b98cf8d8c8bbc5332a`. Fiziksel cihaz kabulü ayrıca bekliyor.
 
 ## [1.0.5] — 2026-10-17
 

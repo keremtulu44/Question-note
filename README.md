@@ -25,20 +25,20 @@ cevaplamak ve çözümü öğrenme sürecinden ayrı saklamaktır.
 
 ## Durum
 
-**v1.0.5 (versionCode 6) yayımlandı.** Ortak kaynak kataloğu, soru başına sayfa/test/soru konumu,
-hazır/özel tek yanlış nedeni ve soru notu UI'sinin kaldırılması eklendi. Eski not verisi korunur.
-Room v3 migration'ı veriyi korur; yeni tam ZIP yedeği v3'tür ve v2 yedeklerini içe alır. Ürün lise
-odağındadır; TYT/AYT ayrımı yoktur.
+**v1.0.6 (versionCode 7) yayımlandı.** Soru ekleme/düzenleme formu; numaralı yuvarlak kartlar,
+daha okunaklı seçim kontrolleri ve ekranda sabit kalan kaydetme alanıyla yenilendi. v1.0.5 ile ortak
+kaynak kataloğu, soru başına sayfa/test/soru konumu, tek ana yanlış nedeni ve soru notu alanının
+kaldırılması gelmişti; eski not verisi korunur. Room v3 migration'ı veriyi korur; tam ZIP yedeği v3'tür
+ve v2 yedeklerini içe alır. Ürün lise odağındadır; TYT/AYT ayrımı yoktur.
 
-CI run `39037429421` **36 testi** geçti; Release derlemesi, imza doğrulaması ve beklenen sertifika
-parmak izi eşleşti. [v1.0.5 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.5)
-CI raporundaki APK SHA-256: `00f0b3b33f1efa81156043ef38a31640f57ce3ba34cf608505eb3164e0a8bedb`.
+CI run `39039791751` **36 testi** geçti; Release derlemesi, imza doğrulaması ve beklenen sertifika
+parmak izi eşleşti. [v1.0.6 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.6)
+CI raporundaki APK SHA-256: `dde5f837a926bf906e164c202a77a85c6bf2ffadce1c16b98cf8d8c8bbc5332a`.
 
 **Cihaz kabulü ayrıdır:** v1.0.3 ana akış adımlarını kullanıcı geçti bildirdi. v1.0.4 tekrar geçmişi,
-v1.0.5 güncelleme/migration, katalog akışı ve v3 yedek/geri yükleme henüz cihazda kabul edilmedi.
+v1.0.5 güncelleme/katalog/ZIP akışı ve v1.0.6 yeni form arayüzü henüz cihazda kabul edilmedi.
 SAF/Drive ve fotoğraf okunabilirliği de bekliyor. v1.0.2 “3. turu denemedim” ifadesinin checklist
 eşlemesi hâlâ teyitsiz; ayrıntı [TEST_KONTROL_LISTESI.md](docs/TEST_KONTROL_LISTESI.md) içinde.
-
 ---
 
 ## Belgeler
@@ -62,9 +62,10 @@ eşlemesi hâlâ teyitsiz; ayrıntı [TEST_KONTROL_LISTESI.md](docs/TEST_KONTROL
 ## Kullanım / APK erişimi
 
 İmzalı APK'lar GitHub [Releases](https://github.com/keremtulu44/Question-note/releases) bölümünde.
-[v1.0.5 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.0.5/yanlis-defteri-1.0.5.apk).
-Mevcut uygulamayı **kaldırmadan** üzerine kur; önce güncelleme sonrası eski kayıtların korunduğunu,
-sonra yeni kaynak/neden akışını ve v3 yedek/geri yüklemeyi dene. İndirme/kurulum ayrıntıları
+[v1.0.6 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.0.6/yanlis-defteri-1.0.6.apk).
+Mevcut uygulamayı **kaldırmadan** üzerine kur; eski kayıtların korunduğunu ve yeni soru formunda
+ekleme/düzenleme, kamera/galeri, görsel sıralama ve kaydetme akışını dene. Ardından kaynak/neden
+seçimini ve v3 yedek/geri yüklemeyi kontrol et. İndirme/kurulum ayrıntıları
 [BUILDING.md](BUILDING.md) içinde.
 
 ---
