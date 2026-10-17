@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.Flow
 interface SoruRepository {
     fun sorulariIzle(dersId: String, konuId: String? = null, konusuz: Boolean = false): Flow<List<Soru>>
 
+    fun bugunTekrarlanacaklariIzle(bugun: Int): Flow<List<Soru>>
+
     suspend fun soruGetir(soruId: String): Soru?
 
     suspend fun soruKaydet(istek: SoruKaydetmeIstegi): SoruIslemSonucu

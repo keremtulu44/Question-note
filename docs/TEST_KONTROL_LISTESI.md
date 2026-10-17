@@ -11,7 +11,7 @@
 > ZIP yol güvenliği) ve **Robolectric** (şema/migration testleri). Emülatör yalnızca gerçekten
 > gerekirse kullanılır; asıl kabul testleri gerçek cihazda yapılır.
 
-Son güncelleme: 2026-10-17 (CI run `39027221270`: 31 test geçti; v1.0.2 imzalı Release/derleme doğrulandı. Cihaz kabul testleri hâlâ bekliyor.)
+Son güncelleme: 2026-10-17. Kullanıcı, v1.0.2'de sade cihaz listesinin 1, 2 ve 4. bölümlerini geçtiğini bildirdi; 3. bölüm (yedek/geri yükleme) denenmedi. v1.0.3 ana ekran ve tekrar akışı için cihaz kontrolü ayrıca bekliyor.
 
 ---
 
@@ -29,29 +29,31 @@ Son güncelleme: 2026-10-17 (CI run `39027221270`: 31 test geçti; v1.0.2 imzal�
 | 1.8 | CI derleme özeti, hata çıktısı ve APK SHA-256 repoda okunabiliyor | YZ | [x] |
 | 1.9 | VersionCode 1 → 2 artışı ve v1.0.1 Release CI'da doğrulandı | YZ | [x] |
 | 1.10 | VersionCode 2 → 3; v1.0.2 Release, APK imzası ve fingerprint CI'da doğrulandı | YZ (CI run `39027221270`) | [x] |
+| 1.11 | v1.0.2 mevcut kurulumun üzerine yüklendi; kullanıcı uygulamanın açıldığını bildirdi | KULLANICI (2026-10-17) | [x] |
+| 1.12 | v1.0.3 güncellemesi, yeni Bugün ekranı ve yan menü gerçek cihazda doğrulanıyor | KULLANICI | [ ] |
 
 ## Aşama 2 — Yerel arşiv
 
 | # | Test | Sorumlu | Durum |
 |---|---|---|---|
-| 2.1 | Uçak modunda soru eklenebiliyor | KULLANICI | [ ] |
-| 2.2 | Uygulama kapanıp açıldığında kayıtlar duruyor | KULLANICI | [ ] |
-| 2.3 | Telefon yeniden başlatıldığında veriler duruyor | KULLANICI | [ ] |
-| 2.4 | Galerideki kaynak görsel silinse de soru açılıyor | KULLANICI | [ ] |
-| 2.5 | Kamera/fotoğraf seçme iptal edilince uygulama bozulmuyor | KULLANICI | [ ] |
-| 2.6 | Konusuz soru eklenebiliyor ve "Konusuz" listesinde görünüyor | KULLANICI | [ ] |
-| 2.7 | Soru ve çözüm ayrı gösteriliyor (çözüm varsayılan gizli) | KULLANICI | [ ] |
-| 2.8 | Çözüm sonradan eklenebiliyor | KULLANICI | [ ] |
-| 2.9 | Çok görsel: "bir sayfa daha ekle" çalışıyor | KULLANICI | [ ] |
-| 2.10 | Görsel büyütme/yakınlaştırma çalışıyor | KULLANICI | [ ] |
-| 2.11 | Soru düzenleme veri ilişkilerini bozmuyor | KULLANICI | [ ] |
-| 2.12 | Silme davranışı açık ve güvenli (onay diyaloğu, sonuç bildirimi) | KULLANICI | [ ] |
-| 2.13 | Ders/konu arşivleme mevcut soruları bozmuyor, yeni kayıtta seçenek olarak çıkmıyor | KULLANICI | [ ] |
+| 2.1 | Uçak modunda soru eklenebiliyor | KULLANICI (v1.0.2 bildirimi 2026-10-17) | [x] |
+| 2.2 | Uygulama kapanıp açıldığında kayıtlar duruyor | KULLANICI (v1.0.2 bildirimi 2026-10-17) | [x] |
+| 2.3 | Telefon yeniden başlatıldığında veriler duruyor | KULLANICI (v1.0.2 bildirimi 2026-10-17) | [x] |
+| 2.4 | Galerideki kaynak görsel silinse de soru açılıyor | KULLANICI (v1.0.2 bildirimi 2026-10-17) | [x] |
+| 2.5 | Kamera/fotoğraf seçme iptal edilince uygulama bozulmuyor | KULLANICI (v1.0.2 bildirimi 2026-10-17) | [x] |
+| 2.6 | Konusuz soru eklenebiliyor ve "Konusuz" listesinde görünüyor | KULLANICI (v1.0.2 bildirimi 2026-10-17) | [x] |
+| 2.7 | Soru ve çözüm ayrı gösteriliyor (çözüm varsayılan gizli) | KULLANICI (v1.0.2 bildirimi 2026-10-17) | [x] |
+| 2.8 | Çözüm sonradan eklenebiliyor | KULLANICI (v1.0.2 bildirimi 2026-10-17) | [x] |
+| 2.9 | Çok görsel: "bir sayfa daha ekle" çalışıyor | KULLANICI (v1.0.2 bildirimi 2026-10-17) | [x] |
+| 2.10 | Görsel büyütme/yakınlaştırma çalışıyor | KULLANICI (v1.0.2 bildirimi 2026-10-17) | [x] |
+| 2.11 | Soru düzenleme veri ilişkilerini bozmuyor | KULLANICI (v1.0.2 bildirimi 2026-10-17) | [x] |
+| 2.12 | Silme davranışı açık ve güvenli (onay diyaloğu, sonuç bildirimi) | KULLANICI (v1.0.2 bildirimi 2026-10-17) | [x] |
+| 2.13 | Ders/konu arşivleme mevcut soruları bozmuyor, yeni kayıtta seçenek olarak çıkmıyor | KULLANICI (v1.0.2 bildirimi 2026-10-17) | [x] |
 | 2.14 | Görseller kalıcı alanda, önbellekte tek kopya yok (dosya sistemi incelenir) | YZ + KULLANICI | [ ] |
 | 2.15 | Yarım kalan işlem bozuk kayıt oluşturmuyor (kod incelemesi + senaryo denemesi) | YZ | [ ] |
 | 2.16 | Kullanılmayan dosya temizliği onaysız/yıkıcı biçimde çalışmıyor, ne sildiğini bildiriyor | YZ + KULLANICI | [ ] |
 | 2.17 | Eksik görsel (dosya yok) durumunda kayıt kırılmıyor, anlaşılır mesaj gösteriliyor | YZ + KULLANICI | [ ] |
-| 2.18 | Sıkıştırma testi: 30–50 gerçek soru fotoğrafında küçük formüller/kök içi ifadeler okunuyor | YZ + KULLANICI | [ ] |
+| 2.18 | Sıkıştırma testi: 30–50 gerçek soru fotoğrafında küçük formüller/kök içi ifadeler okunuyor | KULLANICI (v1.0.2 bildirimi 2026-10-17) | [x] |
 | 2.19 | Room v2 şeması, v1 fixture'ı ve v1→v2 veri koruyan migration zinciri doğrulanıyor | YZ (Robolectric) | [x] |
 | 2.20 | Yeni veritabanında yedi ders, sabit sırada ve arşivsiz oluşturuluyor | YZ (Robolectric) | [x] |
 | 2.21 | Soru/ders/konu yabancı anahtarları ve görsel/geçmiş CASCADE kuralları açık | YZ (Robolectric) | [x] |
@@ -65,6 +67,8 @@ Son güncelleme: 2026-10-17 (CI run `39027221270`: 31 test geçti; v1.0.2 imzal�
 | 2.29 | Soru oluştur/düzenle/filtrele/arşivle/sil, ders-konu ilişkisi ve tekrar planı testleri | YZ (Robolectric) | [x] |
 | 2.30 | JPEG optimizasyonu, EXIF yönü, SHA-256, bozuk/non-image girdi ve geçici dosya yaşı testleri | YZ (Robolectric) | [x] |
 | 2.31 | Onaylı yetim temizliği, dosya yaşı ve DB referansını silme öncesi yeniden denetleme testleri | YZ (Robolectric) | [x] |
+| 2.32 | Yeni ana ekranda bugünün/gecikenlerin listesi, soru ekleme ve yan menü akışı çalışıyor | KULLANICI (v1.0.3) | [ ] |
+| 2.33 | Tekrar sonucu kaydediliyor; çözüm açma kuralı sonraki tarihi doğru belirliyor | KULLANICI (v1.0.3) | [ ] |
 
 ## Aşama 3 — Yedek ve geri yükleme
 

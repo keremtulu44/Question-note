@@ -1,5 +1,6 @@
 package com.keremtulu.questionnote.ui
 
+import android.text.format.Formatter
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -7,15 +8,25 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -25,11 +36,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.data.export.GeriYuklemeOnizlemesi
+import com.keremtulu.questionnote.data.export.SonYedekBilgisi
 import com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti
 import com.keremtulu.questionnote.data.images.GorselTutarliligiHizmeti
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
@@ -37,19 +51,24 @@ import com.keremtulu.questionnote.domain.model.Ders
 import com.keremtulu.questionnote.domain.repository.DersRepository
 import com.keremtulu.questionnote.domain.repository.KonuRepository
 import com.keremtulu.questionnote.domain.repository.SoruRepository
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 private sealed interface UygulamaEkrani {
-    data object Dersler : UygulamaEkrani
-    data class DersAlani(val ders: Ders, val arsivli: Boolean) : UygulamaEkrani
-    data class Konular(val ders: Ders, val arsivli: Boolean) : UygulamaEkrani
-    data class SoruAyrintisi(val ders: Ders, val arsivli: Boolean, val soruId: String) : UygulamaEkrani
-    data class SoruFormu(val ders: Ders, val soruId: String?, val ayrintidanDon: Boolean) : UygulamaEkrani
+    data object Bugun : UygulamaEkrani
+    data class DersSecimi(val soruEkleModu: Boolean) : UygulamaEkrani
+    data class DersAlani(val ders: Ders, val geri: UygulamaEkrani) : UygulamaEkrani
+    data class Konular(val ders: Ders, val geri: UygulamaEkrani) : UygulamaEkrani
+    data class SoruAyrintisi(val ders: Ders, val soruId: String, val geri: UygulamaEkrani) : UygulamaEkrani
+    data class SoruFormu(val ders: Ders, val soruId: String?, val geri: UygulamaEkrani) : UygulamaEkrani
     data object GorselBakimi : UygulamaEkrani
 }
 
 private enum class KurtarmaDurumu { YUKLENIYOR, HAZIR, HATA }
+private enum class MenuEylemi { BUGUN, DERSLER, YEDEK_OLUSTUR, YEDEK_GERI_YUKLE, GORSEL_BAKIMI }
 
 @Composable
 fun YanlisDefteriUygulamasi(
@@ -60,13 +79,14 @@ fun YanlisDefteriUygulamasi(
     gorselTutarliligi: GorselTutarliligiHizmeti,
     disaAktarmaHizmeti: YerelYedeklemeHizmeti,
 ) {
-    var ekran by remember { mutableStateOf<UygulamaEkrani>(UygulamaEkrani.Dersler) }
+    var ekran by remember { mutableStateOf<UygulamaEkrani>(UygulamaEkrani.Bugun) }
     var kurtarma by remember { mutableStateOf(KurtarmaDurumu.YUKLENIYOR) }
     var yedeklemeIslemde by remember { mutableStateOf(false) }
     var geriYuklemeOnizlemesi by remember { mutableStateOf<GeriYuklemeOnizlemesi?>(null) }
     var sonYedek by remember { mutableStateOf<com.keremtulu.questionnote.data.export.SonYedekBilgisi?>(null) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val drawerState = rememberDrawerState(initialValue = androidx.compose.material3.DrawerValue.Closed)
     val snackbarHostState = remember { SnackbarHostState() }
 
     suspend fun kurtarmayiCalistir() {
@@ -83,9 +103,7 @@ fun YanlisDefteriUygulamasi(
         }
     }
 
-    LaunchedEffect(disaAktarmaHizmeti) {
-        kurtarmayiCalistir()
-    }
+    LaunchedEffect(disaAktarmaHizmeti) { kurtarmayiCalistir() }
 
     val exportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/zip"),
@@ -126,69 +144,110 @@ fun YanlisDefteriUygulamasi(
         }
     }
 
-    BackHandler(enabled = kurtarma == KurtarmaDurumu.HAZIR && ekran != UygulamaEkrani.Dersler) {
-        ekran = when (val current = ekran) {
-            UygulamaEkrani.Dersler -> UygulamaEkrani.Dersler
-            is UygulamaEkrani.DersAlani -> UygulamaEkrani.Dersler
-            is UygulamaEkrani.Konular -> UygulamaEkrani.DersAlani(current.ders, current.arsivli)
-            is UygulamaEkrani.SoruAyrintisi -> UygulamaEkrani.DersAlani(current.ders, current.arsivli)
-            is UygulamaEkrani.SoruFormu -> if (current.ayrintidanDon && current.soruId != null) {
-                UygulamaEkrani.SoruAyrintisi(current.ders, arsivli = false, soruId = current.soruId)
-            } else {
-                UygulamaEkrani.DersAlani(current.ders, arsivli = false)
+    fun menuEyleminiCalistir(eylem: MenuEylemi) {
+        scope.launch {
+            drawerState.close()
+            when (eylem) {
+                MenuEylemi.BUGUN -> ekran = UygulamaEkrani.Bugun
+                MenuEylemi.DERSLER -> ekran = UygulamaEkrani.DersSecimi(soruEkleModu = false)
+                MenuEylemi.YEDEK_OLUSTUR -> if (!yedeklemeIslemde) {
+                    exportLauncher.launch("yanlis-defteri-yedek.zip")
+                }
+                MenuEylemi.YEDEK_GERI_YUKLE -> if (!yedeklemeIslemde) {
+                    restoreLauncher.launch(arrayOf("application/zip", "application/octet-stream"))
+                }
+                MenuEylemi.GORSEL_BAKIMI -> ekran = UygulamaEkrani.GorselBakimi
             }
-            UygulamaEkrani.GorselBakimi -> UygulamaEkrani.Dersler
         }
     }
 
-    Box(Modifier.fillMaxSize()) {
-        when (kurtarma) {
-            KurtarmaDurumu.YUKLENIYOR -> UygulamaDurumEkrani(
-                metin = stringResource(R.string.backup_restore_working),
-                yukleniyor = true,
-            )
-            KurtarmaDurumu.HATA -> UygulamaDurumEkrani(
-                metin = stringResource(R.string.backup_restore_recovery_error),
-                yukleniyor = false,
-                tekrarDene = { scope.launch { kurtarmayiCalistir() } },
-            )
-            KurtarmaDurumu.HAZIR -> {
-                when (val current = ekran) {
-                    UygulamaEkrani.Dersler -> DerslerEkrani(
-                        repository = dersRepository,
-                        onDersSecildi = { ders, archived -> ekran = UygulamaEkrani.DersAlani(ders, archived) },
-                        onDisariAktar = { exportLauncher.launch("yanlis-defteri-yedek.zip") },
-                        onIceriAktar = {
-                            restoreLauncher.launch(arrayOf("application/zip", "application/octet-stream"))
+    BackHandler(
+        enabled = kurtarma == KurtarmaDurumu.HAZIR &&
+            drawerState.currentValue == androidx.compose.material3.DrawerValue.Closed &&
+            ekran != UygulamaEkrani.Bugun,
+    ) {
+        ekran = ekran.geriHedefi()
+    }
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        gesturesEnabled = kurtarma == KurtarmaDurumu.HAZIR,
+        drawerContent = {
+            ModalDrawerSheet {
+                YanMenuIcerigi(
+                    ekran = ekran,
+                    yedeklemeIslemde = yedeklemeIslemde,
+                    sonYedek = sonYedek,
+                    onEylem = ::menuEyleminiCalistir,
+                )
+            }
+        },
+    ) {
+        Box(Modifier.fillMaxSize()) {
+            when (kurtarma) {
+                KurtarmaDurumu.YUKLENIYOR -> UygulamaDurumEkrani(
+                    metin = stringResource(R.string.backup_restore_working),
+                    yukleniyor = true,
+                )
+                KurtarmaDurumu.HATA -> UygulamaDurumEkrani(
+                    metin = stringResource(R.string.backup_restore_recovery_error),
+                    yukleniyor = false,
+                    tekrarDene = { scope.launch { kurtarmayiCalistir() } },
+                )
+                KurtarmaDurumu.HAZIR -> when (val current = ekran) {
+                    UygulamaEkrani.Bugun -> BugunEkrani(
+                        soruRepository = soruRepository,
+                        dersRepository = dersRepository,
+                        onMenu = { scope.launch { drawerState.open() } },
+                        onSoruEkle = { ekran = UygulamaEkrani.DersSecimi(soruEkleModu = true) },
+                        onSoruAc = { ders, soruId ->
+                            ekran = UygulamaEkrani.SoruAyrintisi(ders, soruId, UygulamaEkrani.Bugun)
                         },
-                        sonYedek = sonYedek,
-                        yedeklemeIslemde = yedeklemeIslemde,
-                        onBakim = { ekran = UygulamaEkrani.GorselBakimi },
+                    )
+                    is UygulamaEkrani.DersSecimi -> DerslerEkrani(
+                        repository = dersRepository,
+                        soruEkleModu = current.soruEkleModu,
+                        onMenu = { scope.launch { drawerState.open() } },
+                        onDersSecildi = { ders ->
+                            ekran = if (current.soruEkleModu) {
+                                UygulamaEkrani.SoruFormu(ders, null, UygulamaEkrani.Bugun)
+                            } else {
+                                UygulamaEkrani.DersAlani(ders, current)
+                            }
+                        },
                     )
                     is UygulamaEkrani.DersAlani -> DersCalismaEkrani(
                         ders = current.ders,
-                        dersArsivli = current.arsivli,
+                        dersArsivli = false,
                         konuRepository = konuRepository,
                         soruRepository = soruRepository,
-                        onGeri = { ekran = UygulamaEkrani.Dersler },
-                        onKonulariYonet = { ekran = UygulamaEkrani.Konular(current.ders, current.arsivli) },
-                        onSoruEkle = { ekran = UygulamaEkrani.SoruFormu(current.ders, null, ayrintidanDon = false) },
-                        onSoruAc = { id -> ekran = UygulamaEkrani.SoruAyrintisi(current.ders, current.arsivli, id) },
+                        onGeri = { ekran = current.geri },
+                        onKonulariYonet = { ekran = UygulamaEkrani.Konular(current.ders, current) },
+                        onSoruEkle = {
+                            ekran = UygulamaEkrani.SoruFormu(current.ders, null, current)
+                        },
+                        onSoruAc = { id ->
+                            ekran = UygulamaEkrani.SoruAyrintisi(current.ders, id, current)
+                        },
                     )
                     is UygulamaEkrani.Konular -> KonuYonetimiEkrani(
                         ders = current.ders,
                         repository = konuRepository,
-                        onGeri = { ekran = UygulamaEkrani.DersAlani(current.ders, current.arsivli) },
+                        onGeri = { ekran = current.geri },
                     )
                     is UygulamaEkrani.SoruAyrintisi -> SoruDetayEkrani(
                         soruId = current.soruId,
                         ders = current.ders,
-                        dersArsivli = current.arsivli,
+                        dersArsivli = false,
                         soruRepository = soruRepository,
                         konuRepository = konuRepository,
                         gorselDeposu = gorselDeposu,
-                        onGeri = { ekran = UygulamaEkrani.DersAlani(current.ders, current.arsivli) },
-                        onDuzenle = { id -> ekran = UygulamaEkrani.SoruFormu(current.ders, id, ayrintidanDon = true) },
+                        onGeri = { ekran = current.geri },
+                        onDuzenle = { id -> ekran = UygulamaEkrani.SoruFormu(current.ders, id, current) },
+                        onTekrarTamamlandi = {
+                            ekran = current.geri
+                            scope.launch { snackbarHostState.showSnackbar(context.getString(R.string.review_saved)) }
+                        },
                     )
                     is UygulamaEkrani.SoruFormu -> SoruFormuEkrani(
                         ders = current.ders,
@@ -196,25 +255,19 @@ fun YanlisDefteriUygulamasi(
                         soruRepository = soruRepository,
                         konuRepository = konuRepository,
                         gorselDeposu = gorselDeposu,
-                        onGeri = {
-                            ekran = if (current.ayrintidanDon && current.soruId != null) {
-                                UygulamaEkrani.SoruAyrintisi(current.ders, arsivli = false, soruId = current.soruId)
-                            } else {
-                                UygulamaEkrani.DersAlani(current.ders, arsivli = false)
-                            }
-                        },
+                        onGeri = { ekran = current.geri },
                     )
                     UygulamaEkrani.GorselBakimi -> GorselBakimEkrani(
                         service = gorselTutarliligi,
-                        onGeri = { ekran = UygulamaEkrani.Dersler },
+                        onGeri = { ekran = UygulamaEkrani.Bugun },
                     )
                 }
             }
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.align(Alignment.BottomCenter),
+            )
         }
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier.align(Alignment.BottomCenter),
-        )
     }
 
     geriYuklemeOnizlemesi?.let { preview ->
@@ -254,7 +307,7 @@ fun YanlisDefteriUygulamasi(
                             try {
                                 val result = disaAktarmaHizmeti.geriYukle(preview)
                                 geriYuklemeOnizlemesi = null
-                                ekran = UygulamaEkrani.Dersler
+                                ekran = UygulamaEkrani.Bugun
                                 sonYedek = disaAktarmaHizmeti.sonYedekBilgisiGetir()
                                 snackbarHostState.showSnackbar(
                                     context.getString(R.string.backup_restore_success, result.guvenlikYedegiAdi),
@@ -284,6 +337,145 @@ fun YanlisDefteriUygulamasi(
             },
         )
     }
+}
+
+@Composable
+private fun YanMenuIcerigi(
+    ekran: UygulamaEkrani,
+    yedeklemeIslemde: Boolean,
+    sonYedek: SonYedekBilgisi?,
+    onEylem: (MenuEylemi) -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val sonYedekMetni = sonYedek?.let { backup ->
+        val date = SimpleDateFormat("d MMM yyyy HH:mm", Locale("tr", "TR")).format(Date(backup.olusturmaZamani))
+        val size = Formatter.formatShortFileSize(context, backup.boyutBayt)
+        context.getString(
+            R.string.backup_last_info,
+            backup.dosyaAdi,
+            date,
+            size,
+            context.getString(if (backup.guvenlikKopyasi) R.string.backup_safety_copy else R.string.backup_external_copy),
+        )
+    } ?: stringResource(R.string.backup_last_none)
+    Column(
+        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 12.dp, vertical = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+            shape = RoundedCornerShape(24.dp),
+            color = colors.primaryContainer,
+        ) {
+            Column(Modifier.padding(18.dp)) {
+                Text("✦", color = colors.primary, style = MaterialTheme.typography.headlineSmall)
+                Text(
+                    stringResource(R.string.today_menu_title),
+                    modifier = Modifier.padding(top = 6.dp),
+                    color = colors.onPrimaryContainer,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    stringResource(R.string.today_menu_subtitle),
+                    modifier = Modifier.padding(top = 2.dp),
+                    color = colors.onPrimaryContainer.copy(alpha = 0.8f),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        }
+        NavigationDrawerItem(
+            label = { Text(stringResource(R.string.menu_today)) },
+            selected = ekran == UygulamaEkrani.Bugun,
+            onClick = { onEylem(MenuEylemi.BUGUN) },
+            icon = { Text("◷", fontSize = 20.sp) },
+        )
+        NavigationDrawerItem(
+            label = { Text(stringResource(R.string.menu_lessons)) },
+            selected = ekran is UygulamaEkrani.DersSecimi || ekran is UygulamaEkrani.DersAlani || ekran is UygulamaEkrani.Konular,
+            onClick = { onEylem(MenuEylemi.DERSLER) },
+            icon = { Text("▦", fontSize = 20.sp) },
+        )
+        HorizontalDivider(Modifier.padding(vertical = 8.dp))
+        Text(
+            text = stringResource(R.string.menu_tools_heading),
+            modifier = Modifier.padding(start = 16.dp, bottom = 2.dp),
+            color = colors.onSurfaceVariant,
+            style = MaterialTheme.typography.labelMedium,
+            letterSpacing = 1.sp,
+        )
+        NavigationDrawerItem(
+            label = { Text(stringResource(R.string.menu_create_backup)) },
+            selected = false,
+            enabled = !yedeklemeIslemde,
+            onClick = { onEylem(MenuEylemi.YEDEK_OLUSTUR) },
+            icon = { Text("↓", fontSize = 20.sp) },
+        )
+        NavigationDrawerItem(
+            label = { Text(stringResource(R.string.menu_restore_backup)) },
+            selected = false,
+            enabled = !yedeklemeIslemde,
+            onClick = { onEylem(MenuEylemi.YEDEK_GERI_YUKLE) },
+            icon = { Text("↑", fontSize = 20.sp) },
+        )
+        Surface(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+            shape = RoundedCornerShape(18.dp),
+            color = colors.surfaceVariant,
+        ) {
+            Column(Modifier.padding(14.dp)) {
+                Text(
+                    stringResource(R.string.menu_last_backup),
+                    color = colors.onSurfaceVariant,
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    sonYedekMetni,
+                    modifier = Modifier.padding(top = 4.dp),
+                    color = colors.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        }
+        NavigationDrawerItem(
+            label = { Text(stringResource(R.string.menu_image_maintenance)) },
+            selected = ekran == UygulamaEkrani.GorselBakimi,
+            onClick = { onEylem(MenuEylemi.GORSEL_BAKIMI) },
+            icon = { Text("◇", fontSize = 20.sp) },
+        )
+        Surface(
+            modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+            shape = RoundedCornerShape(20.dp),
+            color = colors.surfaceVariant,
+        ) {
+            Column(Modifier.padding(16.dp)) {
+                Text(
+                    stringResource(R.string.menu_education_title),
+                    color = colors.onSurface,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    stringResource(R.string.menu_education_note),
+                    modifier = Modifier.padding(top = 5.dp),
+                    color = colors.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        }
+    }
+}
+
+private fun UygulamaEkrani.geriHedefi(): UygulamaEkrani = when (this) {
+    UygulamaEkrani.Bugun -> UygulamaEkrani.Bugun
+    is UygulamaEkrani.DersSecimi -> UygulamaEkrani.Bugun
+    is UygulamaEkrani.DersAlani -> geri
+    is UygulamaEkrani.Konular -> geri
+    is UygulamaEkrani.SoruAyrintisi -> geri
+    is UygulamaEkrani.SoruFormu -> geri
+    UygulamaEkrani.GorselBakimi -> UygulamaEkrani.Bugun
 }
 
 @Composable

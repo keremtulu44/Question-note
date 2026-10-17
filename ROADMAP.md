@@ -23,7 +23,7 @@ Durum işaretleri: `[ ]` yapılmadı · `[~]` kod/CI hazır, kullanıcı kabulü
 > Kod ve CI kapsamı hazır. Kamera/galeri, kalıcı veri, gerçek fotoğraf okunabilirliği ve cihaz kabulü kullanıcı testini bekliyor.
 
 - [x] Room şema v2; `exportSchema`; yabancı anahtarlar ve v1→v2 veri koruyan migration + Robolectric testi. Yıkıcı migration fallback'i yok.
-- [x] Yedi seed dersi; ders ekleme/ad-sıra düzenleme/arşivleme/geri getirme ve dashboard Flow'u.
+- [x] Yedi lise dersi; kullanıcı arayüzünde ders listesi sabit, ders yönetimi/arsiv akışı ana ekrandan çıkarıldı.
 - [x] Konu ekleme/düzenleme/arşivleme/geri getirme; arşiv ilişkiyi silmiyor.
 - [x] Soru ekleme/düzenleme/silme, ders/konu/konusuz/plan filtreleri, ayrıntı ve görsellerin ilişkilendirilmesi.
 - [x] Tekrar/plan kuralları ve birim testleri (soru arşivinden bağımsız `TekrarKurali`).

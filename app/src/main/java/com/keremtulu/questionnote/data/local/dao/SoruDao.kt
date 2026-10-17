@@ -33,6 +33,20 @@ interface SoruDao {
     @Transaction
     fun sorulariIzle(dersId: String, konuId: String?, konusuz: Boolean): Flow<List<SoruVeGorsellerEntity>>
 
+    @Query(
+        """
+        SELECT sorular.* FROM sorular
+        INNER JOIN dersler ON dersler.id = sorular.ders_id
+        WHERE dersler.arsivli = 0
+          AND sorular.plan_durumu = 'AKTIF'
+          AND sorular.sonraki_tekrar_gun IS NOT NULL
+          AND sorular.sonraki_tekrar_gun <= :bugun
+        ORDER BY sorular.sonraki_tekrar_gun ASC, sorular.guncelleme DESC, sorular.id ASC
+        """,
+    )
+    @Transaction
+    fun bugunTekrarlanacaklariIzle(bugun: Int): Flow<List<SoruVeGorsellerEntity>>
+
     @Query("SELECT * FROM sorular WHERE id = :id LIMIT 1")
     suspend fun idIleGetir(id: String): SoruEntity?
 

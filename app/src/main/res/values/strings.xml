@@ -2,8 +2,40 @@
 <resources>
     <string name="app_name">Yanlış Defteri</string>
     <string name="home_kicker">YANLIŞ DEFTERİ</string>
-    <string name="home_title">Dersler</string>
-    <string name="home_subtitle">Sorularını derslerine göre düzenle.</string>
+    <string name="home_title">Bugün</string>
+    <string name="home_subtitle">Bugün tekrar edeceklerine odaklan.</string>
+    <string name="today_kicker">YANLIŞ DEFTERİ · LİSE</string>
+    <string name="today_title">Bugün</string>
+    <string name="today_section_title">Tekrar sırası gelenler</string>
+    <string name="today_focus_label">GÜNÜN ODAĞI</string>
+    <string name="today_focus_empty">Bugün için planlı soru yok.</string>
+    <string name="today_focus_message">Hazırsan sırayla gözden geçirelim.</string>
+    <string name="today_loading_count">Plan hazırlanıyor…</string>
+    <string name="today_empty_title">Bugünlük tamam</string>
+    <string name="today_empty_description">Bugün tekrar zamanı gelen soru yok. Yeni eklediğin soruların ilk tekrarı ertesi gün planlanır.</string>
+    <string name="today_add_question">Soru ekle</string>
+    <string name="today_due_today">Bugün</string>
+    <string name="today_photo_count">%1$d soru fotoğrafı</string>
+    <string name="today_tap_to_review">Dokun ve tekrar et</string>
+    <string name="today_load_error">Bugünün listesi yüklenemedi. Yeniden deneyin.</string>
+    <string name="today_menu_description">Gezinme menüsünü aç</string>
+    <string name="today_menu_title">Yanlış Defteri</string>
+    <string name="today_menu_subtitle">Lise için tekrar arşivin</string>
+    <string name="menu_today">Bugün</string>
+    <string name="menu_lessons">Derslere göre</string>
+    <string name="menu_create_backup">Yedek oluştur</string>
+    <string name="menu_restore_backup">Yedeği geri yükle</string>
+    <string name="menu_image_maintenance">Görsel kontrolü</string>
+    <string name="menu_last_backup">Yedek durumu</string>
+    <string name="menu_tools_heading">ARAÇLAR</string>
+    <string name="menu_education_title">Şimdilik lise odağı</string>
+    <string name="menu_education_note">Sınav ayrımı yok. Ortaokul ve LGS seçenekleri ileride ayarlara eklenebilir.</string>
+    <string name="lessons_kicker">LİSE DERSLERİ</string>
+    <string name="lessons_title">Derslere göre</string>
+    <string name="lessons_choose_title">Hangi ders?</string>
+    <string name="lessons_browse_subtitle">Sorularına göz atmak için bir ders seç.</string>
+    <string name="lessons_choose_subtitle">Yeni sorunu doğru yere eklemek için ders seç.</string>
+    <string name="lessons_high_school_badge">Lise · sınav ayrımı yok</string>
     <string name="home_loading_dersler">Dersler yükleniyor…</string>
     <string name="home_error_dersler">Dersler yüklenemedi. Uygulamayı yeniden açmayı deneyin.</string>
     <string name="home_empty_dersler">Henüz etkin ders yok.</string>
@@ -61,6 +93,14 @@
     <string name="question_solution_note">Çözüm notu</string>
     <string name="question_next_review">Sonraki planlı tekrar: %1$s</string>
     <string name="question_not_scheduled">Planlanmadı</string>
+    <string name="review_record_title">Bu tekrar nasıldı?</string>
+    <string name="review_record_subtitle">Çözümü açtıysan sonraki tekrar yarına alınır.</string>
+    <string name="review_result_not_solved">Çözemedim</string>
+    <string name="review_result_struggled">Zorlandım</string>
+    <string name="review_result_easy">Rahat çözdüm</string>
+    <string name="review_saving">Tekrar kaydediliyor…</string>
+    <string name="review_saved">Tekrar kaydedildi. Sıradaki gün planı güncellendi.</string>
+    <string name="review_save_error">Tekrar kaydedilemedi. Yeniden deneyin.</string>
     <string name="question_edit">Düzenle</string>
     <string name="question_delete">Sil</string>
     <string name="question_plan_status">Plan durumu</string>
@@ -191,5 +231,13 @@
     <plurals name="question_count">
         <item quantity="one">%d soru</item>
         <item quantity="other">%d soru</item>
+    </plurals>
+    <plurals name="today_question_count">
+        <item quantity="one">%d soru</item>
+        <item quantity="other">%d soru</item>
+    </plurals>
+    <plurals name="today_overdue_days">
+        <item quantity="one">%d gün gecikti</item>
+        <item quantity="other">%d gün gecikti</item>
     </plurals>
 </resources>

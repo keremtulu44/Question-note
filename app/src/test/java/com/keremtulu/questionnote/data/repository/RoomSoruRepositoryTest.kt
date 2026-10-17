@@ -153,6 +153,30 @@ class RoomSoruRepositoryTest {
     }
 
     @Test
+    fun todayReviewFeedIncludesOverdueAndDueActiveQuestionsOnly() = runBlocking {
+        val today = LocalDate.of(2026, 10, 16).toEpochDay().toInt()
+        val overdue = newQuestionFor(dersId)
+        val dueToday = newQuestionFor(dersId)
+        val future = newQuestionFor(dersId)
+        val paused = newQuestionFor(dersId)
+        val archivedLessonId = database.dersDao().tumunuGetir().last().id
+        val archivedLessonQuestion = newQuestionFor(archivedLessonId)
+
+        setNextReview(overdue.id, today - 2)
+        setNextReview(dueToday.id, today)
+        setNextReview(future.id, today + 1)
+        setNextReview(paused.id, today - 1, SoruPlanDurumu.ASKIDA)
+        setNextReview(archivedLessonQuestion.id, today - 3)
+        assertEquals(
+            com.keremtulu.questionnote.domain.model.DersIslemSonucu.Basarili,
+            RoomDersRepository(database).dersArsivDurumunuDegistir(archivedLessonId, true),
+        )
+
+        val actual = repository.bugunTekrarlanacaklariIzle(today).first()
+        assertEquals(listOf(overdue.id, dueToday.id), actual.map { it.id })
+    }
+
+    @Test
     fun sameDayReviewIsRejectedAndPlanStatusIsHonoured() = runBlocking {
         val image = imageFiles.yeniGorsel(GorselTuru.SORU, 0)
         assertEquals(
@@ -178,6 +202,31 @@ class RoomSoruRepositoryTest {
         assertEquals(
             SoruIslemSonucu.PlanDurumuKapali,
             repository.tekrarKaydet(soru.id, TekrarSonucu.RAHAT, false),
+        )
+    }
+
+    private suspend fun newQuestionFor(lessonId: String): com.keremtulu.questionnote.domain.model.Soru {
+        val existingIds = repository.sorulariIzle(lessonId).first().map { it.id }.toSet()
+        val image = imageFiles.yeniGorsel(GorselTuru.SORU, 0)
+        assertEquals(
+            SoruIslemSonucu.Basarili,
+            repository.soruKaydet(
+                SoruKaydetmeIstegi(dersId = lessonId, gorseller = listOf(image)),
+            ),
+        )
+        val saved = repository.sorulariIzle(lessonId).first().first { it.id !in existingIds }
+        return requireNotNull(repository.soruGetir(saved.id))
+    }
+
+    private suspend fun setNextReview(
+        soruId: String,
+        day: Int,
+        status: SoruPlanDurumu = SoruPlanDurumu.AKTIF,
+    ) {
+        val soru = requireNotNull(database.soruDao().idIleGetir(soruId))
+        assertEquals(
+            1,
+            database.soruDao().guncelle(soru.copy(sonrakiTekrarGun = day, planDurumu = status.name)),
         )
     }
 

@@ -17,6 +17,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -44,6 +45,7 @@ import com.keremtulu.questionnote.domain.model.Soru
 import com.keremtulu.questionnote.domain.model.SoruGorseli
 import com.keremtulu.questionnote.domain.model.SoruIslemSonucu
 import com.keremtulu.questionnote.domain.model.SoruPlanDurumu
+import com.keremtulu.questionnote.domain.model.TekrarSonucu
 import com.keremtulu.questionnote.domain.repository.KonuRepository
 import com.keremtulu.questionnote.domain.repository.SoruRepository
 import com.keremtulu.questionnote.ui.bilesenler.SoruGorselResmi
@@ -74,9 +76,12 @@ fun SoruDetayEkrani(
     gorselDeposu: LocalSoruGorselDeposu,
     onGeri: () -> Unit,
     onDuzenle: (String) -> Unit,
+    onTekrarTamamlandi: () -> Unit,
 ) {
     var yenileme by remember(soruId) { mutableIntStateOf(0) }
     var cozumAcik by remember(soruId) { mutableStateOf(false) }
+    var cozumAcildi by remember(soruId) { mutableStateOf(false) }
+    var tekrarKaydediliyor by remember(soruId) { mutableStateOf(false) }
     var silmeOnayi by remember { mutableStateOf(false) }
     var durumMenusu by remember { mutableStateOf(false) }
     var tamEkranGorsel by remember { mutableStateOf<SoruGorseli?>(null) }
@@ -102,6 +107,26 @@ fun SoruDetayEkrani(
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val currentQuestion = (detail as? SoruDetayDurumu.Hazir)?.soru
+
+    fun tekrarSonucunuKaydet(soru: Soru, sonuc: TekrarSonucu) {
+        if (tekrarKaydediliyor) return
+        tekrarKaydediliyor = true
+        scope.launch {
+            val result = try {
+                soruRepository.tekrarKaydet(soru.id, sonuc, cozumAcildi)
+            } catch (cancel: CancellationException) {
+                throw cancel
+            } catch (_: Exception) {
+                null
+            }
+            tekrarKaydediliyor = false
+            if (result == SoruIslemSonucu.Basarili) {
+                onTekrarTamamlandi()
+            } else {
+                snackbarHostState.showSnackbar(context.getString(errorResource(result)))
+            }
+        }
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -196,7 +221,12 @@ fun SoruDetayEkrani(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Button(onClick = { cozumAcik = !cozumAcik }) {
+                            Button(onClick = {
+                                if (!cozumAcik && (soru.cozumNotu != null || soru.gorseller.any { it.tur == com.keremtulu.questionnote.domain.model.GorselTuru.COZUM })) {
+                                    cozumAcildi = true
+                                }
+                                cozumAcik = !cozumAcik
+                            }) {
                                 Text(stringResource(if (cozumAcik) R.string.question_hide_solution else R.string.question_show_solution))
                             }
                             Text(
@@ -235,6 +265,59 @@ fun SoruDetayEkrani(
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
+                    }
+                    val today = LocalDate.now().toEpochDay().toInt()
+                    if (
+                        !dersArsivli && soru.planDurumu == SoruPlanDurumu.AKTIF &&
+                        soru.sonrakiTekrarGun?.let { it <= today } == true
+                    ) {
+                        item {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = androidx.compose.foundation.shape.RoundedCornerShape(24.dp),
+                                colors = androidx.compose.material3.CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                ),
+                            ) {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth().padding(18.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    Text(
+                                        stringResource(R.string.review_record_title),
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.SemiBold,
+                                    )
+                                    Text(
+                                        stringResource(R.string.review_record_subtitle),
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.78f),
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
+                                    OutlinedButton(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        enabled = !tekrarKaydediliyor,
+                                        onClick = { tekrarSonucunuKaydet(soru, TekrarSonucu.COZEMEDIM) },
+                                    ) { Text(stringResource(R.string.review_result_not_solved)) }
+                                    OutlinedButton(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        enabled = !tekrarKaydediliyor,
+                                        onClick = { tekrarSonucunuKaydet(soru, TekrarSonucu.ZORLANDIM) },
+                                    ) { Text(stringResource(R.string.review_result_struggled)) }
+                                    Button(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        enabled = !tekrarKaydediliyor,
+                                        onClick = { tekrarSonucunuKaydet(soru, TekrarSonucu.RAHAT) },
+                                    ) {
+                                        Text(
+                                            stringResource(
+                                                if (tekrarKaydediliyor) R.string.review_saving else R.string.review_result_easy,
+                                            ),
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
                     if (!dersArsivli) {
                         item {

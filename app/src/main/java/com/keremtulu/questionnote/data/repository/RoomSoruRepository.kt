@@ -41,6 +41,10 @@ class RoomSoruRepository(
     ): Flow<List<Soru>> = soruDao.sorulariIzle(dersId, konuId, konusuz)
         .map { rows -> rows.map { row -> row.soru.toDomain(row.gorseller.map { it.toDomain() }) } }
 
+    override fun bugunTekrarlanacaklariIzle(bugun: Int): Flow<List<Soru>> =
+        soruDao.bugunTekrarlanacaklariIzle(bugun)
+            .map { rows -> rows.map { row -> row.soru.toDomain(row.gorseller.map { it.toDomain() }) } }
+
     override suspend fun soruGetir(soruId: String): Soru? {
         val row = soruDao.idIleGetir(soruId) ?: return null
         return row.toDomain(gorselDao.sorununGorselleriniGetir(soruId).map { it.toDomain() })

@@ -48,8 +48,8 @@ Android telefonda kullanılacak, tek kişilik bir dijital yanlış defteri:
 | K2 | TYT–AYT ayrımı **yok**. Yapı: **Ders → Konu → Soru**. |
 | K3 | Konu seçimi **zorunlu değil**. Sadece ders seçerek hızlı kayıt yapılabilir; konu sonradan eklenip değiştirilebilir. |
 | K4 | Konusuz sorular kaybolmaz; "Konusuz" olarak açıkça listelenir ve erişilebilir. |
-| K5 | Ders ve konular veritabanında tutulur ve **düzenlenebilir** (yeniden adlandırma, yeni ders/konu ekleme). |
-| K6 | **Silme = arşivleme.** Ders/konu arşivlenir; mevcut soruların ilişkileri bozulmaz. Ders silinemez, arşivlenir; konu kaldırıldığında sorular silinmez, "konusuz" olur. |
+| K5 | v1'de yedi lise dersi sabittir; ders ekleme/yeniden adlandırma/arşivleme arayüzü olmayacak. Ders seçimi yalnızca soruları düzenlemek içindir. |
+| K6 | Konu yönetimi derslerden ayrıdır: konular eklenip düzenlenebilir; kaldırma arşivleme ile yapılır ve bağlı sorular korunur. |
 | K7 | **Çok görsel desteği** hem şemada hem arayüzde vardır. Bir soru ve bir çözüm için birden fazla sayfa eklenebilir ("bir sayfa daha ekle"). |
 | K8 | Soru ve çözüm **ayrı alanlardır**. Çözüm varsayılan olarak gizlidir, "Çözümü göster" ile açılır. |
 | K9 | Çözümün açıldığı bilgisi **kaydedilir**; "çözümü görünce anladım" ile "yardımsız çözdüm" aynı sayılmaz. |
@@ -65,6 +65,8 @@ Android telefonda kullanılacak, tek kişilik bir dijital yanlış defteri:
 | K19 | Çözüm açılarak yapılan tekrar **bağımsız deneme sayılmaz**. Aynı gün ikinci deneme yapılmaz (çözüm görüldüğü için bu gerçek hatırlama olmaz); soru **1 gün sonra** yeniden karşımıza çıkar ve bu kez bağımsız olarak çözülür. |
 | K20 | Uzun bir aradan sonra **hiçbir soru otomatik olarak sıfırlanmaz**; gecikmiş sorular tek listede toplanır ve kullanıcı ne yapacağını kendisi seçer. |
 | K21 | **Görsel kalite politikası:** fotoğraflar kaydedilirken otomatik optimize edilir (uzun kenar ~3000 piksel, JPEG kalitesi ~%90). Tek ölçüt **okunabilirliktir**: küçük formüller, kök içi ifadeler ve grafik etiketleri okunur kalmalı. Bu, Aşama 2'de gerçek fotoğraflarla doğrulanır. |
+| K22 | Ana ekranın odağı **Bugün**: bugünkü ve gecikmiş tekrarlar sade listede görünür; “Soru ekle” belirgin düğmedir. Yedekleme, görsel bakımı ve derslere göre gezinme yan menüde kalır. |
+| K23 | Şimdiki sürüm lise odağındadır; ders listesi sabit ve TYT/AYT ayrımı yoktur. Gelecekte Ayarlar'da öğrenim seviyesi (ortaokul/lise) ile sınav hedefi (ör. LGS) ayrı seçenekler olarak değerlendirilebilir. |
 
 ### Soru kaydındaki alanlar
 
