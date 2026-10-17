@@ -408,15 +408,13 @@ private fun YanMenuIcerigi(
         NavigationDrawerItem(
             label = { Text(stringResource(R.string.menu_create_backup)) },
             selected = false,
-            enabled = !yedeklemeIslemde,
-            onClick = { onEylem(MenuEylemi.YEDEK_OLUSTUR) },
+            onClick = { if (!yedeklemeIslemde) onEylem(MenuEylemi.YEDEK_OLUSTUR) },
             icon = { Text("↓", fontSize = 20.sp) },
         )
         NavigationDrawerItem(
             label = { Text(stringResource(R.string.menu_restore_backup)) },
             selected = false,
-            enabled = !yedeklemeIslemde,
-            onClick = { onEylem(MenuEylemi.YEDEK_GERI_YUKLE) },
+            onClick = { if (!yedeklemeIslemde) onEylem(MenuEylemi.YEDEK_GERI_YUKLE) },
             icon = { Text("↑", fontSize = 20.sp) },
         )
         Surface(
