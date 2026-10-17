@@ -2,22 +2,22 @@
 
 > Bu dosya Android CI tarafından otomatik üretilir. Keystore veya parola değerleri yazılmaz.
 
-- Zaman (UTC): 2026-10-17T14:39:05Z
-- Workflow commit'i: 24f7b6b77b6f610a676762dc68e1d3eeee2e9e52
+- Zaman (UTC): 2026-10-17T14:44:21Z
+- Workflow commit'i: 3772f1eacc03a4f0458234f2480c0220350607a4
 - Dal: arena/0ec2226d-question-note
 - Uygulama sürümü: 1.0.7 (versionCode 8)
 - Android SDK: compileSdk/targetSdk 37, minSdk 26; build-tools 37.0.0
-- Genel sonuç: **BAŞARISIZ**
+- Genel sonuç: **BAŞARILI**
 - Wrapper çıkış kodu: 0
-- testDebugUnitTest çıkış kodu: 1
-- Birim test özeti: JUnit XML raporu yok (0 test)
-- assembleRelease çıkış kodu: 125
+- testDebugUnitTest çıkış kodu: 0
+- Birim test özeti: 37 test; 0 başarısız; 0 hata; 0 atlandı
+- assembleRelease çıkış kodu: 0
 - İmzalama secret durumu: İki gerekli secret dolu (değerler gösterilmez)
-- İmzalama/verify durumu: İmzalama henüz çalıştırılmadı (kod: 125; apksigner verify: 125)
-- Sertifika parmak izi: bulunamadı (beklenen: FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54; durum: doğrulanmadı)
-- Release: Yayımlanmadı (kod: 125)
-- Release URL: yok
-- İmzalı APK SHA-256: bulunamadı
+- İmzalama/verify durumu: İmzalandı; apksigner doğruladı ve beklenen sertifika eşleşti (kod: 0; apksigner verify: 0)
+- Sertifika parmak izi: FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54 (beklenen: FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54; durum: eşleşti)
+- Release: Release oluşturuldu (kod: 0)
+- Release URL: https://github.com/keremtulu44/Question-note/releases/tag/v1.0.7
+- İmzalı APK SHA-256: 3d10f48d7c6db6ff246d0942fa958df974ac3c87e182b2627855f192035f99c4
 
 ## Gradle sürümü
 
@@ -53,33 +53,6 @@ OS:            Linux 6.17.0-1022-azure amd64
 
 ```text
 -- Derleyici/Gradle hata satırları --
-60:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:62:56 Cannot infer type for type parameter 'T'. Specify it explicitly.
-61:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:64:35 Unresolved reference 'mapIndexed'.
-62:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:64:48 Cannot infer type for value parameter 'index'. Specify it explicitly.
-63:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:64:55 Cannot infer type for value parameter 'ders'. Specify it explicitly.
-64:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:67:28 Suspension functions can only be called within coroutine body.
-65:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:67:42 Unresolved reference 'id'.
-66:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:69:18 Unresolved reference 'id'.
-67:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:69:21 Cannot infer type for type parameter 'A'. Specify it explicitly.
-68:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:69:21 Cannot infer type for type parameter 'B'. Specify it explicitly.
-69:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:69:53 Unresolved reference 'id'.
-70:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:69:74 Suspension functions can only be called within coroutine body.
-71:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:74:41 None of the following candidates is applicable:
-74:  Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-78:  Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-80:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:74:49 Unresolved reference 'id'.
-81:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:77:17 Unresolved reference 'forEachIndexed'.
-82:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:77:34 Cannot infer type for value parameter 'index'. Specify it explicitly.
-83:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:77:41 Cannot infer type for value parameter 'ders'. Specify it explicitly.
-84:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:78:56 Unresolved reference 'id'.
-85:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:78:77 Suspension functions can only be called within coroutine body.
-86:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:85:38 Cannot infer type for type parameter 'K'. Specify it explicitly.
-87:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:85:38 Cannot infer type for type parameter 'V'. Specify it explicitly.
-88:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:85:52 Unresolved reference 'id'.
-89:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:85:56 Unresolved reference 'id'.
-95:* What went wrong:
-98:   > Compilation error. See log for more details
-254:Caused by: org.jetbrains.kotlin.gradle.tasks.CompilationErrorException: Compilation error. See log for more details
 
 -- İlk 100 satır --
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
@@ -110,7 +83,6 @@ Daemon will be stopped at the end of the build
 > Task :app:packageDebugUnitTestForUnitTest
 > Task :app:generateDebugUnitTestConfig
 > Task :app:kspDebugKotlin
-
 > Task :app:compileDebugKotlin
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/export/YerelYedeklemeHizmeti.kt:64:34 Non-public primary constructor is exposed via the generated 'copy()' method of the 'data' class.
 
@@ -140,121 +112,17 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 > Task :app:processDebugJavaRes
 > Task :app:kspDebugUnitTestKotlin
 
-> Task :app:compileDebugUnitTestKotlin FAILED
-e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:62:56 Cannot infer type for type parameter 'T'. Specify it explicitly.
-e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:64:35 Unresolved reference 'mapIndexed'.
-e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:64:48 Cannot infer type for value parameter 'index'. Specify it explicitly.
-e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:64:55 Cannot infer type for value parameter 'ders'. Specify it explicitly.
-e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:67:28 Suspension functions can only be called within coroutine body.
-e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:67:42 Unresolved reference 'id'.
-e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:69:18 Unresolved reference 'id'.
-e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:69:21 Cannot infer type for type parameter 'A'. Specify it explicitly.
-e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:69:21 Cannot infer type for type parameter 'B'. Specify it explicitly.
-e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:69:53 Unresolved reference 'id'.
-e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:69:74 Suspension functions can only be called within coroutine body.
-e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:74:41 None of the following candidates is applicable:
+> Task :app:compileDebugUnitTestKotlin
+w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/export/YerelDisaAktarmaHizmetiTest.kt:150:112 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/export/YerelDisaAktarmaHizmetiTest.kt:151:85 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/images/LocalSoruGorselDeposuTest.kt:46:60 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/images/LocalSoruGorselDeposuTest.kt:47:61 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
 
-suspend fun <T> Flow<T>.first(): T:
-  Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-suspend fun <T> Flow<T>.first(): T
-
-suspend fun <T> Flow<T>.first(predicate: suspend (T) -> Boolean): T:
-  Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-suspend fun <T> Flow<T>.first(predicate: suspend (T) -> Boolean): T
-e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:74:49 Unresolved reference 'id'.
-e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:77:17 Unresolved reference 'forEachIndexed'.
-e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:77:34 Cannot infer type for value parameter 'index'. Specify it explicitly.
-e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:77:41 Cannot infer type for value parameter 'ders'. Specify it explicitly.
-e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:78:56 Unresolved reference 'id'.
-e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:78:77 Suspension functions can only be called within coroutine body.
-e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:85:38 Cannot infer type for type parameter 'K'. Specify it explicitly.
-e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:85:38 Cannot infer type for type parameter 'V'. Specify it explicitly.
-e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:85:52 Unresolved reference 'id'.
-e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomKonuRepositoryTest.kt:85:56 Unresolved reference 'id'.
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes
+> Task :app:testDebugUnitTest
 
 [Incubating] Problems report is available at: file:///home/runner/work/Question-note/Question-note/build/reports/problems/problems-report.html
-
-FAILURE: Build failed with an exception.
-
-* What went wrong:
-Execution failed for task ':app:compileDebugUnitTestKotlin' (registered by plugin 'com.android.internal.application').
-> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.btapi.BuildToolsApiCompilationWork
-   > Compilation error. See log for more details
-
-* Try:
-
--- Son 80 satır --
-	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
-	at org.gradle.internal.execution.steps.ValidateStep$Mutable.executeDelegate(ValidateStep.java:79)
-	at org.gradle.internal.execution.steps.ValidateStep$Mutable.executeDelegate(ValidateStep.java:65)
-	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:105)
-	at org.gradle.internal.execution.steps.ValidateStep$Mutable.execute(ValidateStep.java:65)
-	at org.gradle.internal.execution.steps.CaptureMutableStateBeforeExecutionStep.executeMutable(CaptureMutableStateBeforeExecutionStep.java:86)
-	at org.gradle.internal.execution.steps.CaptureMutableStateBeforeExecutionStep.execute(CaptureMutableStateBeforeExecutionStep.java:65)
-	at org.gradle.internal.execution.steps.CaptureMutableStateBeforeExecutionStep.execute(CaptureMutableStateBeforeExecutionStep.java:45)
-	at org.gradle.internal.execution.steps.SkipEmptyMutableWorkStep.executeWithNonEmptySources(SkipEmptyMutableWorkStep.java:210)
-	at org.gradle.internal.execution.steps.SkipEmptyMutableWorkStep.executeMutable(SkipEmptyMutableWorkStep.java:90)
-	at org.gradle.internal.execution.steps.SkipEmptyMutableWorkStep.executeMutable(SkipEmptyMutableWorkStep.java:53)
-	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
-	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsStartedStep.execute(MarkSnapshottingInputsStartedStep.java:38)
-	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.executeMutable(LoadPreviousExecutionStateStep.java:36)
-	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.executeMutable(LoadPreviousExecutionStateStep.java:23)
-	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
-	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.executeMutable(HandleStaleOutputsStep.java:77)
-	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.executeMutable(HandleStaleOutputsStep.java:43)
-	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
-	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.lambda$executeMutable$0(AssignMutableWorkspaceStep.java:34)
-	at org.gradle.api.internal.tasks.execution.TaskExecution$4.withWorkspace(TaskExecution.java:314)
-	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.executeMutable(AssignMutableWorkspaceStep.java:30)
-	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.executeMutable(AssignMutableWorkspaceStep.java:21)
-	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
-	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:40)
-	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:23)
-	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.lambda$execute$2(ExecuteWorkBuildOperationFiringStep.java:67)
-	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:67)
-	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:39)
-	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:46)
-	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:34)
-	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:56)
-	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:38)
-	at org.gradle.internal.execution.impl.DefaultExecutionEngine$1.execute(DefaultExecutionEngine.java:68)
-	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.doExecute(DefaultTaskNodeExecutor.java:364)
-	... 25 more
-Caused by: org.jetbrains.kotlin.gradle.tasks.CompilationErrorException: Compilation error. See log for more details
-	at org.jetbrains.kotlin.gradle.tasks.TasksUtilsKt.throwExceptionIfCompilationFailed(tasksUtils.kt:21)
-	at org.jetbrains.kotlin.compilerRunner.btapi.BuildToolsApiCompilationWork.execute(BuildToolsApiCompilationWork.kt:320)
-	at org.gradle.workers.internal.DefaultWorkerServer.execute(DefaultWorkerServer.java:68)
-	at org.gradle.workers.internal.NoIsolationWorkerFactory$1$1.create(NoIsolationWorkerFactory.java:64)
-	at org.gradle.workers.internal.NoIsolationWorkerFactory$1$1.create(NoIsolationWorkerFactory.java:61)
-	at org.gradle.internal.classloader.ClassLoaderUtils.executeInClassloader(ClassLoaderUtils.java:103)
-	at org.gradle.workers.internal.NoIsolationWorkerFactory$1.lambda$execute$0(NoIsolationWorkerFactory.java:61)
-	at org.gradle.workers.internal.AbstractWorker$1.call(AbstractWorker.java:44)
-	at org.gradle.workers.internal.AbstractWorker$1.call(AbstractWorker.java:41)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
-	at org.gradle.workers.internal.AbstractWorker.executeWrappedInBuildOperation(AbstractWorker.java:41)
-	at org.gradle.workers.internal.NoIsolationWorkerFactory$1.execute(NoIsolationWorkerFactory.java:58)
-	at org.gradle.workers.internal.DefaultWorkerExecutor.lambda$submitWork$1(DefaultWorkerExecutor.java:169)
-	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner.runExecution(DefaultConditionalExecutionQueue.java:191)
-	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner.access$600(DefaultConditionalExecutionQueue.java:112)
-	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner$1.run(DefaultConditionalExecutionQueue.java:168)
-	at org.gradle.internal.Factories$1.create(Factories.java:30)
-	at org.gradle.internal.work.DefaultWorkerLeaseService.lambda$runAndReleaseLocks$0(DefaultWorkerLeaseService.java:296)
-	at org.gradle.internal.work.ResourceLockStatistics$1.measure(ResourceLockStatistics.java:43)
-	at org.gradle.internal.work.DefaultWorkerLeaseService.runAndReleaseLocks(DefaultWorkerLeaseService.java:294)
-	at org.gradle.internal.work.DefaultWorkerLeaseService.withLocksAcquired(DefaultWorkerLeaseService.java:290)
-	at org.gradle.internal.work.DefaultWorkerLeaseService.withLocks(DefaultWorkerLeaseService.java:282)
-	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(DefaultWorkerLeaseService.java:132)
-	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(DefaultWorkerLeaseService.java:138)
-	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner.runBatch(DefaultConditionalExecutionQueue.java:163)
-	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner.run(DefaultConditionalExecutionQueue.java:125)
-	... 2 more
-
 
 Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
 
@@ -262,8 +130,89 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD FAILED in 1m 39s
-28 actionable tasks: 28 executed
+BUILD SUCCESSFUL in 2m 15s
+30 actionable tasks: 30 executed
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
+
+-- Son 80 satır --
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugResources
+> Task :app:packageDebugResources
+> Task :app:processDebugNavigationResources
+> Task :app:parseDebugLocalResources
+> Task :app:javaPreCompileDebug
+> Task :app:generateDebugRFile
+> Task :app:checkDebugAarMetadata
+> Task :app:mapDebugSourceSetPaths
+> Task :app:compileDebugNavigationResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest
+> Task :app:processDebugManifestForPackage
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets
+> Task :app:mergeDebugResources
+> Task :app:processDebugUnitTestManifest
+> Task :app:processDebugResources
+> Task :app:packageDebugUnitTestForUnitTest
+> Task :app:generateDebugUnitTestConfig
+> Task :app:kspDebugKotlin
+> Task :app:compileDebugKotlin
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/export/YerelYedeklemeHizmeti.kt:64:34 Non-public primary constructor is exposed via the generated 'copy()' method of the 'data' class.
+
+The generated 'copy()' will change its visibility in future releases.
+
+To suppress the warning do one of the following:
+- Annotate the data class with the '@ConsistentCopyVisibility' annotation.
+- Use the '-Xconsistent-data-class-copy-visibility' compiler flag.
+- Annotate the data class with the '@ExposedCopyVisibility' annotation 
+  (Discouraged, but can be used to keep binary compatibility).
+
+To learn more, see the documentation of the '@ConsistentCopyVisibility' and '@ExposedCopyVisibility' annotations.
+
+This will become an error in language version 2.5. See https://youtrack.jetbrains.com/issue/KT-11914.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/images/LocalSoruGorselDeposu.kt:288:35 Elvis operator (?:) always returns the left operand of non-nullable type 'Bitmap'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/local/YanlisDefteriMigrations.kt:12:30 The corresponding parameter in the supertype 'Migration' is named 'db'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/local/YanlisDefteriMigrations.kt:25:30 The corresponding parameter in the supertype 'Migration' is named 'db'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/BugunEkrani.kt:90:66 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/BugunEkrani.kt:91:46 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/SoruDetayEkrani.kt:537:89 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/YanlisDefteriUygulamasi.kt:352:57 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/bilesenler/SoruGorselBileseni.kt:96:26 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
+
+> Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:processDebugJavaRes
+> Task :app:kspDebugUnitTestKotlin
+
+> Task :app:compileDebugUnitTestKotlin
+w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/export/YerelDisaAktarmaHizmetiTest.kt:150:112 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/export/YerelDisaAktarmaHizmetiTest.kt:151:85 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/images/LocalSoruGorselDeposuTest.kt:46:60 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/images/LocalSoruGorselDeposuTest.kt:47:61 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
+
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes
+> Task :app:testDebugUnitTest
+
+[Incubating] Problems report is available at: file:///home/runner/work/Question-note/Question-note/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 2m 15s
+30 actionable tasks: 30 executed
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 ```
 
 ## JUnit başarısızlık ayrıntıları
@@ -275,29 +224,140 @@ Başarısız JUnit testi yok.
 ## Derleme çıktısı (son 120 satır)
 
 ```text
-assembleRelease, birim testleri başarısız olduğu için çalıştırılmadı.
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preReleaseBuild UP-TO-DATE
+> Task :app:mergeReleaseJniLibFolders
+> Task :app:mergeReleaseNativeLibs
+> Task :app:generateReleaseResources FROM-CACHE
+> Task :app:checkReleaseDuplicateClasses
+
+> Task :app:stripReleaseDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so. Run with --info option to learn more.
+
+> Task :app:packageReleaseResources
+> Task :app:extractReleaseNativeSymbolTables
+> Task :app:processReleaseNavigationResources FROM-CACHE
+> Task :app:mergeReleaseNativeDebugMetadata NO-SOURCE
+> Task :app:parseReleaseLocalResources FROM-CACHE
+> Task :app:generateReleaseRFile FROM-CACHE
+> Task :app:kspReleaseKotlin FROM-CACHE
+> Task :app:javaPreCompileRelease FROM-CACHE
+> Task :app:mapReleaseSourceSetPaths
+> Task :app:compileReleaseNavigationResources FROM-CACHE
+> Task :app:checkReleaseAarMetadata
+> Task :app:createReleaseCompatibleScreenManifests
+> Task :app:extractDeepLinksRelease FROM-CACHE
+> Task :app:processReleaseMainManifest
+> Task :app:processReleaseManifest
+> Task :app:desugarReleaseFileDependencies
+> Task :app:mergeReleaseStartupProfile
+> Task :app:processReleaseManifestForPackage
+> Task :app:mergeReleaseResources
+> Task :app:compileReleaseKotlin
+> Task :app:mergeExtDexRelease
+> Task :app:mergeReleaseArtProfile
+> Task :app:generateReleaseAssets UP-TO-DATE
+
+> Task :app:compileReleaseKotlin
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/export/YerelYedeklemeHizmeti.kt:64:34 Non-public primary constructor is exposed via the generated 'copy()' method of the 'data' class.
+
+The generated 'copy()' will change its visibility in future releases.
+
+To suppress the warning do one of the following:
+- Annotate the data class with the '@ConsistentCopyVisibility' annotation.
+- Use the '-Xconsistent-data-class-copy-visibility' compiler flag.
+- Annotate the data class with the '@ExposedCopyVisibility' annotation 
+  (Discouraged, but can be used to keep binary compatibility).
+
+To learn more, see the documentation of the '@ConsistentCopyVisibility' and '@ExposedCopyVisibility' annotations.
+
+This will become an error in language version 2.5. See https://youtrack.jetbrains.com/issue/KT-11914.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/images/LocalSoruGorselDeposu.kt:288:35 Elvis operator (?:) always returns the left operand of non-nullable type 'Bitmap'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/local/YanlisDefteriMigrations.kt:12:30 The corresponding parameter in the supertype 'Migration' is named 'db'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/local/YanlisDefteriMigrations.kt:25:30 The corresponding parameter in the supertype 'Migration' is named 'db'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/BugunEkrani.kt:90:66 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/BugunEkrani.kt:91:46 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/SoruDetayEkrani.kt:537:89 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/YanlisDefteriUygulamasi.kt:352:57 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/bilesenler/SoruGorselBileseni.kt:96:26 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
+
+> Task :app:mergeReleaseAssets
+> Task :app:compressReleaseAssets
+> Task :app:extractReleaseVersionControlInfo
+> Task :app:extractProguardFiles
+> Task :app:processReleaseResources
+> Task :app:collectReleaseDependencies
+> Task :app:sdkReleaseDependencyData
+> Task :app:optimizeReleaseResources
+> Task :app:writeReleaseAppMetadata
+> Task :app:writeReleaseSigningConfigVersions
+> Task :app:compileReleaseJavaWithJavac NO-SOURCE
+> Task :app:dexBuilderRelease
+> Task :app:mergeReleaseGlobalSynthetics
+> Task :app:generateReleaseLintVitalReportModel
+> Task :app:processReleaseJavaRes
+> Task :app:mergeReleaseJavaResource
+> Task :app:mergeDexRelease
+> Task :app:compileReleaseArtProfile
+> Task :app:lintVitalAnalyzeRelease
+> Task :app:lintVitalReportRelease
+> Task :app:lintVitalRelease
+> Task :app:packageRelease
+> Task :app:createReleaseApkListingFileRedirect
+> Task :app:assembleRelease
+
+[Incubating] Problems report is available at: file:///home/runner/work/Question-note/Question-note/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 2m 15s
+48 actionable tasks: 40 executed, 8 from cache
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 ```
 
 ## İmzalama çıktısı
 
 ```text
-İmzalama başlatılmadı.
 ```
 
 ## Sertifika doğrulama çıktısı
 
 ```text
-apksigner verify çalıştırılmadı.
+Verifies
+Verified using v1 scheme (JAR signing): false
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): true
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v3.2 scheme (APK Signature Scheme v3.2): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1
+V3.0 Signer: certificate DN: C=TR, O=keremtulu44, CN=Yanlis Defteri
+V3.0 Signer: certificate SHA-256 digest: fa13ded73cb46ede9e363747ee3895f2b637149c165790a2e46778f13089de54
+V3.0 Signer: certificate SHA-1 digest: e91037b0ae3d996547d94f67150f615b8d39562e
+V3.0 Signer: certificate MD5 digest: ae05416ccef3056264f2b194d11895f4
+V3.0 Signer: key algorithm: RSA
+V3.0 Signer: key size (bits): 2048
+V3.0 Signer: public key SHA-256 digest: f4e20e6ced2eb9a1b0f2babc335d30ab4447486a9c45a4815caea25907b6fc38
+V3.0 Signer: public key SHA-1 digest: 28cb01aac44f1a61a3cc1410b5e5d96b7c4d5253
+V3.0 Signer: public key MD5 digest: efca2e07ac5a04473681ddaf5ff0157e
 ```
 
 ## Release çıktısı
 
 ```text
-Release oluşturulmadı.
+https://github.com/keremtulu44/Question-note/releases/tag/v1.0.7
 ```
 
 ## APK özeti
 
 ```text
-İmzalı APK yok.
+APK: app/build/outputs/apk/release/yanlis-defteri-1.0.7.apk
+SHA-256: 3d10f48d7c6db6ff246d0942fa958df974ac3c87e182b2627855f192035f99c4
 ```
