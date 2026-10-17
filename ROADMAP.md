@@ -33,7 +33,8 @@ Durum işaretleri: `[ ]` yapılmadı · `[~]` kod/CI hazır, kullanıcı kabulü
 - [x] Dışa aktarma akışı tam ZIP yedekleme hizmetine yükseltildi; geri uyumlu eski API adı korunuyor.
 - [x] CI run `39030667492`: toplam 32 birim/Robolectric testi geçti; v1.0.3 Release derlemesi, imza ve sertifika parmak izi başarılı.
 - [~] Kullanıcı v1.0.2 için “3. turu denemedim, onun dışında hepsi geçti” bildirdi; bunun checklist'teki 1/2/4 geçti, 3 (yedek/geri yükleme) denenmedi anlamına geldiği yorumu henüz teyit edilmedi. Bkz. `docs/TEST_KONTROL_LISTESI.md`.
-- [ ] v1.0.3 ana ekranı ve tekrar akışını gerçek cihazda kabul; uçak modu, izin/iptal, düzenleme/silme ve fotoğraf görüntüleme kontrollerini gerektiğinde tekrar et.
+- [x] Kullanıcı v1.0.3'teki güncelleme/veri koruma, Bugün/gecikenler, soru ekleme, yan menü ve tekrar sonucu cihaz adımlarının tümünü geçti bildirdi (2026-10-17); checklist'teki adım kapsamını okuyun.
+- [ ] Uçak modu, izin/iptal, düzenleme/silme ve fotoğraf görüntüleme gibi ayrı Aşama 2 cihaz kontrolleri.
 - [ ] 30–50 gerçek fotoğrafta küçük formül, kök ve grafik etiketlerinin okunabilirliğini doğrula.
 
 ## Aşama 3 — Tam yedek ve geri yükleme [~]
@@ -53,13 +54,15 @@ Durum işaretleri: `[ ]` yapılmadı · `[~]` kod/CI hazır, kullanıcı kabulü
 
 ## Aşama 4 — Tekrar deneyimi ve günlük akış [~]
 
-> Bugün ekranı, yan menü ve sonuç kaydı v1.0.3'te yayımlandı; CI başarılı. Cihaz kabulü bekliyor.
+> Bugün/menü/sonuç akışı v1.0.3'te yayımlandı ve kullanıcı tarafından cihazda geçti bildirildi. Tekrar geçmişi v1.0.4'te CI'da doğrulandı; yeni history UI cihaz testi bekliyor.
 
-- [x] Tekrar aralığı kuralı ve repository seviyesinde plan/tekrar davranışları Aşama 2'de yazıldı ve CI'da test edildi.
+- [x] Tekrar aralığı kuralı ve repository seviyesinde plan/tekrar davranışları CI'da test edildi.
 - [x] Bugün/gecikmiş soruları dersler arası listeleyen ana ekran, belirgin “Soru ekle” eylemi ve ikincil alanlar için yan menü.
 - [x] Çözümün açıldığını ve tekrar sonucunu kaydetme akışı; CI'da derleme ve birim testleri geçti.
-- [ ] v1.0.3'te Bugün listesi, menü hedefleri ve tekrar sonucunun gerçek cihazda doğrulanması.
-- [ ] Tekrar geçmişi için kullanıcıya görünür ekran, elle tarih atama ve kullanıcıya görünür plan akışları.
+- [x] v1.0.3'te mevcut uygulamayı koruyarak güncelleme, Bugün/menü ve tekrar kaydı adımlarının cihazda geçtiği kullanıcı tarafından bildirildi.
+- [x] Tekrar geçmişi: soru ayrıntısında planlanan/gerçekleşen gün, sonuç, çözüm açma ve aralık; CI run `39033698686` 33 testle geçti.
+- [ ] v1.0.4'te tekrar geçmişinin gerçek cihazda okunaklı/güncel gösterildiğinin kabulü.
+- [ ] Elle tarih atama ve kullanıcıya görünür plan akışları.
 - [ ] Saat dilimi ve uzun dönemli gerçek kullanım kabul testleri.
 
 ## Aşama 5 — Kullanılabilirlik ve sağlamlaştırma

@@ -4,7 +4,7 @@ Bu belge projenin **karar kaydıdır**. Yeni bir geliştirme oturumu (insan veya
 belgeyi, sonra [HANDOFF.md](HANDOFF.md) dosyasını okur.
 
 - Son güncelleme: 2026-10-17
-- Durum: **Aşama 2/3/4 kodu v1.0.3'te CI'da doğrulandı; yeni UI'nin cihaz kabulü bekliyor.** CI run `39030667492` (kaynak commit `0f512c8945913565f8e3145ecc6c0cecaede2bef`) 32 testi, Release derlemesini, imzayı ve sertifika doğrulamasını geçti; [v1.0.3 Release'i](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.3) yayımlandı (versionCode 4). Yeni Bugün ekranı/yan menü/tekrar akışı ve SAF/Drive/temiz kurulum/başka cihaz kabulü gerçek cihazda ayrıca denenmeli. Kullanıcının v1.0.2 için “3. turu denemedim, onun dışında hepsi geçti” bildiriminin checklist bölümleriyle eşlemesi teyitsiz; ayrıntı [TEST_KONTROL_LISTESI.md](docs/TEST_KONTROL_LISTESI.md) içinde. Her şema değişikliği için veri koruyan migration ve test şart; migration fallback'i yasak.
+- Durum: **v1.0.4 yayımlandı; CI ve 33 otomatik test geçti.** CI run `39033698686` (kaynak commit `3d3cfd5d103c1a3f3f578e4e197722d12ab347e2`) Release derlemesini, imzayı ve sertifika doğrulamasını geçti; [v1.0.4 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.4) yayımlandı (versionCode 5). Kullanıcı, v1.0.3'teki update/Bugün/menü/tekrar sonucu cihaz adımlarının tümünü geçti bildirdi; v1.0.4 tekrar geçmişinin cihaz kabulü, SAF/Drive/temiz kurulum/başka cihaz ve fotoğraf okunabilirliği bekliyor. v1.0.2 için “3. turu denemedim” ifadesinin checklist bölümleriyle önceki eşlemesi teyitsiz; ayrıntı [TEST_KONTROL_LISTESI.md](docs/TEST_KONTROL_LISTESI.md) içinde. Her şema değişikliği için veri koruyan migration ve test şart; migration fallback'i yasak.
 
 ---
 

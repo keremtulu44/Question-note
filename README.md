@@ -25,20 +25,19 @@ cevaplamak ve çözümü öğrenme sürecinden ayrı saklamaktır.
 
 ## Durum
 
-**v1.0.3 (versionCode 4) yayımlandı.** Ana ekran bugün yapılacak ve gecikmiş tekrarları
-farklı derslerden tek listede toplar; “Soru ekle” akışında ders seçimi korunur. Yedekleme, görsel
-bakımı ve derslere göre gezinme yan menüdedir. Tekrar sonucu/çözüm açma kaydedilir. Ürün şu an lise
-odağındadır; TYT/AYT ayrımı yoktur.
+**v1.0.4 (versionCode 5) yayımlandı.** Bugün ekranı bugünkü ve gecikmiş tekrarları dersler arası
+tek listede toplar; ders seçerek soru ekleme ve yan menü korunur. Soru ayrıntısında tekrar geçmişi,
+planlanan/gerçekleşen gün, sonuç, çözüm açma bilgisi ve aralık gösterilir. Ürün lise odağındadır;
+TYT/AYT ayrımı yoktur.
 
-CI run `39030667492` (kaynak commit `0f512c8945913565f8e3145ecc6c0cecaede2bef`) 32 testi,
-Release derlemesini, imzayı ve beklenen sertifika parmak izini geçti. [v1.0.3 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.3)
-yayımlandı. APK SHA-256: `4641aff60fb38aeb114c765a9721d50849156e9f094b9b99662807cc41724108`.
+CI run `39033698686` (kaynak commit `3d3cfd5d103c1a3f3f578e4e197722d12ab347e2`) 33 testi,
+Release derlemesini, imzayı ve beklenen sertifika parmak izini geçti. [v1.0.4 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.4)
+yayımlandı. APK SHA-256: `bf6978a506a472834d7c7a952ac59818d69b0d9c205772d4c02ce2767cc27468`.
 
-**Cihaz kabulü ayrı ve hâlâ bekliyor:** yeni v1.0.3 ana ekranı/tekrar akışı gerçek cihazda denenmedi;
-SAF/Drive yedek-geri yükleme ve fotoğraf okunabilirliği için de CI sonucu cihaz testinin yerine geçmez.
-Kullanıcının v1.0.2 için “3. turu denemedim, onun dışında hepsi geçti” bildiriminin önceki
-checklist'teki bölüm 1/2/4 geçti, bölüm 3 denenmedi eşlemesi henüz teyit edilmedi; ayrıntı
-[TEST_KONTROL_LISTESI.md](docs/TEST_KONTROL_LISTESI.md) içinde.
+**Cihaz kabulü ayrı:** Kullanıcı v1.0.3'te güncelleme, Bugün/menü ve tekrar sonucu adımlarının
+tümünü geçti bildirdi. Yeni v1.0.4 tekrar geçmişi cihazda henüz denenmedi; SAF/Drive yedek-geri
+yükleme ve fotoğraf okunabilirliği de bekliyor. v1.0.2 için “3. turu denemedim” sözünün checklist
+bölümleriyle önceki eşlemesi hâlâ teyitsiz; ayrıntı [TEST_KONTROL_LISTESI.md](docs/TEST_KONTROL_LISTESI.md) içinde.
 
 ---
 
@@ -63,9 +62,9 @@ checklist'teki bölüm 1/2/4 geçti, bölüm 3 denenmedi eşlemesi henüz teyit 
 ## Kullanım / APK erişimi
 
 İmzalı APK'lar GitHub [Releases](https://github.com/keremtulu44/Question-note/releases) bölümünde.
-[v1.0.3 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.0.3/yanlis-defteri-1.0.3.apk).
-Gerçek cihaz testi için mevcut uygulamayı **kaldırmadan** üzerine kur; yeni Bugün ekranı, menü ve
-tekrar kayıt akışını dene. İndirme/kurulum ayrıntıları [BUILDING.md](BUILDING.md) içinde.
+[v1.0.4 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.0.4/yanlis-defteri-1.0.4.apk).
+Mevcut uygulamayı **kaldırmadan** üzerine kur; özellikle soru ayrıntısındaki yeni tekrar geçmişini
+gerçek cihazda kontrol et. İndirme/kurulum ayrıntıları [BUILDING.md](BUILDING.md) içinde.
 
 ---
 

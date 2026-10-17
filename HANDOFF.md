@@ -3,22 +3,22 @@
 > Yeni bir geliştirme oturumu önce [PROJECT_BRIEF.md](PROJECT_BRIEF.md) ve bu belgeyi okur.
 
 - Son güncelleme: 2026-10-17
-- Aktif aşama: **v1.0.3 yayımlandı; yeni Bugün ekranı ve tekrar akışının gerçek cihaz kabulü bekliyor.** Aşama 2/3/4 kodu CI'da geçti.
-- Son başarılı CI: run `39030667492`, kaynak commit `0f512c8945913565f8e3145ecc6c0cecaede2bef` — 32 test geçti; Release derlemesi, imza ve beklenen sertifika parmak izi doğrulandı. v1.0.3 Release yayımlandı.
-- APK: [v1.0.3 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.3), [doğrudan indir](https://github.com/keremtulu44/Question-note/releases/download/v1.0.3/yanlis-defteri-1.0.3.apk), SHA-256 `4641aff60fb38aeb114c765a9721d50849156e9f094b9b99662807cc41724108`.
-- Kullanıcı eylemi: APK'yı Samsung Galaxy S24 FE'ye **mevcut uygulamayı kaldırmadan** kur. Bugün/gecikenler, soru ekleme sırasında ders seçimi, yan menü hedefleri ve çözüm açma/tekrar sonucu dene; yedek/geri yükleme adımlarını da ancak cihazda deneyince geçti say. Yeni v1.0.3 UI henüz kullanıcı tarafından doğrulanmadı.
-- v1.0.2 için kullanıcının “3. turu denemedim, onun dışında hepsi geçti” sözünün checklist'teki 1/2/4 geçti ve 3. bölüm yedek/geri yükleme denenmedi yorumuna denk geldiği henüz teyit edilmedi. Kaydın ihtiyatlı yorumu: `docs/TEST_KONTROL_LISTESI.md`.
+- Aktif aşama: **v1.0.4 yayımlandı; soru ayrıntısındaki yeni tekrar geçmişinin cihaz kabulü bekliyor.** v1.0.3 Bugün/menü/sonuç akışı kullanıcı tarafından geçti bildirildi; Aşama 2/3/4 CI doğrulandı.
+- Son başarılı CI: run `39033698686`, kaynak commit `3d3cfd5d103c1a3f3f578e4e197722d12ab347e2` — 33 test geçti; Release derlemesi, imza ve beklenen sertifika parmak izi doğrulandı. v1.0.4 Release yayımlandı.
+- APK: [v1.0.4 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.4), [doğrudan indir](https://github.com/keremtulu44/Question-note/releases/download/v1.0.4/yanlis-defteri-1.0.4.apk), CI-reported SHA-256 `bf6978a506a472834d7c7a952ac59818d69b0d9c205772d4c02ce2767cc27468`.
+- Kullanıcı eylemi: APK'yı Samsung Galaxy S24 FE'ye **mevcut uygulamayı kaldırmadan** kur; eski verilerin korunduğunu ve soru ayrıntısındaki tekrar geçmişinin planlanan/gerçekleşen gün, sonuç, çözüm açma ve aralık bilgilerini gösterdiğini kontrol et. Gerçek yedek oluşturma/geri yükleme ve fotoğraf okunabilirliği hâlâ ayrıca denenmeli.
+- v1.0.3 için kullanıcı cihaz adımlarının tümünü geçti bildirdi (2026-10-17). Önceki v1.0.2 “3. tur” ifadesinin checklist bölüm 3 (yedek/geri yükleme) anlamına geldiği teyit edilmedi; ayrıntı `docs/TEST_KONTROL_LISTESI.md`.
 - Tam ZIP biçimi: `docs/YEDEK_FORMATI.md`; test ayrımı ve bekleyenler: `docs/TEST_KONTROL_LISTESI.md`; CI kanıtı: `docs/DERLEME_RAPORU.md`.
 
 ---
 
-## Güncel teslim — v1.0.3 (Aşamalar 2/3/4)
+## Güncel teslim — v1.0.4 (Aşamalar 2/3/4)
 
 - Aşama 2: soru/konu akışları, çoklu görsel, kalıcı saklama, görsel bakımı ve tekrar kuralları; Room v1→v2 veri koruyan migration.
 - Aşama 3: biçim v2 tam ZIP (manifest + JSON + CSV + JPEG), doğrulama, SAF önizleme/onay, güvenlik yedeği ve kesinti kurtarması.
-- Aşama 4: bugün/gecikmiş sorular için dersler arası Bugün ana ekranı, yan menüde ikincil hedefler, ders seçimini koruyan soru ekleme ve tekrar sonucu/çözüm açma kaydı. Ders/lise kapsamı sabit; TYT/AYT ayrımı yok.
-- CI run `39030667492`: 32 test, Release derlemesi, imza ve beklenen sertifika fingerprint geçti; v1.0.3 yayımlandı. Tam kanıt `docs/DERLEME_RAPORU.md` içinde.
-- Gerçek cihaz kabulü bekliyor: yeni ana ekran/menü/tekrar akışı; SAF/Drive, temiz kurulum/geri yükleme/kurtarma ve 30–50 fotoğraf okunabilirliği ayrıca denenmeli. v1.0.2 cihaz bildiriminin bölüm eşlemesi teyit edilmediğinden, yedek kabulü kesin geçmiş sayılmıyor.
+- Aşama 4: Bugün/gecikmiş dersler arası ana ekran, ikincil alanlar için yan menü, soru eklerken ders seçimi, tekrar sonucu kaydı ve soru ayrıntısında canlı tekrar geçmişi.
+- CI run `39033698686`: 33 test, Release derlemesi, imza ve beklenen sertifika fingerprint geçti; v1.0.4 yayımlandı. Tam kanıt `docs/DERLEME_RAPORU.md` içinde.
+- Kullanıcı v1.0.3'teki güncelleme/Bugün/menü/tekrar kaydı cihaz testlerini geçti bildirdi. v1.0.4 geçmiş UI'si, SAF/Drive yedekleme/geri yükleme/kurtarma ve 30–50 fotoğraf okunabilirliği için cihaz kabulü bekliyor. v1.0.2 “3. tur” eşlemesi teyitsiz.
 
 ## Önceki aşama geçmişi (tarihsel)
 

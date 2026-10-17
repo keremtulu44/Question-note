@@ -2,6 +2,14 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.0.4] — 2026-10-17
+
+- Soru ayrıntısına tekrar geçmişi eklendi: en yeni kayıt üstte; gerçekleşen/planlanan gün, sonuç, çözüm açılıp açılmadığı ve aralık görünür.
+- Tekrar geçmişi akışı repository üzerinden Room'dan okunur; 33 otomatik test geçti. Bu değişiklik veritabanı şemasını değiştirmez.
+- CI run `39033698686`: Release derlemesi, sabit anahtarla imza ve beklenen sertifika parmak izi başarılı; [v1.0.4 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.4) yayımlandı.
+- APK SHA-256: `bf6978a506a472834d7c7a952ac59818d69b0d9c205772d4c02ce2767cc27468`.
+- v1.0.4'teki yeni geçmiş arayüzü henüz cihazda test edilmedi. Kullanıcı v1.0.3 Bugün/menü/tekrar adımlarını geçti bildirdi.
+
 ## [1.0.3] — 2026-10-17
 
 - Ana ekran sadeleştirilip **Bugün** odağına alındı: tüm derslerden bugünkü ve gecikmiş tekrarlar tek akışta listelenir; “Soru ekle” belirgindir.
@@ -10,7 +18,7 @@ Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih 
 - Mevcut ürün lise içindir; TYT/AYT ayrımı yok. Ortaokul/LGS ancak gelecekteki Ayarlar seçenekleri olarak değerlendirilebilir.
 - CI run `39030667492`: 32 test geçti; Release derlemesi, imza ve beklenen sertifika parmak izi doğrulandı. [v1.0.3 Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.3) yayımlandı.
 - APK SHA-256: `4641aff60fb38aeb114c765a9721d50849156e9f094b9b99662807cc41724108`.
-- Yeni ana ekran/tekrar akışı gerçek cihazda henüz denenmedi; CI başarısı cihaz kabulü değildir.
+- Kullanıcı 2026-10-17'de mevcut uygulamayı koruyarak güncelleme, Bugün/gecikenler, menü ve tekrar sonucu adımlarının tümünü geçti bildirdi. Yedek oluşturma/gerçek geri yükleme bu adımlar arasında yoktu; v1.0.4 geçmiş ekranı ayrıca test bekliyor.
 
 ## [1.0.2] — 2026-10-17
 

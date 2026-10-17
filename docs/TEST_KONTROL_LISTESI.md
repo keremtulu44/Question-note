@@ -11,7 +11,7 @@
 > ZIP yol güvenliği) ve **Robolectric** (şema/migration testleri). Emülatör yalnızca gerçekten
 > gerekirse kullanılır; asıl kabul testleri gerçek cihazda yapılır.
 
-Son güncelleme: 2026-10-17. v1.0.3 CI run `39030667492` 32 testi, Release derlemesini ve imza doğrulamasını geçti. Kullanıcı, v1.0.3'ü mevcut uygulamanın üzerine kurup burada sıralanan cihaz kabul adımlarının tümünü geçtiğini bildirdi (2026-10-17); yeni Bugün/menü/tekrar akışı ve mevcut verinin güncelleme sonrası korunması bu rapora göre geçti. Yedek menüsünü açma ve geri yüklemeyi iptal etme, tam yedek/geri yükleme turu değildir; Aşama 3 cihaz kabulü hâlâ bekliyor. v1.0.2 için “3. turu denemedim” ifadesinin önceki checklist'te 1/2/4 geçti ve 3. bölüm denenmedi şeklinde eşlenmesi ise hâlâ teyitsizdir.
+Son güncelleme: 2026-10-17. v1.0.4 CI run `39033698686` 33 testi, Release derlemesini ve imzayı geçti. Kullanıcı, v1.0.3'te mevcut uygulamayı koruyan güncelleme, Bugün/gecikenler, menü ve tekrar sonucu cihaz adımlarının tümünü geçti bildirdi (2026-10-17). v1.0.4 tekrar geçmişi UI'si yeni olduğu için cihazda henüz test edilmedi. Yedek menüsünü açma ve geri yüklemeyi iptal etme, tam yedek/geri yükleme turu değildir; Aşama 3 cihaz kabulü hâlâ bekliyor. v1.0.2 için “3. turu denemedim” ifadesinin önceki checklist'te 1/2/4 geçti ve 3. bölüm denenmedi şeklinde eşlenmesi ise hâlâ teyitsizdir.
 
 ---
 
@@ -32,6 +32,8 @@ Son güncelleme: 2026-10-17. v1.0.3 CI run `39030667492` 32 testi, Release derle
 | 1.11 | v1.0.2 mevcut kurulumun üzerine yüklendi; kullanıcı uygulamanın açıldığını bildirdi | KULLANICI (2026-10-17) | [x] |
 | 1.12 | v1.0.3 mevcut uygulamanın üzerine kuruldu; kullanıcı açılışı, önceki verilerin korunmasını, Bugün ekranı ve menü adımlarını geçti bildirdi | KULLANICI (2026-10-17) | [x] |
 | 1.13 | VersionCode 3 → 4; v1.0.3 Release, APK imzası ve fingerprint CI'da doğrulandı | YZ (CI run `39030667492`) | [x] |
+| 1.14 | v1.0.4 mevcut uygulamanın üzerine yükleniyor; veri ve tekrar geçmişi korunuyor/görünüyor | KULLANICI | [ ] |
+| 1.15 | VersionCode 4 → 5; v1.0.4 Release, APK imzası ve fingerprint CI'da doğrulandı | YZ (CI run `39033698686`) | [x] |
 
 ## Aşama 2 — Yerel arşiv
 
@@ -71,6 +73,8 @@ Son güncelleme: 2026-10-17. v1.0.3 CI run `39030667492` 32 testi, Release derle
 | 2.32 | Repository Bugün akışı dersler arası gecikmiş/vadesi gelen aktif soruları içeriyor; gelecek tarihli, askıdaki ve arşiv ders sorularını dışlıyor | YZ (CI run `39030667492`) | [x] |
 | 2.33 | Yeni Bugün/gecikenler ekranı, ders seçerek soru ekleme ve yan menü adımları gerçek cihazda geçti | KULLANICI (2026-10-17, v1.0.3) | [x] |
 | 2.34 | Tekrar sonucu kaydediliyor; uygulama Bugün'e dönüyor ve tamamlanan soru bugünkü listeden çıkıyor | KULLANICI (2026-10-17, v1.0.3) | [x] |
+| 2.35 | Tekrar geçmişi boş durumu, newest-first sırası ve planlanan/gerçekleşen gün/sonuç/çözüm alanları repository'den doğru geliyor | YZ (CI run `39033698686`) | [x] |
+| 2.36 | v1.0.4 soru ayrıntısında tekrar geçmişi cihazda okunaklı ve güncel gösteriliyor | KULLANICI (v1.0.4) | [ ] |
 
 ## Aşama 3 — Yedek ve geri yükleme
 
@@ -106,7 +110,7 @@ Son güncelleme: 2026-10-17. v1.0.3 CI run `39030667492` 32 testi, Release derle
 | 4.5 | Çözüm açıldığında bu bilgi gerçek cihazdaki tekrar akışında kaydediliyor | KULLANICI (v1.0.3) | [ ] |
 | 4.6 | Birim testinde çözüm açılmış tekrarın sonraki tarihi 1 gün sonrası oluyor | YZ (CI run `39030667492`) | [x] |
 | 4.7 | Çözüm açıldıktan sonra aynı gün ikinci deneme kaydı oluşmuyor | YZ | [ ] |
-| 4.8 | Tekrar geçmişi görüntülenebiliyor (planlanan gün ile gerçekleşen gün ayrı) | KULLANICI | [ ] |
+| 4.8 | v1.0.4 soru ayrıntısında tekrar geçmişi gösteriliyor (planlanan/gerçekleşen gün ve sonuç) | KULLANICI | [ ] |
 | 4.9 | Bildirim izni verilmese de "Bugün" listesi çalışıyor | KULLANICI | [ ] |
 | 4.10 | Elle tarih atama çalışıyor | KULLANICI | [ ] |
 | 4.11 | Saat dilimi değişiminde gün hesabı bozulmuyor (kayıtlı gün değişmiyor) | YZ + KULLANICI | [ ] |
