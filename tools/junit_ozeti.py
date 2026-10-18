@@ -25,7 +25,9 @@ for path in sorted(files):
                     f"{failure.attrib.get('type', failure.tag)}: {message}\n{(failure.text or '').strip()[:3500]}"
                 )
 if args.mode == "failures":
-    print("\n\n".join(details) if details else "Başarısız JUnit testi yok.")
+    print("\n\n".join(details) if details else (
+        "Başarısız JUnit testi yok." if files else "JUnit XML raporu yok; testlerin çalıştığı doğrulanamadı."
+    ))
     sys.exit(0)
 if not files:
     print("JUnit XML raporu yok (0 test)")

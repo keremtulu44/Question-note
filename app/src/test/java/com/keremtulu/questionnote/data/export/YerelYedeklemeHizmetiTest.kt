@@ -498,6 +498,7 @@ class YerelYedeklemeHizmetiTest {
     }
 
     @Test fun verifiedRestoreClearsCosmeticQueuesBeforeRecoveryMarkerAndKeepsOwnership() = runBlocking<Unit> {
+        val context = RuntimeEnvironment.getApplication()
         listOf("karne_rozetleri", "rutbe_kutlamalari").forEach { context.getSharedPreferences(it, 0).edit().clear().commit() }
         val archive = measuredArchive()
         val badges = RozetDeposu(context); val ranks = RutbeDeposu(context)
