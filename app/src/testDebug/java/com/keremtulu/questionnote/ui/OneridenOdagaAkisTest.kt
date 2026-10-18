@@ -109,7 +109,8 @@ class OneridenOdagaAkisTest {
             compose.onNodeWithText(easy).performScrollTo().tikla()
             val save = context.getString(R.string.focus_save_last)
             compose.waitUntil(10_000) { compose.onAllNodes(hasText(save) and isEnabled()).fetchSemanticsNodes().isNotEmpty() }
-            compose.onNodeWithText(save).performScrollTo().tikla()
+            // Save is in the fixed Scaffold bottom bar, not the scrollable assessment list.
+            compose.onNodeWithText(save).tikla()
             compose.waitUntil(10_000) { runBlocking { db.tekrarDao().tumunuGetir().size == 1 } }
             val record = runBlocking { db.tekrarDao().tumunuGetir().single() }
             assertEquals("eligible", record.soruId); assertEquals(2, record.algoritmaSurumu)

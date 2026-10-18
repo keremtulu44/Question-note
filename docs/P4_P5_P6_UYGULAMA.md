@@ -84,6 +84,7 @@ Bu belge uygulanan sözleşmeyi ve gerçekten gözlenen kapıları kaydeder; tes
 | P6 `06374a4` | `39142060320` | Debug **298 / 0 / 0 / 0**; Release Gradle görev aşamasında durdu, 0 test. Release host testi açıkça etkinleştiriliyor; ilk hata satırları rapora ekleniyor. Yayın yapılmadı |
 | P6 `ff1bea7` | `39142423706` | Debug **298 / 1 / 0 / 0**; gerçek tekrar kaydı başarılı, karne dönüşü sonrası test yanlışlıkla aynı adlı başlığı navigasyon kabul edebildi. Tab rolü + gerçek Filtreli ekran sınırı ve semantik eylemle fixture kararlılaştırıldı; Release henüz koşmadı |
 | P6 `bcdc461` | `39142970779` | Release **258 / 0 / 0 / 0** ve Release benchmark başarılı. Debug **298 / 1 / 0 / 0**: daha sıkı UI fixture görünürlük kontrolü Rahat seçeneğinin kaydırma gerektirdiğini gösterdi; açık kaydırma + gerçek önizleme/karne hazır beklemeleri eklendi. Yayın kapalı |
+| P6 `4ef73e9` | `39143488466` | Release **258 / 0 / 0 / 0**. Debug **298 / 1 / 0 / 0**: Rahat seçeneğine kaydırma geçti; sabit alt bardaki Kaydet için kaydırma istenemeyeceği görüldü. Yalnız Kaydet’in gereksiz scroll çağrısı kaldırıldı; görünürlük/etkinlik ve gerçek kayıt kontrolleri kaldı |
 
 Sütun sırası: **test / başarısız / hata / atlanan**. Derleme/parsing ile çalışmış test sonucu birbirinin yerine yazılmaz.
 Güncel otomatik rapor [DERLEME_RAPORU.md](DERLEME_RAPORU.md). İlk başarısızlıkları gizlemek için test/koruma silinmedi.
