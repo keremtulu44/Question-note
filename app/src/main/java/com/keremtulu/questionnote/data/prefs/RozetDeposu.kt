@@ -22,12 +22,13 @@ class RozetDeposu(context: Context) {
 
     /** Atomic read-modify-write: parallel aggregate/session checks cannot award twice. */
     @Synchronized
-    fun kaydet(rozetler: Collection<Rozet>): List<Rozet> {
+    fun kaydet(rozetler: Collection<Rozet>, kutla: Boolean = true): List<Rozet> {
         val yeni = rozetler.distinct().filterNot { it in sahip.value }
-        if (yeni.isEmpty()) return emptyList()
+        val esitle = prefs.getBoolean("baseline_required", false)
+        if (yeni.isEmpty() && !esitle) return emptyList()
         val guncel = sahip.value + yeni
-        val kuyruk = sirala(bekleyen.value.toSet() + yeni)
-        val editor = prefs.edit()
+        val kuyruk = sirala(bekleyen.value.toSet() + if (kutla && !esitle) yeni else emptyList())
+        val editor = prefs.edit().putBoolean("baseline_required", false)
             .putStringSet(ANAHTAR, guncel.map { it.anahtar }.toSet())
             .putStringSet(BEKLEYEN, kuyruk.map { it.anahtar }.toSet())
         val now = System.currentTimeMillis()
@@ -44,6 +45,13 @@ class RozetDeposu(context: Context) {
         val kalan = bekleyen.value.filterNot { it == rozet }
         check(prefs.edit().putStringSet(BEKLEYEN, kalan.map { it.anahtar }.toSet()).commit())
         bekleyen.value = kalan
+    }
+
+    /** Restore does not revoke ownership. New retroactive awards are silently baselined once. */
+    @Synchronized
+    fun geriYuklemeSonrasi() {
+        check(prefs.edit().putStringSet(BEKLEYEN, emptySet()).putBoolean("baseline_required", true).commit())
+        bekleyen.value = emptyList()
     }
 
     private companion object {

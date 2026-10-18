@@ -27,6 +27,7 @@ class MainActivity : ComponentActivity() {
                     ilerlemeHizmeti = appContainer.ilerlemeHizmeti,
                     seviyeHizmeti = appContainer.seviyeHizmeti,
                     rozetDeposu = appContainer.rozetDeposu,
+                    rutbeDeposu = appContainer.rutbeDeposu,
                     rozetHizmeti = appContainer.rozetHizmeti,
                     profilDeposu = appContainer.profilDeposu,
                     tekrarPolitikasi = appContainer.tekrarPolitikasi,

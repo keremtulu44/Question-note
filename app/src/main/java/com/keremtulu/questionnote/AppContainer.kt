@@ -30,15 +30,20 @@ class AppContainer(context: Context) {
     val tekrarPolitikasi = TekrarPolitikasiDeposu(context)
     val dersRepository: DersRepository = RoomDersRepository(database, profilDeposu)
     val konuRepository: KonuRepository = RoomKonuRepository(database)
-    val soruRepository: SoruRepository = RoomSoruRepository(database, gorselDeposu, motor = tekrarPolitikasi)
+    val soruRepository: SoruRepository = RoomSoruRepository(database, gorselDeposu, motor = tekrarPolitikasi, sinav = profilDeposu)
     val gorselTutarliligi = GorselTutarliligiHizmeti(database, gorselDeposu)
-    val disaAktarmaHizmeti = YerelYedeklemeHizmeti(context, database, gorselDeposu, oturumDeposu::temizle)
     val ilerlemeHizmeti = IlerlemeHizmeti(database)
     val rozetDeposu = RozetDeposu(context)
+    val rutbeDeposu = com.keremtulu.questionnote.data.prefs.RutbeDeposu(context)
     val gunlukHedefDeposu: GunlukHedefDeposu = TercihGunlukHedefDeposu(context)
     val tercihHedefDeposu = gunlukHedefDeposu as TercihGunlukHedefDeposu
-    val rozetHizmeti = RozetHizmeti(database, rozetDeposu, gunlukHedefDeposu)
-    val seviyeHizmeti = SeviyeHizmeti(database, rozetDeposu, gunlukHedefDeposu, rozetHizmeti)
+    val rozetHizmeti = RozetHizmeti(database, rozetDeposu, gunlukHedefDeposu, rutbeDeposu = rutbeDeposu)
+    val disaAktarmaHizmeti = YerelYedeklemeHizmeti(context, database, gorselDeposu) {
+        oturumDeposu.temizle()
+        rozetDeposu.geriYuklemeSonrasi()
+        rutbeDeposu.geriYuklemeSonrasi()
+    }
+    val seviyeHizmeti = SeviyeHizmeti(database, rozetDeposu, gunlukHedefDeposu, rozetHizmeti, sinav = profilDeposu)
 
     companion object {
         @Volatile private var instance: AppContainer? = null

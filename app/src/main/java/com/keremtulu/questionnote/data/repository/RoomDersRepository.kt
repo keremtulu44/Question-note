@@ -138,6 +138,7 @@ class RoomDersRepository(
             ad = ders.ad,
             sira = ders.sira,
             soruSayisi = soruSayisi,
+            arsivli = ders.arsivli,
         )
 
     private fun String.anahtar(): String =

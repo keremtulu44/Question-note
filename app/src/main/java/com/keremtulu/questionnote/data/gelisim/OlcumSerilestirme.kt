@@ -34,6 +34,8 @@ object OlcumSerilestirme {
         require(sonuc.distinct().size == sonuc.size)
         return sonuc.toSet()
     }
+    fun olcum(entity: com.keremtulu.questionnote.data.local.dao.ProfilOlcumSatiri) = SureOlcumu(entity.denemeAktifMs, entity.incelemeAktifMs,
+        OlcumKalitesi.valueOf(entity.kalite), nedenlerOku(entity.nedenlerJson), entity.olcumSurumu)
     fun olcum(entity: TekrarOlcumEntity) = SureOlcumu(entity.denemeAktifMs, entity.incelemeAktifMs,
         OlcumKalitesi.valueOf(entity.kalite), nedenlerOku(entity.nedenlerJson), entity.olcumSurumu)
 

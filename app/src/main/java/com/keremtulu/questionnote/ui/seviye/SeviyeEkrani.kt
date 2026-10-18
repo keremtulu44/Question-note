@@ -43,6 +43,7 @@ fun SeviyeEkrani(
     rozetDeposu: RozetDeposu,
     onBugun: () -> Unit,
     onSoruEkle: () -> Unit,
+    onCalis: (com.keremtulu.questionnote.domain.model.SoruCalismaFiltresi, Int) -> Unit,
 ) {
     var yenileme by remember { mutableIntStateOf(0) }
     val context = LocalContext.current
@@ -70,7 +71,7 @@ fun SeviyeEkrani(
         SeviyeSayfasi(
             durum = durum, insets = insets,
             kazanilmaZamani = rozetDeposu::kazanilmaZamani,
-            onYenile = { yenileme++ }, onBugun = onBugun, onSoruEkle = onSoruEkle,
+            onYenile = { yenileme++ }, onBugun = onBugun, onSoruEkle = onSoruEkle, onCalis = onCalis,
         )
     }
 }
@@ -84,12 +85,13 @@ fun SeviyeSayfasi(
     onYenile: () -> Unit = {},
     onBugun: () -> Unit = {},
     onSoruEkle: () -> Unit = {},
+    onCalis: (com.keremtulu.questionnote.domain.model.SoruCalismaFiltresi, Int) -> Unit = { _, _ -> },
 ) {
     when (durum) {
         SeviyeDurumuUi.Yukleniyor -> IlerlemeDurumPaneli(hata = false, insets = insets, onYenile = onYenile)
         SeviyeDurumuUi.Hata -> IlerlemeDurumPaneli(hata = true, insets = insets, onYenile = onYenile)
-        is SeviyeDurumuUi.YetersizVeri -> IlerlemeIcerigi(durum.ozet, true, insets, kazanilmaZamani, onBugun, onSoruEkle)
-        is SeviyeDurumuUi.Hazir -> IlerlemeIcerigi(durum.ozet, false, insets, kazanilmaZamani, onBugun, onSoruEkle)
+        is SeviyeDurumuUi.YetersizVeri -> IlerlemeIcerigi(durum.ozet, true, insets, kazanilmaZamani, onBugun, onSoruEkle, onCalis)
+        is SeviyeDurumuUi.Hazir -> IlerlemeIcerigi(durum.ozet, false, insets, kazanilmaZamani, onBugun, onSoruEkle, onCalis)
     }
 }
 

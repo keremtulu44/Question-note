@@ -91,6 +91,7 @@ internal fun IlerlemeIcerigi(
     kazanilmaZamani: (Rozet) -> Long?,
     onBugun: () -> Unit,
     onSoruEkle: () -> Unit,
+    onCalis: (com.keremtulu.questionnote.domain.model.SoruCalismaFiltresi, Int) -> Unit,
 ) {
     val liste = rememberLazyListState()
     LazyColumn(
@@ -102,6 +103,7 @@ internal fun IlerlemeIcerigi(
     ) {
         item(key = "baslik") { IlerlemeBasligi() }
         item(key = "rutbe") { YeniRutbeKarti(ozet) }
+        ozet.analiz?.let { a -> item(key = "sonraki-adim") { SonrakiAdimKarti(a, onCalis) } }
         if (yetersizVeri) item(key = "ilk-adim") {
             IlerlemePaneli(Modifier.testTag("progress-empty")) {
                 BolumBasligi(stringResource(R.string.progress_first_step))
@@ -123,7 +125,8 @@ internal fun IlerlemeIcerigi(
             }
         }
         if (ozet.dersler.isNotEmpty()) item(key = "dersler") { DersPekismesi(ozet.dersler) }
-        item(key = "plan") { TekrarTakvimi(ozet.tahmin) }
+        if (ozet.analiz == null) item(key = "plan") { TekrarTakvimi(ozet.tahmin) }
+        ozet.analiz?.let { a -> item(key = "analiz") { GelisimAnaliziKarti(a, onCalis) } }
         ozet.sureKapsami?.let { kapsam -> item(key = "sure-profili") { SureProfiliKarti(kapsam) } }
         if (!yetersizVeri) item(key = "bugun") {
             OutlinedButton(onClick = onBugun, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {

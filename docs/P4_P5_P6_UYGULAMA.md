@@ -16,3 +16,18 @@ Bu kayıt `GELISIM_VE_OGRENME_PLANI.md` içindeki P4 → P5 → P6 sırasını i
 ## Fiziksel kabul
 
 Gerçek S24 FE, TalkBack, SAF/Drive, düşük depolama, gerçek süreç ölümü ve cihaz frame-p95 ölçümleri henüz yapılmadı. CI/Robolectric çıktıları fiziksel cihaz kabulü veya v3'ün öğrenme yararı kanıtı değildir. Etkin v3 bu sonuçlar varmış gibi açılmayacak.
+
+## P4 otomatik kapısı
+
+- İlk CI `39139076925`: üretim kodu derlendi; bir yeni testin Kotlin dönüşü `Boolean` olduğu için JUnit sınıf başlangıcı reddedildi. Test `Unit` dönüşüne düzeltildi; doğrulama azaltılmadı.
+- Kaynak `35896feb05ff3ca75fbbd339cd30ec5df4db10d8`, CI `39139377311`: **240 test / 0 başarısız / 0 hata / 0 atlandı**. `assembleRelease`, apksigner ve sabit sertifika doğrulaması başarılı. Yayın kasıtlı kapalı; bu ara APK teslim sürümü değildir.
+
+## P5 ilk uygulama (doğrulama bekliyor)
+
+- Karar JSON'u/not/görselleri taşımayan 4 toplu analitik sorgusu; P3 profil sorguları da ince projeksiyon kullanır.
+- Tüm arşivde gerçek soru/tekrar/payda/kapsama; tarihsel konu/kaynak adları, ayrı eksik ve bilinmeyen bağlam grupları.
+- Tamamlanmış iki 7 gün; aynı soruda aynı yakalanmış ders/konu/kaynak bağlamı. En az 10 eşleşen soru ve her dönemde 3 ayrı gün yoksa karşılaştırma yetersizdir. Genel öğrenme/yetenek hükmü yok.
+- 7 günlük gerçek ritim; bugün eksik. Plan ve öneriler seçili sınav görünümünde; geçmiş analizi ve XP tüm arşivde.
+- Plan iş yükünde tüm sonuçlar kullanılır; %80 altı yalnız kapsanan soruların ara toplamı (kapsanan sıfırsa dakika yok). %80 ve üzerindeki toplam ölçeklemesi açıkça yaklaşık ve belirsizdir.
+- Öneri → kapsamı görünür Filtreli → kullanıcı başlatırsa Odak. Ders/vade/normalize kaynak ve gerçek aynı-gün kaydı ortak uygunlukta; başlatma ve kayıt anında tekrar kontrol.
+- Rütbe için kalıcı üst eşik/görülme/tek birleşik kutlama; startup/restore/hedef hesabında sessiz taban; rozet sahipliği silinmez. Ortak host aynı anda yalnız bir fullscreen açar. Rütbenin XP etkisi yoktur.

@@ -5,6 +5,7 @@ data class Ders(
     val ad: String,
     val sira: Int,
     val soruSayisi: Int,
+    val arsivli: Boolean = false,
 )
 
 sealed interface DersIslemSonucu {

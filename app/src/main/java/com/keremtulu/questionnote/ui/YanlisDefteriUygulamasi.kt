@@ -123,6 +123,7 @@ fun YanlisDefteriUygulamasi(
     ilerlemeHizmeti: IlerlemeHizmeti,
     seviyeHizmeti: SeviyeHizmeti,
     rozetDeposu: RozetDeposu,
+    rutbeDeposu: com.keremtulu.questionnote.data.prefs.RutbeDeposu,
     rozetHizmeti: RozetHizmeti,
     profilDeposu: SinavProfiliDeposu,
     tekrarPolitikasi: com.keremtulu.questionnote.data.prefs.TekrarPolitikasiDeposu,
@@ -138,6 +139,7 @@ fun YanlisDefteriUygulamasi(
     var oturumCikisHedefi by remember { mutableStateOf<UygulamaEkrani?>(null) }
     var kurtarma by remember { mutableStateOf(KurtarmaDurumu.YUKLENIYOR) }
     var yedeklemeIslemde by remember { mutableStateOf(false) }
+    var oturumBaslatiliyor by remember { mutableStateOf(false) }
     var geriYuklemeOnizlemesi by remember { mutableStateOf<GeriYuklemeOnizlemesi?>(null) }
     var sonYedek by remember { mutableStateOf<SonYedekBilgisi?>(null) }
     val context = LocalContext.current
@@ -162,10 +164,25 @@ fun YanlisDefteriUygulamasi(
     }
 
     fun oturumBaslat(sorular: List<Soru>, dersler: Map<String, Ders>, bugunden: Boolean = false) {
-        if (sorular.isEmpty()) return
-        val benzersiz = sorular.distinctBy { it.id }
-        oturumGoster(benzersiz, dersler, OdakOturumu(UUID.randomUUID().toString(), benzersiz.map { it.id },
-            System.currentTimeMillis(), bugunden))
+        if (sorular.isEmpty() || oturumBaslatiliyor || yedeklemeIslemde || kurtarma != KurtarmaDurumu.HAZIR) return
+        oturumBaslatiliyor = true
+        scope.launch {
+            try {
+                val filtre = if (bugunden) SoruCalismaFiltresi(vadesiGelen = true) else filtreliCalismaAyar.filtre
+                val uygun = soruRepository.filtreliCalismaSorulariniIzle(filtre).first().associateBy { it.id }
+                val guncelDersler = dersRepository.aktifDersleriIzle().first().associateBy { it.id }
+                val benzersiz = sorular.distinctBy { it.id }.mapNotNull { uygun[it.id] }.filter { it.dersId in guncelDersler }
+                if (benzersiz.isNotEmpty()) oturumGoster(benzersiz, guncelDersler,
+                    OdakOturumu(UUID.randomUUID().toString(), benzersiz.map { it.id }, System.currentTimeMillis(), bugunden))
+                else snackbarHostState.showSnackbar(context.getString(R.string.analysis_no_eligible_group))
+            } catch (iptal: CancellationException) {
+                throw iptal
+            } catch (_: Exception) {
+                snackbarHostState.showSnackbar(context.getString(R.string.focus_load_error))
+            } finally {
+                oturumBaslatiliyor = false
+            }
+        }
     }
 
     fun karneyiKapat(hedef: UygulamaEkrani) {
@@ -195,6 +212,7 @@ fun YanlisDefteriUygulamasi(
                 if (kurtarilan.soruIdleri.isNotEmpty()) oturumGoster(sorular, dersler, kurtarilan)
                 else withContext(Dispatchers.IO) { oturumDeposu.temizle() }
             }
+            rozetHizmeti.degerlendir(kutla = false)
             kurtarma = KurtarmaDurumu.HAZIR
         } catch (cancel: CancellationException) {
             throw cancel
@@ -278,7 +296,7 @@ fun YanlisDefteriUygulamasi(
     }
 
     fun ekranSec(hedef: UygulamaEkrani) {
-        if (yedeklemeIslemde || kurtarma != KurtarmaDurumu.HAZIR) return
+        if (yedeklemeIslemde || oturumBaslatiliyor || kurtarma != KurtarmaDurumu.HAZIR) return
         if (ekran is UygulamaEkrani.FiltreliOturum) {
             oturumCikisHedefi = hedef
         } else if (ekran is UygulamaEkrani.FiltreliCalismaTamamlandi) {
@@ -466,6 +484,10 @@ fun YanlisDefteriUygulamasi(
                         rozetDeposu = rozetDeposu,
                         onBugun = { ekranSec(UygulamaEkrani.Bugun) },
                         onSoruEkle = { ekranSec(UygulamaEkrani.DersSecimi(soruEkleModu = true)) },
+                        onCalis = { filtre, adet ->
+                            filtreliCalismaAyar = FiltreliCalismaEkraniAyar(filtre, adet.coerceIn(1, 5).toString())
+                            ekranSec(UygulamaEkrani.FiltreliCalisma)
+                        },
                     )
                     UygulamaEkrani.Ayarlar -> AyarlarEkrani(
                         gunlukHedefDeposu = tercihHedefDeposu,
@@ -490,7 +512,7 @@ fun YanlisDefteriUygulamasi(
         }
     }
 
-    RozetKutlamaHost(rozetDeposu,
+    com.keremtulu.questionnote.ui.karne.KutlamaHost(rozetDeposu, rutbeDeposu,
         goster = kurtarma == KurtarmaDurumu.HAZIR && !yedeklemeIslemde &&
             ekran !is UygulamaEkrani.FiltreliOturum && ekran !is UygulamaEkrani.SoruFormu &&
             ekran !is UygulamaEkrani.SoruAyrintisi && oturumCikisHedefi == null && geriYuklemeOnizlemesi == null,

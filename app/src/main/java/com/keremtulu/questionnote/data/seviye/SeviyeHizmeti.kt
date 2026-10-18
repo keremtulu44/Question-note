@@ -32,10 +32,12 @@ class SeviyeHizmeti(
     private val gunlukHedefDeposu: GunlukHedefDeposu,
     private val rozetHizmeti: RozetHizmeti,
     private val saat: Clock = YerelTakvimSaati,
+    private val sinav: com.keremtulu.questionnote.data.prefs.SinavProfiliDeposu? = null,
 ) {
     private val ilerlemeDao = database.ilerlemeDao()
     private val tekrarDao = database.tekrarDao()
     private val profilHizmeti = ProfilHizmeti(database)
+    private val analizHizmeti = com.keremtulu.questionnote.data.gelisim.GelisimAnaliziHizmeti(database)
 
     suspend fun ozet(bugun: LocalDate = LocalDate.now(saat)): SeviyeOzeti = database.withTransaction {
         val sahip = rozetDeposu.sahipOlanlar()
@@ -65,6 +67,8 @@ class SeviyeHizmeti(
             rozetGirdisi = rozetHizmeti.girdi(hedef = hedef, bugun = bugun),
             sahipRozetler = sahip,
             sureKapsami = profilHizmeti.kapsam(bugun.toEpochDay().toInt()),
+            analiz = analizHizmeti.hesapla(bugun.toEpochDay().toInt(), sinav?.secimIzle?.value ?:
+                com.keremtulu.questionnote.domain.model.SinavSecimi(com.keremtulu.questionnote.domain.model.SinavProfili.SERBEST)),
         )
     }
 
@@ -102,8 +106,9 @@ class SeviyeHizmeti(
      * always agree with each other.
      */
     fun ozetIzle(): Flow<SeviyeOzeti> =
-        merge(ilerlemeDao.soruSayisiIzle(), ilerlemeDao.tekrarSayisiIzle(),
-            rozetDeposu.sahipIzle.map { it.size }, gunlukHedefDeposu.izle())
+        merge(database.invalidationTracker.createFlow("sorular", "tekrarlar", "tekrar_olcumleri", "dersler", "konular").map { 0 },
+            rozetDeposu.sahipIzle.map { it.size }, gunlukHedefDeposu.izle(),
+            sinav?.secimIzle?.map { 0 } ?: kotlinx.coroutines.flow.flowOf(0))
             .onStart { emit(0) }
             .conflate()
             .map { ozet() }
@@ -122,6 +127,7 @@ data class SeviyeOzeti(
     val rozetGirdisi: RozetGirdisi,
     val sahipRozetler: Set<Rozet> = emptySet(),
     val sureKapsami: SureKapsami? = null,
+    val analiz: com.keremtulu.questionnote.domain.gelisim.GelisimAnalizi? = null,
 )
 
 data class DersIlerlemesi(

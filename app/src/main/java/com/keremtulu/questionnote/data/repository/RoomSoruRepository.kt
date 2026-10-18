@@ -17,6 +17,16 @@ import com.keremtulu.questionnote.domain.repeat.MotorAyari
 import com.keremtulu.questionnote.domain.repeat.TekrarMotorModu
 import com.keremtulu.questionnote.domain.repeat.TekrarModuSaglayici
 import com.keremtulu.questionnote.domain.repeat.UyarlanabilirTekrarKurali
+import com.keremtulu.questionnote.data.prefs.SinavProfiliDeposu
+import com.keremtulu.questionnote.domain.model.CalismaSorusu
+import com.keremtulu.questionnote.domain.model.CalismaUygunlugu
+import com.keremtulu.questionnote.domain.model.SinavSecimi
+import com.keremtulu.questionnote.domain.model.SinavProfili
+import com.keremtulu.questionnote.domain.model.Ders
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flowOf
 import androidx.room.withTransaction
 import com.keremtulu.questionnote.data.local.YanlisDefteriDatabase
 import com.keremtulu.questionnote.data.local.entity.GorselEntity
@@ -57,6 +67,7 @@ class RoomSoruRepository(
     private val gorselDosyalari: GorselDosyaYonetimi,
     private val saat: Clock = YerelTakvimSaati,
     private val motor: TekrarModuSaglayici = TekrarModuSaglayici { MotorAyari(TekrarMotorModu.KAPALI) },
+    private val sinav: SinavProfiliDeposu? = null,
 ) : SoruRepository {
     private val dersDao = database.dersDao()
     private val konuDao = database.konuDao()
@@ -74,20 +85,29 @@ class RoomSoruRepository(
     ): Flow<List<Soru>> = soruDao.sorulariIzle(dersId, konuId, konusuz)
         .map { rows -> rows.map { row -> row.soru.toDomain(row.gorseller.map { it.toDomain() }) } }
 
-    override fun filtreliCalismaSorulariniIzle(filtre: SoruCalismaFiltresi): Flow<List<Soru>> =
-        soruDao.filtreliCalismaSorulariniIzle(
-            bugun = LocalDate.now(saat).toEpochDay().toInt(),
-            konuId = filtre.konuId,
-            konusuz = filtre.konusuz,
-            kaynak = filtre.kaynak,
-            kaynakBelirtilmemis = filtre.kaynakBelirtilmemis,
-            yanlisNedeni = filtre.yanlisNedeni,
-            yanlisNedeniBelirtilmemis = filtre.yanlisNedeniBelirtilmemis,
-        ).map { rows -> rows.map { row -> row.soru.toDomain(row.gorseller.map { it.toDomain() }) } }
+    override fun filtreliCalismaSorulariniIzle(filtre: SoruCalismaFiltresi): Flow<List<Soru>> = flow {
+        // Capture on collection, not construction, so a start/retry always uses today's eligibility.
+        val gun = LocalDate.now(saat).toEpochDay().toInt()
+        val rows = soruDao.filtreliCalismaSorulariniIzle(gun, filtre.konuId, filtre.konusuz, filtre.kaynak,
+            filtre.yanlisNedeni, filtre.yanlisNedeniBelirtilmemis, filtre.dersId, filtre.vadesiGelen)
+        emitAll(combine(rows, dersDao.dersleriIzle(false), sinav?.secimIzle ?: flowOf(SinavSecimi(SinavProfili.SERBEST))) { qs, ds, secim ->
+            val dersler = ds.associate { it.ders.id to Ders(it.ders.id, it.ders.ad, it.ders.sira, it.soruSayisi, it.ders.arsivli) }
+            qs.filter { row ->
+                val q = row.soru.calismaSorusu()
+                CalismaUygunlugu.uygun(q, dersler[q.dersId], secim, gun, false) && CalismaUygunlugu.filtreUyar(q, filtre, gun)
+            }.map { it.soru.toDomain(it.gorseller.map { g -> g.toDomain() }) }
+        })
+    }
 
     override fun bugunTekrarlanacaklariIzle(bugun: Int): Flow<List<Soru>> =
-        soruDao.bugunTekrarlanacaklariIzle(bugun)
-            .map { rows -> rows.map { row -> row.soru.toDomain(row.gorseller.map { it.toDomain() }) } }
+        combine(soruDao.bugunTekrarlanacaklariIzle(bugun), dersDao.dersleriIzle(false),
+            sinav?.secimIzle ?: flowOf(SinavSecimi(SinavProfili.SERBEST))) { qs, ds, secim ->
+            val dersler = ds.associate { it.ders.id to Ders(it.ders.id, it.ders.ad, it.ders.sira, it.soruSayisi, it.ders.arsivli) }
+            qs.filter { CalismaUygunlugu.uygun(it.soru.calismaSorusu(), dersler[it.soru.dersId], secim, bugun, false) }
+                .map { it.soru.toDomain(it.gorseller.map { g -> g.toDomain() }) }
+        }
+
+    private fun SoruEntity.calismaSorusu() = CalismaSorusu(id, dersId, konuId, kaynak, SoruPlanDurumu.valueOf(planDurumu), sonTekrarGun, sonrakiTekrarGun)
 
     override fun tekrarGecmisiniIzle(soruId: String): Flow<List<TekrarKaydi>> =
         olcumDao.gecmisiIzle(soruId).map { records -> records.map { it.tekrar.toDomain(it.olcum) } }
@@ -303,6 +323,10 @@ class RoomSoruRepository(
         val simdi = onizlemeUret(soru, deneme)
         val gun = simdi.gun
         if (tekrarDao.ayniGunTekrarVar(soru.id, gun)) return@withTransaction SoruIslemSonucu.AyniGunTekrarVar
+        val ders = dersDao.idIleGetir(soru.dersId)
+        val secim = sinav?.secimIzle?.value ?: SinavSecimi(SinavProfili.SERBEST)
+        if (!CalismaUygunlugu.uygun(soru.calismaSorusu(), ders?.let { Ders(it.id, it.ad, it.sira, 0, it.arsivli) }, secim, gun, false))
+            return@withTransaction SoruIslemSonucu.PlanDurumuKapali
         if (simdi != onizleme) return@withTransaction SoruIslemSonucu.OnizlemeGuncellendi
         val plan = simdi.plan
         val kayitAni = saat.instant()

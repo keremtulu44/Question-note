@@ -1,5 +1,6 @@
 package com.keremtulu.questionnote.data.local.dao
 
+import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Embedded
 import androidx.room.Delete
@@ -19,8 +20,21 @@ data class SoruVeGorsellerEntity(
     val gorseller: List<GorselEntity>,
 )
 
+data class AnalizSoruSatiri(
+    val id: String,
+    @ColumnInfo(name = "ders_id") val dersId: String,
+    @ColumnInfo(name = "konu_id") val konuId: String?,
+    val kaynak: String?,
+    @ColumnInfo(name = "plan_durumu") val planDurumu: String,
+    @ColumnInfo(name = "son_tekrar_gun") val sonTekrarGun: Int?,
+    @ColumnInfo(name = "sonraki_tekrar_gun") val sonrakiTekrarGun: Int?,
+)
+
 @Dao
 interface SoruDao {
+    @Query("SELECT id, ders_id, konu_id, kaynak, plan_durumu, son_tekrar_gun, sonraki_tekrar_gun FROM sorular ORDER BY id")
+    suspend fun analizSorulari(): List<AnalizSoruSatiri>
+
     @Query(
         """
         SELECT * FROM sorular
@@ -39,6 +53,8 @@ interface SoruDao {
         INNER JOIN dersler ON dersler.id = sorular.ders_id
         WHERE dersler.arsivli = 0
           AND sorular.plan_durumu = 'AKTIF'
+          AND NOT EXISTS (SELECT 1 FROM tekrarlar t WHERE t.soru_id = sorular.id AND t.gun = :bugun)
+          AND (sorular.son_tekrar_gun IS NULL OR sorular.son_tekrar_gun < :bugun)
           AND sorular.sonraki_tekrar_gun IS NOT NULL
           AND sorular.sonraki_tekrar_gun <= :bugun
         ORDER BY sorular.sonraki_tekrar_gun ASC, sorular.guncelleme DESC, sorular.id ASC
@@ -53,11 +69,13 @@ interface SoruDao {
         INNER JOIN dersler ON dersler.id = sorular.ders_id
         WHERE dersler.arsivli = 0
           AND sorular.plan_durumu = 'AKTIF'
+          AND NOT EXISTS (SELECT 1 FROM tekrarlar t WHERE t.soru_id = sorular.id AND t.gun = :bugun)
           AND (sorular.son_tekrar_gun IS NULL OR sorular.son_tekrar_gun < :bugun)
+          AND (:dersId IS NULL OR sorular.ders_id = :dersId)
+          AND (:vadesiGelen = 0 OR (sorular.sonraki_tekrar_gun IS NOT NULL AND sorular.sonraki_tekrar_gun <= :bugun))
           AND (:konuId IS NULL OR sorular.konu_id = :konuId)
           AND (:konusuz = 0 OR sorular.konu_id IS NULL)
           AND (:kaynak IS NULL OR sorular.kaynak = :kaynak)
-          AND (:kaynakBelirtilmemis = 0 OR COALESCE(TRIM(sorular.kaynak), '') = '')
           AND (:yanlisNedeni IS NULL OR sorular.yanlis_nedeni = :yanlisNedeni)
           AND (:yanlisNedeniBelirtilmemis = 0 OR COALESCE(TRIM(sorular.yanlis_nedeni), '') = '')
         ORDER BY sorular.son_tekrar_gun ASC, sorular.olusturma ASC, sorular.id ASC
@@ -69,9 +87,10 @@ interface SoruDao {
         konuId: String?,
         konusuz: Boolean,
         kaynak: String?,
-        kaynakBelirtilmemis: Boolean,
         yanlisNedeni: String?,
         yanlisNedeniBelirtilmemis: Boolean,
+        dersId: String? = null,
+        vadesiGelen: Boolean = false,
     ): Flow<List<SoruVeGorsellerEntity>>
 
     @Query(

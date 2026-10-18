@@ -173,7 +173,7 @@ fun FiltreliCalismaEkrani(
     val topicOptions = buildList {
         add(FiltreSecenegi(tumuSecimi, ""))
         add(FiltreSecenegi(bosSecimi, ""))
-        secenekler?.konular.orEmpty().forEach { topic ->
+        secenekler?.konular.orEmpty().filter { ayar.filtre.dersId == null || it.dersId == ayar.filtre.dersId }.forEach { topic ->
             val lessonName = dersHaritasi[topic.dersId]?.ad ?: return@forEach
             val topicName = if (topic.arsivli) {
                 "${topic.ad} (arşivli)"
@@ -287,6 +287,24 @@ fun FiltreliCalismaEkrani(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         FiltreDropdown(
+                            baslik = androidx.compose.ui.res.stringResource(R.string.analysis_filter_lesson),
+                            secim = ayar.filtre.dersId?.let { FiltreSecimi.Deger(it) } ?: tumuSecimi,
+                            secenekler = listOf(FiltreSecenegi(tumuSecimi, allLabel)) + secenekler?.dersler.orEmpty().map {
+                                FiltreSecenegi(FiltreSecimi.Deger(it.id), it.ad) },
+                            onSecim = { choice -> onAyarDegisti(ayar.copy(filtre = ayar.filtre.copy(
+                                dersId = (choice as? FiltreSecimi.Deger)?.metin, konuId = null, konusuz = false))) },
+                        )
+                        if (ayar.filtre.vadesiGelen) {
+                            Text(androidx.compose.ui.res.stringResource(R.string.analysis_filter_due))
+                            TextButton(onClick = { onAyarDegisti(ayar.copy(filtre = ayar.filtre.copy(vadesiGelen = false))) },
+                                modifier = Modifier.heightIn(min = 48.dp)) { Text(androidx.compose.ui.res.stringResource(R.string.analysis_filter_remove_due)) }
+                        }
+                        ayar.filtre.kaynakAnahtari?.let { anahtar ->
+                            Text(androidx.compose.ui.res.stringResource(R.string.analysis_filter_normalized, anahtar))
+                            TextButton(onClick = { onAyarDegisti(ayar.copy(filtre = ayar.filtre.copy(kaynakAnahtari = null))) },
+                                modifier = Modifier.heightIn(min = 48.dp)) { Text(androidx.compose.ui.res.stringResource(R.string.analysis_filter_remove_source)) }
+                        }
+                        FiltreDropdown(
                             baslik = androidx.compose.ui.res.stringResource(R.string.filtered_practice_filter_topic),
                             secim = topicSecimi,
                             secenekler = topicDropdownOptions,
@@ -312,6 +330,7 @@ fun FiltreliCalismaEkrani(
                                     ayar.copy(
                                         filtre = ayar.filtre.copy(
                                             kaynak = source?.metin,
+                                            kaynakAnahtari = null,
                                             kaynakBelirtilmemis = choice == FiltreSecimi.Belirtilmemis,
                                         ),
                                     ),
@@ -500,7 +519,7 @@ private fun FiltreDropdown(
 ) {
     var acik by remember(baslik) { mutableStateOf(false) }
     val selectedLabel = secenekler.firstOrNull { it.secim == secim }?.etiket
-        ?: secenekler.firstOrNull()?.etiket.orEmpty()
+        ?: androidx.compose.ui.res.stringResource(R.string.analysis_filter_not_visible)
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(
             baslik,
