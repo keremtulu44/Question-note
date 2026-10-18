@@ -17,6 +17,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -24,6 +26,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.key
 import com.keremtulu.questionnote.data.ilerleme.RozetHizmeti
+import com.keremtulu.questionnote.data.ilerleme.dayanikliIzle
+import com.keremtulu.questionnote.data.ilerleme.IzlemeDurumu
 import com.keremtulu.questionnote.data.prefs.SinavProfiliDeposu
 import com.keremtulu.questionnote.data.prefs.OdakOturumuDeposu
 import com.keremtulu.questionnote.domain.calisma.OdakOturumu
@@ -39,6 +43,7 @@ import java.util.UUID
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -136,6 +141,8 @@ fun YanlisDefteriUygulamasi(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    var rozetGozlemYenileme by remember { mutableIntStateOf(0) }
+    var rozetGozlemDurdu by remember { mutableStateOf(false) }
 
     fun oturumGoster(sorular: List<Soru>, dersler: Map<String, Ders>, oturum: OdakOturumu) {
         // Reviews are already committed in Room; a checkpoint failure must not undo that fact.
@@ -193,6 +200,7 @@ fun YanlisDefteriUygulamasi(
     LaunchedEffect(ekran, kurtarma, yedeklemeIslemde) {
         if (kurtarma == KurtarmaDurumu.HAZIR && !yedeklemeIslemde &&
             (ekran == UygulamaEkrani.Seviye || ekran == UygulamaEkrani.Bugun)) {
+            if (rozetGozlemDurdu) rozetGozlemYenileme++
             try {
                 rozetHizmeti.degerlendir()
             } catch (iptal: CancellationException) {
@@ -202,11 +210,23 @@ fun YanlisDefteriUygulamasi(
             }
         }
     }
-    LaunchedEffect(kurtarma, yedeklemeIslemde, rozetHizmeti) {
+    LaunchedEffect(kurtarma, yedeklemeIslemde, rozetHizmeti, rozetGozlemYenileme) {
         if (kurtarma == KurtarmaDurumu.HAZIR && !yedeklemeIslemde) {
-            rozetHizmeti.degisiklikleriIzle().catch {
-                snackbarHostState.showSnackbar(context.getString(R.string.level_error))
-            }.collect { }
+            rozetGozlemDurdu = false
+            dayanikliIzle { rozetHizmeti.degisiklikleriIzle() }.collect { durum ->
+                when (durum) {
+                    is IzlemeDurumu.Hazir -> rozetGozlemDurdu = false
+                    is IzlemeDurumu.Hata -> if (!durum.yenidenDeneniyor) {
+                        rozetGozlemDurdu = true
+                        val yanit = snackbarHostState.showSnackbar(
+                            context.getString(R.string.progress_observer_error),
+                            actionLabel = context.getString(R.string.level_retry),
+                            duration = SnackbarDuration.Long,
+                        )
+                        if (yanit == SnackbarResult.ActionPerformed) rozetGozlemYenileme++
+                    }
+                }
+            }
         }
     }
 
@@ -250,6 +270,7 @@ fun YanlisDefteriUygulamasi(
     }
 
     fun ekranSec(hedef: UygulamaEkrani) {
+        if (yedeklemeIslemde || kurtarma != KurtarmaDurumu.HAZIR) return
         if (ekran is UygulamaEkrani.FiltreliOturum) {
             oturumCikisHedefi = hedef
         } else if (ekran is UygulamaEkrani.FiltreliCalismaTamamlandi) {
@@ -432,6 +453,8 @@ fun YanlisDefteriUygulamasi(
                     UygulamaEkrani.Seviye -> SeviyeEkrani(
                         seviyeHizmeti = seviyeHizmeti,
                         rozetDeposu = rozetDeposu,
+                        onBugun = { ekranSec(UygulamaEkrani.Bugun) },
+                        onSoruEkle = { ekranSec(UygulamaEkrani.DersSecimi(soruEkleModu = true)) },
                     )
                     UygulamaEkrani.Ayarlar -> AyarlarEkrani(
                         gunlukHedefDeposu = tercihHedefDeposu,
@@ -523,9 +546,9 @@ fun YanlisDefteriUygulamasi(
                         scope.launch {
                             yedeklemeIslemde = true
                             try {
-                                withContext(Dispatchers.IO) { oturumDeposu.temizle() }
-                                bekleyenOturum = null
+                                // The service invalidates persisted resume state only after a proven commit.
                                 val result = disaAktarmaHizmeti.geriYukle(preview)
+                                bekleyenOturum = null
                                 val profilHazir = try {
                                     dersRepository.sinavProfiliniUygula(profilDeposu.secili())
                                     true
@@ -545,10 +568,16 @@ fun YanlisDefteriUygulamasi(
                                 throw cancel
                             } catch (_: Exception) {
                                 geriYuklemeOnizlemesi = null
-                                val recoverySucceeded = runCatching {
+                                try {
                                     disaAktarmaHizmeti.kesintiliGeriYuklemeyiTamamla()
-                                }.isSuccess
-                                if (!recoverySucceeded) kurtarma = KurtarmaDurumu.HATA
+                                    val kayit = withContext(Dispatchers.IO) { oturumDeposu.oku() }
+                                    if (kayit?.id != bekleyenOturum?.oturum?.id) bekleyenOturum = null
+                                } catch (iptal: CancellationException) {
+                                    throw iptal
+                                } catch (_: Exception) {
+                                    bekleyenOturum = null
+                                    kurtarma = KurtarmaDurumu.HATA
+                                }
                                 runCatching { disaAktarmaHizmeti.hazirlananYedegiIptalEt(preview.id) }
                                 snackbarHostState.showSnackbar(context.getString(R.string.backup_restore_error))
                             } finally {

@@ -1,6 +1,5 @@
 package com.keremtulu.questionnote.ui.karne
 
-import android.provider.Settings
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
@@ -32,6 +31,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableIntStateOf
+import com.keremtulu.questionnote.ui.tema.LocalHareketPolitikasi
+import com.keremtulu.questionnote.ui.tema.HareketTuru
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -95,7 +98,6 @@ private data class KarneVerisi(
     val sayilar: KarneSayilari,
     val ozet: IlerlemeOzeti?,
     val yeniRozetler: List<Rozet>,
-    val toplamRozet: Int,
     val hedef: Int,
 )
 
@@ -124,29 +126,25 @@ fun KarneEkrani(
     val dagilim = remember(sorular, sonuclar, dersler, konular) {
         dagilimHesapla(sorular, sonuclar, dersler, konular)
     }
-    val animasyonAcik = remember {
-        Settings.Global.getFloat(
-            context.contentResolver,
-            Settings.Global.ANIMATOR_DURATION_SCALE,
-            1f,
-        ) > 0f
-    }
+    val animasyonAcik = LocalHareketPolitikasi.current.hareketAcik
+    var yenileme by remember { mutableIntStateOf(0) }
+    var ekBilgiHatasi by remember { mutableStateOf(false) }
 
-    val durum = produceState<KarneVerisi?>(null, sorular, sonuclar) {
+    val durum = produceState<KarneVerisi?>(null, sorular, sonuclar, yenileme) {
+        ekBilgiHatasi = false
         value = try {
             val ozet = ilerlemeHizmeti.ozet()
-            val sahip = rozetDeposu.sahipOlanlar()
             val yeni = rozetHizmeti.degerlendir(sonuclar)
             KarneVerisi(
                 sayilar = sayilar,
                 ozet = ozet,
                 yeniRozetler = yeni,
-                toplamRozet = (sahip + yeni).size,
                 hedef = gunlukHedefDeposu.hedef(),
             )
         } catch (cancel: CancellationException) {
             throw cancel
         } catch (_: Exception) {
+            ekBilgiHatasi = true
             null
         }
     }.value
@@ -221,7 +219,11 @@ fun KarneEkrani(
                 }
                 if (durum != null && durum.yeniRozetler.isNotEmpty()) {
                     Spacer(Modifier.height(16.dp))
-                    RozetBolumu(durum.yeniRozetler, durum.toplamRozet, animasyonAcik)
+                    KarneRozetBolumu(durum.yeniRozetler, rozetDeposu)
+                }
+                if (ekBilgiHatasi) {
+                    Text(stringResource(R.string.karne_progress_error), Modifier.padding(top = 12.dp))
+                    TextButton(onClick = { yenileme++ }) { Text(stringResource(R.string.level_retry)) }
                 }
                 Spacer(Modifier.height(24.dp))
                 Button(
@@ -301,7 +303,7 @@ private fun sayanDeger(hedef: Int, animasyonAcik: Boolean, gecikmeMs: Int): Int 
     }
     val deger by animateIntAsState(
         targetValue = if (basla) hedef else 0,
-        animationSpec = tween(durationMillis = 700, easing = FastOutSlowInEasing),
+        animationSpec = tween(durationMillis = LocalHareketPolitikasi.current.sure(HareketTuru.DEGER), easing = FastOutSlowInEasing),
         label = "karne-sayac",
     )
     return deger
@@ -311,11 +313,12 @@ private fun sayanDeger(hedef: Int, animasyonAcik: Boolean, gecikmeMs: Int): Int 
 private fun OranHalkasi(sayilar: KarneSayilari, animasyonAcik: Boolean) {
     val colors = MaterialTheme.colorScheme
     val hedefOran = sayilar.oran / 100f
+    val sure = LocalHareketPolitikasi.current.sure(HareketTuru.GRAFIK)
     val ilerleme = remember { Animatable(if (animasyonAcik) 0f else hedefOran) }
     LaunchedEffect(hedefOran, animasyonAcik) {
         if (animasyonAcik) {
             delay(120)
-            ilerleme.animateTo(hedefOran, tween(durationMillis = 700, easing = FastOutSlowInEasing))
+            ilerleme.animateTo(hedefOran, tween(durationMillis = sure, easing = FastOutSlowInEasing))
         } else {
             ilerleme.snapTo(hedefOran)
         }
@@ -602,11 +605,18 @@ private fun SonYediGunBolumu(ozet: IlerlemeOzeti) {
     }
 }
 
+/** Ownership stays live even if the global observer earns another badge after this report loads. */
+@Composable
+internal fun KarneRozetBolumu(rozetler: List<Rozet>, depo: RozetDeposu) {
+    val sahip by depo.sahipIzle.collectAsState()
+    RozetBolumu(rozetler, sahip.size, LocalHareketPolitikasi.current.hareketAcik)
+}
+
 @Composable
 private fun RozetBolumu(rozetler: List<Rozet>, toplamRozet: Int, animasyonAcik: Boolean) {
     val colors = MaterialTheme.colorScheme
-    var buyudu by remember { mutableStateOf(!animasyonAcik) }
-    LaunchedEffect(Unit) {
+    var buyudu by remember(animasyonAcik) { mutableStateOf(!animasyonAcik) }
+    LaunchedEffect(animasyonAcik) {
         if (animasyonAcik) {
             delay(250)
             buyudu = true
@@ -614,7 +624,7 @@ private fun RozetBolumu(rozetler: List<Rozet>, toplamRozet: Int, animasyonAcik: 
     }
     val olcek by animateFloatAsState(
         targetValue = if (buyudu) 1f else 0.6f,
-        animationSpec = tween(400, easing = FastOutSlowInEasing),
+        animationSpec = tween(LocalHareketPolitikasi.current.sure(HareketTuru.GRAFIK), easing = FastOutSlowInEasing),
         label = "rozet-olcek",
     )
     BolumKarti(baslik = stringResource(R.string.karne_badges_title)) {
@@ -667,8 +677,9 @@ private data class KonfetiParcasi(
 private fun Konfeti(renkler: List<Color>) {
     var goster by remember { mutableStateOf(true) }
     val ilerleme = remember { Animatable(0f) }
-    LaunchedEffect(Unit) {
-        ilerleme.animateTo(1f, tween(durationMillis = 1200, easing = LinearEasing))
+    val sure = LocalHareketPolitikasi.current.sure(HareketTuru.KUTLAMA)
+    LaunchedEffect(sure) {
+        ilerleme.animateTo(1f, tween(durationMillis = sure, easing = LinearEasing))
         goster = false
     }
     if (!goster) return

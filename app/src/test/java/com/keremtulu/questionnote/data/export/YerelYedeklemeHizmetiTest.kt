@@ -1,6 +1,9 @@
 package com.keremtulu.questionnote.data.export
 
 import android.graphics.Bitmap
+import com.keremtulu.questionnote.data.prefs.OdakOturumuDeposu
+import com.keremtulu.questionnote.domain.calisma.OdakOturumu
+import java.io.IOException
 import android.graphics.Canvas
 import android.graphics.Color
 import androidx.room.Room
@@ -55,6 +58,7 @@ class YerelYedeklemeHizmetiTest {
     @Before
     fun setUp() {
         val context = RuntimeEnvironment.getApplication()
+        OdakOturumuDeposu(context).temizle()
         database = Room.inMemoryDatabaseBuilder(context, YanlisDefteriDatabase::class.java)
             .addCallback(VarsayilanDersleriEkle())
             .allowMainThreadQueries()
@@ -258,6 +262,9 @@ class YerelYedeklemeHizmetiTest {
         permanentNames += newName
         val newImage = newStaged.copy(dosyaAdi = newName, gecici = false)
 
+        val oturumDeposu = OdakOturumuDeposu(RuntimeEnvironment.getApplication())
+        val oturum = OdakOturumu("old-session", listOf("recovery-question"), 1L)
+        oturumDeposu.kaydet(oturum)
         // Simulate the pre-commit state: DB still references the old file, so recovery removes only new bytes.
         val restoreId = UUID.randomUUID().toString()
         writeJournal(restoreId, oldImage.dosyaAdi, newName, "PREPARED")
@@ -266,6 +273,7 @@ class YerelYedeklemeHizmetiTest {
         assertFalse(File(RuntimeEnvironment.getApplication().filesDir, newName).exists())
         assertFalse(File(RuntimeEnvironment.getApplication().filesDir, "yedekler/geri-yukleme.json").exists())
 
+        assertEquals(oturum, oturumDeposu.oku())
         // Simulate the post-commit state: the marker and the new row make recovery finish cleanup, not roll back.
         val nextName = requireNotNull(store.kaliciyaKopyala(newStaged.dosyaAdi))
         permanentNames += nextName
@@ -279,8 +287,64 @@ class YerelYedeklemeHizmetiTest {
         service.kesintiliGeriYuklemeyiTamamla()
         assertFalse(File(RuntimeEnvironment.getApplication().filesDir, oldImage.dosyaAdi).exists())
         assertTrue(store.kaliciDosyayiDogrula(committedImage.asInput()))
+        assertEquals(null, oturumDeposu.oku())
         assertEquals(null, database.geriYuklemeIsaretiDao().idGetir())
         assertFalse(File(RuntimeEnvironment.getApplication().filesDir, "yedekler/geri-yukleme.json").exists())
+    }
+
+    @Test
+    fun failedRestoreBeforeCommitPreservesResumeEvenWhenIdsMatchBackup() = runBlocking {
+        val lesson = database.dersDao().tumunuGetir().first().id
+        insertQuestionWithImage("resume-question", lesson, "Original")
+        val archive = service.zipOlustur().also(temporaryFiles::add)
+        val preview = service.dosyadanOnizle(archive)
+        val depo = OdakOturumuDeposu(RuntimeEnvironment.getApplication())
+        val oturum = OdakOturumu("resume-session", listOf("resume-question"), 1)
+        depo.kaydet(oturum)
+        service.hazirlananYedegiIptalEt(preview.id)
+        try {
+            service.geriYukle(preview)
+            org.junit.Assert.fail("Missing prepared archive must fail")
+        } catch (_: IOException) { /* No commit. */ }
+        service.kesintiliGeriYuklemeyiTamamla()
+        assertEquals(oturum, depo.oku())
+        assertEquals("Original", database.soruDao().idIleGetir("resume-question")?.soruNotu)
+    }
+
+    @Test
+    fun successfulRestoreClearsResumeEvenWhenQuestionIdsAreReused() = runBlocking {
+        val lesson = database.dersDao().tumunuGetir().first().id
+        insertQuestionWithImage("same-id", lesson, "Original")
+        val archive = service.zipOlustur().also(temporaryFiles::add)
+        val preview = service.dosyadanOnizle(archive)
+        val depo = OdakOturumuDeposu(RuntimeEnvironment.getApplication())
+        depo.kaydet(OdakOturumu("resume-session", listOf("same-id"), 1))
+        service.geriYukle(preview)
+        assertNotNull(database.soruDao().idIleGetir("same-id"))
+        assertEquals(null, depo.oku())
+        assertEquals(null, OdakOturumuDeposu(RuntimeEnvironment.getApplication()).oku())
+    }
+
+    @Test
+    fun checkpointClearFailureKeepsCommitMarkerUntilRecoveryCanInvalidateOldSession() = runBlocking {
+        val context = RuntimeEnvironment.getApplication()
+        val lesson = database.dersDao().tumunuGetir().first().id
+        insertQuestionWithImage("same-id", lesson, "Original")
+        val archive = service.zipOlustur().also(temporaryFiles::add)
+        val preview = service.dosyadanOnizle(archive)
+        val depo = OdakOturumuDeposu(context)
+        depo.kaydet(OdakOturumu("resume-session", listOf("same-id"), 1))
+        val bozuk = YerelYedeklemeHizmeti(context, database, store) { throw IOException("prefs unavailable") }
+        try {
+            bozuk.geriYukle(preview)
+            org.junit.Assert.fail("Cannot finish while stale resume remains")
+        } catch (_: IOException) { /* Marker must remain for startup recovery. */ }
+        assertEquals(preview.id, database.geriYuklemeIsaretiDao().idGetir())
+        assertNotNull(depo.oku())
+        assertTrue(service.kesintiliGeriYuklemeyiTamamla())
+        assertEquals(null, depo.oku())
+        assertEquals(null, database.geriYuklemeIsaretiDao().idGetir())
+        assertFalse(service.kesintiliGeriYuklemeyiTamamla())
     }
 
     private suspend fun insertQuestionWithImage(

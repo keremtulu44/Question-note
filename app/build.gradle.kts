@@ -12,8 +12,8 @@ android {
         applicationId = "com.keremtulu.questionnote"
         minSdk = 26
         targetSdk = 37
-        versionCode = 14
-        versionName = "1.2.0"
+        versionCode = 15
+        versionName = "1.3.0"
     }
 
     buildFeatures {
@@ -66,6 +66,8 @@ dependencies {
 
     testImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.tooling.preview)
     testImplementation(libs.junit)
     testImplementation(libs.androidx.room.testing)
     testImplementation(libs.robolectric)

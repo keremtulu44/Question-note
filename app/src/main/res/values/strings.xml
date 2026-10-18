@@ -409,7 +409,7 @@
     <string name="level_xp_independent">Bağımsız çözüm bonusu · %1$d</string>
     <string name="level_xp_goal">Günlük hedef bonusu · %1$d gün</string>
     <string name="level_xp_streak">Seri kilometre taşları</string>
-    <string name="level_xp_badges">Rozetler · %1$d/11</string>
+    <string name="level_xp_badges">Rozetler · %1$d/%2$d</string>
     <string name="level_xp_value">+%1$d XP</string>
     <string name="level_xp_zero">0 XP</string>
 
@@ -583,4 +583,41 @@
     <string name="badge_kusursuz_20">Gizli şampiyon</string>
     <string name="badge_desc_kusursuz_20">En az 20 soruluk bir oturumun tamamını bağımsız çöz.</string>
     <string name="focus_checkpoint_error">Tekrarın kaydedildi; oturum devam noktası saklanamadı. Uygulamayı kapatmadan oturumu bitirebilirsin.</string>
+
+    <!-- P0/P1: gerçek verili ilerleme ve kontrollü hareket -->
+    <string name="progress_observer_error">Rozetler şu anda güncellenemiyor. Kayıtların üzerinden yeniden deneyebilirsin.</string>
+    <string name="karne_progress_error">Karne hazır; ek ilerleme bilgileri yüklenemedi.</string>
+    <string name="progress_headline">Emeğin iz bırakıyor.</string>
+    <string name="progress_subtitle">Kendi ritminde, adım adım.</string>
+    <string name="progress_effort_label">EMEK YOLCULUĞUN</string>
+    <string name="progress_effort_title">Küçük adımların toplamı</string>
+    <string name="progress_effort_note">Zorlandığın tekrarlar da emeğinin bir parçası.</string>
+    <string name="progress_total_xp">%1$s toplam XP</string>
+    <string name="progress_xp_fraction">%1$s / %2$s XP · bu seviye</string>
+    <string name="progress_level_remaining">Sonraki seviyeye %1$s XP kaldı.</string>
+    <string name="progress_next_rank">Sırada %1$s var</string>
+    <string name="progress_rank_remaining">Seviye %1$d · bu rütbeye %2$s XP</string>
+    <string name="progress_xp_note">XP çalışma emeğini gösterir; öğrenme veya sınav başarı puanı değildir.</string>
+    <string name="progress_xp_amount">%1$s XP</string>
+    <string name="progress_show_details">XP dökümünü gör</string>
+    <string name="progress_hide_details">Daha az göster</string>
+    <string name="progress_learning_title">Tekrarların ne söylüyor?</string>
+    <string name="progress_learning_note">Pekişme göstergeleri tekrar planından türetilir. Bağımsız çözüm: Rahat ve çözüm açılmamış. Süre veya kaynak başarısı tahmini üretilmez.</string>
+    <string name="progress_scope">İstatistikler tüm arşivini kapsar. XP, soru ve tekrar kayıtlarından yeniden hesaplanır.</string>
+    <string name="progress_first_step">İlk adımına yer aç.</string>
+    <string name="progress_empty_archive">Henüz kayıtlı sorun yok. Bir soru eklediğinde emeğin burada görünmeye başlayacak.</string>
+    <string name="progress_no_reviews">Soruların hazır. İlk tekrarından sonra öğrenme göstergelerin oluşmaya başlayacak.</string>
+    <string name="progress_add_question">İlk sorumu ekle</string>
+    <string name="progress_go_today">Bugünkü çalışmama dön</string>
+    <string name="progress_forecast_note">Mevcut planına göre soru adedi. Gecikmiş sorular bu grafiğe dahil değildir.</string>
+    <string name="progress_day_load">%1$s · %2$d soru</string>
+    <string name="progress_all_lessons">Bütün dersleri gör</string>
+    <string name="progress_collection_title">Koleksiyonun</string>
+    <string name="progress_open_badges">30 rozeti keşfet</string>
+    <string name="progress_close_badges">Rozetleri kapat</string>
+    <string name="progress_open_ranks">15 rütbeyi keşfet</string>
+    <string name="progress_close_ranks">Rütbeleri kapat</string>
+    <string name="progress_loading">İlerlemen hazırlanıyor</string>
+    <string name="progress_loading_note">Kayıtlarından yolculuğunun özeti çıkarılıyor.</string>
+    <string name="progress_error_note">Bu ekran şu anda bilgilerini okuyamıyor. Yeniden deneyebilirsin.</string>
 </resources>

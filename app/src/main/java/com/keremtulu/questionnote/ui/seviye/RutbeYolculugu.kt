@@ -23,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -35,6 +36,7 @@ import com.keremtulu.questionnote.domain.seviye.SeviyeHesabi
 
 @Composable
 fun RutbeYolculugu(durum: SeviyeDurumu) {
+    val kartGenisligi = if (LocalDensity.current.fontScale >= 1.5f) 200.dp else 132.dp
     var detay by remember { mutableStateOf<Rutbe?>(null) }
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(stringResource(R.string.rank_gallery_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
@@ -43,7 +45,7 @@ fun RutbeYolculugu(durum: SeviyeDurumu) {
         LazyRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             items(Rutbe.entries.toList(), key = { it.anahtar }) { rutbe ->
                 val aktif = durum.seviye >= rutbe.baslangicSeviye
-                Card(onClick = { detay = rutbe }, modifier = Modifier.width(132.dp), shape = RoundedCornerShape(22.dp),
+                Card(onClick = { detay = rutbe }, modifier = Modifier.width(kartGenisligi), shape = RoundedCornerShape(22.dp),
                     colors = CardDefaults.cardColors(containerColor = if (rutbe == durum.rutbe) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface)) {
                     Column(Modifier.fillMaxWidth().padding(14.dp), horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(6.dp)) {

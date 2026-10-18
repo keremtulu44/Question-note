@@ -375,6 +375,21 @@ jobs:
         if: steps.release.outputs.wrapper_exit != '0' || steps.release.outputs.unit_test_exit != '0' || steps.release.outputs.build_exit != '0' || steps.release.outputs.signing_exit != '0' || steps.release.outputs.fingerprint_exit != '0' || steps.release.outputs.release_exit != '0'
         run: exit 1
 
+      - name: P1 yerel Compose önizlemelerini sakla
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in p1-light p1-dark p1-empty p1-error p1-large; do
+            source="app/build/outputs/p1-previews/$name.png"
+            if [[ -f "$source" ]]; then
+              # Small, named documentation previews only; never collect arbitrary build outputs.
+              test "$(stat -c%s "$source")" -lt 1500000
+              mkdir -p docs/ui/p1
+              cp "$source" "docs/ui/p1/$name.png"
+            fi
+          done
+
       - name: Wrapper ve raporu repoya yaz
         if: always()
         shell: bash
@@ -383,6 +398,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/DERLEME_RAPORU.md
+          if [[ -d docs/ui/p1 ]]; then git add docs/ui/p1; fi
           if [[ -d app/schemas ]]; then git add app/schemas; fi
           for path in gradlew gradlew.bat gradle/wrapper/gradle-wrapper.jar gradle/wrapper/gradle-wrapper.properties; do
             if [[ -f "$path" ]]; then git add "$path"; fi

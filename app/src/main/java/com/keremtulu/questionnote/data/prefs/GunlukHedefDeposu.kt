@@ -1,10 +1,15 @@
 package com.keremtulu.questionnote.data.prefs
 
 import android.content.Context
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOf
 
 /** Daily review target. The settings-backed implementation supports 5/10/15/20/30. */
 interface GunlukHedefDeposu {
     fun hedef(): Int
+    fun izle(): Flow<Int> = flowOf(hedef())
 }
 
 class SabitGunlukHedefDeposu(
@@ -21,6 +26,9 @@ class SabitGunlukHedefDeposu(
 class TercihGunlukHedefDeposu(context: Context) : GunlukHedefDeposu {
     private val prefs = context.applicationContext.getSharedPreferences(DOSYA, Context.MODE_PRIVATE)
 
+    private val guncelHedef = MutableStateFlow(hedef())
+    override fun izle(): Flow<Int> = guncelHedef.asStateFlow()
+
     override fun hedef(): Int =
         prefs.getInt(ANAHTAR, SabitGunlukHedefDeposu.VARSAYILAN_HEDEF)
             .takeIf { it in SECENEKLER } ?: SabitGunlukHedefDeposu.VARSAYILAN_HEDEF
@@ -28,6 +36,7 @@ class TercihGunlukHedefDeposu(context: Context) : GunlukHedefDeposu {
     fun hedefiAyarla(deger: Int) {
         if (deger !in SECENEKLER) return
         prefs.edit().putInt(ANAHTAR, deger).apply()
+        guncelHedef.value = deger
     }
 
     companion object {

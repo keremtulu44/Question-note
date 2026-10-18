@@ -64,6 +64,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.keremtulu.questionnote.R
+import com.keremtulu.questionnote.ui.tema.LocalHareketPolitikasi
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
 import com.keremtulu.questionnote.domain.karne.KarneHesabi
 import com.keremtulu.questionnote.domain.karne.OturumSonucu
@@ -136,10 +137,12 @@ fun OdakOturumuEkrani(
     val cozumVar = !soru.cozumNotu.isNullOrBlank() || soru.gorseller.any { it.tur == GorselTuru.COZUM }
     val colors = MaterialTheme.colorScheme
 
-    LaunchedEffect(degerlendirme) {
+    val hareket = LocalHareketPolitikasi.current
+    LaunchedEffect(degerlendirme, hareket) {
         if (degerlendirme) {
-            delay(100)
-            liste.animateScrollToItem((liste.layoutInfo.totalItemsCount - if (sira < toplam) 2 else 1).coerceAtLeast(0))
+            if (hareket.hareketAcik) delay(100)
+            val hedef = (liste.layoutInfo.totalItemsCount - if (sira < toplam) 2 else 1).coerceAtLeast(0)
+            if (hareket.azaltildi) liste.scrollToItem(hedef) else liste.animateScrollToItem(hedef)
         }
     }
 

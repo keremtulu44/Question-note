@@ -1,5 +1,7 @@
 package com.keremtulu.questionnote.data.seviye
 
+import androidx.room.withTransaction
+import com.keremtulu.questionnote.domain.karne.Rozet
 import com.keremtulu.questionnote.data.local.YanlisDefteriDatabase
 import com.keremtulu.questionnote.data.prefs.GunlukHedefDeposu
 import com.keremtulu.questionnote.data.prefs.RozetDeposu
@@ -31,7 +33,8 @@ class SeviyeHizmeti(
     private val ilerlemeDao = database.ilerlemeDao()
     private val tekrarDao = database.tekrarDao()
 
-    suspend fun ozet(bugun: LocalDate = LocalDate.now(saat)): SeviyeOzeti {
+    suspend fun ozet(bugun: LocalDate = LocalDate.now(saat)): SeviyeOzeti = database.withTransaction {
+        val sahip = rozetDeposu.sahipOlanlar()
         val hedef = gunlukHedefDeposu.hedef()
         val soruSayisi = ilerlemeDao.soruSayisi()
         val tekrarSayisi = ilerlemeDao.tekrarSayisi()
@@ -43,9 +46,9 @@ class SeviyeHizmeti(
             bagimsizTekrarSayisi = bagimsizSayisi,
             hedefTamamGunSayisi = ilerlemeDao.hedefTamamlananGunSayisi(hedef),
             seriBonusu = XpHesabi.seriBonusu(gunler),
-            rozetSayisi = rozetDeposu.sahipOlanlar().size,
+            rozetSayisi = sahip.size,
         )
-        return SeviyeOzeti(
+        SeviyeOzeti(
             durum = SeviyeHesabi.durum(kirilim.toplam),
             kirilim = kirilim,
             soruSayisi = soruSayisi,
@@ -55,7 +58,8 @@ class SeviyeHizmeti(
             hedef = hedef,
             dersler = dersDagilimi(),
             tahmin = tahmin(bugun),
-            rozetGirdisi = rozetHizmeti.girdi(),
+            rozetGirdisi = rozetHizmeti.girdi(hedef = hedef, bugun = bugun),
+            sahipRozetler = sahip,
         )
     }
 
@@ -93,7 +97,8 @@ class SeviyeHizmeti(
      * always agree with each other.
      */
     fun ozetIzle(): Flow<SeviyeOzeti> =
-        merge(ilerlemeDao.soruSayisiIzle(), ilerlemeDao.tekrarSayisiIzle(), rozetDeposu.sahipIzle.map { it.size })
+        merge(ilerlemeDao.soruSayisiIzle(), ilerlemeDao.tekrarSayisiIzle(),
+            rozetDeposu.sahipIzle.map { it.size }, gunlukHedefDeposu.izle())
             .onStart { emit(0) }
             .conflate()
             .map { ozet() }
@@ -110,6 +115,7 @@ data class SeviyeOzeti(
     val dersler: List<DersIlerlemesi>,
     val tahmin: List<GunTahmini>,
     val rozetGirdisi: RozetGirdisi,
+    val sahipRozetler: Set<Rozet> = emptySet(),
 )
 
 data class DersIlerlemesi(

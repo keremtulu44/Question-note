@@ -1,6 +1,5 @@
 package com.keremtulu.questionnote.ui.karne
 
-import android.provider.Settings
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -35,7 +34,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -45,6 +43,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.keremtulu.questionnote.R
+import com.keremtulu.questionnote.ui.tema.LocalHareketPolitikasi
+import com.keremtulu.questionnote.ui.tema.HareketTuru
 import com.keremtulu.questionnote.data.prefs.RozetDeposu
 import com.keremtulu.questionnote.domain.karne.Rozet
 import kotlinx.coroutines.CancellationException
@@ -82,16 +82,16 @@ fun RozetKutlamaHost(depo: RozetDeposu, goster: Boolean) {
 /** Fullscreen, dismissible, no time limit, finite animation and respects disabled system motion. */
 @Composable
 private fun RozetKutlamasi(rozet: Rozet, kalan: Int, kapanis: Boolean, hata: Boolean, onKapat: () -> Unit) {
-    val context = LocalContext.current
-    val hareket = remember {
-        runCatching { Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) > 0f }
-            .getOrDefault(false)
-    }
+    val politika = LocalHareketPolitikasi.current
+    val hareket = politika.hareketAcik
     val acilis = remember { Animatable(if (hareket) 0f else 1f) }
     val haptic = LocalHapticFeedback.current
     LaunchedEffect(rozet) {
         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-        if (hareket) acilis.animateTo(1f, tween(1200))
+    }
+    LaunchedEffect(rozet, hareket) {
+        if (hareket) acilis.animateTo(1f, tween(politika.sure(HareketTuru.KUTLAMA)))
+        else acilis.snapTo(1f)
     }
     val altin = Color(0xFFF5D38E)
     Dialog(

@@ -27,8 +27,12 @@ class RozetHizmeti(
     private val hedefDeposu: GunlukHedefDeposu,
     private val saat: Clock = Clock.systemDefaultZone(),
 ) {
-    suspend fun girdi(sonuclar: List<OturumSonucu> = emptyList()): RozetGirdisi = database.withTransaction {
-        val gun = LocalDate.now(saat).toEpochDay().toInt()
+    suspend fun girdi(
+        sonuclar: List<OturumSonucu> = emptyList(),
+        hedef: Int = hedefDeposu.hedef(),
+        bugun: LocalDate = LocalDate.now(saat),
+    ): RozetGirdisi = database.withTransaction {
+        val gun = bugun.toEpochDay().toInt()
         val dao = database.ilerlemeDao()
         val tekrar = database.tekrarDao()
         val gunler = tekrar.gunDengeleri(gun - 4, gun).associateBy { it.gun }
@@ -42,7 +46,7 @@ class RozetHizmeti(
             },
             soruSayisi = dao.soruSayisi(),
             tekrarSayisi = dao.tekrarSayisi(),
-            hedefGunSayisi = dao.hedefTamamlananGunSayisi(hedefDeposu.hedef()),
+            hedefGunSayisi = dao.hedefTamamlananGunSayisi(hedef),
             birGundeDersSayisi = dao.enCokGunDersSayisi(),
             toplamDersSayisi = dao.calisilanDersSayisi(),
             donusumVar = dao.donusumVar(),
@@ -61,5 +65,6 @@ class RozetHizmeti(
     fun degisiklikleriIzle(): Flow<List<Rozet>> = merge(
         database.ilerlemeDao().soruSayisiIzle(),
         database.ilerlemeDao().tekrarSayisiIzle(),
+        hedefDeposu.izle(),
     ).conflate().map { degerlendir() }
 }

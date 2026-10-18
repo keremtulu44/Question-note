@@ -5,18 +5,18 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
 internal val AcikRenkSemasi = lightColorScheme(
-    primary = Color(0xFF3A5C6F),
+    primary = Color(0xFF285E6B),
     onPrimary = Color(0xFFFFFFFF),
     primaryContainer = Color(0xFFDCEAF1),
     onPrimaryContainer = Color(0xFF183746),
-    secondary = Color(0xFF9A5F3C),
+    secondary = Color(0xFF8C5739),
     onSecondary = Color(0xFFFFFFFF),
     secondaryContainer = Color(0xFFFFDBC8),
     onSecondaryContainer = Color(0xFF35180A),
     tertiary = Color(0xFF5E7254),
-    background = Color(0xFFF6F6F1),
+    background = Color(0xFFF7F5EF),
     onBackground = Color(0xFF1E272B),
-    surface = Color(0xFFFFFEFB),
+    surface = Color(0xFFFFFCF6),
     onSurface = Color(0xFF1E272B),
     surfaceVariant = Color(0xFFE8ECEA),
     onSurfaceVariant = Color(0xFF515D60),
@@ -45,7 +45,7 @@ internal val KoyuRenkSemasi = darkColorScheme(
 )
 
 internal object DersRenkleri {
-    val GenelAcik = Color(0xFF3A5C6F)
+    val GenelAcik = Color(0xFF285E6B)
     val GenelKoyu = Color(0xFFA7C9D8)
     val EdebiyatAcik = Color(0xFFA34F5C)
     val EdebiyatKoyu = Color(0xFFE9A4AE)

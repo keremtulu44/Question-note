@@ -6,6 +6,18 @@ Durum işaretleri: `[ ]` yapılmadı · `[~]` kod mevcut; bu sürümün CI/Relea
 
 ---
 
+## Sonraki geliştirme — planlandı (2026-10-18)
+
+Ayrıntılı görev/dosya/bağımlılık/test planı: [Gelişim ve Öğrenme Planı](docs/GELISIM_VE_OGRENME_PLANI.md).
+Bu bölüm önerilen sıradır; uygulanan v1.2.0 davranışı aşağıda ayrı tutulur.
+
+- [ ] P0–P1: mevcut davranışın regresyonları, görsel sistem ve bağımsız İlerleme prototipi.
+- [ ] P2: güvenilir süre ölçümü; atomik kayıt ve devam noktası; Room/ZIP v4 uyumluluğu.
+- [ ] P3: veri yeterliliği, dayanıklı kişisel süre profilleri, kayıt anı kaynak/konu bağlamı.
+- [ ] P4: ayrı karar katmanı; önce v2 tarihlerini değiştirmeyen gölge çalışma.
+- [ ] P5: gerçek veriye bağlı gelişim özeti, kaynak/konu profilleri, eylem bağlantıları ve kontrollü animasyonlar.
+- [ ] P6: fiziksel cihaz/performans/erişilebilirlik testleri; koşullu etkinleştirme ve geri dönüş.
+
 ## Güncel — v1.2.0
 
 Aşağıdaki `[~]` özelliklerin kodu/otomatik testleri yayımlandı; fiziksel cihaz kabulü bekliyor.

@@ -87,6 +87,10 @@ class YerelYedeklemeHizmeti(
     context: Context,
     private val database: YanlisDefteriDatabase,
     private val gorselDeposu: LocalSoruGorselDeposu,
+    // Clear ONLY a committed restore, before removing its recovery markers. Also used on startup.
+    private val oturumTemizle: () -> Unit = {
+        com.keremtulu.questionnote.data.prefs.OdakOturumuDeposu(context.applicationContext).temizle()
+    },
 ) {
     private val appContext = context.applicationContext
     private val root = File(appContext.filesDir, BACKUP_DIRECTORY).apply { mkdirs() }
@@ -243,6 +247,9 @@ class YerelYedeklemeHizmeti(
         val safetyArchive = File(root, safetyName)
         try {
             createArchiveAtomically(safetyArchive, current)
+        } catch (cancel: CancellationException) {
+            safetyArchive.delete()
+            throw cancel
         } catch (error: Exception) {
             safetyArchive.delete()
             throw IOException("Mevcut arşiv için güvenlik yedeği alınamadı; geri yükleme yapılmadı.", error)
@@ -331,7 +338,13 @@ class YerelYedeklemeHizmeti(
             // Keep the durable journal; startup recovery decides commit vs. rollback from the DB marker.
             throw cancel
         } catch (error: Exception) {
-            runCatching { recoverIfNeeded() }
+            try {
+                recoverIfNeeded()
+            } catch (cancel: CancellationException) {
+                throw cancel
+            } catch (recovery: Exception) {
+                if (recovery !== error) error.addSuppressed(recovery)
+            }
             throw error
         }
     }
@@ -371,6 +384,10 @@ class YerelYedeklemeHizmeti(
                 throw IOException("Geri yükleme sonrası görsel doğrulaması başarısız: ${row.dosyaAdi}")
             }
         }
+        // A failed pre-commit restore preserves the old session. A committed replacement must
+        // never resume an old question ID, even when the imported backup reuses that ID.
+        // If preference persistence fails, retain journal/DB marker and block recovery safely.
+        oturumTemizle()
         journal.oldFileNames.filterNot { it in journal.newFileNames }
             .forEach { gorselDeposu.kaliciDosyayiSil(it) }
         database.withTransaction {

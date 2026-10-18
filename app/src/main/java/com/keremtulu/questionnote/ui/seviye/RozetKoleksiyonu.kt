@@ -28,6 +28,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -49,9 +50,14 @@ private val oturumRozetleri = setOf(Rozet.ILK_KARNE, Rozet.KUSURSUZ_TUR, Rozet.O
     Rozet.YIRMI_SORU, Rozet.COZUMSUZ, Rozet.ZINCIR_10, Rozet.KUSURSUZ_20)
 
 @Composable
-fun RozetKoleksiyonu(sahip: Set<Rozet>, girdi: RozetGirdisi, depo: RozetDeposu) {
+fun RozetKoleksiyonu(sahip: Set<Rozet>, girdi: RozetGirdisi, depo: RozetDeposu) =
+    RozetKoleksiyonu(sahip, girdi, depo::kazanilmaZamani)
+
+@Composable
+fun RozetKoleksiyonu(sahip: Set<Rozet>, girdi: RozetGirdisi, kazanilmaZamani: (Rozet) -> Long?) {
     var filtre by rememberSaveable { mutableStateOf("all") }
     var detay by remember { mutableStateOf<Rozet?>(null) }
+    val sutunSayisi = if (LocalDensity.current.fontScale >= 1.5f) 1 else 2
     val liste = Rozet.entries.filter { when (filtre) {
         "earned" -> it in sahip
         "locked" -> it !in sahip
@@ -70,7 +76,7 @@ fun RozetKoleksiyonu(sahip: Set<Rozet>, girdi: RozetGirdisi, depo: RozetDeposu) 
             }
         }
         if (liste.isEmpty()) Text(stringResource(R.string.badge_filter_empty), style = MaterialTheme.typography.bodyMedium)
-        liste.chunked(2).forEach { satir ->
+        liste.chunked(sutunSayisi).forEach { satir ->
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 satir.forEach { rozet ->
                     val kazanildi = rozet in sahip
@@ -104,7 +110,7 @@ fun RozetKoleksiyonu(sahip: Set<Rozet>, girdi: RozetGirdisi, depo: RozetDeposu) 
                         }
                     }
                 }
-                if (satir.size == 1) Spacer(Modifier.weight(1f))
+                if (sutunSayisi == 2 && satir.size == 1) Spacer(Modifier.weight(1f))
             }
         }
     }
@@ -122,7 +128,7 @@ fun RozetKoleksiyonu(sahip: Set<Rozet>, girdi: RozetGirdisi, depo: RozetDeposu) 
                     if (!gizli) {
                         if (kazanildi) {
                             Text("✓ " + stringResource(R.string.badge_earned))
-                            depo.kazanilmaZamani(rozet)?.let {
+                            kazanilmaZamani(rozet)?.let {
                                 val tarih = Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
                                 Text(stringResource(R.string.badge_earned_date, tarih))
                             }

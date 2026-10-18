@@ -30,7 +30,7 @@ class AppContainer(context: Context) {
     val konuRepository: KonuRepository = RoomKonuRepository(database)
     val soruRepository: SoruRepository = RoomSoruRepository(database, gorselDeposu)
     val gorselTutarliligi = GorselTutarliligiHizmeti(database, gorselDeposu)
-    val disaAktarmaHizmeti = YerelYedeklemeHizmeti(context, database, gorselDeposu)
+    val disaAktarmaHizmeti = YerelYedeklemeHizmeti(context, database, gorselDeposu, oturumDeposu::temizle)
     val ilerlemeHizmeti = IlerlemeHizmeti(database)
     val rozetDeposu = RozetDeposu(context)
     val gunlukHedefDeposu: GunlukHedefDeposu = TercihGunlukHedefDeposu(context)

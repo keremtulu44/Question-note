@@ -2,6 +2,15 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.3.0] — 2026-10-18 · doğrulama bekleniyor
+
+- **P0/P1:** İlerleme ekranında yeni rütbe odağı, gerçek XP, kompakt sayılar, açılır XP/rozet/rütbe koleksiyonları; boş, yükleniyor, hata ve yeniden deneme durumları.
+- Açık/koyu tema ve büyük yazıda uyarlanan yerleşim; ortak, sistem ayarını canlı izleyen azaltılmış hareket politikası. Ekranı açmak sahte XP artışı üretmez.
+- Karne rozet sayısı güncel sahiplikten izlenir. Ödül gözleminde üç sınırlı yeniden deneme; tükenirse kullanıcı yenilemesi/sekme dönüşünde yeniden başlama. Hedef değişiklikleri XP ve rozetlere yansır.
+- Geri yüklemede yarım oturum önceden silinmez. Başarılı commit veya startup recovery’de devam noktası, kurtarma işaretleri kaldırılmadan geçersizleştirilir; temizleme hatası güvenli recovery sınırında kalır.
+- Debug-only Preview’lar ve sentetik Robolectric arayüz/görsel regresyonları. Fiziksel cihaz kabulü yapılmadı; CI sonucu henüz bekleniyor.
+- **Room/ZIP v3, tekrar v2, XP katsayıları ve rozet/rütbe kuralları aynı.** Yeni süre verisi, öğrenme profili veya kaynak analizi eklenmedi.
+
 ## [1.2.0] — 2026-10-17
 
 - **İlerleme büyüdü:** 11 → **30 rozet**, 9 → **15 rütbe**. Altı yeni, saydam WebP amblem; tüm rütbeleri ve XP eşiklerini gösteren yolculuk galerisi. Eski 200-seviye sınırı ve yüksek XP taşma riski kaldırıldı.
