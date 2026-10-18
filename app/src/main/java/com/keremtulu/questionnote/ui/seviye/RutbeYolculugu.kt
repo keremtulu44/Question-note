@@ -35,11 +35,11 @@ import com.keremtulu.questionnote.domain.seviye.SeviyeDurumu
 import com.keremtulu.questionnote.domain.seviye.SeviyeHesabi
 
 @Composable
-fun RutbeYolculugu(durum: SeviyeDurumu) {
+fun RutbeYolculugu(durum: SeviyeDurumu, baslikGoster: Boolean = true) {
     val kartGenisligi = if (LocalDensity.current.fontScale >= 1.5f) 200.dp else 132.dp
     var detay by remember { mutableStateOf<Rutbe?>(null) }
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text(stringResource(R.string.rank_gallery_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        if (baslikGoster) Text(stringResource(R.string.rank_gallery_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         Text(stringResource(R.string.rank_gallery_note), style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant)
         LazyRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {

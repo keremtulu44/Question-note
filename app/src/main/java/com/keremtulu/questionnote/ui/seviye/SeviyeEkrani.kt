@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
@@ -88,12 +89,17 @@ fun SeviyeSayfasi(
     onSoruEkle: () -> Unit = {},
     onCalis: (com.keremtulu.questionnote.domain.model.SoruCalismaFiltresi, Int) -> Unit = { _, _ -> },
 ) {
-    when (durum) {
-        SeviyeDurumuUi.Yukleniyor -> IlerlemeDurumPaneli(hata = false, insets = insets, onYenile = onYenile)
-        SeviyeDurumuUi.Hata -> IlerlemeDurumPaneli(hata = true, insets = insets, onYenile = onYenile)
-        is SeviyeDurumuUi.YetersizVeri -> IlerlemeIcerigi(durum.ozet, true, insets, kazanilmaZamani, onBugun, onSoruEkle, onCalis)
-        is SeviyeDurumuUi.Hazir -> IlerlemeIcerigi(durum.ozet, false, insets, kazanilmaZamani, onBugun, onSoruEkle, onCalis)
+    // A date/resume refresh may briefly replace content with Loading. Keep only UI navigation/scroll state,
+    // never a second copy of the summary, so returning to the app does not silently send a detail back home.
+    val gorunumDurumu = rememberSaveableStateHolder()
+    val ozet = when (durum) {
+        is SeviyeDurumuUi.YetersizVeri -> durum.ozet
+        is SeviyeDurumuUi.Hazir -> durum.ozet
+        else -> null
     }
+    if (ozet != null) gorunumDurumu.SaveableStateProvider("progress-content") {
+        IlerlemeIcerigi(ozet, durum is SeviyeDurumuUi.YetersizVeri, insets, kazanilmaZamani, onBugun, onSoruEkle, onCalis)
+    } else IlerlemeDurumPaneli(hata = durum is SeviyeDurumuUi.Hata, insets = insets, onYenile = onYenile)
 }
 
 private tailrec fun Context.seviyeActivity(): ComponentActivity? = when (this) {

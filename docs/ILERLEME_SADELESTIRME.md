@@ -13,7 +13,7 @@ veya toplamak değil; mevcut bilgiyi daha sakin, seçici ve görsel bir düzene 
 - Büyük sloganlar, ömür boyu dört sayaç, XP dökümü, yedi günlük metin listeleri, karşılaştırma,
   plan/iş yükü ve süre profili artık ana sayfanın altına istiflenmez. Kapalı ayrıntılar Compose ağacına da eklenmez.
 - Ayrıntılar menüsünde yalnız seçilen bölüm açılır: emek, ritim, konu/kaynak, dönem, plan,
-  ders veya süre. Ekran içi/Android geri doğru üst sayfaya döner; ana liste konumu korunur.
+  ders veya süre. Ekran içi/Android geri doğru üst sayfaya döner; ana liste konumu korunur. Geçici yükleme/yenileme de seçili sayfayı sıfırlamaz.
 - Ritim çubuk grafikle; plan yalnız tarih/soru adediyle başlar. Bir güne dokununca o günün
   kapsam/ara toplam/tahmin bilgisi açılır. Karşılaştırmada iki küçük dönem kartı vardır;
   yetersizlik kısa görünür, gerçek gün/örneklem dayanağı “Neden?” altında korunur.
@@ -27,7 +27,7 @@ veya toplamak değil; mevcut bilgiyi daha sakin, seçici ve görsel bir düzene 
 
 ## Doğrulama durumu
 
-Aday **1.5.1 / code19**. İlk CI ve native görsel incelemesi bekleniyor; ara yayın kapalı.
+Aday **1.5.1 / code19**. İlk CI `39155923794`, taşınırken eksik kalan dört yerel renk tanımında derleme hatası verdi (testler çalışmadı); tanımlar geri eklendi. Yeni CI ve native görsel incelemesi bekleniyor; ara yayın kapalı.
 Yerelde 147 Kotlin sözdizimi ağacı, XML, workflow YAML/Bash ve kaynak referansları kontrol edildi;
 bu, Kotlin/Android derlemesinin veya cihaz kabulünün yerine geçmez.
 

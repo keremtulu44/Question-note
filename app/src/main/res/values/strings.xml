@@ -745,7 +745,7 @@
     <string name="progress_action_due">Tekrar zamanı gelen %1$d soru var.</string>
     <string name="progress_action_difficulty">Zorlandığın konuya küçük bir dönüş.</string>
     <string name="progress_action_small">Hazırsan kısa bir tur yapabilirsin.</string>
-    <string name="progress_action_inspect">%1$d soruyu filtrede incele</string>
+    <string name="progress_action_inspect">%1$d soruluk turu hazırla</string>
     <string name="progress_rhythm_scope">Tekrar sayıları · tüm dersler</string>
     <string name="progress_today_partial">Bugün henüz tamamlanmadı.</string>
     <string name="progress_day_details">Gün gün soru ve tekrar sayıları</string>

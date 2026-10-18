@@ -94,6 +94,23 @@ class IlerlemeSadelikTest {
         compose.onNodeWithText(text(R.string.progress_comparison_pending)).assertExists()
     }
 
+    @Test fun loadingRefreshKeepsTheChosenDetailInsteadOfReturningToTheOverview() {
+        val sample = ornekIlerlemeOzeti()
+        val state = mutableStateOf<SeviyeDurumuUi>(SeviyeDurumuUi.ozetten(sample))
+        compose.setContent { YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+            SeviyeSayfasi(state.value)
+        } }
+        bolumAc("progress-details", "progress-list")
+        bolumAc("progress-open-plan")
+        compose.runOnIdle { state.value = SeviyeDurumuUi.Yukleniyor }
+        compose.onNodeWithTag("progress-loading").assertExists()
+        compose.runOnIdle { state.value = SeviyeDurumuUi.ozetten(sample) }
+        compose.onNodeWithTag("analysis-plan").assertExists()
+        compose.onNodeWithTag("progress-hero").assertDoesNotExist()
+        compose.runOnIdle { compose.activity.onBackPressedDispatcher.onBackPressed() }
+        compose.onNodeWithTag("progress-open-plan").assertExists()
+    }
+
     @Test fun realTodayCountUpdatesWithoutClampingItsLabelOrInventingXp() {
         val sample = mutableStateOf(ornekIlerlemeOzeti())
         compose.setContent { YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {

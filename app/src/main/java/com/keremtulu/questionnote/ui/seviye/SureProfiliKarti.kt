@@ -33,14 +33,14 @@ import java.util.Locale
 
 /** P3 foundation, not the P5 source/topic dashboard or a general exam-speed score. */
 @Composable
-internal fun SureProfiliKarti(kapsam: SureKapsami) {
+internal fun SureProfiliKarti(kapsam: SureKapsami, baslikGoster: Boolean = true) {
     var tumu by rememberSaveable { mutableStateOf(false) }
     val renk = MaterialTheme.colorScheme
     val tarih = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.forLanguageTag("tr-TR"))
     Surface(Modifier.fillMaxWidth().testTag("progress-time-profile"), shape = RoundedCornerShape(24.dp),
         color = renk.surface, border = BorderStroke(1.dp, renk.outlineVariant)) {
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(stringResource(R.string.profile_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold,
+            if (baslikGoster) Text(stringResource(R.string.profile_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold,
                 modifier = Modifier.semantics { heading() })
             Text(stringResource(R.string.profile_scope_note), style = MaterialTheme.typography.bodySmall, color = renk.onSurfaceVariant)
             Text(stringResource(R.string.profile_window, tarih.format(LocalDate.ofEpochDay(kapsam.ilkGun.toLong())),

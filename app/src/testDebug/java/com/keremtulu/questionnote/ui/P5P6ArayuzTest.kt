@@ -97,6 +97,20 @@ class P5P6ArayuzTest {
         compose.onAllNodesWithText("dk", substring = true).assertCountEquals(0)
         compose.onNodeWithText(context.getString(R.string.analysis_no_total_time)).assertExists()
     }
+    @Test fun fullyCoveredDayDoesNotRepeatTheSameEstimateAsASubtotal() {
+        val a = p6AnalizOrnegi().let { it.copy(plan = it.plan.map { p ->
+            p.copy(kapsanan = p.adet, bilinmeyen = 0, altMs = p.adet * 60_000.0, ustMs = p.adet * 120_000.0)
+        }) }
+        compose.setContent { YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+            Column(Modifier.verticalScroll(rememberScrollState())) { GelisimAnaliziKarti(a, AnalizBolumu.PLAN) { _, _ -> } }
+        } }
+        compose.onNodeWithTag("analysis-plan-day-0").performScrollTo().performClick()
+        val n = a.plan.first().adet
+        compose.onNodeWithText(context.getString(R.string.analysis_total_time, n, n * 2)).assertExists()
+        compose.onNodeWithText(context.getString(R.string.analysis_partial_time, n, n * 2)).assertDoesNotExist()
+        compose.onNodeWithText(context.getString(R.string.analysis_plan_coverage, n, n, 100, 0)).assertExists()
+    }
+
     @Test fun insufficientComparisonShowsActualDaysRatherThanJustTheMinimumThreshold() {
         val a = p6AnalizOrnegi()
         assertEquals(40, a.donem.eslesen.soru)

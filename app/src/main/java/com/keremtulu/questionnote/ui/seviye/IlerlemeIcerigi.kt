@@ -45,6 +45,12 @@ import com.keremtulu.questionnote.ui.tema.*
 import java.text.NumberFormat
 import java.util.Locale
 
+// Established petrol/copper hero palette; deliberately independent of the page's light/dark surfaces.
+private val Murekkep = Color(0xFF153544)
+private val Gece = Color(0xFF0C202C)
+private val Kagit = Color(0xFFFFF7E8)
+private val BakirIsik = Color(0xFFEFC18A)
+
 /** Navigation is presentation state only. Opening a detail never creates a measurement or changes a plan. */
 private enum class IlerlemeBolumu(val baslik: Int) {
     OZET(R.string.progress_headline), AYRINTILAR(R.string.progress_details_title),
@@ -156,9 +162,9 @@ internal fun IlerlemeIcerigi(
                         onClick = { sayfa = IlerlemeBolumu.RUTBELER }) }
                     item { RozetKoleksiyonu(ozet.sahipRozetler, ozet.rozetGirdisi, kazanilmaZamani) }
                 }
-                IlerlemeBolumu.RUTBELER -> item { RutbeYolculugu(ozet.durum) }
+                IlerlemeBolumu.RUTBELER -> item { RutbeYolculugu(ozet.durum, baslikGoster = false) }
                 IlerlemeBolumu.DERSLER -> item { DersPekismesi(ozet.dersler) }
-                IlerlemeBolumu.SURE -> item { ozet.sureKapsami?.let { SureProfiliKarti(it) } }
+                IlerlemeBolumu.SURE -> item { ozet.sureKapsami?.let { SureProfiliKarti(it, baslikGoster = false) } }
                 IlerlemeBolumu.RITIM, IlerlemeBolumu.PLAN, IlerlemeBolumu.DONEM, IlerlemeBolumu.GRUPLAR -> item {
                     ozet.analiz?.let { a -> GelisimAnaliziKarti(a, when (sayfa) {
                         IlerlemeBolumu.RITIM -> AnalizBolumu.RITIM

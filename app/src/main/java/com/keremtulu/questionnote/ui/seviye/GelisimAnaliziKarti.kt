@@ -123,13 +123,16 @@ private fun PlanKarti(a: GelisimAnalizi) {
             color = MaterialTheme.colorScheme.onSurfaceVariant)
         a.plan.forEachIndexed { i, p ->
             val acik = acikGun == p.gun
+            val aciklik = stringResource(if (acik) R.string.progress_details_open else R.string.progress_details_closed)
             Surface(onClick = { acikGun = if (acik) null else p.gun },
                 color = if (acik) MaterialTheme.colorScheme.primaryContainer.copy(alpha = .35f) else MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("analysis-plan-day-$i")) {
+                shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("analysis-plan-day-$i").semantics { stateDescription = aciklik }) {
                 Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(if (i == 0) stringResource(R.string.progress_plan_today) else tarih(p.gun),
                         Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
                     Text(stringResource(R.string.progress_plan_count, p.adet), style = MaterialTheme.typography.titleSmall)
+                    Text(if (acik) "−" else "+", modifier = Modifier.clearAndSetSemantics {},
+                        style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
                 }
             }
             AcilanIcerik(acik) {
@@ -137,7 +140,7 @@ private fun PlanKarti(a: GelisimAnalizi) {
                     if (p.adet == 0) Text(stringResource(R.string.progress_plan_empty)) else {
                         Text(stringResource(R.string.analysis_plan_coverage, p.kapsanan, p.adet, p.kapsamYuzde, p.bilinmeyen),
                             style = MaterialTheme.typography.bodySmall)
-                        if (p.kapsanan > 0) Text(stringResource(R.string.analysis_partial_time, dakikaAlt(p.altMs), dakikaUst(p.ustMs)),
+                        if (p.kapsanan > 0 && p.kapsanan < p.adet) Text(stringResource(R.string.analysis_partial_time, dakikaAlt(p.altMs), dakikaUst(p.ustMs)),
                             style = MaterialTheme.typography.bodyMedium)
                         if (p.toplamTahminAcik) Text(stringResource(R.string.analysis_total_time,
                             dakikaAlt(requireNotNull(p.toplamAltMs)), dakikaUst(requireNotNull(p.toplamUstMs))), style = MaterialTheme.typography.bodyMedium)
