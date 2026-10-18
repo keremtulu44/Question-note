@@ -1,130 +1,110 @@
-# Tam ZIP yedek biçimi — v3
+# Tam ZIP yedek biçimi — v4
 
-> Güncel biçim: `yanlis-defteri-backup`, format sürümü **3**, Room şema sürümü **3**. Uygulama v2
-> yedeklerini de geri yükleyebilir; yeni yedekler v3 olarak yazılır. Bu belge kodla günceldir.
-> Son güncelleme: 2026-10-17.
+Güncel yazım: `yanlis-defteri-backup`, **ZIP v4 / Room v4**. Okuma: **v2, v3, v4**; her biri
+kendi şema/CSV/alan sözleşmesiyle doğrulanır. Tekrar algoritması bunlardan bağımsızdır ve hâlâ
+**v2**'dir. Son güncelleme: 2026-10-18.
 
 ## 1. Arşiv yapısı
 
 ```text
 yanlis-defteri-yedek.zip
 ├── manifest.json
-├── data.json                 # Geri yüklemenin kanonik kaynağı
+├── data.json                 # kanonik geri yükleme kaynağı
 ├── csv/
 │   ├── lessons.csv
 │   ├── topics.csv
 │   ├── questions.csv
-│   ├── catalog_options.csv   # Global kaynaklar ve yanlış nedenleri
+│   ├── catalog_options.csv
 │   ├── images.csv
-│   └── reviews.csv           # İnceleme/tablo uygulamalarına yönelik kopyalar
+│   ├── reviews.csv
+│   └── measurements.csv      # süre/kalite, kayıt bağlamı, karar özeti
 └── images/
-    └── <uuid>.jpg            # Soru ve çözüm görselleri
+    └── <uuid>.jpg
 ```
 
-Yedek; ders, konu, soru ve çözüm notları (eski soru notları dâhil), plan/öğrenme durumu, tekrar
-geçmişi, global kaynak ve yanlış nedeni kataloğu, soruya özel kaynak konumu ve soru/çözüm görsellerini
-içerir. CSV dosyaları yardımcı kopyadır; geri yükleme ilişkileri JSON üzerinden doğrular ve CSV'yi
-veri kaynağı olarak kullanmaz. Cihaz içindeki gerçek dosya yolu yedeğe konmaz; geri yüklemede yeni
-kalıcı dosya adları üretilir. Önizleme/küçük resimler dâhil değildir.
+Ders/konu, eski soru/çözüm notları, plan/öğrenme durumu, tekrar geçmişi, katalog, kaynak konumu
+ve fotoğraflar korunur. V4 ayrıca `data.json.measurements` dizisini içerir. Tamamlanmış tekrarın
+ölçümü, kalite/nedenler, kayıt anındaki ders/konu/kaynak ve sınırlı karar snapshot'ı taşınır.
+CSV yardımcı insan kopyasıdır; geri yükleme JSON'u kullanır. Formül önekleri CSV'de nötrleştirilir.
+Cihazdaki mutlak dosya yolu, bitmap önizlemesi veya saniyelik olay günlüğü taşınmaz.
 
-## 2. Manifest, bütünlük ve sınırlar
+## 2. Sürüm ve ölçüm sözleşmesi
 
-`manifest.json` en az biçim kimliği/sürümü, Room şema sürümü, oluşturulma zamanı, `data.json` ve
-`images/` yolları, temel tablolar ile katalog seçeneklerinin satır sayıları, zorunlu CSV yolları ve
-her yük için göreli yol, byte uzunluğu ve SHA-256 içerir. JSON, ilişki, katalog türü ve enum alanları
-ayrıca doğrulanır; görsellerin boyutu, SHA-256'sı, JPEG MIME türü ve çözünürlük metadata ile
-eşleştirilir.
+| ZIP | Room alanı | CSV/JSON farkı |
+|---|---:|---|
+| v2 | 2 | 5 CSV; kaynak/neden kataloğu sorulardan yeniden kurulur; locator/ölçüm yok |
+| v3 | 3 | 6 CSV; katalog ve `source_location` korunur; ölçüm yok |
+| v4 | 4 | 7 CSV; `measurements` JSON/CSV, manifest ölçüm sayısı |
 
-Uygulanan üst sınırlar: ZIP 512 MiB; açılmış toplam içerik 1 GiB; tek girdi 128 MiB; `data.json`
-64 MiB; manifest 1 MiB; 10.007 ZIP girdisi (manifest dâhil); 10.000 görsel; tablo başına 200.000
-kayıt; görsel kenarı en çok 3.000 px; sıkıştırma oranı en çok 1.000:1. İçe aktarma, arşivi app-private
-güvenli hazırlık dizinine sınırlandırılmış şekilde kopyalar, SHA-256 ve ilişki kontrollerini yapar,
-yol kaçışı/tekrarlı/yabancı ZIP girdilerini reddeder ve çıkarma öncesi yaklaşık boş alanı denetler.
-Dışa aktarma ve görsel kopyalama öncesinde de boş alan kontrolü uygulanır. SHA-256 bozulmayı
-saptar; **şifreleme veya kaynağın kimliğini doğrulama sağlamaz**.
+Eski yedekten süre veya o günkü bilinmeyen konu/kaynak bilgisi uydurulmaz; ölçüm tablosu boş
+kalır. Yeni ölçümsüz tekrarın bağlamı kaydedilebilir ama süreleri null, kalitesi `YOK` olur.
+V4 ölçüm başına `review_id` FK/PK, benzersiz `attempt_id`, nullable `session_id`, iki nullable ms,
+kalite/nedenler, ölçüm sürümü 1, tarihsel bağlam ve karar JSON'u vardır. Ayrıntı:
+[OLCUM_VE_PROFILLER.md](OLCUM_VE_PROFILLER.md).
 
-Yeni v3 yedeklerinde katalog seçenekleri `catalog_options` JSON listesi ve CSV kopyası olarak
-saklanır; sorunun kaynak adı `source`, o soruya özel sayfa/test/soru bilgisi `source_location`
-alanındadır. Uygulama v2 yedeklerini de kabul eder: eski soru kaynakları ve özel yanlış nedenleri
-soru kayıtlarından yeniden kataloğa eklenir, hazır nedenler seed edilir; v2'de konum alanı olmadığı
-için boş kalır. Daha yeni format veya Room şema sürümü açık hata ile reddedilir; v2'den eski biçimler
-desteklenmez. Format sürümü ve Room migration'ı bağımsız yönetilir; yeni alan/format değişiminde bu
-belge ve testler birlikte güncellenmelidir.
+Yetim/yinelenen ölçüm/deneme kimliği, negatif/taşan süre, desteklenmeyen kalite/sürüm,
+normalize kaynak uyuşmazlığı, bozuk/çok büyük karar snapshot'ı ve tekrar/karar aralığı uyuşmazlığı
+reddedilir. Süreler tam sayı ms'dir; sayısal taşma veya metin/ondalık coercion ile kabul edilmez.
+Karar snapshot'ı sürüm 1 / `V2` modudur; P4/v3 kararı varmış gibi içe alınmaz.
 
-## 3. Dışa aktarma ve SAF/Drive
+## 3. Manifest, bütünlük ve sınırlar
 
-Kullanıcı Android belge seçicisinde hedefi seçer. ZIP önce cache içinde geçici dosyaya yazılır; her
-yükün boyutu/hash'i kaynağa karşı kontrol edilir, dosya `fsync` ve atomik taşıma ile tamamlanır;
-ancak bundan sonra `ContentResolver` üzerinden seçilen hedefe kopyalanır ve son yedek özeti
-kaydedilir. Başarısız işlem başarı olarak gösterilmez. Son özet dosya adı, tarih, boyut ve bunun
-seçilen konum mu yoksa güvenlik kopyası mı olduğunu gösterir.
+Manifest: format/Room sürümleri, tarih, yollar, temel tablolar/katalog/ölçüm satır sayıları,
+beklenen CSV kümesi ve her payload için göreli yol, byte uzunluğu, SHA-256. Envanter sürüme
+göre tam eşleşir. Görsellerin JPEG türü, boyutu, SHA-256'sı ve çözünürlüğü ayrıca doğrulanır.
 
-Android belge sağlayıcısına yazmanın tamamlanması Drive/bulut yüklemesinin bittiğini kanıtlamaz.
-Arayüz kullanıcıya bulut sağlayıcısındaki yüklemeyi ayrıca doğrulaması gerektiğini söyler.
-Uygulama kaldırılırsa cihaz içi veriler ve uygulamanın özel alanındaki güvenlik kopyası silinebilir;
-önemli yedek ayrıca kullanıcının seçtiği kalıcı konuma kaydedilmelidir.
+Üst sınırlar: ZIP **512 MiB**; açılmış toplam **1 GiB**; tek girdi **128 MiB**; JSON **64 MiB**;
+manifest **1 MiB**; manifest dahil **10.009 girdi**; **10.000 görsel**; tablo başına **200.000 satır**;
+görsel kenarı **3.000 px**; sıkıştırma oranı **1.000:1**. Karar JSON'u en çok **16 KiB**;
+ölçüm fazı başına **24 saat**. İçe/dışa aktarma ve görsel kopyalamada boş alan kontrol edilir.
 
-## 4. Tam geri yükleme
+Yol kaçışı, tekrarlı/yabancı girdiler, kesik dosya, yanlış sayı/hash ve desteklenmeyen format/şema
+normal arşive dokunmadan reddedilir. SHA-256 bozulmayı saptar; **kaynağın kimliğini doğrulamaz**.
+Geçerli hash'lerle yeniden yazılmış ama anlamı bozuk ölçümlerin reddi de test edilir.
 
-Geri yükleme **mevcut arşivin tamamını değiştirir**; birleştirme desteklenmez.
+## 4. Dışa aktarma ve SAF/Drive
 
-1. SAF'ten seçilen ZIP sınırlı biçimde özel hazırlık dizinine kopyalanır. Manifest, sürüm, girdi
-   yolları, sayılar, dosya boyutları/SHA-256, JSON ilişkileri, JPEG metadata'sı ve boş alan kontrolü
-   tamamlanmadan onay gösterilmez.
-2. Önizleme yedekteki ve mevcut arşivdeki kayıt/görsel sayılarını gösterir. Kullanıcının açık
-   onayı olmadan veritabanı veya kalıcı görseller değiştirilmez.
-3. Mevcut veritabanı ve görsellerden doğrulanmış `safety-<uuid>.zip` güvenlik kopyası oluşturulur;
-   oluşturulamıyorsa işlem başlamaz. Kopya `files/yedekler/` altında tutulur.
-4. İşlem günlüğü yazılır, yeni görseller farklı kalıcı adlarla kopyalanıp doğrulanır. Sonra Room
-   transaction'ında eski tekrar/görsel/soru/katalog seçeneği/konu/ders tabloları silinir,
-   doğrulanmış içerik sırayla eklenir ve geri yükleme işareti yazılır.
-5. Yeni satırlar ve görsel dosyaları tekrar doğrulanır. Başarılıysa eskiye ait görseller silinir,
-   Room işareti ve günlük temizlenir. Soru/görsel referanslarının yanlışlıkla aynı dosyayı
-   göstermemesi için yeni kalıcı adlar kullanılır.
+Kullanıcı Android belge seçicisinde hedefi seçer. ZIP önce cache'te hazırlanır; içerik, boyut/hash,
+`fsync` ve atomik taşıma tamamlandıktan sonra seçilen hedefe kopyalanır. Başarısızlık başarı gibi
+gösterilmez. Son yedek özeti dosya adı, tarih, boyut ve güvenlik kopyası ayrımını gösterir.
 
-Kesinti kurtarması için app-private JSON işlem günlüğü ile Room v1→v2 migration'ında oluşturulan
-`geri_yukleme_isaretleri` tablosu birlikte kullanılır. Room v2→v3 migration'ı kaynak konumu kolonunu
-ve katalog tablosunu ekler; eski soru kaynakları/özel nedenleri ile hazır nedenler kaybolmadan taşınır. Uygulama normal ekranları açmadan önce
-kurtarmayı çalıştırır: Room işareti yoksa işlem transaction'a ulaşmamıştır ve yalnızca yeni dosyalar
-silinerek eski arşiv bırakılır; işaret varsa yeni arşiv commit edilmiştir ve eski dosya temizliği
-idempotent biçimde tamamlanır. Günlük/işaret tutarsızlığı veya yeni görsel doğrulama hatası varsa
-uygulama verileri sessizce değiştirmek yerine normal kullanımı kilitler ve tekrar kurtarma seçeneği
-gösterir.
+Android belge sağlayıcısına yazmak bulut yüklemesinin bittiğini kanıtlamaz. Drive/bulut durumunu
+sağlayıcı arayüzünde ayrıca doğrulamak gerekir. Uygulama kaldırılınca cihaz-özel güvenlik kopyası
+da silinebilir; önemli yedeği kullanıcının seçtiği kalıcı konuma ayrıca kaydetmek gerekir.
 
-## 5. Test ve cihaz kabulü
+## 5. Tam geri yükleme ve kurtarma
 
-Robolectric/JVM testleri ZIP üretimini, her envanter SHA/uzunluğunu, katalog ve kaynak konumu
-dahil tam geri yüklemeyi, eski v2 yedeği geri yüklemeyi, dosya adı yeniden üretimini, mevcut verinin
-güvenlik kopyasını, checksum bozulmasını, path-traversal reddini, kesinti kurtarmasında
-commit/rollback ayrımını, Room v1→v2→v3 migration zincirini ve mevcut soru verisinin korunmasını kapsar.
-CI run `39037429421` toplam 36 testi başarıyla çalıştırdı. CI testi fiziksel cihaz/SAF sağlayıcı
-davranışını kanıtlamaz.
+**Tam değiştirme; birleştirme veya senkronizasyon değil.**
 
-Kullanıcı kabulü ayrıca gerekir: cihazda seçilen Downloads/Drive hedefi, uygulama kapanıp açılması,
-yedek seçme-önizleme-onay/iptal akışları ve başka/temiz kurulumda geri yükleme kontrol edilmelidir.
-Bulut yükleme durumu Drive arayüzünden ayrıca doğrulanır. 30–50 fotoğraflı okunabilirlik ve Aşama 2
-kamera/galeri testleri de gerçek cihazda bekliyor.
+1. Seçilen ZIP sınırlandırılmış biçimde özel hazırlık dizinine kopyalanır; tamamı doğrulanır.
+2. Yedek/mevcut soru/görsel ve yeni ölçüm sayısı gösterilir; açık onay olmadan arşiv değiştirilmez.
+3. Mevcut arşivin ölçümleri de içeren doğrulanmış `safety-<uuid>.zip` kopyası alınır.
+4. Journal yazılır; yeni görseller ayrı adlarla kalıcılaştırılır. Tek Room transaction'ında eski
+   arşiv değiştirilir, tekrarlar ve ölçümler eklenir, commit işareti yazılır. Review silinmesi
+   eski ölçümleri cascade ile siler. Bir adım başarısızsa DB transaction'ı geri alınır.
+5. Commit kanıtı ve yeni görseller doğrulanır. Eski devam noktası **kalıcı temizlenir**; ardından
+   eski görseller, Room işareti ve journal kaldırılır. Temizlik başarısızsa recovery sınırı korunur.
 
-## 6. Şifreleme ve gizlilik
+Startup recovery normal ekranlardan önce çalışır: commit işareti yoksa yeni dosyalar geri
+alınır ve eski arşiv/oturum kalır; işaret varsa yeni arşivin temizliği tamamlanır. İşaret/journal
+uyuşmazlığında veya doğrulama hatasında normal kullanım kilitlenir; kullanıcı yeniden deneyebilir.
+Geç kalan checkpoint IO işi, silinen oturumu diriltemez. Profiller kalıcı cache olmadığından
+restore sonrasında yeni veri kümesinden yeniden hesaplanır.
 
-v3 (ve geriye uyumlu v2) yedeği şifrelenmez. ZIP; soru/çözüm notları, kaynak kataloğu ve soru fotoğrafları içerebilir. Yedeği
-kullanıcının seçtiği saklama yerinde koruması gerekir. İleride şifreleme eklenirse parola kaybı riski,
-CSV'nin incelenebilirliği ve olgun bir standart kullanımı ayrıca kararlaştırılmalıdır.
+## 6. Dahil olmayanlar ve gizlilik
 
+Rozet sahipliği/kutlama kuyruğu, günlük hedef, seçili sınav formatı ve **yarım oturumun cihaz-yerel
+checkpoint'i** ZIP'e dahil değildir. Sınav profiliyle eklenen dersler normal ders kayıtlarıdır ve
+yedekte bulunur. Tamamlanmış ölçüm ve bağlam ise v4'te yedeklidir.
 
-## v1.2.0 uyumluluk notu
+ZIP şifreli değildir; fotoğraf/not/katalog yanında çalışma süreleri ve bağlam da içerebilir.
+Güvenli saklama kullanıcıya aittir. Daha yeni ZIP'i eski APK'ya verme veya DB downgrade desteklenmez.
 
-- Room ve ZIP biçimi **3** olarak kalır; v2 ZIP içe alma devam eder.
-- Yeni tekrarlar `algorithm_version = 2` yazar. Sürüm, aralık, çözüm açma ve zaman alanları zaten
-  mevcut biçimdedir; v2 algoritma kaydının tam export → restore turu test edilir.
-- Kolaylık ve unutma sayısı geçmişten türetilir; ayrı kolon/backfill veya ZIP v4 alanı yoktur.
-- Sınav profili dersleri normal `lessons` kayıtlarıdır ve yedeğe girer; hangi profilin seçili olduğu
-  cihaz-yerel tercihtir. Aynı şekilde rozetler, kutlama kuyruğu, günlük hedef ve oturum devam noktası
-  ZIP'e dahil değildir. Yeni cihaz Tümü / özel görünümüyle başlayabilir.
-- **v1.3.0/P0:** Eski odak devam noktası girişim başlamadan silinmez. Ön doğrulama veya
-  commit öncesi rollback başarısız girişimde devamı korur. Doğrulanmış DB commit'inden sonra,
-  kurtarma işareti/journal silinmeden önce devam noktası kalıcı olarak temizlenir. Aynı soru
-  ID'lerinin yedekte bulunması eski oturumu geçerli yapmaz.
-- Devam noktası temizlenemezse commit işareti/journal korunur; normal ekranlar açılmaz.
-  Startup recovery aynı temizlemeyi yeniden dener. Başarısız restore sonrası UI belleğindeki
-  oturum, kalıcı devam noktasının kimliğiyle uzlaştırılır. ZIP şeması değişmez.
+## 7. Doğrulama
+
+Otomatik kapsam: v2/v3 import; v4 tam tur; ölçüm null/kalite/snapshot korunması; hash/envanter;
+semantik bozulma/taşma/orphan/tekrar reddi; safety kopyası; commit/rollback ve checkpoint sınırı;
+Room 1/2/3→4. Güncel sonuç [DERLEME_RAPORU.md](DERLEME_RAPORU.md) içindedir.
+
+Bunlar fiziksel telefon, SAF/bulut sağlayıcısı, gerçek düşük depolama veya süreç öldürme kabulü
+değildir. [TEST_KONTROL_LISTESI.md](TEST_KONTROL_LISTESI.md) içindeki cihaz kapıları açık tutulur.

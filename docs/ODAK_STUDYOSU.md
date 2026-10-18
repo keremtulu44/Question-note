@@ -1,4 +1,4 @@
-# Odak Stüdyosu ve adaptif tekrar v2 — v1.2.0
+# Odak Stüdyosu ve adaptif tekrar v2 — v1.4.x
 
 ## Kullanıcı akışı
 
@@ -6,7 +6,7 @@
    özel soru sayısı ve mevcut konu/kaynak/neden filtreleri de kullanılabilir.
 2. **Akıllı sıra** (varsayılan) veya **En eski önce** seçilir. Bugün/Filtreli listesindeki tek
    soruya dokunmak da aynı odak ekranını bir soruluk oturumla açar.
-3. Odak ekranı ders, oturum ilerlemesi, soru başına aktif süre, tamamlanan sayı ve oturum emeği
+3. Odak ekranı ders, oturum ilerlemesi, ayrı **deneme/inceleme süreleri**, tamamlanan sayı ve oturum emeği
    XP'sini gösterir. Fotoğrafa dokunarak tam ekran yakınlaştırılır; eski soru notları okunabilir.
 4. **Çözümü incele** isteğe bağlıdır. **Cevabımı değerlendir** çözüm açılmasını zorunlu kılmaz.
 5. Çözemedim / Zorlandım / Rahat için bir sonraki tekrar aralığı **kaydetmeden önce** görünür.
@@ -15,6 +15,7 @@
 6. **Sona bırak** soru sırasını değiştirir, XP/tekrar oluşturmaz. Çözüm daha önce açılmışsa işaret
    korunur; soruyu sona bırakıp bağımsız bonusunu yeniden elde etmek mümkün değildir.
 7. **Mola** süreyi durdurur. Uygulama arka plandayken ve tam ekran görsel açıkken de süre artmaz.
+   Tam ekran ölçümü kısmi yapar; referansa katılmaz. Değerlendirme/kaydetmede süre dondurulur.
    Süre puanı veya hız cezası yoktur.
 8. Son sorudan sonra mevcut karne açılır. Yeni rozetler tam ekran ve sırayla kutlanır.
 
@@ -75,17 +76,20 @@ geçmişten türetme** seçildi. Bu v1.2.0 mimari revizyonudur:
 - `TekrarKurali` v1 fonksiyonu ve testleri eski davranışın referansı olarak kalır.
 - Eski tekrarlar yeniden yazılmaz. Yeni kayıtlar `algoritma_surumu = 2` kullanır.
 - `TekrarKaydi` artık zaten tabloda olan algoritma sürümü ve zaman damgasını domain'e taşır.
-- Room v3 / ZIP v3 değişmez. v2 algoritma kaydının export → restore turu ayrı test edilir.
-- Önceki şartnamedeki v4 migration/yedek planı bu sürüm için **uygulanmadı ve gerekmiyor**.
+- v1.2/v1.3 algoritma durumu için şema değişmemişti. P2 ölçümleri geçmişten türetilemediğinden
+  v1.4.x’te **Room/ZIP v4 uygulandı**; v2/v3 yedek okuma korunur. Algoritma hâlâ v2’dir.
 
 ## Kapanma, çıkış ve devam
 
-`OdakOturumuDeposu` yalnız oturum ID'si, sıralı soru ID'leri, konum, sonuçlar ve çözüm açma
-işaretlerini cihazda tutar; fotoğraf/not kopyalamaz. Kalıcı tekrarın tek kaynağı Room'dur.
+`OdakOturumuDeposu` oturum/soru/deneme ID'leri, konum, sonuçlar, çözüm açma ve soru bazında
+birikmiş ölçüm/kalite/seçim bilgisini cihazda tutar; monotonik başlangıç, fotoğraf/not kopyalamaz. Kalıcı tekrarın tek kaynağı Room'dur.
 
-- Sonuç Room'a yazıldıktan sonra devam noktası kaydedilir.
-- Uygulama bu iki adım arasında kapanırsa kurtarma, oturum başlangıcından sonra yazılmış Room
-  kayıtlarını kontrol eder ve konumu ilerletir. İkinci XP/tekrar yazmaz.
+- Aktif ön planda yaklaşık 5 saniyede bir ve geçişlerde IO checkpoint alınır.
+- Çözüm gösterilmeden önce açma işareti en güncel snapshot ile kalıcılaştırılır.
+- Sonuç + ölçüm + soru planı atomik Room kaydıdır; devam noktası bunun ardından ilerler.
+- Uygulama bu iki adım arasında kapanırsa kurtarma deneme/oturum kimliğiyle Room kaydını eşleştirir;
+  ilk soru checkpoint'i eksik ve duvar saati geri alınmış olsa da tamamlanan tekrar tanınır.
+  Eski kimliksiz kayıtlarda tarih kontrolü sürer. İkinci XP/tekrar yazılmaz.
 - Bilinçli çıkıştan sonra Bugün/Filtreli sekmesinde **Yarım kalan oturuma dön** bulunur.
 - Süreç yeniden başlarsa devam noktası yüklenir; eksik/silinmiş sorular ayıklanır.
 - Bitmiş oturum, kullanıcı karneden ayrılıncaya kadar kurtarılabilir. Bu, kalıcı geçmiş karne
@@ -95,8 +99,10 @@ işaretlerini cihazda tutar; fotoğraf/not kopyalamaz. Kalıcı tekrarın tek ka
   recovery işaretleri kaldırılmadan temizlenir. Commit öncesi başarısız girişim/rollback eski
   devam noktasını korur; temizlik başarısızsa startup recovery sınırı kapanmaz.
   Rozet/hedef/format tercihleri cihaz-yereldir.
-- Değerlendirme alanına otomatik kaydırma ortak hareket politikasına uyar. Bu değişiklik
-  sayaç doğruluğu veya süre kalıcılığı eklemez; bunlar Gelişim Planı'nın P2 paketindedir.
+- Değerlendirme alanına kaydırma ortak hareket politikasına uyar. P2 ölçer tick değil gerçek
+  monotonik farkları toplar; yeni süreçte bilinmeyen zaman eklenmez, ölçüm kısmi olur.
+- Gün/saat dilimi/geçmiş/profil değişirse önizleme yenilenir; görünmeyen yeni tarih sessizce kaydedilmez.
+- Ölçüm ve P3 profil sözleşmesi: [OLCUM_VE_PROFILLER.md](OLCUM_VE_PROFILLER.md).
 
 ## Doğrulama ve sınırlar
 

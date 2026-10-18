@@ -1,4 +1,4 @@
-# İlerleme, rütbe ve rozetler — v1.3.0
+# İlerleme, rütbe ve rozetler — v1.4.x
 
 Kod: `domain/seviye`, `domain/karne/Rozet.kt`, `data/ilerleme/RozetHizmeti.kt`,
 `data/seviye/SeviyeHizmeti.kt`. Bu belge uygulanan kuralları anlatır; cihaz performansı ölçülmüş değildir.
@@ -19,7 +19,7 @@ kontrol listesinde ayrıca doğrulanmalıdır.
   dökümü isteğe bağlı açılır; ilk ekran bütün galeriyi çizmez.
 - **Emek ≠ öğrenme:** XP çalışma kaydıdır. Ders pekişmesi mevcut tekrar planından türetilen
   göstergedir, sınav başarısı değildir. 7 günlük grafikte soru adedi vardır; gecikmiş kayıtlar
-  dahil değildir. Süre, kaynak/konu başarısı ve kişisel profil sayısı üretilmez.
+  dahil değildir. Kaynak/konu başarısı veya genel yetenek puanı üretilmez; P3 süre referansı ayrı bölümde gösterilir.
 - `SeviyeDurumuUi`: yükleniyor, hata/yeniden dene, tekrar verisi yetersiz, hazır. Boş arşivden
   soru eklemeye; sorusu olup tekrarı olmayan kullanıcı Bugün'e yönlendirilir.
 - XP ilk gösterimde gerçek değerden başlar. Yalnız açık ekrandaki gerçek değişiklik animasyon
@@ -31,6 +31,17 @@ kontrol listesinde ayrıca doğrulanmalıdır.
 - İlerleme özeti tek Room transaction'ında okunur; sahiplik, gün ve hedef snapshot'ı galeri/XP
   için ortaktır. Günlük hedef değişikliği başka tekrar gerektirmeden özeti/rozetleri yeniler.
 - [Debug-only tasarım önizlemeleri](ui/p1/README.md) gerçek cihaz kabulü değildir.
+
+## P2/P3: ölçüm kapsamı ve kişisel süre referansı
+
+- Son 60 günün tam/kısmi/ölçülmemiş/geçersiz kapsamı ve tarih aralığı gösterilir.
+- Yalnız yeterli veride dersin soru başına medyanı, çeyrekleri ve MAD'ı görünür; az veride
+  “ölçüm birikiyor” ve örneklem eşikleri vardır. Eski kayıtlardan süre uydurulmaz.
+- Yardımsız Rahat referansı ve tüm sonuçlardan aktif iş yükü ayrı tutulur. Aynı kolay soru
+  çok tekrarlanınca profili ele geçiremez. Bu, genel sınav hızı veya öğrenme/zekâ puanı değildir.
+- Konu/kaynak profili ve aynı derse dönüş P3 altyapısında vardır; kaynak başarı sıralaması ve
+  yeni çalışma önerisi panosu P5'e bırakılmıştır. Profil tekrar tarihini veya XP'yi değiştirmez.
+- Sözleşme/test sınırları: [OLCUM_VE_PROFILLER.md](OLCUM_VE_PROFILLER.md).
 
 ## XP: eklemek de çalışmak da değerli
 
@@ -132,6 +143,7 @@ Teknik koşulların kaynağı `RozetKurallari`; galeri ilerlemesi ile ödül ko�
 
 ## Veri sınırı
 
-Room **v3**, taşınabilir ZIP **v3** (v2 içe alma korunur). Yeni tablo veya kolon yoktur. Rozetler,
+Room **v4**, taşınabilir ZIP **v4** (v2/v3 içe alma korunur). Yeni ölçüm/bağlam tablosu vardır;
+eski satır ve tarihler değişmez. Tamamlanmış ölçümler yedeklenir. Rozetler,
 hedef, format tercihi ve yarım oturum cihaz-yerel prefs'tedir; ZIP'e girmez. Çözme sistemi:
 [ODAK_STUDYOSU.md](ODAK_STUDYOSU.md). Test kanıtı: [DERLEME_RAPORU.md](DERLEME_RAPORU.md).

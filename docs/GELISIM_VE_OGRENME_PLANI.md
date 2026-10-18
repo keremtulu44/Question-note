@@ -1,17 +1,17 @@
 # Yanlış Defteri — Premium deneyim ve kişiselleşen öğrenme sistemi
 
 **Tarih:** 2026-10-18
-**Durum:** P0/P1 uygulandı ve v1.3.0 ile yayımlandı; CI `39131225744` 157/0. Fiziksel cihaz kabulü bekler. P2/P3 kodlandı; yeni CI doğrulaması bekleniyor. P4–P6 öneri olarak kalır.
+**Durum:** P0–P3 uygulandı; v1.4.1/code17, CI `39136991000` **221/0/0/0**, Release/imza/digest doğrulandı. Fiziksel cihaz kabulü açık. P4–P6 öneri olarak kalır.
 **Başlangıç:** v1.2.0 / code 14, Room v3, ZIP v3, tekrar algoritması v2. Başlangıç CI kanıtı: `39067624050`, 130 başarılı test; fiziksel cihaz kabulü ayrı ve bekliyor.
 
-## P0/P1 uygulama notu — 2026-10-18
+## Tarihsel P0/P1 uygulama notu — v1.3.0 / 2026-10-18
 
 - **P0:** Canlı karne rozet sayısı; sınırlandırılmış otomatik tekrar/manual yenileme; tek DB snapshot’ı ve ortak sahiplik/hedef girdisi; hedef değişince XP/rozet yenileme.
 - **Restore:** Devam noktası yalnız doğrulanmış commit sonrasında, kalıcı kurtarma işaretleri kaldırılmadan temizlenir. Başarısız ön doğrulama/rollback oturumu korur; temizleme hatasında işaretler kalır. Aynı soru ID’leri kullanılsa bile eski oturum başarıyla değişmiş arşive taşınmaz.
 - **P1:** Stateless durum modeli; petrol/lacivert-bakır rütbe kartı; gerçek başlangıç XP’si; kompakt/adaptif sayılar; emek ile pekişme ayrımı; kapalı açılan koleksiyon; mevcut gerçek ders/plan verileri; boş/hata/yenileme eylemleri.
 - **Hareket:** Canlı sistem ölçeği gözlemi, ortak politika, sonlu animasyonlar. Hareket kapalıyken değerler/eylemler kaybolmaz. Odak’taki otomatik değerlendirme kaydırması da bu politikaya uyar; sayaç/ölçüm mantığı değişmedi.
 - **Örnek veri:** Yalnız `src/debug` Preview/test fixture’larında; release veri yolunda yok. Native Robolectric görüntüleri sentetik önizlemedir, fiziksel cihaz kanıtı değildir.
-- **Değişmeyenler:** Room/ZIP v3, tekrar v2, XP katsayıları, 15 rütbe/30 rozet kuralları. Süre kalıcılığı, kişisel profiller, v3 motor, kaynak/konu analizleri **uygulanmadı**.
+- **O aşamada:** Room/ZIP v3, tekrar v2, XP katsayıları ve 15 rütbe/30 rozet kuralları korundu. Süre ve kişisel profiller sonraki P2/P3 teslimine bırakıldı; aşağıdaki yeni uygulama notu geçerlidir.
 - **Doğrulama:** CI `39131225744`: 157 test / 0 başarısız / 0 hata / 0 atlanan; Release/imza/sertifika ve yayımlanan APK digest eşleşmesi başarılı. Eski 130 + 27 yeni test. [Sentetik önizlemeler](ui/p1/README.md) ve sanal animasyon zamanı fiziksel cihaz/performans kabulü değildir.
 
 ## P2/P3 uygulama notu — 2026-10-18
@@ -23,7 +23,8 @@
 - Sürümlü 60 günlük kişisel profiller: yardımsız Rahat ve tüm sonuçlar için iş yükü ayrı; soru başına medyan, çeyrekler/MAD; 20/10/5 ve 30/15/7 eşikleri; mevcut deneme hariç; konu/kaynaktan aynı derse güvenli dönüş.
 - İlerleme'de gerçek ölçüm kapsamı ve ders referansı; az veride sayı uydurulmaz. Kaynak/konu bağlamı kayıt anından alınır. Genel sınav hızına/zekâya dair iddia yoktur.
 - **P4/v3 motor, gölge karar, P5 kaynak karşılaştırması ve yeni çalışma önerileri uygulanmadı.** Tekrar algoritması ve XP/rozet/rütbe kuralları değişmedi.
-- Yerel statik kontroller tamamlandı; derleme/test/cihaz kanıtı henüz bu paketler için yok. Yeni CI sonucu sonrası güncellenecek.
+- **Doğrulama:** v1.4.0 ana paket CI `39135928734` 217/0; son v1.4.1 CI `39136991000` **221/0/0/0**. Önceki 157 + 64 yeni test; Release/imza/sertifika ve asset digest eşleşti. Gerçek cihaz/performans kabulü ayrıca bekler. [Uygulanan sözleşme](OLCUM_VE_PROFILLER.md).
+- Son güvence: çözüm gösterilmeden en güncel açma işareti kalıcıdır; ilk checkpoint gecikse/duvar saati geri alınsa da commit, deneme/oturum ID’siyle uzlaştırılır.
 
 ## 1. Hedef ve ana karar
 
@@ -70,7 +71,7 @@ Görsel prototip erken hazırlanabilir. Gerçek süre grafikleri, kaynak profill
 
 ## 4. Mimari ve ortak sözleşmeler
 
-Önerilen yeni parçalar; adları uygulama sırasında kesinleştirilecek, bugün mevcut API değiller:
+P2/P3’te `AktifSureOlcer`, `TekrarDenemesi`, `SureOlcumu`, `TekrarOnizlemesi` ve kişisel profiller uygulandı. Ortak v2 önizleme/kayıt servisi `RoomSoruRepository` içindedir. Aşağıdaki ayrı v3 karar katmanı ve geniş `GelisimOzeti` hâlâ P4/P5 önerisidir:
 
 ```text
 Odak ekranı / eski soru ayrıntısı
@@ -137,14 +138,14 @@ Sayaç artırmak yerine `SystemClock.elapsedRealtime()` tabanlı segment farklar
 
 ### 6.1 Tercih: tekrar başına bir ek kayıt
 
-Önerilen `tekrar_olcumleri` tablosu, `tekrar_id` üzerinden `tekrarlar` ile 0..1 ilişki kurar. Eski satırlar olduğu gibi kalır; yeni tekrarlar süre ölçülmemiş olsa da bağlam kaydı alabilir.
+Uygulanan `tekrar_olcumleri` tablosu, `tekrar_id` üzerinden `tekrarlar` ile 0..1 ilişki kurar. Eski satırlar olduğu gibi kalır; yeni tekrarlar süre ölçülmemiş olsa da bağlam kaydı alabilir.
 
 | Alan grubu | İçerik |
 |---|---|
 | Kimlik | `tekrar_id` PK/FK (silmede cascade), benzersiz `deneme_id`, isteğe bağlı `oturum_id` |
 | Ölçüm | Nullable `deneme_aktif_ms`, `inceleme_aktif_ms`, kalite/nedenler, `olcum_surumu` |
 | Kayıt anı bağlamı | Ders/konu kimliği ve etiketi; normalize kaynak anahtarı ve kaynak etiketi |
-| Karar dayanağı | Sürümlü, boyutu sınırlandırılmış snapshot: profil örneklemi/medyanı, kullanılan nedenler, temel ve aday/final aralık; gölge/etkin modu |
+| Karar dayanağı | Sürümlü, boyutu sınırlandırılmış snapshot: profil örneklemi/medyanı ve v2 temel/final aralık. Aday/gölge/etkin modu P4’e bırakıldı |
 
 Sonuç, tarih ve algoritma sürümünün asıl kaynağı mevcut `tekrarlar` tablosudur. Tam karar geçmişi veya ham saniyelik olay günlüğü ikinci kez depolanmaz. Analiz için aralık/filtre sorgularına gerekli indeksler ve join planı ölçülür.
 
@@ -152,8 +153,8 @@ Sonuç, tarih ve algoritma sürümünün asıl kaynağı mevcut `tekrarlar` tabl
 
 ### 6.2 Sürüm kararları
 
-- Bu yeni ölçümler geçmişten türetilemediği için **Room v4 migration gerekir**. v1.2.0'daki eski “v4 gerekmez” kararı yalnız o sürümün adaptif v2 durumu içindi.
-- Taşınabilir yeni ölçümler için **ZIP v4** önerilir. Room sürümü, ZIP sürümü ve algoritma sürümü ayrı kavramlardır.
+- Bu yeni ölçümler geçmişten türetilemediği için **Room v4 migration uygulandı**. v1.2.0'daki eski “v4 gerekmez” kararı yalnız o sürümün adaptif v2 durumu içindi.
+- Taşınabilir yeni ölçümler için **ZIP v4** uygulandı. Room sürümü, ZIP sürümü ve algoritma sürümü ayrı kavramlardır.
 - `MIGRATION_3_4`; mevcut 1→2→3 zinciriyle beraber 1/2/3→4 yolları test edilir. Yıkıcı migration yok.
 - Eski tekrarlar ve plan tarihleri değişmez. Olmayan ölçümler sıfırla doldurulmaz.
 - Yeni ZIP, ölçümleri/karar snapshot'ını JSON ve yardımcı CSV'de taşır; manifest envanteri, sayı/hash kontrolleri ve FK doğrulaması genişletilir.
@@ -180,7 +181,7 @@ Ham süre silinmez/değiştirilmez. Negatif/taşmış/ölçülmemiş değerler a
 | Ders | 20 | 10 | 5 |
 | Ders içindeki konu veya kaynak | 30 | 15 | 7 |
 
-- İlk hareketli pencere önerisi 60 gün; eşikler tek `ProfilPolitikasi` altında sürümlenir.
+- Uygulanan ilk hareketli pencere 60 gün; eşikler tek `ProfilPolitikasi` altında sürümlenir.
 - Konu/kaynak yetersizse ders profiline dönülür; ders de yetersizse süreye bağlı karar verilmez.
 - Her göstergede tarih aralığı, örneklem ve kapsama yer verilir. Yetersiz grupta “ölçüm birikiyor”; sahte yüzde veya genel hız etiketi yok.
 - İstatistiksel olarak kalibre edilmemiş `%92 güven` gibi değerler kullanılmaz. “Veri dayanağı: yetersiz / sınırlı / yeterli” ve örneklem gösterilir.
@@ -280,14 +281,14 @@ Rütbe kutlaması için kalıcı görülme/kuyruk takibi gerekir. İlk kurulum, 
 
 ## 11. Kod paketleri ve bağımlılıklar
 
-**P0/P1 kod/otomatik test bakımından tamamlandı; fiziksel kabul açık. P2/P3 kodlandı, CI bekleniyor. P4–P6 planlandı, uygulanmadı.** “Bitti” için kodun yazılması değil ilgili kabul kapısının geçilmesi gerekir.
+**P0–P3 kod/otomatik test bakımından tamamlandı; fiziksel kabul açık. P4–P6 planlandı, uygulanmadı.** “Bitti” için kodun yazılması değil ilgili kabul kapısının geçilmesi gerekir.
 
 | Paket | Başlıca görevler / dosyalar | Bağımlılık | Kabul kapısı |
 |---|---|---|---|
 | P0 — Sağlam başlangıç (uygulandı) | Mevcut test tabanı; örnek senaryolar; `KarneEkrani` rozet snapshot tutarlılığı, ödül gözlem hatası/yenileme ve restore sonrası state sınırlarının regresyonları | Yok | Eski davranış doğrulanır; mevcut 130 test korunur, gerçek cihaz bekleyenleri gizlenmez |
 | P1 — Görsel sistem/prototip (uygulandı) | `ui/tema/{Renk,Tipografi}.kt`, yeni `HareketPolitikasi`, `SeviyeEkrani` durum modelleri ve tasarım Preview'ları | P0; P2 ile bağımsız çalışabilir | Yeni/yoğun/verisiz/hatalı durum; koyu tema, büyük yazı, hareket kapalı |
-| P2 — Ölçüm ve veri güvenliği | Yeni `domain/calisma/AktifSureOlcer.kt`, ölçüm modelleri; Odak ve devam deposu; `SoruRepository`/`RoomSoruRepository`; yeni entity/DAO; Database/Provider/Migrations; export/import | P0 | Saat/lifecycle/kurtarma, atomik kayıt, migration ve ZIP roundtrip yeşil; planlar hâlâ v2 |
-| P3 — Kişisel profil | Yeni `domain/analiz/KisiselSureProfili.kt`, `ProfilPolitikasi.kt`, `data/analiz/GelisimHizmeti.kt` ve toplu sorgular | P2 | Az veri, uç değer, aynı soru baskısı, tarihsel bağlam ve soğuk başlangıç testleri |
+| P2 — Ölçüm ve veri güvenliği (uygulandı) | Yeni `domain/calisma/AktifSureOlcer.kt`, ölçüm modelleri; Odak ve devam deposu; `SoruRepository`/`RoomSoruRepository`; yeni entity/DAO; Database/Provider/Migrations; export/import | P0 | Saat/lifecycle/kurtarma, atomik kayıt, migration ve ZIP roundtrip yeşil; planlar hâlâ v2 |
+| P3 — Kişisel profil (uygulandı) | `domain/gelisim/KisiselProfil.kt` içinde politika/hesap; `data/gelisim/ProfilHizmeti.kt`, `TekrarOlcumDao` toplu sorguları ve `SureProfiliKarti` | P2 | Az veri, uç değer, aynı soru baskısı, tarihsel bağlam ve soğuk başlangıç testleri |
 | P4 — Karar v3 / gölge | Yeni `domain/repeat/UyarlanabilirTekrarKurali.kt`, ortak karar servisi ve sürüm yönlendirme; Odak önizlemesi | P3 | Önizleme=yazma; çift ceza yok; eski sonuçlar aynı; gölgede tarih değişmiyor |
 | P5 — Gerçek veriyle arayüz/eylem | `SeviyeHizmeti`, `SeviyeEkrani`, yeni `ui/ilerleme` bileşenleri; kaynak/konu detayları; filtre ve root route; rütbe kutlama host'u | P1 + P3; aday motor açık olmak zorunda değil | Gerçek veri/boş durum; kaynak veya konudan doğru ve uygun oturuma geçiş |
 | P6 — Etkinleştirme ve kalite | Politika modları; sorgu/cache iyileştirmesi; erişilebilirlik; release/device ölçümü; belgeler | P4 + P5 | Tüm regresyonlar, cihaz kanıtı, imza ve uyumluluk; karar katmanı kontrollü açılır |

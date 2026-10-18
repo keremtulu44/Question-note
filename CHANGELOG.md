@@ -2,12 +2,14 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
-## [1.4.1] — 2026-10-18 · son doğrulama bekleniyor
+## [1.4.1] — 2026-10-18
 
 - Çözüm, açılma işaretinin en güncel devam noktasına kalıcı yazılmasından sonra gösterilir. Geciken eski IO yazısı onay sayılmaz; sahiplik/oturum sınırı korunur.
 - İlk soru checkpoint'i yetişmemiş olsa bile commit sonrası kurtarma oturum ID'siyle yapılır; cihazın duvar saati geri alınsa da kayıt kaybolmuş sanılmaz.
 - Hızlı seçim/çözüm/kaydetme etkileşimlerinde güncel dondurulmuş istek kontrol edilir. Ölçümsüz ayrıntı ekranı eski bir başka sorunun saveable kimliğini devralmaz.
-- Room/ZIP v4 ve tekrar v2 aynı. Ana v1.4.0 paketi CI `39135928734` ile 217/0 doğrulandı; bu ek güvencelerin son CI sonucu bekleniyor.
+- Room/ZIP v4 ve tekrar v2 aynı. Ana v1.4.0 paketi CI `39135928734` ile 217/0 doğrulandı; ek güvencelerle son CI `39136991000`: **221/0/0/0**; Release, apksigner ve sertifika başarılı.
+
+- [İmzalı v1.4.1 APK](https://github.com/keremtulu44/Question-note/releases/tag/v1.4.1), 10.651.871 bayt; SHA-256 `9634c5bb59ea574f27c101a8332ed2689719ddf95e31a5a102b6165e48180057`. Yayımlanan asset digest'i CI ile eşleşti. Fiziksel cihaz kabulü bekler.
 
 ## [1.4.0] — 2026-10-18
 

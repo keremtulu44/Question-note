@@ -1,6 +1,6 @@
 # Test Kontrol Listesi
 
-> **v1.3.0 / P0–P1:** CI `39131225744` **157 testle başarılı**; Release, imza ve asset SHA-256 doğrulandı.
+> **v1.4.1 / P0–P3:** CI `39136991000` **221 testle başarılı**; Release, imza ve asset SHA-256 doğrulandı.
 > Beş native Compose çizimi sentetik önizlemedir; fiziksel test değildir. Aşağıdaki fiziksel cihaz satırları otomatik olarak işaretlenmez.
 
 
@@ -15,13 +15,43 @@
 > ZIP yol güvenliği) ve **Robolectric** (şema/migration testleri). Emülatör yalnızca gerçekten
 > gerekirse kullanılır; asıl kabul testleri gerçek cihazda yapılır.
 
-Son güncelleme: 2026-10-18. **v1.3.0 (versionCode 15)** yayımlandı. CI `39131225744`: 157 test,
+Son güncelleme: 2026-10-18. **v1.4.1 (versionCode 17)** yayımlandı. CI `39136991000`: 221 test,
 0 başarısız/hata/atlanan; Release/apksigner/sertifika ve asset SHA-256 eşleşmesi doğrulandı.
 Fiziksel cihaz kabulü henüz tamamlanmadı. Aşağıdaki tarihsel kullanıcı işaretleri korunur;
 yeni testlerin yeşil olması geçmişteki cihaz bekleyenlerini tamamlanmış yapmaz.
 
 
 ---
+
+## P2/P3 — ölçüm, uyumluluk ve kişisel referans
+
+| Test | Sorumlu | Durum |
+|---|---|---|
+| 157-test tabanı + 64 yeni = 221/0/0/0; Release, imza ve asset digest eşleşmesi | YZ / CI `39136991000` | [x] |
+| Tick olmadan monotonik toplam; mola/loading/arka plan; 2 faz, değerlendirmede donma, tam ekran kısmi | YZ / saf saat testleri | [x] |
+| Döndürme benzetimi, sona bırakma, süreç/reboot benzetimi; eski başlangıç kullanılmaz, bilinmeyen segment eklenmez | YZ / saf model + prefs | [x] |
+| Aynı deneme retry, aynı gün, çelişen ID; kayıt/ölçüm/plan rollback ve yeniden deneme | YZ / Room | [x] |
+| Gün, saat dilimi, yazma sırasında saat atlaması, bağlam/profil değişiminde açık önizleme yenileme | YZ / enjekte Clock + Room | [x] |
+| İlk checkpoint yokken/duvar saati geriyken oturum ID'siyle commit kurtarma; başka oturumu sahiplenmeme | YZ / oturum modeli | [x] |
+| En güncel çözüm işareti yazılmadan içerik açılmaz; eski/yanlış owner veya superseded yazı izin değildir | YZ / prefs + Compose | [x] |
+| Gerçek v3 schema JSON'u ile 3→4; mevcut 1/2→4 zinciri; eski tarih/sonuç/süre-null korunması | YZ / Room migration | [x] |
+| Gün/bağlam sorgusu planında yeni indeksler; soru silinince ölçüm cascade ve profilsiz cache | YZ / SQLite + Room | [x] |
+| ZIP v2/v3 import, v4 kalite/bağlam/karar tam tur; CSV formül koruması; checksum geçerli olsa da bozuk ölçüm reddi | YZ / ZIP testleri | [x] |
+| Negatif/taşmış/metin süre, bilinmeyen kalite/sürüm, yetim/çift deneme, bozuk/büyük snapshot | YZ / ZIP testleri | [x] |
+| Mevcut deneme hariç; 20/10/5 ve 30/15/7; tek soru/gün; uç değer, MAD=0, soru başına ağırlık | YZ / saf profil | [x] |
+| Yardımsız/iş yükü ayrımı, eksik/kısmi/sıfır hariç, 60 gün, dersler karışmaz, topic/source fallback | YZ / saf profil + Room | [x] |
+| Konu/kaynak değişince eski snapshot etiketi korunur; eski kayıtta hayalî süre/bağlam yok | YZ / Room | [x] |
+| Boş/az verili profil; %200 koyu; gerçek Odak → dondur → seçim → atomik ölçüm kaydı | YZ / Compose + Room | [x] |
+| v1.4.1'i kaldırmadan güncelle; eski arşiv/rozetler ve yarım oturum gerçek telefonda korunur | KULLANICI / S24 FE | [ ] |
+| Mola, kilit, arka plan, bildirim perdesi/çoklu pencere, döndürme; süre/faz sınırları | KULLANICI / S24 FE | [ ] |
+| Gerçek süreç öldürme/reboot; son bilinmeyen bölüm kısmi, çözüm işareti ve commit kurtarması | KULLANICI / S24 FE | [ ] |
+| Tam ekran zoom, TalkBack, yatay/%200 yazı, jest/3 düğmeli nav | KULLANICI / S24 FE | [ ] |
+| Gerçek düşük depolama, başarısız kayıt/restore; SAF/bulut aktarımı | KULLANICI / S24 FE | [ ] |
+| 1.000 soru/20.000 tekrar ölçeğinde gecikme/bellek/frame ölçümü | YZ + KULLANICI / henüz çalıştırılmadı | [ ] |
+
+Ana v1.4.0 paketi `39135928734` ile 217/0; son sertleştirme v1.4.1 ile 221/0 doğrulandı.
+Sanal saat ve Robolectric süreci gerçek cihaz/süreç öldürme testi diye sunulmaz. P4 v3/gölge
+karar ve P5 kaynak/konu panosu/öneri eylemleri bu teslimde yoktur.
 
 ## P0/P1 — yeni regresyonlar ve ayrı cihaz kabulü
 
@@ -41,8 +71,8 @@ yeni testlerin yeşil olması geçmişteki cihaz bekleyenlerini tamamlanmış ya
 | Sistem animasyon ayarını açık ekranda değiştir; XP/karne/kutlama/otomatik kaydırmayı kontrol et | KULLANICI / S24 FE | [ ] |
 | Restore sırasında kesinti, devam noktası, arka plan/süreç ölümü; gerçek performans | KULLANICI / S24 FE | [ ] |
 
-P2 süre ölçümü/kalıcılığı, Room/ZIP v4, kişisel profil, v3 motor ve kaynak/konu analizi bu
-kabulün parçası değildir. Önizlemeler: [ui/p1](ui/p1/README.md). Aşağıdaki tarihsel cihaz
+Bu tarihsel P0/P1 tablosu ölçüm/kişisel profil kabulü değildir; bunlar yukarıdaki P2/P3 tablosunda
+izlenir. V3 motor ve kaynak/konu karşılaştırma panosu hâlâ ileriki paketlerdir. Önizlemeler: [ui/p1](ui/p1/README.md). Aşağıdaki tarihsel cihaz
 kayıtlarının işaretleri korunur; bu sürümün otomatik testleri onları tamamlamış saymaz.
 
 ## Aşama 1 — Derleme ve güncelleme zinciri

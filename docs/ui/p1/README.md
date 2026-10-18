@@ -3,7 +3,8 @@
 Bu görüntüler **telefon ekran görüntüsü değildir**. `IlerlemeGorselOnizlemeTest`, gerçek Compose
 bileşenlerini Robolectric'in native grafik motorunda çizer. Üstteki **ÖRNEK VERİ** etiketi
 kasıtlıdır: 72 soru / 144 tekrar gibi sayılar yalnız `src/debug` fixture'ına aittir; APK'nın
-release veri yolunda örnek soru, uydurma süre veya kişisel öğrenme analizi yoktur.
+release veri yolunda örnek soru veya uydurma süre yoktur. P2/P3 ile eklenen gerçek süre
+referansları bu P1 örneklerinde gösterilmez; yalnız gerçek ölçüm biriktikten sonra oluşur.
 
 ## Görünümler
 

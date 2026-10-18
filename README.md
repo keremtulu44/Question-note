@@ -25,8 +25,11 @@ cevaplamak ve çözümü öğrenme sürecinden ayrı saklamaktır.
 
 ## Durum
 
-**v1.3.0 yayımlandı** (versionCode 15). [CI `39131225744`](https://github.com/keremtulu44/Question-note/actions/runs/39131225744): **157 test geçti**, Release derlemesi, imza ve sertifika doğrulaması başarılı.
+**v1.4.1 yayımlandı** (versionCode 17). [CI `39136991000`](https://github.com/keremtulu44/Question-note/actions/runs/39136991000): **221 test geçti**, Release derlemesi, imza ve sertifika doğrulaması başarılı.
 
+- **P2/P3:** Monotonik deneme/inceleme ölçümü, dondurulan değerlendirme, güvenli devam ve atomik
+  tekrar kaydı. Yeterli yeni ölçümde kişisel süre referansı; eski kayıttan hayalî süre yok.
+  Ders için 20 ölçüm/10 soru/5 gün birlikte aranır. Profil, tekrar v2 tarihini veya XP'yi değiştirmez.
 - **P0/P1:** Yeni petrol/lacivert-bakır İlerleme ekranı; rütbe odağı, gerçek XP, uyarlanan sayılar,
   açılır koleksiyonlar, boş/yükleniyor/hata durumları ve sistem ayarına uyan sonlu hareket.
   Karne sahiplik sayımı, ödül gözlemi ve restore/devam noktası sınırları güçlendirildi.
@@ -40,12 +43,13 @@ cevaplamak ve çözümü öğrenme sürecinden ayrı saklamaktır.
 - **Adaptif tekrar v2:** geçmişten kolaylık hesabı, ilerleyen Zorlandım aralığı, gecikme düzeltmesi
   ve zor soruda destekleyici yönlendirme. Bu öz değerlendirmedir; otomatik cevap doğrulama değildir.
 - XP ekleme ve çözme emeğinden gelir. Bağımsız = yalnız **Rahat + çözüm açılmamış**.
-- Room **v3** ve ZIP **v3** değişmedi. Hesap/sunucu/abonelik yok; çevrimdışı çalışır.
+- **Room/ZIP v4:** veri koruyan 1/2/3→4 geçişi; v2/v3 yedek okuma sürer. Yeni ölçümler ve kayıt
+  bağlamı yedeklenir. Hesap/sunucu/abonelik yok; çevrimdışı çalışır.
 
 **Cihaz kabulü ayrıdır:** v1.0.3 ana akış adımlarını kullanıcı geçti bildirdi. v1.0.4 tekrar geçmişi,
 v1.0.5 katalog/ZIP akışı, v1.0.6 form yenilemesi, v1.0.7 ders bazında konu ekleme, v1.0.8 filtreli
 çalışma, v1.0.9 düzeltmeleri, v1.0.10 karne/rozet/hedef akışı ve v1.1.x alt menü/seviye/ayarlar/silme
-ile v1.2.0 odak/profil/rozet ve v1.3.0 P0/P1 yenilemeleri henüz cihazda kabul edilmedi. SAF/Drive ve fotoğraf okunabilirliği de bekliyor. v1.0.2 “3.
+ile v1.2.0 odak/profil/rozet, v1.3.0 P0/P1 ve v1.4.x P2/P3 yenilemeleri henüz cihazda kabul edilmedi. SAF/Drive ve fotoğraf okunabilirliği de bekliyor. v1.0.2 “3.
 turu denemedim” ifadesinin checklist eşlemesi hâlâ teyitsiz; ayrıntı
 [TEST_KONTROL_LISTESI.md](docs/TEST_KONTROL_LISTESI.md) içinde.
 ---
@@ -66,7 +70,8 @@ turu denemedim” ifadesinin checklist eşlemesi hâlâ teyitsiz; ayrıntı
 | [docs/YEDEK_FORMATI.md](docs/YEDEK_FORMATI.md) | Yedek ZIP yapısı, manifest, geri yükleme kuralları |
 | [docs/TEST_KONTROL_LISTESI.md](docs/TEST_KONTROL_LISTESI.md) | Kabul kriterleri ve test sorumluları |
 | [docs/FIKIR_ALMA_METNI.md](docs/FIKIR_ALMA_METNI.md) | Dışarıdan görüş almak için tek başına okunabilen proje tanıtım metni |
-| [docs/GELISIM_VE_OGRENME_PLANI.md](docs/GELISIM_VE_OGRENME_PLANI.md) | Yeni geliştirme planı: premium arayüz, süre ölçümü, kişisel profiller, karar motoru ve kabul kapıları (P0/P1 uygulandı; P2–P6 plan) |
+| [docs/GELISIM_VE_OGRENME_PLANI.md](docs/GELISIM_VE_OGRENME_PLANI.md) | Yeni geliştirme planı: premium arayüz, süre ölçümü, kişisel profiller, karar motoru ve kabul kapıları (P0–P3 uygulandı; P4–P6 plan) |
+| [docs/OLCUM_VE_PROFILLER.md](docs/OLCUM_VE_PROFILLER.md) | P2/P3 süre, kalite, atomik kayıt, kişisel referans ve v4 uyumluluk sözleşmesi |
 | [docs/ui/p1/README.md](docs/ui/p1/README.md) | Gerçek Compose bileşenlerinden örnek verili önizlemeler; cihaz testi değildir |
 | [docs/KODLAMA_PLANI.md](docs/KODLAMA_PLANI.md) | Kodlama sırası, hedef dosya yapısı, imzalama kurulumu, test stratejisi |
 | [docs/IMZALAMA.md](docs/IMZALAMA.md) | İmzalama anahtarı prosedürü ve sertifika parmak izi (değerler değil, parmak izi) |
@@ -76,9 +81,9 @@ turu denemedim” ifadesinin checklist eşlemesi hâlâ teyitsiz; ayrıntı
 ## Kullanım / APK erişimi
 
 İmzalı APK'lar GitHub [Releases](https://github.com/keremtulu44/Question-note/releases) bölümünde.
-[v1.3.0 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.3.0/yanlis-defteri-1.3.0.apk).
+[v1.4.1 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.4.1/yanlis-defteri-1.4.1.apk).
 
-APK: 10.574.047 bayt. SHA-256: `a232e7759e8f98398449295f32e524565d9d917bb5e3644881908a8f85a96b8f`. CI raporu ile GitHub asset digest eşleşiyor.
+APK: 10.651.871 bayt. SHA-256: `9634c5bb59ea574f27c101a8332ed2689719ddf95e31a5a102b6165e48180057`. CI raporu ile GitHub asset digest eşleşiyor.
 Mevcut uygulamayı **kaldırmadan** üzerine kur; eski kayıtların korunduğunu doğrula. Alt menüdeki beş
 sekmeyi gez; **İlerleme** sekmesinde rütbe amblemini, XP çubuğunu, rozet galerisini ve tahmini kontrol et.
 **Ayarlar**'da günlük hedefi değiştir, yedek al. Konu ve kaynak/neden silmeyi dene (kullanımdaysa

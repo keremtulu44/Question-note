@@ -1,9 +1,9 @@
-# Veri Modeli (Room şema v3)
+# Veri Modeli (Room şema v4)
 
-> Room v3; soru kaynak konumu, global kaynak/yanlış nedeni kataloğu ve kesintiye dayanıklı geri
-> yükleme işaretini içerir. v1→v2→v3 zinciri mevcut soru/not verisini korur; v2→v3 kaynakları ve özel
-> nedenleri kataloğa taşır. CI run `39037429421` migration testlerini geçti ve v3 schema JSON üretti.
-> Son güncelleme: 2026-10-17.
+> Room v4: önceki soru/katalog/recovery şemasına 0..1 tekrar ölçümü ve tarihsel bağlam eklenir.
+> `MIGRATION_3_4` yalnız yeni tablo/indeks ekler; eski tekrarlar, plan tarihleri ve notlar değişmez.
+> 1→2→3→4 zinciri korunur. Güncel CI kanıtı `DERLEME_RAPORU.md` içinde; fiziksel cihaz kabulü ayrıdır.
+> Son güncelleme: 2026-10-18.
 
 Veritabanı: **Room / SQLite**. Yerel veri tek doğruluk kaynağıdır.
 
@@ -17,7 +17,7 @@ Veritabanı: **Room / SQLite**. Yerel veri tek doğruluk kaynağıdır.
 | Veritabanında **dosya yolu tutulmaz**, yalnızca dosya adı tutulur | Görseller her zaman uygulamanın kalıcı klasörüne göre çözülür; yeni telefonda geri yükleme bozulmaz |
 | Kayıt anları: **epoch milisaniye** (UTC) | Anlık zaman damgası |
 | Planlanan/gerçekleşen tekrar tarihleri: **yerel takvim günü** (epoch'tan bu yana gün sayısı, kayıt anında cihazın yerel tarihinden hesaplanır) | Saat dilimi değişse bile geçmişteki tarih kendiliğinden değişmez |
-| Ders/konu silme = **arşivleme** | Mevcut soruların ilişkileri bozulmaz |
+| Kullanılan ders/konu silinmez; arşivlenebilir. Kullanılmayan konu Ayarlar’dan silinebilir | Mevcut soruların ilişkileri bozulmaz |
 | Yabancı anahtarlar **açıkça tanımlanır**; silme davranışı `CASCADE` ile soru silmeyi tetiklemez | Beklenmeyen veri kaybını engeller |
 | **Türetilmiş alanlar ham geçmişin yerini almaz** | Ham `tekrarlar` kayıtları her zaman doğruluk kaynağıdır |
 | Tablo/kolon adları ASCII Türkçe | Kod okunabilirliği ve belge uyumu |
@@ -132,6 +132,25 @@ Liste kaydırması ölçümde yetersiz kalırsa bir görsel önbelleği eklenmes
 > `algoritma_surumu` sayesinde aralık kuralı ileride değiştirilse bile eski kayıtlar doğru
 > yorumlanır; geçmişi yeniden yazmak veya silmek gerekmez.
 
+### `tekrar_olcumleri` (v4)
+
+| Alan | Tip | Sözleşme |
+|---|---|---|
+| `tekrar_id` | TEXT PK/FK | `tekrarlar.id`; silmede CASCADE; tekrar başına 0..1 |
+| `deneme_id` | TEXT UNIQUE | Aynı denemeyi ikinci kez kaydetmeme kimliği |
+| `oturum_id` | TEXT nullable | Duvar saati değişse de commit–checkpoint uzlaştırma |
+| `deneme_aktif_ms`, `inceleme_aktif_ms` | INTEGER nullable | Gerçek aktif segmentler; yoksa null, sıfırla backfill yok |
+| `kalite`, `nedenler_json`, `olcum_surumu` | TEXT/TEXT/INTEGER | YOK/TAM/KISMI/GECERSIZ; nedenler; sürüm 1 |
+| `ders_id`, `ders_adi`, `konu_id`, `konu_adi` | TEXT; konu nullable | Kayıt anı kimlik/etiket; güncel katalog FK'sı değil |
+| `kaynak_anahtari`, `kaynak_etiketi` | TEXT nullable | NFC/Türkçe normalizasyon; tarihsel kaynak |
+| `karar_json` | TEXT | ≤16 KiB; sürüm 1, V2 planı, gün/saat dilimi ve profil dayanağı |
+
+Tekrar, ölçüm ve yeni v2 planı aynı Room transaction'ındadır. Eski satırların ek kaydı yoktur;
+ölçümsüz yeni kayıt `YOK` ve nullable süreyle bağlam alabilir. İndeksler: benzersiz deneme ID'si,
+`(ders_id, konu_id)`, `(ders_id, kaynak_anahtari)` ve tekrarlar üzerinde `gun`.
+Profiller bu verilerden türetilir; kalıcı ikinci bir profil/XP tablosu yoktur.
+Ayrıntı: [OLCUM_VE_PROFILLER.md](OLCUM_VE_PROFILLER.md).
+
 ### `geri_yukleme_isaretleri` (v2)
 
 | Kolon | Tip | Not |
@@ -219,11 +238,11 @@ Veritabanı işlemi ile dosya sistemi işlemi tek atomik işlem değildir. Bu y�
   güncelleme çözümü değildir.
 - Şema JSON'ları sürüm kontrolünde saklanır (Room `exportSchema`).
 - **Her migration için otomatik test yazılır**; şema ve veri koruması test edilir. `MIGRATION_1_2` yalnızca `geri_yukleme_isaretleri` tablosunu ekler. `MIGRATION_2_3`, `kaynak_konumu` kolonunu ve global katalog tablosunu ekler; mevcut soru notu/kaynak/neden değerleri korunur, kaynak ve özel nedenler yeniden kullanılabilir kataloğa alınır.
-- Room v3 şeması `app/schemas/com.keremtulu.questionnote.data.local.YanlisDefteriDatabase/3.json` dosyasına CI tarafından aktarıldı. v1→v2→v3 zinciri ve doğrudan v2→v3 veri koruması CI run `39037429421` içinde geçti.
+- Room v1/v2/v3/v4 şemaları `app/schemas/com.keremtulu.questionnote.data.local.YanlisDefteriDatabase/` altında korunur. `MIGRATION_3_4` ölçüm tablosu ve indeksleri ekler; 1/2/3→4 yolları ve null tarihsel ölçümler test edilir. v3 tarihsel CI kanıtı `39037429421`, v4 ana paket kanıtı `39135928734` (217/0).
 - Testler JVM/Robolectric üzerinde çalışır; CI sonucu fiziksel cihaz güncelleme kabulü değildir.
 
 
-## v1.2.0: şema değiştirmeden adaptif tekrar ve profiller
+## Tarihsel v1.2.0: şema değiştirmeden adaptif tekrar ve sınav formatları
 
 `AkilliTekrarKurali` hafıza durumunu `tekrarlar` tablosundaki mevcut aralık/sonuç/algoritma sürümü
 alanlarından türetir. Yeni kayıtlar sürüm 2, eski kayıtlar özgün sürümde kalır. Domain `TekrarKaydi`
@@ -232,3 +251,9 @@ artık mevcut `zaman` ve `algoritma_surumu` değerlerini de taşır; bunlar yeni
 Sınav formatları eksik dersleri normal `dersler` satırları olarak ekler, ad eşleşen ID'yi tekrar
 kullanır. Profil tercihi, rozet sahipliği/kutlama kuyruğu ve son oturum devam noktası prefs'tedir.
 Bağımsız çözüm sorguları `sonuc = 'RAHAT' AND cozum_acildi = 0` kullanır.
+
+## v1.4.x / P2–P3
+
+Süre geçmişten türetilemediği için bu pakette Room/ZIP v4 uygulandı. Yukarıdaki v1.2.0 kararı
+yalnız o sürümün v2 algoritma durumunu anlatır. Tekrar algoritması 2 olarak kalır; daha hızlı
+çözene bonus veya yavaşlığa ceza eklenmez. Yeni ölçüm/bağlam ZIP v4 ile taşınır.

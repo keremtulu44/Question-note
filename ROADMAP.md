@@ -6,19 +6,26 @@ Durum işaretleri: `[ ]` yapılmadı · `[~]` kod mevcut; bu sürümün CI/Relea
 
 ---
 
-## Gelişim planı — P0/P1 uygulandı (2026-10-18)
+## Gelişim planı — P0–P3 uygulandı (2026-10-18)
 
 Ayrıntılı görev/dosya/bağımlılık/test planı: [Gelişim ve Öğrenme Planı](docs/GELISIM_VE_OGRENME_PLANI.md).
-P0/P1 kod ve otomatik testleri tamamlandı; fiziksel kabul açık. P2–P6 önerilen sıradır.
+P0–P3 kod ve otomatik testleri tamamlandı; fiziksel kabul açık. P4–P6 önerilen sıradır.
 
 - [~] **P0–P1 uygulandı:** canlı rozet/snapshot, dayanıklı gözlem ve commit sonrası devam temizliği; gerçek verili yeni İlerleme, ortak hareket politikası ve debug Preview. CI `39131225744`: **157/0**; cihaz kabulü bekliyor.
-- [ ] P2: güvenilir süre ölçümü; atomik kayıt ve devam noktası; Room/ZIP v4 uyumluluğu.
-- [ ] P3: veri yeterliliği, dayanıklı kişisel süre profilleri, kayıt anı kaynak/konu bağlamı.
+- [~] **P2 uygulandı:** monotonik/fazlı süre, kalite, atomik/idempotent kayıt, kimlikli kurtarma, çözüm açma bariyeri ve Room/ZIP v4.
+- [~] **P3 uygulandı:** 60 gün; ayrı yardımsız/iş yükü referansı, soru başına medyan/çeyrek/MAD, yeterlilik/fallback, kayıt anı bağlamı; gerçek ders referansı UI’sı.
 - [ ] P4: ayrı karar katmanı; önce v2 tarihlerini değiştirmeyen gölge çalışma.
 - [ ] P5: gerçek veriye bağlı gelişim özeti, kaynak/konu profilleri, eylem bağlantıları ve kontrollü animasyonlar.
 - [ ] P6: fiziksel cihaz/performans/erişilebilirlik testleri; koşullu etkinleştirme ve geri dönüş.
 
-## Güncel — v1.3.0
+## Güncel — v1.4.1
+
+- [x] **v1.4.1/code 17:** CI `39136991000`, **221 test / 0 başarısız**, Release/imza/sertifika ve yayımlanmış APK digest eşleşmesi başarılı. Önceki 157-test tabanı + 64 yeni test.
+- [x] P2/P3 ana paket v1.4.0 CI `39135928734` ile 217/0; son paket ek kurtarma/çözüm bariyeri güvencelerini içerir.
+- [ ] P2/P3 gerçek cihaz: güncelleme, süreç öldürme/reboot, kilit/arka plan, yakınlaştırma, düşük depolama ve büyük veri performansı.
+- [ ] P4/v3 motor/gölge karar, P5 kaynak/konu panosu ve yeni eylemler. Kodlandı diye işaretlenmez.
+
+## Korunan önceki kapsam — v1.3.0
 
 - [x] **v1.3.0/code 15 yayımlandı:** CI `39131225744`, 157 test, Release/imza/sertifika başarılı.
 - [x] GitHub APK digest'i CI ile aynı; sürüm notları ve küçük native Compose önizlemeleri kaydedildi.
@@ -37,8 +44,8 @@ Aşağıdaki `[~]` özelliklerin kodu/otomatik testleri yayımlandı; fiziksel c
 - [ ] Üç düğmeli/jest gezinme, büyük yazı, yatay ekran, gizli rozet kutlaması ve odak akışı cihaz kabulü.
 - [ ] Geçmiş karneler arşivi, mola günü jetonu, bildirimler. Bu sürümde tamamlandı diye işaretlenmez.
 
-**Mimari revizyon:** Algoritma v2 mevcut tekrar geçmişinden türetiliyor. Room v4/ZIP v4 migration
-önceki öneriydi, bu uygulama için gerekli değil. Detay `docs/ODAK_STUDYOSU.md`.
+**Tarihsel v1.2 kararı:** v2 algoritma durumu mevcut geçmişten türetildiği için o sürümde v4 gerekmiyordu.
+P2 süreleri geçmişten türetilemediğinden v1.4.x ile Room/ZIP v4 uygulandı. Detay `docs/ODAK_STUDYOSU.md`.
 
 Aşağıdaki Aşama 0–4 kayıtları önceki sürümlerin tarihsel durumudur.
 
