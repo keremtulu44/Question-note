@@ -304,7 +304,7 @@ class OlcumKaydiTest {
         assertEquals(eskiOlcum, db.tekrarOlcumDao().tumunuGetir().first { it.tekrarId == eski.id })
     }
 
-    @Test fun productionPreferenceDefaultsToShadowAndCannotBypassClosedActiveGate() = runBlocking {
+    @Test fun productionPreferenceDefaultsToShadowAndCannotBypassClosedActiveGate() = runBlocking<Unit> {
         val context = RuntimeEnvironment.getApplication()
         context.getSharedPreferences("tekrar_politikasi", 0).edit().clear().commit()
         val depo = TekrarPolitikasiDeposu(context)
