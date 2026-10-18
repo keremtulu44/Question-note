@@ -84,6 +84,8 @@ Bu belge uygulanan sözleşmeyi ve gerçekten gözlenen kapıları kaydeder; tes
 
 | P6 `06374a4` | `39142060320` | Debug **298 / 0 / 0 / 0**; Release Gradle görev aşamasında durdu, 0 test. Release host testi açıkça etkinleştiriliyor; ilk hata satırları rapora ekleniyor. Yayın yapılmadı |
 
+| P6 `ff1bea7` | `39142423706` | Debug **298 / 1 / 0 / 0**; gerçek tekrar kaydı başarılı, karne dönüşü sonrası test yanlışlıkla aynı adlı başlığı navigasyon kabul edebildi. Tab rolü + gerçek Filtreli ekran sınırı ve semantik eylemle fixture kararlılaştırıldı; Release henüz koşmadı |
+
 Sütun sırası: **test / başarısız / hata / atlanan**. Derleme/parsing ile çalışmış test sonucu birbirinin yerine yazılmaz.
 Güncel otomatik rapor [DERLEME_RAPORU.md](DERLEME_RAPORU.md). İlk başarısızlıkları gizlemek için test/koruma silinmedi.
 
@@ -102,3 +104,5 @@ Güncel otomatik rapor [DERLEME_RAPORU.md](DERLEME_RAPORU.md). İlk başarısız
 Native önizlemeler incelendi: koyu debug fixture açıklamasındaki kontrast düzeltildi; yeni analiz panelleri mevcut petrol/bakır yüzey paletine uyarlandı. Eşleşen soru çok olsa da gün eşiği sağlanmayan örnekte gerçek gün adetleri eklendi; yeterlilik kuralı değiştirilmedi. Bu görsel/gün-kapsama değişiklikleri 298-test Debug koşusunda geçti; Release kapısı henüz doğrulanmadı.
 
 CI test görevleri her koşuda gerçekten çalıştırılacak (test cache/up-to-date kapalı, derleyici/dependency cache açık). Eksik zorunlu UI/benchmark/ZIP test sınıfı, sıfır rapor veya atlanan test kapıyı geçemez; eski benchmark/PNG kanıtı yeni ölçüm diye etiketlenmez. Bu CI sertleştirmesi yeniden doğrulama bekliyor.
+
+Debug başarısız olsa bile Release testi ayrıca çalışır; derleme/imza/yayın **her iki** kapının geçmesini ister. Böylece bir UI problemi diğer varyantın tanısını gizlemez.

@@ -128,16 +128,15 @@ jobs:
             if [[ "$unit_test_exit" -eq 0 && "$test_summary_exit" -ne 0 ]]; then
               unit_test_exit=1
             fi
-            if [[ "$unit_test_exit" -eq 0 ]]; then
-              ./gradlew --no-daemon --console=plain --stacktrace :app:testReleaseUnitTest > "$release_test_log" 2>&1
-              release_test_exit=$?
-              release_test_summary=$(python3 tools/junit_ozeti.py summary app/build/test-results/testReleaseUnitTest \
-                --require-class com.keremtulu.questionnote.data.gelisim.AnalizPerformansTest \
-                --require-class com.keremtulu.questionnote.data.gelisim.MotorTaniHizmetiTest \
-                --require-class com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest)
-              release_summary_exit=$?
-              if [[ "$release_test_exit" -eq 0 && "$release_summary_exit" -ne 0 ]]; then release_test_exit=1; fi
-            fi
+            # Run both independent gates even if Debug fails; build/sign/publish still require BOTH.
+            ./gradlew --no-daemon --console=plain --stacktrace :app:testReleaseUnitTest > "$release_test_log" 2>&1
+            release_test_exit=$?
+            release_test_summary=$(python3 tools/junit_ozeti.py summary app/build/test-results/testReleaseUnitTest \
+              --require-class com.keremtulu.questionnote.data.gelisim.AnalizPerformansTest \
+              --require-class com.keremtulu.questionnote.data.gelisim.MotorTaniHizmetiTest \
+              --require-class com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest)
+            release_summary_exit=$?
+            if [[ "$release_test_exit" -eq 0 && "$release_summary_exit" -ne 0 ]]; then release_test_exit=1; fi
             unit_test_failure_details=$(python3 tools/junit_ozeti.py failures app/build/test-results/testDebugUnitTest app/build/test-results/testReleaseUnitTest)
             if [[ "$unit_test_exit" -eq 0 && "$release_test_exit" -eq 0 ]]; then
               ./gradlew --no-daemon --console=plain --stacktrace :app:assembleRelease > "$build_log" 2>&1
