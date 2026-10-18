@@ -25,15 +25,13 @@ cevaplamak ve çözümü öğrenme sürecinden ayrı saklamaktır.
 
 ## Durum
 
-**Çalışılan aday: 1.5.1/code19.** İlerleme daha az metin, tek çalışma eylemi ve ayrı ayrıntı
-sayfalarıyla sadeleştirildi. Ara CI `39156980764`: Debug312/0 + Release258/0, imzalı derleme ve
-native görsel kontrolü başarılı. Final yayın koşusu başlatılıyor; aşağıdaki APK önceki doğrulanmış sürümdür.
-[Değişikliğin sınırı](docs/ILERLEME_SADELESTIRME.md).
-
-**v1.5.0 yayımlandı** (versionCode18). [CI `39144684877`](https://github.com/keremtulu44/Question-note/actions/runs/39144684877):
-**Debug 298/0/0/0 · Release 258/0/0/0**; derleme/imza/sertifika başarılı, yayımlanan asset digest CI ile eşleşti.
+**v1.5.1 yayımlandı** (versionCode19). [İndir](https://github.com/keremtulu44/Question-note/releases/download/v1.5.1/yanlis-defteri-1.5.1.apk) · [CI `39158221022`](https://github.com/keremtulu44/Question-note/actions/runs/39158221022).
+**Debug 312/0/0/0 · Release 258/0/0/0**; APK/imza/sertifika ve yayımlanan asset digest doğrulandı.
 Ortak testler iki varyantta tekrar eder; sayılar toplanmaz.
 
+- **Sade İlerleme:** rütbe, bugünkü hedef, tek çalışma eylemi. XP/ritim/plan/karşılaştırma ve
+  koleksiyon ayrı isteğe bağlı sayfalarda; büyük yazı, geri/yenileme ve gizli koşullar korunur.
+  Yeni veri/puan yok. [Değişiklik](docs/ILERLEME_SADELESTIRME.md) · [Native önizlemeler](docs/ui/progress/README.md).
 - **P4:** Açıklanabilir v3 adayı **Gölge** modunda; gerçek tarihler hâlâ v2. Güvenilir süre ve yakın güçlük birlikte değerlendirilir; hız bonusu/tek başına yavaşlık cezası yok. Etkin v3 kapalı.
 - **P5:** Tarihsel kaynak/konu, soru/tekrar/payda/kapsama, gerçek ritim ve tamamlanmış dönemler; kapsamlı iş yükü ve öneriden Filtreli/Odak’a geçiş. Kalıcı birleşik rütbe kuyruğu, tek fullscreen host.
 - **P6:** Ayrı Debug/Release kapıları, 1.000 soru/20.000 tekrar native host raporları, beş sentetik Compose önizlemesi; tanı, ZIP/sürüm/restore ve gerçek shell regresyonları. **Fiziksel cihaz kabulü açık.** [Kanıt/rollback](docs/P4_P5_P6_UYGULAMA.md).
@@ -42,7 +40,7 @@ Ortak testler iki varyantta tekrar eder; sayılar toplanmaz.
   tekrar kaydı. Yeterli yeni ölçümde kişisel süre referansı; eski kayıttan hayalî süre yok.
   Ders için 20 ölçüm/10 soru/5 gün birlikte aranır. Profil, tekrar v2 tarihini veya XP'yi değiştirmez.
 - **P0/P1:** Yeni petrol/lacivert-bakır İlerleme ekranı; rütbe odağı, gerçek XP, uyarlanan sayılar,
-  açılır koleksiyonlar, boş/yükleniyor/hata durumları ve sistem ayarına uyan sonlu hareket.
+  ayrı koleksiyon sayfaları, boş/yükleniyor/hata durumları ve sistem ayarına uyan sonlu hareket.
   Karne sahiplik sayımı, ödül gözlemi ve restore/devam noktası sınırları güçlendirildi.
 - **İlerleme:** 30 rozet (5 gizli), kazanma açıklamaları, ilerleme çubukları, 15 rütbe ve
   saydam amblemler. Yeni rozetler tam ekran kutlanır; kutlama kuyruğu kapanmada kaybolmaz.
@@ -60,7 +58,7 @@ Ortak testler iki varyantta tekrar eder; sayılar toplanmaz.
 **Cihaz kabulü ayrıdır:** v1.0.3 ana akış adımlarını kullanıcı geçti bildirdi. v1.0.4 tekrar geçmişi,
 v1.0.5 katalog/ZIP akışı, v1.0.6 form yenilemesi, v1.0.7 ders bazında konu ekleme, v1.0.8 filtreli
 çalışma, v1.0.9 düzeltmeleri, v1.0.10 karne/rozet/hedef akışı ve v1.1.x alt menü/seviye/ayarlar/silme
-ile v1.2.0 odak/profil/rozet, v1.3.0 P0/P1, v1.4.x P2/P3 ve 1.5.0 P4–P6 yenilemeleri henüz cihazda kabul edilmedi. SAF/Drive ve fotoğraf okunabilirliği de bekliyor. v1.0.2 “3.
+ile v1.2.0 odak/profil/rozet, v1.3.0 P0/P1, v1.4.x P2/P3 ve 1.5.0 P4–P6 / 1.5.1 sade İlerleme yenilemeleri henüz cihazda kabul edilmedi. SAF/Drive ve fotoğraf okunabilirliği de bekliyor. v1.0.2 “3.
 turu denemedim” ifadesinin checklist eşlemesi hâlâ teyitsiz; ayrıntı
 [TEST_KONTROL_LISTESI.md](docs/TEST_KONTROL_LISTESI.md) içinde.
 ---

@@ -1,5 +1,18 @@
 # Test Kontrol Listesi
 
+## 1.5.1 — sade İlerleme, otomatik doğrulama
+
+[CI `39158221022`](https://github.com/keremtulu44/Question-note/actions/runs/39158221022), kaynak `c25b32bce6c20b0f2c39ff27af6990d13c300074`: **Debug312/0/0/0, Release258/0/0/0**;
+APK/imza/sertifika/yayın, API digest/tag ve sekiz native çıktı doğrulandı. Sayılar toplanmaz.
+
+- [x] Ana görünümde tek eylem/metin bütçesi; teknik paneller ve gizli koşullar varsayılan kapalı.
+- [x] Doğru kapsamlı filtre, bölüm/geri/saved-state/yenileme; bilinmeyen sayı sıfır olmaz, hedef üstü gerçek sayı korunur.
+- [x] %200 eylem tamamen alt menünün üzerinde; 320dp’de beş 48dp+ sekme ve tek satır seçili etiket.
+- [x] Sıfır kapsamda dakika yok; tam kapsamda gereksiz aynı ara toplam yok; karşılaştırmanın gerçek 2+2 gün gerekçesi isteğe bağlı.
+- [ ] S24 FE’de 1.5.0 üstüne kurulum, ana görünüm/ayrıntı/geri, sistem yazı ölçeği ve gerçek TalkBack doğrulaması.
+- [ ] Aşağıdaki fiziksel SAF/süreç ölümü/depolama/frame-p95 ve gölge kapıları hâlâ açık. Native host testleri bunların yerine geçmez.
+
+
 > **v1.4.1 / P0–P3:** CI `39136991000` **221 testle başarılı**; Release, imza ve asset SHA-256 doğrulandı.
 > Beş native Compose çizimi sentetik önizlemedir; fiziksel test değildir. Aşağıdaki fiziksel cihaz satırları otomatik olarak işaretlenmez.
 

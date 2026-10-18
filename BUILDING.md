@@ -4,11 +4,13 @@
 > Hiçbir anahtar, parola veya token bu depoya yazılmaz.
 
 - Son güncelleme: 2026-10-18
-- Son yayımlanan sürüm: **v1.5.0 (versionCode18)**. CI `39144684877`: **Debug298/0/0/0**, ayrıca **Release258/0/0/0**.
-  Release APK derlemesi, apksigner ve beklenen sertifika eşleşmesi başarılı.
-- [Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.5.0) · [APK indir](https://github.com/keremtulu44/Question-note/releases/download/v1.5.0/yanlis-defteri-1.5.0.apk).
-  APK **10.791.135 bayt**; SHA-256 `3e7158345d0e0c88bf03698b8ba21db1fedef6a123758de5e7b13f8e5a5470db`.
-  CI raporu ile GitHub asset digest eşleşir; tag/derlenen commit `9c3c51f34aa8419c2cab948601823f6fc58351e3`.
+- Son yayımlanan sürüm: **v1.5.1 (versionCode19)**. CI `39158221022`: **Debug312/0/0/0**, **Release258/0/0/0**.
+  APK derlemesi, apksigner, beklenen sertifika, asset digest ve tag kaynağı doğrulandı.
+- [Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.5.1) · [APK indir](https://github.com/keremtulu44/Question-note/releases/download/v1.5.1/yanlis-defteri-1.5.1.apk).
+  APK **10.819.807 bayt**; SHA-256 `c8d1d45cfd7ad55ab6d3ebba6bf52464fd772d16d23929cbcb406fe8b2a9a053`.
+  Tag/derlenen commit `c25b32bce6c20b0f2c39ff27af6990d13c300074`. 1.5.0 APK/tag korunur.
+- 1.5.1 yalnız sunum sadeleştirmesidir; [sekiz native önizleme](docs/ui/progress/README.md) ve
+  büyük-yazı/geri/saved-state/filtre doğrulamaları vardır. Üretim veri/hesaplama hizmetleri değişmedi.
 - P0–P5 ve P6 otomatik kalite kapıları yayımlandı; Room/ZIP4, geçmiş/snapshot uyumluluğu korunur.
   Varsayılan **Gölge v2 tarihi uygular; etkin v3 kapalıdır**. XP/30 rozet/15 rütbe katsayıları aynı.
 - **Fiziksel cihaz kabulü ayrıdır**; otomatik testin yeşil olması gerçek cihaz testi yapıldığı anlamına gelmez.
@@ -16,9 +18,9 @@
 
 ---
 
-## P6 varyant ve kanıt kapısı
+## Varyant ve kanıt kapısı
 
-- 1.5.0/code18, son yayın CI `39144684877`: Debug298/0, Release258/0 ve APK/imza/sertifika/yayın başarılı.
+- 1.5.1/code19, son yayın CI `39158221022`: Debug312/0, Release258/0 ve APK/imza/sertifika/yayın başarılı.
   Güncel sonuç ve kaynak: [DERLEME_RAPORU.md](docs/DERLEME_RAPORU.md).
 - Debug başarısız olsa da Release testi çalışır; APK için **ikisi de** geçmelidir. CI sırası `:app:testDebugUnitTest` → `:app:testReleaseUnitTest` → `:app:assembleRelease` →
   imza/sertifika → yayın. Ortak testler iki varyantta; UI/Preview `src/testDebug`'da, sayılar toplanmaz.
@@ -28,7 +30,7 @@
   keşfedilmemesini reddeder. Derleme hatası, “0 test başarılı” diye geçilmez.
 - Ara `PUBLISH_RELEASE=false`, başarılı imzalı ara APK'yı yayımlamaz. İki varyant `39143916007` ile
   birlikte doğrulandı; nihai paket bayrağı açıldı, `39144684877` aynı kapıları yeniden geçerek yayımladı. **Bu yayın bayrağı, ayrı olan etkin-v3 kapılarını açmaz.**
-- Küçük native PNG'ler `docs/ui/p6`, sentetik host ölçümleri `docs/PERFORMANS_DEBUG.md` ve
+- Küçük native PNG'ler `docs/ui/progress` (sekiz güncel ekran) ve `docs/ui/p6`, sentetik host ölçümleri `docs/PERFORMANS_DEBUG.md` ve
   `docs/PERFORMANS_RELEASE.md`. Büyük veri/ZIP/APK Git'e girmez.
 
 ## 1. Genel akış
@@ -51,7 +53,7 @@ Kullanıcının telefonunda Android SDK, Gradle veya Termux kurması **gerekmez*
 
 - Tek Gradle modülü, Kotlin + Jetpack Compose.
 - Sürümler `gradle/libs.versions.toml` içinde sabitlenir; Gradle wrapper depoda tutulur.
-- minSdk 26, compileSdk/targetSdk 37; yayımlanmış v1.5.0 `versionCode=18` (v1.4.1: 17; v1.4.0: 16; v1.3.0: 15).
+- minSdk 26, compileSdk/targetSdk 37; yayımlanmış v1.5.1 `versionCode=19` (v1.5.0: 18; v1.4.1: 17; v1.4.0: 16; v1.3.0: 15).
 - Yapay zekâ ortamında Java/Android SDK ve Maven erişimi yoktur → derleme **yalnızca** Actions'ta olur.
 
 ## 3. İmzalama düzeni (kritik)

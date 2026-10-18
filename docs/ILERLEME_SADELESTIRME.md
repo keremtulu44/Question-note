@@ -25,28 +25,20 @@ veya toplamak değil; mevcut bilgiyi daha sakin, seçici ve görsel bir düzene 
   gerçek sayı korunur; yalnız dekoratif halka %100'de sınırlanır.
 - Font küçültülerek sığdırma yapılmaz. %200 yazı, dikey kaydırma, 48dp eylemler ve azaltılmış hareket korunur.
 
-## Doğrulama durumu
+## Doğrulama ve teslim
 
-Aday **1.5.1 / code19**. İlk CI `39155923794`, taşınırken eksik kalan dört yerel renk tanımında derleme hatası verdi (testler çalışmadı); tanımlar geri eklendi. İkinci CI `39156298092` / `7f8c3d3`: Debug311/0/0/0, Release258/0/0/0; APK/imza/sertifika başarılı, yayın kapalı.
-Sekiz ana native görünüm ve P6 ritmi incelendi: normal yazıda ana görünüm tek viewport'a sığıyor.
-%200'de eski alt menünün kelime bölünmesi görüldü; seçili etikete alan, diğer dört simgeye tam
-semantik ad + 48dp üzeri dokunma alanı veren uyarlama ve gerçek text-layout regresyonu eklendi.
-Son üretim kodu `1c429d0` / CI `39156980764`: **Debug312/0/0/0, Release258/0/0/0**, APK/imza/sertifika başarılı.
-Alt menüde %200 tek satır ve 320dp/48dp hedef testleri geçti; yeni normal/koyu/boş/ayrıntı görünümleri incelendi.
-Son yayın koşusuna yalnız debug önizleme kabuğu düzeltmesi/katı dikey sınır kontrolü eklendi: üretimde zaten
-kullanılan `padding + consumeWindowInsets` düzeni fixture’a da uygulandı. Böylece büyük-yazı görüntüsü
-"görünüyor" semantiğine değil, düğmenin alt menünün tamamen üstünde olmasına dayanır.
-Üretim kodu değişmeden yayın doğrulaması sürüyor. `39157747382`/`b6903c4` Debug test derlemesinde
-`DpRect` üzerinde `width/height` kullanımı nedeniyle durdu; Release258/0 geçti, APK/yayın kapısı açılmadı.
-Aynı katı kontrol, gerçek DpRect kenar farklarıyla düzeltildi; boyut/örtüşme şartları gevşetilmedi.
-Gerçek cihaz kabulü açık.
-Yerelde 147 Kotlin sözdizimi ağacı, XML, workflow YAML/Bash ve kaynak referansları kontrol edildi;
-bu, Kotlin/Android derlemesinin veya cihaz kabulünün yerine geçmez.
+**v1.5.1 / code19 yayımlandı.** [Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.5.1) · [APK](https://github.com/keremtulu44/Question-note/releases/download/v1.5.1/yanlis-defteri-1.5.1.apk) · [CI `39158221022`](https://github.com/keremtulu44/Question-note/actions/runs/39158221022)
+**Debug312/0/0/0 · Release258/0/0/0**; APK/imza/sertifika başarılı. Ortak testler iki varyantta tekrar eder, sayılar toplanmaz.
+Kaynak/tag `c25b32bce6c20b0f2c39ff27af6990d13c300074`; asset **654278786**, **10.819.807 bayt**; yayımlanma `2026-10-18T19:22:49Z`.
+SHA-256 `c8d1d45cfd7ad55ab6d3ebba6bf52464fd772d16d23929cbcb406fe8b2a9a053`; GitHub asset digest ve tag referansı CI ile bağımsız eşleştirildi.
 
-- Yeni `IlerlemeSadelikTest`: ana sayfa metin bütçesi, tek eylem, kapalı teknik paneller,
-  gerçek filtre, geri/saved-state, güncel/eksik/hedef üstü sayılar, %200/48dp ve gizli koşullar.
-- Var olan XP/animasyon, filtre→Odak→karne→İlerleme, kapsam ve karşılaştırma testleri yeni
-  ayrıntı gezinmesi üzerinden korunur; veri kuralları gevşetilmez.
-- Native çıktılar `docs/ui/progress/`: açık/koyu/büyük yazı/boş/hata/menü/karşılaştırma/plan.
-  Gerçek Compose bileşeni + sentetik debug verisi; telefon ekran görüntüsü değildir.
-- S24 FE, TalkBack, gerçek süreç ölümü/SAF/depolama/frame-p95 kabulü hâlâ ayrıdır.
+- İlk `39155923794`/`8bfdfe8` derlemesi dört yerel renk tanımı eksik olduğu için testlere ulaşmadı; tanımlar geri eklendi.
+- `39156298092`/`7f8c3d3`: Debug311/0 + Release258/0, imza; sekiz native görünüm incelendi.
+- `39156980764`/`1c429d0`: Debug312/0 + Release258/0, imza; %200 menü bölünmesi giderildi.
+- `39157747382`/`b6903c4`: yalnız Debug test derlemesinde DpRect boyut özelliği hatası; Release258/0. Yayın engellendi, kontrol kenar farklarıyla düzeltildi.
+- Finalde üretim kodu `1c429d0` ile aynı. Debug önizlemenin viewport’u gerçek uygulama kabuğuyla
+  eşlendi; eylemin tamamının menünün üstünde olması unclipped bounds ile doğrulandı. Yayın bütün kapıları yeniden geçti.
+- Dokuz sadelik testi; sekiz native sahne; mevcut XP/motion/filtre→Odak→karne/kapsam/ZIP/motor
+  regresyonları korunur. Test atlama/sıfır rapor/kayıp sınıf/kayıp önizleme başarı sayılmaz.
+- **Fiziksel S24 FE, TalkBack, gerçek süreç ölümü/SAF/depolama/frame-p95 ve uzunlamasına gölge kabulü açık.**
+  Native renderer/host benchmark telefon kabulü değildir. Etkin v3 açılmadı. Merge/PR yapılmadı.

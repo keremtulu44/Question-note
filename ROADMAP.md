@@ -18,7 +18,15 @@ P0–P5 kod/otomatik kapıları geçti; P6 son yayın CI `39144684877`: Debug298
 - [~] **P5 uygulandı:** gerçek kaynak/konu/ritim/dönem/iş yükü, uygun filtre/Odak eylemi ve kalıcı tek kutlama host’u. CI 274/0.
 - [~] **P6:** birleşik Debug298/0 + Release258/0; iki host benchmark ve beş önizleme, APK/imza/sertifika doğrulandı. Fiziksel cihaz/TalkBack/SAF/frame-p95 bekliyor.
 
-## Son yayımlanan — v1.5.0 / code18
+## Son yayımlanan — v1.5.1 / code19
+
+- [x] İlerleme ana görünümü: rütbe, bugünkü hedef ve tek eylem; rapor yığını kaldırıldı.
+- [x] Ayrı ayrıntı/rozet sayfaları, kısa copy, gerçek filtre; veri/XP/tekrar kuralları değişmedi.
+- [x] %200 seçili menü etiketi, tüm sekmelerin semantik adı/48dp alanı; geri/yenileme/saved-state ve viewport regresyonları.
+- [x] CI `39158221022`: Debug312/0 + Release258/0, APK/imza/sertifika/yayın ve API digest/tag doğrulandı. [APK](https://github.com/keremtulu44/Question-note/releases/download/v1.5.1/yanlis-defteri-1.5.1.apk).
+- [~] Fiziksel cihaz/TalkBack/SAF/frame-p95 ve uzunlamasına gölge kabulü açık; etkin v3 kapalı.
+
+## Önceki yayımlanan — v1.5.0 / code18
 
 - [x] P4/P5 + P6 otomatik kapıları: CI `39144684877` Debug298/0, Release258/0; release/imza/sertifika ve yayımlanan asset digest doğrulandı.
 - [x] Kaynak/tag `9c3c51f`, APK 10.791.135 bayt. Etkin v3 kapalı, Gölge v2 tarihini uygular.

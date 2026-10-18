@@ -3,15 +3,23 @@
 **Son güncelleme: 2026-10-18.** Önce bu belge, `docs/DERLEME_RAPORU.md` ve
 [P4–P6 sözleşme/kanıt kaydı](docs/P4_P5_P6_UYGULAMA.md) okunur.
 
-## Güncel çalışma: 1.5.1 sade İlerleme
+## Güncel doğrulanmış teslim: 1.5.1 sade İlerleme
 
-Kullanıcı İlerleme’yi fazla metinli/karmaşık buldu. Dört bloklu ana görünüm ve isteğe bağlı,
-her seferinde tek bölüm açan ayrıntı gezinmesi uygulandı. [Sözleşme ve kontrol](docs/ILERLEME_SADELESTIRME.md).
-Aday **1.5.1/code19**: `1c429d0` / CI `39156980764` **Debug312/0/0/0 + Release258/0/0/0**,
-APK/imza/sertifika başarılı. Sekiz native görünüm/alt menü rötuşu incelendi; fixture viewport’u üretimle eşlendi.
-`PUBLISH_RELEASE=true` ile final yeniden doğrulama/yayın koşusu başlatılıyor; henüz yayın sonucu değil.
-Room/ZIP/domain/veri hizmetleri aynı; XP/rozet/rütbe katsayıları ve etkin-v3 kapıları değişmedi.
-Aday doğrulanmadan mevcut 1.5.0 APK değiştirilmez.
+**v1.5.1 / code19 yayımlandı.** [Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.5.1) · [APK](https://github.com/keremtulu44/Question-note/releases/download/v1.5.1/yanlis-defteri-1.5.1.apk) · [CI `39158221022`](https://github.com/keremtulu44/Question-note/actions/runs/39158221022)
+**Debug312/0/0/0 · Release258/0/0/0**; APK/imza/sertifika başarılı. Ortak testler iki varyantta tekrar eder, sayılar toplanmaz.
+Kaynak/tag `c25b32bce6c20b0f2c39ff27af6990d13c300074`; asset **654278786**, **10.819.807 bayt**; yayımlanma `2026-10-18T19:22:49Z`.
+SHA-256 `c8d1d45cfd7ad55ab6d3ebba6bf52464fd772d16d23929cbcb406fe8b2a9a053`; GitHub asset digest ve tag referansı CI ile bağımsız eşleştirildi.
+
+- Kullanıcının fazla metin/karmaşıklık düzeltmesi uygulandı: rütbe, günlük hedef, tek eylem;
+  Koleksiyon/Ayrıntılar ayrı sayfalarda. Yeni veri, puan, şema veya tekrar kuralı yok.
+- %200 alt menü etiketleri düzeltilmiş; tüm sekmeler adlandırılmış ve 48dp üzerinde. Geri,
+  saved-state, yenileme, gerçek sayılar, filtre→Odak→karne ve gizli rozet sözleşmeleri testli.
+- Sekiz native önizleme incelendi. Son büyük-yazı fixture’ı üretimdeki inset düzeniyle aynı;
+  eylemin alt menünün tamamen üstünde olması katı geometrik kontrolden geçer.
+- [Değişiklik/kanıt](docs/ILERLEME_SADELESTIRME.md) · [Native görüntüler](docs/ui/progress/README.md).
+- **Etkin v3 kapalı**, Gölge v2 tarihini uygular. Fiziksel S24 FE/TalkBack/SAF/süreç ölümü/frame-p95 açık.
+- Yayın bayrağı açık. Sonraki kaynak değişikliğinde yeni sürüm/code veya kapalı ara yayın kullan;
+  doğrulanmış 1.5.1 APK’sını yeniden yazma. Merge/PR yapılmadı.
 
 ## Önceki doğrulanmış teslim: 1.5.0
 

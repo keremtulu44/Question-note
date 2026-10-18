@@ -4,6 +4,15 @@
 **Durum:** P0–P5 uygulandı. P4 CI `39139377311` **240/0/0/0**, P5 CI `39140443680` **274/0/0/0**. P6 son yayın CI `39144684877` **Debug298/0/0/0 + Release258/0/0/0**, APK/imza/sertifika başarılı. **v1.5.0/code18 yayımlandı**, asset digest ve kaynak/tag doğrulandı. Fiziksel kabul açık; etkin v3 kapalı. [Uygulama/kanıt kaydı](P4_P5_P6_UYGULAMA.md).
 **Başlangıç:** v1.2.0 / code 14, Room v3, ZIP v3, tekrar algoritması v2. Başlangıç CI kanıtı: `39067624050`, 130 başarılı test; fiziksel cihaz kabulü ayrı ve bekliyor.
 
+## Sunum düzeltmesi — 1.5.1 / 2026-10-18
+
+Kullanıcı yoğun metin ve karmaşıklığı reddetti. Rütbe + bugünkü hedef + tek eylem ana görünüm;
+XP/ritim/plan/konu/kaynak/karşılaştırma ve koleksiyon ayrı isteğe bağlı sayfalardadır.
+Bu sunum hiyerarşisi aşağıdaki eski P1/P5 ekran düzenini **geçersiz kılar**, hesaplama/veri güvenliği
+sözleşmesini değiştirmez. Yeni veri, puan veya motor kuralı yoktur.
+CI `39158221022`: Debug312/0 + Release258/0; imzalı 1.5.1/code19 yayımlandı, API digest/tag doğrulandı.
+[Uygulama ve kanıt](ILERLEME_SADELESTIRME.md). Fiziksel kabul açık; etkin v3 kapalı.
+
 ## Tarihsel P0/P1 uygulama notu — v1.3.0 / 2026-10-18
 
 - **P0:** Canlı karne rozet sayısı; sınırlandırılmış otomatik tekrar/manual yenileme; tek DB snapshot’ı ve ortak sahiplik/hedef girdisi; hedef değişince XP/rozet yenileme.

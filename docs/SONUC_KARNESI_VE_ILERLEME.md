@@ -1,5 +1,10 @@
 # Sonuç Karnesi, Kutlama ve İlerleme Sistemi — Tasarım Şartnamesi
 
+> **1.5.1 sunum güncellemesi:** ana İlerleme rütbe + günlük hedef + tek çalışma eylemidir.
+> XP/ritim/plan/analiz ve koleksiyon ayrı isteğe bağlı sayfalara taşındı; aşağıdaki hesaplama,
+> sahiplik ve kutlama kuralları değişmedi. Güncel ekran düzeni: [Sadeleştirme](ILERLEME_SADELESTIRME.md).
+
+
 > **Uygulama durumu (2026-10-17):** Karne v1.0.10, ilerleme/ayarlar v1.1.x ile uygulandı.
 > v1.2.0, 30 rozet/15 rütbe, gizli rozet kutlaması, sınav profili ve adaptif odak oturumunu ekler.
 > Güncel kurallar `SEVIYE_SISTEMI.md` ve `ODAK_STUDYOSU.md` içindedir. Aşağıdaki faz adları

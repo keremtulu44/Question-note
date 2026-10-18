@@ -21,7 +21,7 @@ Karşılaştırma örneğinde 40 ortak soru bulunmasına rağmen son değerlendi
 Testler `app/src/testDebug/java/.../ui/P6GorselOnizlemeTest.kt`; veriler
 `app/src/debug/java/.../ui/seviye/P6Onizlemeleri.kt`; ana bileşen
 `app/src/main/java/.../ui/seviye/GelisimAnaliziKarti.kt`. Debug kaynak setinin keşfi ayrıca CI kapısıdır.
-1.5.1 sadeleştirmesi bu bileşenlere de yansır. İlk güncel çıktı: CI `39156298092`, kaynak `7f8c3d3`, Debug311/0.
+1.5.1 sadeleştirmesi bu bileşenlere de yansır. Son güncel çıktı: CI `39158221022`, kaynak `c25b32b`, Debug312/0.
 Tam ana görünüm ve ayrı karşılaştırma/plan sayfaları [progress](../progress/README.md) klasöründedir.
 [P4–P6 hesaplama sözleşmesi](../../P4_P5_P6_UYGULAMA.md) değişmez.
 

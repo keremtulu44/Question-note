@@ -3,6 +3,13 @@
 **18 Ekim 2026.** Tek görev/bağımlılık planı [GELISIM_VE_OGRENME_PLANI.md](GELISIM_VE_OGRENME_PLANI.md).
 Bu belge uygulanan sözleşmeyi ve gerçekten gözlenen kapıları kaydeder; test yazılması, testin geçmesi değildir.
 
+## 1.5.1 sunum notu
+
+Sade İlerleme **1.5.1/code19** yayımlandı; CI `39158221022` / `c25b32b`: Debug312/0 + Release258/0,
+APK/imza/sertifika ve API digest/tag doğrulandı. Aşağıdaki 1.5.0 sayıları tarihsel P4–P6 temelinin kanıtıdır.
+Yeni sürüm yalnız sunumu/erişilebilirliği değiştirir; motor, veritabanı, XP ve burada tanımlı sınırlar aynı.
+[Yeni görünüm/kanıt](ILERLEME_SADELESTIRME.md). Etkin v3 kapalı, fiziksel/gölge kabulü açık.
+
 ## Güncel durum
 
 - **P4/P5 ve P6 otomatik kapıları geçti.** Son yayın `9c3c51f` / CI `39144684877`: Debug **298/0/0/0**, Release **258/0/0/0**, APK derleme/imza/sertifika/yayın başarılı. Ortak testler iki kez yürür; sayılar toplanmaz.

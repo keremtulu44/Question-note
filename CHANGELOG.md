@@ -2,12 +2,14 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
-## [1.5.1] — aday / 2026-10-18
+## [1.5.1] — 2026-10-18
 
 - İlerleme ana sayfası rütbe, bugünkü hedef ve tek çalışma eylemine indirildi; uzun açıklamalar ve üst üste analitik kartlar kaldırıldı.
 - Emek/XP, ritim, plan, konu/kaynak ve karşılaştırma ayrı isteğe bağlı sayfalarda. Planın süre kapsamı güne dokununca, karşılaştırmanın dayanağı “Neden?” altında açılır.
 - Koleksiyon ayrıldı; rozet yönergeleri kartlardan detay penceresine taşındı. Gizli rozet maskelemesi, geri gezinme, büyük yazı ve azaltılmış hareket korunur.
-- Yeni veri, puan, şema veya tekrar kuralı yok. Aday code19, yayın ilk CI/native görsel incelemesine kadar kapalı; 1.5.0 APK değiştirilmez.
+- Yeni veri, puan, şema veya tekrar kuralı yok. 1.5.0 APK/tag değiştirilmedi; etkin v3 kapalı.
+- CI `39158221022`: **Debug312/0 + Release258/0**, APK/imza/sertifika/yayın başarılı. Sekiz native görünüm ve yeni sadelik/viewport/etiket regresyonları. Fiziksel cihaz kabulü ayrı.
+- [İmzalı 1.5.1 APK](https://github.com/keremtulu44/Question-note/releases/download/v1.5.1/yanlis-defteri-1.5.1.apk): 10.819.807 bayt; SHA-256 `c8d1d45cfd7ad55ab6d3ebba6bf52464fd772d16d23929cbcb406fe8b2a9a053`. API digest ve tag/source `c25b32b` CI ile eşleşti.
 
 ## [1.5.0] — 2026-10-18
 

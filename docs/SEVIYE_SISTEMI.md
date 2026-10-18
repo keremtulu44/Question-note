@@ -1,5 +1,10 @@
 # İlerleme, rütbe ve rozetler — v1.5.x
 
+> **1.5.1 sunum güncellemesi:** ana İlerleme rütbe + günlük hedef + tek çalışma eylemidir.
+> XP/ritim/plan/analiz ve koleksiyon ayrı isteğe bağlı sayfalara taşındı; aşağıdaki hesaplama,
+> sahiplik ve kutlama kuralları değişmedi. Güncel ekran düzeni: [Sadeleştirme](ILERLEME_SADELESTIRME.md).
+
+
 Kod: `domain/seviye`, `domain/karne/Rozet.kt`, `data/ilerleme/RozetHizmeti.kt`,
 `data/seviye/SeviyeHizmeti.kt`. Bu belge uygulanan kuralları anlatır; cihaz performansı ölçülmüş değildir.
 
