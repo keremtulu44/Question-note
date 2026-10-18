@@ -2,15 +2,15 @@
 
 > Bu dosya Android CI tarafından otomatik üretilir. Keystore veya parola değerleri yazılmaz.
 
-- Zaman (UTC): 2026-10-18T13:15:15Z
-- Workflow commit'i: ce3270bbefc7eb5c8986feb8638799aba3dafaae
+- Zaman (UTC): 2026-10-18T13:19:32Z
+- Workflow commit'i: 998a0ccd4bedeca2ca8624fca6b45911fecfdc29
 - Dal: arena/59c6570d-question-note
 - Uygulama sürümü: 1.3.0 (versionCode 15)
 - Android SDK: compileSdk/targetSdk 37, minSdk 26; build-tools 37.0.0
 - Genel sonuç: **BAŞARISIZ**
 - Wrapper çıkış kodu: 0
 - testDebugUnitTest çıkış kodu: 1
-- Birim test özeti: 155 test; 1 başarısız; 0 hata; 0 atlandı
+- Birim test özeti: 156 test; 1 başarısız; 0 hata; 0 atlandı
 - assembleRelease çıkış kodu: 125
 - İmzalama secret durumu: İki gerekli secret dolu (değerler gösterilmez)
 - İmzalama/verify durumu: İmzalama henüz çalıştırılmadı (kod: 125; apksigner verify: 125)
@@ -53,7 +53,7 @@ OS:            Linux 6.17.0-1022-azure amd64
 
 ```text
 -- Derleyici/Gradle hata satırları --
-82:* What went wrong:
+83:* What went wrong:
 
 -- İlk 100 satır --
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
@@ -65,10 +65,10 @@ Daemon will be stopped at the end of the build
 > Task :app:packageDebugResources
 > Task :app:processDebugNavigationResources
 > Task :app:parseDebugLocalResources
-> Task :app:javaPreCompileDebug
-> Task :app:generateDebugRFile
 > Task :app:checkDebugAarMetadata
 > Task :app:mapDebugSourceSetPaths
+> Task :app:javaPreCompileDebug
+> Task :app:generateDebugRFile
 > Task :app:compileDebugNavigationResources
 > Task :app:createDebugCompatibleScreenManifests
 > Task :app:extractDeepLinksDebug
@@ -76,15 +76,16 @@ Daemon will be stopped at the end of the build
 > Task :app:processDebugManifest
 > Task :app:preDebugUnitTestBuild UP-TO-DATE
 > Task :app:javaPreCompileDebugUnitTest
-> Task :app:processDebugManifestForPackage
 > Task :app:generateDebugAssets UP-TO-DATE
-> Task :app:mergeDebugResources
 > Task :app:mergeDebugAssets
-> Task :app:processDebugResources
+> Task :app:mergeDebugResources
 > Task :app:processDebugUnitTestManifest
+> Task :app:processDebugManifestForPackage
+> Task :app:kspDebugKotlin
+> Task :app:processDebugResources
 > Task :app:packageDebugUnitTestForUnitTest
 > Task :app:generateDebugUnitTestConfig
-> Task :app:kspDebugKotlin
+
 > Task :app:compileDebugKotlin
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/export/YerelYedeklemeHizmeti.kt:64:34 Non-public primary constructor is exposed via the generated 'copy()' method of the 'data' class.
 
@@ -107,8 +108,8 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/karne/KarneEkrani.kt:216:47 Unnecessary safe call on a non-null receiver of type 'KarneVerisi'.
 
 > Task :app:compileDebugJavaWithJavac
-> Task :app:bundleDebugClassesToRuntimeJar
 > Task :app:processDebugJavaRes
+> Task :app:bundleDebugClassesToRuntimeJar
 > Task :app:bundleDebugClassesToCompileJar
 > Task :app:kspDebugUnitTestKotlin
 
@@ -127,9 +128,9 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/ke
 > Task :app:testDebugUnitTest
 
 PremiumIlerlemeTest > initialXpIsRealAndReducedMotionAppliesUpdatesWithoutCountingFromZero FAILED
-    java.lang.AssertionError at PremiumIlerlemeTest.kt:105
+    java.lang.AssertionError at PremiumIlerlemeTest.kt:119
 
-155 tests completed, 1 failed
+156 tests completed, 1 failed
 
 > Task :app:testDebugUnitTest FAILED
 
@@ -155,7 +156,6 @@ org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':app:tes
 	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.executeSkippingOnlyIf(DefaultTaskNodeExecutor.java:272)
 	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.executeCatchingFailures(DefaultTaskNodeExecutor.java:228)
 	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.executeWithFallbackOperationId(DefaultTaskNodeExecutor.java:197)
-	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.executeWithLifecycle(DefaultTaskNodeExecutor.java:171)
 
 -- Son 80 satır --
 	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
@@ -236,7 +236,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD FAILED in 2m 34s
+BUILD FAILED in 2m 14s
 32 actionable tasks: 32 executed
 ```
 
@@ -256,7 +256,7 @@ Selector used: (TestTag = 'progress-xp-total')
 	at androidx.compose.ui.test.AssertionsKt.assert$default(Assertions.kt:283)
 	at androidx.compose.ui.test.AssertionsKt.assertTextEquals(Assertions.kt:207)
 	at androidx.compose.ui.test.AssertionsKt.assertTextEquals$default(Assertions.kt:203)
-	at com.keremtulu.questionnote.ui.PremiumIlerlemeTest.initialXpIsRealAndReducedMotionAppliesUpdatesWithoutCountingFromZero(PremiumIlerlemeTest.kt:105)
+	at com.keremtulu.questionnote.ui.PremiumIlerlemeTest.initialXpIsRealAndReducedMotionAppliesUpdatesWithoutCountingFromZero(PremiumIlerlemeTest.kt:119)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
