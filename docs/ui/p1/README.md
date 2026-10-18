@@ -1,4 +1,8 @@
-# P1 — Compose tasarım önizlemeleri
+# P1 — arşivlenmiş Compose tasarım önizlemeleri
+
+> Bu klasör 1.5.0 öncesi/1.5.0 yerleşimini koruyan tarihsel referanstır. Güncel 1.5.1 test
+> çıktıları artık [progress](../progress/README.md) klasörüne yazılır; aşağıdaki üretme
+> komutu yeni yerleşimi üretir, bu eski PNG’leri güncellemez.
 
 Bu görüntüler **telefon ekran görüntüsü değildir**. `IlerlemeGorselOnizlemeTest`, gerçek Compose
 bileşenlerini Robolectric'in native grafik motorunda çizer. Üstteki **ÖRNEK VERİ** etiketi

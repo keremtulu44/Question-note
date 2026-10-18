@@ -8,7 +8,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.*
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
@@ -139,9 +141,9 @@ class PremiumIlerlemeTest {
         assertTrue(compose.mainClock.currentTime - baslangic in 400..800)
     }
 
-    @Test fun twoHundredPercentTextKeepsTheActionUsableAndExplainsEffortVersusLearning() {
+    @Test fun twoHundredPercentTextKeepsTheActionUsableAndExplainsXpOnlyInDetails() {
         var bugun = 0
-        val ozet = ornekIlerlemeOzeti(bos = true).copy(soruSayisi = 3)
+        val ozet = ornekIlerlemeOzeti(bos = true).copy(soruSayisi = 3, analiz = null)
         compose.setContent {
             CompositionLocalProvider(LocalDensity provides Density(1f, fontScale = 2f)) {
                 YanlisDefteriTema(koyuTema = true, hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
@@ -157,8 +159,11 @@ class PremiumIlerlemeTest {
         val alan = compose.onNodeWithText(etiket).fetchSemanticsNode().boundsInRoot
         assertTrue(alan.width >= 48 && alan.height >= 48)
         assertEquals(1, bugun)
-        compose.onNodeWithTag("progress-list").performScrollToNode(hasText(context.getString(R.string.progress_xp_note)))
-        compose.onNodeWithText(context.getString(R.string.progress_xp_note)).assertIsDisplayed()
+        compose.onNodeWithText(context.getString(R.string.progress_xp_note)).assertDoesNotExist()
+        detayAc("progress-details", "progress-list")
+        detayAc("progress-open-effort", "progress-detail-list")
+        compose.onNodeWithTag("progress-detail-list").performScrollToNode(hasText(context.getString(R.string.progress_xp_note)))
+        compose.onNodeWithText(context.getString(R.string.progress_xp_note)).performScrollTo().assertIsDisplayed()
     }
 
     @Test fun collapsedCollectionDoesNotExposeHiddenNamesAndBadgeDenominatorIsThirty() {
@@ -167,15 +172,26 @@ class PremiumIlerlemeTest {
                 SeviyeSayfasi(SeviyeDurumuUi.ozetten(ornekIlerlemeOzeti()))
             }
         }
-        compose.onNodeWithTag("progress-list").performScrollToNode(hasText(context.getString(R.string.progress_show_details)))
-        compose.onNodeWithTag("progress-xp-toggle").performClick()
+        compose.onNodeWithText(context.getString(R.string.progress_xp_note)).assertDoesNotExist()
+        detayAc("progress-details", "progress-list")
+        detayAc("progress-open-effort", "progress-detail-list")
         val rozet = context.getString(R.string.level_xp_badges, 8, 30)
-        compose.onNodeWithTag("progress-list").performScrollToNode(hasText(rozet))
+        compose.onNodeWithTag("progress-detail-list").performScrollToNode(hasText(rozet))
         compose.onNodeWithText(rozet).assertExists()
-        compose.onNodeWithTag("progress-list").performScrollToNode(hasText(context.getString(R.string.progress_open_badges)))
-        compose.onNodeWithText(context.getString(R.string.progress_open_badges)).assertExists()
+        repeat(2) {
+            compose.onNodeWithTag("progress-detail-list").performScrollToIndex(0)
+            compose.onNodeWithTag("progress-back").performSemanticsAction(SemanticsActions.OnClick) { it() }
+        }
+        compose.onNodeWithTag("progress-list").performScrollToNode(hasTestTag("progress-collection"))
+        compose.onNodeWithTag("progress-collection").assertExists()
         compose.onAllNodesWithText("Gizli rozet").assertCountEquals(0)
         compose.onAllNodesWithText(context.getString(R.string.badge_donusum)).assertCountEquals(0)
+    }
+
+    private fun detayAc(tag: String, liste: String) {
+        compose.onNodeWithTag(liste).performScrollToNode(hasTestTag(tag))
+        compose.onNodeWithTag(tag).performScrollTo().assertIsDisplayed()
+            .performSemanticsAction(SemanticsActions.OnClick) { it() }
     }
 
     @Test fun reportOwnershipCountTracksAConcurrentLifetimeAward() {

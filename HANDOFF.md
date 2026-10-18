@@ -3,7 +3,15 @@
 **Son güncelleme: 2026-10-18.** Önce bu belge, `docs/DERLEME_RAPORU.md` ve
 [P4–P6 sözleşme/kanıt kaydı](docs/P4_P5_P6_UYGULAMA.md) okunur.
 
-## Güncel çalışma / teslim
+## Güncel çalışma: 1.5.1 sade İlerleme
+
+Kullanıcı İlerleme’yi fazla metinli/karmaşık buldu. Dört bloklu ana görünüm ve isteğe bağlı,
+her seferinde tek bölüm açan ayrıntı gezinmesi uygulandı. [Sözleşme ve kontrol](docs/ILERLEME_SADELESTIRME.md).
+Aday **1.5.1/code19**, `PUBLISH_RELEASE=false`; ilk Debug/Release CI ve yeni native PNG incelemesi bekleniyor.
+Room/ZIP/domain/veri hizmetleri aynı; XP/rozet/rütbe katsayıları ve etkin-v3 kapıları değişmedi.
+Aday doğrulanmadan mevcut 1.5.0 APK değiştirilmez.
+
+## Önceki doğrulanmış teslim: 1.5.0
 
 - Kullanıcı: **“P4 P5 ve P6 uygula dikkatli adım adım çalış.”** P0–P3 önceki teslimde tamamlandı.
 - P4 CI `39139377311` / `35896fe`: **240/0/0/0**. P5 CI `39140443680` / `522b009`: **274/0/0/0**.

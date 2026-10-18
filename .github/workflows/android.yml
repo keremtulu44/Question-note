@@ -43,7 +43,7 @@ jobs:
         id: release
         shell: bash
         env:
-          PUBLISH_RELEASE: "true" # Run 39143916007: Debug298/0 + Release258/0 + signed APK. Active-v3 gates stay CLOSED.
+          PUBLISH_RELEASE: "false" # 1.5.1: verify the simpler overview and native captures before final publication.
           WRAPPER_VERSION: "9.8.1"
           BUILD_TOOLS_VERSION: "37.0.0"
           EXPECTED_FINGERPRINT: "FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54"
@@ -122,11 +122,21 @@ jobs:
             unit_test_summary=$(python3 tools/junit_ozeti.py summary app/build/test-results/testDebugUnitTest \
               --require-class com.keremtulu.questionnote.ui.OneridenOdagaAkisTest \
               --require-class com.keremtulu.questionnote.ui.P5P6ArayuzTest \
+              --require-class com.keremtulu.questionnote.ui.IlerlemeSadelikTest \
+              --require-class com.keremtulu.questionnote.ui.IlerlemeGorselOnizlemeTest \
               --require-class com.keremtulu.questionnote.ui.P6GorselOnizlemeTest \
               --require-class com.keremtulu.questionnote.data.gelisim.AnalizPerformansTest)
             test_summary_exit=$?
             if [[ "$unit_test_exit" -eq 0 && "$test_summary_exit" -ne 0 ]]; then
               unit_test_exit=1
+            fi
+            if [[ "$unit_test_exit" -eq 0 ]]; then
+              for name in overview-light overview-dark overview-empty overview-error overview-large details comparison plan; do
+                if [[ ! -s "app/build/outputs/progress-previews/$name.png" ]]; then
+                  echo "ERROR: Güncel İlerleme önizlemesi eksik: $name" >> "$test_log"
+                  unit_test_exit=1
+                fi
+              done
             fi
             # Run both independent gates even if Debug fails; build/sign/publish still require BOTH.
             ./gradlew --no-daemon --console=plain --stacktrace :app:testReleaseUnitTest > "$release_test_log" 2>&1
@@ -375,18 +385,18 @@ jobs:
         if: steps.release.outputs.wrapper_exit != '0' || steps.release.outputs.unit_test_exit != '0' || steps.release.outputs.release_test_exit != '0' || steps.release.outputs.build_exit != '0' || steps.release.outputs.signing_exit != '0' || steps.release.outputs.fingerprint_exit != '0' || steps.release.outputs.release_exit != '0'
         run: exit 1
 
-      - name: P1 yerel Compose önizlemelerini sakla
+      - name: Sade İlerleme yerel Compose önizlemelerini sakla
         if: always()
         shell: bash
         run: |
           set -euo pipefail
-          for name in p1-light p1-dark p1-empty p1-error p1-large; do
-            source="app/build/outputs/p1-previews/$name.png"
+          for name in overview-light overview-dark overview-empty overview-error overview-large details comparison plan; do
+            source="app/build/outputs/progress-previews/$name.png"
             if [[ -f "$source" ]]; then
               # Small, named documentation previews only; never collect arbitrary build outputs.
               test "$(stat -c%s "$source")" -lt 1500000
-              mkdir -p docs/ui/p1
-              cp "$source" "docs/ui/p1/$name.png"
+              mkdir -p docs/ui/progress
+              cp "$source" "docs/ui/progress/$name.png"
             fi
           done
 
@@ -419,7 +429,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/DERLEME_RAPORU.md
-          if [[ -d docs/ui/p1 ]]; then git add docs/ui/p1; fi
+          if [[ -d docs/ui/progress ]]; then git add docs/ui/progress; fi
           if [[ -d docs/ui/p6 ]]; then git add docs/ui/p6; fi
           for report in docs/PERFORMANS_DEBUG.md docs/PERFORMANS_RELEASE.md; do
             if [[ -f "$report" ]]; then git add "$report"; fi

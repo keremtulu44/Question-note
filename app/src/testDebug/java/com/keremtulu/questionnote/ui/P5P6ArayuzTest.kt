@@ -74,11 +74,10 @@ class P5P6ArayuzTest {
         var route: Pair<SoruCalismaFiltresi, Int>? = null
         compose.setContent {
             YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
-                Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) { GelisimAnaliziKarti(a) { f, n -> route = f to n } }
+                Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) { GelisimAnaliziKarti(a, AnalizBolumu.GRUPLAR) { f, n -> route = f to n } }
             }
         }
-        compose.onNodeWithText("Kesirler").assertDoesNotExist()
-        compose.onNodeWithTag("analysis-groups-toggle").performScrollTo().performClick()
+        compose.onNodeWithText(context.getString(R.string.analysis_group_action, a.konular.first { it.anahtar.deger == "kesirler" }.uygunSoru)).assertDoesNotExist()
         compose.onNodeWithText("Kesirler").performScrollTo().performClick()
         val g = a.konular.single { it.anahtar.deger == "kesirler" }
         val label = context.getString(R.string.analysis_group_action, g.uygunSoru)
@@ -89,11 +88,14 @@ class P5P6ArayuzTest {
         val a = p6AnalizOrnegi().let { it.copy(plan = it.plan.map { p -> p.copy(kapsanan = 0, bilinmeyen = p.adet, altMs = 0.0, ustMs = 0.0) }) }
         compose.setContent {
             YanlisDefteriTema {
-                Column(Modifier.verticalScroll(rememberScrollState())) { GelisimAnaliziKarti(a) { _, _ -> } }
+                Column(Modifier.verticalScroll(rememberScrollState())) { GelisimAnaliziKarti(a, AnalizBolumu.PLAN) { _, _ -> } }
             }
         }
         compose.onAllNodesWithText("dk", substring = true).assertCountEquals(0)
-        compose.onAllNodesWithText(context.getString(R.string.analysis_no_total_time)).assertCountEquals(7)
+        compose.onAllNodesWithText(context.getString(R.string.analysis_no_total_time)).assertCountEquals(0)
+        compose.onNodeWithTag("analysis-plan-day-0").performScrollTo().performClick()
+        compose.onAllNodesWithText("dk", substring = true).assertCountEquals(0)
+        compose.onNodeWithText(context.getString(R.string.analysis_no_total_time)).assertExists()
     }
     @Test fun insufficientComparisonShowsActualDaysRatherThanJustTheMinimumThreshold() {
         val a = p6AnalizOrnegi()
@@ -102,9 +104,12 @@ class P5P6ArayuzTest {
         assertFalse(a.donem.eslesen.yeterli)
         compose.setContent {
             YanlisDefteriTema {
-                Column(Modifier.verticalScroll(rememberScrollState())) { GelisimAnaliziKarti(a) { _, _ -> } }
+                Column(Modifier.verticalScroll(rememberScrollState())) { GelisimAnaliziKarti(a, AnalizBolumu.DONEM) { _, _ -> } }
             }
         }
+        compose.onNodeWithText(context.getString(R.string.progress_comparison_pending)).assertExists()
+        compose.onNodeWithText(context.getString(R.string.analysis_matched_days, 2, 2)).assertDoesNotExist()
+        compose.onNodeWithTag("analysis-comparison-method").performScrollTo().performClick()
         compose.onNodeWithText(context.getString(R.string.analysis_matched_days, 2, 2)).performScrollTo().assertIsDisplayed()
         compose.onNodeWithText(context.getString(R.string.analysis_insufficient_comparison, 40)).assertExists()
     }

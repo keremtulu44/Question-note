@@ -490,7 +490,7 @@
     <string name="badge_filter_locked">Kilitli</string>
     <string name="badge_filter_secret">Gizli</string>
     <string name="badge_filter_empty">Bu bölümde henüz rozet yok. Her küçük adım ilerleme.</string>
-    <string name="badge_gallery_note">Rozete dokun, koşulunu ve ilerlemeni gör. Bağımsız çözüm = Rahat + çözümü açmadan.</string>
+    <string name="badge_gallery_note">Koşullar için bir rozete dokun.</string>
     <string name="badge_celebrate_kicker">YENİ BAŞARI</string>
     <string name="badge_celebrate_secret">BİR SIR AÇILDI</string>
     <string name="badge_celebrate_title">Bu rozet senin!</string>
@@ -587,14 +587,14 @@
     <!-- P0/P1: gerçek verili ilerleme ve kontrollü hareket -->
     <string name="progress_observer_error">Rozetler şu anda güncellenemiyor. Kayıtların üzerinden yeniden deneyebilirsin.</string>
     <string name="karne_progress_error">Karne hazır; ek ilerleme bilgileri yüklenemedi.</string>
-    <string name="progress_headline">Emeğin iz bırakıyor.</string>
+    <string name="progress_headline">İlerleme</string>
     <string name="progress_subtitle">Kendi ritminde, adım adım.</string>
-    <string name="progress_effort_label">EMEK YOLCULUĞUN</string>
+    <string name="progress_effort_label">EMEK PUANI</string>
     <string name="progress_effort_title">Küçük adımların toplamı</string>
     <string name="progress_effort_note">Zorlandığın tekrarlar da emeğinin bir parçası.</string>
-    <string name="progress_total_xp">%1$s toplam XP</string>
+    <string name="progress_total_xp">%1$s XP</string>
     <string name="progress_xp_fraction">%1$s / %2$s XP · bu seviye</string>
-    <string name="progress_level_remaining">Sonraki seviyeye %1$s XP kaldı.</string>
+    <string name="progress_level_remaining">Sonraki seviye için %1$s XP</string>
     <string name="progress_next_rank">Sırada %1$s var</string>
     <string name="progress_rank_remaining">Seviye %1$d · bu rütbeye %2$s XP</string>
     <string name="progress_xp_note">XP çalışma emeğini gösterir; öğrenme veya sınav başarı puanı değildir.</string>
@@ -604,9 +604,9 @@
     <string name="progress_learning_title">Tekrarların ne söylüyor?</string>
     <string name="progress_learning_note">Pekişme göstergeleri tekrar planından türetilir. Bağımsız çözüm: Rahat ve çözüm açılmamış. Bu gösterge genel sınav başarısı değildir.</string>
     <string name="progress_scope">İstatistikler tüm arşivini kapsar. XP, soru ve tekrar kayıtlarından yeniden hesaplanır.</string>
-    <string name="progress_first_step">İlk adımına yer aç.</string>
-    <string name="progress_empty_archive">Henüz kayıtlı sorun yok. Bir soru eklediğinde emeğin burada görünmeye başlayacak.</string>
-    <string name="progress_no_reviews">Soruların hazır. İlk tekrarından sonra öğrenme göstergelerin oluşmaya başlayacak.</string>
+    <string name="progress_first_step">Bir soruyla başla.</string>
+    <string name="progress_empty_archive">İlk sorunu ekle, yolculuğun başlasın.</string>
+    <string name="progress_no_reviews">Soruların hazır. İlk tekrarına geçebilirsin.</string>
     <string name="progress_add_question">İlk sorumu ekle</string>
     <string name="progress_go_today">Bugünkü çalışmama dön</string>
     <string name="progress_forecast_note">Mevcut planına göre soru adedi. Gecikmiş sorular bu grafiğe dahil değildir.</string>
@@ -664,7 +664,7 @@
     <string name="motor_reason_baseline">v2 kuralı korunuyor. Hız tek başına ödül, yavaşlık tek başına ceza değildir; eksik kanıtta uyarlama yapılmaz.</string>
     <string name="analysis_next_title">Sıradaki küçük adım</string>
     <string name="analysis_current_scope">Çalışma kapsamı: %1$s · yalnız etkin, görünür ve o gün çalışılmamış sorular.</string>
-    <string name="analysis_no_action">Şu anda uygun soru yok. Dinlenebilir veya kendi isteğinle yeni bir soru ekleyebilirsin.</string>
+    <string name="analysis_no_action">Şu an çalışılacak uygun soru yok.</string>
     <string name="analysis_due_action">Vadesi gelen %1$d sorudan başlayabilirsin.</string>
     <string name="analysis_difficulty_action">Bu grupta %2$d soruda yakın güçlük görüldü. Bugün çalışılabilecek %1$d soru var.</string>
     <string name="analysis_small_action">Bugün için %1$d uygun soru var. İstersen küçük bir tur seç; hedefin kendiliğinden artırılmaz.</string>
@@ -729,4 +729,44 @@
     <string name="motor_refresh_diagnostics">Yerel tanıyı yenile</string>
     <string name="motor_diagnostics_error">Tanı okunamadı. Güvenli mod değişmedi; tekrar deneyebilirsin.</string>
     <string name="analysis_matched_days">Eşleşen örneklemin son değerlendirmeleri: önce %1$d ayrı gün, sonra %2$d ayrı gün.</string>
+
+    <!-- 1.5.1: calm overview, details only on request; no new metric or data collection -->
+    <string name="progress_details_title">Ayrıntılar</string>
+    <string name="progress_details_hint">Çalışmalarını yakından incele</string>
+    <string name="progress_effort_details">Emek ve XP</string>
+    <string name="progress_rhythm_short">Son 7 gün</string>
+    <string name="progress_plan_short">Tekrar planı</string>
+    <string name="progress_comparison_short">Dönem karşılaştırması</string>
+    <string name="progress_groups_short">Konular ve kaynaklar</string>
+    <string name="progress_badge_count">%1$d / %2$d rozet</string>
+    <string name="progress_today_scope">Bugün · tüm dersler</string>
+    <string name="progress_daily_count">%1$d / %2$d tekrar</string>
+    <string name="progress_action_scope">%1$s · çalışma kapsamı</string>
+    <string name="progress_action_due">Tekrar zamanı gelen %1$d soru var.</string>
+    <string name="progress_action_difficulty">Zorlandığın konuya küçük bir dönüş.</string>
+    <string name="progress_action_small">Hazırsan kısa bir tur yapabilirsin.</string>
+    <string name="progress_action_inspect">%1$d soruyu filtrede incele</string>
+    <string name="progress_rhythm_scope">Tekrar sayıları · tüm dersler</string>
+    <string name="progress_today_partial">Bugün henüz tamamlanmadı.</string>
+    <string name="progress_day_details">Gün gün soru ve tekrar sayıları</string>
+    <string name="progress_plan_today">Bugün + gecikenler</string>
+    <string name="progress_plan_count">%1$d soru</string>
+    <string name="progress_plan_empty">Bu güne planlanmış soru yok.</string>
+    <string name="progress_calculation_info">Nasıl hesaplanır?</string>
+    <string name="progress_completed_periods">Tamamlanmış iki hafta · bugün hariç</string>
+    <string name="progress_period_before">Önceki 7 gün</string>
+    <string name="progress_period_after">Son 7 gün</string>
+    <string name="progress_matched_sample">%1$d ortak soru</string>
+    <string name="progress_matched_counts">Bağımsız sonuç: önce %1$d, sonra %2$d</string>
+    <string name="progress_comparison_pending">Karşılaştırma için henüz yeterli veri yok.</string>
+    <string name="progress_comparison_limit">Aynı soruların son değerlendirmeleri; genel başarı puanı değil.</string>
+    <string name="progress_why">Neden?</string>
+    <string name="progress_period_independent">%1$d / %2$d</string>
+    <string name="progress_independent_short">bağımsız değerlendirme</string>
+    <string name="progress_topics_short">Konular</string>
+    <string name="progress_sources_short">Kaynaklar</string>
+    <string name="progress_captured_context">Kayıt anındaki konu ve kaynaklar</string>
+    <string name="progress_sample_details">Süre ve örneklem ayrıntıları</string>
+    <string name="progress_details_open">Açık</string>
+    <string name="progress_details_closed">Kapalı</string>
 </resources>

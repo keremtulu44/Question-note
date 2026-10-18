@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -72,7 +73,7 @@ fun RozetKoleksiyonu(sahip: Set<Rozet>, girdi: RozetGirdisi, kazanilmaZamani: (R
         Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             listOf("all" to R.string.badge_filter_all, "earned" to R.string.badge_filter_earned,
                 "locked" to R.string.badge_filter_locked, "secret" to R.string.badge_filter_secret).forEach { (key, label) ->
-                FilterChip(selected = filtre == key, onClick = { filtre = key }, label = { Text(stringResource(label)) })
+                FilterChip(modifier = Modifier.heightIn(min = 48.dp), selected = filtre == key, onClick = { filtre = key }, label = { Text(stringResource(label)) })
             }
         }
         if (liste.isEmpty()) Text(stringResource(R.string.badge_filter_empty), style = MaterialTheme.typography.bodyMedium)
@@ -92,11 +93,7 @@ fun RozetKoleksiyonu(sahip: Set<Rozet>, girdi: RozetGirdisi, kazanilmaZamani: (R
                             else RozetGorseli(rozet, kazanildi, Modifier.size(64.dp))
                             Text(stringResource(if (gizli) R.string.badge_hidden else rozetAdi(rozet)),
                                 style = MaterialTheme.typography.titleSmall, textAlign = TextAlign.Center, fontWeight = FontWeight.SemiBold)
-                            Text(
-                                stringResource(if (gizli) R.string.badge_hidden_desc else rozetAciklamasi(rozet)),
-                                style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
+                            // Unlock instructions belong in the existing detail dialog, not on every tile.
                             if (kazanildi) Text("✓ " + stringResource(R.string.badge_earned),
                                 color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium)
                             else if (!gizli && rozet !in oturumRozetleri) {

@@ -2,6 +2,13 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.5.1] — aday / 2026-10-18
+
+- İlerleme ana sayfası rütbe, bugünkü hedef ve tek çalışma eylemine indirildi; uzun açıklamalar ve üst üste analitik kartlar kaldırıldı.
+- Emek/XP, ritim, plan, konu/kaynak ve karşılaştırma ayrı isteğe bağlı sayfalarda. Planın süre kapsamı güne dokununca, karşılaştırmanın dayanağı “Neden?” altında açılır.
+- Koleksiyon ayrıldı; rozet yönergeleri kartlardan detay penceresine taşındı. Gizli rozet maskelemesi, geri gezinme, büyük yazı ve azaltılmış hareket korunur.
+- Yeni veri, puan, şema veya tekrar kuralı yok. Aday code19, yayın ilk CI/native görsel incelemesine kadar kapalı; 1.5.0 APK değiştirilmez.
+
 ## [1.5.0] — 2026-10-18
 
 - P4: v2 tarihini koruyan varsayılan **Gölge** ve açıklanabilir, en çok %10 azaltan aday3; yakın güçlük ve güvenilir uzun süre birlikte gerekir. Hız XP/bonus değildir. Etkin v3 cihaz/gölge kapıları kapalı.
