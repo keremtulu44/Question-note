@@ -106,14 +106,20 @@ class OneridenOdagaAkisTest {
             compose.mainClock.advanceTimeBy(150)
             val easy = context.getString(R.string.review_result_easy)
             compose.waitUntil(10_000) { compose.onAllNodes(hasText(easy) and isEnabled()).fetchSemanticsNodes().isNotEmpty() }
-            compose.onNodeWithText(easy).tikla()
-            compose.onNodeWithText(context.getString(R.string.focus_save_last)).tikla()
+            compose.onNodeWithText(easy).performScrollTo().tikla()
+            val save = context.getString(R.string.focus_save_last)
+            compose.waitUntil(10_000) { compose.onAllNodes(hasText(save) and isEnabled()).fetchSemanticsNodes().isNotEmpty() }
+            compose.onNodeWithText(save).performScrollTo().tikla()
             compose.waitUntil(10_000) { runBlocking { db.tekrarDao().tumunuGetir().size == 1 } }
             val record = runBlocking { db.tekrarDao().tumunuGetir().single() }
             assertEquals("eligible", record.soruId); assertEquals(2, record.algoritmaSurumu)
             val snapshot = org.json.JSONObject(runBlocking { db.tekrarOlcumDao().tumunuGetir().single().kararJson })
             assertEquals("GOLGE", snapshot.getString("mode"))
             assertEquals(snapshot.getInt("base_interval"), record.sonrakiAralik)
+            // Wait for the async report body so scrolling cannot race its layout expansion.
+            compose.waitUntil(10_000) {
+                compose.onAllNodesWithText(context.getString(R.string.karne_progress_title)).fetchSemanticsNodes().isNotEmpty()
+            }
             val back = context.getString(R.string.karne_to_filters)
             compose.waitUntil(10_000) { compose.onAllNodesWithText(back).fetchSemanticsNodes().isNotEmpty() }
             compose.onNodeWithText(back).performScrollTo().tikla()

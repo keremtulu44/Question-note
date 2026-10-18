@@ -136,7 +136,7 @@ class AnalizPerformansTest {
                 ad to lines
             }
             assertTrue(plans.last().second.any { it.contains("index_tekrarlar_soru_id_gun") })
-            val out = File("build/outputs/p6-benchmark/${BuildConfig.BUILD_TYPE}.md").apply { parentFile.mkdirs() }
+            val out = File("build/outputs/p6-benchmark/${BuildConfig.BUILD_TYPE}.md").apply { requireNotNull(parentFile).mkdirs() }
             val payload = measures.sumOf { it.kararJson.toByteArray(Charsets.UTF_8).size.toLong() }
             fun fmt(n: Double) = String.format(Locale.ROOT, "%.2f", n)
             out.writeText(buildString {

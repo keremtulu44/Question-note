@@ -39,7 +39,7 @@ class P6GorselOnizlemeTest {
         compose.waitForIdle()
         val b = compose.onNodeWithTag("p6-preview").captureToImage().asAndroidBitmap()
         assertTrue(b.width >= 320 && b.height >= 600)
-        val out = File("build/outputs/p6-previews/$ad.png").apply { parentFile.mkdirs() }
+        val out = File("build/outputs/p6-previews/$ad.png").apply { requireNotNull(parentFile).mkdirs() }
         out.outputStream().use { assertTrue(b.compress(Bitmap.CompressFormat.PNG, 100, it)) }
         assertTrue(out.length() in 1..1_500_000)
     }
