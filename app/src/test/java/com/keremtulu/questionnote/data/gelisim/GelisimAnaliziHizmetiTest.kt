@@ -74,8 +74,8 @@ class GelisimAnaliziHizmetiTest {
         val a = analiz()
         assertEquals(2, a.toplam.tekrar); assertEquals(2, a.toplam.bagimsiz); assertEquals(1, a.toplam.baglamsiz)
         assertEquals(2, a.kaynaklar.size)
-        val sql = synchronized(queries) { queries.filter { it.trimStart().startsWith("SELECT", true) } }
-        assertEquals(4, sql.size)
+        val sql = synchronized(queries) { queries.filter { it.trimStart().startsWith("SELECT", true) && !it.contains("room_table_modification_log", true) } }
+        assertEquals(sql.joinToString("\n"), 4, sql.size)
         assertTrue(sql.none { it.contains("karar_json", true) || it.contains("soru_notu", true) || it.contains("gorseller", true) })
     }
     @Test fun actualSameDayRowsOverrideAStaleQuestionSummaryInAllPracticeRoutes() = runBlocking<Unit> {

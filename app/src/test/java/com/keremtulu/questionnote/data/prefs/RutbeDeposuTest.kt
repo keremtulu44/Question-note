@@ -83,7 +83,7 @@ class RutbeDeposuTest {
         depo.geriYuklemeSonrasi()
         val restored = RozetDeposu(context)
         restored.kaydet(Rozet.entries.take(8))
-        assertEquals(8, restored.sahipOlanlar().size)
+        assertEquals(Rozet.entries.take(8).toSet() + Rozet.ILK_SORU, restored.sahipOlanlar())
         assertTrue(restored.bekleyenIzle.value.isEmpty())
         restored.kaydet(listOf(Rozet.entries[8]))
         assertEquals(listOf(Rozet.entries[8]), restored.bekleyenIzle.value)

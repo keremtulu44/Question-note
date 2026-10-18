@@ -88,7 +88,7 @@ class IlerlemeTutarliligiTest {
         } finally { islem.cancelAndJoin(); cevaplar.close() }
     }
 
-    @Test fun goalChangesReevaluateAwardsWithoutChangingTheReviewArchive() = runBlocking {
+    @Test fun goalChangesReevaluateOwnershipWithoutChangingTheArchiveOrCelebratingRetroactiveWork() = runBlocking {
         besTekrar()
         val cevaplar = Channel<List<Rozet>>(Channel.UNLIMITED)
         val islem = launch { odul.degisiklikleriIzle().collect { cevaplar.send(it) } }
@@ -101,7 +101,9 @@ class IlerlemeTutarliligiTest {
             }
             assertTrue(Rozet.HEDEF_1 in rozetler.sahipOlanlar())
             assertEquals(5, db.tekrarDao().tumunuGetir().size)
-            assertEquals(1, rozetler.bekleyenIzle.value.count { it == Rozet.HEDEF_1 })
+            // P5 contract: goal recalculation grants ownership/XP, not a retroactive celebration storm.
+            assertEquals(0, rozetler.bekleyenIzle.value.count { it == Rozet.HEDEF_1 })
+            assertTrue(Rozet.HEDEF_1 in RozetDeposu(RuntimeEnvironment.getApplication()).sahipOlanlar())
         } finally { islem.cancelAndJoin(); cevaplar.close() }
     }
 }
