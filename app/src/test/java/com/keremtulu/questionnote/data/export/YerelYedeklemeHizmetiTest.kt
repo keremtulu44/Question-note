@@ -508,11 +508,15 @@ class YerelYedeklemeHizmetiTest {
         var fail = true
         val guarded = YerelYedeklemeHizmeti(context, database, store) {
             OdakOturumuDeposu(context).temizle(); badges.geriYuklemeSonrasi(); ranks.geriYuklemeSonrasi()
-            if (fail) { fail = false; throw IOException("Simulated interruption after durable cosmetic reset") }
+            // Keep failing through the service's immediate recovery attempt, like unavailable storage.
+            if (fail) throw IOException("Simulated interruption after durable cosmetic reset")
         }
         val preview = guarded.dosyadanOnizle(archive)
         assertThrows(IOException::class.java) { runBlocking { guarded.geriYukle(preview) } }
         assertEquals(preview.id, database.geriYuklemeIsaretiDao().idGetir())
+        assertTrue(RozetDeposu(context).bekleyenIzle.value.isEmpty())
+        assertNull(RutbeDeposu(context).bekleyenIzle.value)
+        fail = false
         assertTrue(guarded.kesintiliGeriYuklemeyiTamamla())
         assertNull(database.geriYuklemeIsaretiDao().idGetir())
         assertTrue(Rozet.ILK_SORU in RozetDeposu(context).sahipOlanlar())

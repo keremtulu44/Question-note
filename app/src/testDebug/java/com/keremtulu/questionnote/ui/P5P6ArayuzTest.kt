@@ -2,6 +2,9 @@ package com.keremtulu.questionnote.ui
 
 import android.content.Context
 import android.content.Intent
+import android.os.Looper
+import androidx.activity.ComponentActivity
+import androidx.lifecycle.Lifecycle
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.rememberScrollState
@@ -11,7 +14,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.*
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.unit.Density
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.data.prefs.*
@@ -32,12 +35,13 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
+import org.robolectric.Shadows
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], qualifiers = "w393dp-h852dp-mdpi")
 class P5P6ArayuzTest {
-    @get:Rule val compose = createComposeRule()
+    @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
     private val context: Context get() = RuntimeEnvironment.getApplication()
     @Before fun temizle() {
         listOf("karne_rozetleri", "rutbe_kutlamalari", "tekrar_politikasi").forEach { context.getSharedPreferences(it, 0).edit().clear().commit() }
@@ -119,18 +123,35 @@ class P5P6ArayuzTest {
         assertEquals(setOf(Rozet.ILK_KARNE), badges.sahipOlanlar())
     }
     @Test fun wallClockAndZoneBroadcastsRefreshTheDisplayedDayWithoutPerSecondPolling() {
-        val clock = object : Clock() {
-            var now: Instant = Instant.parse("2026-10-18T00:30:00Z")
-            var zoneId: ZoneId = ZoneOffset.UTC
-            override fun getZone(): ZoneId = zoneId
-            override fun withZone(zone: ZoneId): Clock = Clock.fixed(now, zone)
-            override fun instant(): Instant = now
-        }
+        val clock = TestClock(Instant.parse("2026-10-18T00:30:00Z"))
         compose.setContent { Text(hatirlaYerelGun(clock).toString()) }
         compose.onNodeWithText("2026-10-18").assertExists()
         compose.runOnIdle { clock.zoneId = ZoneId.of("America/Los_Angeles"); context.sendBroadcast(Intent(Intent.ACTION_TIMEZONE_CHANGED)) }
         compose.waitUntil(5_000) { compose.onAllNodesWithText("2026-10-17").fetchSemanticsNodes().isNotEmpty() }
         compose.runOnIdle { clock.now = clock.now.plusSeconds(86_400); context.sendBroadcast(Intent(Intent.ACTION_TIME_CHANGED)) }
         compose.waitUntil(5_000) { compose.onAllNodesWithText("2026-10-18").fetchSemanticsNodes().isNotEmpty() }
+    }
+    @Test fun resumeAfterClockChangeRefreshesTheDayWithoutNeedingABroadcast() {
+        val clock = TestClock(Instant.parse("2026-10-18T12:00:00Z"))
+        compose.setContent { Text(hatirlaYerelGun(clock).toString()) }
+        compose.onNodeWithText("2026-10-18").assertExists()
+        compose.activityRule.scenario.moveToState(Lifecycle.State.STARTED)
+        clock.now = clock.now.plusSeconds(86_400)
+        compose.activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
+        compose.onNodeWithText("2026-10-19").assertExists()
+    }
+    @Test fun nextMidnightRefreshesTheDayWithoutAResumeOrDateBroadcast() {
+        val clock = TestClock(Instant.parse("2026-10-18T23:59:59Z"))
+        compose.setContent { Text(hatirlaYerelGun(clock).toString()) }
+        compose.onNodeWithText("2026-10-18").assertExists()
+        compose.runOnIdle { clock.now = clock.now.plusSeconds(2) }
+        compose.mainClock.advanceTimeBy(2_000)
+        Shadows.shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(2))
+        compose.onNodeWithText("2026-10-19").assertExists()
+    }
+    private class TestClock(var now: Instant, var zoneId: ZoneId = ZoneOffset.UTC) : Clock() {
+        override fun getZone(): ZoneId = zoneId
+        override fun withZone(zone: ZoneId): Clock = Clock.fixed(now, zone)
+        override fun instant(): Instant = now
     }
 }
