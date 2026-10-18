@@ -104,7 +104,6 @@ class PremiumIlerlemeTest {
 
     @Test fun initialXpIsRealAndReducedMotionAppliesUpdatesWithoutCountingFromZero() {
         val ozet = mutableStateOf(ornekIlerlemeOzeti())
-        compose.mainClock.autoAdvance = false
         compose.setContent {
             YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
                 SeviyeSayfasi(SeviyeDurumuUi.ozetten(ozet.value))
@@ -113,13 +112,31 @@ class PremiumIlerlemeTest {
         fun etiket(xp: Int) = context.getString(R.string.progress_total_xp,
             NumberFormat.getIntegerInstance(Locale.forLanguageTag("tr-TR")).format(xp))
         compose.onNodeWithTag("progress-xp-total").assertTextEquals(etiket(ozet.value.durum.toplamXp))
+        val baslangic = compose.mainClock.currentTime
         compose.runOnIdle { ozet.value = ozet.value.copy(durum = SeviyeHesabi.durum(ozet.value.durum.toplamXp + 10)) }
-        compose.mainClock.advanceTimeByFrame()
-        compose.mainClock.advanceTimeByFrame()
+        // Let Compose dispatch snapshot/apply/measure work. A frozen v1 test clock can assert
+        // stale semantics even for plain Text; bound virtual time instead of skipping redraws.
         compose.onNodeWithTag("progress-xp-total").assertTextEquals(etiket(ozet.value.durum.toplamXp))
         val ilerleme = compose.onNodeWithTag("progress-xp-bar").fetchSemanticsNode().config[SemanticsProperties.ProgressBarRangeInfo]
         assertEquals(ozet.value.durum.oran, ilerleme.current, 0.0001f)
-        compose.mainClock.autoAdvance = true
+        assertTrue("Reduced motion must not wait for the 500 ms XP animation",
+            compose.mainClock.currentTime - baslangic <= 100)
+    }
+
+    @Test fun aRealXpChangeUsesOneShortFiniteAnimationWhenMotionIsEnabled() {
+        val ozet = mutableStateOf(ornekIlerlemeOzeti())
+        compose.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Normal) {
+                SeviyeSayfasi(SeviyeDurumuUi.ozetten(ozet.value))
+            }
+        }
+        compose.waitForIdle()
+        val baslangic = compose.mainClock.currentTime
+        val hedef = ozet.value.durum.toplamXp + 100
+        compose.runOnIdle { ozet.value = ozet.value.copy(durum = SeviyeHesabi.durum(hedef)) }
+        compose.onNodeWithTag("progress-xp-total").assertTextEquals(context.getString(R.string.progress_total_xp,
+            NumberFormat.getIntegerInstance(Locale.forLanguageTag("tr-TR")).format(hedef)))
+        assertTrue(compose.mainClock.currentTime - baslangic in 400..800)
     }
 
     @Test fun twoHundredPercentTextKeepsTheActionUsableAndExplainsEffortVersusLearning() {
