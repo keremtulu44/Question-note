@@ -1,7 +1,7 @@
 # Yanlış Defteri — Premium deneyim ve kişiselleşen öğrenme sistemi
 
 **Tarih:** 2026-10-18
-**Durum:** P0–P5 uygulandı. P4 CI `39139377311` **240/0/0/0**, P5 CI `39140443680` **274/0/0/0**. P6 birleşik CI `39143916007` **Debug298/0/0/0 + Release258/0/0/0**, APK/imza/sertifika başarılı. Aday 1.5.0/code18, son yayımlanan 1.4.1/code17. Fiziksel kabul açık; etkin v3 kapalı. [Uygulama/kanıt kaydı](P4_P5_P6_UYGULAMA.md).
+**Durum:** P0–P5 uygulandı. P4 CI `39139377311` **240/0/0/0**, P5 CI `39140443680` **274/0/0/0**. P6 son yayın CI `39144684877` **Debug298/0/0/0 + Release258/0/0/0**, APK/imza/sertifika başarılı. **v1.5.0/code18 yayımlandı**, asset digest ve kaynak/tag doğrulandı. Fiziksel kabul açık; etkin v3 kapalı. [Uygulama/kanıt kaydı](P4_P5_P6_UYGULAMA.md).
 **Başlangıç:** v1.2.0 / code 14, Room v3, ZIP v3, tekrar algoritması v2. Başlangıç CI kanıtı: `39067624050`, 130 başarılı test; fiziksel cihaz kabulü ayrı ve bekliyor.
 
 ## Tarihsel P0/P1 uygulama notu — v1.3.0 / 2026-10-18
@@ -26,7 +26,7 @@
 - **Doğrulama:** v1.4.0 ana paket CI `39135928734` 217/0; son v1.4.1 CI `39136991000` **221/0/0/0**. Önceki 157 + 64 yeni test; Release/imza/sertifika ve asset digest eşleşti. Gerçek cihaz/performans kabulü ayrıca bekler. [Uygulanan sözleşme](OLCUM_VE_PROFILLER.md).
 - Son güvence: çözüm gösterilmeden en güncel açma işareti kalıcıdır; ilk checkpoint gecikse/duvar saati geri alınsa da commit, deneme/oturum ID’siyle uzlaştırılır.
 
-## P4–P6 uygulama notu — 1.5.0 adayı / 2026-10-18
+## P4–P6 uygulama notu — v1.5.0 / 2026-10-18
 
 - P4: v2'yi koruyan açıklanabilir v3 adayı, Gölge varsayılanı; 5 ayrı gün/90 gün, iki başarıyla toparlanma,
   yeterli kişisel referans + tekrarlayan güçlük + uzun tam ölçüm birlikte. Gerçek indirim ≤%10, çift ceza/XP etkisi yok.

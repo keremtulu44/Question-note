@@ -5,8 +5,8 @@ Bu belge uygulanan sözleşmeyi ve gerçekten gözlenen kapıları kaydeder; tes
 
 ## Güncel durum
 
-- **P4/P5 ve P6 otomatik kapıları geçti.** `478b86c` / CI `39143916007`: Debug **298/0/0/0**, Release **258/0/0/0**, APK derleme/imza/sertifika başarılı. Ortak testler iki kez yürür; sayılar toplanmaz.
-- Sürüm **1.5.0 / code18**; birleşik doğrulama sonrası son yayın koşusu açılıyor. Henüz yayımlanan son paket **1.4.1 / code17**; ara APK yayınlanmadı.
+- **P4/P5 ve P6 otomatik kapıları geçti.** Son yayın `9c3c51f` / CI `39144684877`: Debug **298/0/0/0**, Release **258/0/0/0**, APK derleme/imza/sertifika/yayın başarılı. Ortak testler iki kez yürür; sayılar toplanmaz.
+- **v1.5.0 / code18 yayımlandı.** APK 10.791.135 bayt, asset 653916834; CI SHA-256 `3e7158345d0e0c88bf03698b8ba21db1fedef6a123758de5e7b13f8e5a5470db` GitHub asset digest ile eşleşti. Tag/source `9c3c51f`; ara APK’lar yayımlanmamıştı.
 - Üretim varsayılanı **Gölge**: kaydedilen tarih v2; ayrı v3 adayının farkı/nedenleri yerel kayıttadır.
 - **Etkin v3 kapalı.** Cihaz ve gölge kabul kapıları kodda ayrı ve varsayılan false. Tercih dosyası bu kapıları atlayamaz.
 - Fiziksel S24 FE / daha düşük güçlü cihaz, TalkBack, SAF/bulut, düşük depolama, gerçek süreç ölümü/reboot ve frame-p95 kabulü yapılmadı. Robolectric bunu ikame etmez.
@@ -86,6 +86,7 @@ Bu belge uygulanan sözleşmeyi ve gerçekten gözlenen kapıları kaydeder; tes
 | P6 `bcdc461` | `39142970779` | Release **258 / 0 / 0 / 0** ve Release benchmark başarılı. Debug **298 / 1 / 0 / 0**: daha sıkı UI fixture görünürlük kontrolü Rahat seçeneğinin kaydırma gerektirdiğini gösterdi; açık kaydırma + gerçek önizleme/karne hazır beklemeleri eklendi. Yayın kapalı |
 | P6 `4ef73e9` | `39143488466` | Release **258 / 0 / 0 / 0**. Debug **298 / 1 / 0 / 0**: Rahat seçeneğine kaydırma geçti; sabit alt bardaki Kaydet için kaydırma istenemeyeceği görüldü. Yalnız Kaydet’in gereksiz scroll çağrısı kaldırıldı; görünürlük/etkinlik ve gerçek kayıt kontrolleri kaldı |
 | P6 `478b86c` | `39143916007` | **Debug 298 / 0 / 0 / 0; Release 258 / 0 / 0 / 0**. Derleme/imza/sertifika başarılı, iki native benchmark + beş PNG taze üretildi. Ara yayın kapalıydı; bu birleşik kanıt sonrası nihai yayın açılıyor |
+| **P6 son `9c3c51f`** | **`39144684877`** | **Debug298/0/0/0 + Release258/0/0/0**, APK/imza/sertifika ve v1.5.0 yayını başarılı; tag/source/asset digest bağımsız API ile eşleşti. Cihaz/etkin-v3 kapıları açık sayılmadı |
 
 Sütun sırası: **test / başarısız / hata / atlanan**. Derleme/parsing ile çalışmış test sonucu birbirinin yerine yazılmaz.
 Güncel otomatik rapor [DERLEME_RAPORU.md](DERLEME_RAPORU.md). İlk başarısızlıkları gizlemek için test/koruma silinmedi.
@@ -112,3 +113,7 @@ Debug başarısız olsa bile Release testi ayrıca çalışır; derleme/imza/yay
 Release 555,00 / 721,55 ms, tam İlerleme 700,96 ms. Dört ince SELECT ve 22.749.680 bayt karar yükünün
 projeksiyondan dışlanması doğrulandı. Bunlar farklı host koşuları arasında hız kazanımı ya da telefon
 kare bütçesi iddiası değildir; sonraki koşuların ham ölçümü ayrı otomatik raporlardadır.
+
+Son yayın koşusunun (`9c3c51f`) sıcak host medyan/p95'i Debug **575,56 /617,73ms**, Release **521,81 /604,30ms**;
+tam Release İlerleme **672,57ms**. Beş PNG önceki incelenmiş çıktılarla aynı; kaynak seti/test koşusu taze.
+[Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.5.0) · [APK](https://github.com/keremtulu44/Question-note/releases/download/v1.5.0/yanlis-defteri-1.5.0.apk).

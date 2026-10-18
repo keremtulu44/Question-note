@@ -25,8 +25,8 @@ yeni testlerin yeşil olması geçmişteki cihaz bekleyenlerini tamamlanmış ya
 
 ## P4–P6 — otomatik kanıt ve ayrı fiziksel kabul
 
-Aday sürüm 1.5.0/code18. P4 CI `39139377311` 240/0, P5 `39140443680` 274/0;
-P6 **birleşik CI `39143916007`: Debug298/0/0/0 + Release258/0/0/0**, APK/imza/sertifika başarılı. Nihai yayın ve bağımsız asset kontrolü bekleniyor. Ayrı varyantlar aynı ortak
+Yayımlanan sürüm v1.5.0/code18. P4 CI `39139377311` 240/0, P5 `39140443680` 274/0;
+P6 **son yayın CI `39144684877`: Debug298/0/0/0 + Release258/0/0/0**, APK/imza/sertifika başarılı. Nihai yayın, tag/source ve GitHub asset digest CI raporuyla eşleşti. Ayrı varyantlar aynı ortak
 testleri tekrar eder; sayılar toplanmaz. [Koşu/başarısızlık günlüğü](P4_P5_P6_UYGULAMA.md).
 
 | Kontrol | Kanıt / sorumlu | Durum |
@@ -44,7 +44,7 @@ testleri tekrar eder; sayılar toplanmaz. [Koşu/başarısızlık günlüğü](P
 | Açık/koyu, %200, hareket kapalı, ≥48dp eylem, gizli maske/semantik; native bileşen çizimleri | Debug-only Compose | [x] |
 | 1.000 soru/20.000 tekrar, dört ince SELECT, EXPLAIN indeksleri ve ham host süre raporu | `PERFORMANS_DEBUG.md` | [x] |
 | Ortak testlerin ayrıca **Release** derlenmesi/çalışması ve Release benchmark | CI `39143916007` / Release258/0 + rapor | [x] |
-| Nihai release derlemesi, imza/sertifika ve yayımlanan asset SHA-256 eşleşmesi | CI `39143916007` derleme/imza geçti; son yayın/asset digest bekliyor | [ ] |
+| Nihai release derlemesi, imza/sertifika ve yayımlanan asset SHA-256 eşleşmesi | CI `39144684877` + Release/tag/asset API kontrolü | [x] |
 
 ### P6 fiziksel kapıları — otomatik test sonucu ile işaretlenmez
 

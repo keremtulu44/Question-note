@@ -4,22 +4,21 @@
 > Hiçbir anahtar, parola veya token bu depoya yazılmaz.
 
 - Son güncelleme: 2026-10-18
-- Son yayımlanan sürüm: **v1.4.1 (versionCode 17)**. CI run `39136991000`: **221 test** geçti;
-  Release derlemesi, apksigner ve beklenen sertifika eşleşmesi başarılı.
-- [Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.4.1) ·
-  [APK indir](https://github.com/keremtulu44/Question-note/releases/download/v1.4.1/yanlis-defteri-1.4.1.apk).
-  APK 10.651.871 bayt; SHA-256 `9634c5bb59ea574f27c101a8332ed2689719ddf95e31a5a102b6165e48180057`.
-  CI raporu ile GitHub asset digest eşleşir; derlenen commit `2fbe6255646029d040cfe4e2f2d600340e0206a7`.
-- P0–P3 yayımlandı: gerçek süre/kalite, güvenli kayıt/kurtarma, kişisel referans, Room/ZIP v4.
-  Tekrar v2, XP ve 30 rozet/15 rütbe kuralları korundu.
-  **Fiziksel cihaz kabulü ayrıdır**; otomatik testlerin yeşil olması gerçek cihaz testi yapıldığı
-  anlamına gelmez. Ayrıntı `docs/TEST_KONTROL_LISTESI.md`.
+- Son yayımlanan sürüm: **v1.5.0 (versionCode18)**. CI `39144684877`: **Debug298/0/0/0**, ayrıca **Release258/0/0/0**.
+  Release APK derlemesi, apksigner ve beklenen sertifika eşleşmesi başarılı.
+- [Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.5.0) · [APK indir](https://github.com/keremtulu44/Question-note/releases/download/v1.5.0/yanlis-defteri-1.5.0.apk).
+  APK **10.791.135 bayt**; SHA-256 `3e7158345d0e0c88bf03698b8ba21db1fedef6a123758de5e7b13f8e5a5470db`.
+  CI raporu ile GitHub asset digest eşleşir; tag/derlenen commit `9c3c51f34aa8419c2cab948601823f6fc58351e3`.
+- P0–P5 ve P6 otomatik kalite kapıları yayımlandı; Room/ZIP4, geçmiş/snapshot uyumluluğu korunur.
+  Varsayılan **Gölge v2 tarihi uygular; etkin v3 kapalıdır**. XP/30 rozet/15 rütbe katsayıları aynı.
+- **Fiziksel cihaz kabulü ayrıdır**; otomatik testin yeşil olması gerçek cihaz testi yapıldığı anlamına gelmez.
+  Ayrıntı `docs/TEST_KONTROL_LISTESI.md`; host benchmark telefon/frame/cold-start ölçümü değildir.
 
 ---
 
 ## P6 varyant ve kanıt kapısı
 
-- 1.5.0/code18, birleşik CI `39143916007`: Debug298/0, Release258/0 ve APK/imza/sertifika başarılı; son yayın hazırlanıyor.
+- 1.5.0/code18, son yayın CI `39144684877`: Debug298/0, Release258/0 ve APK/imza/sertifika/yayın başarılı.
   Güncel sonuç ve kaynak: [DERLEME_RAPORU.md](docs/DERLEME_RAPORU.md).
 - Debug başarısız olsa da Release testi çalışır; APK için **ikisi de** geçmelidir. CI sırası `:app:testDebugUnitTest` → `:app:testReleaseUnitTest` → `:app:assembleRelease` →
   imza/sertifika → yayın. Ortak testler iki varyantta; UI/Preview `src/testDebug`'da, sayılar toplanmaz.
@@ -28,7 +27,7 @@
 - `tools/junit_ozeti.py` eksik/sıfır rapor, başarısız/hatalı/atlanan test ve zorunlu test sınıfının
   keşfedilmemesini reddeder. Derleme hatası, “0 test başarılı” diye geçilmez.
 - Ara `PUBLISH_RELEASE=false`, başarılı imzalı ara APK'yı yayımlamaz. İki varyant `39143916007` ile
-  birlikte doğrulandığı için nihai paket bayrağı açılıyor. **Bu yayın bayrağı, ayrı olan etkin-v3 kapılarını açmaz.**
+  birlikte doğrulandı; nihai paket bayrağı açıldı, `39144684877` aynı kapıları yeniden geçerek yayımladı. **Bu yayın bayrağı, ayrı olan etkin-v3 kapılarını açmaz.**
 - Küçük native PNG'ler `docs/ui/p6`, sentetik host ölçümleri `docs/PERFORMANS_DEBUG.md` ve
   `docs/PERFORMANS_RELEASE.md`. Büyük veri/ZIP/APK Git'e girmez.
 
@@ -52,7 +51,7 @@ Kullanıcının telefonunda Android SDK, Gradle veya Termux kurması **gerekmez*
 
 - Tek Gradle modülü, Kotlin + Jetpack Compose.
 - Sürümler `gradle/libs.versions.toml` içinde sabitlenir; Gradle wrapper depoda tutulur.
-- minSdk 26, compileSdk/targetSdk 37; yayımlanmış v1.4.1 `versionCode=17` (v1.4.0: 16; v1.3.0: 15).
+- minSdk 26, compileSdk/targetSdk 37; yayımlanmış v1.5.0 `versionCode=18` (v1.4.1: 17; v1.4.0: 16; v1.3.0: 15).
 - Yapay zekâ ortamında Java/Android SDK ve Maven erişimi yoktur → derleme **yalnızca** Actions'ta olur.
 
 ## 3. İmzalama düzeni (kritik)
@@ -123,7 +122,7 @@ günlük arşivin kurulu olduğu telefonun üzerine kurulmaz.
 
 ## 5. APK'ya telefondan erişim
 
-**Güncel:** [v1.4.1 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.4.1/yanlis-defteri-1.4.1.apk).
+**Güncel:** [v1.5.0 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.5.0/yanlis-defteri-1.5.0.apk).
 Mevcut uygulamayı kaldırmadan üzerine kur; güncelleme öncesi Ayarlar'dan ZIP yedeği almak önerilir.
 
 İlk sürümlerin tarihsel Release kayıtları:

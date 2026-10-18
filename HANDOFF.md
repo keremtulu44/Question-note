@@ -8,15 +8,17 @@
 - Kullanıcı: **“P4 P5 ve P6 uygula dikkatli adım adım çalış.”** P0–P3 önceki teslimde tamamlandı.
 - P4 CI `39139377311` / `35896fe`: **240/0/0/0**. P5 CI `39140443680` / `522b009`: **274/0/0/0**.
   Her ikisinde release derlemesi/imza/sertifika başarılı; ara yayın bilinçli kapalıydı.
-- **P6 birleşik CI `39143916007` / `478b86c`: Debug 298/0/0/0, Release 258/0/0/0**, release APK
-  derlemesi/imza/sertifika başarılı. İki varyant benchmark ve beş native PNG gerçekten üretildi; test cache/up-to-date kapalı.
-- **1.5.0 / code18** son yayın koşusu açılıyor. **Etkin v3 kapalı**; Gölge varsayılanı v2 tarihini uygular.
-  Ara APK yayımlanmadı; iki varyantın birleşik yeşil sonucundan sonra `PUBLISH_RELEASE=true` açılıyor.
-- Son bağımsız doğrulanmış yayımlanan sürüm **v1.4.1 / code17**, CI `39136991000`, **221/0/0/0**;
-  kaynak `2fbe6255646029d040cfe4e2f2d600340e0206a7`.
-  [APK](https://github.com/keremtulu44/Question-note/releases/download/v1.4.1/yanlis-defteri-1.4.1.apk),
-  **10.651.871 bayt**, asset `653705565`, SHA-256 `9634c5bb59ea574f27c101a8332ed2689719ddf95e31a5a102b6165e48180057`.
-  CI ile GitHub asset digest ayrıca eşleştirildi.
+- **P6 son yayın CI `39144684877` / `9c3c51f`: Debug298/0/0/0, Release258/0/0/0**; APK derleme,
+  imza/sertifika ve Release başarılı. İlk birleşik yeşil koşu `39143916007` / `478b86c` idi; final aynı kontrolleri yeniden geçti.
+- **Yayımlanan v1.5.0 / code18**, `2026-10-18T16:24:15Z`. [Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.5.0) · [APK](https://github.com/keremtulu44/Question-note/releases/download/v1.5.0/yanlis-defteri-1.5.0.apk).
+  Kaynak/tag commit'i **`9c3c51f34aa8419c2cab948601823f6fc58351e3`**, asset **653916834**, **10.791.135 bayt**.
+  SHA-256 **`3e7158345d0e0c88bf03698b8ba21db1fedef6a123758de5e7b13f8e5a5470db`**. CI raporu ile GitHub asset digest, boyut/isim ve tag referansı bağımsız API sorgusuyla eşleştirildi.
+- **Etkin v3 kapalı**; Gölge varsayılanı v2 tarihini uygular. Yayın bayrağı bu ayrı motor kapılarını açmaz.
+- Host ölçümü: Debug sıcak medyan575,56 / host-p95 617,73ms; Release521,81 /604,30ms,
+  tam Release İlerleme672,57ms. Dört ince SELECT, 22.749.680 bayt karar JSON'u projeksiyon dışında.
+  Bu **telefon frame-p95 veya cold-start kabulü değildir**; örnekler/planlar iki otomatik raporda.
+- Beş P6 PNG incelendi: açık/koyu/%200/boş/analiz, footer kontrastı ve gerçek eşleşen gün adetleri.
+  Görüntüler native/sentetik; cihaz ekran fotoğrafı değildir. Fiziksel kabul açık.
 
 ## Çalışma sınırları
 
@@ -101,7 +103,9 @@
 
 ## Sonraki somut adım
 
-1. Son yayın koşusunun sonucunu takip et; Debug298/0 + Release258/0 + imza/sertifika yeniden geçmeden yayın oluşamaz.
-2. Rapor botunu fetch/rebase ile al; Release asset boyut/digest/target SHA ilişkisini API'den bağımsız doğrula.
-3. README/HANDOFF/BUILDING/ROADMAP/CHANGELOG ve test kaydındaki aday/yayın durumunu gerçek yayın kanıtıyla güncelle.
-4. Fiziksel kabul bekleyenlerini açık bırak; etkin v3'ü cihaz/gölge kanıtı olmadan açma.
+Kod/otomatik teslim tamamlandı, v1.5.0 yayımlandı; merge/PR yapılmadı.
+
+1. Fiziksel `P6.D1–D13` kabulünü gerçek S24 FE/TalkBack/SAF ve mümkünse daha düşük güçlü cihazda yürüt.
+2. Gerçek süreç ölümü/reboot/düşük depolama ve cihaz frame-p95 sonuçlarını host ölçümüyle karıştırmadan kaydet.
+3. Gerçek gölge fark/neden/eksik veri/yuvarlama/toparlanma örneklerini uzunlamasına incele.
+4. Bu iki kabul olmadan etkin v3 kapılarını açma. Sorunda Ayarlar → Kapalı/v2; eski APK'ya DB downgrade yapma.

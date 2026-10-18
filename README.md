@@ -25,11 +25,13 @@ cevaplamak ve çözümü öğrenme sürecinden ayrı saklamaktır.
 
 ## Durum
 
-**v1.4.1 yayımlandı** (versionCode 17). [CI `39136991000`](https://github.com/keremtulu44/Question-note/actions/runs/39136991000): **221 test geçti**, Release derlemesi, imza ve sertifika doğrulaması başarılı.
+**v1.5.0 yayımlandı** (versionCode18). [CI `39144684877`](https://github.com/keremtulu44/Question-note/actions/runs/39144684877):
+**Debug 298/0/0/0 · Release 258/0/0/0**; derleme/imza/sertifika başarılı, yayımlanan asset digest CI ile eşleşti.
+Ortak testler iki varyantta tekrar eder; sayılar toplanmaz.
 
-**Geliştirme dalında 1.5.0 adayı:** P4/P5 uygulandı; gölge v3, tarihsel kaynak/konu analitiği,
-ritim/iş yükü, öneriden Odak’a geçiş ve kalıcı rütbe kutlaması. **Birleşik P6 CI `39143916007`: Debug 298/0, Release 258/0**, APK derleme/imza/sertifika başarılı.
-Son yayın hazırlanıyor; aday henüz yayımlanmadı. [Kanıt ve açık kapılar](docs/P4_P5_P6_UYGULAMA.md).
+- **P4:** Açıklanabilir v3 adayı **Gölge** modunda; gerçek tarihler hâlâ v2. Güvenilir süre ve yakın güçlük birlikte değerlendirilir; hız bonusu/tek başına yavaşlık cezası yok. Etkin v3 kapalı.
+- **P5:** Tarihsel kaynak/konu, soru/tekrar/payda/kapsama, gerçek ritim ve tamamlanmış dönemler; kapsamlı iş yükü ve öneriden Filtreli/Odak’a geçiş. Kalıcı birleşik rütbe kuyruğu, tek fullscreen host.
+- **P6:** Ayrı Debug/Release kapıları, 1.000 soru/20.000 tekrar native host raporları, beş sentetik Compose önizlemesi; tanı, ZIP/sürüm/restore ve gerçek shell regresyonları. **Fiziksel cihaz kabulü açık.** [Kanıt/rollback](docs/P4_P5_P6_UYGULAMA.md).
 
 - **P2/P3:** Monotonik deneme/inceleme ölçümü, dondurulan değerlendirme, güvenli devam ve atomik
   tekrar kaydı. Yeterli yeni ölçümde kişisel süre referansı; eski kayıttan hayalî süre yok.
@@ -88,10 +90,10 @@ turu denemedim” ifadesinin checklist eşlemesi hâlâ teyitsiz; ayrıntı
 ## Kullanım / APK erişimi
 
 İmzalı APK'lar GitHub [Releases](https://github.com/keremtulu44/Question-note/releases) bölümünde.
-[v1.4.1 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.4.1/yanlis-defteri-1.4.1.apk).
+[v1.5.0 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.5.0/yanlis-defteri-1.5.0.apk).
 
-APK: 10.651.871 bayt. SHA-256: `9634c5bb59ea574f27c101a8332ed2689719ddf95e31a5a102b6165e48180057`. CI raporu ile GitHub asset digest eşleşiyor.
-Mevcut uygulamayı **kaldırmadan** üzerine kur; eski kayıtların korunduğunu doğrula. Alt menüdeki beş
+APK: 10.791.135 bayt. SHA-256: `3e7158345d0e0c88bf03698b8ba21db1fedef6a123758de5e7b13f8e5a5470db`. CI raporu ile GitHub asset digest eşleşiyor.
+Güncellemeden önce Ayarlar’dan ZIP yedeği al. Mevcut uygulamayı **kaldırmadan** üzerine kur; eski kayıtların korunduğunu doğrula. Alt menüdeki beş
 sekmeyi gez; **İlerleme** sekmesinde rütbe amblemini, XP çubuğunu, rozet galerisini ve tahmini kontrol et.
 **Ayarlar**'da günlük hedefi değiştir, yedek al. Konu ve kaynak/neden silmeyi dene (kullanımdaysa
 uyarı çıkmalı). Ardından filtreli bir oturum tamamlayıp karnenin hâlâ çalıştığını doğrula.

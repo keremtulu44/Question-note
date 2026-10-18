@@ -9,7 +9,7 @@ Durum işaretleri: `[ ]` yapılmadı · `[~]` kod mevcut; bu sürümün CI/Relea
 ## Gelişim planı — P0–P5 uygulandı; P6 kapıları (2026-10-18)
 
 Ayrıntılı görev/dosya/bağımlılık/test planı: [Gelişim ve Öğrenme Planı](docs/GELISIM_VE_OGRENME_PLANI.md).
-P0–P5 kod/otomatik kapıları geçti; P6 birleşik CI `39143916007`: Debug298/0, Release258/0 + APK/imza/sertifika geçti. Fiziksel kabul açık. [Güncel kanıt](docs/P4_P5_P6_UYGULAMA.md).
+P0–P5 kod/otomatik kapıları geçti; P6 son yayın CI `39144684877`: Debug298/0, Release258/0 + APK/imza/sertifika geçti. Fiziksel kabul açık. [Güncel kanıt](docs/P4_P5_P6_UYGULAMA.md).
 
 - [~] **P0–P1 uygulandı:** canlı rozet/snapshot, dayanıklı gözlem ve commit sonrası devam temizliği; gerçek verili yeni İlerleme, ortak hareket politikası ve debug Preview. CI `39131225744`: **157/0**; cihaz kabulü bekliyor.
 - [~] **P2 uygulandı:** monotonik/fazlı süre, kalite, atomik/idempotent kayıt, kimlikli kurtarma, çözüm açma bariyeri ve Room/ZIP v4.
@@ -18,7 +18,13 @@ P0–P5 kod/otomatik kapıları geçti; P6 birleşik CI `39143916007`: Debug298/
 - [~] **P5 uygulandı:** gerçek kaynak/konu/ritim/dönem/iş yükü, uygun filtre/Odak eylemi ve kalıcı tek kutlama host’u. CI 274/0.
 - [~] **P6:** birleşik Debug298/0 + Release258/0; iki host benchmark ve beş önizleme, APK/imza/sertifika doğrulandı. Fiziksel cihaz/TalkBack/SAF/frame-p95 bekliyor.
 
-## Son yayımlanan — v1.4.1 (1.5.0 adayı henüz yayımlanmadı)
+## Son yayımlanan — v1.5.0 / code18
+
+- [x] P4/P5 + P6 otomatik kapıları: CI `39144684877` Debug298/0, Release258/0; release/imza/sertifika ve yayımlanan asset digest doğrulandı.
+- [x] Kaynak/tag `9c3c51f`, APK 10.791.135 bayt. Etkin v3 kapalı, Gölge v2 tarihini uygular.
+- [ ] P6.D1–D13 fiziksel/gölge kabulü; yalnız otomatik testle tamamlandı sayılmaz.
+
+### Önceki v1.4.1 / P2–P3 teslimi
 
 - [x] **v1.4.1/code 17:** CI `39136991000`, **221 test / 0 başarısız**, Release/imza/sertifika ve yayımlanmış APK digest eşleşmesi başarılı. Önceki 157-test tabanı + 64 yeni test.
 - [x] P2/P3 ana paket v1.4.0 CI `39135928734` ile 217/0; son paket ek kurtarma/çözüm bariyeri güvencelerini içerir.
@@ -119,7 +125,7 @@ Aşağıdaki Aşama 0–4 kayıtları önceki sürümlerin tarihsel durumudur.
 
 ## Aşama 5 — Kullanılabilirlik ve sağlamlaştırma
 
-- [ ] Büyük arşiv performansını ölçme; ölçmeden performans iddiası yok.
+- [~] P6: 1.000 soru/20.000 tekrar Debug/Release native host ölçümü ve EXPLAIN tamam. Gerçek cihaz frame-p95/ilk-sıcak açılış kabulü açık; host sonucu telefon performansı değildir.
 - [ ] Depolama göstergesi, düşük depolama ve yarıda kesilen işlemler için cihaz testleri.
 - [ ] Önizleme stratejisi, kırpma ekranı, erişilebilirlik ve tema iyileştirmeleri.
 
