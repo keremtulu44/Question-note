@@ -539,7 +539,7 @@
     <string name="focus_save_error">Sonucun kaydedilemedi. Seçimin duruyor; yeniden dene.</string>
     <string name="focus_difficult">Bu soru biraz daha ilgi istiyor</string>
     <string name="focus_difficult_note">Dört veya daha fazla çözemedim kaydı var. Çözümü adım adım incele; istersen konuyu yeniden çalış. Hiçbir soru otomatik askıya alınmaz.</string>
-    <string name="focus_image_hint">Büyütmek ve yakınlaştırmak için görsele dokun.</string>
+    <string name="focus_image_hint">Yakınlaştırmak için görsele dokun. Tam ekranda süre durur; ölçüm kısmi sayılır.</string>
     <string name="focus_no_questions">Bu oturumdaki sorular artık kullanılabilir değil.</string>
     <string name="focus_restore_note">Yarım kalan odak oturumun geri getirildi.</string>
     <string name="focus_continue_session">Yarım kalan oturuma dön</string>
