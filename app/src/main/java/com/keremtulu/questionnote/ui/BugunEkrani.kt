@@ -88,15 +88,7 @@ fun BugunEkrani(
     onOturumBaslat: (List<Soru>, Map<String, Ders>) -> Unit,
     onDevam: (() -> Unit)? = null,
 ) {
-    val today by produceState(initialValue = LocalDate.now()) {
-        while (true) {
-            val now = ZonedDateTime.now()
-            val midnight = now.toLocalDate().plusDays(1).atStartOfDay(now.zone)
-            val waitMillis = Duration.between(now, midnight).toMillis().coerceAtLeast(1_000L)
-            delay(waitMillis)
-            value = LocalDate.now()
-        }
-    }
+    val today = com.keremtulu.questionnote.ui.bilesenler.hatirlaYerelGun()
     val dateText = remember(today) {
         today.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", Locale.forLanguageTag("tr-TR")))
             .replaceFirstChar { it.titlecase(Locale.forLanguageTag("tr-TR")) }

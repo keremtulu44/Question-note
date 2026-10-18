@@ -24,11 +24,25 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 @Composable
-fun MotorAyarlariKarti(depo: TekrarPolitikasiDeposu) {
+fun MotorAyarlariKarti(depo: TekrarPolitikasiDeposu, taniHizmeti: com.keremtulu.questionnote.data.gelisim.MotorTaniHizmeti? = null) {
     val ayar by depo.izle.collectAsState()
     val scope = rememberCoroutineScope()
     var mesgul by remember { mutableStateOf(false) }
     var hata by remember { mutableStateOf(false) }
+    var taniYenile by remember { mutableIntStateOf(0) }
+    var taniHatasi by remember { mutableStateOf(false) }
+    val tani by produceState<com.keremtulu.questionnote.data.gelisim.MotorTanisi?>(null, taniHizmeti, taniYenile, ayar) {
+        value = null; taniHatasi = false
+        if (taniHizmeti != null) {
+            try {
+                value = taniHizmeti.oku()
+            } catch (iptal: CancellationException) {
+                throw iptal
+            } catch (_: Exception) {
+                taniHatasi = true
+            }
+        }
+    }
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(stringResource(R.string.motor_title), style = MaterialTheme.typography.titleMedium)
@@ -61,6 +75,15 @@ fun MotorAyarlariKarti(depo: TekrarPolitikasiDeposu) {
             }
             if (!ayar.kapi.etkinAcik) Text(stringResource(R.string.motor_gate_note), style = MaterialTheme.typography.bodySmall)
             if (hata) Text(stringResource(R.string.motor_save_error), color = MaterialTheme.colorScheme.error)
+            tani?.let { t ->
+                Text(stringResource(R.string.motor_diagnostics, t.incelenen, t.toplamKarar, t.v2, t.golge, t.farkliAday, t.etkin, t.gecersiz),
+                    style = MaterialTheme.typography.bodySmall)
+                Text(stringResource(R.string.motor_diagnostics_note), style = MaterialTheme.typography.bodySmall)
+            }
+            if (taniHatasi) Text(stringResource(R.string.motor_diagnostics_error), color = MaterialTheme.colorScheme.error)
+            if (taniHizmeti != null) OutlinedButton(onClick = { taniYenile++ }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+                Text(stringResource(R.string.motor_refresh_diagnostics))
+            }
         }
     }
 }

@@ -31,3 +31,17 @@ Gerçek S24 FE, TalkBack, SAF/Drive, düşük depolama, gerçek süreç ölümü
 - Plan iş yükünde tüm sonuçlar kullanılır; %80 altı yalnız kapsanan soruların ara toplamı (kapsanan sıfırsa dakika yok). %80 ve üzerindeki toplam ölçeklemesi açıkça yaklaşık ve belirsizdir.
 - Öneri → kapsamı görünür Filtreli → kullanıcı başlatırsa Odak. Ders/vade/normalize kaynak ve gerçek aynı-gün kaydı ortak uygunlukta; başlatma ve kayıt anında tekrar kontrol.
 - Rütbe için kalıcı üst eşik/görülme/tek birleşik kutlama; startup/restore/hedef hesabında sessiz taban; rozet sahipliği silinmez. Ortak host aynı anda yalnız bir fullscreen açar. Rütbenin XP etkisi yoktur.
+
+## P5 otomatik kapısı
+
+- İlk CI `39140225921`: **274 test / 3 başarısız**. İki yeni testte fixture beklentisi düzeltildi: Room'un iç invalidation sorguları 4 uygulama sorgusundan ayrıldı; eski rozetin korunması sayıya katıldı. Eski hedef testi, yeni P5 sözleşmesine göre sahiplik/XP korunarak **kutlama kuyruğuna eklenmeme** davranışını doğrular hâle getirildi; arşiv/ödül idempotensi kontrolleri kaldırılmadı.
+- Kaynak `522b0094a5fe01a7df1de23dd45b5af4c0413706`, CI `39140443680`: **274 / 0 / 0 / 0**; release build ve sertifika başarılı. Ara yayın kapısı hâlâ kapalı.
+
+## P6 doğrulama hazırlığı (sonuç henüz yok)
+
+- UI/Preview testleri `src/testDebug`'a ayrıldı; ortak testler hem Debug hem Release varyantında derlenip çalıştırılacak. Release'e debug fixture/Preview/test Activity eklenmedi.
+- CI'da iki ayrı JUnit özeti, gerçek 1.000 soru / 20.000 tekrar host benchmark'ı, SQLite EXPLAIN planları ve 5 yeni sentetik native Compose önizlemesi için çıktı toplama eklendi. Ölçülmeden süre/başarı sonucu yazılmadı.
+- Uygulama shell'i üzerinde öneri → filtre → Odak → karne → İlerleme smoke regresyonu, rozet/rütbe tek-host testi, %200 / kapalı hareket / 48dp / gölge-ayarı UI kontrolleri eklendi.
+- Gün/saat dilimi değişimi ve resume ile gün tabanlı ekranlar yenilenir; analitik saniyelik poll yapmaz.
+- Ayarlar tanısı en yeni 100 karar için katı doğrulama uygular; toplam/örnek/gölge/farklı aday/etkin/bozuk sayıları açıkça ayrılır. Bu örneklem etkinleştirme kanıtı diye sunulmaz.
+- ZIP4 içinde karar1/karar2 ve testte açık kapılı v3 roundtrip/rollback; semantik bozulma doğru hash ile de reddedilir. Restore commit/marker sınırında kozmetik kuyrukların sıfırlanması regresyonu eklendi.

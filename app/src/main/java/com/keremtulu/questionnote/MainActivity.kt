@@ -31,6 +31,7 @@ class MainActivity : ComponentActivity() {
                     rozetHizmeti = appContainer.rozetHizmeti,
                     profilDeposu = appContainer.profilDeposu,
                     tekrarPolitikasi = appContainer.tekrarPolitikasi,
+                    motorTanisi = appContainer.motorTanisi,
                     oturumDeposu = appContainer.oturumDeposu,
                     gunlukHedefDeposu = appContainer.gunlukHedefDeposu,
                     tercihHedefDeposu = appContainer.tercihHedefDeposu,

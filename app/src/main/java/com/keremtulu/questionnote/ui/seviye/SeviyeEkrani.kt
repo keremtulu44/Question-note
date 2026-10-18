@@ -46,6 +46,7 @@ fun SeviyeEkrani(
     onCalis: (com.keremtulu.questionnote.domain.model.SoruCalismaFiltresi, Int) -> Unit,
 ) {
     var yenileme by remember { mutableIntStateOf(0) }
+    val bugun = com.keremtulu.questionnote.ui.bilesenler.hatirlaYerelGun()
     val context = LocalContext.current
     val activity = remember(context) { context.seviyeActivity() }
     // Refresh date-dependent forecasts when returning after a night/background pause.
@@ -60,7 +61,7 @@ fun SeviyeEkrani(
         activity?.lifecycle?.addObserver(gozlemci)
         onDispose { activity?.lifecycle?.removeObserver(gozlemci) }
     }
-    val durum by produceState<SeviyeDurumuUi>(SeviyeDurumuUi.Yukleniyor, seviyeHizmeti, yenileme) {
+    val durum by produceState<SeviyeDurumuUi>(SeviyeDurumuUi.Yukleniyor, seviyeHizmeti, yenileme, bugun) {
         value = SeviyeDurumuUi.Yukleniyor
         seviyeHizmeti.ozetIzle().catch { hata ->
             if (hata is CancellationException) throw hata

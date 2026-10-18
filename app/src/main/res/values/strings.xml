@@ -721,7 +721,11 @@
     <string name="rank_celebration_continue">Güzel, devam edelim</string>
     <string name="rank_celebration_error">Kapatma kaydedilemedi; tekrar deneyebilirsin.</string>
     <string name="analysis_recent_group">Son 90 gün / en fazla 5 ayrı gün: yakın güçlük %1$d soruda; son iki günü bağımsız %2$d soruda.</string>
-    <string name="analysis_lesson_reference">Aynı dersin kişisel bağımsız süre medyanı: %1$d sn (son 60 gün).</string>
-    <string name="analysis_group_reference">Bu grubun bağımsız süre medyanı: %1$d sn · %2$d tam ölçüm / %3$d farklı soru / %4$d gün. Soru başına tek ağırlık; hız başarı puanı değildir.</string>
+    <string name="analysis_lesson_reference">Aynı dersin kişisel bağımsız süre medyanı: %1$s sn (son 60 gün).</string>
+    <string name="analysis_group_reference">Bu grubun bağımsız süre medyanı: %1$s sn · %2$d tam ölçüm / %3$d farklı soru / %4$d gün. Soru başına tek ağırlık; hız başarı puanı değildir.</string>
     <string name="analysis_group_reference_missing">Grup süre referansı için ölçüm birikiyor; dersler veya kitaplar arasında hız sıralaması yapılmaz.</string>
+    <string name="motor_diagnostics">Son %1$d / %2$d kayıt incelendi: v2/kapalı %3$d · gölge %4$d · farklı gölge aday %5$d · etkin kaydedilmiş %6$d · doğrulanamayan %7$d.</string>
+    <string name="motor_diagnostics_note">Tanı en yeni 100 kararla sınırlıdır ve yenileme anını gösterir; öğrenme yararı veya fiziksel cihaz kabulü kanıtı değildir. Eski/aktarılmış etkin kayıtlar şu an v3’ün açık olduğu anlamına gelmez.</string>
+    <string name="motor_refresh_diagnostics">Yerel tanıyı yenile</string>
+    <string name="motor_diagnostics_error">Tanı okunamadı. Güvenli mod değişmedi; tekrar deneyebilirsin.</string>
 </resources>

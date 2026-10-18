@@ -1,5 +1,11 @@
 package com.keremtulu.questionnote.data.export
 
+import com.keremtulu.questionnote.domain.repeat.*
+import com.keremtulu.questionnote.data.gelisim.MotorTaniHizmeti
+import com.keremtulu.questionnote.data.prefs.RozetDeposu
+import com.keremtulu.questionnote.data.prefs.RutbeDeposu
+import com.keremtulu.questionnote.domain.karne.Rozet
+import com.keremtulu.questionnote.domain.seviye.Rutbe
 import com.keremtulu.questionnote.data.repository.RoomSoruRepository
 import com.keremtulu.questionnote.data.gelisim.OlcumSerilestirme
 import com.keremtulu.questionnote.data.gelisim.ProfilHizmeti
@@ -43,6 +49,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
@@ -448,9 +455,75 @@ class YerelYedeklemeHizmetiTest {
         assertEquals(4, database.tekrarDao().tumunuGetir().size)
     }
 
-    private suspend fun measuredArchive(): File {
+    @Test fun shadowDecisionVersionTwoRoundTripsZipFourAndDiagnosticsAreTruthful() = runBlocking<Unit> {
+        val archive = measuredArchive(TekrarMotorModu.GOLGE)
+        val measurements = database.tekrarOlcumDao().tumunuGetir()
+        val reviews = database.tekrarDao().tumunuGetir()
+        assertTrue(measurements.all { JSONObject(it.kararJson).getInt("version") == 2 })
+        assertTrue(reviews.all { it.algoritmaSurumu == 2 })
+        service.geriYukle(service.dosyadanOnizle(archive))
+        assertEquals(measurements, database.tekrarOlcumDao().tumunuGetir())
+        assertEquals(reviews, database.tekrarDao().tumunuGetir())
+        val tani = MotorTaniHizmeti(database).oku()
+        assertEquals(4, tani.golge); assertEquals(0, tani.gecersiz); assertEquals(0, tani.farkliAday)
+    }
+
+    @Test fun explicitlyGatedActiveRecordsRoundTripThenRollbackWritesOnlyNewV2History() = runBlocking<Unit> {
+        val archive = measuredArchive(TekrarMotorModu.ETKIN)
+        val old = database.tekrarDao().tumunuGetir().associateBy { it.id }
+        service.geriYukle(service.dosyadanOnizle(archive))
+        assertTrue(database.tekrarDao().tumunuGetir().all { it.algoritmaSurumu == 3 })
+        val tomorrow = LocalDate.now().plusDays(1).atTime(12, 0).atZone(java.time.ZoneId.systemDefault())
+        val repo = RoomSoruRepository(database, store, java.time.Clock.fixed(tomorrow.toInstant(), tomorrow.zone))
+        assertEquals(SoruIslemSonucu.Basarili, repo.tekrarKaydet("measured-0", TekrarSonucu.RAHAT, false))
+        val records = database.tekrarDao().tumunuGetir()
+        assertEquals(2, records.single { it.id !in old }.algoritmaSurumu)
+        assertTrue(records.filter { it.id in old }.all { it == old[it.id] })
+    }
+
+    @Test fun forgedV2CandidateModeOrReasonIsRejectedEvenAfterBackupHashesAreRecomputed() = runBlocking<Unit> {
+        val archive = measuredArchive(TekrarMotorModu.GOLGE)
+        val before = database.tekrarOlcumDao().tumunuGetir()
+        val changes: List<(JSONObject) -> Unit> = listOf(
+            { it.put("version", 99) }, { it.put("candidate_interval", 180) },
+            { it.put("mode", "ETKIN") }, { it.put("reasons", JSONArray(listOf("SPEED_BONUS"))) },
+            { it.put("base_interval", 181) },
+        )
+        changes.forEachIndexed { i, change ->
+            val bad = File(archive.parentFile, "bad-shadow-$i-${System.nanoTime()}.zip").also(temporaryFiles::add)
+            rewriteMeasuredArchive(archive, bad) { data -> change(data.getJSONArray("measurements").getJSONObject(0).getJSONObject("decision")) }
+            assertThrows(Exception::class.java) { runBlocking { service.dosyadanOnizle(bad) } }
+            assertEquals(before, database.tekrarOlcumDao().tumunuGetir())
+        }
+    }
+
+    @Test fun verifiedRestoreClearsCosmeticQueuesBeforeRecoveryMarkerAndKeepsOwnership() = runBlocking<Unit> {
+        listOf("karne_rozetleri", "rutbe_kutlamalari").forEach { context.getSharedPreferences(it, 0).edit().clear().commit() }
+        val archive = measuredArchive()
+        val badges = RozetDeposu(context); val ranks = RutbeDeposu(context)
+        badges.kaydet(listOf(Rozet.ILK_SORU)); ranks.guncelle(Rutbe.BASLANGIC, 10, false); ranks.guncelle(Rutbe.MERAKLI, 10, true)
+        assertNotNull(ranks.bekleyenIzle.value)
+        assertFalse(badges.bekleyenIzle.value.isEmpty())
+        var fail = true
+        val guarded = YerelYedeklemeHizmeti(context, database, store) {
+            OdakOturumuDeposu(context).temizle(); badges.geriYuklemeSonrasi(); ranks.geriYuklemeSonrasi()
+            if (fail) { fail = false; throw IOException("Simulated interruption after durable cosmetic reset") }
+        }
+        val preview = guarded.dosyadanOnizle(archive)
+        assertThrows(IOException::class.java) { runBlocking { guarded.geriYukle(preview) } }
+        assertEquals(preview.id, database.geriYuklemeIsaretiDao().idGetir())
+        assertTrue(guarded.kesintiliGeriYuklemeyiTamamla())
+        assertNull(database.geriYuklemeIsaretiDao().idGetir())
+        assertTrue(Rozet.ILK_SORU in RozetDeposu(context).sahipOlanlar())
+        assertTrue(RozetDeposu(context).bekleyenIzle.value.isEmpty())
+        val restored = RutbeDeposu(context)
+        restored.guncelle(Rutbe.KOZMIK, 10, true)
+        assertNull(restored.bekleyenIzle.value)
+    }
+
+    private suspend fun measuredArchive(mod: TekrarMotorModu = TekrarMotorModu.KAPALI): File {
         val lesson = database.dersDao().tumunuGetir().first().id
-        val repo = RoomSoruRepository(database, store)
+        val repo = RoomSoruRepository(database, store, motor = TekrarModuSaglayici { MotorAyari(mod, MotorYayinKapisi(true, true)) })
         val olcumler = listOf(SureOlcumu(6_000, 0, OlcumKalitesi.TAM),
             SureOlcumu(1_000, 2_000, OlcumKalitesi.KISMI, setOf(OlcumNedeni.TAM_EKRAN)),
             SureOlcumu(), SureOlcumu(kalite = OlcumKalitesi.GECERSIZ, nedenler = setOf(OlcumNedeni.SAAT_TUTARSIZ)))

@@ -127,6 +127,7 @@ fun YanlisDefteriUygulamasi(
     rozetHizmeti: RozetHizmeti,
     profilDeposu: SinavProfiliDeposu,
     tekrarPolitikasi: com.keremtulu.questionnote.data.prefs.TekrarPolitikasiDeposu,
+    motorTanisi: com.keremtulu.questionnote.data.gelisim.MotorTaniHizmeti,
     oturumDeposu: OdakOturumuDeposu,
     gunlukHedefDeposu: GunlukHedefDeposu,
     tercihHedefDeposu: TercihGunlukHedefDeposu,
@@ -493,6 +494,7 @@ fun YanlisDefteriUygulamasi(
                         gunlukHedefDeposu = tercihHedefDeposu,
                         profilDeposu = profilDeposu, dersRepository = dersRepository,
                         tekrarPolitikasi = tekrarPolitikasi,
+                        motorTanisi = motorTanisi,
                         sonYedek = sonYedek,
                         yedeklemeIslemde = yedeklemeIslemde,
                         onYedekOlustur = {

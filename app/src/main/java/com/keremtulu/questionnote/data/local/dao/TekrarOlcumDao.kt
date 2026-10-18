@@ -72,6 +72,12 @@ interface TekrarOlcumDao {
         FROM tekrarlar t LEFT JOIN tekrar_olcumleri m ON m.tekrar_id = t.id
         ORDER BY t.gun, t.zaman, t.id""")
     suspend fun analizVerileri(): List<TekrarAnalizSatiri>
+    @Transaction
+    @Query("""SELECT t.* FROM tekrarlar t JOIN tekrar_olcumleri m ON m.tekrar_id = t.id
+        ORDER BY t.zaman DESC, t.id ASC LIMIT :sinir""")
+    suspend fun sonKararlar(sinir: Int): List<OlcumluTekrar>
+    @Query("SELECT COUNT(*) FROM tekrar_olcumleri")
+    suspend fun toplamKararSayisi(): Int
     @Query("SELECT COUNT(*) FROM tekrarlar WHERE gun BETWEEN :ilkGun AND :sonGun")
     suspend fun pencereSayisi(ilkGun: Int, sonGun: Int): Int
 }

@@ -41,6 +41,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
@@ -106,6 +107,7 @@ fun FiltreliCalismaEkrani(
     onDevam: (() -> Unit)? = null,
 ) {
     var yenileme by remember { mutableIntStateOf(0) }
+    val bugun = com.keremtulu.questionnote.ui.bilesenler.hatirlaYerelGun()
 
     val dersAkisi = remember(dersRepository, yenileme) { dersRepository.aktifDersleriIzle() }
     val konuAkisi = remember(konuRepository, yenileme) { konuRepository.tumunuIzle() }
@@ -135,7 +137,7 @@ fun FiltreliCalismaEkrani(
             .collect { value = EkranYukleme.Hazir(it) }
     }.value
 
-    val soruAkisi = remember(soruRepository, ayar.filtre, yenileme) {
+    val soruAkisi = remember(soruRepository, ayar.filtre, yenileme, bugun) {
         soruRepository.filtreliCalismaSorulariniIzle(ayar.filtre)
     }
     val soruDurumu = produceState<EkranYukleme<List<Soru>>>(
@@ -222,8 +224,8 @@ fun FiltreliCalismaEkrani(
         is EkranYukleme.Hazir -> state.deger.filter { it.dersId in dersHaritasi }
         else -> emptyList()
     }
-    val siraliSorular = remember(sorular, ayar.akilliSira) {
-        if (ayar.akilliSira) CalismaSorulariniSirala.akilliOncelik(sorular, LocalDate.now().toEpochDay().toInt())
+    val siraliSorular = remember(sorular, ayar.akilliSira, bugun) {
+        if (ayar.akilliSira) CalismaSorulariniSirala.akilliOncelik(sorular, bugun.toEpochDay().toInt())
         else CalismaSorulariniSirala.enUzunSureCalisilmayanlar(sorular, ZoneId.systemDefault())
     }
     // Kullanıcının yazdığı sayı korunur; istenen sayı eşleşenden büyükse altındaki bilgi metni
@@ -246,7 +248,7 @@ fun FiltreliCalismaEkrani(
         contentWindowInsets = WindowInsets.safeDrawing,
     ) { insets ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(insets),
+            modifier = Modifier.fillMaxSize().padding(insets).testTag("practice-filter-list"),
             contentPadding = PaddingValues(start = 20.dp, top = 10.dp, end = 20.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {

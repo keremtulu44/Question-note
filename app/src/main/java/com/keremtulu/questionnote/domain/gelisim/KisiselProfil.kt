@@ -8,9 +8,11 @@ import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.floor
 
+private val KaynakBosluklari = Regex("\\s+")
+
 /** Case/spacing/NFC only. Never fuzzy-match books or compare different lessons as one population. */
 fun kaynakAnahtari(etiket: String?): String? = etiket?.let {
-    Normalizer.normalize(it, Normalizer.Form.NFC).trim().replace(Regex("\\s+"), " ")
+    Normalizer.normalize(it, Normalizer.Form.NFC).trim().replace(KaynakBosluklari, " ")
         .lowercase(Locale.forLanguageTag("tr-TR")).let { s -> Normalizer.normalize(s, Normalizer.Form.NFC) }
         .takeIf(String::isNotEmpty)
 }

@@ -8,6 +8,7 @@ on:
       - arena/59c6570d-question-note
     paths:
       - 'app/**'
+      - 'tools/junit_ozeti.py'
       - 'gradle/**'
       - 'gradlew'
       - 'gradlew.bat'
@@ -26,6 +27,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-24.04
+    timeout-minutes: 30
     steps:
       - name: Depoyu al
         uses: actions/checkout@v5
@@ -54,6 +56,7 @@ jobs:
           mkdir -p docs
           wrapper_log="$RUNNER_TEMP/wrapper-bootstrap.log"
           test_log="$RUNNER_TEMP/android-unit-tests.log"
+          release_test_log="$RUNNER_TEMP/android-release-unit-tests.log"
           build_log="$RUNNER_TEMP/android-build.log"
           sign_log="$RUNNER_TEMP/android-sign.log"
           verify_log="$RUNNER_TEMP/android-verify.log"
@@ -62,6 +65,8 @@ jobs:
           apk_info="$RUNNER_TEMP/apk-info.txt"
           wrapper_exit=0
           unit_test_exit=125
+          release_test_exit=125
+          release_test_summary="Release JUnit sonucu henüz yok"
           unit_test_summary="JUnit sonucu henüz yok"
           unit_test_failure_details="JUnit hata ayrıntısı henüz yok"
           build_exit=125
@@ -114,62 +119,24 @@ jobs:
           if [[ "$wrapper_exit" -eq 0 ]]; then
             ./gradlew --no-daemon --console=plain --stacktrace :app:testDebugUnitTest > "$test_log" 2>&1
             unit_test_exit=$?
-            unit_test_summary=$(python3 - <<'PY'
-          import sys
-          from pathlib import Path
-          from xml.etree import ElementTree
-
-          files = list(Path("app/build/test-results/testDebugUnitTest").glob("TEST-*.xml"))
-          if not files:
-              print("JUnit XML raporu yok (0 test)")
-              sys.exit(1)
-
-          totals = {"tests": 0, "failures": 0, "errors": 0, "skipped": 0}
-          for path in files:
-              root = ElementTree.parse(path).getroot()
-              for suite in root.iter():
-                  if suite.tag.endswith("testsuite"):
-                      for key in totals:
-                          totals[key] += int(suite.attrib.get(key, "0"))
-
-          print(
-              f"{totals['tests']} test; {totals['failures']} başarısız; "
-              f"{totals['errors']} hata; {totals['skipped']} atlandı"
-          )
-          sys.exit(1 if totals["tests"] == 0 or totals["failures"] or totals["errors"] else 0)
-          PY
-            )
+            unit_test_summary=$(python3 tools/junit_ozeti.py summary app/build/test-results/testDebugUnitTest)
             test_summary_exit=$?
-            unit_test_failure_details=$(python3 - <<'PY'
-          from pathlib import Path
-          from xml.etree import ElementTree
-
-          files = list(Path("app/build/test-results/testDebugUnitTest").glob("TEST-*.xml"))
-          details = []
-          for path in files:
-              root = ElementTree.parse(path).getroot()
-              for case in root.iter():
-                  if not case.tag.endswith("testcase"):
-                      continue
-                  for failure in list(case):
-                      if failure.tag.endswith("failure") or failure.tag.endswith("error"):
-                          message = failure.attrib.get("message", "").replace("\n", " ")
-                          details.append(
-                              f"{case.attrib.get('classname', '')} > {case.attrib.get('name', '')}: "
-                              f"{failure.attrib.get('type', failure.tag)}: {message}\n"
-                              f"{(failure.text or '').strip()[:3000]}"
-                          )
-          print("\n\n".join(details) if details else "Başarısız JUnit testi yok.")
-          PY
-            )
             if [[ "$unit_test_exit" -eq 0 && "$test_summary_exit" -ne 0 ]]; then
               unit_test_exit=1
             fi
             if [[ "$unit_test_exit" -eq 0 ]]; then
+              ./gradlew --no-daemon --console=plain --stacktrace :app:testReleaseUnitTest > "$release_test_log" 2>&1
+              release_test_exit=$?
+              release_test_summary=$(python3 tools/junit_ozeti.py summary app/build/test-results/testReleaseUnitTest)
+              release_summary_exit=$?
+              if [[ "$release_test_exit" -eq 0 && "$release_summary_exit" -ne 0 ]]; then release_test_exit=1; fi
+            fi
+            unit_test_failure_details=$(python3 tools/junit_ozeti.py failures app/build/test-results/testDebugUnitTest app/build/test-results/testReleaseUnitTest)
+            if [[ "$unit_test_exit" -eq 0 && "$release_test_exit" -eq 0 ]]; then
               ./gradlew --no-daemon --console=plain --stacktrace :app:assembleRelease > "$build_log" 2>&1
               build_exit=$?
             else
-              printf '%s\n' "assembleRelease, birim testleri başarısız olduğu için çalıştırılmadı." > "$build_log"
+              printf '%s\n' "assembleRelease, Debug/Release birim test kapılarından biri geçmediği için çalıştırılmadı." > "$build_log"
             fi
           fi
 
@@ -251,6 +218,10 @@ jobs:
               echo "Yanlış Defteri ${version_name} (${version_code})"
               echo
               echo "- Derlenen commit: ${GITHUB_SHA}"
+              echo "- Debug testleri: ${unit_test_summary}"
+              echo "- Release ortak testleri: ${release_test_summary} (ortak testler ikinci kez çalışır; sayılar toplanmaz)"
+              echo "- Varsayılan gölge mod: v2 tarihleri korunur. Etkin v3 gerçek cihaz/gölge kabulü tamamlanana kadar kapalıdır."
+              echo "- Fiziksel cihaz, TalkBack, SAF ve frame-p95 kabulü henüz yapılmadı."
               echo "- APK SHA-256: ${apk_sha256}"
               echo "- Sertifika SHA-256: ${actual_fingerprint_display}"
             } > "$notes_file"
@@ -281,7 +252,7 @@ jobs:
             fi
           fi
 
-          if [[ "$wrapper_exit" -eq 0 && "$unit_test_exit" -eq 0 && "$build_exit" -eq 0 && "$signing_exit" -eq 0 && "$fingerprint_exit" -eq 0 && "$release_exit" -eq 0 ]]; then
+          if [[ "$wrapper_exit" -eq 0 && "$unit_test_exit" -eq 0 && "$release_test_exit" -eq 0 && "$build_exit" -eq 0 && "$signing_exit" -eq 0 && "$fingerprint_exit" -eq 0 && "$release_exit" -eq 0 ]]; then
             overall="BAŞARILI"
           else
             overall="BAŞARISIZ"
@@ -300,7 +271,10 @@ jobs:
             echo "- Genel sonuç: **$overall**"
             echo "- Wrapper çıkış kodu: $wrapper_exit"
             echo "- testDebugUnitTest çıkış kodu: $unit_test_exit"
-            echo "- Birim test özeti: $unit_test_summary"
+            echo "- Birim test özeti (Debug): $unit_test_summary"
+            echo "- testReleaseUnitTest çıkış kodu: $release_test_exit"
+            echo "- Birim test özeti (Release ortak testler): $release_test_summary"
+            echo "- UI/Preview regresyonları yalnız testDebug; ortak testler iki varyantta çalışır, sayılar toplanmaz."
             echo "- assembleRelease çıkış kodu: $build_exit"
             echo "- İmzalama secret durumu: $secret_status"
             echo "- İmzalama/verify durumu: $signing_result (kod: $signing_exit; apksigner verify: $verify_exit)"
@@ -329,6 +303,17 @@ jobs:
               tail -n 80 "$test_log"
             else
               echo "Birim testleri çalıştırılmadı."
+            fi
+            echo '```'
+            echo
+            echo "## Release birim test çıktısı"
+            echo
+            echo '```text'
+            if [[ -f "$release_test_log" ]]; then
+              grep -nEi '(^e: |error:|unresolved reference|compilation error|what went wrong|failed to)' "$release_test_log" | head -n 80 || true
+              tail -n 100 "$release_test_log"
+            else
+              echo "Release birim testi başlatılmadı."
             fi
             echo '```'
             echo
@@ -371,13 +356,14 @@ jobs:
 
           echo "wrapper_exit=$wrapper_exit" >> "$GITHUB_OUTPUT"
           echo "unit_test_exit=$unit_test_exit" >> "$GITHUB_OUTPUT"
+          echo "release_test_exit=$release_test_exit" >> "$GITHUB_OUTPUT"
           echo "build_exit=$build_exit" >> "$GITHUB_OUTPUT"
           echo "signing_exit=$signing_exit" >> "$GITHUB_OUTPUT"
           echo "fingerprint_exit=$fingerprint_exit" >> "$GITHUB_OUTPUT"
           echo "release_exit=$release_exit" >> "$GITHUB_OUTPUT"
 
       - name: Test, derleme, imza veya Release başarısızsa işi kırmızıya çevir
-        if: steps.release.outputs.wrapper_exit != '0' || steps.release.outputs.unit_test_exit != '0' || steps.release.outputs.build_exit != '0' || steps.release.outputs.signing_exit != '0' || steps.release.outputs.fingerprint_exit != '0' || steps.release.outputs.release_exit != '0'
+        if: steps.release.outputs.wrapper_exit != '0' || steps.release.outputs.unit_test_exit != '0' || steps.release.outputs.release_test_exit != '0' || steps.release.outputs.build_exit != '0' || steps.release.outputs.signing_exit != '0' || steps.release.outputs.fingerprint_exit != '0' || steps.release.outputs.release_exit != '0'
         run: exit 1
 
       - name: P1 yerel Compose önizlemelerini sakla
@@ -395,6 +381,27 @@ jobs:
             fi
           done
 
+      - name: P6 ölçüm ve yerel Compose kanıtlarını sakla
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in p6-action-light p6-action-dark p6-analysis p6-large p6-empty; do
+            source="app/build/outputs/p6-previews/$name.png"
+            if [[ -f "$source" ]]; then
+              test "$(stat -c%s "$source")" -lt 1500000
+              mkdir -p docs/ui/p6
+              cp "$source" "docs/ui/p6/$name.png"
+            fi
+          done
+          for variant in debug release; do
+            source="app/build/outputs/p6-benchmark/$variant.md"
+            if [[ -f "$source" ]]; then
+              test "$(stat -c%s "$source")" -lt 100000
+              cp "$source" "docs/PERFORMANS_${variant^^}.md"
+            fi
+          done
+
       - name: Wrapper ve raporu repoya yaz
         if: always()
         shell: bash
@@ -404,6 +411,10 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/DERLEME_RAPORU.md
           if [[ -d docs/ui/p1 ]]; then git add docs/ui/p1; fi
+          if [[ -d docs/ui/p6 ]]; then git add docs/ui/p6; fi
+          for report in docs/PERFORMANS_DEBUG.md docs/PERFORMANS_RELEASE.md; do
+            if [[ -f "$report" ]]; then git add "$report"; fi
+          done
           if [[ -d app/schemas ]]; then git add app/schemas; fi
           for path in gradlew gradlew.bat gradle/wrapper/gradle-wrapper.jar gradle/wrapper/gradle-wrapper.properties; do
             if [[ -f "$path" ]]; then git add "$path"; fi

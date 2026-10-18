@@ -128,9 +128,9 @@ private fun GrupListesi(a: GelisimAnalizi, onCalis: (SoruCalismaFiltresi, Int) -
                     Text(stringResource(R.string.analysis_recent_group, g.yakinGuclukSoru, g.sonIkiBagimsizSoru), style = MaterialTheme.typography.bodySmall)
                     val d = g.dersReferansi?.dagilim
                     val p = g.yardimsizProfil
-                    if (d != null) Text(stringResource(R.string.analysis_lesson_reference, (d.medyanMs / 1_000).toInt()), style = MaterialTheme.typography.bodySmall)
+                    if (d != null) Text(stringResource(R.string.analysis_lesson_reference, saniye(d.medyanMs)), style = MaterialTheme.typography.bodySmall)
                     if (p?.dagilim != null) Text(stringResource(R.string.analysis_group_reference,
-                        (p.dagilim.medyanMs / 1_000).toInt(), p.olcumSayisi, p.farkliSoru, p.farkliGun), style = MaterialTheme.typography.bodySmall)
+                        saniye(p.dagilim.medyanMs), p.olcumSayisi, p.farkliSoru, p.farkliGun), style = MaterialTheme.typography.bodySmall)
                     else Text(stringResource(R.string.analysis_group_reference_missing), style = MaterialTheme.typography.bodySmall)
                     DonemMetni(g.donem)
                     if (g.filtre != null && g.uygunSoru > 0) Button(onClick = { onCalis(g.filtre, minOf(5, g.uygunSoru)) },
@@ -189,3 +189,6 @@ private val TarihBicimi = DateTimeFormatter.ofPattern("d MMM", Locale.forLanguag
 private fun tarih(gun: Int) = LocalDate.ofEpochDay(gun.toLong()).format(TarihBicimi)
 private fun dakikaAlt(ms: Double): Int = floor(ms / 60_000).toInt()
 private fun dakikaUst(ms: Double): Int = ceil(ms / 60_000).toInt()
+
+private fun saniye(ms: Double): String = java.text.NumberFormat.getNumberInstance(Locale.forLanguageTag("tr-TR"))
+    .apply { maximumFractionDigits = if (ms < 1_000) 3 else 1 }.format(ms / 1_000)

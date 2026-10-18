@@ -53,6 +53,7 @@ fun AyarlarEkrani(
     gunlukHedefDeposu: TercihGunlukHedefDeposu,
     profilDeposu: SinavProfiliDeposu,
     tekrarPolitikasi: com.keremtulu.questionnote.data.prefs.TekrarPolitikasiDeposu,
+    motorTanisi: com.keremtulu.questionnote.data.gelisim.MotorTaniHizmeti,
     dersRepository: DersRepository,
     sonYedek: SonYedekBilgisi?,
     yedeklemeIslemde: Boolean,
@@ -107,7 +108,7 @@ fun AyarlarEkrani(
                     style = MaterialTheme.typography.displaySmall,
                 )
             }
-            item { MotorAyarlariKarti(tekrarPolitikasi) }
+            item { MotorAyarlariKarti(tekrarPolitikasi, motorTanisi) }
             item {
                 Bolum(stringResource(R.string.settings_profile_title)) {
                     Text(stringResource(R.string.settings_profile_note), style = MaterialTheme.typography.bodySmall,
