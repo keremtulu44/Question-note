@@ -2,6 +2,14 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.4.0] — 2026-10-18 · doğrulama bekleniyor
+
+- P2: gerçek monotonik deneme/inceleme ölçümü, dondurulan değerlendirme, sürümlü devam noktası ve idempotent/atomik tekrar kaydı.
+- Room v4 ve ZIP v4: eski tarihler/satırlar korunur, v2/v3 yedekler okunur; yeni süre/kalite/kayıt anı bağlamı ve sınırlı karar özeti taşınır.
+- P3: 60 günlük, soru başına ağırlıklı medyan/çeyrek/MAD; veri yeterliliği ve ders/konu/kaynak ayrımı. İlerleme'de ölçüm kapsamı ve ders referansı; eski/eksik veriden hayalî süre yok.
+- Tekrar v2 ve XP/rozet/rütbe kuralları aynı. P4 karar motoru ve P5 kaynak/konu panosu bu sürüme dahil değil.
+- Yeni testler eklendi; gerçek CI sonucu ve fiziksel cihaz kabulü henüz bekleniyor.
+
 ## [1.3.0] — 2026-10-18
 
 - **P0/P1:** İlerleme ekranında yeni rütbe odağı, gerçek XP, kompakt sayılar, açılır XP/rozet/rütbe koleksiyonları; boş, yükleniyor, hata ve yeniden deneme durumları.

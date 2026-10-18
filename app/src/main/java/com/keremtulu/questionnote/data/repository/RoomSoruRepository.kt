@@ -1,5 +1,18 @@
 package com.keremtulu.questionnote.data.repository
 
+import com.keremtulu.questionnote.data.gelisim.OlcumSerilestirme
+import com.keremtulu.questionnote.data.gelisim.ProfilHizmeti
+import com.keremtulu.questionnote.data.local.entity.TekrarOlcumEntity
+import com.keremtulu.questionnote.domain.calisma.TekrarDenemesi
+import com.keremtulu.questionnote.domain.calisma.TekrarOnizlemesi
+import com.keremtulu.questionnote.domain.calisma.SureOlcumu
+import com.keremtulu.questionnote.domain.calisma.OlcumKalitesi
+import com.keremtulu.questionnote.domain.calisma.OlcumNedeni
+import com.keremtulu.questionnote.domain.gelisim.ProfilBaglami
+import com.keremtulu.questionnote.domain.gelisim.kaynakAnahtari
+import org.json.JSONObject
+import org.json.JSONArray
+import java.security.MessageDigest
 import androidx.room.withTransaction
 import com.keremtulu.questionnote.data.local.YanlisDefteriDatabase
 import com.keremtulu.questionnote.data.local.entity.GorselEntity
@@ -28,6 +41,7 @@ import com.keremtulu.questionnote.domain.repeat.TekrarKurali
 import com.keremtulu.questionnote.domain.repeat.AkilliTekrarKurali
 import com.keremtulu.questionnote.domain.repository.GorselDosyaYonetimi
 import com.keremtulu.questionnote.domain.repository.SoruRepository
+import com.keremtulu.questionnote.domain.calisma.YerelTakvimSaati
 import java.time.Clock
 import java.time.LocalDate
 import java.util.UUID
@@ -37,7 +51,7 @@ import kotlinx.coroutines.flow.map
 class RoomSoruRepository(
     private val database: YanlisDefteriDatabase,
     private val gorselDosyalari: GorselDosyaYonetimi,
-    private val saat: Clock = Clock.systemDefaultZone(),
+    private val saat: Clock = YerelTakvimSaati,
 ) : SoruRepository {
     private val dersDao = database.dersDao()
     private val konuDao = database.konuDao()
@@ -45,6 +59,8 @@ class RoomSoruRepository(
     private val soruSecenegiDao = database.soruSecenegiDao()
     private val gorselDao = database.gorselDao()
     private val tekrarDao = database.tekrarDao()
+    private val olcumDao = database.tekrarOlcumDao()
+    private val profilHizmeti = ProfilHizmeti(database)
 
     override fun sorulariIzle(
         dersId: String,
@@ -69,7 +85,7 @@ class RoomSoruRepository(
             .map { rows -> rows.map { row -> row.soru.toDomain(row.gorseller.map { it.toDomain() }) } }
 
     override fun tekrarGecmisiniIzle(soruId: String): Flow<List<TekrarKaydi>> =
-        tekrarDao.sorununTekrarGecmisiniIzle(soruId).map { records -> records.map { it.toDomain() } }
+        olcumDao.gecmisiIzle(soruId).map { records -> records.map { it.tekrar.toDomain(it.olcum) } }
 
     override suspend fun soruGetir(soruId: String): Soru? {
         val row = soruDao.idIleGetir(soruId) ?: return null
@@ -254,45 +270,85 @@ class RoomSoruRepository(
             }
         }
 
-    override suspend fun tekrarKaydet(
-        soruId: String,
-        sonuc: TekrarSonucu,
-        cozumAcildi: Boolean,
-    ): SoruIslemSonucu = database.withTransaction {
-        val soru = soruDao.idIleGetir(soruId) ?: return@withTransaction SoruIslemSonucu.Bulunamadi
-        if (soru.planDurumu != SoruPlanDurumu.AKTIF.name) {
-            return@withTransaction SoruIslemSonucu.PlanDurumuKapali
+    override suspend fun tekrarOnizle(deneme: TekrarDenemesi): TekrarOnizlemesi? = database.withTransaction {
+        val soru = soruDao.idIleGetir(deneme.soruId) ?: return@withTransaction null
+        if (soru.planDurumu != SoruPlanDurumu.AKTIF.name) return@withTransaction null
+        onizlemeUret(soru, deneme)
+    }
+
+    /** Compatibility path for unmeasured callers. Still writes a context row, never invents a duration. */
+    override suspend fun tekrarKaydet(soruId: String, sonuc: TekrarSonucu, cozumAcildi: Boolean): SoruIslemSonucu =
+        database.withTransaction {
+            val soru = soruDao.idIleGetir(soruId) ?: return@withTransaction SoruIslemSonucu.Bulunamadi
+            if (soru.planDurumu != SoruPlanDurumu.AKTIF.name) return@withTransaction SoruIslemSonucu.PlanDurumuKapali
+            tekrarKaydet(onizlemeUret(soru, TekrarDenemesi(UUID.randomUUID().toString(), soruId, sonuc, cozumAcildi)))
         }
-        val bugun = LocalDate.now(saat)
-        val gun = bugun.toEpochDay().toInt()
-        if (tekrarDao.ayniGunTekrarVar(soruId, gun)) return@withTransaction SoruIslemSonucu.AyniGunTekrarVar
-        val gecmis = tekrarDao.sorununTekrarlariniGetir(soruId).map { it.toDomain() }
-        val plan = AkilliTekrarKurali.hesapla(gecmis, sonuc, cozumAcildi, bugun, soru.sonrakiTekrarGun)
-        val now = System.currentTimeMillis()
-        tekrarDao.ekle(
-            TekrarEntity(
-                id = UUID.randomUUID().toString(),
-                soruId = soruId,
-                zaman = now,
-                gun = gun,
-                planlananGun = soru.sonrakiTekrarGun,
-                sonuc = sonuc.name,
-                cozumAcildi = cozumAcildi,
-                oncekiAralik = plan.oncekiAralik,
-                sonrakiAralik = plan.sonrakiAralik,
-                algoritmaSurumu = AkilliTekrarKurali.ALGORITMA_SURUMU,
-                elleAtandi = false,
-            ),
-        )
-        soruDao.guncelle(
-            soru.copy(
-                ogrenmeDurumu = plan.ogrenmeDurumu.name,
-                sonTekrarGun = gun,
-                sonrakiTekrarGun = plan.sonrakiGun,
-                guncelleme = now,
-            ),
-        )
+
+    override suspend fun tekrarKaydet(onizleme: TekrarOnizlemesi): SoruIslemSonucu = database.withTransaction {
+        val deneme = onizleme.deneme
+        val once = olcumDao.denemeIleGetir(deneme.denemeId)
+        if (once != null) {
+            val kayit = olcumDao.tekrarGetir(once.tekrarId)
+            return@withTransaction if (kayit?.soruId == deneme.soruId && kayit.sonuc == deneme.sonuc.name &&
+                kayit.cozumAcildi == deneme.cozumAcildi && once.oturumId == deneme.oturumId)
+                SoruIslemSonucu.Basarili else SoruIslemSonucu.DenemeCakismasi
+        }
+        val soru = soruDao.idIleGetir(deneme.soruId) ?: return@withTransaction SoruIslemSonucu.Bulunamadi
+        if (soru.planDurumu != SoruPlanDurumu.AKTIF.name) return@withTransaction SoruIslemSonucu.PlanDurumuKapali
+        val gun = LocalDate.now(saat).toEpochDay().toInt()
+        if (tekrarDao.ayniGunTekrarVar(soru.id, gun)) return@withTransaction SoruIslemSonucu.AyniGunTekrarVar
+        val simdi = onizlemeUret(soru, deneme)
+        if (simdi != onizleme) return@withTransaction SoruIslemSonucu.OnizlemeGuncellendi
+        val plan = simdi.plan
+        val kayitAni = saat.instant()
+        if (saat.zone.id != simdi.saatDilimi || kayitAni.atZone(saat.zone).toLocalDate().toEpochDay().toInt() != simdi.gun) {
+            return@withTransaction SoruIslemSonucu.OnizlemeGuncellendi
+        }
+        val now = kayitAni.toEpochMilli()
+        val tekrar = TekrarEntity(UUID.randomUUID().toString(), soru.id, now, gun, soru.sonrakiTekrarGun,
+            deneme.sonuc.name, deneme.cozumAcildi, plan.oncekiAralik, plan.sonrakiAralik,
+            AkilliTekrarKurali.ALGORITMA_SURUMU, false)
+        val olcum = simdi.deneme.olcum
+        val kayit = TekrarOlcumEntity(tekrar.id, deneme.denemeId, deneme.oturumId,
+            olcum.denemeAktifMs, olcum.incelemeAktifMs, olcum.kalite.name, OlcumSerilestirme.nedenlerYaz(olcum.nedenler), olcum.surum,
+            soru.dersId, requireNotNull(dersDao.idIleGetir(soru.dersId)).ad,
+            soru.konuId, soru.konuId?.let { konuDao.idIleGetir(it)?.ad },
+            kaynakAnahtari(soru.kaynak), soru.kaynak?.takeIf { it.isNotBlank() }, simdi.kararOzeti)
+        OlcumSerilestirme.dogrula(kayit, tekrar)
+        // Exactly one transaction: answer + measurement/context + the unchanged v2 plan.
+        tekrarDao.ekle(tekrar)
+        olcumDao.ekle(kayit)
+        check(soruDao.guncelle(soru.copy(ogrenmeDurumu = plan.ogrenmeDurumu.name,
+            sonTekrarGun = gun, sonrakiTekrarGun = plan.sonrakiGun, guncelleme = now)) == 1)
         SoruIslemSonucu.Basarili
+    }
+
+    private suspend fun onizlemeUret(soru: SoruEntity, istek: TekrarDenemesi): TekrarOnizlemesi {
+        require(istek.denemeId.isNotBlank() && istek.denemeId.length <= 128)
+        var olcum = istek.olcum.guvenli()
+        if (!istek.cozumAcildi && (olcum.incelemeAktifMs ?: 0L) > 0L) {
+            olcum = SureOlcumu(kalite = OlcumKalitesi.GECERSIZ, nedenler = setOf(OlcumNedeni.GECERSIZ_GIRDI))
+        }
+        val deneme = istek.copy(olcum = olcum)
+        val bolge = saat.zone
+        val bugun = saat.instant().atZone(bolge).toLocalDate()
+        val gun = bugun.toEpochDay().toInt()
+        val gecmis = tekrarDao.sorununTekrarlariniGetir(soru.id)
+        val plan = AkilliTekrarKurali.hesapla(gecmis.map { it.toDomain() }, deneme.sonuc, deneme.cozumAcildi, bugun, soru.sonrakiTekrarGun)
+        val profil = profilHizmeti.profil(ProfilBaglami(soru.dersId, soru.konuId, kaynakAnahtari(soru.kaynak)), gun, deneme.denemeId)
+        val karar = OlcumSerilestirme.kararYaz(plan, gun, profil, bolge.id)
+        val baglam = JSONObject().put("day", gun).put("question", JSONObject()
+            .put("id", soru.id).put("updated", soru.guncelleme).put("lesson", soru.dersId)
+            .put("lesson_label", dersDao.idIleGetir(soru.dersId)?.ad)
+            .put("topic", soru.konuId ?: JSONObject.NULL).put("topic_label", soru.konuId?.let { konuDao.idIleGetir(it)?.ad } ?: JSONObject.NULL)
+            .put("source", soru.kaynak ?: JSONObject.NULL).put("scheduled", soru.sonrakiTekrarGun ?: JSONObject.NULL))
+            .put("history", JSONArray().apply { gecmis.sortedBy { it.id }.forEach { put(JSONObject()
+                .put("id", it.id).put("day", it.gun).put("time", it.zaman).put("result", it.sonuc).put("solution", it.cozumAcildi)
+                .put("interval", it.sonrakiAralik ?: JSONObject.NULL).put("algorithm", it.algoritmaSurumu)) } })
+            .put("decision", JSONObject(karar)).toString()
+        val imza = MessageDigest.getInstance("SHA-256").digest(baglam.toByteArray(Charsets.UTF_8))
+            .joinToString("") { "%02x".format(it.toInt() and 0xff) }
+        return TekrarOnizlemesi(deneme, gun, plan, imza, karar, bolge.id)
     }
 
     private suspend fun veriIliskisiDogrula(
@@ -361,7 +417,7 @@ class RoomSoruRepository(
         sha256 = sha256,
     )
 
-    private fun TekrarEntity.toDomain() = TekrarKaydi(
+    private fun TekrarEntity.toDomain(olcumKaydi: TekrarOlcumEntity? = null) = TekrarKaydi(
         id = id,
         gun = gun,
         planlananGun = planlananGun,
@@ -372,6 +428,8 @@ class RoomSoruRepository(
         elleAtandi = elleAtandi,
         algoritmaSurumu = algoritmaSurumu,
         zaman = zaman,
+        denemeId = olcumKaydi?.denemeId,
+        olcum = olcumKaydi?.let(OlcumSerilestirme::olcum),
     )
 
     private inline fun <reified T : Enum<T>> enumOrDefault(value: String, default: T): T =

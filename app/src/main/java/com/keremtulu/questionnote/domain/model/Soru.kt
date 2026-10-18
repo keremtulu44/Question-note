@@ -87,6 +87,8 @@ sealed interface SoruIslemSonucu {
     data object GorselGecersiz : SoruIslemSonucu
     data object AyniGunTekrarVar : SoruIslemSonucu
     data object PlanDurumuKapali : SoruIslemSonucu
+    data object OnizlemeGuncellendi : SoruIslemSonucu
+    data object DenemeCakismasi : SoruIslemSonucu
 }
 
 enum class TekrarSonucu {
@@ -106,6 +108,8 @@ data class TekrarKaydi(
     val elleAtandi: Boolean,
     val algoritmaSurumu: Int = 1,
     val zaman: Long = 0L,
+    val denemeId: String? = null,
+    val olcum: com.keremtulu.questionnote.domain.calisma.SureOlcumu? = null,
 )
 
 data class TekrarPlani(

@@ -41,6 +41,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.keremtulu.questionnote.R
+import com.keremtulu.questionnote.domain.calisma.TekrarDenemesi
+import androidx.compose.runtime.saveable.rememberSaveable
+import java.util.UUID
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
 import com.keremtulu.questionnote.domain.model.Ders
 import com.keremtulu.questionnote.domain.model.Konu
@@ -91,6 +94,7 @@ fun SoruDetayEkrani(
     oturumSira: Int? = null,
     oturumToplam: Int? = null,
 ) {
+    val denemeId = rememberSaveable(soruId) { UUID.randomUUID().toString() }
     var yenileme by remember(soruId) { mutableIntStateOf(0) }
     var cozumAcik by remember(soruId) { mutableStateOf(false) }
     var cozumAcildi by remember(soruId) { mutableStateOf(false) }
@@ -137,7 +141,8 @@ fun SoruDetayEkrani(
         tekrarKaydediliyor = true
         scope.launch {
             val result = try {
-                soruRepository.tekrarKaydet(soru.id, sonuc, cozumAcildi)
+                val onizleme = soruRepository.tekrarOnizle(TekrarDenemesi(denemeId, soru.id, sonuc, cozumAcildi))
+                if (onizleme == null) SoruIslemSonucu.Bulunamadi else soruRepository.tekrarKaydet(onizleme)
             } catch (cancel: CancellationException) {
                 throw cancel
             } catch (_: Exception) {
@@ -529,6 +534,19 @@ private fun TekrarGecmisiKarti(record: TekrarKaydi) {
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
+            val olcum = record.olcum
+            if (olcum?.denemeAktifMs == null || olcum.incelemeAktifMs == null) {
+                Text(stringResource(R.string.measure_unavailable), style = MaterialTheme.typography.bodySmall)
+            } else {
+                fun sure(ms: Long) = String.format(Locale.ROOT, "%02d:%02d", ms / 60_000, ms / 1_000 % 60)
+                Text(stringResource(R.string.measure_phase_times, sure(olcum.denemeAktifMs), sure(olcum.incelemeAktifMs)),
+                    style = MaterialTheme.typography.bodySmall)
+                Text(stringResource(when (olcum.kalite) {
+                    com.keremtulu.questionnote.domain.calisma.OlcumKalitesi.TAM -> R.string.measure_complete
+                    com.keremtulu.questionnote.domain.calisma.OlcumKalitesi.KISMI -> R.string.measure_partial
+                    else -> R.string.measure_invalid
+                }), style = MaterialTheme.typography.labelSmall)
+            }
             if (record.elleAtandi) {
                 Text(
                     stringResource(R.string.review_history_manual),
@@ -568,5 +586,7 @@ private fun errorResource(result: SoruIslemSonucu?): Int = when (result) {
     SoruIslemSonucu.GorselGecersiz -> R.string.question_error_photo_invalid
     SoruIslemSonucu.AyniGunTekrarVar -> R.string.question_error_same_day
     SoruIslemSonucu.PlanDurumuKapali -> R.string.question_error_plan_paused
+    SoruIslemSonucu.OnizlemeGuncellendi -> R.string.measure_plan_changed
+    SoruIslemSonucu.DenemeCakismasi -> R.string.measure_attempt_conflict
     else -> R.string.question_error_generic
 }

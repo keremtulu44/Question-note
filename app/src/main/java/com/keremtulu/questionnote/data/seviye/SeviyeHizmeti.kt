@@ -1,5 +1,7 @@
 package com.keremtulu.questionnote.data.seviye
 
+import com.keremtulu.questionnote.data.gelisim.ProfilHizmeti
+import com.keremtulu.questionnote.domain.gelisim.SureKapsami
 import androidx.room.withTransaction
 import com.keremtulu.questionnote.domain.karne.Rozet
 import com.keremtulu.questionnote.data.local.YanlisDefteriDatabase
@@ -16,6 +18,7 @@ import com.keremtulu.questionnote.data.ilerleme.RozetHizmeti
 import com.keremtulu.questionnote.domain.karne.RozetGirdisi
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
+import com.keremtulu.questionnote.domain.calisma.YerelTakvimSaati
 import java.time.Clock
 import java.time.LocalDate
 
@@ -28,10 +31,11 @@ class SeviyeHizmeti(
     private val rozetDeposu: RozetDeposu,
     private val gunlukHedefDeposu: GunlukHedefDeposu,
     private val rozetHizmeti: RozetHizmeti,
-    private val saat: Clock = Clock.systemDefaultZone(),
+    private val saat: Clock = YerelTakvimSaati,
 ) {
     private val ilerlemeDao = database.ilerlemeDao()
     private val tekrarDao = database.tekrarDao()
+    private val profilHizmeti = ProfilHizmeti(database)
 
     suspend fun ozet(bugun: LocalDate = LocalDate.now(saat)): SeviyeOzeti = database.withTransaction {
         val sahip = rozetDeposu.sahipOlanlar()
@@ -60,6 +64,7 @@ class SeviyeHizmeti(
             tahmin = tahmin(bugun),
             rozetGirdisi = rozetHizmeti.girdi(hedef = hedef, bugun = bugun),
             sahipRozetler = sahip,
+            sureKapsami = profilHizmeti.kapsam(bugun.toEpochDay().toInt()),
         )
     }
 
@@ -116,6 +121,7 @@ data class SeviyeOzeti(
     val tahmin: List<GunTahmini>,
     val rozetGirdisi: RozetGirdisi,
     val sahipRozetler: Set<Rozet> = emptySet(),
+    val sureKapsami: SureKapsami? = null,
 )
 
 data class DersIlerlemesi(

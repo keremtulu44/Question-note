@@ -9,7 +9,7 @@ import com.keremtulu.questionnote.ui.tema.YanlisDefteriTema
 
 class MainActivity : ComponentActivity() {
     private val appContainer by lazy(LazyThreadSafetyMode.NONE) {
-        AppContainer(applicationContext)
+        AppContainer.getInstance(applicationContext)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

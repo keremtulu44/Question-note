@@ -1,5 +1,14 @@
 package com.keremtulu.questionnote.data.export
 
+import com.keremtulu.questionnote.data.repository.RoomSoruRepository
+import com.keremtulu.questionnote.data.gelisim.OlcumSerilestirme
+import com.keremtulu.questionnote.data.gelisim.ProfilHizmeti
+import com.keremtulu.questionnote.domain.calisma.OlcumKalitesi
+import com.keremtulu.questionnote.domain.calisma.OlcumNedeni
+import com.keremtulu.questionnote.domain.calisma.SureOlcumu
+import com.keremtulu.questionnote.domain.calisma.TekrarDenemesi
+import com.keremtulu.questionnote.domain.model.TekrarSonucu
+import com.keremtulu.questionnote.domain.model.SoruIslemSonucu
 import android.graphics.Bitmap
 import com.keremtulu.questionnote.data.prefs.OdakOturumuDeposu
 import com.keremtulu.questionnote.domain.calisma.OdakOturumu
@@ -137,7 +146,7 @@ class YerelYedeklemeHizmetiTest {
     }
 
     @Test
-    fun v2AlgorithmHistoryRoundTripsInExistingV3BackupWithoutNewColumns() = runBlocking {
+    fun v2AlgorithmHistoryRoundTripsInCurrentBackupWithoutRewritingHistory() = runBlocking {
         val lesson = database.dersDao().tumunuGetir().first().id
         insertQuestionWithImage("adaptive-question", lesson, "Adaptif tekrar notu")
         val gun = LocalDate.of(2026, 10, 17).toEpochDay().toInt()
@@ -205,7 +214,7 @@ class YerelYedeklemeHizmetiTest {
         )
         val currentArchive = service.zipOlustur().also(temporaryFiles::add)
         val oldArchive = File(currentArchive.parentFile, "v2-${System.nanoTime()}.zip").also(temporaryFiles::add)
-        convertV3ArchiveToV2(currentArchive, oldArchive)
+        convertCurrentArchiveToV2(currentArchive, oldArchive)
         ZipFile(oldArchive).use { zip ->
             val legacyHeader = zip.getInputStream(zip.getEntry("csv/questions.csv")).bufferedReader().use { it.readLine() }
             assertFalse(legacyHeader.contains("source_location"))
@@ -347,6 +356,141 @@ class YerelYedeklemeHizmetiTest {
         assertFalse(service.kesintiliGeriYuklemeyiTamamla())
     }
 
+    @Test
+    fun versionFourRoundTripsMeasurementsQualityAndDecisionContextWithoutChangingTheV2Plan() = runBlocking {
+        val archive = measuredArchive()
+        val before = database.tekrarOlcumDao().tumunuGetir()
+        val reviews = database.tekrarDao().tumunuGetir()
+        ZipFile(archive).use { zip ->
+            val manifest = zip.getInputStream(zip.getEntry("manifest.json")).use { JSONObject(it.readBytes().toString(Charsets.UTF_8)) }
+            assertEquals(4, manifest.getInt("format_version"))
+            assertEquals(4, manifest.getInt("room_schema_version"))
+            assertEquals(4, manifest.getJSONObject("counts").getInt("measurements"))
+            val csv = zip.getInputStream(zip.getEntry("csv/measurements.csv")).bufferedReader().use { it.readText() }
+            assertTrue(csv.contains("attempt_active_ms"))
+            assertTrue(csv.contains("'=SUM")) // labels remain safe in human-readable CSV
+        }
+        val preview = service.dosyadanOnizle(archive)
+        assertEquals(4, preview.yedek.sayilar.olcumSayisi)
+        service.geriYukle(preview)
+        assertEquals(before, database.tekrarOlcumDao().tumunuGetir())
+        assertEquals(reviews, database.tekrarDao().tumunuGetir())
+        assertEquals(setOf("TAM", "KISMI", "YOK", "GECERSIZ"), before.map { it.kalite }.toSet())
+        assertEquals(null, before.single { it.kalite == "YOK" }.denemeAktifMs)
+        assertTrue(reviews.all { it.algoritmaSurumu == 2 })
+    }
+
+    @Test
+    fun versionThreeReaderKeepsCatalogAndLocatorButDoesNotInventMeasurements() = runBlocking {
+        val archive = measuredArchive()
+        val old = File(archive.parentFile, "v3-${System.nanoTime()}.zip").also(temporaryFiles::add)
+        rewriteMeasuredArchive(archive, old, version = 3)
+        val before = database.tekrarDao().tumunuGetir()
+        service.geriYukle(service.dosyadanOnizle(old))
+        assertEquals(before, database.tekrarDao().tumunuGetir())
+        assertTrue(database.tekrarOlcumDao().tumunuGetir().isEmpty())
+        assertEquals("s. 10", database.soruDao().idIleGetir("measured-0")?.kaynakKonumu)
+        val scope = ProfilHizmeti(database).kapsam(LocalDate.now().toEpochDay().toInt())
+        assertEquals(4, scope.olcumsuz)
+        assertTrue(scope.dersler.isEmpty())
+    }
+
+    @Test
+    fun invalidMeasurementNumbersAndQualitiesAreRejectedEvenWithValidChecksums() = runBlocking {
+        val archive = measuredArchive()
+        val before = database.tekrarOlcumDao().tumunuGetir()
+        val changes: List<(JSONObject) -> Unit> = listOf(
+            { it.put("attempt_active_ms", -1) },
+            { it.put("attempt_active_ms", 1e30) },
+            { it.put("attempt_active_ms", "9223372036854775808") },
+            { it.put("quality", "UNKNOWN") },
+            { it.put("measurement_version", 99) },
+            { it.put("source_key", "not-the-normalized-label") },
+        )
+        changes.forEachIndexed { i, change ->
+            val bad = File(archive.parentFile, "bad-measure-$i-${System.nanoTime()}.zip").also(temporaryFiles::add)
+            rewriteMeasuredArchive(archive, bad) { data -> change(data.getJSONArray("measurements").getJSONObject(0)) }
+            assertThrows(Exception::class.java) { runBlocking { service.dosyadanOnizle(bad) } }
+            assertEquals(before, database.tekrarOlcumDao().tumunuGetir())
+        }
+    }
+
+    @Test
+    fun orphanAndDuplicateAttemptMeasurementsAreRejectedBeforeRestore() = runBlocking {
+        val archive = measuredArchive()
+        val before = database.tekrarDao().tumunuGetir()
+        val orphan = File(archive.parentFile, "orphan-${System.nanoTime()}.zip").also(temporaryFiles::add)
+        rewriteMeasuredArchive(archive, orphan) { it.getJSONArray("measurements").getJSONObject(0).put("review_id", "missing-review") }
+        assertThrows(Exception::class.java) { runBlocking { service.dosyadanOnizle(orphan) } }
+        val duplicate = File(archive.parentFile, "duplicate-${System.nanoTime()}.zip").also(temporaryFiles::add)
+        rewriteMeasuredArchive(archive, duplicate) {
+            val rows = it.getJSONArray("measurements")
+            rows.getJSONObject(1).put("attempt_id", rows.getJSONObject(0).getString("attempt_id"))
+        }
+        assertThrows(Exception::class.java) { runBlocking { service.dosyadanOnizle(duplicate) } }
+        assertEquals(before, database.tekrarDao().tumunuGetir())
+    }
+
+    @Test
+    fun malformedUnsupportedOrOversizedDecisionSnapshotsAreRejected() = runBlocking {
+        val archive = measuredArchive()
+        val changes: List<(JSONObject) -> Unit> = listOf(
+            { it.put("version", 99) },
+            { it.put("mode", "SHADOW_V3") },
+            { it.put("final_interval", 180) },
+            { it.put("padding", "x".repeat(OlcumSerilestirme.KARAR_UST_SINIR)) },
+        )
+        changes.forEachIndexed { i, change ->
+            val bad = File(archive.parentFile, "bad-decision-$i-${System.nanoTime()}.zip").also(temporaryFiles::add)
+            rewriteMeasuredArchive(archive, bad) { data -> change(data.getJSONArray("measurements").getJSONObject(0).getJSONObject("decision")) }
+            assertThrows(Exception::class.java) { runBlocking { service.dosyadanOnizle(bad) } }
+        }
+        assertEquals(4, database.tekrarDao().tumunuGetir().size)
+    }
+
+    private suspend fun measuredArchive(): File {
+        val lesson = database.dersDao().tumunuGetir().first().id
+        val repo = RoomSoruRepository(database, store)
+        val olcumler = listOf(SureOlcumu(6_000, 0, OlcumKalitesi.TAM),
+            SureOlcumu(1_000, 2_000, OlcumKalitesi.KISMI, setOf(OlcumNedeni.TAM_EKRAN)),
+            SureOlcumu(), SureOlcumu(kalite = OlcumKalitesi.GECERSIZ, nedenler = setOf(OlcumNedeni.SAAT_TUTARSIZ)))
+        olcumler.forEachIndexed { i, olcum ->
+            val id = "measured-$i"
+            insertQuestionWithImage(id, lesson, "Ölçümlü", "=SUM(1,2)", "s. 10")
+            val onizleme = requireNotNull(repo.tekrarOnizle(TekrarDenemesi("attempt-$i", id, TekrarSonucu.RAHAT, i == 1, olcum, "session")))
+            assertEquals(SoruIslemSonucu.Basarili, repo.tekrarKaydet(onizleme))
+        }
+        return service.zipOlustur().also(temporaryFiles::add)
+    }
+
+    /** Rebuild all inventory sizes/hashes, so rejection tests exercise semantic validation, not just checksums. */
+    private fun rewriteMeasuredArchive(source: File, destination: File, version: Int = 4, change: (JSONObject) -> Unit = {}) {
+        ZipFile(source).use { zip ->
+            val manifest = zip.getInputStream(zip.getEntry("manifest.json")).use { JSONObject(it.readBytes().toString(Charsets.UTF_8)) }
+            val payloads = linkedMapOf<String, ByteArray>()
+            zip.entries().asSequence().filter { it.name != "manifest.json" }.forEach { entry ->
+                payloads[entry.name] = zip.getInputStream(entry).use { it.readBytes() }
+            }
+            val data = JSONObject(requireNotNull(payloads["data.json"]).toString(Charsets.UTF_8))
+            change(data)
+            if (version == 3) {
+                data.remove("measurements"); payloads.remove("csv/measurements.csv")
+                manifest.getJSONObject("counts").remove("measurements")
+            }
+            payloads["data.json"] = data.toString().toByteArray(Charsets.UTF_8)
+            manifest.put("format_version", version).put("room_schema_version", version)
+                .put("csv_files", JSONArray(payloads.keys.filter { it.startsWith("csv/") }.sorted()))
+            manifest.put("files", JSONArray().apply { payloads.toSortedMap().forEach { (name, bytes) ->
+                val hash = java.security.MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02x".format(it.toInt() and 0xff) }
+                put(JSONObject().put("path", name).put("size_bytes", bytes.size).put("sha256", hash))
+            } })
+            ZipOutputStream(FileOutputStream(destination)).use { out ->
+                out.putNextEntry(ZipEntry("manifest.json")); out.write(manifest.toString().toByteArray(Charsets.UTF_8)); out.closeEntry()
+                payloads.forEach { (name, bytes) -> out.putNextEntry(ZipEntry(name)); out.write(bytes); out.closeEntry() }
+            }
+        }
+    }
+
     private suspend fun insertQuestionWithImage(
         id: String,
         lessonId: String,
@@ -394,7 +538,7 @@ class YerelYedeklemeHizmetiTest {
         return file
     }
 
-    private fun convertV3ArchiveToV2(source: File, destination: File) {
+    private fun convertCurrentArchiveToV2(source: File, destination: File) {
         ZipFile(source).use { zip ->
             val manifest = zip.getInputStream(zip.getEntry("manifest.json")).use {
                 JSONObject(it.readBytes().toString(Charsets.UTF_8))
@@ -404,12 +548,13 @@ class YerelYedeklemeHizmetiTest {
             }
             val payloads = linkedMapOf<String, ByteArray>()
             zip.entries().asSequence().forEach { entry ->
-                if (entry.name == "manifest.json" || entry.name == "csv/catalog_options.csv") return@forEach
+                if (entry.name == "manifest.json" || entry.name == "csv/catalog_options.csv" || entry.name == "csv/measurements.csv") return@forEach
                 var bytes = zip.getInputStream(entry).use { it.readBytes() }
                 when (entry.name) {
                     "data.json" -> {
                         val data = JSONObject(bytes.toString(Charsets.UTF_8))
                         data.remove("catalog_options")
+                        data.remove("measurements")
                         val questions = data.getJSONArray("questions")
                         for (index in 0 until questions.length()) {
                             questions.getJSONObject(index).remove("source_location")
@@ -435,6 +580,7 @@ class YerelYedeklemeHizmetiTest {
             )
             val counts = manifest.getJSONObject("counts")
             counts.remove("catalog_options")
+            counts.remove("measurements")
             manifest.put("files", JSONArray().apply {
                 payloads.toSortedMap().forEach { (name, bytes) ->
                     val hash = java.security.MessageDigest.getInstance("SHA-256").digest(bytes)

@@ -64,6 +64,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.keremtulu.questionnote.R
+import com.keremtulu.questionnote.data.prefs.OdakOturumuDeposu
+import com.keremtulu.questionnote.domain.calisma.MonotonikSaat
+import com.keremtulu.questionnote.domain.calisma.OlcumKalitesi
+import com.keremtulu.questionnote.domain.calisma.OlcumNedeni
+import com.keremtulu.questionnote.domain.calisma.TekrarOnizlemesi
+import com.keremtulu.questionnote.ui.bilesenler.GorselHazirligi
+import android.os.SystemClock
 import com.keremtulu.questionnote.ui.tema.LocalHareketPolitikasi
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
 import com.keremtulu.questionnote.domain.karne.KarneHesabi
@@ -93,6 +100,9 @@ fun OdakOturumuEkrani(
     ders: Ders,
     repository: SoruRepository,
     gorselDeposu: LocalSoruGorselDeposu,
+    oturumId: String,
+    oturumDeposu: OdakOturumuDeposu,
+    disDuraklatildi: Boolean = false,
     sira: Int,
     toplam: Int,
     sonuclar: List<OturumSonucu>,
@@ -102,15 +112,21 @@ fun OdakOturumuEkrani(
     onSonuc: (TekrarSonucu, Boolean) -> Unit,
     onSonaBirak: () -> Unit,
     onAtla: () -> Unit,
+    monotonikSaat: MonotonikSaat = MonotonikSaat { SystemClock.elapsedRealtime() },
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val liste = rememberLazyListState()
+    val olcum = rememberOdakOlcum(oturumId, soru.id, cozumOnceAcildi, oturumDeposu, monotonikSaat)
+    val cozumAcildi = olcum.nokta.cozumAcildi
+    val degerlendirme = olcum.nokta.donduruldu
+    val secim = olcum.nokta.secim
+    var gorselDurumlari by remember(soru.id) { mutableStateOf<Map<String, GorselHazirligi>>(emptyMap()) }
+    var soruGoruldu by remember(soru.id) { mutableStateOf(!soru.soruNotu.isNullOrBlank()) }
+    var planHatasi by remember(soru.id) { mutableStateOf(false) }
+    var planYenilendi by remember(soru.id) { mutableStateOf(false) }
     var mola by rememberSaveable(soru.id) { mutableStateOf(false) }
     var cozumGorunur by rememberSaveable(soru.id) { mutableStateOf(false) }
-    var cozumAcildi by rememberSaveable(soru.id) { mutableStateOf(cozumOnceAcildi) }
-    var degerlendirme by rememberSaveable(soru.id) { mutableStateOf(false) }
-    var secimAdi by rememberSaveable(soru.id) { mutableStateOf<String?>(null) }
     var kaydediliyor by remember(soru.id) { mutableStateOf(false) }
     var kayitHatasi by remember(soru.id) { mutableStateOf(false) }
     var tekrarli by remember(soru.id) { mutableStateOf(false) }
@@ -132,15 +148,27 @@ fun OdakOturumuEkrani(
     val oncekiKayitlar = gecmis
     val hafiza = remember(oncekiKayitlar) { AkilliTekrarKurali.hafiza(oncekiKayitlar.orEmpty()) }
     val sayilar = remember(sonuclar) { KarneHesabi.hesapla(sonuclar) }
-    val saniye = odakSuresi(durdu = mola || gorsel != null || kaydediliyor)
-    val secim = secimAdi?.let { TekrarSonucu.valueOf(it) }
     val cozumVar = !soru.cozumNotu.isNullOrBlank() || soru.gorseller.any { it.tur == GorselTuru.COZUM }
     val colors = MaterialTheme.colorScheme
+
+    val gorselHazir = soruGoruldu && gorselDurumlari.values.none { it != GorselHazirligi.HAZIR }
+    OdakOlcumIzleyicisi(olcum, oncekiKayitlar != null && gorselHazir && !mola && gorsel == null &&
+        !kaydediliyor && !degerlendirme && !disDuraklatildi && !tekrarli && !kullanilamaz)
+    val onizlemeler by produceState<Map<TekrarSonucu, TekrarOnizlemesi>?>(null, soru.id, degerlendirme,
+        cozumAcildi, olcum.nokta.olcum, oncekiKayitlar, yenileme, olcum.yenidenOnPlanda) {
+        value = null
+        planHatasi = false
+        if (degerlendirme && oncekiKayitlar != null) {
+            value = try {
+                TekrarSonucu.entries.associateWith { sonuc -> requireNotNull(repository.tekrarOnizle(olcum.deneme(sonuc))) }
+            } catch (iptal: CancellationException) { throw iptal } catch (_: Exception) { planHatasi = true; null }
+        }
+    }
 
     val hareket = LocalHareketPolitikasi.current
     LaunchedEffect(degerlendirme, hareket) {
         if (degerlendirme) {
-            if (hareket.hareketAcik) delay(100)
+            delay(100) // wait for newly composed assessment items; only the scroll motion is optional
             val hedef = (liste.layoutInfo.totalItemsCount - if (sira < toplam) 2 else 1).coerceAtLeast(0)
             if (hareket.azaltildi) liste.scrollToItem(hedef) else liste.animateScrollToItem(hedef)
         }
@@ -148,14 +176,17 @@ fun OdakOturumuEkrani(
 
     fun kaydet() {
         val sonuc = secim ?: return
+        val onizleme = onizlemeler?.get(sonuc) ?: return
         if (kaydediliyor || oncekiKayitlar == null) return
+        olcum.kaydet()
         kaydediliyor = true
         kayitHatasi = false
         scope.launch {
             try {
-                when (repository.tekrarKaydet(soru.id, sonuc, cozumAcildi || cozumOnceAcildi)) {
+                when (repository.tekrarKaydet(onizleme)) {
                     SoruIslemSonucu.Basarili -> onSonuc(sonuc, cozumAcildi || cozumOnceAcildi)
                     SoruIslemSonucu.AyniGunTekrarVar -> tekrarli = true
+                    SoruIslemSonucu.OnizlemeGuncellendi -> { planYenilendi = true; yenileme++ }
                     SoruIslemSonucu.Bulunamadi, SoruIslemSonucu.PlanDurumuKapali -> kullanilamaz = true
                     else -> kayitHatasi = true
                 }
@@ -176,16 +207,25 @@ fun OdakOturumuEkrani(
             Surface(color = colors.surface, tonalElevation = 3.dp) {
                 Column(Modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)).padding(horizontal = 20.dp, vertical = 10.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    if (olcum.kayitHatasi) Text(stringResource(R.string.focus_checkpoint_error), color = colors.error, style = MaterialTheme.typography.bodySmall)
+                    if (planYenilendi) Text(stringResource(R.string.measure_plan_changed), color = colors.primary, style = MaterialTheme.typography.bodySmall)
+                    if (planHatasi) {
+                        Text(stringResource(R.string.measure_preview_error), color = colors.error, style = MaterialTheme.typography.bodySmall)
+                        TextButton(onClick = { yenileme++ }) { Text(stringResource(R.string.level_retry)) }
+                    }
                     if (kayitHatasi) Text(stringResource(R.string.focus_save_error), color = colors.error, style = MaterialTheme.typography.bodySmall)
                     if (tekrarli || kullanilamaz) {
                         Text(stringResource(if (kullanilamaz) R.string.filtered_practice_question_unavailable else R.string.focus_duplicate), style = MaterialTheme.typography.bodySmall)
-                        Button(onClick = onAtla, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.focus_skip)) }
+                        Button(onClick = { olcum.aktiflik(false); onAtla() }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.focus_skip)) }
                     } else if (!degerlendirme) {
-                        Button(onClick = { degerlendirme = true }, enabled = oncekiKayitlar != null,
+                        Button(onClick = {
+                            if (!gorselHazir) olcum.kismi(OlcumNedeni.GORSEL_EKSIK)
+                            olcum.dondur()
+                        }, enabled = oncekiKayitlar != null,
                             modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.focus_assess)) }
                     } else {
                         Text(stringResource(R.string.focus_plan_note), style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant)
-                        Button(onClick = ::kaydet, enabled = secim != null && !kaydediliyor && oncekiKayitlar != null,
+                        Button(onClick = ::kaydet, enabled = secim != null && !kaydediliyor && onizlemeler != null,
                             modifier = Modifier.fillMaxWidth()) {
                             if (kaydediliyor) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
                             Text(stringResource(when {
@@ -208,10 +248,10 @@ fun OdakOturumuEkrani(
             item {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween) {
-                    TextButton(onClick = onGeri, enabled = !kaydediliyor) { Text(stringResource(R.string.common_back)) }
+                    TextButton(onClick = { olcum.aktiflik(false); onGeri() }, enabled = !kaydediliyor) { Text(stringResource(R.string.common_back)) }
                     Text(stringResource(R.string.filtered_practice_session_progress, sira, toplam),
                         style = MaterialTheme.typography.labelLarge, color = colors.primary)
-                    TextButton(onClick = { mola = true }, enabled = !kaydediliyor) { Text(stringResource(R.string.focus_pause)) }
+                    TextButton(onClick = { olcum.aktiflik(false); mola = true }, enabled = !kaydediliyor) { Text(stringResource(R.string.focus_pause)) }
                 }
             }
             item {
@@ -222,8 +262,12 @@ fun OdakOturumuEkrani(
                     Text(stringResource(R.string.focus_kicker), color = Color(0xFFEDD09A), letterSpacing = 2.sp,
                         style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
                     Text(ders.ad, color = Color.White, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                    Text(stringResource(R.string.focus_elapsed, String.format(Locale.ROOT, "%02d:%02d", saniye / 60, saniye % 60)),
+                    Text(stringResource(R.string.measure_phase_times,
+                        sureMetni(olcum.nokta.olcum.denemeAktifMs), sureMetni(olcum.nokta.olcum.incelemeAktifMs)),
                         color = Color.White.copy(alpha = 0.8f), style = MaterialTheme.typography.bodySmall)
+                    if (olcum.nokta.olcum.kalite != OlcumKalitesi.TAM) Text(stringResource(
+                        if (olcum.nokta.olcum.kalite == OlcumKalitesi.KISMI) R.string.measure_partial else R.string.measure_invalid),
+                        color = Color(0xFFF0D18E), style = MaterialTheme.typography.labelSmall)
                     Box(Modifier.fillMaxWidth().height(5.dp).background(Color.White.copy(alpha = 0.2f), RoundedCornerShape(4.dp))) {
                         Box(Modifier.fillMaxWidth(((sira - 1).toFloat() / toplam.coerceAtLeast(1)).coerceIn(0f, 1f)).height(5.dp)
                             .background(Color(0xFFF0D18E), RoundedCornerShape(4.dp)))
@@ -249,13 +293,18 @@ fun OdakOturumuEkrani(
             val kaynak = listOfNotNull(soru.kaynak, soru.kaynakKonumu).filter { it.isNotBlank() }.joinToString(" · ")
             if (kaynak.isNotBlank()) item { Text(kaynak, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant) }
             items(soru.gorseller.filter { it.tur == GorselTuru.SORU }, key = { it.id }) { image ->
-                OdakGorseli(image, gorselDeposu, stringResource(R.string.question_image_description)) { gorsel = image }
+                OdakGorseli(image, gorselDeposu, stringResource(R.string.question_image_description),
+                    onDurum = { durum ->
+                        gorselDurumlari = if (durum == null) gorselDurumlari - image.id else gorselDurumlari + (image.id to durum)
+                        if (durum == GorselHazirligi.HAZIR) soruGoruldu = true
+                        if (durum == GorselHazirligi.HATA) olcum.kismi(OlcumNedeni.GORSEL_EKSIK)
+                    }) { olcum.tamEkran(); gorsel = image }
             }
             item { Text(stringResource(R.string.focus_image_hint), style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant) }
             item {
                 OutlinedButton(onClick = {
                     cozumGorunur = !cozumGorunur
-                    if (cozumGorunur) { cozumAcildi = true; onCozumAcildi() }
+                    if (cozumGorunur) { olcum.cozumuAc(); onCozumAcildi() }
                 }, enabled = cozumVar && !kaydediliyor, modifier = Modifier.fillMaxWidth()) {
                     Text(stringResource(if (cozumGorunur) R.string.question_hide_solution else R.string.focus_reveal))
                 }
@@ -270,7 +319,11 @@ fun OdakOturumuEkrani(
                     }
                 }
                 items(soru.gorseller.filter { it.tur == GorselTuru.COZUM }, key = { it.id }) { image ->
-                    OdakGorseli(image, gorselDeposu, stringResource(R.string.solution_image_description)) { gorsel = image }
+                    OdakGorseli(image, gorselDeposu, stringResource(R.string.solution_image_description),
+                        onDurum = { durum ->
+                            gorselDurumlari = if (durum == null) gorselDurumlari - image.id else gorselDurumlari + (image.id to durum)
+                            if (durum == GorselHazirligi.HATA) olcum.kismi(OlcumNedeni.GORSEL_EKSIK)
+                        }) { olcum.tamEkran(); gorsel = image }
                 }
             }
             if (yuklemeHatasi) item {
@@ -281,10 +334,15 @@ fun OdakOturumuEkrani(
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(stringResource(R.string.focus_assess_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     Text(stringResource(R.string.focus_assess_note), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+                    Text(stringResource(R.string.measure_frozen_note), style = MaterialTheme.typography.bodySmall)
+                    TextButton(onClick = { olcum.calismayaDon(); planYenilendi = false }, enabled = !kaydediliyor) {
+                        Text(stringResource(R.string.measure_return_to_study))
+                    }
+                    if (onizlemeler == null && !planHatasi) Text(stringResource(R.string.measure_preparing))
                     TekrarSonucu.entries.forEach { sonuc ->
-                        val plan = AkilliTekrarKurali.hesapla(oncekiKayitlar, sonuc, cozumAcildi || cozumOnceAcildi, LocalDate.now(), soru.sonrakiTekrarGun)
+                        val plan = onizlemeler?.get(sonuc)?.plan
                         val secili = secim == sonuc
-                        Card(onClick = { secimAdi = sonuc.name }, enabled = !kaydediliyor,
+                        Card(onClick = { olcum.dondur(sonuc) }, enabled = !kaydediliyor && plan != null,
                             modifier = Modifier.fillMaxWidth().semantics { selected = secili; role = Role.RadioButton },
                             shape = RoundedCornerShape(18.dp),
                             colors = CardDefaults.cardColors(containerColor = if (secili) colors.primaryContainer else colors.surface)) {
@@ -296,7 +354,7 @@ fun OdakOturumuEkrani(
                                     TekrarSonucu.RAHAT -> R.string.review_result_easy
                                 }), fontWeight = FontWeight.SemiBold)
                                 Column(horizontalAlignment = Alignment.End) {
-                                    Text(if (plan.sonrakiAralik == 1) stringResource(R.string.focus_tomorrow)
+                                    Text(if (plan == null) "—" else if (plan.sonrakiAralik == 1) stringResource(R.string.focus_tomorrow)
                                     else stringResource(R.string.focus_next_days, plan.sonrakiAralik), style = MaterialTheme.typography.labelSmall)
                                     if (secili) Text("✓", color = colors.primary)
                                 }
@@ -306,7 +364,7 @@ fun OdakOturumuEkrani(
                 }
             }
             if (sira < toplam) item {
-                TextButton(onClick = onSonaBirak, enabled = !kaydediliyor, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.focus_defer)) }
+                TextButton(onClick = { olcum.aktiflik(false); onSonaBirak() }, enabled = !kaydediliyor, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.focus_defer)) }
                 Text(stringResource(R.string.focus_defer_note), style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant)
             }
         }
@@ -324,35 +382,13 @@ fun OdakOturumuEkrani(
 }
 
 @Composable
-private fun OdakGorseli(image: SoruGorseli, depo: LocalSoruGorselDeposu, aciklama: String, onClick: () -> Unit) {
+private fun OdakGorseli(image: SoruGorseli, depo: LocalSoruGorselDeposu, aciklama: String,
+    onDurum: (GorselHazirligi?) -> Unit, onClick: () -> Unit) {
     val ratio = (image.genislik.toFloat() / image.yukseklik.coerceAtLeast(1)).coerceIn(0.55f, 2f)
     SoruGorselResmi(depo.dosyaGoruntuIcin(image.dosyaAdi), aciklama,
         modifier = Modifier.fillMaxWidth().heightIn(min = 160.dp, max = 560.dp).aspectRatio(ratio),
-        contentScale = ContentScale.Fit, maxDecodeEdge = 1800, onClick = onClick)
+        contentScale = ContentScale.Fit, maxDecodeEdge = 1800, onClick = onClick, onDurum = onDurum)
 }
 
-/** Only active foreground time counts; a pause/background/zoom never creates a speed penalty. */
-@Composable
-private fun odakSuresi(durdu: Boolean): Int {
-    val context = LocalContext.current
-    val activity = remember(context) { context.activity() }
-    var onPlanda by remember { mutableStateOf(activity?.lifecycle?.currentState?.isAtLeast(Lifecycle.State.RESUMED) == true) }
-    var saniye by rememberSaveable { mutableIntStateOf(0) }
-    DisposableEffect(activity) {
-        val observer = LifecycleEventObserver { _, _ ->
-            onPlanda = activity?.lifecycle?.currentState?.isAtLeast(Lifecycle.State.RESUMED) == true
-        }
-        activity?.lifecycle?.addObserver(observer)
-        onDispose { activity?.lifecycle?.removeObserver(observer) }
-    }
-    LaunchedEffect(durdu, onPlanda) {
-        while (!durdu && onPlanda) { delay(1_000); saniye++ }
-    }
-    return saniye
-}
-
-private tailrec fun Context.activity(): ComponentActivity? = when (this) {
-    is ComponentActivity -> this
-    is ContextWrapper -> baseContext.activity()
-    else -> null
-}
+private fun sureMetni(ms: Long?): String = if (ms == null) "—" else
+    String.format(Locale.ROOT, "%02d:%02d", ms / 60_000, ms / 1_000 % 60)

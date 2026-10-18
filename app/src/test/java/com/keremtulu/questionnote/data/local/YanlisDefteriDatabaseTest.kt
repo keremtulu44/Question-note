@@ -109,14 +109,14 @@ class YanlisDefteriDatabaseTest {
     }
 
     @Test
-    fun schemaCreatesAllPlannedTablesAtVersionThree() = runBlocking {
+    fun schemaCreatesAllPlannedTablesAtVersionFour() = runBlocking {
         val sqlite = database.openHelper.readableDatabase
         val cursor = sqlite.query("PRAGMA user_version")
         val version = cursor.use {
             assertTrue(it.moveToFirst())
             it.getInt(0)
         }
-        assertEquals(3, version)
+        assertEquals(4, version)
 
         val namesCursor = sqlite.query("SELECT name FROM sqlite_master WHERE type = 'table'")
         val tableNames = namesCursor.use { rows ->
@@ -125,7 +125,7 @@ class YanlisDefteriDatabaseTest {
             }
         }
         assertTrue(tableNames.containsAll(setOf(
-            "dersler", "konular", "sorular", "gorseller", "tekrarlar", "geri_yukleme_isaretleri", "soru_secenekleri",
+            "dersler", "konular", "sorular", "gorseller", "tekrarlar", "geri_yukleme_isaretleri", "soru_secenekleri", "tekrar_olcumleri",
         )))
         assertEquals(VarsayilanSoruNedenleri, database.soruSecenegiDao().tumunuGetir()
             .filter { it.varsayilan }
@@ -133,7 +133,7 @@ class YanlisDefteriDatabaseTest {
     }
 
     @Test
-    fun migrationOneToThreeAddsOptionsAndRecoveryMarkerWithoutLosingExistingRows() = runBlocking {
+    fun migrationOneToFourAddsOptionsAndRecoveryMarkerWithoutLosingExistingRows() = runBlocking {
         val context = RuntimeEnvironment.getApplication()
         val databaseName = "migration-preserve-${System.nanoTime()}.db"
         val file = context.getDatabasePath(databaseName)
@@ -160,7 +160,7 @@ class YanlisDefteriDatabaseTest {
             YanlisDefteriDatabase::class.java,
             databaseName,
         )
-            .addMigrations(YanlisDefteriMigrations.MIGRATION_1_2, YanlisDefteriMigrations.MIGRATION_2_3)
+            .addMigrations(YanlisDefteriMigrations.MIGRATION_1_2, YanlisDefteriMigrations.MIGRATION_2_3, YanlisDefteriMigrations.MIGRATION_3_4)
             .allowMainThreadQueries()
             .build()
         try {
@@ -174,7 +174,7 @@ class YanlisDefteriDatabaseTest {
                 it.moveToFirst()
                 it.getInt(0)
             }
-            assertEquals(3, version)
+            assertEquals(4, version)
             assertEquals(VarsayilanSoruNedenleri, migrated.soruSecenegiDao().tumunuGetir()
                 .filter { it.varsayilan }
                 .map { it.ad })
@@ -185,7 +185,7 @@ class YanlisDefteriDatabaseTest {
     }
 
     @Test
-    fun migrationTwoToThreeKeepsQuestionTextAndBackfillsGlobalChoices() = runBlocking {
+    fun migrationTwoToFourKeepsQuestionTextAndBackfillsGlobalChoices() = runBlocking {
         val context = RuntimeEnvironment.getApplication()
         val databaseName = "migration-v2-v3-${System.nanoTime()}.db"
         val file = context.getDatabasePath(databaseName)
@@ -225,7 +225,7 @@ class YanlisDefteriDatabaseTest {
             YanlisDefteriDatabase::class.java,
             databaseName,
         )
-            .addMigrations(YanlisDefteriMigrations.MIGRATION_1_2, YanlisDefteriMigrations.MIGRATION_2_3)
+            .addMigrations(YanlisDefteriMigrations.MIGRATION_1_2, YanlisDefteriMigrations.MIGRATION_2_3, YanlisDefteriMigrations.MIGRATION_3_4)
             .allowMainThreadQueries()
             .build()
         try {
@@ -249,7 +249,7 @@ class YanlisDefteriDatabaseTest {
                 it.moveToFirst()
                 it.getInt(0)
             }
-            assertEquals(3, version)
+            assertEquals(4, version)
         } finally {
             migrated.close()
             context.deleteDatabase(databaseName)

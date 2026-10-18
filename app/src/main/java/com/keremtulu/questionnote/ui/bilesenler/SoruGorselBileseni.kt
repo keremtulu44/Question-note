@@ -17,6 +17,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -40,6 +43,8 @@ import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+enum class GorselHazirligi { YUKLENIYOR, HAZIR, HATA }
+
 @Composable
 fun SoruGorselResmi(
     file: File?,
@@ -47,14 +52,23 @@ fun SoruGorselResmi(
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Crop,
     maxDecodeEdge: Int = 1_800,
+    onDurum: ((GorselHazirligi?) -> Unit)? = null,
     onClick: (() -> Unit)? = null,
 ) {
+    val durumBildir by rememberUpdatedState(onDurum)
+    var yukleniyor by remember(file?.absolutePath, maxDecodeEdge) { mutableStateOf(true) }
     val bitmapState = produceState<Bitmap?>(initialValue = null, file?.absolutePath, maxDecodeEdge) {
+        yukleniyor = true
         value = if (file == null) null else withContext(Dispatchers.IO) {
             runCatching { cozumle(file, maxDecodeEdge) }.getOrNull()
         }
+        yukleniyor = false
     }
     val bitmap = bitmapState.value
+    LaunchedEffect(bitmap, yukleniyor) {
+        durumBildir?.invoke(if (yukleniyor) GorselHazirligi.YUKLENIYOR else if (bitmap != null) GorselHazirligi.HAZIR else GorselHazirligi.HATA)
+    }
+    DisposableEffect(file?.absolutePath) { onDispose { durumBildir?.invoke(null) } }
     DisposableEffect(bitmap) {
         onDispose { bitmap?.recycle() }
     }
@@ -66,7 +80,7 @@ fun SoruGorselResmi(
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                text = stringResource(if (file == null || !file.exists()) R.string.image_missing else R.string.image_load_error),
+                text = stringResource(if (yukleniyor) R.string.image_loading else if (file == null || !file.exists()) R.string.image_missing else R.string.image_load_error),
                 modifier = Modifier.padding(12.dp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,

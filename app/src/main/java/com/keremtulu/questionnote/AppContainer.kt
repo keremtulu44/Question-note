@@ -37,4 +37,13 @@ class AppContainer(context: Context) {
     val tercihHedefDeposu = gunlukHedefDeposu as TercihGunlukHedefDeposu
     val rozetHizmeti = RozetHizmeti(database, rozetDeposu, gunlukHedefDeposu)
     val seviyeHizmeti = SeviyeHizmeti(database, rozetDeposu, gunlukHedefDeposu, rozetHizmeti)
+
+    companion object {
+        @Volatile private var instance: AppContainer? = null
+        // Activity recreation shares the checkpoint owner; elapsed origins still stay in the screen controller.
+        fun getInstance(context: Context): AppContainer = instance ?: synchronized(this) {
+            instance ?: AppContainer(context.applicationContext).also { instance = it }
+        }
+    }
+
 }

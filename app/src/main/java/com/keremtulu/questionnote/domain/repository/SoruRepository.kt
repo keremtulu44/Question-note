@@ -11,6 +11,8 @@ import com.keremtulu.questionnote.domain.model.SoruKaydetmeIstegi
 import com.keremtulu.questionnote.domain.model.SoruPlanDurumu
 import com.keremtulu.questionnote.domain.model.TekrarKaydi
 import com.keremtulu.questionnote.domain.model.TekrarSonucu
+import com.keremtulu.questionnote.domain.calisma.TekrarDenemesi
+import com.keremtulu.questionnote.domain.calisma.TekrarOnizlemesi
 import kotlinx.coroutines.flow.Flow
 
 interface SoruRepository {
@@ -35,6 +37,10 @@ interface SoruRepository {
     suspend fun soruSil(soruId: String): SoruIslemSonucu
 
     suspend fun planDurumunuAyarla(soruId: String, durum: SoruPlanDurumu): SoruIslemSonucu
+
+    suspend fun tekrarOnizle(deneme: TekrarDenemesi): TekrarOnizlemesi?
+
+    suspend fun tekrarKaydet(onizleme: TekrarOnizlemesi): SoruIslemSonucu
 
     suspend fun tekrarKaydet(
         soruId: String,

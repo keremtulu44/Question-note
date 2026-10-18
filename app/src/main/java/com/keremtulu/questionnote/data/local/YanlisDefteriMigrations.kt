@@ -99,4 +99,26 @@ object YanlisDefteriMigrations {
             importLegacyColumn("yanlis_nedeni", SoruSecenekTuru.YANLIS_NEDENI)
         }
     }
+
+    /** Additive only: no historical review, duration, result or scheduled day is rewritten. */
+    val MIGRATION_3_4 = object : Migration(3, 4) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("""
+                CREATE TABLE IF NOT EXISTS `tekrar_olcumleri` (
+                    `tekrar_id` TEXT NOT NULL, `deneme_id` TEXT NOT NULL, `oturum_id` TEXT,
+                    `deneme_aktif_ms` INTEGER, `inceleme_aktif_ms` INTEGER,
+                    `kalite` TEXT NOT NULL, `nedenler_json` TEXT NOT NULL, `olcum_surumu` INTEGER NOT NULL,
+                    `ders_id` TEXT NOT NULL, `ders_adi` TEXT NOT NULL, `konu_id` TEXT, `konu_adi` TEXT,
+                    `kaynak_anahtari` TEXT, `kaynak_etiketi` TEXT, `karar_json` TEXT NOT NULL,
+                    PRIMARY KEY(`tekrar_id`),
+                    FOREIGN KEY(`tekrar_id`) REFERENCES `tekrarlar`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE
+                )
+            """.trimIndent())
+            database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_tekrar_olcumleri_deneme_id` ON `tekrar_olcumleri` (`deneme_id`)")
+            database.execSQL("CREATE INDEX IF NOT EXISTS `index_tekrar_olcumleri_ders_id_konu_id` ON `tekrar_olcumleri` (`ders_id`, `konu_id`)")
+            database.execSQL("CREATE INDEX IF NOT EXISTS `index_tekrar_olcumleri_ders_id_kaynak_anahtari` ON `tekrar_olcumleri` (`ders_id`, `kaynak_anahtari`)")
+            database.execSQL("CREATE INDEX IF NOT EXISTS `index_tekrarlar_gun` ON `tekrarlar` (`gun`)")
+        }
+    }
+
 }

@@ -12,6 +12,8 @@ data class OdakOturumu(
     val sira: Int = 0,
     val sonuclar: List<OturumSonucu> = emptyList(),
     val cozumAcilanlar: Set<String> = emptySet(),
+    val olcumler: Map<String, OlcumDevamNoktasi> = emptyMap(),
+    val olcumDestekli: Boolean = true,
 ) {
     val bitti: Boolean get() = sira >= soruIdleri.size
     val simdikiId: String? get() = soruIdleri.getOrNull(sira)
@@ -38,7 +40,11 @@ data class OdakOturumu(
     fun kurtar(mevcutIdler: Set<String>, kayitlar: Map<String, TekrarKaydi>): OdakOturumu {
         val verilenler = sonuclar.associateBy { it.soruId }.toMutableMap()
         soruIdleri.drop(sira).forEach { id ->
-            kayitlar[id]?.takeIf { it.zaman >= baslamaZamani }?.let {
+            kayitlar[id]?.takeIf { kayit ->
+                val deneme = olcumler[id]?.denemeId
+                if (deneme != null && kayit.denemeId != null) kayit.denemeId == deneme
+                else kayit.zaman >= baslamaZamani
+            }?.let {
                 verilenler.putIfAbsent(id, OturumSonucu(id, it.sonuc, it.cozumAcildi))
             }
         }
@@ -49,6 +55,7 @@ data class OdakOturumu(
             sira = biten.size,
             sonuclar = soruIdleri.mapNotNull { verilenler[it] },
             cozumAcilanlar = cozumAcilanlar.intersect(mevcutIdler),
+            olcumler = olcumler.filterKeys { it in kalan },
         )
     }
 }

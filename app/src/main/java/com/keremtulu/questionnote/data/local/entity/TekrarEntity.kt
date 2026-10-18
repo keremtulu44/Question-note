@@ -17,7 +17,7 @@ import androidx.room.PrimaryKey
             onUpdate = ForeignKey.NO_ACTION,
         ),
     ],
-    indices = [Index(value = ["soru_id", "gun"])],
+    indices = [Index(value = ["soru_id", "gun"]), Index(value = ["gun"])],
 )
 data class TekrarEntity(
     @PrimaryKey

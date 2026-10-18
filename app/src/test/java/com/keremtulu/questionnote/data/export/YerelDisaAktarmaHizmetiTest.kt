@@ -153,9 +153,9 @@ class YerelDisaAktarmaHizmetiTest {
                     JSONObject(it.readText())
                 }
                 assertEquals("yanlis-defteri-backup", manifest.getString("format"))
-                assertEquals(3, manifest.getInt("format_version"))
-                assertEquals(3, manifest.getInt("room_schema_version"))
-                assertTrue(manifest.getJSONArray("files").length() >= 8)
+                assertEquals(4, manifest.getInt("format_version"))
+                assertEquals(4, manifest.getInt("room_schema_version"))
+                assertTrue(manifest.getJSONArray("files").length() >= 9)
                 val inventory = manifest.getJSONArray("files")
                 for (index in 0 until inventory.length()) {
                     val item = inventory.getJSONObject(index)
@@ -166,7 +166,7 @@ class YerelDisaAktarmaHizmetiTest {
                     assertEquals(item.getString("sha256"), digest)
                 }
                 assertTrue(entryNames.containsAll(setOf(
-                    "csv/lessons.csv", "csv/topics.csv", "csv/questions.csv", "csv/catalog_options.csv", "csv/images.csv", "csv/reviews.csv",
+                    "csv/lessons.csv", "csv/topics.csv", "csv/questions.csv", "csv/catalog_options.csv", "csv/images.csv", "csv/reviews.csv", "csv/measurements.csv",
                 )))
                 assertEquals(1, manifest.getJSONObject("counts").getInt("questions"))
                 assertEquals(1, manifest.getJSONObject("counts").getInt("reviews"))

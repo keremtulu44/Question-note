@@ -124,6 +124,7 @@ internal fun IlerlemeIcerigi(
         }
         if (ozet.dersler.isNotEmpty()) item(key = "dersler") { DersPekismesi(ozet.dersler) }
         item(key = "plan") { TekrarTakvimi(ozet.tahmin) }
+        ozet.sureKapsami?.let { kapsam -> item(key = "sure-profili") { SureProfiliKarti(kapsam) } }
         if (!yetersizVeri) item(key = "bugun") {
             OutlinedButton(onClick = onBugun, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
                 Text(stringResource(R.string.progress_go_today))

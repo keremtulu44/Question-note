@@ -6,6 +6,7 @@ import com.keremtulu.questionnote.domain.ilerleme.HaftaDengesi
 import com.keremtulu.questionnote.domain.ilerleme.IlerlemeOzeti
 import com.keremtulu.questionnote.domain.karne.HaftaPenceresi
 import com.keremtulu.questionnote.domain.karne.SeriHesabi
+import com.keremtulu.questionnote.domain.calisma.YerelTakvimSaati
 import java.time.Clock
 import java.time.LocalDate
 import kotlinx.coroutines.flow.Flow
@@ -17,7 +18,7 @@ import kotlinx.coroutines.flow.map
  */
 class IlerlemeHizmeti(
     private val database: YanlisDefteriDatabase,
-    private val saat: Clock = Clock.systemDefaultZone(),
+    private val saat: Clock = YerelTakvimSaati,
 ) {
     private val tekrarDao = database.tekrarDao()
     private val soruDao = database.soruDao()

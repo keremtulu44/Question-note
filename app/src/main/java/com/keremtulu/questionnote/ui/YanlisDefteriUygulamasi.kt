@@ -73,6 +73,7 @@ import com.keremtulu.questionnote.domain.repository.SoruRepository
 import com.keremtulu.questionnote.ui.ayarlar.AyarlarEkrani
 import com.keremtulu.questionnote.ui.karne.KarneEkrani
 import com.keremtulu.questionnote.ui.seviye.SeviyeEkrani
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
@@ -145,15 +146,17 @@ fun YanlisDefteriUygulamasi(
     var rozetGozlemDurdu by remember { mutableStateOf(false) }
 
     fun oturumGoster(sorular: List<Soru>, dersler: Map<String, Ders>, oturum: OdakOturumu) {
-        // Reviews are already committed in Room; a checkpoint failure must not undo that fact.
-        runCatching { oturumDeposu.kaydet(oturum) }.onFailure {
-            scope.launch { snackbarHostState.showSnackbar(context.getString(R.string.focus_checkpoint_error)) }
+        val surum = oturumDeposu.hazirla(oturum)
+        val guncel = oturumDeposu.oku() ?: oturum
+        scope.launch(NonCancellable) {
+            try { oturumDeposu.kalicilastir(surum) }
+            catch (_: Exception) { scope.launch { snackbarHostState.showSnackbar(context.getString(R.string.focus_checkpoint_error)) } }
         }
         bekleyenOturum = null
-        ekran = if (oturum.bitti) {
-            UygulamaEkrani.FiltreliCalismaTamamlandi(sorular, dersler, oturum.sonuclar)
+        ekran = if (guncel.bitti) {
+            UygulamaEkrani.FiltreliCalismaTamamlandi(sorular, dersler, guncel.sonuclar)
         } else {
-            UygulamaEkrani.FiltreliOturum(sorular, dersler, oturum)
+            UygulamaEkrani.FiltreliOturum(sorular, dersler, guncel)
         }
     }
 
@@ -165,7 +168,11 @@ fun YanlisDefteriUygulamasi(
     }
 
     fun karneyiKapat(hedef: UygulamaEkrani) {
-        runCatching { oturumDeposu.temizle() }
+        val surum = oturumDeposu.sifirlamayiHazirla()
+        scope.launch(NonCancellable) {
+            try { oturumDeposu.kalicilastir(surum) }
+            catch (_: Exception) { scope.launch { snackbarHostState.showSnackbar(context.getString(R.string.focus_checkpoint_error)) } }
+        }
         ekran = hedef
     }
 
@@ -399,6 +406,9 @@ fun YanlisDefteriUygulamasi(
                             OdakOturumuEkrani(
                                 soru = question, ders = lesson, repository = soruRepository, gorselDeposu = gorselDeposu,
                                 sira = current.sira + 1, toplam = current.oturum.soruIdleri.size, sonuclar = current.sonuclar,
+                                oturumId = current.oturum.id,
+                                oturumDeposu = oturumDeposu,
+                                disDuraklatildi = oturumCikisHedefi != null,
                                 cozumOnceAcildi = question.id in current.oturum.cozumAcilanlar,
                                 onCozumAcildi = { oturumGoster(current.sorular, current.dersler, current.oturum.cozumuAc()) },
                                 onGeri = { ekranSec(current.geriHedefi()) },
@@ -535,7 +545,7 @@ fun YanlisDefteriUygulamasi(
                             preview.yedek.sayilar.gorselSayisi,
                             preview.mevcut.soruSayisi,
                             preview.mevcut.gorselSayisi,
-                        ),
+                        ) + "\n\n" + context.getString(R.string.backup_measurement_count, preview.yedek.sayilar.olcumSayisi),
                     )
                 }
             },

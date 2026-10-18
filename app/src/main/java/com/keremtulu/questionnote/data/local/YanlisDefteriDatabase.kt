@@ -1,5 +1,7 @@
 package com.keremtulu.questionnote.data.local
 
+import com.keremtulu.questionnote.data.local.dao.TekrarOlcumDao
+import com.keremtulu.questionnote.data.local.entity.TekrarOlcumEntity
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
@@ -26,10 +28,11 @@ import com.keremtulu.questionnote.data.local.entity.TekrarEntity
         SoruEntity::class,
         GorselEntity::class,
         TekrarEntity::class,
+        TekrarOlcumEntity::class,
         GeriYuklemeIsaretiEntity::class,
         SoruSecenegiEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
 )
 abstract class YanlisDefteriDatabase : RoomDatabase() {
@@ -39,6 +42,7 @@ abstract class YanlisDefteriDatabase : RoomDatabase() {
     abstract fun soruSecenegiDao(): SoruSecenegiDao
     abstract fun gorselDao(): GorselDao
     abstract fun tekrarDao(): TekrarDao
+    abstract fun tekrarOlcumDao(): TekrarOlcumDao
     abstract fun ilerlemeDao(): IlerlemeDao
     abstract fun geriYuklemeIsaretiDao(): GeriYuklemeIsaretiDao
 

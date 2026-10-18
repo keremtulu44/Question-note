@@ -1,5 +1,7 @@
 package com.keremtulu.questionnote.data.export
 
+import com.keremtulu.questionnote.data.gelisim.OlcumSerilestirme
+import com.keremtulu.questionnote.data.local.entity.TekrarOlcumEntity
 import android.content.Context
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -52,6 +54,7 @@ data class YedekSayilari(
     val soruSayisi: Int,
     val gorselSayisi: Int,
     val tekrarSayisi: Int,
+    val olcumSayisi: Int = 0,
 )
 
 data class YedekOzet(
@@ -323,6 +326,7 @@ class YerelYedeklemeHizmeti(
                     )
                 }
                 if (verified.data.tekrarlar.isNotEmpty()) database.tekrarDao().ekle(verified.data.tekrarlar)
+                if (verified.data.olcumler.isNotEmpty()) database.tekrarOlcumDao().ekle(verified.data.olcumler)
                 database.geriYuklemeIsaretiDao().ekle(GeriYuklemeIsaretiEntity(preview.id))
             }
 
@@ -405,6 +409,7 @@ class YerelYedeklemeHizmeti(
             soruSayisi = database.soruDao().tumunuGetir().size,
             gorselSayisi = database.gorselDao().tumunuGetir().size,
             tekrarSayisi = database.tekrarDao().tumunuGetir().size,
+            olcumSayisi = database.tekrarOlcumDao().tumunuGetir().size,
         )
     }
 
@@ -416,6 +421,7 @@ class YerelYedeklemeHizmeti(
             secenekler = database.soruSecenegiDao().tumunuGetir(),
             gorseller = database.gorselDao().tumunuGetir(),
             tekrarlar = database.tekrarDao().tumunuGetir(),
+            olcumler = database.tekrarOlcumDao().tumunuGetir(),
         )
     }
 
@@ -529,6 +535,7 @@ class YerelYedeklemeHizmeti(
             .put("questions", counts.soruSayisi)
             .put("images", counts.gorselSayisi)
             .put("reviews", counts.tekrarSayisi)
+            .put("measurements", counts.olcumSayisi)
             .put("catalog_options", catalogOptionCount))
         .put("files", JSONArray().apply {
             payloads.sortedBy { it.name }.forEach { item ->
@@ -546,6 +553,7 @@ class YerelYedeklemeHizmeti(
         .put("catalog_options", JSONArray().apply { data.secenekler.forEach { put(it.toJson()) } })
         .put("images", JSONArray().apply { data.images.forEach { put(it.toJson()) } })
         .put("reviews", JSONArray().apply { data.tekrarlar.forEach { put(it.toJson()) } })
+        .put("measurements", JSONArray().apply { data.olcumler.forEach { put(OlcumSerilestirme.yaz(it)) } })
 
     private fun csvFiles(data: BackupData): Map<String, ByteArray> = linkedMapOf(
         "csv/lessons.csv" to csv(
@@ -571,6 +579,12 @@ class YerelYedeklemeHizmeti(
         "csv/reviews.csv" to csv(
             listOf("id", "question_id", "time_epoch_ms", "day", "scheduled_day", "result", "solution_opened", "previous_interval_days", "next_interval_days", "algorithm_version", "manually_assigned"),
             data.tekrarlar.map { listOf(it.id, it.soruId, it.zaman, it.gun, it.planlananGun, it.sonuc, it.cozumAcildi, it.oncekiAralik, it.sonrakiAralik, it.algoritmaSurumu, it.elleAtandi) },
+        ),
+        "csv/measurements.csv" to csv(
+            listOf("review_id", "attempt_id", "session_id", "attempt_active_ms", "assisted_active_ms", "quality", "reasons", "measurement_version",
+                "lesson_id", "lesson_label", "topic_id", "topic_label", "source_key", "source_label", "decision_json"),
+            data.olcumler.map { listOf(it.tekrarId, it.denemeId, it.oturumId, it.denemeAktifMs, it.incelemeAktifMs, it.kalite, it.nedenlerJson,
+                it.olcumSurumu, it.dersId, it.dersAdi, it.konuId, it.konuAdi, it.kaynakAnahtari, it.kaynakEtiketi, it.kararJson) },
         ),
     ).mapValues { (_, text) -> text.toByteArray(Charsets.UTF_8) }
 
@@ -694,6 +708,7 @@ class YerelYedeklemeHizmeti(
             secenekler = secenekler,
             images = imageData,
             tekrarlar = tekrarlar,
+            olcumler = olcumler,
         )
     }
 
@@ -723,10 +738,11 @@ class YerelYedeklemeHizmeti(
             if (manifest.getString("format") != FORMAT_ID || formatVersion !in SUPPORTED_FORMAT_VERSIONS) {
                 throw IOException("Bu ZIP yedek biçimi desteklenmiyor.")
             }
-            val expectedSchemaVersion = if (formatVersion == LEGACY_FORMAT_VERSION) {
-                LEGACY_ROOM_SCHEMA_VERSION
-            } else {
-                ROOM_SCHEMA_VERSION
+            val expectedSchemaVersion = when (formatVersion) {
+                2 -> 2
+                3 -> 3
+                4 -> 4
+                else -> throw IOException("Desteklenmeyen yedek sürümü.")
             }
             if (manifest.getInt("room_schema_version") != expectedSchemaVersion) {
                 throw IOException("Yedeğin Room şema sürümü desteklenmiyor.")
@@ -737,8 +753,8 @@ class YerelYedeklemeHizmeti(
             val createdAt = manifest.getLong("created_at_epoch_ms")
             if (createdAt <= 0L) throw IOException("Yedek tarihi geçersiz.")
             val manifestCounts = manifest.getJSONObject("counts")
-            val counts = manifestCounts.toCounts()
-            val catalogOptionCount = if (formatVersion == FORMAT_VERSION) {
+            val counts = manifestCounts.toCounts(formatVersion)
+            val catalogOptionCount = if (formatVersion in 3..4) {
                 manifestCounts.getInt("catalog_options").also {
                     if (it < 0) throw IOException("Manifest içindeki katalog sayısı negatif.")
                 }
@@ -751,15 +767,19 @@ class YerelYedeklemeHizmeti(
                 throw IOException("ZIP girdileri manifest ile eşleşmiyor.")
             }
             val declaredCsv = manifest.getJSONArray("csv_files").toStringSet()
-            val expectedCsvFiles = if (formatVersion == LEGACY_FORMAT_VERSION) {
-                LEGACY_REQUIRED_CSV_FILES
-            } else {
-                REQUIRED_CSV_FILES
+            val expectedCsvFiles = when (formatVersion) {
+                2 -> LEGACY_REQUIRED_CSV_FILES
+                3 -> V3_REQUIRED_CSV_FILES
+                4 -> REQUIRED_CSV_FILES
+                else -> throw IOException("Desteklenmeyen CSV sürümü.")
             }
             if (declaredCsv != expectedCsvFiles || !inventoryPaths.containsAll(expectedCsvFiles)) {
                 throw IOException("Yedek CSV tabloları eksik veya tanımsız.")
             }
             val imageEntries = inventoryPaths.filter { it.startsWith(IMAGE_DIRECTORY) }
+            if (inventoryPaths != expectedCsvFiles + DATA_FILE + imageEntries) {
+                throw IOException("ZIP envanteri biçim sürümünün tablolarıyla eşleşmiyor.")
+            }
             if (imageEntries.size != counts.gorselSayisi || imageEntries.any { !IMAGE_PATH.matches(it) }) {
                 throw IOException("Yedek görsel envanteri geçersiz.")
             }
@@ -870,9 +890,9 @@ class YerelYedeklemeHizmeti(
                 guncelleme = item.getLong("updated_at_epoch_ms"),
             )
         }
-        val options = if (formatVersion == LEGACY_FORMAT_VERSION) {
-            legacyCatalogOptions(questions)
-        } else {
+        val options = when (formatVersion) {
+            2 -> legacyCatalogOptions(questions)
+            3, 4 -> {
             json.getJSONArray("catalog_options").toTypedList(MAX_ROWS_PER_TABLE) { item ->
                 val type = runCatching { SoruSecenekTuru.valueOf(item.getString("type")) }
                     .getOrElse { throw IOException("Yedekte bilinmeyen katalog türü var.") }
@@ -886,6 +906,8 @@ class YerelYedeklemeHizmeti(
                     olusturma = item.getLong("created_at_epoch_ms"),
                 )
             }
+        }
+            else -> throw IOException("Desteklenmeyen katalog sürümü.")
         }
         val images = json.getJSONArray("images").toTypedList(MAX_IMAGES) { item ->
             val type = runCatching { GorselTuru.valueOf(item.getString("type")) }
@@ -923,6 +945,14 @@ class YerelYedeklemeHizmeti(
                 elleAtandi = item.getBoolean("manually_assigned"),
             )
         }
+        val measurements = when (formatVersion) {
+            2, 3 -> {
+                if (json.has("measurements")) throw IOException("Eski biçim ölçüm tablosu içeremez.")
+                emptyList()
+            }
+            4 -> json.getJSONArray("measurements").toTypedList(MAX_ROWS_PER_TABLE, OlcumSerilestirme::oku)
+            else -> throw IOException("Desteklenmeyen ölçüm tablosu sürümü.")
+        }
         BackupData(
             dersler = lessons,
             konular = topics,
@@ -930,6 +960,7 @@ class YerelYedeklemeHizmeti(
             secenekler = options,
             images = images,
             tekrarlar = reviews,
+            olcumler = measurements,
         )
     } catch (error: IOException) {
         throw error
@@ -1052,6 +1083,15 @@ class YerelYedeklemeHizmeti(
                 throw IOException("Soru görseli olmayan kayıt bulundu: ${question.id}")
             }
         }
+        if (data.olcumler.size > MAX_ROWS_PER_TABLE) throw IOException("Ölçüm tablosu sınırı aşıldı.")
+        uniqueIds(data.olcumler.map { it.tekrarId }, "ölçüm")
+        uniqueIds(data.olcumler.map { it.denemeId }, "deneme")
+        val reviewsById = data.tekrarlar.associateBy { it.id }
+        data.olcumler.forEach { olcum ->
+            val tekrar = reviewsById[olcum.tekrarId] ?: throw IOException("Yetim ölçüm kaydı.")
+            try { OlcumSerilestirme.dogrula(olcum, tekrar) }
+            catch (error: Exception) { throw IOException("Ölçüm/bağlam/karar kaydı geçersiz.", error) }
+        }
         val reviewDays = mutableSetOf<Pair<String, Int>>()
         data.tekrarlar.forEach { review ->
             if (review.soruId !in questionIds || review.gun < 0 || review.zaman < 0L ||
@@ -1069,14 +1109,15 @@ class YerelYedeklemeHizmeti(
         throw IOException("Manifest sayıları okunamadı.", error)
     }
 
-    private fun JSONObject.toCounts() = YedekSayilari(
+    private fun JSONObject.toCounts(formatVersion: Int = FORMAT_VERSION) = YedekSayilari(
         dersSayisi = getInt("lessons"),
         konuSayisi = getInt("topics"),
         soruSayisi = getInt("questions"),
         gorselSayisi = getInt("images"),
         tekrarSayisi = getInt("reviews"),
+        olcumSayisi = if (formatVersion == 4) OlcumSerilestirme.tamInt(this, "measurements") else 0,
     ).also { counts ->
-        if (listOf(counts.dersSayisi, counts.konuSayisi, counts.soruSayisi, counts.gorselSayisi, counts.tekrarSayisi).any { it < 0 }) {
+        if (listOf(counts.dersSayisi, counts.konuSayisi, counts.soruSayisi, counts.gorselSayisi, counts.tekrarSayisi, counts.olcumSayisi).any { it < 0 }) {
             throw IOException("Manifest içindeki sayı negatif.")
         }
     }
@@ -1335,8 +1376,8 @@ class YerelYedeklemeHizmeti(
 
     private fun ByteArray.toHex(): String = joinToString("") { "%02x".format(it.toInt() and 0xff) }
 
-    private fun ExportSnapshot.counts() = YedekSayilari(dersler.size, konular.size, sorular.size, gorseller.size, tekrarlar.size)
-    private fun BackupData.counts() = YedekSayilari(dersler.size, konular.size, sorular.size, images.size, tekrarlar.size)
+    private fun ExportSnapshot.counts() = YedekSayilari(dersler.size, konular.size, sorular.size, gorseller.size, tekrarlar.size, olcumler.size)
+    private fun BackupData.counts() = YedekSayilari(dersler.size, konular.size, sorular.size, images.size, tekrarlar.size, olcumler.size)
 
     private data class ExportSnapshot(
         val dersler: List<DersEntity>,
@@ -1345,6 +1386,7 @@ class YerelYedeklemeHizmeti(
         val secenekler: List<SoruSecenegiEntity>,
         val gorseller: List<GorselEntity>,
         val tekrarlar: List<TekrarEntity>,
+        val olcumler: List<TekrarOlcumEntity>,
     )
 
     private data class BackupData(
@@ -1354,6 +1396,7 @@ class YerelYedeklemeHizmeti(
         val secenekler: List<SoruSecenegiEntity>,
         val images: List<BackupImage>,
         val tekrarlar: List<TekrarEntity>,
+        val olcumler: List<TekrarOlcumEntity>,
     )
 
     private data class BackupImage(
@@ -1403,9 +1446,9 @@ class YerelYedeklemeHizmeti(
         const val FORMAT_ID = "yanlis-defteri-backup"
         const val LEGACY_FORMAT_VERSION = 2
         const val LEGACY_ROOM_SCHEMA_VERSION = 2
-        const val FORMAT_VERSION = 3
-        const val ROOM_SCHEMA_VERSION = 3
-        val SUPPORTED_FORMAT_VERSIONS = setOf(LEGACY_FORMAT_VERSION, FORMAT_VERSION)
+        const val FORMAT_VERSION = 4
+        const val ROOM_SCHEMA_VERSION = 4
+        val SUPPORTED_FORMAT_VERSIONS = setOf(2, 3, 4)
         const val STATE_PREPARED = "PREPARED"
         const val STATE_COMMITTED = "COMMITTED"
         const val JPEG_MIME = "image/jpeg"
@@ -1414,7 +1457,7 @@ class YerelYedeklemeHizmeti(
         const val MAX_ENTRY_BYTES = 128L * 1024L * 1024L
         const val MAX_JSON_BYTES = 64L * 1024L * 1024L
         const val MAX_MANIFEST_BYTES = 1 * 1024 * 1024
-        const val MAX_ARCHIVE_ENTRIES = 10_008
+        const val MAX_ARCHIVE_ENTRIES = 10_009
         const val MAX_IMAGES = 10_000
         const val MAX_ROWS_PER_TABLE = 200_000
         const val MAX_TEXT_FIELD = 200_000
@@ -1436,7 +1479,8 @@ class YerelYedeklemeHizmeti(
             "csv/images.csv",
             "csv/reviews.csv",
         )
-        val REQUIRED_CSV_FILES = LEGACY_REQUIRED_CSV_FILES + "csv/catalog_options.csv"
+        val V3_REQUIRED_CSV_FILES = LEGACY_REQUIRED_CSV_FILES + "csv/catalog_options.csv"
+        val REQUIRED_CSV_FILES = V3_REQUIRED_CSV_FILES + "csv/measurements.csv"
         val CSV_FILES = REQUIRED_CSV_FILES.sorted()
     }
 }

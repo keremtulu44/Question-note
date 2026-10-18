@@ -11,6 +11,7 @@ import com.keremtulu.questionnote.domain.karne.Rozet
 import com.keremtulu.questionnote.domain.karne.RozetGirdisi
 import com.keremtulu.questionnote.domain.karne.RozetKurallari
 import com.keremtulu.questionnote.domain.seviye.XpHesabi
+import com.keremtulu.questionnote.domain.calisma.YerelTakvimSaati
 import java.time.Clock
 import java.time.LocalDate
 import kotlinx.coroutines.Dispatchers
@@ -25,7 +26,7 @@ class RozetHizmeti(
     private val database: YanlisDefteriDatabase,
     private val depo: RozetDeposu,
     private val hedefDeposu: GunlukHedefDeposu,
-    private val saat: Clock = Clock.systemDefaultZone(),
+    private val saat: Clock = YerelTakvimSaati,
 ) {
     suspend fun girdi(
         sonuclar: List<OturumSonucu> = emptyList(),

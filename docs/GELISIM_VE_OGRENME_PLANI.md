@@ -1,7 +1,7 @@
 # Yanlış Defteri — Premium deneyim ve kişiselleşen öğrenme sistemi
 
 **Tarih:** 2026-10-18
-**Durum:** P0/P1 uygulandı ve v1.3.0 ile yayımlandı; CI `39131225744` 157/0. Fiziksel cihaz kabulü bekler. P2–P6 aşağıda öneri olarak kalır.
+**Durum:** P0/P1 uygulandı ve v1.3.0 ile yayımlandı; CI `39131225744` 157/0. Fiziksel cihaz kabulü bekler. P2/P3 kodlandı; yeni CI doğrulaması bekleniyor. P4–P6 öneri olarak kalır.
 **Başlangıç:** v1.2.0 / code 14, Room v3, ZIP v3, tekrar algoritması v2. Başlangıç CI kanıtı: `39067624050`, 130 başarılı test; fiziksel cihaz kabulü ayrı ve bekliyor.
 
 ## P0/P1 uygulama notu — 2026-10-18
@@ -13,6 +13,17 @@
 - **Örnek veri:** Yalnız `src/debug` Preview/test fixture’larında; release veri yolunda yok. Native Robolectric görüntüleri sentetik önizlemedir, fiziksel cihaz kanıtı değildir.
 - **Değişmeyenler:** Room/ZIP v3, tekrar v2, XP katsayıları, 15 rütbe/30 rozet kuralları. Süre kalıcılığı, kişisel profiller, v3 motor, kaynak/konu analizleri **uygulanmadı**.
 - **Doğrulama:** CI `39131225744`: 157 test / 0 başarısız / 0 hata / 0 atlanan; Release/imza/sertifika ve yayımlanan APK digest eşleşmesi başarılı. Eski 130 + 27 yeni test. [Sentetik önizlemeler](ui/p1/README.md) ve sanal animasyon zamanı fiziksel cihaz/performans kabulü değildir.
+
+## P2/P3 uygulama notu — 2026-10-18
+
+- Monotonik segment ölçeri; deneme/inceleme ayrımı; değerlendirmede dondurma; loading/mola/arka plan/tam ekran hariç. Tam ekran/eksik görsel ve süreç kurtarma kısmi; bilinmeyen zaman eklenmez.
+- Sürümlü, soru/deneme kimlikli devam noktaları; IO yazılarında revizyon/oturum koruması. Yeni bir süreç birikmiş süreyi alır, eski monotonik başlangıcı almaz.
+- Tek transaction'da tekrar + ölçüm/bağlam + v2 planı; idempotent deneme ID'si; gün/saat dilimi/geçmiş/profil değişince açık önizleme yenileme. Eski ayrıntı yolu `YOK` ölçümle aynı sözleşmeyi kullanır.
+- Additive Room v4 / `MIGRATION_3_4`; eski satır/tarih değişmez. ZIP v4 ölçüm/karar/bağlam JSON + CSV taşır; v2/v3 ayrı dallarla okunur. Eski süre null kalır.
+- Sürümlü 60 günlük kişisel profiller: yardımsız Rahat ve tüm sonuçlar için iş yükü ayrı; soru başına medyan, çeyrekler/MAD; 20/10/5 ve 30/15/7 eşikleri; mevcut deneme hariç; konu/kaynaktan aynı derse güvenli dönüş.
+- İlerleme'de gerçek ölçüm kapsamı ve ders referansı; az veride sayı uydurulmaz. Kaynak/konu bağlamı kayıt anından alınır. Genel sınav hızına/zekâya dair iddia yoktur.
+- **P4/v3 motor, gölge karar, P5 kaynak karşılaştırması ve yeni çalışma önerileri uygulanmadı.** Tekrar algoritması ve XP/rozet/rütbe kuralları değişmedi.
+- Yerel statik kontroller tamamlandı; derleme/test/cihaz kanıtı henüz bu paketler için yok. Yeni CI sonucu sonrası güncellenecek.
 
 ## 1. Hedef ve ana karar
 
@@ -269,7 +280,7 @@ Rütbe kutlaması için kalıcı görülme/kuyruk takibi gerekir. İlk kurulum, 
 
 ## 11. Kod paketleri ve bağımlılıklar
 
-**P0 ve P1 kod/otomatik test bakımından tamamlandı; fiziksel kabul açık. P2–P6 planlandı, uygulanmadı.** “Bitti” için kodun yazılması değil ilgili kabul kapısının geçilmesi gerekir.
+**P0/P1 kod/otomatik test bakımından tamamlandı; fiziksel kabul açık. P2/P3 kodlandı, CI bekleniyor. P4–P6 planlandı, uygulanmadı.** “Bitti” için kodun yazılması değil ilgili kabul kapısının geçilmesi gerekir.
 
 | Paket | Başlıca görevler / dosyalar | Bağımlılık | Kabul kapısı |
 |---|---|---|---|
