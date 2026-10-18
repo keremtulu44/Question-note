@@ -42,7 +42,12 @@ class OlcumKaydiTest {
         var bolge: ZoneId = ZoneOffset.UTC
         override fun getZone(): ZoneId = bolge
         override fun withZone(zone: ZoneId): Clock = Clock.fixed(an, zone)
-        override fun instant(): Instant = an
+        var sonrakiAn: Instant? = null
+        override fun instant(): Instant {
+            val sonuc = an
+            sonrakiAn?.let { an = it; sonrakiAn = null }
+            return sonuc
+        }
     }
     private val files = object : GorselDosyaYonetimi {
         override suspend fun geciciDosyayiDogrula(gorsel: SoruGorselGirdisi) = true
@@ -230,6 +235,19 @@ class OlcumKaydiTest {
         assertEquals(SoruIslemSonucu.OnizlemeGuncellendi, repo.tekrarKaydet(p))
         assertTrue(db.tekrarDao().tumunuGetir().isEmpty())
         assertEquals(SoruIslemSonucu.Basarili, repo.tekrarKaydet(yeni))
+    }
+
+
+    @Test fun aClockJumpDuringSaveRequestsRefreshInsteadOfMixingTwoCalendarDays() = runBlocking {
+        soru()
+        val p = requireNotNull(repo.tekrarOnizle(deneme()))
+        saat.sonrakiAn = saat.an
+        saat.an = saat.an.minusSeconds(86_400)
+        assertEquals(SoruIslemSonucu.OnizlemeGuncellendi, repo.tekrarKaydet(p))
+        assertTrue(db.tekrarDao().tumunuGetir().isEmpty())
+        val yeni = requireNotNull(repo.tekrarOnizle(deneme()))
+        assertEquals(SoruIslemSonucu.Basarili, repo.tekrarKaydet(yeni))
+        assertEquals(yeni.gun, db.tekrarDao().tumunuGetir().single().gun)
     }
 
 }

@@ -100,9 +100,9 @@ internal fun OdakOlcumIzleyicisi(durum: OdakOlcumDurumu, aktifIzin: Boolean) {
         }
     }
     LaunchedEffect(aktifIzin, onPlanda, durum) { durum.aktiflik(aktifIzin && onPlanda) }
-    LaunchedEffect(durum) {
+    LaunchedEffect(durum, aktifIzin, onPlanda) {
         var tik = 0
-        while (true) {
+        while (aktifIzin && onPlanda) {
             delay(1_000)
             durum.gosterimiYenile()
             if (++tik % 5 == 0) durum.kaydet()

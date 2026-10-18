@@ -295,9 +295,9 @@ class RoomSoruRepository(
         }
         val soru = soruDao.idIleGetir(deneme.soruId) ?: return@withTransaction SoruIslemSonucu.Bulunamadi
         if (soru.planDurumu != SoruPlanDurumu.AKTIF.name) return@withTransaction SoruIslemSonucu.PlanDurumuKapali
-        val gun = LocalDate.now(saat).toEpochDay().toInt()
-        if (tekrarDao.ayniGunTekrarVar(soru.id, gun)) return@withTransaction SoruIslemSonucu.AyniGunTekrarVar
         val simdi = onizlemeUret(soru, deneme)
+        val gun = simdi.gun
+        if (tekrarDao.ayniGunTekrarVar(soru.id, gun)) return@withTransaction SoruIslemSonucu.AyniGunTekrarVar
         if (simdi != onizleme) return@withTransaction SoruIslemSonucu.OnizlemeGuncellendi
         val plan = simdi.plan
         val kayitAni = saat.instant()

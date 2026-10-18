@@ -12,7 +12,6 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onAllNodes
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -123,9 +122,14 @@ class OlcumVeProfilArayuzTest {
             compose.waitForIdle()
             compose.runOnIdle { now += 5_000 }
             compose.onNodeWithText(degerlendir).performClick()
+            compose.mainClock.advanceTimeBy(150) // allow the finite assessment scroll to lay out its items
             val rahat = context.getString(R.string.review_result_easy)
             compose.waitUntil(5_000) { compose.onAllNodes(hasText(rahat) and isEnabled()).fetchSemanticsNodes().isNotEmpty() }
             compose.onNodeWithText(rahat).performClick()
+            compose.waitForIdle()
+            val dondurulanRevizyon = requireNotNull(depo.oku()?.olcumler?.get("q")).revizyon
+            compose.mainClock.advanceTimeBy(6_000)
+            assertEquals(dondurulanRevizyon, depo.oku()?.olcumler?.get("q")?.revizyon)
             compose.runOnIdle { now += 30_000 } // reflection / choosing / saving never counts as study
             compose.onNodeWithText(context.getString(R.string.focus_save_last)).performClick()
             compose.waitUntil(5_000) { tamam.get() }
