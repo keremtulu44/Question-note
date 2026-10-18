@@ -1,4 +1,4 @@
-# İlerleme, rütbe ve rozetler — v1.4.x
+# İlerleme, rütbe ve rozetler — v1.5.x
 
 Kod: `domain/seviye`, `domain/karne/Rozet.kt`, `data/ilerleme/RozetHizmeti.kt`,
 `data/seviye/SeviyeHizmeti.kt`. Bu belge uygulanan kuralları anlatır; cihaz performansı ölçülmüş değildir.
@@ -18,8 +18,8 @@ kontrol listesinde ayrıca doğrulanmalıdır.
 - Normal ölçekte 2×2, büyük yazıda tek sütun istatistikler. Rozet/rütbe koleksiyonu ve XP
   dökümü isteğe bağlı açılır; ilk ekran bütün galeriyi çizmez.
 - **Emek ≠ öğrenme:** XP çalışma kaydıdır. Ders pekişmesi mevcut tekrar planından türetilen
-  göstergedir, sınav başarısı değildir. 7 günlük grafikte soru adedi vardır; gecikmiş kayıtlar
-  dahil değildir. Kaynak/konu başarısı veya genel yetenek puanı üretilmez; P3 süre referansı ayrı bölümde gösterilir.
+  göstergedir, sınav başarısı değildir. P5 planı gecikmiş uygun soruları bugüne dahil eder; seçili profil
+  kapsamını ve soru/süre belirsizliğini gösterir. Genel yetenek puanı üretilmez.
 - `SeviyeDurumuUi`: yükleniyor, hata/yeniden dene, tekrar verisi yetersiz, hazır. Boş arşivden
   soru eklemeye; sorusu olup tekrarı olmayan kullanıcı Bugün'e yönlendirilir.
 - XP ilk gösterimde gerçek değerden başlar. Yalnız açık ekrandaki gerçek değişiklik animasyon
@@ -39,9 +39,25 @@ kontrol listesinde ayrıca doğrulanmalıdır.
   “ölçüm birikiyor” ve örneklem eşikleri vardır. Eski kayıtlardan süre uydurulmaz.
 - Yardımsız Rahat referansı ve tüm sonuçlardan aktif iş yükü ayrı tutulur. Aynı kolay soru
   çok tekrarlanınca profili ele geçiremez. Bu, genel sınav hızı veya öğrenme/zekâ puanı değildir.
-- Konu/kaynak profili ve aynı derse dönüş P3 altyapısında vardır; kaynak başarı sıralaması ve
-  yeni çalışma önerisi panosu P5'e bırakılmıştır. Profil tekrar tarihini veya XP'yi değiştirmez.
+- Konu/kaynak profili ve aynı derse dönüş P3 altyapısında vardır. P5 tarihsel grupları ve çalışma
+  önerisini kullanır; kaynak kalite sıralaması yapmaz. Varsayılan Gölge tarihleri v2 bırakır, XP aynı kalır.
 - Sözleşme/test sınırları: [OLCUM_VE_PROFILLER.md](OLCUM_VE_PROFILLER.md).
+
+## P5/P6: analitik, eylem ve güvenli kutlama
+
+- Rütbe kartından sonra **Sıradaki küçük adım**; kullanıcı başlatınca doğru ders/vade/kaynak kapsamıyla
+  Filtreli → Odak. Uygunluk yeniden denetlenir; aynı gün/askı/ders arşivi/profil sınırı aşılmaz.
+- Gerçek 7 günlük ritim; bugün eksik. Tamamlanmış iki 7 gün; aynı sorunun aynı bağlamlı son
+  değerlendirmeleri için ≥10 soru ve her tarafta ≥3 gün. Gerçek eşleşen gün sayısı da görünür.
+- Tarihsel konu/kaynak, farklı soru/tekrar/payda/kapsama; bilinmeyen ve belirtilmemiş bağlam ayrı.
+  Grup ayrıntıları altılı sayfalarda; sürekli animasyon yok, ≥48dp eylemler, azaltılmış harekette doğrudan son durum.
+- İş yükü tüm sonuçların TAM aktif ölçümlerinden. ≥%80 kapsama olmadan toplam dakika ölçeklenmez;
+  yalnız kapsanan soru ara toplamı verilir, sıfır kapsamada dakika yoktur.
+- Kalıcı `RutbeDeposu`: çok eşik tek son rütbeye birleşir; görülmüş eşik tekrar oynatılmaz, rütbe XP vermez.
+  Startup/hedef/restore sessiz tabandır; rozet sahipliği korunur. `KutlamaHost` önce rozet, sonra rütbe;
+  iki fullscreen aynı anda açılmaz. Geri yüklemede eski kuyruklar marker kaldırılmadan temizlenir.
+- Kalıcı analiz cache'i yok. Veri/tercih/restore, gece yarısı ve saat/lifecycle değişiminde yeniden türetilir.
+  Ölçümler/otomatik kabul sınırları [P4–P6 kaydında](P4_P5_P6_UYGULAMA.md).
 
 ## XP: eklemek de çalışmak da değerli
 

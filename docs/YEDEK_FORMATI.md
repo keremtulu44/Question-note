@@ -1,8 +1,8 @@
 # Tam ZIP yedek biçimi — v4
 
 Güncel yazım: `yanlis-defteri-backup`, **ZIP v4 / Room v4**. Okuma: **v2, v3, v4**; her biri
-kendi şema/CSV/alan sözleşmesiyle doğrulanır. Tekrar algoritması bunlardan bağımsızdır ve hâlâ
-**v2**'dir. Son güncelleme: 2026-10-18.
+kendi şema/CSV/alan sözleşmesiyle doğrulanır. Algoritma ve karar snapshot sürümleri bunlardan ayrıdır.
+Varsayılan **Gölge**, v2 planını uygular ve ayrı v3 adayı saklar. Son güncelleme: 2026-10-18.
 
 ## 1. Arşiv yapısı
 
@@ -45,7 +45,10 @@ kalite/nedenler, ölçüm sürümü 1, tarihsel bağlam ve karar JSON'u vardır.
 Yetim/yinelenen ölçüm/deneme kimliği, negatif/taşan süre, desteklenmeyen kalite/sürüm,
 normalize kaynak uyuşmazlığı, bozuk/çok büyük karar snapshot'ı ve tekrar/karar aralığı uyuşmazlığı
 reddedilir. Süreler tam sayı ms'dir; sayısal taşma veya metin/ondalık coercion ile kabul edilmez.
-Karar snapshot'ı sürüm 1 / `V2` modudur; P4/v3 kararı varmış gibi içe alınmaz.
+Karar snapshot **1 / V2** ve **2 / GOLGE–ETKIN** açıkça doğrulanır. Snapshot2'de temel/aday/uygulanan
+aralık, algoritma sürümü, yakın günler ve gerekçeler yeniden hesaplanan kararla tutarlı olmalıdır.
+Etkin3 geçmişi içe alınabilir; bu, mevcut cihazın etkinleştirme kapısını açmaz. Kapalı'ya dönüş
+eski v3 geçmişini korur, yalnız sonraki kayıtları v2 yapar. Bilinmeyen snapshot/aday sürümü reddedilir.
 
 ## 3. Manifest, bütünlük ve sınırlar
 
@@ -82,8 +85,10 @@ da silinebilir; önemli yedeği kullanıcının seçtiği kalıcı konuma ayrıc
 4. Journal yazılır; yeni görseller ayrı adlarla kalıcılaştırılır. Tek Room transaction'ında eski
    arşiv değiştirilir, tekrarlar ve ölçümler eklenir, commit işareti yazılır. Review silinmesi
    eski ölçümleri cascade ile siler. Bir adım başarısızsa DB transaction'ı geri alınır.
-5. Commit kanıtı ve yeni görseller doğrulanır. Eski devam noktası **kalıcı temizlenir**; ardından
-   eski görseller, Room işareti ve journal kaldırılır. Temizlik başarısızsa recovery sınırı korunur.
+5. Commit kanıtı ve yeni görseller doğrulanır. Eski devam noktası **kalıcı temizlenir**; üretim callback'i
+   rozet/rütbe bekleyen kutlamalarını da sıfırlar, sahipliği korur ve sessiz yeni taban ister. Ardından
+   eski görseller, Room işareti ve journal kaldırılır. Temizlik başarısızsa recovery sınırı korunur;
+   servis anlık recovery dener, hâlâ başarısızsa startup'da tekrar eder.
 
 Startup recovery normal ekranlardan önce çalışır: commit işareti yoksa yeni dosyalar geri
 alınır ve eski arşiv/oturum kalır; işaret varsa yeni arşivin temizliği tamamlanır. İşaret/journal
@@ -93,7 +98,7 @@ restore sonrasında yeni veri kümesinden yeniden hesaplanır.
 
 ## 6. Dahil olmayanlar ve gizlilik
 
-Rozet sahipliği/kutlama kuyruğu, günlük hedef, seçili sınav formatı ve **yarım oturumun cihaz-yerel
+Rozet/rütbe sahiplik/görülme/kutlama durumu, motor politikası, günlük hedef, seçili sınav formatı ve **yarım oturumun cihaz-yerel
 checkpoint'i** ZIP'e dahil değildir. Sınav profiliyle eklenen dersler normal ders kayıtlarıdır ve
 yedekte bulunur. Tamamlanmış ölçüm ve bağlam ise v4'te yedeklidir.
 
@@ -102,7 +107,7 @@ Güvenli saklama kullanıcıya aittir. Daha yeni ZIP'i eski APK'ya verme veya DB
 
 ## 7. Doğrulama
 
-Otomatik kapsam: v2/v3 import; v4 tam tur; ölçüm null/kalite/snapshot korunması; hash/envanter;
+Otomatik kapsam: v2/v3 import; v4 tam tur; ölçüm null/kalite, snapshot1/2 ve v3 geçmişinin korunması; hash/envanter;
 semantik bozulma/taşma/orphan/tekrar reddi; safety kopyası; commit/rollback ve checkpoint sınırı;
 Room 1/2/3→4. Güncel sonuç [DERLEME_RAPORU.md](DERLEME_RAPORU.md) içindedir.
 

@@ -7,9 +7,11 @@ from xml.etree import ElementTree
 parser = argparse.ArgumentParser()
 parser.add_argument("mode", choices=("summary", "failures"))
 parser.add_argument("directories", nargs="+")
+parser.add_argument("--require-class", action="append", default=[])
 args = parser.parse_args()
 totals = dict(tests=0, failures=0, errors=0, skipped=0)
 details = []
+classes = set()
 files = [p for directory in args.directories for p in Path(directory).glob("TEST-*.xml")]
 for path in sorted(files):
     root = ElementTree.parse(path).getroot()
@@ -17,6 +19,7 @@ for path in sorted(files):
         for key in totals:
             totals[key] += int(suite.attrib.get(key, "0"))
     for case in root.iter("testcase"):
+        classes.add(case.attrib.get("classname", ""))
         for failure in case:
             if failure.tag in ("failure", "error"):
                 message = failure.attrib.get("message", "").replace("\n", " ")
@@ -33,4 +36,7 @@ if not files:
     print("JUnit XML raporu yok (0 test)")
     sys.exit(1)
 print(f"{totals['tests']} test; {totals['failures']} başarısız; {totals['errors']} hata; {totals['skipped']} atlandı")
-sys.exit(1 if not totals["tests"] or totals["failures"] or totals["errors"] else 0)
+missing = sorted(set(args.require_class) - classes)
+if missing:
+    print("Zorunlu test sınıfı çalışmadı: " + ", ".join(missing))
+sys.exit(1 if missing or not totals["tests"] or totals["failures"] or totals["errors"] or totals["skipped"] else 0)

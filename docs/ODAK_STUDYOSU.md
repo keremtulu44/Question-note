@@ -1,4 +1,4 @@
-# Odak Stüdyosu ve adaptif tekrar v2 — v1.4.x
+# Odak Stüdyosu ve güvenli gölge motor — v1.5.x
 
 ## Kullanıcı akışı
 
@@ -45,7 +45,7 @@ kullanır. Kural sezgiseldir; klinik/akademik olarak kişiselleştirilmiş öğr
 
 - Aralık = son geçerli tekrarın `sonraki_aralik` değeri, yoksa **1**.
 - Kolaylık başlangıcı **250** (%250); yalnız `algoritma_surumu >= 2` kayıtlarıyla güncellenir.
-- Çözüm açılmamış v2 kayıtta: Rahat +5, Zorlandım −15, Çözemedim −20. Sınır **130…280**.
+- Çözüm açılmamış desteklenen v2/v3 kayıtta: Rahat +5, Zorlandım −15, Çözemedim −20. Sınır **130…280**.
 - Çözüm açılmışsa kolaylık yargısı verilmez.
 - Unutma sayısı = çözüm açılmadan Çözemedim verilen kayıtların sayısı (eski kayıtlar dahil).
   **4 ve üzeri** destekleyici "biraz daha ilgi istiyor" kartını açar; otomatik askıya alma yoktur.
@@ -67,7 +67,7 @@ Tam sayı yuvarlama yarımda yukarıdır. Örnekler: ilk Rahat **3 gün**, ilk Z
 **43 gün**. Çözüm açılan her sonuç ertesi güne gelir. Aynı soru için aynı yerel günde ikinci
 kayıt hâlâ engellenir; ne plan ne XP iki kez artar.
 
-### Neden Room v4 yok?
+### Tarihsel v1.2.0 kararı: neden o aşamada Room v4 gerekmedi?
 
 Önceki tasarım `aralik_gun/kolaylik_yuz/unutma_sayisi` kolonları önermişti. Uygulamada hepsi
 zaten tutulan değişmez tekrar geçmişinden hesaplanabildiği için **çift durum saklamak yerine
@@ -113,3 +113,17 @@ commit sonrası süreç kaybı; formatta veri koruma; bağımsız çözüm sorgu
 Fiziksel cihazda üç-düğmeli/jest gezinme, yatay ekran, büyük yazı, tam ekran kutlama, gerçek
 fotoğraf yakınlaştırma ve arka plan/süreç kapatma kabulü ayrı işlerdir. CI başarısı bunları
 geçtiğimiz anlamına gelmez; `TEST_KONTROL_LISTESI.md` içinde açık bırakılır.
+
+
+## P4–P6 ek sözleşmesi
+
+V2 yukarıdaki referans kuralıdır; üretim varsayılanı **Gölge** aynı tarihi uygular, ayrı v3 adayını
+ve gerekçesini yerel snapshot2'de saklar. **Etkin v3 kapalıdır.** Son 90 günde en çok 5 ayrı gün;
+son iki bağımsız başarı güçlük uyarısını kaldırır. Yavaşlık tek başına ceza, hız XP/uzatma değildir.
+Süre düzeltmesi yalnız Rahat/çözüm açılmamış/güvenilir tam ölçüm + tekrarlayan yakın güçlük + yeterli
+kişisel referansla aday olabilir; gerçek indirim en çok %10, gecikme indirimiyle birikmez.
+
+İlerleme önerisi görünür ders/vade/kaynak filtresine gider; Odak kullanıcı başlatırsa açılır.
+Gün/profil/plan/gerçek aynı-gün uygunluğu başlatma ve kayıt öncesi yeniden kontrol edilir. Önizleme
+politikası/bağlamı değişirse sessiz başka tarih yazılmaz. Ayrıntı ve kabul kanıtı:
+[P4_P5_P6_UYGULAMA.md](P4_P5_P6_UYGULAMA.md).

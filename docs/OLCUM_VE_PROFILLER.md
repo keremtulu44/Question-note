@@ -1,8 +1,9 @@
 # P2/P3 — Süre ölçümü ve kişisel referanslar
 
 **Kapsam:** Yanlış Defteri'ndeki çalışma ölçümü ve profil altyapısı. Genel sınav hızı, zekâ,
-öğrenme başarısı veya bilimsel güven yüzdesi ölçülmez. **Tekrar v2 ve XP kuralları değişmez.**
-Gölge/etkin v3 motor, kaynak karşılaştırma panosu ve yeni çalışma önerileri P4/P5'e aittir.
+öğrenme başarısı veya bilimsel güven yüzdesi ölçülmez. **XP kuralları değişmez; varsayılan Gölge mod v2 tarihini uygular.**
+P4/P5 karar katmanı, kaynak/konu analitiği ve çalışma önerileri uygulandı; ek sözleşme ve kabul kanıtı
+[P4_P5_P6_UYGULAMA.md](P4_P5_P6_UYGULAMA.md) içindedir. Etkin v3 kapıları kapalıdır.
 
 Derleme ve test kanıtı [DERLEME_RAPORU.md](DERLEME_RAPORU.md) içinde; fiziksel cihaz kabulü
 [TEST_KONTROL_LISTESI.md](TEST_KONTROL_LISTESI.md) içinde ayrı izlenir.
@@ -56,7 +57,7 @@ recovery işaretleri kaldırılmaz. Disk hatasında uyarı vardır; son bilinmey
 
 `TekrarDenemesi` + `TekrarOnizlemesi`, hem Odak hem ölçümsüz soru ayrıntısının ortak sözleşmesidir.
 Önizleme gerçek DB geçmişi, kayıt bağlamı, yerel gün/saat dilimi ve mevcut deneme hariç profille
-üretilir. V2 temel planı ve sınırlı profil özeti beraber dondurulur.
+üretilir. V2 temel planı, sınırlı profil özeti ve P4 aday/uygulanan karar beraber dondurulur.
 
 Kaydetme transaction'ında:
 
@@ -65,7 +66,7 @@ Kaydetme transaction'ında:
 2. Soru, aktif plan ve aynı-gün sınırı denetlenir.
 3. Önizleme yeniden hesaplanıp imza/plan karşılaştırılır. Gün, saat dilimi, geçmiş, ilgili
    bağlam veya profil değişmişse yazılmaz; kullanıcı yeni önizlemeyi kontrol edip yeniden kaydeder.
-4. **Tekrar + ölçüm/bağlam + sorunun v2 planı tek transaction'da** yazılır. Ölçüm ekleme hatası
+4. **Tekrar + ölçüm/bağlam/karar + sorunun uygulanacak planı tek transaction'da** yazılır. Ölçüm ekleme hatası
    hepsini geri alır.
 
 Çözüm açma işareti, içerik gösterilmeden önce en güncel devam noktasıyla IO'da kalıcılaştırılır.
@@ -86,8 +87,9 @@ Yeni tablo:
 - `deneme_id`: benzersiz; `oturum_id`: nullable.
 - Nullable deneme/inceleme ms, kalite, nedenler JSON'u, ölçüm sürümü 1.
 - Kayıt anı ders/konu ID ve etiketleri, normalize kaynak anahtarı/etiketi.
-- Boyutu sınırlı karar JSON'u: sürüm 1, **V2** modu, tarih/saat dilimi, temel/final aralık,
-  sonraki gün, profil politikası/örneklemi/varsa dağılım. P4 kararı verilmiş gibi gösterilmez.
+- ≤16 KiB karar JSON'u: Kapalı'da snapshot1/**V2**; P4 Gölge/Etkin'de snapshot2, temel/aday/final
+  aralık, uygulanmış/adaya ait algoritma sürümü, yakın günler, gerekçe, profil dayanağı ve saat dilimi.
+  Gölge modda uygulanmış plan v2'dir; Etkin v3 yalnız iki kabul kapısı açıkken mümkün. Codec eski snapshot1'i korur.
 
 Bağlam etiketleri tarihsel snapshot'tır; konu/kaynak sonradan değişince geçmiş sessizce yeniden
 etiketlenmez. Bu etiketlerin güncel kataloğa FK'sı yoktur; soru/tekrar silinince ölçüm de silinir.
@@ -100,7 +102,7 @@ Okuyucular açıkça **v2 / v3 / v4** seçer. V2 katalog yeniden kurulumunu; v3 
 korur. V2/v3'ten süre/bağlam uydurulmaz. V4'te yetim/yinelenen ilişki, negatif/taşmış süre,
 bozuk kalite veya snapshot, sürüm/şema/CSV uyuşmazlığı ve checksum hatası reddedilir.
 
-Rozet, hedef, sınav formatı ve cihaz-yerel devam noktası ZIP'e eklenmedi. **Tamamlanmış yeni
+Rozet/rütbe, hedef, sınav formatı, motor politikası ve cihaz-yerel devam noktası prefs'i ZIP'e eklenmedi. **Tamamlanmış yeni
 ölçüm ve kayıt bağlamı ZIP'e dahildir.** Yeni v4 yedeği eski uygulamaya verme/downgrade desteklenmez.
 
 ## 5. Kişisel referans politikası — sürüm 1
@@ -137,7 +139,7 @@ medyan hesabı yoktur. Saniyelik sayaç analitik hesaplatmaz.
 medyan/çeyrek/MAD ve örneklem gelir; oluşmadıysa **ölçüm birikiyor**. Tamamlanmış tekrar geçmişi
 iki fazı ve kaliteyi gösterir. Eski kayıtta **süre ölçülmedi** yazar.
 
-P3 altyapısı konu/kaynak profili ve ders fallback'i de hesaplar; kaynakların başarı sıralaması,
-nedensel kitap kalitesi iddiası ve kaynak/konudan çalışma önerisi UI'sı **P5 kapsamıdır; henüz yoktur**.
-Süre nedeniyle ödül/ceza, aday aralık veya v3 plan yazılmaz. Fiziksel cihaz, gerçek süreç ölümü,
-TalkBack ve büyük arşiv performans kabulü otomatik testlerden ayrı tutulur.
+P5 aynı altyapıyı tarihsel kaynak/konu ayrıntısı ve uygun soruya çalışma eyleminde kullanır; kitap
+kalitesi veya genel yetenek sıralaması yapılmaz. P4'ün aday aralığı ayrı ve açıklanabilirdir; varsayılan
+gölgede uygulanan v2 tarihini değiştirmez. Süre XP üretmez, yavaşlık tek başına ceza değildir.
+Fiziksel cihaz, gerçek süreç ölümü, TalkBack ve cihaz performans kabulü otomatik testlerden ayrıdır.

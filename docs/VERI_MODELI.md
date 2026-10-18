@@ -143,9 +143,9 @@ Liste kaydırması ölçümde yetersiz kalırsa bir görsel önbelleği eklenmes
 | `kalite`, `nedenler_json`, `olcum_surumu` | TEXT/TEXT/INTEGER | YOK/TAM/KISMI/GECERSIZ; nedenler; sürüm 1 |
 | `ders_id`, `ders_adi`, `konu_id`, `konu_adi` | TEXT; konu nullable | Kayıt anı kimlik/etiket; güncel katalog FK'sı değil |
 | `kaynak_anahtari`, `kaynak_etiketi` | TEXT nullable | NFC/Türkçe normalizasyon; tarihsel kaynak |
-| `karar_json` | TEXT | ≤16 KiB; sürüm 1, V2 planı, gün/saat dilimi ve profil dayanağı |
+| `karar_json` | TEXT | ≤16 KiB; snapshot1/V2 veya snapshot2/Gölge–Etkin; temel/aday/uygulanan plan, gün/saat dilimi, gerekçe ve profil dayanağı |
 
-Tekrar, ölçüm ve yeni v2 planı aynı Room transaction'ındadır. Eski satırların ek kaydı yoktur;
+Tekrar, ölçüm/karar ve uygulanacak yeni plan aynı Room transaction'ındadır; varsayılan Gölge v2 uygular. Eski satırların ek kaydı yoktur;
 ölçümsüz yeni kayıt `YOK` ve nullable süreyle bağlam alabilir. İndeksler: benzersiz deneme ID'si,
 `(ders_id, konu_id)`, `(ders_id, kaynak_anahtari)` ve tekrarlar üzerinde `gun`.
 Profiller bu verilerden türetilir; kalıcı ikinci bir profil/XP tablosu yoktur.
@@ -257,3 +257,12 @@ Bağımsız çözüm sorguları `sonuc = 'RAHAT' AND cozum_acildi = 0` kullanır
 Süre geçmişten türetilemediği için bu pakette Room/ZIP v4 uygulandı. Yukarıdaki v1.2.0 kararı
 yalnız o sürümün v2 algoritma durumunu anlatır. Tekrar algoritması 2 olarak kalır; daha hızlı
 çözene bonus veya yavaşlığa ceza eklenmez. Yeni ölçüm/bağlam ZIP v4 ile taşınır.
+
+
+## v1.5.x / P4–P6
+
+Room4/ZIP4 kolonları aynı; yeni şema veya profil cache tablosu eklenmedi. `karar_json` okuyucusu
+snapshot1/2'yi açıkça seçer. Geçmiş algoritma 1/2/3 yönlendirmesi, v3 ease ve gelecekteki v2'ye
+geri dönüş desteklenir; eski satırlar yeniden yazılmaz. Etkin v3 cihaz/gölge kabul kapıları kapalıdır.
+Analitik ince projeksiyonla 4 toplu SELECT; ayar tanısı yalnız en yeni 100 kararın içeriğini doğrular.
+[P4–P6 sözleşmesi ve kanıtı](P4_P5_P6_UYGULAMA.md).

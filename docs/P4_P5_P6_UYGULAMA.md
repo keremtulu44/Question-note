@@ -5,7 +5,7 @@ Bu belge uygulanan sözleşmeyi ve gerçekten gözlenen kapıları kaydeder; tes
 
 ## Güncel durum
 
-- **P4 ve P5 otomatik kapıları geçti.** P6 kodu ve ek kontrolleri uygulanıyor; son birleşik Debug/Release kapısı henüz yeşil değil.
+- **P4 ve P5 otomatik kapıları geçti.** P6 Debug kapısı **298 / 0 / 0 / 0**; Release görev aşamasındaki engel düzeltiliyor. Birleşik kapı henüz yeşil değil.
 - Aday sürüm **1.5.0 / code18**; ara APK yayını kapalı. Son doğrulanmış yayımlanan sürüm hâlâ **1.4.1 / code17**.
 - Üretim varsayılanı **Gölge**: kaydedilen tarih v2; ayrı v3 adayının farkı/nedenleri yerel kayıttadır.
 - **Etkin v3 kapalı.** Cihaz ve gölge kabul kapıları kodda ayrı ve varsayılan false. Tercih dosyası bu kapıları atlayamaz.
@@ -82,6 +82,8 @@ Bu belge uygulanan sözleşmeyi ve gerçekten gözlenen kapıları kaydeder; tes
 | P6 `ffd8437` | `39141497735` | Debug **292 / 1 / 0 / 0**; tüm UI/benchmark geçti, restore fixture tek-sefer hata verdiği için anlık recovery marker'ı kaldırdı; sürekli hata senaryosuna düzeltildi. Release çalışmadı |
 | P6 `abc0fb0` | `39141755041` | Debug **297 / 1 / 0 / 0**; restore ve midnight/resume geçti. Tanı doğru 100 kaydı verdi; Room Relation cursor tekrarını hesaba katmayan 3-sorgu beklentisi düzeltildi (1 COUNT + 1–2 sınırlı parent + tek 100-ID child; N+1 yasak). Release çalışmadı |
 
+| P6 `06374a4` | `39142060320` | Debug **298 / 0 / 0 / 0**; Release Gradle görev aşamasında durdu, 0 test. Release host testi açıkça etkinleştiriliyor; ilk hata satırları rapora ekleniyor. Yayın yapılmadı |
+
 Sütun sırası: **test / başarısız / hata / atlanan**. Derleme/parsing ile çalışmış test sonucu birbirinin yerine yazılmaz.
 Güncel otomatik rapor [DERLEME_RAPORU.md](DERLEME_RAPORU.md). İlk başarısızlıkları gizlemek için test/koruma silinmedi.
 
@@ -97,4 +99,6 @@ Güncel otomatik rapor [DERLEME_RAPORU.md](DERLEME_RAPORU.md). İlk başarısız
 5. Sorun halinde Ayarlar → **Kapalı / v2**. Bundan sonraki kayıt v2; eski geçmiş/ölçüm/snapshot korunur.
    Eski APK'ya DB downgrade veya tarihleri geriye dönük yeniden yazma geri dönüş yöntemi değildir.
 
-Native önizlemeler incelendi: koyu debug fixture açıklamasındaki kontrast düzeltildi; yeni analiz panelleri mevcut petrol/bakır yüzey paletine uyarlandı. Eşleşen soru çok olsa da gün eşiği sağlanmayan örnekte gerçek gün adetleri eklendi; yeterlilik kuralı değiştirilmedi. Bu son değişiklikler yeniden CI bekliyor.
+Native önizlemeler incelendi: koyu debug fixture açıklamasındaki kontrast düzeltildi; yeni analiz panelleri mevcut petrol/bakır yüzey paletine uyarlandı. Eşleşen soru çok olsa da gün eşiği sağlanmayan örnekte gerçek gün adetleri eklendi; yeterlilik kuralı değiştirilmedi. Bu görsel/gün-kapsama değişiklikleri 298-test Debug koşusunda geçti; Release kapısı henüz doğrulanmadı.
+
+CI test görevleri her koşuda gerçekten çalıştırılacak (test cache/up-to-date kapalı, derleyici/dependency cache açık). Eksik zorunlu UI/benchmark/ZIP test sınıfı, sıfır rapor veya atlanan test kapıyı geçemez; eski benchmark/PNG kanıtı yeni ölçüm diye etiketlenmez. Bu CI sertleştirmesi yeniden doğrulama bekliyor.

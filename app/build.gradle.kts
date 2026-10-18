@@ -41,6 +41,16 @@ android {
     }
 }
 
+// P6 must test the release variant too, not just compile its APK. Opt in explicitly rather than
+// depending on AGP's default host-test selection. Debug-only UI fixtures stay in testDebug.
+androidComponents {
+    beforeVariants(selector().all()) { variant ->
+        checkNotNull(variant.hostTests[com.android.build.api.variant.HostTestBuilder.UNIT_TEST_TYPE]) {
+            "Unit-test host component is missing for ${variant.name}"
+        }.enable = true
+    }
+}
+
 kotlin {
     compilerOptions {
         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
@@ -71,4 +81,14 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.androidx.room.testing)
     testImplementation(libs.robolectric)
+}
+
+// CI evidence includes per-run benchmark timings and native previews outside JUnit's output directory.
+// Never restore these tests from the build cache (or skip as up-to-date) and mislabel old evidence as new.
+// Dependency/compilation caching and normal local incremental test behavior remain unchanged.
+if (providers.environmentVariable("CI").orNull == "true") {
+    tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
+        outputs.upToDateWhen { false }
+        outputs.cacheIf { false }
+    }
 }
