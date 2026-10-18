@@ -1,5 +1,6 @@
 package com.keremtulu.questionnote
 
+import com.keremtulu.questionnote.data.prefs.TekrarPolitikasiDeposu
 import android.content.Context
 import com.keremtulu.questionnote.data.local.YanlisDefteriDatabaseProvider
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
@@ -26,9 +27,10 @@ class AppContainer(context: Context) {
     val gorselDeposu = LocalSoruGorselDeposu(context)
     val profilDeposu = SinavProfiliDeposu(context)
     val oturumDeposu = OdakOturumuDeposu(context)
+    val tekrarPolitikasi = TekrarPolitikasiDeposu(context)
     val dersRepository: DersRepository = RoomDersRepository(database, profilDeposu)
     val konuRepository: KonuRepository = RoomKonuRepository(database)
-    val soruRepository: SoruRepository = RoomSoruRepository(database, gorselDeposu)
+    val soruRepository: SoruRepository = RoomSoruRepository(database, gorselDeposu, motor = tekrarPolitikasi)
     val gorselTutarliligi = GorselTutarliligiHizmeti(database, gorselDeposu)
     val disaAktarmaHizmeti = YerelYedeklemeHizmeti(context, database, gorselDeposu, oturumDeposu::temizle)
     val ilerlemeHizmeti = IlerlemeHizmeti(database)

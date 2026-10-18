@@ -149,7 +149,10 @@ fun OdakOturumuEkrani(
         }
     }
     val oncekiKayitlar = gecmis
-    val hafiza = remember(oncekiKayitlar) { AkilliTekrarKurali.hafiza(oncekiKayitlar.orEmpty()) }
+    val yakinGecmis = remember(oncekiKayitlar, olcum.yenidenOnPlanda, degerlendirme) {
+        com.keremtulu.questionnote.domain.repeat.YakinGecmisHesabi.hesapla(oncekiKayitlar.orEmpty(),
+            java.time.LocalDate.now().toEpochDay().toInt())
+    }
     val sayilar = remember(sonuclar) { KarneHesabi.hesapla(sonuclar) }
     val cozumVar = !soru.cozumNotu.isNullOrBlank() || soru.gorseller.any { it.tur == GorselTuru.COZUM }
     val colors = MaterialTheme.colorScheme
@@ -287,11 +290,11 @@ fun OdakOturumuEkrani(
                     }
                 }
             }
-            if (hafiza.zorSoru) item {
+            if (yakinGecmis.tekrarGucluk) item {
                 Card(colors = CardDefaults.cardColors(containerColor = colors.secondaryContainer), shape = RoundedCornerShape(20.dp)) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text(stringResource(R.string.focus_difficult), fontWeight = FontWeight.Bold)
-                        Text(stringResource(R.string.focus_difficult_note), style = MaterialTheme.typography.bodySmall)
+                        Text(stringResource(R.string.recent_difficulty_hint), style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }
@@ -363,6 +366,7 @@ fun OdakOturumuEkrani(
                         Text(stringResource(R.string.measure_return_to_study))
                     }
                     if (onizlemeler == null && !planHatasi) Text(stringResource(R.string.measure_preparing))
+                    onizlemeler?.get(secim ?: TekrarSonucu.RAHAT)?.karar?.let { KararAciklamasi(it) }
                     TekrarSonucu.entries.forEach { sonuc ->
                         val plan = onizlemeler?.get(sonuc)?.plan
                         val secili = secim == sonuc
@@ -416,3 +420,21 @@ private fun OdakGorseli(image: SoruGorseli, depo: LocalSoruGorselDeposu, aciklam
 
 private fun sureMetni(ms: Long?): String = if (ms == null) "—" else
     String.format(Locale.ROOT, "%02d:%02d", ms / 60_000, ms / 1_000 % 60)
+
+@Composable
+private fun KararAciklamasi(karar: com.keremtulu.questionnote.domain.repeat.TekrarKarari) {
+    val mod = karar.mod
+    val aciklama = when (mod) {
+        com.keremtulu.questionnote.domain.repeat.TekrarMotorModu.KAPALI -> R.string.motor_focus_off
+        com.keremtulu.questionnote.domain.repeat.TekrarMotorModu.GOLGE -> R.string.motor_focus_shadow
+        com.keremtulu.questionnote.domain.repeat.TekrarMotorModu.ETKIN -> R.string.motor_focus_active
+    }
+    Text(stringResource(aciklama, karar.temel.sonrakiAralik, karar.aday.sonrakiAralik),
+        style = MaterialTheme.typography.bodySmall)
+    Text(stringResource(when {
+        com.keremtulu.questionnote.domain.repeat.KararNedeni.BIRLIKTE_SINYAL in karar.nedenler -> R.string.motor_reason_combined
+        com.keremtulu.questionnote.domain.repeat.KararNedeni.TOPARLANMA in karar.nedenler -> R.string.motor_reason_recovery
+        com.keremtulu.questionnote.domain.repeat.KararNedeni.IKINCI_INDIRIM_YOK in karar.nedenler -> R.string.motor_reason_no_stack
+        else -> R.string.motor_reason_baseline
+    }), style = MaterialTheme.typography.bodySmall)
+}

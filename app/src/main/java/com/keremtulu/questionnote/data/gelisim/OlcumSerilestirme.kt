@@ -13,6 +13,12 @@ import com.keremtulu.questionnote.domain.gelisim.SureProfili
 import com.keremtulu.questionnote.domain.gelisim.VeriDayanagi
 import com.keremtulu.questionnote.domain.gelisim.kaynakAnahtari
 import com.keremtulu.questionnote.domain.model.TekrarPlani
+import com.keremtulu.questionnote.domain.repeat.*
+import com.keremtulu.questionnote.domain.calisma.TekrarDenemesi
+import com.keremtulu.questionnote.domain.gelisim.DayanikliDagilim
+import com.keremtulu.questionnote.domain.gelisim.ProfilEsigi
+import com.keremtulu.questionnote.domain.model.OgrenmeDurumu
+import com.keremtulu.questionnote.domain.model.TekrarSonucu
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -65,6 +71,20 @@ object OlcumSerilestirme {
         .put("profile", JSONObject().put("policy_version", profil.politikaSurumu)
             .put("independent", secimYaz(profil.yardimsiz)).put("workload", secimYaz(profil.isYuku))).toString()
 
+    fun kararYaz(karar: TekrarKarari, gun: Int, profil: KisiselProfil, saatDilimi: String): String {
+        if (karar.mod == TekrarMotorModu.KAPALI) return kararYaz(karar.temel, gun, profil, saatDilimi)
+        return JSONObject(kararYaz(karar.temel, gun, profil, saatDilimi))
+            .put("version", 2).put("mode", karar.mod.name).put("requested_mode", karar.istenenMod.name)
+            .put("algorithm_version", karar.algoritmaSurumu).put("candidate_algorithm_version", 3)
+            .put("candidate_interval", karar.aday.sonrakiAralik).put("final_interval", karar.uygulanan.sonrakiAralik)
+            .put("next_day", karar.uygulanan.sonrakiGun).put("unknown_history", karar.desteklenmeyenGecmis)
+            .put("v2_late_discount", karar.v2GecikmeIndirimi)
+            .put("reasons", JSONArray(karar.nedenler.map { it.name }.sorted()))
+            .put("recent", JSONArray().apply { karar.yakin.gunler.forEach {
+                put(JSONObject().put("day", it.gun).put("result", it.sonuc.name).put("solution_opened", it.cozumAcildi))
+            } }).toString()
+    }
+
     private fun secimYaz(secim: ProfilSecimi): JSONObject = JSONObject().put("requested", profilYaz(secim.istenen))
         .put("reference", secim.referans?.let(::profilYaz) ?: JSONObject.NULL)
 
@@ -90,15 +110,20 @@ object OlcumSerilestirme {
         require(tekrar.cozumAcildi || (o.incelemeAktifMs ?: 0) == 0L)
         require(e.kararJson.toByteArray(Charsets.UTF_8).size <= KARAR_UST_SINIR)
         val karar = JSONObject(e.kararJson)
-        require(tamInt(karar, "version") == 1 && karar.getString("mode") == "V2")
-        require(tamInt(karar, "algorithm_version") == 2 && tekrar.algoritmaSurumu == 2)
+        val surum = tamInt(karar, "version")
+        require(surum in 1..2)
         require(tamInt(karar, "day") == tekrar.gun)
         java.time.ZoneId.of(karar.getString("timezone"))
         val aralik = tamInt(karar, "final_interval")
-        require(aralik in 1..180 && aralik == tekrar.sonrakiAralik && aralik == tamInt(karar, "base_interval"))
+        require(aralik in 1..180 && aralik == tekrar.sonrakiAralik)
         require(tamLong(karar, "next_day") == tekrar.gun.toLong() + aralik)
-        val neden = karar.getJSONArray("reasons")
-        require(neden.length() == 1 && neden.getString(0) == "V2_KORUNDU")
+        if (surum == 1) {
+            require(karar.getString("mode") == "V2")
+            require(tamInt(karar, "algorithm_version") == 2 && tekrar.algoritmaSurumu == 2)
+            require(aralik == tamInt(karar, "base_interval"))
+            val neden = karar.getJSONArray("reasons")
+            require(neden.length() == 1 && neden.getString(0) == "V2_KORUNDU")
+        }
         val profil = karar.getJSONObject("profile")
         require(tamInt(profil, "policy_version") == 1)
         listOf("independent", "workload").forEach { key ->
@@ -110,6 +135,57 @@ object OlcumSerilestirme {
                 require(ref.getString("basis") == VeriDayanagi.YETERLI.name)
             }
         }
+        if (surum == 2) v2KararDogrula(e, tekrar, karar)
+    }
+
+    private fun v2KararDogrula(e: TekrarOlcumEntity, t: TekrarEntity, json: JSONObject) {
+        val mod = TekrarMotorModu.valueOf(json.getString("mode"))
+        val istenen = TekrarMotorModu.valueOf(json.getString("requested_mode"))
+        require(mod in setOf(TekrarMotorModu.GOLGE, TekrarMotorModu.ETKIN))
+        require(istenen == mod || istenen == TekrarMotorModu.ETKIN && mod == TekrarMotorModu.GOLGE)
+        require(tamInt(json, "candidate_algorithm_version") == 3)
+        require(t.algoritmaSurumu == if (mod == TekrarMotorModu.ETKIN) 3 else 2)
+        require(tamInt(json, "algorithm_version") == t.algoritmaSurumu)
+        val temelAralik = tamInt(json, "base_interval")
+        val onceki = requireNotNull(t.oncekiAralik)
+        require(temelAralik in 1..180 && onceki in 1..180)
+        if (t.cozumAcildi || t.sonuc == "COZEMEDIM") require(temelAralik == 1)
+        val dizi = json.getJSONArray("recent")
+        require(dizi.length() <= YakinGecmisHesabi.EN_COK_GUN)
+        val gunler = (0 until dizi.length()).map { i ->
+            val k = dizi.getJSONObject(i)
+            val gun = tamInt(k, "day")
+            require(gun.toLong() in (t.gun.toLong() - 89)..t.gun.toLong())
+            YakinTekrar(gun, TekrarSonucu.valueOf(k.getString("result")), k.get("solution_opened") as Boolean)
+        }
+        require(gunler.map { it.gun } == gunler.map { it.gun }.distinct().sortedDescending())
+        val temel = TekrarPlani(onceki, temelAralik, Math.addExact(t.gun, temelAralik), when {
+            temelAralik <= 3 -> OgrenmeDurumu.OGRENIYOR
+            temelAralik <= 21 -> OgrenmeDurumu.PEKISIYOR
+            else -> OgrenmeDurumu.SAGLAM
+        })
+        val profil = json.getJSONObject("profile").getJSONObject("independent")
+        val referans = if (profil.isNull("reference")) null else profilOku(profil.getJSONObject("reference"))
+        val gecikme = t.planlananGun?.let { t.gun.toLong() - it > 2L * onceki } == true && !t.cozumAcildi && t.sonuc != "COZEMEDIM"
+        require(json.get("v2_late_discount") as Boolean == gecikme)
+        val hesap = UyarlanabilirTekrarKurali.karar(temel,
+            TekrarDenemesi(e.denemeId, t.soruId, TekrarSonucu.valueOf(t.sonuc), t.cozumAcildi, olcum(e), e.oturumId),
+            referans, t.gun, istenen, mod, YakinGecmis(gunler), json.get("unknown_history") as Boolean, gecikme)
+        require(hesap.aday.sonrakiAralik == tamInt(json, "candidate_interval"))
+        require(hesap.uygulanan.sonrakiAralik == t.sonrakiAralik)
+        val nedenler = json.getJSONArray("reasons")
+        require(nedenler.length() <= KararNedeni.entries.size)
+        val adlar = (0 until nedenler.length()).map { nedenler.getString(it) }
+        require(adlar.size == adlar.distinct().size && adlar.toSet() == hesap.nedenler.map { it.name }.toSet())
+    }
+
+    private fun profilOku(j: JSONObject): SureProfili {
+        val d = if (j.isNull("distribution")) null else j.getJSONObject("distribution").let {
+            DayanikliDagilim(it.getDouble("median_ms"), it.getDouble("q1_ms"), it.getDouble("q3_ms"), it.getDouble("mad_ms")) }
+        return SureProfili(ProfilDuzeyi.valueOf(j.getString("scope")), VeriDayanagi.valueOf(j.getString("basis")),
+            tamInt(j, "measurements"), tamInt(j, "questions"), tamInt(j, "days"), tamInt(j, "known_context_records"),
+            ProfilEsigi(tamInt(j, "minimum_measurements"), tamInt(j, "minimum_questions"), tamInt(j, "minimum_days")),
+            tamInt(j, "first_day"), tamInt(j, "last_day"), d)
     }
 
     private fun profilDogrula(json: JSONObject, gun: Int) {

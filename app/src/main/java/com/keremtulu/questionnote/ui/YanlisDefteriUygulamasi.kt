@@ -125,6 +125,7 @@ fun YanlisDefteriUygulamasi(
     rozetDeposu: RozetDeposu,
     rozetHizmeti: RozetHizmeti,
     profilDeposu: SinavProfiliDeposu,
+    tekrarPolitikasi: com.keremtulu.questionnote.data.prefs.TekrarPolitikasiDeposu,
     oturumDeposu: OdakOturumuDeposu,
     gunlukHedefDeposu: GunlukHedefDeposu,
     tercihHedefDeposu: TercihGunlukHedefDeposu,
@@ -469,6 +470,7 @@ fun YanlisDefteriUygulamasi(
                     UygulamaEkrani.Ayarlar -> AyarlarEkrani(
                         gunlukHedefDeposu = tercihHedefDeposu,
                         profilDeposu = profilDeposu, dersRepository = dersRepository,
+                        tekrarPolitikasi = tekrarPolitikasi,
                         sonYedek = sonYedek,
                         yedeklemeIslemde = yedeklemeIslemde,
                         onYedekOlustur = {

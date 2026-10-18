@@ -13,6 +13,10 @@ import com.keremtulu.questionnote.domain.gelisim.kaynakAnahtari
 import org.json.JSONObject
 import org.json.JSONArray
 import java.security.MessageDigest
+import com.keremtulu.questionnote.domain.repeat.MotorAyari
+import com.keremtulu.questionnote.domain.repeat.TekrarMotorModu
+import com.keremtulu.questionnote.domain.repeat.TekrarModuSaglayici
+import com.keremtulu.questionnote.domain.repeat.UyarlanabilirTekrarKurali
 import androidx.room.withTransaction
 import com.keremtulu.questionnote.data.local.YanlisDefteriDatabase
 import com.keremtulu.questionnote.data.local.entity.GorselEntity
@@ -52,6 +56,7 @@ class RoomSoruRepository(
     private val database: YanlisDefteriDatabase,
     private val gorselDosyalari: GorselDosyaYonetimi,
     private val saat: Clock = YerelTakvimSaati,
+    private val motor: TekrarModuSaglayici = TekrarModuSaglayici { MotorAyari(TekrarMotorModu.KAPALI) },
 ) : SoruRepository {
     private val dersDao = database.dersDao()
     private val konuDao = database.konuDao()
@@ -307,7 +312,7 @@ class RoomSoruRepository(
         val now = kayitAni.toEpochMilli()
         val tekrar = TekrarEntity(UUID.randomUUID().toString(), soru.id, now, gun, soru.sonrakiTekrarGun,
             deneme.sonuc.name, deneme.cozumAcildi, plan.oncekiAralik, plan.sonrakiAralik,
-            AkilliTekrarKurali.ALGORITMA_SURUMU, false)
+            requireNotNull(simdi.karar).algoritmaSurumu, false)
         val olcum = simdi.deneme.olcum
         val kayit = TekrarOlcumEntity(tekrar.id, deneme.denemeId, deneme.oturumId,
             olcum.denemeAktifMs, olcum.incelemeAktifMs, olcum.kalite.name, OlcumSerilestirme.nedenlerYaz(olcum.nedenler), olcum.surum,
@@ -330,9 +335,10 @@ class RoomSoruRepository(
         val bugun = saat.instant().atZone(bolge).toLocalDate()
         val gun = bugun.toEpochDay().toInt()
         val gecmis = tekrarDao.sorununTekrarlariniGetir(soru.id)
-        val plan = AkilliTekrarKurali.hesapla(gecmis.map { it.toDomain() }, deneme.sonuc, deneme.cozumAcildi, bugun, soru.sonrakiTekrarGun)
         val profil = profilHizmeti.profil(ProfilBaglami(soru.dersId, soru.konuId, kaynakAnahtari(soru.kaynak)), gun, deneme.denemeId)
-        val karar = OlcumSerilestirme.kararYaz(plan, gun, profil, bolge.id)
+        val kararSonucu = UyarlanabilirTekrarKurali.hesapla(gecmis.map { it.toDomain() }, deneme, profil, bugun, soru.sonrakiTekrarGun, motor.oku())
+        val plan = kararSonucu.uygulanan
+        val karar = OlcumSerilestirme.kararYaz(kararSonucu, gun, profil, bolge.id)
         val baglam = JSONObject().put("day", gun).put("question", JSONObject()
             .put("id", soru.id).put("updated", soru.guncelleme).put("lesson", soru.dersId)
             .put("lesson_label", dersDao.idIleGetir(soru.dersId)?.ad)
@@ -344,7 +350,7 @@ class RoomSoruRepository(
             .put("decision", JSONObject(karar)).toString()
         val imza = MessageDigest.getInstance("SHA-256").digest(baglam.toByteArray(Charsets.UTF_8))
             .joinToString("") { "%02x".format(it.toInt() and 0xff) }
-        return TekrarOnizlemesi(deneme, gun, plan, imza, karar, bolge.id)
+        return TekrarOnizlemesi(deneme, gun, plan, imza, karar, bolge.id, kararSonucu)
     }
 
     private suspend fun veriIliskisiDogrula(

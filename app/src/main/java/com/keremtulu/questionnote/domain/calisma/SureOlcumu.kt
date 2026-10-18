@@ -81,4 +81,5 @@ data class TekrarOnizlemesi(
     val baglamImzasi: String,
     val kararOzeti: String,
     val saatDilimi: String,
+    val karar: com.keremtulu.questionnote.domain.repeat.TekrarKarari? = null,
 )

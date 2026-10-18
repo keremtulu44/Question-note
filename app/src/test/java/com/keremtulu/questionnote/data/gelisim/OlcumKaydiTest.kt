@@ -1,5 +1,8 @@
 package com.keremtulu.questionnote.data.gelisim
 
+import com.keremtulu.questionnote.domain.repeat.*
+import com.keremtulu.questionnote.data.prefs.TekrarPolitikasiDeposu
+import org.json.JSONObject
 import androidx.room.Room
 import com.keremtulu.questionnote.data.local.VarsayilanDersleriEkle
 import com.keremtulu.questionnote.data.local.YanlisDefteriDatabase
@@ -248,6 +251,97 @@ class OlcumKaydiTest {
         val yeni = requireNotNull(repo.tekrarOnizle(deneme()))
         assertEquals(SoruIslemSonucu.Basarili, repo.tekrarKaydet(yeni))
         assertEquals(yeni.gun, db.tekrarDao().tumunuGetir().single().gun)
+    }
+
+
+    @Test fun shadowSnapshotVersionTwoIsStrictAndV1ReaderStillWorks() = runBlocking {
+        soru()
+        repo = RoomSoruRepository(db, files, saat, TekrarModuSaglayici { MotorAyari() })
+        val p = requireNotNull(repo.tekrarOnizle(deneme()))
+        assertEquals(SoruIslemSonucu.Basarili, repo.tekrarKaydet(p))
+        val t = db.tekrarDao().tumunuGetir().single()
+        val o = db.tekrarOlcumDao().tumunuGetir().single()
+        assertEquals(2, JSONObject(o.kararJson).getInt("version"))
+        assertEquals("GOLGE", JSONObject(o.kararJson).getString("mode"))
+        assertEquals(2, t.algoritmaSurumu)
+        OlcumSerilestirme.dogrula(OlcumSerilestirme.oku(OlcumSerilestirme.yaz(o)), t)
+        listOf("version" to 99, "candidate_interval" to 180, "final_interval" to 180, "mode" to "ETKIN").forEach { (alan, deger) ->
+            var reddedildi = false
+            try { OlcumSerilestirme.dogrula(o.copy(kararJson = JSONObject(o.kararJson).put(alan, deger).toString()), t) }
+            catch (_: Exception) { reddedildi = true }
+            assertTrue("$alan must be rejected", reddedildi)
+        }
+    }
+
+    @Test fun modeChangeRefreshesPreviewEvenWhenTheAppliedDateIsUnchanged() = runBlocking {
+        soru()
+        var ayar = MotorAyari(TekrarMotorModu.KAPALI)
+        repo = RoomSoruRepository(db, files, saat, TekrarModuSaglayici { ayar })
+        val p = requireNotNull(repo.tekrarOnizle(deneme()))
+        ayar = MotorAyari(TekrarMotorModu.GOLGE)
+        val golge = requireNotNull(repo.tekrarOnizle(deneme()))
+        assertEquals(p.plan, golge.plan)
+        assertEquals(SoruIslemSonucu.OnizlemeGuncellendi, repo.tekrarKaydet(p))
+        assertTrue(db.tekrarDao().tumunuGetir().isEmpty())
+        assertEquals(SoruIslemSonucu.Basarili, repo.tekrarKaydet(golge))
+    }
+
+    @Test fun activeToOffRollbackKeepsOldV3HistoryImmutableAndNewRecordsUseV2() = runBlocking {
+        soru()
+        var ayar = MotorAyari(TekrarMotorModu.ETKIN, MotorYayinKapisi(true, true))
+        repo = RoomSoruRepository(db, files, saat, TekrarModuSaglayici { ayar })
+        assertEquals(SoruIslemSonucu.Basarili, repo.tekrarKaydet(requireNotNull(repo.tekrarOnizle(deneme()))))
+        val eski = db.tekrarDao().tumunuGetir().single()
+        val eskiOlcum = db.tekrarOlcumDao().tumunuGetir().single()
+        assertEquals(3, eski.algoritmaSurumu)
+        OlcumSerilestirme.dogrula(eskiOlcum, eski)
+        saat.an = saat.an.plusSeconds(86_400)
+        ayar = MotorAyari(TekrarMotorModu.KAPALI)
+        assertEquals(SoruIslemSonucu.Basarili, repo.tekrarKaydet(requireNotNull(repo.tekrarOnizle(deneme("b")))))
+        val yeni = db.tekrarDao().tumunuGetir().first { it.id != eski.id }
+        assertEquals(2, yeni.algoritmaSurumu)
+        assertEquals(eski, db.tekrarDao().tumunuGetir().first { it.id == eski.id })
+        assertEquals(eskiOlcum, db.tekrarOlcumDao().tumunuGetir().first { it.tekrarId == eski.id })
+    }
+
+    @Test fun productionPreferenceDefaultsToShadowAndCannotBypassClosedActiveGate() = runBlocking {
+        val context = RuntimeEnvironment.getApplication()
+        context.getSharedPreferences("tekrar_politikasi", 0).edit().clear().commit()
+        val depo = TekrarPolitikasiDeposu(context)
+        assertEquals(TekrarMotorModu.GOLGE, depo.oku().uygulanan)
+        assertFalse(depo.ayarla(TekrarMotorModu.ETKIN))
+        assertTrue(depo.ayarla(TekrarMotorModu.KAPALI))
+        assertEquals(TekrarMotorModu.KAPALI, TekrarPolitikasiDeposu(context).oku().uygulanan)
+        context.getSharedPreferences("tekrar_politikasi", 0).edit().putString("mod", "ETKIN").commit()
+        val bozuk = TekrarPolitikasiDeposu(context).oku()
+        assertEquals(TekrarMotorModu.GOLGE, bozuk.uygulanan)
+        context.getSharedPreferences("tekrar_politikasi", 0).edit().clear().commit()
+    }
+
+    @Test fun reliableLongAttemptAndRepeatedDifficultyWriteDifferentCandidateButSameRealDate() = runBlocking {
+        val simdi = saat.an
+        repeat(20) { i ->
+            saat.an = simdi.minusSeconds((10 - i / 4) * 86_400L)
+            val q = "reference${i % 10}"
+            if (db.soruDao().idIleGetir(q) == null) soru(q)
+            assertEquals(SoruIslemSonucu.Basarili, repo.tekrarKaydet(requireNotNull(repo.tekrarOnizle(deneme("ref$i", q)))))
+        }
+        saat.an = simdi
+        soru()
+        val gun = LocalDate.now(saat).toEpochDay().toInt()
+        repeat(2) { i -> db.tekrarDao().ekle(TekrarEntity("hard$i", "q", saat.millis() - (i + 1) * 86_400_000L,
+            gun - i - 1, sonuc = "COZEMEDIM", oncekiAralik = 20, sonrakiAralik = 20, algoritmaSurumu = 2)) }
+        repo = RoomSoruRepository(db, files, saat, TekrarModuSaglayici { MotorAyari() })
+        val p = requireNotNull(repo.tekrarOnizle(deneme(ms = 200_000)))
+        val k = requireNotNull(p.karar)
+        assertTrue(k.aday.sonrakiAralik < k.temel.sonrakiAralik)
+        assertEquals(k.temel, p.plan)
+        assertEquals(SoruIslemSonucu.Basarili, repo.tekrarKaydet(p))
+        val o = db.tekrarOlcumDao().tumunuGetir().single { it.denemeId == "a" }
+        val t = db.tekrarDao().tumunuGetir().single { it.id == o.tekrarId }
+        assertEquals(p.plan.sonrakiAralik, t.sonrakiAralik)
+        OlcumSerilestirme.dogrula(o, t)
+        assertEquals(SoruIslemSonucu.Basarili, repo.tekrarKaydet(p))
     }
 
 }

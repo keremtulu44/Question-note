@@ -647,4 +647,19 @@
     <string name="backup_measurement_count">Ölçüm ve kayıt bağlamı: %1$d</string>
     <string name="measure_solution_preparing">Çözüm hazırlanıyor…</string>
     <string name="measure_solution_checkpoint_error">Çözüm işareti kaydedilemedi. Çözümü açmak için tekrar dene.</string>
+    <string name="motor_title">Tekrar motoru · güvenli geçiş</string>
+    <string name="motor_off">Kapalı · yalnız v2 planı</string>
+    <string name="motor_shadow">Gölge · v2 tarihleri korunur</string>
+    <string name="motor_active">Etkin v3 · kabul kapısı gerekli</string>
+    <string name="motor_shadow_note">Gölge mod aday planı ve nedenlerini yalnız cihazında kaydeder; uygulanan tarihi değiştirmez. Kapattığında yeni kararlar v2 ile devam eder, eski kayıtlar yeniden yazılmaz.</string>
+    <string name="motor_gate_note">Bu sürümde etkin v3 kapalı. Gerçek cihaz, gölge karşılaştırma ve geri dönüş kabulü tamamlanmadı. Room 4 · ZIP 4 · karar 1/2 · desteklenen algoritmalar 1/2/3. Daha hızlı olmak XP veya süre avantajı sağlamaz.</string>
+    <string name="motor_save_error">Tercih kaydedilemedi; önceki güvenli mod korunuyor.</string>
+    <string name="recent_difficulty_hint">Son 90 gündeki en fazla 5 tekrar gününde güçlük görüldü. İstersen kısa bir pekiştirme yap; son iki bağımsız başarı bu uyarıyı kaldırır.</string>
+    <string name="motor_focus_off">v2 uygulanır: %1$d gün. Uyarlama kapalı.</string>
+    <string name="motor_focus_shadow">v2 uygulanır: %1$d gün · gölge aday: %2$d gün. Tarihin değişmez.</string>
+    <string name="motor_focus_active">v2 referans: %1$d gün · etkin v3: %2$d gün.</string>
+    <string name="motor_reason_combined">Yakın güçlük ve kişisel referansa göre belirgin uzun deneme birlikte görüldü. Aday indirim en fazla yüzde 10.</string>
+    <string name="motor_reason_recovery">Son iki ayrı tekrar günü bağımsız başarı; eski güçlük uyarısı temizlendi.</string>
+    <string name="motor_reason_no_stack">Gecikme düzeltmesi zaten uygulandı; ikinci bir indirim yapılmadı.</string>
+    <string name="motor_reason_baseline">v2 kuralı korunuyor. Hız tek başına ödül, yavaşlık tek başına ceza değildir; eksik kanıtta uyarlama yapılmaz.</string>
 </resources>

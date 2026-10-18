@@ -52,6 +52,7 @@ import java.util.Locale
 fun AyarlarEkrani(
     gunlukHedefDeposu: TercihGunlukHedefDeposu,
     profilDeposu: SinavProfiliDeposu,
+    tekrarPolitikasi: com.keremtulu.questionnote.data.prefs.TekrarPolitikasiDeposu,
     dersRepository: DersRepository,
     sonYedek: SonYedekBilgisi?,
     yedeklemeIslemde: Boolean,
@@ -106,6 +107,7 @@ fun AyarlarEkrani(
                     style = MaterialTheme.typography.displaySmall,
                 )
             }
+            item { MotorAyarlariKarti(tekrarPolitikasi) }
             item {
                 Bolum(stringResource(R.string.settings_profile_title)) {
                     Text(stringResource(R.string.settings_profile_note), style = MaterialTheme.typography.bodySmall,

@@ -22,12 +22,12 @@ object AkilliTekrarKurali {
     }
 
     fun hafiza(gecmis: List<TekrarKaydi>): Hafiza {
-        val sirali = gecmis.sortedWith(compareBy<TekrarKaydi> { it.gun }.thenBy { it.id })
+        val sirali = gecmis.filter { it.algoritmaSurumu in setOf(1, 2, 3) }.sortedWith(compareBy<TekrarKaydi> { it.gun }.thenBy { it.id })
         var kolaylik = 250
         var unutma = 0
         sirali.forEach { kayit ->
             if (!kayit.cozumAcildi && kayit.sonuc == TekrarSonucu.COZEMEDIM) unutma++
-            if (kayit.algoritmaSurumu >= ALGORITMA_SURUMU && !kayit.cozumAcildi) {
+            if (kayit.algoritmaSurumu in setOf(2, 3) && !kayit.cozumAcildi) {
                 kolaylik = (kolaylik + when (kayit.sonuc) {
                     TekrarSonucu.RAHAT -> 5
                     TekrarSonucu.ZORLANDIM -> -15

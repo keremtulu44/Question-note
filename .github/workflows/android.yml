@@ -41,6 +41,7 @@ jobs:
         id: release
         shell: bash
         env:
+          PUBLISH_RELEASE: "false" # P4/P5 intermediate gates; enable only for the final tested package.
           WRAPPER_VERSION: "9.8.1"
           BUILD_TOOLS_VERSION: "37.0.0"
           EXPECTED_FINGERPRINT: "FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54"
@@ -254,7 +255,11 @@ jobs:
               echo "- Sertifika SHA-256: ${actual_fingerprint_display}"
             } > "$notes_file"
 
-            if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            if [[ "$PUBLISH_RELEASE" != "true" ]]; then
+              release_exit=0
+              release_result="Ara doğrulama başarılı; yayın kapısı kapalı, Release oluşturulmadı"
+              printf '%s\n' "$release_result" > "$release_log"
+            elif gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
               release_exit=0
               release_result="Bu sürüm etiketi için Release zaten mevcut; yeniden oluşturulmadı"
               release_url=$(gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json url --jq .url 2>/dev/null)
