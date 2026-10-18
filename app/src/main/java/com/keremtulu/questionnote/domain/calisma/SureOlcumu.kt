@@ -63,7 +63,15 @@ data class TekrarDenemesi(
     val cozumAcildi: Boolean,
     val olcum: SureOlcumu = SureOlcumu(),
     val oturumId: String? = null,
-)
+) {
+    fun guvenli(): TekrarDenemesi {
+        var sonucOlcumu = olcum.guvenli()
+        if (!cozumAcildi && (sonucOlcumu.incelemeAktifMs ?: 0L) > 0L) {
+            sonucOlcumu = SureOlcumu(kalite = OlcumKalitesi.GECERSIZ, nedenler = setOf(OlcumNedeni.GECERSIZ_GIRDI))
+        }
+        return copy(olcum = sonucOlcumu)
+    }
+}
 
 /** The v2 plan and its inputs are frozen together. Saving checks this token again in the DB transaction. */
 data class TekrarOnizlemesi(

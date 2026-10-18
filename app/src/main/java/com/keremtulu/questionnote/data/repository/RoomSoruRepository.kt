@@ -325,11 +325,7 @@ class RoomSoruRepository(
 
     private suspend fun onizlemeUret(soru: SoruEntity, istek: TekrarDenemesi): TekrarOnizlemesi {
         require(istek.denemeId.isNotBlank() && istek.denemeId.length <= 128)
-        var olcum = istek.olcum.guvenli()
-        if (!istek.cozumAcildi && (olcum.incelemeAktifMs ?: 0L) > 0L) {
-            olcum = SureOlcumu(kalite = OlcumKalitesi.GECERSIZ, nedenler = setOf(OlcumNedeni.GECERSIZ_GIRDI))
-        }
-        val deneme = istek.copy(olcum = olcum)
+        val deneme = istek.guvenli()
         val bolge = saat.zone
         val bugun = saat.instant().atZone(bolge).toLocalDate()
         val gun = bugun.toEpochDay().toInt()
@@ -429,6 +425,7 @@ class RoomSoruRepository(
         algoritmaSurumu = algoritmaSurumu,
         zaman = zaman,
         denemeId = olcumKaydi?.denemeId,
+        oturumId = olcumKaydi?.oturumId,
         olcum = olcumKaydi?.let(OlcumSerilestirme::olcum),
     )
 

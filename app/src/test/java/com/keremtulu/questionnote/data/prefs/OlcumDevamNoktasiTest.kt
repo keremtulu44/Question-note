@@ -93,4 +93,20 @@ class OlcumDevamNoktasiTest {
         context.getSharedPreferences("odak_oturumu", Context.MODE_PRIVATE).edit().putString("oturum", "{\"version\":99}").commit()
         assertNull(OdakOturumuDeposu(context).oku())
     }
+
+    @Test fun solutionRevealBarrierFlushesTheLatestRevisionAndChecksItsOwner() = runBlocking {
+        val depo = OdakOturumuDeposu(context); depo.kaydet(oturum)
+        assertFalse(depo.cozumIsaretiniKalicilastir(oturum.id, "a"))
+        val eski = depo.olcumuHazirla(oturum.id, nokta(1).copy(cozumAcildi = true))
+        depo.olcumuHazirla(oturum.id, nokta(2, 7_000).copy(cozumAcildi = true))
+        depo.kalicilastir(eski) // obsolete queued write cannot serve as permission to reveal
+        assertTrue(depo.cozumIsaretiniKalicilastir(oturum.id, "a"))
+        val gelen = requireNotNull(OdakOturumuDeposu(context).oku())
+        assertTrue("a" in gelen.cozumAcilanlar)
+        assertEquals(7_000L, gelen.olcumler["a"]?.olcum?.denemeAktifMs)
+        assertFalse(depo.cozumIsaretiniKalicilastir("other-session", "a"))
+        depo.temizle()
+        assertFalse(depo.cozumIsaretiniKalicilastir(oturum.id, "a"))
+    }
+
 }

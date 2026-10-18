@@ -42,8 +42,11 @@ data class OdakOturumu(
         soruIdleri.drop(sira).forEach { id ->
             kayitlar[id]?.takeIf { kayit ->
                 val deneme = olcumler[id]?.denemeId
-                if (deneme != null && kayit.denemeId != null) kayit.denemeId == deneme
-                else kayit.zaman >= baslamaZamani
+                when {
+                    deneme != null && kayit.denemeId != null -> kayit.denemeId == deneme && (kayit.oturumId == null || kayit.oturumId == this.id)
+                    kayit.oturumId != null -> kayit.oturumId == this.id
+                    else -> kayit.zaman >= baslamaZamani
+                }
             }?.let {
                 verilenler.putIfAbsent(id, OturumSonucu(id, it.sonuc, it.cozumAcildi))
             }

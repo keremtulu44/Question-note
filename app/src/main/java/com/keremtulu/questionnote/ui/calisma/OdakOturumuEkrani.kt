@@ -128,6 +128,9 @@ fun OdakOturumuEkrani(
     var mola by rememberSaveable(soru.id) { mutableStateOf(false) }
     var cozumGorunur by rememberSaveable(soru.id) { mutableStateOf(false) }
     var kaydediliyor by remember(soru.id) { mutableStateOf(false) }
+    var cozumAciliyor by remember(soru.id) { mutableStateOf(false) }
+    var cozumKayitHatasi by remember(soru.id) { mutableStateOf(false) }
+    val mesgul = kaydediliyor || cozumAciliyor
     var kayitHatasi by remember(soru.id) { mutableStateOf(false) }
     var tekrarli by remember(soru.id) { mutableStateOf(false) }
     var kullanilamaz by remember(soru.id) { mutableStateOf(false) }
@@ -153,7 +156,7 @@ fun OdakOturumuEkrani(
 
     val gorselHazir = soruGoruldu && gorselDurumlari.values.none { it != GorselHazirligi.HAZIR }
     OdakOlcumIzleyicisi(olcum, oncekiKayitlar != null && gorselHazir && !mola && gorsel == null &&
-        !kaydediliyor && !degerlendirme && !disDuraklatildi && !tekrarli && !kullanilamaz)
+        !mesgul && !degerlendirme && !disDuraklatildi && !tekrarli && !kullanilamaz)
     val onizlemeler by produceState<Map<TekrarSonucu, TekrarOnizlemesi>?>(null, soru.id, degerlendirme,
         cozumAcildi, olcum.nokta.olcum, oncekiKayitlar, yenileme, olcum.yenidenOnPlanda) {
         value = null
@@ -175,9 +178,14 @@ fun OdakOturumuEkrani(
     }
 
     fun kaydet() {
-        val sonuc = secim ?: return
+        val sonuc = olcum.nokta.secim ?: return
         val onizleme = onizlemeler?.get(sonuc) ?: return
-        if (kaydediliyor || oncekiKayitlar == null) return
+        if (kaydediliyor || cozumAciliyor || !olcum.nokta.donduruldu || oncekiKayitlar == null) return
+        if (onizleme.deneme != olcum.deneme(sonuc).guvenli()) {
+            planYenilendi = true
+            yenileme++
+            return
+        }
         olcum.kaydet()
         kaydediliyor = true
         kayitHatasi = false
@@ -221,11 +229,11 @@ fun OdakOturumuEkrani(
                         Button(onClick = {
                             if (!gorselHazir) olcum.kismi(OlcumNedeni.GORSEL_EKSIK)
                             olcum.dondur()
-                        }, enabled = oncekiKayitlar != null,
+                        }, enabled = oncekiKayitlar != null && !mesgul,
                             modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.focus_assess)) }
                     } else {
                         Text(stringResource(R.string.focus_plan_note), style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant)
-                        Button(onClick = ::kaydet, enabled = secim != null && !kaydediliyor && onizlemeler != null,
+                        Button(onClick = ::kaydet, enabled = secim != null && !mesgul && onizlemeler != null,
                             modifier = Modifier.fillMaxWidth()) {
                             if (kaydediliyor) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
                             Text(stringResource(when {
@@ -248,10 +256,10 @@ fun OdakOturumuEkrani(
             item {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween) {
-                    TextButton(onClick = { olcum.aktiflik(false); onGeri() }, enabled = !kaydediliyor) { Text(stringResource(R.string.common_back)) }
+                    TextButton(onClick = { if (!kaydediliyor && !cozumAciliyor) { olcum.aktiflik(false); onGeri() } }, enabled = !mesgul) { Text(stringResource(R.string.common_back)) }
                     Text(stringResource(R.string.filtered_practice_session_progress, sira, toplam),
                         style = MaterialTheme.typography.labelLarge, color = colors.primary)
-                    TextButton(onClick = { olcum.aktiflik(false); mola = true }, enabled = !kaydediliyor) { Text(stringResource(R.string.focus_pause)) }
+                    TextButton(onClick = { if (!kaydediliyor && !cozumAciliyor) { olcum.aktiflik(false); mola = true } }, enabled = !mesgul) { Text(stringResource(R.string.focus_pause)) }
                 }
             }
             item {
@@ -303,11 +311,27 @@ fun OdakOturumuEkrani(
             item { Text(stringResource(R.string.focus_image_hint), style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant) }
             item {
                 OutlinedButton(onClick = {
-                    cozumGorunur = !cozumGorunur
-                    if (cozumGorunur) { olcum.cozumuAc(); onCozumAcildi() }
-                }, enabled = cozumVar && !kaydediliyor, modifier = Modifier.fillMaxWidth()) {
-                    Text(stringResource(if (cozumGorunur) R.string.question_hide_solution else R.string.focus_reveal))
+                    if (kaydediliyor || cozumAciliyor) return@OutlinedButton
+                    if (cozumGorunur) cozumGorunur = false else {
+                        olcum.aktiflik(false)
+                        olcum.cozumuAc()
+                        cozumAciliyor = true
+                        cozumKayitHatasi = false
+                        scope.launch {
+                            try {
+                                if (olcum.cozumIzni()) {
+                                    cozumGorunur = true
+                                    onCozumAcildi()
+                                } else cozumKayitHatasi = true
+                            } finally { cozumAciliyor = false }
+                        }
+                    }
+                }, enabled = cozumVar && !mesgul, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(if (cozumAciliyor) R.string.measure_solution_preparing
+                        else if (cozumGorunur) R.string.question_hide_solution else R.string.focus_reveal))
                 }
+                if (cozumKayitHatasi) Text(stringResource(R.string.measure_solution_checkpoint_error), color = colors.error,
+                    style = MaterialTheme.typography.bodySmall)
                 if (!cozumVar) Text(stringResource(R.string.focus_no_solution), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
                 if (cozumAcildi || cozumOnceAcildi) Text(stringResource(R.string.focus_solution_note), style = MaterialTheme.typography.bodySmall,
                     color = colors.primary, modifier = Modifier.padding(top = 8.dp))
@@ -335,14 +359,14 @@ fun OdakOturumuEkrani(
                     Text(stringResource(R.string.focus_assess_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     Text(stringResource(R.string.focus_assess_note), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
                     Text(stringResource(R.string.measure_frozen_note), style = MaterialTheme.typography.bodySmall)
-                    TextButton(onClick = { olcum.calismayaDon(); planYenilendi = false }, enabled = !kaydediliyor) {
+                    TextButton(onClick = { olcum.calismayaDon(); planYenilendi = false }, enabled = !mesgul) {
                         Text(stringResource(R.string.measure_return_to_study))
                     }
                     if (onizlemeler == null && !planHatasi) Text(stringResource(R.string.measure_preparing))
                     TekrarSonucu.entries.forEach { sonuc ->
                         val plan = onizlemeler?.get(sonuc)?.plan
                         val secili = secim == sonuc
-                        Card(onClick = { olcum.dondur(sonuc) }, enabled = !kaydediliyor && plan != null,
+                        Card(onClick = { olcum.dondur(sonuc) }, enabled = !mesgul && plan != null,
                             modifier = Modifier.fillMaxWidth().semantics { selected = secili; role = Role.RadioButton },
                             shape = RoundedCornerShape(18.dp),
                             colors = CardDefaults.cardColors(containerColor = if (secili) colors.primaryContainer else colors.surface)) {
@@ -364,7 +388,7 @@ fun OdakOturumuEkrani(
                 }
             }
             if (sira < toplam) item {
-                TextButton(onClick = { olcum.aktiflik(false); onSonaBirak() }, enabled = !kaydediliyor, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.focus_defer)) }
+                TextButton(onClick = { if (!kaydediliyor && !cozumAciliyor) { olcum.aktiflik(false); onSonaBirak() } }, enabled = !mesgul, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.focus_defer)) }
                 Text(stringResource(R.string.focus_defer_note), style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant)
             }
         }

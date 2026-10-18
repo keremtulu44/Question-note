@@ -140,4 +140,36 @@ class OlcumVeProfilArayuzTest {
             assertEquals(1, runBlocking { db.tekrarDao().tumunuGetir().size })
         } finally { db.close() }
     }
+
+    @Test fun focusDoesNotExposeTheSolutionBeforeItsCheckpointMarkerIsSaved() {
+        val db = Room.inMemoryDatabaseBuilder(context, YanlisDefteriDatabase::class.java)
+            .addCallback(VarsayilanDersleriEkle()).allowMainThreadQueries().build()
+        val depo = OdakOturumuDeposu(context)
+        depo.temizle(); depo.kaydet(OdakOturumu("reveal-session", listOf("q"), 1_000))
+        val images = LocalSoruGorselDeposu(context)
+        val repo = RoomSoruRepository(db, images)
+        val (ders, soru) = runBlocking {
+            val d = RoomDersRepository(db).dersleriIzle(false).first().first()
+            db.soruDao().ekle(SoruEntity("q", d.id, soruNotu = "Örnek soru", cozumNotu = "Çözüm içeriği", olusturma = 1, guncelleme = 1))
+            d to requireNotNull(repo.soruGetir("q"))
+        }
+        val acildi = AtomicBoolean(false)
+        try {
+            compose.setContent {
+                YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                    OdakOturumuEkrani(soru, ders, repo, images, "reveal-session", depo,
+                        sira = 1, toplam = 1, sonuclar = emptyList(), cozumOnceAcildi = false,
+                        onCozumAcildi = {
+                            assertTrue("q" in requireNotNull(OdakOturumuDeposu(context).oku()).cozumAcilanlar)
+                            acildi.set(true)
+                        }, onGeri = {}, onSonuc = { _, _ -> }, onSonaBirak = {}, onAtla = {})
+                }
+            }
+            compose.onNodeWithText("Çözüm içeriği").assertDoesNotExist()
+            compose.onNodeWithText(context.getString(R.string.focus_reveal)).performScrollTo().performClick()
+            compose.waitUntil(5_000) { acildi.get() }
+            assertTrue(requireNotNull(depo.oku()?.olcumler?.get("q")).cozumAcildi)
+        } finally { db.close() }
+    }
+
 }

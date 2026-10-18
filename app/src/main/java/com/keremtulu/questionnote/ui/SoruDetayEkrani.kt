@@ -42,7 +42,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.domain.calisma.TekrarDenemesi
-import androidx.compose.runtime.saveable.rememberSaveable
 import java.util.UUID
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
 import com.keremtulu.questionnote.domain.model.Ders
@@ -94,7 +93,7 @@ fun SoruDetayEkrani(
     oturumSira: Int? = null,
     oturumToplam: Int? = null,
 ) {
-    val denemeId = rememberSaveable(soruId) { UUID.randomUUID().toString() }
+    val denemeId = remember(soruId) { UUID.randomUUID().toString() }
     var yenileme by remember(soruId) { mutableIntStateOf(0) }
     var cozumAcik by remember(soruId) { mutableStateOf(false) }
     var cozumAcildi by remember(soruId) { mutableStateOf(false) }

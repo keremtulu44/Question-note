@@ -52,6 +52,17 @@ class OdakOturumuDeposu(context: Context) {
         }
     }
 
+    /** Reveal barrier: flush the LATEST owner state, not a possibly superseded queued revision. */
+    suspend fun cozumIsaretiniKalicilastir(oturumId: String, soruId: String): Boolean = withContext(Dispatchers.IO) {
+        synchronized(this@OdakOturumuDeposu) {
+            disDegisikligiOku()
+            val oturum = bellek
+            if (oturum?.id != oturumId || soruId !in oturum.cozumAcilanlar ||
+                soruId !in oturum.soruIdleri.drop(oturum.sira) || oturum.sonuclar.any { it.soruId == soruId }) false
+            else { diskeYaz(oturum); true }
+        }
+    }
+
     /** Synchronous compatibility/test API. App UI uses hazirla + the IO method instead. */
     @Synchronized fun kaydet(oturum: OdakOturumu) { hazirla(oturum); diskeYaz(bellek) }
     @Synchronized fun sifirlamayiHazirla(): Long { bellek = null; return ++revizyon }

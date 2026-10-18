@@ -24,6 +24,7 @@ import com.keremtulu.questionnote.domain.calisma.OlcumNedeni
 import com.keremtulu.questionnote.domain.calisma.TekrarDenemesi
 import com.keremtulu.questionnote.domain.model.TekrarSonucu
 import java.util.UUID
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
@@ -52,6 +53,10 @@ internal class OdakOlcumDurumu(
     fun onPlanda() { yenidenOnPlanda++ }
     fun gosterimiYenile() { nokta = nokta.copy(olcum = olcer.olcum()) }
     fun deneme(sonuc: TekrarSonucu) = TekrarDenemesi(nokta.denemeId, nokta.soruId, sonuc, nokta.cozumAcildi, nokta.olcum, oturumId)
+
+    suspend fun cozumIzni(): Boolean = try {
+        depo.cozumIsaretiniKalicilastir(oturumId, nokta.soruId).also { kayitHatasi = !it }
+    } catch (iptal: CancellationException) { throw iptal } catch (_: Exception) { kayitHatasi = true; false }
 
     fun kaydet() {
         nokta = olcer.devamNoktasi()

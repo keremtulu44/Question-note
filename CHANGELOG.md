@@ -2,13 +2,20 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
-## [1.4.0] — 2026-10-18 · doğrulama bekleniyor
+## [1.4.1] — 2026-10-18 · son doğrulama bekleniyor
+
+- Çözüm, açılma işaretinin en güncel devam noktasına kalıcı yazılmasından sonra gösterilir. Geciken eski IO yazısı onay sayılmaz; sahiplik/oturum sınırı korunur.
+- İlk soru checkpoint'i yetişmemiş olsa bile commit sonrası kurtarma oturum ID'siyle yapılır; cihazın duvar saati geri alınsa da kayıt kaybolmuş sanılmaz.
+- Hızlı seçim/çözüm/kaydetme etkileşimlerinde güncel dondurulmuş istek kontrol edilir. Ölçümsüz ayrıntı ekranı eski bir başka sorunun saveable kimliğini devralmaz.
+- Room/ZIP v4 ve tekrar v2 aynı. Ana v1.4.0 paketi CI `39135928734` ile 217/0 doğrulandı; bu ek güvencelerin son CI sonucu bekleniyor.
+
+## [1.4.0] — 2026-10-18
 
 - P2: gerçek monotonik deneme/inceleme ölçümü, dondurulan değerlendirme, sürümlü devam noktası ve idempotent/atomik tekrar kaydı.
 - Room v4 ve ZIP v4: eski tarihler/satırlar korunur, v2/v3 yedekler okunur; yeni süre/kalite/kayıt anı bağlamı ve sınırlı karar özeti taşınır.
 - P3: 60 günlük, soru başına ağırlıklı medyan/çeyrek/MAD; veri yeterliliği ve ders/konu/kaynak ayrımı. İlerleme'de ölçüm kapsamı ve ders referansı; eski/eksik veriden hayalî süre yok.
 - Tekrar v2 ve XP/rozet/rütbe kuralları aynı. P4 karar motoru ve P5 kaynak/konu panosu bu sürüme dahil değil.
-- Yeni testler eklendi; gerçek CI sonucu ve fiziksel cihaz kabulü henüz bekleniyor.
+- CI `39135928734`: **217 test, 0 başarısız/hata/atlanan**; Release/imza/sertifika doğrulandı. İlk ön kontroldeki test importu ve indeks alanı olmayan eski şema fixture'ı düzeltildi. Fiziksel cihaz kabulü bekler.
 
 ## [1.3.0] — 2026-10-18
 

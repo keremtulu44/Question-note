@@ -109,6 +109,7 @@ data class TekrarKaydi(
     val algoritmaSurumu: Int = 1,
     val zaman: Long = 0L,
     val denemeId: String? = null,
+    val oturumId: String? = null,
     val olcum: com.keremtulu.questionnote.domain.calisma.SureOlcumu? = null,
 )
 

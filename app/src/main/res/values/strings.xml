@@ -645,4 +645,6 @@
     <string name="profile_sample">Ölçüm %1$d/%2$d · farklı soru %3$d/%4$d · farklı gün %5$d/%6$d</string>
     <string name="profile_policy_note">Üç eşik birlikte aranır; bunlar ürün varsayımıdır. Her soru bir oy taşır. Yalnız pozitif tam ölçümler referansa katılır; isimler kayıt anındaki bağlama aittir.</string>
     <string name="backup_measurement_count">Ölçüm ve kayıt bağlamı: %1$d</string>
+    <string name="measure_solution_preparing">Çözüm hazırlanıyor…</string>
+    <string name="measure_solution_checkpoint_error">Çözüm işareti kaydedilemedi. Çözümü açmak için tekrar dene.</string>
 </resources>

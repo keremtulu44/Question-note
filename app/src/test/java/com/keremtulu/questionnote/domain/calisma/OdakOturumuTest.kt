@@ -52,4 +52,20 @@ class OdakOturumuTest {
         assertEquals("b", recovered.simdikiId)
         assertTrue(yeni().kurtar(emptySet(), emptyMap()).bitti)
     }
+
+    @Test fun sessionIdentityRecoversACommitEvenBeforeFirstAttemptCheckpointAndAfterWallClockRollback() {
+        val kayit = TekrarKaydi("r", 10, 10, TekrarSonucu.RAHAT, false, 1, 3, false, 2,
+            zaman = 500L, denemeId = "attempt-not-yet-checkpointed", oturumId = "session")
+        val kurtarilan = yeni().kurtar(setOf("a", "b", "c"), mapOf("a" to kayit))
+        assertEquals(1, kurtarilan.sira)
+        assertEquals("b", kurtarilan.simdikiId)
+        assertEquals(1, kurtarilan.sonuclar.size)
+    }
+
+    @Test fun aReviewOwnedByAnotherSessionCannotBeRecoveredJustBecauseItsTimestampIsNewer() {
+        val kayit = TekrarKaydi("r", 10, 10, TekrarSonucu.RAHAT, false, 1, 3, false, 2,
+            zaman = 9_999L, denemeId = "other-attempt", oturumId = "other-session")
+        assertEquals(yeni(), yeni().kurtar(setOf("a", "b", "c"), mapOf("a" to kayit)))
+    }
+
 }
