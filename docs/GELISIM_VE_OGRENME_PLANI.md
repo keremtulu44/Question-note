@@ -1,7 +1,7 @@
 # Yanlış Defteri — Premium deneyim ve kişiselleşen öğrenme sistemi
 
 **Tarih:** 2026-10-18
-**Durum:** P0–P3 uygulandı; v1.4.1/code17, CI `39136991000` **221/0/0/0**, Release/imza/digest doğrulandı. Fiziksel cihaz kabulü açık. P4–P6 öneri olarak kalır.
+**Durum:** P0–P5 uygulandı. P4 CI `39139377311` **240/0/0/0**, P5 CI `39140443680` **274/0/0/0**. P6 Debug CI `39142060320` **298/0/0/0**; Release `39142970779` **258/0/0/0**; son UI fixture sertleştirmesinin birleşik CI kapısı doğrulanıyor. Aday 1.5.0/code18, son yayımlanan 1.4.1/code17. Fiziksel kabul açık; etkin v3 kapalı. [Uygulama/kanıt kaydı](P4_P5_P6_UYGULAMA.md).
 **Başlangıç:** v1.2.0 / code 14, Room v3, ZIP v3, tekrar algoritması v2. Başlangıç CI kanıtı: `39067624050`, 130 başarılı test; fiziksel cihaz kabulü ayrı ve bekliyor.
 
 ## Tarihsel P0/P1 uygulama notu — v1.3.0 / 2026-10-18
@@ -14,7 +14,7 @@
 - **O aşamada:** Room/ZIP v3, tekrar v2, XP katsayıları ve 15 rütbe/30 rozet kuralları korundu. Süre ve kişisel profiller sonraki P2/P3 teslimine bırakıldı; aşağıdaki yeni uygulama notu geçerlidir.
 - **Doğrulama:** CI `39131225744`: 157 test / 0 başarısız / 0 hata / 0 atlanan; Release/imza/sertifika ve yayımlanan APK digest eşleşmesi başarılı. Eski 130 + 27 yeni test. [Sentetik önizlemeler](ui/p1/README.md) ve sanal animasyon zamanı fiziksel cihaz/performans kabulü değildir.
 
-## P2/P3 uygulama notu — 2026-10-18
+## Tarihsel P2/P3 uygulama notu — v1.4.x / 2026-10-18
 
 - Monotonik segment ölçeri; deneme/inceleme ayrımı; değerlendirmede dondurma; loading/mola/arka plan/tam ekran hariç. Tam ekran/eksik görsel ve süreç kurtarma kısmi; bilinmeyen zaman eklenmez.
 - Sürümlü, soru/deneme kimlikli devam noktaları; IO yazılarında revizyon/oturum koruması. Yeni bir süreç birikmiş süreyi alır, eski monotonik başlangıcı almaz.
@@ -22,9 +22,20 @@
 - Additive Room v4 / `MIGRATION_3_4`; eski satır/tarih değişmez. ZIP v4 ölçüm/karar/bağlam JSON + CSV taşır; v2/v3 ayrı dallarla okunur. Eski süre null kalır.
 - Sürümlü 60 günlük kişisel profiller: yardımsız Rahat ve tüm sonuçlar için iş yükü ayrı; soru başına medyan, çeyrekler/MAD; 20/10/5 ve 30/15/7 eşikleri; mevcut deneme hariç; konu/kaynaktan aynı derse güvenli dönüş.
 - İlerleme'de gerçek ölçüm kapsamı ve ders referansı; az veride sayı uydurulmaz. Kaynak/konu bağlamı kayıt anından alınır. Genel sınav hızına/zekâya dair iddia yoktur.
-- **P4/v3 motor, gölge karar, P5 kaynak karşılaştırması ve yeni çalışma önerileri uygulanmadı.** Tekrar algoritması ve XP/rozet/rütbe kuralları değişmedi.
+- **O aşamada** P4/v3 motor, gölge karar, P5 kaynak karşılaştırması ve yeni çalışma önerileri uygulanmamıştı; aşağıdaki P4–P6 notu günceldir. Tekrar algoritması ve XP/rozet/rütbe kuralları değişmedi.
 - **Doğrulama:** v1.4.0 ana paket CI `39135928734` 217/0; son v1.4.1 CI `39136991000` **221/0/0/0**. Önceki 157 + 64 yeni test; Release/imza/sertifika ve asset digest eşleşti. Gerçek cihaz/performans kabulü ayrıca bekler. [Uygulanan sözleşme](OLCUM_VE_PROFILLER.md).
 - Son güvence: çözüm gösterilmeden en güncel açma işareti kalıcıdır; ilk checkpoint gecikse/duvar saati geri alınsa da commit, deneme/oturum ID’siyle uzlaştırılır.
+
+## P4–P6 uygulama notu — 1.5.0 adayı / 2026-10-18
+
+- P4: v2'yi koruyan açıklanabilir v3 adayı, Gölge varsayılanı; 5 ayrı gün/90 gün, iki başarıyla toparlanma,
+  yeterli kişisel referans + tekrarlayan güçlük + uzun tam ölçüm birlikte. Gerçek indirim ≤%10, çift ceza/XP etkisi yok.
+- P5: tarihsel konu/kaynak ve kapsam/payda ayrımı; gerçek ritim, tamamlanmış dönem ve eşleşen soru/gün dayanağı;
+  gerçek plan ve kapsama bağlı iş yükü; öneri→görünür filtre→kullanıcı başlatırsa Odak; kalıcı tek kutlama host'u.
+- P6: sınırlandırılmış tanı, gece yarısı/resume/saat dilimi yenileme, Debug/Release ayrımı, native host benchmark,
+  gerçek bileşen önizlemeleri, ZIP/snapshot rollback ve uçtan uca regresyonlar. Debug 298/0 ve Release 258/0 ayrı koşularda görüldü; son birleşik kapı yeniden doğrulanıyor.
+- Room4/ZIP4 ve XP katsayıları aynı. Karar snapshot1/2, geçmiş algoritma1/2/3 açık yönlendirilir; geçmiş yeniden yazılmaz.
+- Fiziksel cihaz/SAF/TalkBack/frame-p95/gölge kullanımı tamamlanmadan etkin v3 açılmaz. [Sözleşme ve kapılar](P4_P5_P6_UYGULAMA.md).
 
 ## 1. Hedef ve ana karar
 
@@ -71,7 +82,7 @@ Görsel prototip erken hazırlanabilir. Gerçek süre grafikleri, kaynak profill
 
 ## 4. Mimari ve ortak sözleşmeler
 
-P2/P3’te `AktifSureOlcer`, `TekrarDenemesi`, `SureOlcumu`, `TekrarOnizlemesi` ve kişisel profiller uygulandı. Ortak v2 önizleme/kayıt servisi `RoomSoruRepository` içindedir. Aşağıdaki ayrı v3 karar katmanı ve geniş `GelisimOzeti` hâlâ P4/P5 önerisidir:
+P2/P3’te ölçüm/önizleme/kişisel profiller; P4/P5’te ayrı v3 aday katmanı ve `GelisimAnalizi` uygulandı. Ortak önizleme/kayıt `RoomSoruRepository`, saf karar `UyarlanabilirTekrarKurali` içindedir:
 
 ```text
 Odak ekranı / eski soru ayrıntısı
@@ -80,7 +91,7 @@ Odak ekranı / eski soru ayrıntısı
 TekrarDenemesi + AktifSureOlcer
        │
        ▼
-TekrarKararHizmeti
+RoomSoruRepository / UyarlanabilirTekrarKurali
   ├─ geçmiş + kişisel profil (mevcut deneme hariç)
   ├─ mevcut v2 kuralı
   └─ yeni karar katmanı (kapalı / gölge / etkin)
@@ -90,7 +101,7 @@ TekrarKararHizmeti
 Room transaction: tekrar + ölçüm/karar + yeni soru planı
        │
        ▼
-GelisimHizmeti + mevcut SeviyeHizmeti
+GelisimAnaliziHizmeti + mevcut SeviyeHizmeti
        │
        ▼
 İlerleme / kaynak-konular / çalışma önerisi / kutlama
@@ -99,7 +110,7 @@ GelisimHizmeti + mevcut SeviyeHizmeti
 - `TekrarDenemesi`: kalıcı deneme kimliği, soru/oturum kimliği, sonuç, çözüm açma, ölçüm özeti.
 - `SureOlcumu`: deneme süresi, çözüm sonrası aktif süre, kalite, kalite nedenleri, ölçüm sürümü.
 - `TekrarKarari`: temel/final aralık, tarih, öğrenme durumu, kural sürümü, gerekçe kodları, veri dayanağı, önizleme bağlamı.
-- `GelisimOzeti`: gerçek değerler, örneklem/kapsam, tarih aralığı, karşılaştırılabilirlik ve isteğe bağlı çalışma önerisi.
+- `GelisimAnalizi`: gerçek değerler, örneklem/kapsam, tarih aralığı, karşılaştırılabilirlik ve isteğe bağlı çalışma önerisi.
 
 Hesaplar saf Kotlin fonksiyonlarına ayrılır; Compose sadece gösterir. Android saati ve yerel takvim saati enjekte edilir. Tek Gradle modülü ve mevcut `AppContainer` korunur; bunun için Hilt veya çevrimiçi analitik altyapısı eklenmez.
 
@@ -145,7 +156,7 @@ Uygulanan `tekrar_olcumleri` tablosu, `tekrar_id` üzerinden `tekrarlar` ile 0..
 | Kimlik | `tekrar_id` PK/FK (silmede cascade), benzersiz `deneme_id`, isteğe bağlı `oturum_id` |
 | Ölçüm | Nullable `deneme_aktif_ms`, `inceleme_aktif_ms`, kalite/nedenler, `olcum_surumu` |
 | Kayıt anı bağlamı | Ders/konu kimliği ve etiketi; normalize kaynak anahtarı ve kaynak etiketi |
-| Karar dayanağı | Sürümlü, boyutu sınırlandırılmış snapshot: profil örneklemi/medyanı ve v2 temel/final aralık. Aday/gölge/etkin modu P4’e bırakıldı |
+| Karar dayanağı | ≤16 KiB snapshot1/V2 ve snapshot2/Gölge–Etkin: profil dayanağı, temel/aday/uygulanan aralık, yakın geçmiş ve gerekçe |
 
 Sonuç, tarih ve algoritma sürümünün asıl kaynağı mevcut `tekrarlar` tablosudur. Tam karar geçmişi veya ham saniyelik olay günlüğü ikinci kez depolanmaz. Analiz için aralık/filtre sorgularına gerekli indeksler ve join planı ölçülür.
 
@@ -212,7 +223,7 @@ Bu sayılar ilk kod/test politikasını somutlaştırır; veri görmeden bilimse
 
 Odak ekranındaki zor soru kartı da yeni yakın-geçmiş özetini kullanır; süre yetersizliğinde v2 tarihine dönmek, ömür boyu zorluk etiketi göstermek zorunda değildir. Bu değişiklik eski rozetlerin tarihsel kazanma koşullarını veya sahipliğini değiştirmez.
 
-**Sürüm güvenliği:** `AkilliTekrarKurali.hafiza` bugün `algoritmaSurumu >= 2` kullanıyor. v3 kayıtlarını gelecekteki tüm sürümlerle aynı varsaymak yerine desteklenen sürümler açıkça ele alınmalı. 1/2 geçmişinin aralıkları değişmez; v3 etkisi ve kolaylık güncellemesinin ortak/ayrı kuralları testle sabitlenir.
+**Sürüm güvenliği (uygulandı):** Eski `algoritmaSurumu >= 2` varsayımı kaldırıldı; 1/2/3 açıkça yönlendirilir. Desteklenmeyen sürüm v2/v3 diye tahmin edilmez ve aday düzeltmeyi kapatır. 1/2 geçmişinin aralıkları değişmez; v3 ease ve gelecekteki v2’ye geri dönüş testle sabitlenir.
 
 **Geri dönüş:** Yeni katman kapatılınca gelecekteki denemeler v2 temel kararına döner. Kaydedilmiş sonuçlar, ölçümler ve geçmiş planlar topluca yeniden yazılmaz; bu bir APK/DB downgrade değildir.
 
@@ -281,7 +292,7 @@ Rütbe kutlaması için kalıcı görülme/kuyruk takibi gerekir. İlk kurulum, 
 
 ## 11. Kod paketleri ve bağımlılıklar
 
-**P0–P3 kod/otomatik test bakımından tamamlandı; fiziksel kabul açık. P4–P6 planlandı, uygulanmadı.** “Bitti” için kodun yazılması değil ilgili kabul kapısının geçilmesi gerekir.
+**P0–P5 kod/otomatik test bakımından uygulandı; P6 Debug 298/0 ve Release 258/0; son birleşik kapı doğrulanıyor. Fiziksel kabul açık.** “Bitti” için kodun yazılması değil ilgili kabul kapısının geçilmesi gerekir.
 
 | Paket | Başlıca görevler / dosyalar | Bağımlılık | Kabul kapısı |
 |---|---|---|---|
@@ -289,9 +300,9 @@ Rütbe kutlaması için kalıcı görülme/kuyruk takibi gerekir. İlk kurulum, 
 | P1 — Görsel sistem/prototip (uygulandı) | `ui/tema/{Renk,Tipografi}.kt`, yeni `HareketPolitikasi`, `SeviyeEkrani` durum modelleri ve tasarım Preview'ları | P0; P2 ile bağımsız çalışabilir | Yeni/yoğun/verisiz/hatalı durum; koyu tema, büyük yazı, hareket kapalı |
 | P2 — Ölçüm ve veri güvenliği (uygulandı) | Yeni `domain/calisma/AktifSureOlcer.kt`, ölçüm modelleri; Odak ve devam deposu; `SoruRepository`/`RoomSoruRepository`; yeni entity/DAO; Database/Provider/Migrations; export/import | P0 | Saat/lifecycle/kurtarma, atomik kayıt, migration ve ZIP roundtrip yeşil; planlar hâlâ v2 |
 | P3 — Kişisel profil (uygulandı) | `domain/gelisim/KisiselProfil.kt` içinde politika/hesap; `data/gelisim/ProfilHizmeti.kt`, `TekrarOlcumDao` toplu sorguları ve `SureProfiliKarti` | P2 | Az veri, uç değer, aynı soru baskısı, tarihsel bağlam ve soğuk başlangıç testleri |
-| P4 — Karar v3 / gölge | Yeni `domain/repeat/UyarlanabilirTekrarKurali.kt`, ortak karar servisi ve sürüm yönlendirme; Odak önizlemesi | P3 | Önizleme=yazma; çift ceza yok; eski sonuçlar aynı; gölgede tarih değişmiyor |
-| P5 — Gerçek veriyle arayüz/eylem | `SeviyeHizmeti`, `SeviyeEkrani`, yeni `ui/ilerleme` bileşenleri; kaynak/konu detayları; filtre ve root route; rütbe kutlama host'u | P1 + P3; aday motor açık olmak zorunda değil | Gerçek veri/boş durum; kaynak veya konudan doğru ve uygun oturuma geçiş |
-| P6 — Etkinleştirme ve kalite | Politika modları; sorgu/cache iyileştirmesi; erişilebilirlik; release/device ölçümü; belgeler | P4 + P5 | Tüm regresyonlar, cihaz kanıtı, imza ve uyumluluk; karar katmanı kontrollü açılır |
+| P4 — Karar v3 / gölge (uygulandı) | Yeni `domain/repeat/UyarlanabilirTekrarKurali.kt`, ortak karar servisi ve sürüm yönlendirme; Odak önizlemesi | P3 | Önizleme=yazma; çift ceza yok; eski sonuçlar aynı; gölgede tarih değişmiyor |
+| P5 — Gerçek veriyle arayüz/eylem (uygulandı) | `SeviyeHizmeti`, `SeviyeEkrani`, `ui/seviye/GelisimAnaliziKarti` bileşenleri; kaynak/konu detayları; filtre ve root route; rütbe kutlama host'u | P1 + P3; aday motor açık olmak zorunda değil | Gerçek veri/boş durum; kaynak veya konudan doğru ve uygun oturuma geçiş |
+| P6 — Etkinleştirme ve kalite (otomatik kapı sürüyor) | Politika modları; sorgu/cache iyileştirmesi; erişilebilirlik; release/device ölçümü; belgeler | P4 + P5 | Tüm regresyonlar, cihaz kanıtı, imza ve uyumluluk; karar katmanı kontrollü açılır |
 
 Önemli ayrım: **P5, v3'ü etkinleştirmeyi beklemek zorunda değil.** Doğru ölçülmüş profiller ve güzel arayüz, mevcut güvenli v2 planlamayla da değer sağlar. Tek birleşik veri modeli, tek seferde büyük ve riskli yayın demek değildir.
 
@@ -328,7 +339,7 @@ Yeni test sayısı önceden başarı kanıtı gibi ilan edilmez. Önce mevcut 13
 
 ## 14. Teslim sınırları ve zamanlama
 
-Takvimden önce kabul kapıları esas alınır. Tek geliştirici için kabaca planlama aralıkları, çalışma saati/teslim sözü değildir:
+Takvimden önce kabul kapıları esas alınır. Aşağıdaki başlangıç planı aralıkları tarihsel tahmindir; gerçekleşmiş çalışma saati veya kalan teslim süresi değildir:
 
 | Paket | Kaba iş günü aralığı |
 |---|---:|
@@ -348,7 +359,7 @@ Toplam yaklaşık **18–32 iş günü**; tek geliştiricide P1'i diğer işle a
 - **Teslim B:** gerçek kaynak/konu profilleri + gelişim özeti + eyleme geçiş + kontrollü animasyonlar. Aday motor gölgede kalabilir.
 - **Teslim C:** testler ve veri dayanağı uygunsa v3'ü koşullu etkinleştir; sorun halinde yalnız yeni katmanı kapat.
 
-İlk kodlanacak dikey dilim: **tek sorunun zamanını doğru ölç → aynı transaction'da kaydet → geçmişte göster → ZIP'ten geri getir → v2 tarihinin değişmediğini doğrula.** Buna paralel olarak izole İlerleme tasarım prototipi hazırlanır. Bu dilim geçmeden süreye dayalı puan/karar eklenmez.
+P2/P3’te uygulanan ilk dikey dilim: **tek sorunun zamanını doğru ölç → aynı transaction'da kaydet → geçmişte göster → ZIP'ten geri getir → v2 tarihinin değişmediğini doğrula.** İzole İlerleme prototipi de tamamlandı. P4 bu doğrulanmış veri hattının üstüne, gölge olarak eklendi; süreye bağlı XP yoktur.
 
 ## 15. Bu plana eklemediğimiz işler
 

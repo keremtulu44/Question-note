@@ -6,24 +6,24 @@ Durum işaretleri: `[ ]` yapılmadı · `[~]` kod mevcut; bu sürümün CI/Relea
 
 ---
 
-## Gelişim planı — P0–P3 uygulandı (2026-10-18)
+## Gelişim planı — P0–P5 uygulandı; P6 kapıları (2026-10-18)
 
 Ayrıntılı görev/dosya/bağımlılık/test planı: [Gelişim ve Öğrenme Planı](docs/GELISIM_VE_OGRENME_PLANI.md).
-P0–P3 kod ve otomatik testleri tamamlandı; fiziksel kabul açık. P4–P6 önerilen sıradır.
+P0–P5 kod/otomatik kapıları geçti; P6 Debug 298/0, Release 258/0; son birleşik kapı doğrulanıyor. Fiziksel kabul açık. [Güncel kanıt](docs/P4_P5_P6_UYGULAMA.md).
 
 - [~] **P0–P1 uygulandı:** canlı rozet/snapshot, dayanıklı gözlem ve commit sonrası devam temizliği; gerçek verili yeni İlerleme, ortak hareket politikası ve debug Preview. CI `39131225744`: **157/0**; cihaz kabulü bekliyor.
 - [~] **P2 uygulandı:** monotonik/fazlı süre, kalite, atomik/idempotent kayıt, kimlikli kurtarma, çözüm açma bariyeri ve Room/ZIP v4.
 - [~] **P3 uygulandı:** 60 gün; ayrı yardımsız/iş yükü referansı, soru başına medyan/çeyrek/MAD, yeterlilik/fallback, kayıt anı bağlamı; gerçek ders referansı UI’sı.
-- [ ] P4: ayrı karar katmanı; önce v2 tarihlerini değiştirmeyen gölge çalışma.
-- [ ] P5: gerçek veriye bağlı gelişim özeti, kaynak/konu profilleri, eylem bağlantıları ve kontrollü animasyonlar.
-- [ ] P6: fiziksel cihaz/performans/erişilebilirlik testleri; koşullu etkinleştirme ve geri dönüş.
+- [~] **P4 uygulandı:** ayrı açıklanabilir aday3; varsayılan gölge v2 tarihini korur. CI 240/0; etkin v3 fiziksel/gölge kapıları kapalı.
+- [~] **P5 uygulandı:** gerçek kaynak/konu/ritim/dönem/iş yükü, uygun filtre/Odak eylemi ve kalıcı tek kutlama host’u. CI 274/0.
+- [~] **P6:** Debug 298/0; Release 258/0; son birleşik UI/benchmark/önizleme kapısı doğrulanıyor. Fiziksel cihaz/TalkBack/SAF/frame-p95 bekliyor.
 
-## Güncel — v1.4.1
+## Son yayımlanan — v1.4.1 (1.5.0 adayı henüz yayımlanmadı)
 
 - [x] **v1.4.1/code 17:** CI `39136991000`, **221 test / 0 başarısız**, Release/imza/sertifika ve yayımlanmış APK digest eşleşmesi başarılı. Önceki 157-test tabanı + 64 yeni test.
 - [x] P2/P3 ana paket v1.4.0 CI `39135928734` ile 217/0; son paket ek kurtarma/çözüm bariyeri güvencelerini içerir.
 - [ ] P2/P3 gerçek cihaz: güncelleme, süreç öldürme/reboot, kilit/arka plan, yakınlaştırma, düşük depolama ve büyük veri performansı.
-- [ ] P4/v3 motor/gölge karar, P5 kaynak/konu panosu ve yeni eylemler. Kodlandı diye işaretlenmez.
+- [ ] Etkin v3’ün gerçek cihaz ve gerçek gölge kullanımı kabulü; kodlanmış olması bu kapıları açmaz.
 
 ## Korunan önceki kapsam — v1.3.0
 

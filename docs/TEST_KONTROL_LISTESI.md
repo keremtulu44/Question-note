@@ -23,6 +23,49 @@ yeni testlerin yeşil olması geçmişteki cihaz bekleyenlerini tamamlanmış ya
 
 ---
 
+## P4–P6 — otomatik kanıt ve ayrı fiziksel kabul
+
+Aday sürüm 1.5.0/code18. P4 CI `39139377311` 240/0, P5 `39140443680` 274/0;
+P6 Debug `39142060320` **298/0/0/0**, Release `39142970779` **258/0/0/0**. Son UI fixture sertleştirmesiyle iki varyantın birlikte yeşil koşusu bekleniyor. Ayrı varyantlar aynı ortak
+testleri tekrar eder; sayılar toplanmaz. [Koşu/başarısızlık günlüğü](P4_P5_P6_UYGULAMA.md).
+
+| Kontrol | Kanıt / sorumlu | Durum |
+|---|---|---|
+| V2 korunur; gölge aday, süre+güçlük birlikte, eksik veri fallback, çift indirim yok, ≤%10 gerçek indirim | P4 saf/Room, son Debug 298/0 | [x] |
+| Desteklenen 1/2/3 geçmişi, iki bağımsız günle toparlanma, bilinmeyen sürüm fallback, önizleme/save eşitliği | P4 saf/Room | [x] |
+| Tarihsel kaynak/konu; doğru payda, eksik/bilinmeyen bağlam, gerçek ritim ve aynı-soru/gün karşılaştırması | P5 domain/Room + Debug UI | [x] |
+| Plan gerçek; tüm-sonuç iş yükü, %80 kapısı, sıfır kapsamada dakika yok | P5 saf + P6 UI | [x] |
+| Öneri → Filtreli → Odak → Karne → İlerleme; askı/ders arşivi/profil/gerçek same-day dışlama | P6 gerçek shell + Room, Debug | [x] |
+| Kalıcı birleşik rütbe, sessiz startup/hedef/restore, eski rozet sahipliği; tek fullscreen host | P5 prefs/Room + P6 UI | [x] |
+| Snapshot2 gölge/etkin3 ZIP turu, gelecek v2'ye rollback, doğru hash'li semantik bozulma reddi | P6 ortak ZIP, Debug | [x] |
+| Restore callback kesintisi ve anlık recovery boyunca marker korunur; kozmetik kuyruklar önce temizlenir | P6 ortak ZIP, Debug; simülasyon | [x] |
+| Tanı: toplam ≠ örnek, en yeni ≤100, bozuk ayrı, silmede pencere yenilenir; batched relation, N+1 yok | P6 Room, Debug | [x] |
+| Time/timezone broadcast, bir sonraki gece yarısı, Activity resume gün yenilemesi | P6 Robolectric; cihaz değildir | [x] |
+| Açık/koyu, %200, hareket kapalı, ≥48dp eylem, gizli maske/semantik; native bileşen çizimleri | Debug-only Compose | [x] |
+| 1.000 soru/20.000 tekrar, dört ince SELECT, EXPLAIN indeksleri ve ham host süre raporu | `PERFORMANS_DEBUG.md` | [x] |
+| Ortak testlerin ayrıca **Release** derlenmesi/çalışması ve Release benchmark | CI `39142970779` / Release 258/0 + rapor | [x] |
+| Nihai release derlemesi, imza/sertifika ve yayımlanan asset SHA-256 eşleşmesi | CI + bağımsız asset kontrolü | [ ] |
+
+### P6 fiziksel kapıları — otomatik test sonucu ile işaretlenmez
+
+| # | Gerçek cihaz senaryosu / beklenen | Sorumlu | Durum |
+|---|---|---|---|
+| P6.D1 | ZIP yedek al; v1.4.1 üzerine kaldırmadan güncelle. Soru/görsel/tekrar/tarih ve sahiplik korunur; ilk açılış kutlama yağmuru üretmez | S24 FE | [ ] |
+| P6.D2 | Gölge/Kapalı seçiminde sonraki plan v2; Etkin düğmesi kapalı. Tanı örnek/total/fark ayrımı dürüst, yenileme çalışır | S24 FE | [ ] |
+| P6.D3 | Gerçek soru/çözüm fotoğrafı; deneme → çözüm → değerlendirme. Zoom/mola/kilit/arka plan süreye eklenmez; çözüm gizlenince bağımsızlığa dönmez | S24 FE | [ ] |
+| P6.D4 | Sona bırak/döndür/uygulamayı öldür/reboot; doğru soru/faz ve kısmi süre kurtulur, aynı gün ikinci tekrar/XP yok | S24 FE; gerçek süreç | [ ] |
+| P6.D5 | Öneriden kaynak/konu/vade filtresi; LGS/TYT/Tümü değişimi; askı/arşiv/same-day sınırı; uygun soru yoksa boş eylem | S24 FE | [ ] |
+| P6.D6 | Gece yarısı açık ekran ve arka plandan ertesi gün dönüş; saat/saat dilimi değişimi; önizleme değişince açık yeniden onay | S24 FE | [ ] |
+| P6.D7 | Açık/koyu, yatay/dikey, %200 yazı, jest/üç düğme, azaltılmış hareket. Sistem çubuğu çakışmaz, yatay taşma/ulaşılamayan eylem yok | S24 FE | [ ] |
+| P6.D8 | TalkBack başlık/eylem/örneklem/kapsama okuma sırası, büyük butonlar, gizli rozet maskesi ve dialog odağı/kapatma | Gerçek TalkBack | [ ] |
+| P6.D9 | Aynı ilerlemede çok rozet+rütbe: sırayla tek fullscreen; kapat/aç replay yok; hedef değişimi/restore toplu kutlama yapmaz | S24 FE | [ ] |
+| P6.D10 | Gerçek SAF/Drive ZIP dışa/içe aktarımı, bulut yüklemesini sağlayıcıda doğrulama; kesinti/bozuk arşiv eski veriyi korur | Cihaz/sağlayıcı | [ ] |
+| P6.D11 | Gerçek düşük depolamada kayıt/ZIP/kalıcı prefs hatası açıkça görünür; yanlış başarı/boş yedek yok, recovery marker korunur | Cihaz; güvenlik yedeğiyle | [ ] |
+| P6.D12 | 1.000 soru/20.000 tekrar sentetik arşiv: analitik ilk/sıcak yükleme, kaydırma frame-p95/jank (60Hz bütçesi16,7ms), kaydetme gecikmesi; S24 FE + mümkünse düşük güçlü cihaz | Gerçek cihaz profilleme | [ ] |
+| P6.D13 | Gerçek yerel gölge fark/nedenleri, eksik veri/fail/gecikme/yuvarlama ve sonraki farklı-gün denemeleri incelenir; fayda sayısı uydurulmaz | Uzunlamasına gölge kabulü | [ ] |
+
+**D12 host benchmark değildir; D13 100 kayıt sayacıyla otomatik açılmaz. Etkin v3'ün iki kod kapısı kapalı kalır.**
+
 ## P2/P3 — ölçüm, uyumluluk ve kişisel referans
 
 | Test | Sorumlu | Durum |

@@ -2,6 +2,16 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [Yayımlanmamış — 1.5.0 adayı] — 2026-10-18
+
+- P4: v2 tarihini koruyan varsayılan **Gölge** ve açıklanabilir, en çok %10 azaltan aday3; yakın güçlük ve güvenilir uzun süre birlikte gerekir. Hız XP/bonus değildir. Etkin v3 cihaz/gölge kapıları kapalı.
+- P5: tarihsel kaynak/konu, soru/tekrar/payda/kapsama, gerçek 7 günlük ritim, tamamlanmış iki hafta ve aynı-soru karşılaştırması. Gün eşiği sağlanmıyorsa gerçek gün sayısı gösterilir; öğrenme/yetenek hükmü yoktur.
+- Gerçek uygun 7 günlük plan; tüm sonuçların TAM iş yükünden yaklaşık süre. %80 altında yalnız kapsananların ara toplamı, sıfır kapsamada dakika yok.
+- Öneri → görünür filtre → kullanıcı başlatırsa Odak; askı/ders arşivi/profil/same-day uygunluğu yeniden kontrol edilir. Kalıcı, tek birleşik rütbe kuyruğu; rozetle üst üste açılmaz, ek XP yoktur. Startup/hedef/restore sessiz tabandır.
+- P6: Ayarlar’da en yeni 100 karar için dürüst tanı, gece yarısı/resume/saat dilimi yenileme; kaynak seti ayrımı, native 1.000 soru/20.000 tekrar host ölçümü ve beş sentetik Compose önizlemesi. Debug 298/0; Release 258/0 geçti; son birleşik kapı bekleniyor, yayımlanmadı.
+- Room4/ZIP4; snapshot1/2, geçmiş1/2/3 ve v2'ye gelecek kayıt rollback'i. Eski kayıtlar yeniden yazılmaz; XP/15 rütbe/30 rozet katsayıları korunur.
+- Fiziksel S24 FE, TalkBack, gerçek süreç ölümü, düşük depolama, SAF ve cihaz frame-p95 kabulü yapılmadı. Etkin v3 açılmadı.
+
 ## [1.4.1] — 2026-10-18
 
 - Çözüm, açılma işaretinin en güncel devam noktasına kalıcı yazılmasından sonra gösterilir. Geciken eski IO yazısı onay sayılmaz; sahiplik/oturum sınırı korunur.
