@@ -34,8 +34,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -54,6 +57,9 @@ fun AltMenu(
     systemInsets: WindowInsets = WindowInsets.navigationBars.union(WindowInsets.displayCutout),
 ) {
     val colors = MaterialTheme.colorScheme
+    // At large font scales keep all five 48dp+ destinations, but give the selected label room
+    // rather than splitting words or silently shrinking the user's chosen text size.
+    val buyukYazi = LocalDensity.current.fontScale >= 1.5f
     Surface(color = colors.surface, tonalElevation = 2.dp) {
         Column(
             Modifier.windowInsetsPadding(
@@ -72,7 +78,8 @@ fun AltMenu(
                         AltSekme.AYARLAR -> R.string.nav_settings
                     })
                     Column(
-                        Modifier.weight(1f).heightIn(min = 72.dp)
+                        Modifier.weight(if (buyukYazi && aktif) 2f else 1f).heightIn(min = 72.dp)
+                            .semantics { if (buyukYazi && !aktif) contentDescription = etiket }
                             .selectable(selected = aktif, role = Role.Tab, onClick = { onSec(sekme) })
                             .padding(horizontal = 2.dp, vertical = 8.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -87,7 +94,7 @@ fun AltMenu(
                         ) {
                             MenuSimgesi(sekme, if (aktif) colors.primary else colors.onSurfaceVariant)
                         }
-                        Text(
+                        if (!buyukYazi || aktif) Text(
                             etiket, fontSize = 11.sp, lineHeight = 14.sp, textAlign = TextAlign.Center,
                             color = if (aktif) colors.primary else colors.onSurfaceVariant,
                             fontWeight = if (aktif) FontWeight.Bold else FontWeight.Medium,

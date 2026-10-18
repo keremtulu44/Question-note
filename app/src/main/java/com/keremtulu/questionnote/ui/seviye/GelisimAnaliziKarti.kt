@@ -108,7 +108,7 @@ private fun RitimKarti(a: GelisimAnalizi) {
         }
         Text(stringResource(R.string.progress_today_partial), style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant)
-        BilgiAciklamasi(R.string.progress_day_details, "analysis-rhythm-details") {
+        if (LocalDensity.current.fontScale < 1.5f) BilgiAciklamasi(R.string.progress_day_details, "analysis-rhythm-details") {
             a.ritim.forEach { g -> Text(stringResource(R.string.analysis_rhythm_row, tarih(g.gun), g.soru, g.tekrar),
                 style = MaterialTheme.typography.bodySmall) }
         }

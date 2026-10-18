@@ -53,6 +53,10 @@ class IlerlemeGorselOnizlemeTest {
                     .performSemanticsAction(SemanticsActions.OnClick) { it() }
             }
         }
+        if (olcek >= 1.5f) {
+            compose.onNodeWithTag("progress-list").performScrollToNode(hasTestTag("analysis-action"))
+            compose.onNodeWithTag("analysis-action").performScrollTo().assertIsDisplayed()
+        }
         compose.waitForIdle()
         val bitmap = compose.onNodeWithTag("preview-root").captureToImage().asAndroidBitmap()
         assertTrue(bitmap.width >= 320 && bitmap.height >= 600)

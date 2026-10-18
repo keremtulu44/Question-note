@@ -27,7 +27,11 @@ veya toplamak değil; mevcut bilgiyi daha sakin, seçici ve görsel bir düzene 
 
 ## Doğrulama durumu
 
-Aday **1.5.1 / code19**. İlk CI `39155923794`, taşınırken eksik kalan dört yerel renk tanımında derleme hatası verdi (testler çalışmadı); tanımlar geri eklendi. Yeni CI ve native görsel incelemesi bekleniyor; ara yayın kapalı.
+Aday **1.5.1 / code19**. İlk CI `39155923794`, taşınırken eksik kalan dört yerel renk tanımında derleme hatası verdi (testler çalışmadı); tanımlar geri eklendi. İkinci CI `39156298092` / `7f8c3d3`: Debug311/0/0/0, Release258/0/0/0; APK/imza/sertifika başarılı, yayın kapalı.
+Sekiz ana native görünüm ve P6 ritmi incelendi: normal yazıda ana görünüm tek viewport'a sığıyor.
+%200'de eski alt menünün kelime bölünmesi görüldü; seçili etikete alan, diğer dört simgeye tam
+semantik ad + 48dp üzeri dokunma alanı veren uyarlama ve gerçek text-layout regresyonu eklendi.
+Bu son rötuşun yeni CI/native çıktısı bekleniyor.
 Yerelde 147 Kotlin sözdizimi ağacı, XML, workflow YAML/Bash ve kaynak referansları kontrol edildi;
 bu, Kotlin/Android derlemesinin veya cihaz kabulünün yerine geçmez.
 

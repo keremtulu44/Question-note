@@ -743,7 +743,7 @@
     <string name="progress_daily_count">%1$d / %2$d tekrar</string>
     <string name="progress_action_scope">%1$s · çalışma kapsamı</string>
     <string name="progress_action_due">Tekrar zamanı gelen %1$d soru var.</string>
-    <string name="progress_action_difficulty">Zorlandığın konuya küçük bir dönüş.</string>
+    <string name="progress_action_difficulty">Zorlandığın yere kısa bir dönüş.</string>
     <string name="progress_action_small">Hazırsan kısa bir tur yapabilirsin.</string>
     <string name="progress_action_inspect">%1$d soruluk turu hazırla</string>
     <string name="progress_rhythm_scope">Tekrar sayıları · tüm dersler</string>
@@ -753,7 +753,7 @@
     <string name="progress_plan_count">%1$d soru</string>
     <string name="progress_plan_empty">Bu güne planlanmış soru yok.</string>
     <string name="progress_calculation_info">Nasıl hesaplanır?</string>
-    <string name="progress_completed_periods">Tamamlanmış iki hafta · bugün hariç</string>
+    <string name="progress_completed_periods">Tüm arşiv · bugün hariç iki dönem</string>
     <string name="progress_period_before">Önceki 7 gün</string>
     <string name="progress_period_after">Son 7 gün</string>
     <string name="progress_matched_sample">%1$d ortak soru</string>
@@ -765,7 +765,7 @@
     <string name="progress_independent_short">bağımsız değerlendirme</string>
     <string name="progress_topics_short">Konular</string>
     <string name="progress_sources_short">Kaynaklar</string>
-    <string name="progress_captured_context">Kayıt anındaki konu ve kaynaklar</string>
+    <string name="progress_captured_context">Tüm arşiv · kayıt anındaki bağlam</string>
     <string name="progress_sample_details">Süre ve örneklem ayrıntıları</string>
     <string name="progress_details_open">Açık</string>
     <string name="progress_details_closed">Kapalı</string>
