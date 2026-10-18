@@ -1,6 +1,6 @@
 # P6 sentetik analitik ölçümü · debug
 
-Kaynak: `7f8c3d3430a4abcb240be52f191e9d8958cd0a3f`
+Kaynak: `1c429d07dc83a8b2341c52fd8cd6894cff990fc1`
 
 Robolectric 4.15.1 / SDK 35 / yerel SQLite / OpenJDK 64-Bit Server VM 17.0.20.1 / Linux amd64
 
@@ -10,12 +10,12 @@ Analiz başına **4 uygulama SELECT**; karar JSON'u taşınmadı (veritabanında
 
 | İşlem | Örnek | medyan ms | p95 ms* | ham ms |
 |---|---:|---:|---:|---|
-| Sentetik veri üretimi + transaction yükleme | 1 | 1392.58 | 1392.58 | 1392.58 |
-| İlk analiz çağrısı (DB kurulumu hariç) | 1 | 650.24 | 650.24 | 650.24 |
-| Isınmış toplu analiz (5 tekrar) | 5 | 486.59 | 508.76 | 471.78, 486.59, 499.07, 508.76, 370.73 |
-| Tek ders profili (ince projeksiyon) | 1 | 26.09 | 26.09 | 26.09 |
-| Tüm ders süre kapsamı | 1 | 234.55 | 234.55 | 234.55 |
-| Tam İlerleme özeti (XP + profil + analiz) | 1 | 519.87 | 519.87 | 519.87 |
+| Sentetik veri üretimi + transaction yükleme | 1 | 1981.16 | 1981.16 | 1981.16 |
+| İlk analiz çağrısı (DB kurulumu hariç) | 1 | 741.81 | 741.81 | 741.81 |
+| Isınmış toplu analiz (5 tekrar) | 5 | 476.84 | 650.03 | 515.44, 476.84, 444.36, 650.03, 409.06 |
+| Tek ders profili (ince projeksiyon) | 1 | 37.41 | 37.41 | 37.41 |
+| Tüm ders süre kapsamı | 1 | 344.68 | 344.68 | 344.68 |
+| Tam İlerleme özeti (XP + profil + analiz) | 1 | 845.69 | 845.69 | 845.69 |
 
 *Az sayıda host örneğinin nearest-rank yüzdeliği; kare/frame p95 değildir. İlk çağrı gerçek telefon soğuk açılışı değildir. GC/CI paylaşımı sonuçları etkileyebilir; bu sayılar cihaz performansı veya S24 FE kabulü diye yorumlanamaz.
 
