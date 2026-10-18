@@ -146,7 +146,7 @@ class IlerlemeSadelikTest {
         compose.onNodeWithTag("analysis-action").performScrollTo().assertIsDisplayed()
         val button = compose.onNodeWithTag("analysis-action").getUnclippedBoundsInRoot()
         val root = compose.onNodeWithTag("progress-list").getUnclippedBoundsInRoot()
-        assertTrue(button.height >= 48.dp && button.width >= 48.dp)
+        assertTrue(button.bottom - button.top >= 48.dp && button.right - button.left >= 48.dp)
         assertTrue(button.left >= root.left && button.right <= root.right)
         assertTrue(button.top >= root.top && button.bottom <= root.bottom)
         val bar = compose.onNodeWithTag("preview-navigation").getUnclippedBoundsInRoot()

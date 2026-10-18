@@ -36,7 +36,10 @@ Alt menüde %200 tek satır ve 320dp/48dp hedef testleri geçti; yeni normal/koy
 Son yayın koşusuna yalnız debug önizleme kabuğu düzeltmesi/katı dikey sınır kontrolü eklendi: üretimde zaten
 kullanılan `padding + consumeWindowInsets` düzeni fixture’a da uygulandı. Böylece büyük-yazı görüntüsü
 "görünüyor" semantiğine değil, düğmenin alt menünün tamamen üstünde olmasına dayanır.
-Üretim kodu değişmeden yayın koşusu başlatılıyor; gerçek cihaz kabulü açık.
+Üretim kodu değişmeden yayın doğrulaması sürüyor. `39157747382`/`b6903c4` Debug test derlemesinde
+`DpRect` üzerinde `width/height` kullanımı nedeniyle durdu; Release258/0 geçti, APK/yayın kapısı açılmadı.
+Aynı katı kontrol, gerçek DpRect kenar farklarıyla düzeltildi; boyut/örtüşme şartları gevşetilmedi.
+Gerçek cihaz kabulü açık.
 Yerelde 147 Kotlin sözdizimi ağacı, XML, workflow YAML/Bash ve kaynak referansları kontrol edildi;
 bu, Kotlin/Android derlemesinin veya cihaz kabulünün yerine geçmez.
 
