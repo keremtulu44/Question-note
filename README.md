@@ -28,8 +28,8 @@ cevaplamak ve çözümü öğrenme sürecinden ayrı saklamaktır.
 **v1.4.1 yayımlandı** (versionCode 17). [CI `39136991000`](https://github.com/keremtulu44/Question-note/actions/runs/39136991000): **221 test geçti**, Release derlemesi, imza ve sertifika doğrulaması başarılı.
 
 **Geliştirme dalında 1.5.0 adayı:** P4/P5 uygulandı; gölge v3, tarihsel kaynak/konu analitiği,
-ritim/iş yükü, öneriden Odak’a geçiş ve kalıcı rütbe kutlaması. P6 Debug **298/0**; Release 258/0 geçti. Son birleşik
-CI kapısı doğrulanıyor, aday yayımlanmadı. [Kanıt ve açık kapılar](docs/P4_P5_P6_UYGULAMA.md).
+ritim/iş yükü, öneriden Odak’a geçiş ve kalıcı rütbe kutlaması. **Birleşik P6 CI `39143916007`: Debug 298/0, Release 258/0**, APK derleme/imza/sertifika başarılı.
+Son yayın hazırlanıyor; aday henüz yayımlanmadı. [Kanıt ve açık kapılar](docs/P4_P5_P6_UYGULAMA.md).
 
 - **P2/P3:** Monotonik deneme/inceleme ölçümü, dondurulan değerlendirme, güvenli devam ve atomik
   tekrar kaydı. Yeterli yeni ölçümde kişisel süre referansı; eski kayıttan hayalî süre yok.

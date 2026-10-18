@@ -5,8 +5,8 @@ Bu belge uygulanan sözleşmeyi ve gerçekten gözlenen kapıları kaydeder; tes
 
 ## Güncel durum
 
-- **P4 ve P5 otomatik kapıları geçti.** P6 Debug `06374a4` ile **298/0** gördü; son uçtan uca fixture sertleştirmesi yeniden doğrulanıyor. Release `bcdc461` ile **258/0/0/0** geçti. İki kapı aynı koşuda henüz yeşil değil.
-- Aday sürüm **1.5.0 / code18**; ara APK yayını kapalı. Son doğrulanmış yayımlanan sürüm hâlâ **1.4.1 / code17**.
+- **P4/P5 ve P6 otomatik kapıları geçti.** `478b86c` / CI `39143916007`: Debug **298/0/0/0**, Release **258/0/0/0**, APK derleme/imza/sertifika başarılı. Ortak testler iki kez yürür; sayılar toplanmaz.
+- Sürüm **1.5.0 / code18**; birleşik doğrulama sonrası son yayın koşusu açılıyor. Henüz yayımlanan son paket **1.4.1 / code17**; ara APK yayınlanmadı.
 - Üretim varsayılanı **Gölge**: kaydedilen tarih v2; ayrı v3 adayının farkı/nedenleri yerel kayıttadır.
 - **Etkin v3 kapalı.** Cihaz ve gölge kabul kapıları kodda ayrı ve varsayılan false. Tercih dosyası bu kapıları atlayamaz.
 - Fiziksel S24 FE / daha düşük güçlü cihaz, TalkBack, SAF/bulut, düşük depolama, gerçek süreç ölümü/reboot ve frame-p95 kabulü yapılmadı. Robolectric bunu ikame etmez.
@@ -85,6 +85,7 @@ Bu belge uygulanan sözleşmeyi ve gerçekten gözlenen kapıları kaydeder; tes
 | P6 `ff1bea7` | `39142423706` | Debug **298 / 1 / 0 / 0**; gerçek tekrar kaydı başarılı, karne dönüşü sonrası test yanlışlıkla aynı adlı başlığı navigasyon kabul edebildi. Tab rolü + gerçek Filtreli ekran sınırı ve semantik eylemle fixture kararlılaştırıldı; Release henüz koşmadı |
 | P6 `bcdc461` | `39142970779` | Release **258 / 0 / 0 / 0** ve Release benchmark başarılı. Debug **298 / 1 / 0 / 0**: daha sıkı UI fixture görünürlük kontrolü Rahat seçeneğinin kaydırma gerektirdiğini gösterdi; açık kaydırma + gerçek önizleme/karne hazır beklemeleri eklendi. Yayın kapalı |
 | P6 `4ef73e9` | `39143488466` | Release **258 / 0 / 0 / 0**. Debug **298 / 1 / 0 / 0**: Rahat seçeneğine kaydırma geçti; sabit alt bardaki Kaydet için kaydırma istenemeyeceği görüldü. Yalnız Kaydet’in gereksiz scroll çağrısı kaldırıldı; görünürlük/etkinlik ve gerçek kayıt kontrolleri kaldı |
+| P6 `478b86c` | `39143916007` | **Debug 298 / 0 / 0 / 0; Release 258 / 0 / 0 / 0**. Derleme/imza/sertifika başarılı, iki native benchmark + beş PNG taze üretildi. Ara yayın kapalıydı; bu birleşik kanıt sonrası nihai yayın açılıyor |
 
 Sütun sırası: **test / başarısız / hata / atlanan**. Derleme/parsing ile çalışmış test sonucu birbirinin yerine yazılmaz.
 Güncel otomatik rapor [DERLEME_RAPORU.md](DERLEME_RAPORU.md). İlk başarısızlıkları gizlemek için test/koruma silinmedi.
@@ -103,6 +104,11 @@ Güncel otomatik rapor [DERLEME_RAPORU.md](DERLEME_RAPORU.md). İlk başarısız
 
 Native önizlemeler incelendi: koyu debug fixture açıklamasındaki kontrast düzeltildi; yeni analiz panelleri mevcut petrol/bakır yüzey paletine uyarlandı. Eşleşen soru çok olsa da gün eşiği sağlanmayan örnekte gerçek gün adetleri eklendi; yeterlilik kuralı değiştirilmedi. Bu görsel/gün-kapsama değişiklikleri 298-test Debug koşusunda geçti; Release ortak testleri `bcdc461` ile 258/0 geçti.
 
-CI test görevleri her koşuda gerçekten çalıştırılacak (test cache/up-to-date kapalı, derleyici/dependency cache açık). Eksik zorunlu UI/benchmark/ZIP test sınıfı, sıfır rapor veya atlanan test kapıyı geçemez; eski benchmark/PNG kanıtı yeni ölçüm diye etiketlenmez. Her iki varyantta testler gerçekten yürütüldü; birleşik yeşil sonuç hâlâ bekleniyor.
+CI test görevleri her koşuda gerçekten çalıştırılır (test cache/up-to-date kapalı, derleyici/dependency cache açık). Eksik zorunlu UI/benchmark/ZIP test sınıfı, sıfır rapor veya atlanan test kapıyı geçemez; eski benchmark/PNG kanıtı yeni ölçüm diye etiketlenmez. Her iki varyantta testler gerçekten yürütüldü; birleşik yeşil sonuç `39143916007` ile doğrulandı.
 
 Debug başarısız olsa bile Release testi ayrıca çalışır; derleme/imza/yayın **her iki** kapının geçmesini ister. Böylece bir UI problemi diğer varyantın tanısını gizlemez.
+
+İlk birleşik yeşil koşunun (478b86c) host ölçümü: Debug sıcak medyan 589,73 / host-p95 725,87 ms;
+Release 555,00 / 721,55 ms, tam İlerleme 700,96 ms. Dört ince SELECT ve 22.749.680 bayt karar yükünün
+projeksiyondan dışlanması doğrulandı. Bunlar farklı host koşuları arasında hız kazanımı ya da telefon
+kare bütçesi iddiası değildir; sonraki koşuların ham ölçümü ayrı otomatik raporlardadır.

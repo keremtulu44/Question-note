@@ -19,7 +19,7 @@
 
 ## P6 varyant ve kanıt kapısı
 
-- Geliştirme adayı 1.5.0/code18; P4/P5 doğrulandı, P6 Debug 298/0; Release 258/0 geçti; son UI fixture değişikliğiyle birleşik CI kapısı doğrulanıyor.
+- 1.5.0/code18, birleşik CI `39143916007`: Debug298/0, Release258/0 ve APK/imza/sertifika başarılı; son yayın hazırlanıyor.
   Güncel sonuç ve kaynak: [DERLEME_RAPORU.md](docs/DERLEME_RAPORU.md).
 - Debug başarısız olsa da Release testi çalışır; APK için **ikisi de** geçmelidir. CI sırası `:app:testDebugUnitTest` → `:app:testReleaseUnitTest` → `:app:assembleRelease` →
   imza/sertifika → yayın. Ortak testler iki varyantta; UI/Preview `src/testDebug`'da, sayılar toplanmaz.
@@ -27,8 +27,8 @@
   derleyici/dependency cache korunur. Her benchmark/önizleme o koşuda üretilir.
 - `tools/junit_ozeti.py` eksik/sıfır rapor, başarısız/hatalı/atlanan test ve zorunlu test sınıfının
   keşfedilmemesini reddeder. Derleme hatası, “0 test başarılı” diye geçilmez.
-- Ara `PUBLISH_RELEASE=false`, başarılı imzalı ara APK'yı yayımlamaz. Nihai paket için iki varyant
-  doğrulanınca açılabilir. **Bu yayın bayrağı, ayrı olan etkin-v3 kapılarını açmaz.**
+- Ara `PUBLISH_RELEASE=false`, başarılı imzalı ara APK'yı yayımlamaz. İki varyant `39143916007` ile
+  birlikte doğrulandığı için nihai paket bayrağı açılıyor. **Bu yayın bayrağı, ayrı olan etkin-v3 kapılarını açmaz.**
 - Küçük native PNG'ler `docs/ui/p6`, sentetik host ölçümleri `docs/PERFORMANS_DEBUG.md` ve
   `docs/PERFORMANS_RELEASE.md`. Büyük veri/ZIP/APK Git'e girmez.
 

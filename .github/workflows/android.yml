@@ -43,7 +43,7 @@ jobs:
         id: release
         shell: bash
         env:
-          PUBLISH_RELEASE: "false" # Intermediate gates; enable only after both tested variants are verified.
+          PUBLISH_RELEASE: "true" # Run 39143916007: Debug298/0 + Release258/0 + signed APK. Active-v3 gates stay CLOSED.
           WRAPPER_VERSION: "9.8.1"
           BUILD_TOOLS_VERSION: "37.0.0"
           EXPECTED_FINGERPRINT: "FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54"

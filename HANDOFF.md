@@ -8,12 +8,10 @@
 - Kullanıcı: **“P4 P5 ve P6 uygula dikkatli adım adım çalış.”** P0–P3 önceki teslimde tamamlandı.
 - P4 CI `39139377311` / `35896fe`: **240/0/0/0**. P5 CI `39140443680` / `522b009`: **274/0/0/0**.
   Her ikisinde release derlemesi/imza/sertifika başarılı; ara yayın bilinçli kapalıydı.
-- P6 Debug CI `39142060320` / `06374a4`: **298/0/0/0**. Release CI `39142970779` / `bcdc461`:
-  **258/0/0/0**; host-test görevi açık seçimle çalıştı, kaynak seti/Release test derlemesi ve benchmark doğrulandı.
-  Son birleşik koşu henüz yeşil değil: Debug uçtan uca fixture'da ekran dışındaki seçeneğe kaydırma gerekiyordu.
-  **`478b86c`** / CI `39143916007` açık kaydırma, önizleme/karne hazır beklemeleriyle yeniden CI'da; başarı varsayılmaz.
-- Aday **1.5.0 / code18**. **Etkin v3 kapalı**, üretim varsayılanı Gölge: tarihler hâlâ v2.
-  Ara `PUBLISH_RELEASE=false`; iki varyant doğrulanmadan yayın yok.
+- **P6 birleşik CI `39143916007` / `478b86c`: Debug 298/0/0/0, Release 258/0/0/0**, release APK
+  derlemesi/imza/sertifika başarılı. İki varyant benchmark ve beş native PNG gerçekten üretildi; test cache/up-to-date kapalı.
+- **1.5.0 / code18** son yayın koşusu açılıyor. **Etkin v3 kapalı**; Gölge varsayılanı v2 tarihini uygular.
+  Ara APK yayımlanmadı; iki varyantın birleşik yeşil sonucundan sonra `PUBLISH_RELEASE=true` açılıyor.
 - Son bağımsız doğrulanmış yayımlanan sürüm **v1.4.1 / code17**, CI `39136991000`, **221/0/0/0**;
   kaynak `2fbe6255646029d040cfe4e2f2d600340e0206a7`.
   [APK](https://github.com/keremtulu44/Question-note/releases/download/v1.4.1/yanlis-defteri-1.4.1.apk),
@@ -73,14 +71,14 @@
 ## P6 — kod / gözlenen kanıt / açık kapılar
 
 - UI testleri `src/testDebug`; Release'e fixture/test Activity taşınmadı. Katı JUnit özetleri ayrı.
-  CI test cache/up-to-date kapalı olacak; benchmark/PNG her koşunun kendi çıktısı olmalı.
+  CI test cache/up-to-date kapalı; benchmark/PNG her koşunun kendi çıktısı olmalı.
 - `MotorTaniHizmeti`: toplam ile zaman damgasına göre son ≤100 örnek ayrı; strict doğrulama, farklı aday/
   Gölge/Etkin/V2/bozuk sayısı. Count + 1–2 sınırlı Room parent + tek batched relation; N+1 yok.
 - Analiz4 ince SELECT; karar JSON'u/görsel/not yok. SQLite EXPLAIN mevcut ders/gün/PK/same-day indekslerini
   gösterir. Ana iş parçacığı dışında saf hesap, DB snapshot tutarlılığı korunur; fiziksel maliyet ölçülmedi.
 - Native SDK35 host benchmark: 1.000 soru/20.000 tekrar, 5 sıcak örnek, profil/tam özet maliyeti.
   `docs/PERFORMANS_DEBUG.md` kaynak SHA ve gerçek ham süreleri içerir. `docs/PERFORMANS_RELEASE.md` de gerçek ölçüm içerir; her rapor kendi kaynak SHA’sını taşır.
-- Debug 298/0: öneri→Filtreli→Odak→Karne→İlerleme; %200/48dp/reduced-motion, tek host, politika gate;
+- Birleşik yeşil Debug 298/0: öneri→Filtreli→Odak→Karne→İlerleme; %200/48dp/reduced-motion, tek host, politika gate;
   broadcast, gece yarısı ve Activity resume; bounded tanı; ZIP snapshot2/active3 rollback/tamper;
   restore callback kesintisinde marker/kozmetik kuyruklar. Bunlar fiziksel süreç öldürme değildir.
 - `docs/ui/p6`: 5 gerçek Compose/sentetik görüntü. Koyu fixture açıklamasının kontrastı, yeni panel yüzeyleri
@@ -103,7 +101,7 @@
 
 ## Sonraki somut adım
 
-1. `39143916007` CI sonucunu incele; Release görev/derleme/test hatası varsa gider. İki varyantı gerçekten yeşile getir.
-2. Rapor botunu fetch/rebase ile al; Debug/Release benchmark SHA/süre/EXPLAIN ve P6 görüntülerini kontrol et.
-3. İki kapı geçerse son paket yayını; release/asset digest kontrolü. Aday/son-yayın belgelerini gerçek kanıtla güncelle.
+1. Son yayın koşusunun sonucunu takip et; Debug298/0 + Release258/0 + imza/sertifika yeniden geçmeden yayın oluşamaz.
+2. Rapor botunu fetch/rebase ile al; Release asset boyut/digest/target SHA ilişkisini API'den bağımsız doğrula.
+3. README/HANDOFF/BUILDING/ROADMAP/CHANGELOG ve test kaydındaki aday/yayın durumunu gerçek yayın kanıtıyla güncelle.
 4. Fiziksel kabul bekleyenlerini açık bırak; etkin v3'ü cihaz/gölge kanıtı olmadan açma.

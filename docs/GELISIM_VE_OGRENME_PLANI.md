@@ -1,7 +1,7 @@
 # Yanlış Defteri — Premium deneyim ve kişiselleşen öğrenme sistemi
 
 **Tarih:** 2026-10-18
-**Durum:** P0–P5 uygulandı. P4 CI `39139377311` **240/0/0/0**, P5 CI `39140443680` **274/0/0/0**. P6 Debug CI `39142060320` **298/0/0/0**; Release `39142970779` **258/0/0/0**; son UI fixture sertleştirmesinin birleşik CI kapısı doğrulanıyor. Aday 1.5.0/code18, son yayımlanan 1.4.1/code17. Fiziksel kabul açık; etkin v3 kapalı. [Uygulama/kanıt kaydı](P4_P5_P6_UYGULAMA.md).
+**Durum:** P0–P5 uygulandı. P4 CI `39139377311` **240/0/0/0**, P5 CI `39140443680` **274/0/0/0**. P6 birleşik CI `39143916007` **Debug298/0/0/0 + Release258/0/0/0**, APK/imza/sertifika başarılı. Aday 1.5.0/code18, son yayımlanan 1.4.1/code17. Fiziksel kabul açık; etkin v3 kapalı. [Uygulama/kanıt kaydı](P4_P5_P6_UYGULAMA.md).
 **Başlangıç:** v1.2.0 / code 14, Room v3, ZIP v3, tekrar algoritması v2. Başlangıç CI kanıtı: `39067624050`, 130 başarılı test; fiziksel cihaz kabulü ayrı ve bekliyor.
 
 ## Tarihsel P0/P1 uygulama notu — v1.3.0 / 2026-10-18
@@ -33,7 +33,7 @@
 - P5: tarihsel konu/kaynak ve kapsam/payda ayrımı; gerçek ritim, tamamlanmış dönem ve eşleşen soru/gün dayanağı;
   gerçek plan ve kapsama bağlı iş yükü; öneri→görünür filtre→kullanıcı başlatırsa Odak; kalıcı tek kutlama host'u.
 - P6: sınırlandırılmış tanı, gece yarısı/resume/saat dilimi yenileme, Debug/Release ayrımı, native host benchmark,
-  gerçek bileşen önizlemeleri, ZIP/snapshot rollback ve uçtan uca regresyonlar. Debug 298/0 ve Release 258/0 ayrı koşularda görüldü; son birleşik kapı yeniden doğrulanıyor.
+  gerçek bileşen önizlemeleri, ZIP/snapshot rollback ve uçtan uca regresyonlar. Birleşik Debug298/0 + Release258/0, iki native host raporu ve beş görüntü doğrulandı.
 - Room4/ZIP4 ve XP katsayıları aynı. Karar snapshot1/2, geçmiş algoritma1/2/3 açık yönlendirilir; geçmiş yeniden yazılmaz.
 - Fiziksel cihaz/SAF/TalkBack/frame-p95/gölge kullanımı tamamlanmadan etkin v3 açılmaz. [Sözleşme ve kapılar](P4_P5_P6_UYGULAMA.md).
 
@@ -292,7 +292,7 @@ Rütbe kutlaması için kalıcı görülme/kuyruk takibi gerekir. İlk kurulum, 
 
 ## 11. Kod paketleri ve bağımlılıklar
 
-**P0–P5 kod/otomatik test bakımından uygulandı; P6 Debug 298/0 ve Release 258/0; son birleşik kapı doğrulanıyor. Fiziksel kabul açık.** “Bitti” için kodun yazılması değil ilgili kabul kapısının geçilmesi gerekir.
+**P0–P5 kod/otomatik test bakımından uygulandı; P6 birleşik Debug298/0 + Release258/0 ve APK/imza/sertifika geçti. Fiziksel kabul açık.** “Bitti” için kodun yazılması değil ilgili kabul kapısının geçilmesi gerekir.
 
 | Paket | Başlıca görevler / dosyalar | Bağımlılık | Kabul kapısı |
 |---|---|---|---|
@@ -302,7 +302,7 @@ Rütbe kutlaması için kalıcı görülme/kuyruk takibi gerekir. İlk kurulum, 
 | P3 — Kişisel profil (uygulandı) | `domain/gelisim/KisiselProfil.kt` içinde politika/hesap; `data/gelisim/ProfilHizmeti.kt`, `TekrarOlcumDao` toplu sorguları ve `SureProfiliKarti` | P2 | Az veri, uç değer, aynı soru baskısı, tarihsel bağlam ve soğuk başlangıç testleri |
 | P4 — Karar v3 / gölge (uygulandı) | Yeni `domain/repeat/UyarlanabilirTekrarKurali.kt`, ortak karar servisi ve sürüm yönlendirme; Odak önizlemesi | P3 | Önizleme=yazma; çift ceza yok; eski sonuçlar aynı; gölgede tarih değişmiyor |
 | P5 — Gerçek veriyle arayüz/eylem (uygulandı) | `SeviyeHizmeti`, `SeviyeEkrani`, `ui/seviye/GelisimAnaliziKarti` bileşenleri; kaynak/konu detayları; filtre ve root route; rütbe kutlama host'u | P1 + P3; aday motor açık olmak zorunda değil | Gerçek veri/boş durum; kaynak veya konudan doğru ve uygun oturuma geçiş |
-| P6 — Etkinleştirme ve kalite (otomatik kapı sürüyor) | Politika modları; sorgu/cache iyileştirmesi; erişilebilirlik; release/device ölçümü; belgeler | P4 + P5 | Tüm regresyonlar, cihaz kanıtı, imza ve uyumluluk; karar katmanı kontrollü açılır |
+| P6 — Etkinleştirme ve kalite (otomatik geçti; cihaz açık) | Politika modları; sorgu/cache iyileştirmesi; erişilebilirlik; release/device ölçümü; belgeler | P4 + P5 | Tüm regresyonlar, cihaz kanıtı, imza ve uyumluluk; karar katmanı kontrollü açılır |
 
 Önemli ayrım: **P5, v3'ü etkinleştirmeyi beklemek zorunda değil.** Doğru ölçülmüş profiller ve güzel arayüz, mevcut güvenli v2 planlamayla da değer sağlar. Tek birleşik veri modeli, tek seferde büyük ve riskli yayın demek değildir.
 

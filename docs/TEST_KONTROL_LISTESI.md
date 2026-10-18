@@ -26,7 +26,7 @@ yeni testlerin yeşil olması geçmişteki cihaz bekleyenlerini tamamlanmış ya
 ## P4–P6 — otomatik kanıt ve ayrı fiziksel kabul
 
 Aday sürüm 1.5.0/code18. P4 CI `39139377311` 240/0, P5 `39140443680` 274/0;
-P6 Debug `39142060320` **298/0/0/0**, Release `39142970779` **258/0/0/0**. Son UI fixture sertleştirmesiyle iki varyantın birlikte yeşil koşusu bekleniyor. Ayrı varyantlar aynı ortak
+P6 **birleşik CI `39143916007`: Debug298/0/0/0 + Release258/0/0/0**, APK/imza/sertifika başarılı. Nihai yayın ve bağımsız asset kontrolü bekleniyor. Ayrı varyantlar aynı ortak
 testleri tekrar eder; sayılar toplanmaz. [Koşu/başarısızlık günlüğü](P4_P5_P6_UYGULAMA.md).
 
 | Kontrol | Kanıt / sorumlu | Durum |
@@ -43,8 +43,8 @@ testleri tekrar eder; sayılar toplanmaz. [Koşu/başarısızlık günlüğü](P
 | Time/timezone broadcast, bir sonraki gece yarısı, Activity resume gün yenilemesi | P6 Robolectric; cihaz değildir | [x] |
 | Açık/koyu, %200, hareket kapalı, ≥48dp eylem, gizli maske/semantik; native bileşen çizimleri | Debug-only Compose | [x] |
 | 1.000 soru/20.000 tekrar, dört ince SELECT, EXPLAIN indeksleri ve ham host süre raporu | `PERFORMANS_DEBUG.md` | [x] |
-| Ortak testlerin ayrıca **Release** derlenmesi/çalışması ve Release benchmark | CI `39142970779` / Release 258/0 + rapor | [x] |
-| Nihai release derlemesi, imza/sertifika ve yayımlanan asset SHA-256 eşleşmesi | CI + bağımsız asset kontrolü | [ ] |
+| Ortak testlerin ayrıca **Release** derlenmesi/çalışması ve Release benchmark | CI `39143916007` / Release258/0 + rapor | [x] |
+| Nihai release derlemesi, imza/sertifika ve yayımlanan asset SHA-256 eşleşmesi | CI `39143916007` derleme/imza geçti; son yayın/asset digest bekliyor | [ ] |
 
 ### P6 fiziksel kapıları — otomatik test sonucu ile işaretlenmez
 
