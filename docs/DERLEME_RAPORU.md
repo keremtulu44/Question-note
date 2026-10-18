@@ -2,15 +2,15 @@
 
 > Bu dosya Android CI tarafından otomatik üretilir. Keystore veya parola değerleri yazılmaz.
 
-- Zaman (UTC): 2026-10-18T15:42:27Z
-- Workflow commit'i: ffd84372425786b185ebee1ae9761f813a50edf0
+- Zaman (UTC): 2026-10-18T15:44:50Z
+- Workflow commit'i: abc0fb0da9943a68ff3c14a8005375a15483e8c3
 - Dal: arena/59c6570d-question-note
 - Uygulama sürümü: 1.5.0 (versionCode 18)
 - Android SDK: compileSdk/targetSdk 37, minSdk 26; build-tools 37.0.0
 - Genel sonuç: **BAŞARISIZ**
 - Wrapper çıkış kodu: 0
 - testDebugUnitTest çıkış kodu: 1
-- Birim test özeti (Debug): 292 test; 1 başarısız; 0 hata; 0 atlandı
+- Birim test özeti (Debug): 297 test; 1 başarısız; 0 hata; 0 atlandı
 - testReleaseUnitTest çıkış kodu: 125
 - Birim test özeti (Release ortak testler): Release JUnit sonucu henüz yok
 - UI/Preview regresyonları yalnız testDebug; ortak testler iki varyantta çalışır, sayılar toplanmaz.
@@ -56,7 +56,7 @@ OS:            Linux 6.17.0-1022-azure amd64
 
 ```text
 -- Derleyici/Gradle hata satırları --
-90:* What went wrong:
+91:* What went wrong:
 
 -- İlk 100 satır --
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
@@ -88,6 +88,7 @@ Daemon will be stopped at the end of the build
 > Task :app:packageDebugUnitTestForUnitTest
 > Task :app:generateDebugUnitTestConfig
 > Task :app:kspDebugKotlin
+
 > Task :app:compileDebugKotlin
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/export/YerelYedeklemeHizmeti.kt:67:34 Non-public primary constructor is exposed via the generated 'copy()' method of the 'data' class.
 
@@ -126,8 +127,8 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/c
 w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/com/keremtulu/questionnote/ui/IlerlemeGorselOnizlemeTest.kt:30:29 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
 w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/com/keremtulu/questionnote/ui/OlcumVeProfilArayuzTest.kt:58:29 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
 w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/com/keremtulu/questionnote/ui/OneridenOdagaAkisTest.kt:34:29 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
-w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/com/keremtulu/questionnote/ui/P5P6ArayuzTest.kt:40:29 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
-w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/com/keremtulu/questionnote/ui/P5P6ArayuzTest.kt:61:30 Unnecessary safe call on a non-null receiver of type 'Pair<SoruCalismaFiltresi, Int>'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/com/keremtulu/questionnote/ui/P5P6ArayuzTest.kt:44:29 'fun <reified A : ComponentActivity> createAndroidComposeRule(effectContext: CoroutineContext = ...): AndroidComposeTestRule<ActivityScenarioRule<A>, A>' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createAndroidComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/com/keremtulu/questionnote/ui/P5P6ArayuzTest.kt:65:30 Unnecessary safe call on a non-null receiver of type 'Pair<SoruCalismaFiltresi, Int>'.
 w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/com/keremtulu/questionnote/ui/P6GorselOnizlemeTest.kt:27:29 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
 w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/com/keremtulu/questionnote/ui/P6GorselOnizlemeTest.kt:42:69 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type 'File?'.
 w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/com/keremtulu/questionnote/ui/PremiumIlerlemeTest.kt:50:29 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
@@ -137,10 +138,10 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/c
 
 > Task :app:testDebugUnitTest
 
-YerelYedeklemeHizmetiTest > verifiedRestoreClearsCosmeticQueuesBeforeRecoveryMarkerAndKeepsOwnership FAILED
-    java.lang.AssertionError at YerelYedeklemeHizmetiTest.kt:500
+MotorTaniHizmetiTest > onlyNewestHundredAreValidatedAndTotalIsNotMistakenForTheSample FAILED
+    java.lang.AssertionError at MotorTaniHizmetiTest.kt:45
 
-292 tests completed, 1 failed
+297 tests completed, 1 failed
 
 > Task :app:testDebugUnitTest FAILED
 
@@ -158,7 +159,6 @@ Execution failed for task ':app:testDebugUnitTest'.
 * Exception is:
 org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':app:testDebugUnitTest'.
 	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.lambda$doExecute$1(DefaultTaskNodeExecutor.java:367)
-	at org.gradle.internal.Try$Failure.ifSuccessfulOrElse(Try.java:288)
 
 -- Son 80 satır --
 	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
@@ -239,7 +239,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD FAILED in 2m 7s
+BUILD FAILED in 1m 14s
 32 actionable tasks: 24 executed, 8 from cache
 ```
 
@@ -252,13 +252,17 @@ Release birim testi başlatılmadı.
 ## JUnit başarısızlık ayrıntıları
 
 ```text
-testDebugUnitTest: com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest > verifiedRestoreClearsCosmeticQueuesBeforeRecoveryMarkerAndKeepsOwnership: java.lang.AssertionError: java.lang.AssertionError: expected:<988503f9-7229-408c-b6a9-313791e2a42b> but was:<null>
-java.lang.AssertionError: expected:<988503f9-7229-408c-b6a9-313791e2a42b> but was:<null>
+testDebugUnitTest: com.keremtulu.questionnote.data.gelisim.MotorTaniHizmetiTest > onlyNewestHundredAreValidatedAndTotalIsNotMistakenForTheSample: java.lang.AssertionError: java.lang.AssertionError: SELECT COUNT(*) FROM tekrar_olcumleri SELECT t.* FROM tekrarlar t JOIN tekrar_olcumleri m ON m.tekrar_id = t.id         ORDER BY t.zaman DESC, t.id ASC LIMIT ? SELECT `tekrar_id`,`deneme_id`,`oturum_id`,`deneme_aktif_ms`,`inceleme_aktif_ms`,`kalite`,`nedenler_json`,`olcum_surumu`,`ders_id`,`ders_adi`,`konu_id`,`konu_adi`,`kaynak_anahtari`,`kaynak_etiketi`,`karar_json` FROM `tekrar_olcumleri` WHERE `tekrar_id` IN (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) SELECT t.* FROM tekrarlar t JOIN tekrar_olcumleri m ON m.tekrar_id = t.id         ORDER BY t.zaman DESC, t.id ASC LIMIT ? expected:<3> but was:<4>
+java.lang.AssertionError: SELECT COUNT(*) FROM tekrar_olcumleri
+SELECT t.* FROM tekrarlar t JOIN tekrar_olcumleri m ON m.tekrar_id = t.id
+        ORDER BY t.zaman DESC, t.id ASC LIMIT ?
+SELECT `tekrar_id`,`deneme_id`,`oturum_id`,`deneme_aktif_ms`,`inceleme_aktif_ms`,`kalite`,`nedenler_json`,`olcum_surumu`,`ders_id`,`ders_adi`,`konu_id`,`konu_adi`,`kaynak_anahtari`,`kaynak_etiketi`,`karar_json` FROM `tekrar_olcumleri` WHERE `tekrar_id` IN (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+SELECT t.* FROM tekrarlar t JOIN tekrar_olcumleri m ON m.tekrar_id = t.id
+        ORDER BY t.zaman DESC, t.id ASC LIMIT ? expected:<3> but was:<4>
 	at org.junit.Assert.fail(Assert.java:89)
 	at org.junit.Assert.failNotEquals(Assert.java:835)
 	at org.junit.Assert.assertEquals(Assert.java:120)
-	at org.junit.Assert.assertEquals(Assert.java:146)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest$verifiedRestoreClearsCosmeticQueuesBeforeRecoveryMarkerAndKeepsOwnership$1.invokeSuspend(YerelYedeklemeHizmetiTest.kt:515)
+	at com.keremtulu.questionnote.data.gelisim.MotorTaniHizmetiTest$onlyNewestHundredAreValidatedAndTotalIsNotMistakenForTheSample$1.invokeSuspend(MotorTaniHizmetiTest.kt:53)
 	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
 	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
 	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:263)
@@ -267,7 +271,7 @@ java.lang.AssertionError: expected:<988503f9-7229-408c-b6a9-313791e2a42b> but wa
 	at kotlinx.coroutines.BuildersKt.runBlocking(Unknown Source)
 	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking$default(Builders.kt:47)
 	at kotlinx.coroutines.BuildersKt.runBlocking$default(Unknown Source)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest.verifiedRestoreClearsCosmeticQueuesBeforeRecoveryMarkerAndKeepsOwnership(YerelYedeklemeHizmetiTest.kt:500)
+	at com.keremtulu.questionnote.data.gelisim.MotorTaniHizmetiTest.onlyNewestHundredAreValidatedAndTotalIsNotMistakenForTheSample(MotorTaniHizmetiTest.kt:45)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -287,14 +291,7 @@ java.lang.AssertionError: expected:<988503f9-7229-408c-b6a9-313791e2a42b> but wa
 	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
 	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
 	at org.robolectric.internal.SandboxTestRunner.access$600(SandboxTestRunner.java:67)
-	at org.robolectric.internal.SandboxTestRunner$6.evaluate(SandboxTestRunner.java:333)
-	at org.robolectric.internal.SandboxTestRunner$3.evaluate(SandboxTestRunner.java:233)
-	at org.robolectric.internal.SandboxTestRunner$5.lambda$evaluate$0(SandboxTestRunner.java:317)
-	at org.robolectric.internal.bytecode.Sandbox.lambda$runOnMainThread$0(Sandbox.java:101)
-	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
-	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
-	at ja
+	at org.ro
 ```
 
 ## Derleme çıktısı (son 120 satır)
