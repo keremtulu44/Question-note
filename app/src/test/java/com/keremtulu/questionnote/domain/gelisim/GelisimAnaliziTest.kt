@@ -66,9 +66,11 @@ class GelisimAnaliziTest {
         val rs = (0..9).flatMap { i -> listOf(r("old$i", "$i", gun - 8 - i % 3, TekrarSonucu.COZEMEDIM, o = null),
             r("new$i", "$i", gun - 1 - i % 3, o = SureOlcumu(-1, 0, OlcumKalitesi.TAM))) }
         val e = analiz(rs = rs).donem.eslesen
+        assertEquals(3, e.onceGun); assertEquals(3, e.sonraGun)
         assertTrue(e.yeterli); assertEquals(10, e.soru); assertEquals(0, e.onceBagimsiz); assertEquals(10, e.sonraBagimsiz)
         assertFalse(analiz(rs = rs.filter { it.soruId != "9" }).donem.eslesen.yeterli)
-        assertFalse(analiz(rs = rs.map { it.copy(gun = if (it.id.startsWith("old")) gun - 8 else gun - 1) }).donem.eslesen.yeterli)
+        val sameDay = analiz(rs = rs.map { it.copy(gun = if (it.id.startsWith("old")) gun - 8 else gun - 1) }).donem.eslesen
+        assertFalse(sameDay.yeterli); assertEquals(1, sameDay.onceGun); assertEquals(1, sameDay.sonraGun)
     }
     @Test fun changedOrUnknownContextDoesNotEnterMatchedComparison() {
         val rs = listOf(r("a", g = gun - 8), r("b", g = gun - 1, baglam = b.copy(kaynakAnahtari = "other")),

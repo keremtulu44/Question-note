@@ -48,7 +48,7 @@ fun P6BilesenOnizlemesi(koyu: Boolean = false, analiz: Boolean = false, bos: Boo
                 if (analiz) GelisimAnaliziKarti(a) { _, _ -> } else {
                     SonrakiAdimKarti(a) { _, _ -> }
                     Text("Soru/tekrar ayrımı, tarihsel bağlam ve kapsama ayrıntıları İlerleme ekranında açılır.",
-                        style = MaterialTheme.typography.bodyMedium)
+                        style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onBackground)
                 }
             }
         }

@@ -49,9 +49,14 @@ class MotorTaniHizmetiTest {
         assertEquals(MotorTanisi(121, 100, 0, 99, 0, 0, 1), tani)
         val reads = synchronized(queries) { queries.filter { it.trimStart().startsWith("SELECT", true) &&
             !it.contains("room_table_modification_log", true) }.toList() }
-        // Count + bounded review selection + one batched @Relation read, never one query per decision.
-        assertEquals(reads.joinToString("\n"), 3, reads.size)
-        assertTrue(reads.any { it.contains("LIMIT", true) })
+        // Room may replay the parent cursor after collecting relation keys. That is still bounded;
+        // require one COUNT, 1–2 limited parent executions and exactly one batched child read (not N+1).
+        val parents = reads.filter { it.contains("SELECT t.* FROM tekrarlar") }
+        assertTrue(reads.joinToString("\n"), parents.size in 1..2)
+        assertTrue(parents.all { it.contains("LIMIT", true) })
+        assertEquals(1, reads.count { it.contains("SELECT COUNT(*)") })
+        assertEquals(1, reads.count { it.contains("WHERE `tekrar_id` IN") && it.count { c -> c == '?' } == 100 })
+        assertEquals(reads.joinToString("\n"), parents.size + 2, reads.size)
         val rows = db.tekrarOlcumDao().sonKararlar(100)
         assertEquals("r120", rows.first().tekrar.id)
         assertEquals("r21", rows.last().tekrar.id)

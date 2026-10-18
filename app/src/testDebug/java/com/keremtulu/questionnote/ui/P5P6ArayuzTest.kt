@@ -95,6 +95,19 @@ class P5P6ArayuzTest {
         compose.onAllNodesWithText("dk", substring = true).assertCountEquals(0)
         compose.onAllNodesWithText(context.getString(R.string.analysis_no_total_time)).assertCountEquals(7)
     }
+    @Test fun insufficientComparisonShowsActualDaysRatherThanJustTheMinimumThreshold() {
+        val a = p6AnalizOrnegi()
+        assertEquals(40, a.donem.eslesen.soru)
+        assertEquals(2, a.donem.eslesen.onceGun); assertEquals(2, a.donem.eslesen.sonraGun)
+        assertFalse(a.donem.eslesen.yeterli)
+        compose.setContent {
+            YanlisDefteriTema {
+                Column(Modifier.verticalScroll(rememberScrollState())) { GelisimAnaliziKarti(a) { _, _ -> } }
+            }
+        }
+        compose.onNodeWithText(context.getString(R.string.analysis_matched_days, 2, 2)).performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText(context.getString(R.string.analysis_insufficient_comparison, 40)).assertExists()
+    }
     @Test fun activeModeIsDisabledAndOffChoiceIsPersistedWithoutAnActivationBypass() {
         val depo = TekrarPolitikasiDeposu(context)
         compose.setContent {

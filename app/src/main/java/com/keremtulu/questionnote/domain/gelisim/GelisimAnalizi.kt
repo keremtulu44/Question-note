@@ -24,7 +24,7 @@ data class AnalizSayaci(val soru: Int, val tekrar: Int, val bagimsiz: Int, val g
     val kapsamYuzde: Int get() = if (tekrar == 0) 0 else (100L * guvenilirSure / tekrar).toInt()
 }
 data class EslesenSorular(val soru: Int, val onceBagimsiz: Int, val sonraBagimsiz: Int,
-    val yeterli: Boolean, val baglamDegisen: Int)
+    val yeterli: Boolean, val baglamDegisen: Int, val onceGun: Int, val sonraGun: Int)
 data class DonemKarsilastirmasi(val onceki: AnalizSayaci, val son: AnalizSayaci, val eslesen: EslesenSorular,
     val oncekiIlkGun: Int, val sonIlkGun: Int, val sonGun: Int)
 data class AnalizGrubu(val anahtar: GrupAnahtari, val dersAdi: String?, val etiketler: List<String>,
@@ -108,10 +108,11 @@ object GelisimAnaliziHesabi {
         fun esBaglam(x: TarihselBaglam?, y: TarihselBaglam?) = x != null && y != null && x.dersId == y.dersId &&
             x.konuId == y.konuId && x.kaynakAnahtari == y.kaynakAnahtari
         val eslesen = ortak.filter { esBaglam(a.getValue(it).baglam, b.getValue(it).baglam) }
-        val yeterli = eslesen.size >= 10 && eslesen.map { a.getValue(it).gun }.distinct().size >= 3 &&
-            eslesen.map { b.getValue(it).gun }.distinct().size >= 3
+        val onceGun = eslesen.map { a.getValue(it).gun }.distinct().size
+        val sonraGun = eslesen.map { b.getValue(it).gun }.distinct().size
+        val yeterli = eslesen.size >= 10 && onceGun >= 3 && sonraGun >= 3
         return DonemKarsilastirmasi(say(once), say(son), EslesenSorular(eslesen.size,
-            eslesen.count { a.getValue(it).bagimsiz }, eslesen.count { b.getValue(it).bagimsiz }, yeterli, ortak.size - eslesen.size),
+            eslesen.count { a.getValue(it).bagimsiz }, eslesen.count { b.getValue(it).bagimsiz }, yeterli, ortak.size - eslesen.size, onceGun, sonraGun),
             gun - 14, gun - 7, gun - 1)
     }
 

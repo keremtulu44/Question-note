@@ -728,4 +728,5 @@
     <string name="motor_diagnostics_note">Tanı en yeni 100 kararla sınırlıdır ve yenileme anını gösterir; öğrenme yararı veya fiziksel cihaz kabulü kanıtı değildir. Eski/aktarılmış etkin kayıtlar şu an v3’ün açık olduğu anlamına gelmez.</string>
     <string name="motor_refresh_diagnostics">Yerel tanıyı yenile</string>
     <string name="motor_diagnostics_error">Tanı okunamadı. Güvenli mod değişmedi; tekrar deneyebilirsin.</string>
+    <string name="analysis_matched_days">Eşleşen örneklemin son değerlendirmeleri: önce %1$d ayrı gün, sonra %2$d ayrı gün.</string>
 </resources>

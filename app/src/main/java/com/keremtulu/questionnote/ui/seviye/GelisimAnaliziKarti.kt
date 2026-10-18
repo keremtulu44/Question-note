@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -120,7 +121,7 @@ private fun GrupListesi(a: GelisimAnalizi, onCalis: (SoruCalismaFiltresi, Int) -
                     Text(stringResource(R.string.analysis_group_counts, g.sayac.soru, g.sayac.tekrar), style = MaterialTheme.typography.bodySmall)
                 }
             }
-            if (secili == g.anahtar) Surface(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = RoundedCornerShape(18.dp)) {
+            if (secili == g.anahtar) Surface(color = MaterialTheme.colorScheme.surfaceVariant, shape = RoundedCornerShape(18.dp)) {
                 Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     if (g.etiketler.size > 1) Text(stringResource(R.string.analysis_captured_names,
                         g.etiketler.take(5).joinToString(" · "), g.etiketler.size), style = MaterialTheme.typography.bodySmall)
@@ -170,6 +171,7 @@ private fun DonemMetni(d: DonemKarsilastirmasi) {
     Text(stringResource(R.string.analysis_period_row, tarih(d.sonIlkGun), tarih(d.sonGun), d.son.soru, d.son.tekrar,
         d.son.bagimsiz), style = MaterialTheme.typography.bodySmall)
     val e = d.eslesen
+    Text(stringResource(R.string.analysis_matched_days, e.onceGun, e.sonraGun), style = MaterialTheme.typography.bodySmall)
     Text(stringResource(if (e.yeterli) R.string.analysis_matched else R.string.analysis_insufficient_comparison,
         e.soru, e.onceBagimsiz, e.sonraBagimsiz), fontWeight = FontWeight.SemiBold)
     if (e.baglamDegisen > 0) Text(stringResource(R.string.analysis_context_excluded, e.baglamDegisen), style = MaterialTheme.typography.bodySmall)
@@ -178,7 +180,8 @@ private fun DonemMetni(d: DonemKarsilastirmasi) {
 
 @Composable
 private fun AnalizPanel(baslik: String, content: @Composable ColumnScope.() -> Unit) {
-    Surface(shape = RoundedCornerShape(24.dp), color = MaterialTheme.colorScheme.surfaceContainerLow, modifier = Modifier.fillMaxWidth()) {
+    Surface(shape = RoundedCornerShape(24.dp), color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.65f)), modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(baslik, modifier = Modifier.semantics { heading() }, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
             content()
