@@ -1,6 +1,6 @@
 # KODLAMA PLANI (Aşama 1 ve sonrası)
 
-> **Yeni geliştirme planı — 2026-10-18:** Premium arayüz, güvenilir süre ölçümü, kişisel profiller ve açıklanabilir tekrar kararları için [Gelişim ve Öğrenme Planı](GELISIM_VE_OGRENME_PLANI.md) esas alınır. Bu yeni işler henüz uygulanmadı. Aşağıdaki belge kurulum ve önceki aşamaların teknik/tarihsel kaydıdır.
+> **Yeni geliştirme planı — 2026-10-18:** Premium arayüz, güvenilir süre ölçümü, kişisel profiller ve açıklanabilir tekrar kararları için [Gelişim ve Öğrenme Planı](GELISIM_VE_OGRENME_PLANI.md) esas alınır. P0/P1 uygulaması ve doğrulama durumu yeni planda izlenir; P2–P6 henüz uygulanmadı. Aşağıdaki belge kurulum ve önceki aşamaların teknik/tarihsel kaydıdır.
 
 > Bu belge **nasıl kodlayacağımızı** ve ölçülen sonuçları kaydeder: görev sırası, dosya yapısı,
 > sürüm sabitleme, imzalama kurulumu, derleme bütçesi, test stratejisi. v1.0.8 filtreli çalışma akışı CI run `39044777998` ile doğrulandı ve yayımlandı; `+ Konu` koruması ile v1.0.5–v1.0.8 özelliklerinin fiziksel cihaz kabulü bekleniyor. v1.0.9 düzeltmeleri CI run `39048703584` ile doğrulandı; cihaz kabulü bekliyor.

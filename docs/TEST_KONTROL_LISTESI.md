@@ -1,7 +1,7 @@
 # Test Kontrol Listesi
 
-> **v1.2.0:** CI `39067624050` **130 testle başarılı**; Release ve imza doğrulandı. Üç yeni
-> Compose UI testi dahil. Aşağıdaki fiziksel cihaz satırları otomatik olarak işaretlenmez.
+> **v1.3.0 / P0–P1:** CI `39131225744` **157 testle başarılı**; Release, imza ve asset SHA-256 doğrulandı.
+> Beş native Compose çizimi sentetik önizlemedir; fiziksel test değildir. Aşağıdaki fiziksel cihaz satırları otomatik olarak işaretlenmez.
 
 
 > Her testte **kim** yaptığı açıkça yazılır. Yapay zekâ, çalıştırmadığı bir testi "geçti" olarak
@@ -15,13 +15,35 @@
 > ZIP yol güvenliği) ve **Robolectric** (şema/migration testleri). Emülatör yalnızca gerçekten
 > gerekirse kullanılır; asıl kabul testleri gerçek cihazda yapılır.
 
-Son güncelleme: 2026-10-17. **v1.2.0 (versionCode 14)** yayımlandı. CI `39067624050`: 130 test,
+Son güncelleme: 2026-10-18. **v1.3.0 (versionCode 15)** yayımlandı. CI `39131225744`: 157 test,
 0 başarısız/hata/atlanan; Release/apksigner/sertifika ve asset SHA-256 eşleşmesi doğrulandı.
 Fiziksel cihaz kabulü henüz tamamlanmadı. Aşağıdaki tarihsel kullanıcı işaretleri korunur;
 yeni testlerin yeşil olması geçmişteki cihaz bekleyenlerini tamamlanmış yapmaz.
 
 
 ---
+
+## P0/P1 — yeni regresyonlar ve ayrı cihaz kabulü
+
+| Test | Sorumlu | Durum |
+|---|---|---|
+| Eski 130 test + 27 yeni; 157/0/0/0; Release, imza ve GitHub digest eşleşmesi | YZ / CI `39131225744` | [x] |
+| Canlı karne rozet toplamı; aynı sahiplik snapshot'ından XP/galeri | YZ / Room + Compose | [x] |
+| Akışın geçici/kalıcı hatası, tekrar sınırı, yeniden abonelik, cancellation/downstream ayrımı | YZ / Flow testleri | [x] |
+| Hedef değişince tekrar eklemeden XP ve rozet yenileme | YZ / Room + Flow | [x] |
+| Precommit hata/rollback devamı korur; commit aynı ID'lerle bile temizler | YZ / restore testleri | [x] |
+| Prefs temizleme hatası işaretleri korur; startup recovery güvenli temizliği tekrarlar | YZ / restore testleri | [x] |
+| Boş arşiv/tekrarsız arşiv, gerçek eylem, loading/hata/yenileme, gizli maskeleme | YZ / Compose | [x] |
+| Normal ilk girişte gerçek XP; değişiklik sonlu, hareket kapalı güncelleme animasyon beklemez | YZ / Compose sanal zaman | [x] |
+| Açık/koyu, %200 yazı, 5 native örnek veri çizimi ve 6 Studio Preview tanımı | YZ / Robolectric + kaynak | [x] |
+| v1.3.0'ı kaldırmadan güncelle; mevcut soru/tekrar/rozetler ve yarım oturum korunur | KULLANICI / S24 FE | [ ] |
+| Gerçek 3-düğmeli/jest nav, yatay ekran, %200 yazı, TalkBack, büyük arşivde kaydırma | KULLANICI / S24 FE | [ ] |
+| Sistem animasyon ayarını açık ekranda değiştir; XP/karne/kutlama/otomatik kaydırmayı kontrol et | KULLANICI / S24 FE | [ ] |
+| Restore sırasında kesinti, devam noktası, arka plan/süreç ölümü; gerçek performans | KULLANICI / S24 FE | [ ] |
+
+P2 süre ölçümü/kalıcılığı, Room/ZIP v4, kişisel profil, v3 motor ve kaynak/konu analizi bu
+kabulün parçası değildir. Önizlemeler: [ui/p1](ui/p1/README.md). Aşağıdaki tarihsel cihaz
+kayıtlarının işaretleri korunur; bu sürümün otomatik testleri onları tamamlamış saymaz.
 
 ## Aşama 1 — Derleme ve güncelleme zinciri
 

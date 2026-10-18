@@ -2,14 +2,17 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
-## [1.3.0] — 2026-10-18 · doğrulama bekleniyor
+## [1.3.0] — 2026-10-18
 
 - **P0/P1:** İlerleme ekranında yeni rütbe odağı, gerçek XP, kompakt sayılar, açılır XP/rozet/rütbe koleksiyonları; boş, yükleniyor, hata ve yeniden deneme durumları.
 - Açık/koyu tema ve büyük yazıda uyarlanan yerleşim; ortak, sistem ayarını canlı izleyen azaltılmış hareket politikası. Ekranı açmak sahte XP artışı üretmez.
 - Karne rozet sayısı güncel sahiplikten izlenir. Ödül gözleminde üç sınırlı yeniden deneme; tükenirse kullanıcı yenilemesi/sekme dönüşünde yeniden başlama. Hedef değişiklikleri XP ve rozetlere yansır.
 - Geri yüklemede yarım oturum önceden silinmez. Başarılı commit veya startup recovery’de devam noktası, kurtarma işaretleri kaldırılmadan geçersizleştirilir; temizleme hatası güvenli recovery sınırında kalır.
-- Debug-only Preview’lar ve sentetik Robolectric arayüz/görsel regresyonları. Fiziksel cihaz kabulü yapılmadı; CI sonucu henüz bekleniyor.
+- Debug-only Preview’lar ve sentetik Robolectric arayüz/görsel regresyonları. Fiziksel cihaz kabulü yapılmadı; örnek veriler release veri yoluna girmez.
 - **Room/ZIP v3, tekrar v2, XP katsayıları ve rozet/rütbe kuralları aynı.** Yeni süre verisi, öğrenme profili veya kaynak analizi eklenmedi.
+
+- **CI `39131225744`: 157 test geçti** (eski 130 + 27 yeni; 0 başarısız/hata/atlanan). Release, apksigner ve beklenen sertifika doğrulandı. İlk iki kontroldeki yeni manuel-saatli UI testi, redraw senkronizasyonu ve sanal zaman sınırlarıyla düzeltildi.
+- [İmzalı v1.3.0 APK](https://github.com/keremtulu44/Question-note/releases/tag/v1.3.0), **10.574.047 bayt**; SHA-256 `a232e7759e8f98398449295f32e524565d9d917bb5e3644881908a8f85a96b8f`. GitHub asset digest'i CI ile eşleşti.
 
 ## [1.2.0] — 2026-10-17
 

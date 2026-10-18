@@ -6,19 +6,25 @@ Durum işaretleri: `[ ]` yapılmadı · `[~]` kod mevcut; bu sürümün CI/Relea
 
 ---
 
-## Sonraki geliştirme — planlandı (2026-10-18)
+## Gelişim planı — P0/P1 uygulandı (2026-10-18)
 
 Ayrıntılı görev/dosya/bağımlılık/test planı: [Gelişim ve Öğrenme Planı](docs/GELISIM_VE_OGRENME_PLANI.md).
-Bu bölüm önerilen sıradır; uygulanan v1.2.0 davranışı aşağıda ayrı tutulur.
+P0/P1 kod ve otomatik testleri tamamlandı; fiziksel kabul açık. P2–P6 önerilen sıradır.
 
-- [ ] P0–P1: mevcut davranışın regresyonları, görsel sistem ve bağımsız İlerleme prototipi.
+- [~] **P0–P1 uygulandı:** canlı rozet/snapshot, dayanıklı gözlem ve commit sonrası devam temizliği; gerçek verili yeni İlerleme, ortak hareket politikası ve debug Preview. CI `39131225744`: **157/0**; cihaz kabulü bekliyor.
 - [ ] P2: güvenilir süre ölçümü; atomik kayıt ve devam noktası; Room/ZIP v4 uyumluluğu.
 - [ ] P3: veri yeterliliği, dayanıklı kişisel süre profilleri, kayıt anı kaynak/konu bağlamı.
 - [ ] P4: ayrı karar katmanı; önce v2 tarihlerini değiştirmeyen gölge çalışma.
 - [ ] P5: gerçek veriye bağlı gelişim özeti, kaynak/konu profilleri, eylem bağlantıları ve kontrollü animasyonlar.
 - [ ] P6: fiziksel cihaz/performans/erişilebilirlik testleri; koşullu etkinleştirme ve geri dönüş.
 
-## Güncel — v1.2.0
+## Güncel — v1.3.0
+
+- [x] **v1.3.0/code 15 yayımlandı:** CI `39131225744`, 157 test, Release/imza/sertifika başarılı.
+- [x] GitHub APK digest'i CI ile aynı; sürüm notları ve küçük native Compose önizlemeleri kaydedildi.
+- [ ] P0/P1 fiziksel cihaz / TalkBack / gerçek performans kabulü. Örnek verili görüntüler bunu tamamlamaz.
+
+## Korunan önceki kapsam — v1.2.0
 
 Aşağıdaki `[~]` özelliklerin kodu/otomatik testleri yayımlandı; fiziksel cihaz kabulü bekliyor.
 

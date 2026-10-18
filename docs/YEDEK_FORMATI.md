@@ -121,4 +121,10 @@ CSV'nin incelenebilirliği ve olgun bir standart kullanımı ayrıca kararlaşt�
 - Sınav profili dersleri normal `lessons` kayıtlarıdır ve yedeğe girer; hangi profilin seçili olduğu
   cihaz-yerel tercihtir. Aynı şekilde rozetler, kutlama kuyruğu, günlük hedef ve oturum devam noktası
   ZIP'e dahil değildir. Yeni cihaz Tümü / özel görünümüyle başlayabilir.
-- Tam geri yükleme başlatılınca eski odak devam noktası temizlenir; eski oturum ile yeni veri karışmaz.
+- **v1.3.0/P0:** Eski odak devam noktası girişim başlamadan silinmez. Ön doğrulama veya
+  commit öncesi rollback başarısız girişimde devamı korur. Doğrulanmış DB commit'inden sonra,
+  kurtarma işareti/journal silinmeden önce devam noktası kalıcı olarak temizlenir. Aynı soru
+  ID'lerinin yedekte bulunması eski oturumu geçerli yapmaz.
+- Devam noktası temizlenemezse commit işareti/journal korunur; normal ekranlar açılmaz.
+  Startup recovery aynı temizlemeyi yeniden dener. Başarısız restore sonrası UI belleğindeki
+  oturum, kalıcı devam noktasının kimliğiyle uzlaştırılır. ZIP şeması değişmez.

@@ -25,10 +25,13 @@ cevaplamak ve çözümü öğrenme sürecinden ayrı saklamaktır.
 
 ## Durum
 
-**v1.2.0 yayımlandı** (versionCode 14). [CI `39067624050`](https://github.com/keremtulu44/Question-note/actions/runs/39067624050): **130 test geçti**, Release derlemesi, imza ve sertifika doğrulaması başarılı.
+**v1.3.0 yayımlandı** (versionCode 15). [CI `39131225744`](https://github.com/keremtulu44/Question-note/actions/runs/39131225744): **157 test geçti**, Release derlemesi, imza ve sertifika doğrulaması başarılı.
 
-- **İlerleme:** 30 rozet (5 gizli), kazanma açıklamaları, ilerleme çubukları, 15 rütbe ve 6 yeni
-  saydam amblem. Yeni rozetler tam ekran kutlanır; kutlama kuyruğu kapanmada kaybolmaz.
+- **P0/P1:** Yeni petrol/lacivert-bakır İlerleme ekranı; rütbe odağı, gerçek XP, uyarlanan sayılar,
+  açılır koleksiyonlar, boş/yükleniyor/hata durumları ve sistem ayarına uyan sonlu hareket.
+  Karne sahiplik sayımı, ödül gözlemi ve restore/devam noktası sınırları güçlendirildi.
+- **İlerleme:** 30 rozet (5 gizli), kazanma açıklamaları, ilerleme çubukları, 15 rütbe ve
+  saydam amblemler. Yeni rozetler tam ekran kutlanır; kutlama kuyruğu kapanmada kaybolmaz.
 - **Gezinme:** alt menü Android sistem çubuğu/çentiğine göre yerleşir. Sağ üst Ayarlar kısayolları kaldırıldı.
 - **Sınav formatı:** Ayarlar → LGS / TYT / AYT / KPSS / Tümü. İlgili dersler hazırlanır; eski veriler
   silinmez. Ayarlar'da tüm dersleri kapsayan **konu yönetimi ve silme** bulunur.
@@ -42,7 +45,7 @@ cevaplamak ve çözümü öğrenme sürecinden ayrı saklamaktır.
 **Cihaz kabulü ayrıdır:** v1.0.3 ana akış adımlarını kullanıcı geçti bildirdi. v1.0.4 tekrar geçmişi,
 v1.0.5 katalog/ZIP akışı, v1.0.6 form yenilemesi, v1.0.7 ders bazında konu ekleme, v1.0.8 filtreli
 çalışma, v1.0.9 düzeltmeleri, v1.0.10 karne/rozet/hedef akışı ve v1.1.x alt menü/seviye/ayarlar/silme
-ile v1.2.0 odak/profil/rozet yenilemesi henüz cihazda kabul edilmedi. SAF/Drive ve fotoğraf okunabilirliği de bekliyor. v1.0.2 “3.
+ile v1.2.0 odak/profil/rozet ve v1.3.0 P0/P1 yenilemeleri henüz cihazda kabul edilmedi. SAF/Drive ve fotoğraf okunabilirliği de bekliyor. v1.0.2 “3.
 turu denemedim” ifadesinin checklist eşlemesi hâlâ teyitsiz; ayrıntı
 [TEST_KONTROL_LISTESI.md](docs/TEST_KONTROL_LISTESI.md) içinde.
 ---
@@ -63,7 +66,8 @@ turu denemedim” ifadesinin checklist eşlemesi hâlâ teyitsiz; ayrıntı
 | [docs/YEDEK_FORMATI.md](docs/YEDEK_FORMATI.md) | Yedek ZIP yapısı, manifest, geri yükleme kuralları |
 | [docs/TEST_KONTROL_LISTESI.md](docs/TEST_KONTROL_LISTESI.md) | Kabul kriterleri ve test sorumluları |
 | [docs/FIKIR_ALMA_METNI.md](docs/FIKIR_ALMA_METNI.md) | Dışarıdan görüş almak için tek başına okunabilen proje tanıtım metni |
-| [docs/GELISIM_VE_OGRENME_PLANI.md](docs/GELISIM_VE_OGRENME_PLANI.md) | Yeni geliştirme planı: premium arayüz, süre ölçümü, kişisel profiller, karar motoru ve kabul kapıları (henüz uygulanmadı) |
+| [docs/GELISIM_VE_OGRENME_PLANI.md](docs/GELISIM_VE_OGRENME_PLANI.md) | Yeni geliştirme planı: premium arayüz, süre ölçümü, kişisel profiller, karar motoru ve kabul kapıları (P0/P1 uygulandı; P2–P6 plan) |
+| [docs/ui/p1/README.md](docs/ui/p1/README.md) | Gerçek Compose bileşenlerinden örnek verili önizlemeler; cihaz testi değildir |
 | [docs/KODLAMA_PLANI.md](docs/KODLAMA_PLANI.md) | Kodlama sırası, hedef dosya yapısı, imzalama kurulumu, test stratejisi |
 | [docs/IMZALAMA.md](docs/IMZALAMA.md) | İmzalama anahtarı prosedürü ve sertifika parmak izi (değerler değil, parmak izi) |
 
@@ -72,11 +76,11 @@ turu denemedim” ifadesinin checklist eşlemesi hâlâ teyitsiz; ayrıntı
 ## Kullanım / APK erişimi
 
 İmzalı APK'lar GitHub [Releases](https://github.com/keremtulu44/Question-note/releases) bölümünde.
-[v1.2.0 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.2.0/yanlis-defteri-1.2.0.apk).
+[v1.3.0 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.3.0/yanlis-defteri-1.3.0.apk).
 
-APK: 10.524.895 bayt. SHA-256: `eb8ab5b3e678a6015c54c7597b8bc93508f82ab3291a6dd06a290c7f4fabcea1`. CI raporu ile GitHub asset digest eşleşiyor.
+APK: 10.574.047 bayt. SHA-256: `a232e7759e8f98398449295f32e524565d9d917bb5e3644881908a8f85a96b8f`. CI raporu ile GitHub asset digest eşleşiyor.
 Mevcut uygulamayı **kaldırmadan** üzerine kur; eski kayıtların korunduğunu doğrula. Alt menüdeki beş
-sekmeyi gez; **Seviye** sekmesinde rütbe amblemini, XP çubuğunu, rozet galerisini ve tahmini kontrol et.
+sekmeyi gez; **İlerleme** sekmesinde rütbe amblemini, XP çubuğunu, rozet galerisini ve tahmini kontrol et.
 **Ayarlar**'da günlük hedefi değiştir, yedek al. Konu ve kaynak/neden silmeyi dene (kullanımdaysa
 uyarı çıkmalı). Ardından filtreli bir oturum tamamlayıp karnenin hâlâ çalıştığını doğrula.
 İndirme/kurulum ayrıntıları [BUILDING.md](BUILDING.md) içinde.

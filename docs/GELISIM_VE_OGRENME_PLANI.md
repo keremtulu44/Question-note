@@ -1,8 +1,8 @@
 # Yanlış Defteri — Premium deneyim ve kişiselleşen öğrenme sistemi
 
 **Tarih:** 2026-10-18
-**Durum:** P0/P1 kodlandı; yeni CI doğrulaması bekleniyor. P2–P6 aşağıda öneri olarak kalır.
-**Başlangıç:** v1.2.0 / code 14, Room v3, ZIP v3, tekrar algoritması v2. Son kayıtlı CI kanıtı: `39067624050`, 130 başarılı test; fiziksel cihaz kabulü ayrı ve bekliyor.
+**Durum:** P0/P1 uygulandı ve v1.3.0 ile yayımlandı; CI `39131225744` 157/0. Fiziksel cihaz kabulü bekler. P2–P6 aşağıda öneri olarak kalır.
+**Başlangıç:** v1.2.0 / code 14, Room v3, ZIP v3, tekrar algoritması v2. Başlangıç CI kanıtı: `39067624050`, 130 başarılı test; fiziksel cihaz kabulü ayrı ve bekliyor.
 
 ## P0/P1 uygulama notu — 2026-10-18
 
@@ -12,7 +12,7 @@
 - **Hareket:** Canlı sistem ölçeği gözlemi, ortak politika, sonlu animasyonlar. Hareket kapalıyken değerler/eylemler kaybolmaz. Odak’taki otomatik değerlendirme kaydırması da bu politikaya uyar; sayaç/ölçüm mantığı değişmedi.
 - **Örnek veri:** Yalnız `src/debug` Preview/test fixture’larında; release veri yolunda yok. Native Robolectric görüntüleri sentetik önizlemedir, fiziksel cihaz kanıtı değildir.
 - **Değişmeyenler:** Room/ZIP v3, tekrar v2, XP katsayıları, 15 rütbe/30 rozet kuralları. Süre kalıcılığı, kişisel profiller, v3 motor, kaynak/konu analizleri **uygulanmadı**.
-- **Doğrulama:** Yeni regresyonlar eklendi; yerel statik kontrol derleme/test yerine geçmez. CI sonucu ve fiziksel kabul ayrı raporlanacak.
+- **Doğrulama:** CI `39131225744`: 157 test / 0 başarısız / 0 hata / 0 atlanan; Release/imza/sertifika ve yayımlanan APK digest eşleşmesi başarılı. Eski 130 + 27 yeni test. [Sentetik önizlemeler](ui/p1/README.md) ve sanal animasyon zamanı fiziksel cihaz/performans kabulü değildir.
 
 ## 1. Hedef ve ana karar
 
@@ -263,18 +263,18 @@ Mevcut petrol mavisi, sıcak açık zemin ve bakır vurguyu güçlendirmek öner
 | Grafik çizimi | 300–500 ms | Değeri okunur kılar, sonucu süslemez |
 | Rütbe/rozet kutlaması | ~900–1200 ms efekt | Efekt biter; kullanıcı kapatana kadar bilgi kalır |
 
-`HareketPolitikasi` bütün bileşenlerin ortak kaynağı olur. Sistem hareket azaltma/animasyon kapalı tercihinde anlık son durum; işlev kaybı yok. Sürekli sonsuz animasyon veya ağır blur yok.
+`HareketPolitikasi` P1’de İlerleme/karne/kutlama/Odak kaydırması için ortak kaynak olarak eklendi; sonraki bileşenler de aynı politikayı kullanır. Sistem hareket azaltma/animasyon kapalı tercihinde anlık son durum; işlev kaybı yok. Sürekli sonsuz animasyon veya ağır blur yok.
 
 Rütbe kutlaması için kalıcı görülme/kuyruk takibi gerekir. İlk kurulum, migration, geri yükleme veya hedef değişiminin XP yeniden hesabı toplu “yeni başarı” yağmuruna dönüştürülmez. Tek ilerlemede çok eşik geçilirse kısa bir özet/son rütbe gösterilir. Sahiplik mevcut rozet deposunda korunur; ortak sunum kuyruğu iki tam ekran kutlamayı üst üste açmaz. Rütbe atlamak ayrıca XP üretmez.
 
 ## 11. Kod paketleri ve bağımlılıklar
 
-Tüm paketler **planlandı, uygulanmadı**. “Bitti” için kodun yazılması değil ilgili kabul kapısının geçilmesi gerekir.
+**P0 ve P1 kod/otomatik test bakımından tamamlandı; fiziksel kabul açık. P2–P6 planlandı, uygulanmadı.** “Bitti” için kodun yazılması değil ilgili kabul kapısının geçilmesi gerekir.
 
 | Paket | Başlıca görevler / dosyalar | Bağımlılık | Kabul kapısı |
 |---|---|---|---|
-| P0 — Sağlam başlangıç | Mevcut test tabanı; örnek senaryolar; `KarneEkrani` rozet snapshot tutarlılığı, ödül gözlem hatası/yenileme ve restore sonrası state sınırlarının regresyonları | Yok | Eski davranış doğrulanır; mevcut 130 test korunur, gerçek cihaz bekleyenleri gizlenmez |
-| P1 — Görsel sistem/prototip | `ui/tema/{Renk,Tipografi}.kt`, yeni `HareketPolitikasi`, `SeviyeEkrani` durum modelleri ve tasarım Preview'ları | P0; P2 ile bağımsız çalışabilir | Yeni/yoğun/verisiz/hatalı durum; koyu tema, büyük yazı, hareket kapalı |
+| P0 — Sağlam başlangıç (uygulandı) | Mevcut test tabanı; örnek senaryolar; `KarneEkrani` rozet snapshot tutarlılığı, ödül gözlem hatası/yenileme ve restore sonrası state sınırlarının regresyonları | Yok | Eski davranış doğrulanır; mevcut 130 test korunur, gerçek cihaz bekleyenleri gizlenmez |
+| P1 — Görsel sistem/prototip (uygulandı) | `ui/tema/{Renk,Tipografi}.kt`, yeni `HareketPolitikasi`, `SeviyeEkrani` durum modelleri ve tasarım Preview'ları | P0; P2 ile bağımsız çalışabilir | Yeni/yoğun/verisiz/hatalı durum; koyu tema, büyük yazı, hareket kapalı |
 | P2 — Ölçüm ve veri güvenliği | Yeni `domain/calisma/AktifSureOlcer.kt`, ölçüm modelleri; Odak ve devam deposu; `SoruRepository`/`RoomSoruRepository`; yeni entity/DAO; Database/Provider/Migrations; export/import | P0 | Saat/lifecycle/kurtarma, atomik kayıt, migration ve ZIP roundtrip yeşil; planlar hâlâ v2 |
 | P3 — Kişisel profil | Yeni `domain/analiz/KisiselSureProfili.kt`, `ProfilPolitikasi.kt`, `data/analiz/GelisimHizmeti.kt` ve toplu sorgular | P2 | Az veri, uç değer, aynı soru baskısı, tarihsel bağlam ve soğuk başlangıç testleri |
 | P4 — Karar v3 / gölge | Yeni `domain/repeat/UyarlanabilirTekrarKurali.kt`, ortak karar servisi ve sürüm yönlendirme; Odak önizlemesi | P3 | Önizleme=yazma; çift ceza yok; eski sonuçlar aynı; gölgede tarih değişmiyor |

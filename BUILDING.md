@@ -3,14 +3,14 @@
 > Bu belge **değerleri değil**, sırların nerede ve nasıl tutulduğunu anlatır.
 > Hiçbir anahtar, parola veya token bu depoya yazılmaz.
 
-- Son güncelleme: 2026-10-17
-- Son yayımlanan sürüm: **v1.2.0 (versionCode 14)**. CI run `39067624050`: **130 test** geçti;
+- Son güncelleme: 2026-10-18
+- Son yayımlanan sürüm: **v1.3.0 (versionCode 15)**. CI run `39131225744`: **157 test** geçti;
   Release derlemesi, apksigner ve beklenen sertifika eşleşmesi başarılı.
-- [Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.2.0) ·
-  [APK indir](https://github.com/keremtulu44/Question-note/releases/download/v1.2.0/yanlis-defteri-1.2.0.apk).
-  APK 10.524.895 bayt; SHA-256 `eb8ab5b3e678a6015c54c7597b8bc93508f82ab3291a6dd06a290c7f4fabcea1`.
-  CI raporu ile GitHub asset digest eşleşir; derlenen commit `baf7bea4269c8970c0102ea46442cc12563f5d0f`.
-- 30 rozet/15 rütbe, sınav profilleri, alt menü inset düzeltmesi ve Odak Stüdyosu yayımlandı.
+- [Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.3.0) ·
+  [APK indir](https://github.com/keremtulu44/Question-note/releases/download/v1.3.0/yanlis-defteri-1.3.0.apk).
+  APK 10.574.047 bayt; SHA-256 `a232e7759e8f98398449295f32e524565d9d917bb5e3644881908a8f85a96b8f`.
+  CI raporu ile GitHub asset digest eşleşir; derlenen commit `1df9c7c4754490b7d8686235e64c9e7c65aebd2d`.
+- P0/P1 güvenilirlik ve İlerleme tasarımı yayımlandı; 30 rozet/15 rütbe, profiller ve Odak korundu.
   **Fiziksel cihaz kabulü ayrıdır**; otomatik testlerin yeşil olması gerçek cihaz testi yapıldığı
   anlamına gelmez. Ayrıntı `docs/TEST_KONTROL_LISTESI.md`.
 
@@ -36,7 +36,7 @@ Kullanıcının telefonunda Android SDK, Gradle veya Termux kurması **gerekmez*
 
 - Tek Gradle modülü, Kotlin + Jetpack Compose.
 - Sürümler `gradle/libs.versions.toml` içinde sabitlenir; Gradle wrapper depoda tutulur.
-- minSdk 26, compileSdk/targetSdk 37; yayımlanmış v1.2.0 `versionCode=14` (önceki v1.1.1: `versionCode=13`).
+- minSdk 26, compileSdk/targetSdk 37; yayımlanmış v1.3.0 `versionCode=15` (önceki v1.2.0: `versionCode=14`).
 - Yapay zekâ ortamında Java/Android SDK ve Maven erişimi yoktur → derleme **yalnızca** Actions'ta olur.
 
 ## 3. İmzalama düzeni (kritik)
@@ -107,7 +107,7 @@ günlük arşivin kurulu olduğu telefonun üzerine kurulmaz.
 
 ## 5. APK'ya telefondan erişim
 
-**Güncel:** [v1.2.0 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.2.0/yanlis-defteri-1.2.0.apk).
+**Güncel:** [v1.3.0 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.3.0/yanlis-defteri-1.3.0.apk).
 Mevcut uygulamayı kaldırmadan üzerine kur; güncelleme öncesi Ayarlar'dan ZIP yedeği almak önerilir.
 
 İlk sürümlerin tarihsel Release kayıtları:

@@ -1,4 +1,4 @@
-# İlerleme, rütbe ve rozetler — v1.2.0
+# İlerleme, rütbe ve rozetler — v1.3.0
 
 Kod: `domain/seviye`, `domain/karne/Rozet.kt`, `data/ilerleme/RozetHizmeti.kt`,
 `data/seviye/SeviyeHizmeti.kt`. Bu belge uygulanan kuralları anlatır; cihaz performansı ölçülmüş değildir.
@@ -10,6 +10,27 @@ kısayolları kaldırıldı; Ayarlar yalnız alt sekmededir. Alt menü, Android 
 çentiği inset'lerini kendisi uygular. Dış Scaffold bu boşluğu içeriğe aktarır ve tüketir; iç ekranlar
 aynı alt boşluğu ikinci kez eklemez. Üç düğmeli gezinme, jest modu, yatay ekran ve büyük yazı cihaz
 kontrol listesinde ayrıca doğrulanmalıdır.
+
+## P0/P1: gerçek verili yeni sunum
+
+- Rütbe → seviye → toplam/seviye içi XP → sonraki rütbe hiyerarşisi. Petrol/lacivert kart,
+  bakır vurgular, mevcut saydam amblemler; ağır blur veya sonsuz parıltı yok.
+- Normal ölçekte 2×2, büyük yazıda tek sütun istatistikler. Rozet/rütbe koleksiyonu ve XP
+  dökümü isteğe bağlı açılır; ilk ekran bütün galeriyi çizmez.
+- **Emek ≠ öğrenme:** XP çalışma kaydıdır. Ders pekişmesi mevcut tekrar planından türetilen
+  göstergedir, sınav başarısı değildir. 7 günlük grafikte soru adedi vardır; gecikmiş kayıtlar
+  dahil değildir. Süre, kaynak/konu başarısı ve kişisel profil sayısı üretilmez.
+- `SeviyeDurumuUi`: yükleniyor, hata/yeniden dene, tekrar verisi yetersiz, hazır. Boş arşivden
+  soru eklemeye; sorusu olup tekrarı olmayan kullanıcı Bugün'e yönlendirilir.
+- XP ilk gösterimde gerçek değerden başlar. Yalnız açık ekrandaki gerçek değişiklik animasyon
+  alır. Sistem animasyon ayarı canlı izlenir; kapalıyken sayılar/çubuklar animasyon karelerini
+  beklemeden hedef değeri gösterir. Karne, kutlama ve Odak otomatik kaydırması aynı politikayı kullanır.
+- Karne rozet toplamı sahiplik akışından canlı okunur. Gözlem geçici hatada 1/2/3 saniye
+  aralıkla en fazla üç kez yeniden kurulur; kalıcı hatada yenileme eylemi ve Bugün/İlerleme'ye
+  dönüş yeni gözlem başlatır. İptal, veri hatası olarak yutulmaz.
+- İlerleme özeti tek Room transaction'ında okunur; sahiplik, gün ve hedef snapshot'ı galeri/XP
+  için ortaktır. Günlük hedef değişikliği başka tekrar gerektirmeden özeti/rozetleri yeniler.
+- [Debug-only tasarım önizlemeleri](ui/p1/README.md) gerçek cihaz kabulü değildir.
 
 ## XP: eklemek de çalışmak da değerli
 

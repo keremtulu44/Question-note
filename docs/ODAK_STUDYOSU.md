@@ -91,7 +91,12 @@ işaretlerini cihazda tutar; fotoğraf/not kopyalamaz. Kalıcı tekrarın tek ka
 - Bitmiş oturum, kullanıcı karneden ayrılıncaya kadar kurtarılabilir. Bu, kalıcı geçmiş karne
   arşivi değildir; yalnız son oturum devam noktasıdır.
 - Bozuk devam noktası uygulamayı çökertmez; soru/tekrar arşivini etkilemeden göz ardı edilir.
-- ZIP geri yüklemede eski oturum devam noktası temizlenir. Rozet/hedef/format tercihleri cihaz-yereldir.
+- ZIP geri yüklemede (v1.3.0/P0) devam noktası yalnız doğrulanmış commit sonrasında,
+  recovery işaretleri kaldırılmadan temizlenir. Commit öncesi başarısız girişim/rollback eski
+  devam noktasını korur; temizlik başarısızsa startup recovery sınırı kapanmaz.
+  Rozet/hedef/format tercihleri cihaz-yereldir.
+- Değerlendirme alanına otomatik kaydırma ortak hareket politikasına uyar. Bu değişiklik
+  sayaç doğruluğu veya süre kalıcılığı eklemez; bunlar Gelişim Planı'nın P2 paketindedir.
 
 ## Doğrulama ve sınırlar
 

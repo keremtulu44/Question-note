@@ -1,90 +1,91 @@
 # HANDOFF — Yanlış Defteri
 
-Son güncelleme: **2026-10-17**. Önce bu belge, `PROJECT_BRIEF.md`, `docs/DERLEME_RAPORU.md` okunur.
+Son güncelleme: **2026-10-18**. Önce bu belge, `PROJECT_BRIEF.md`, `docs/DERLEME_RAPORU.md` okunur.
 
 ## Güncel durum
 
-- **v1.2.0 (versionCode 14) yayımlandı.** CI run
-  [`39067624050`](https://github.com/keremtulu44/Question-note/actions/runs/39067624050):
-  **130 test, 0 başarısız/hata/atlanan**, Release, apksigner ve beklenen sertifika eşleşmesi başarılı.
-- Release commit: `baf7bea4269c8970c0102ea46442cc12563f5d0f`; CI rapor botu: `014ffb2`.
-- [Release v1.2.0](https://github.com/keremtulu44/Question-note/releases/tag/v1.2.0) ·
-  [APK indir](https://github.com/keremtulu44/Question-note/releases/download/v1.2.0/yanlis-defteri-1.2.0.apk).
-  APK **10.524.895 bayt**, SHA-256 `eb8ab5b3e678a6015c54c7597b8bc93508f82ab3291a6dd06a290c7f4fabcea1`.
-  GitHub asset `651554160` digest'i CI ile ayrıca karşılaştırıldı ve aynı.
-- **Dal:** `arena/59c6570d-question-note`. Kullanıcı açıkça merge/PR istemiyor; main'e dokunulmaz.
-  Her adım için onay istenmez. Bash çağrılarına kısa timeout konur; uzun `gh run watch` yerine
-  aralıklı `gh run view --json status,conclusion` kullanılır.
-- Yerelde Java/Android SDK yok; gerçek derleme/test CI'da. Yerel kaynak/XML kontrolleri derlemenin
-  yerine geçmez. CI botu derleme raporunu aynı dala commit eder; push öncesi fetch/rebase gerekir.
+- **P0 ve P1 uygulandı; v1.3.0 (versionCode 15) yayımlandı.**
+- [CI `39131225744`](https://github.com/keremtulu44/Question-note/actions/runs/39131225744):
+  **157 test, 0 başarısız/hata/atlanan**. Release derlemesi, apksigner ve beklenen sertifika eşleşmesi başarılı.
+- Derlenen commit: `1df9c7c4754490b7d8686235e64c9e7c65aebd2d`; CI rapor botu: `b12bec7`.
+- [Release v1.3.0](https://github.com/keremtulu44/Question-note/releases/tag/v1.3.0) ·
+  [APK indir](https://github.com/keremtulu44/Question-note/releases/download/v1.3.0/yanlis-defteri-1.3.0.apk).
+  APK **10.574.047 bayt**; SHA-256 `a232e7759e8f98398449295f32e524565d9d917bb5e3644881908a8f85a96b8f`.
+  GitHub asset `653550121` digest'i CI ile ayrıca karşılaştırıldı ve aynı.
+- **Dal:** `arena/59c6570d-question-note`. Merge/PR yapılmaz; main'e dokunulmaz. Her adım için
+  onay istenmez. Bash çağrılarına timeout konur; uzun `gh run watch` yerine aralıklı,
+  sınırlı `gh run view --json status,conclusion` çağrıları kullanılır.
+- Yerelde Java/Android SDK yok. Gerçek derleme/test CI'da; statik kontrol onun yerine geçmez.
+  CI botu aynı dala rapor/önizleme commit eder; push öncesi fetch/rebase gerekir.
 
-## v1.2.0 teslim kapsamı
+## P0: güvenilirlik
 
-1. **30 rozet / 5 gizli**; koşullar, birikimli ilerleme, filtreler ve detay. Eski 11 rozet anahtarı
-   korunur. Gizli rozet kilitliyken ad, koşul ve özel çizim hem kart hem detayda gizlidir.
-2. **15 rütbe**; 6 yeni üretilmiş saydam WebP amblem (5 yoğunluk, 96 dp), rütbe eşiği galerisi.
-   Ürün seviyesi 200 sınırı kaldırıldı; sayısal taşma koruması var.
-3. **Tam ekran kutlama**; kalıcı sahiplik + bekleyen kuyruğu, idempotent kazanım, sonlu animasyon,
-   sistem hareket ayarına uyum. Form/odak ekranını kesmez; güvenli ekranda gösterilir.
-4. **Alt menü inset düzeltmesi** ve üst sağ Ayarlar kısayollarının kaldırılması. Android nav/cutout
-   boşluğu menü tarafından uygulanır, dış Scaffold iç ekranlar için tüketir.
-5. **LGS / TYT / AYT / KPSS / Tümü**: eksik dersleri ekleyen, mevcut ID/veriyi koruyan profil.
-   Bugün/Dersler/Filtreli filtrelenir; tüm konu yönetimi profil dışında kalan derslere de ulaşır.
-6. **Ayarlar → Konu yönetimi ve silme**. Kullanımdaki konu silinmez; arşivleme alternatifi vardır.
-7. **Odak Stüdyosu**: tek/sıralı sorular, akıllı/en eski sıralama, 5/10/20 hazır sayılar, mola,
-   çözüm açmadan değerlendirme, önizleme, ayrı Kaydet, sona bırak ve otomatik karne.
-8. **Adaptif tekrar v2**: kolaylık/gecikme/unutma mevcut geçmişten türetilir. Önizleme ve yazma
-   aynı fonksiyondur. Eski v1 kayıtları değişmez; yeniler `algoritma_surumu=2`.
-9. **Oturum devam noktası**: ID/konum/sonuç/çözüm işaretleri cihazda; Room commit sonrası kesinti
-   uzlaştırılır. Tekrar veya XP ikinci kez yazılmaz. Tam karne arşivi değildir.
-10. **Bağımsız sayım düzeltmesi**: yalnız RAHAT + çözüm açılmamış; ZORLANDIM hâlâ +5 emek kazanır.
+1. Karne rozet toplamı, eski bir defalık snapshot yerine `RozetDeposu.sahipIzle` üzerinden canlıdır.
+2. `dayanikliIzle`: soğuk kaynak fabrikası, 1/2/3 saniye beklemeli en fazla üç yeniden deneme;
+   tükenirse snackbar yenileme eylemi veya Bugün/İlerleme'ye yeniden giriş yeni gözlem kurar.
+   CancellationException yayılır; downstream hataları depo hatası diye yeniden denenmez.
+3. Geri yükleme başlamadan devam noktası **silinmez**. Doğrulanmış DB commit'i sonrasında,
+   journal/Room işareti kaldırılmadan kalıcı olarak temizlenir. Aynı soru ID'lerinin tekrar
+   kullanılması eski oturumu geçerli yapmaz. Temizlik hatasında kurtarma işaretleri korunur.
+4. Startup recovery de aynı temizlemeyi uygular. Başarısız precommit/rollback eski oturumu korur;
+   UI belleğindeki devam noktası işlem sonunda kalıcı oturum kimliğiyle uzlaştırılır.
+5. İlerleme özeti tek Room transaction'ında; galeri ve XP için aynı sahiplik/hedef/gün snapshot'ı.
+   Günlük hedef değişikliği başka tekrar gerekmeden XP/rozet gözlemlerini tetikler.
 
-## Veri ve uyumluluk
+## P1: görsel sistem
 
-- **Room v3 / ZIP v3**; v2 ZIP içe alma ve v1→v2→v3 migration zinciri korunur.
-- Önceki v4 kolon önerisi yerine durum geçmişten türetildi; v4 migration yapılmadı/gerekmiyor.
-- XP tablosu yok. Rozet/hedef/profil/son oturum prefs'tedir, ZIP'e dahil değildir.
-- `AkilliTekrarKurali` yeni kaydı planlar; `TekrarKurali` v1 referansı ve testleri olarak kalır.
-- Sınav profili hiçbir soruyu silmez/arşivlemez. Kullanıcının arşivli dersleri otomatik açılmaz.
-- Geri yükleme eski devam noktasını temizler; seçili profilin eksik dersleri yeniden hazırlanır.
+- Petrol/lacivert-bakır rütbe odağı; rütbe → seviye → XP → sonraki rütbe. Mevcut 15 amblem ve
+  30 rozet çizimi korunur. Normal ölçekte 2×2, büyük yazıda tek sütun sayılar/rozetler.
+- Açılır XP dökümü, rozet ve rütbe koleksiyonu. Mevcut ders pekişmesi ve 7 günlük planlı soru
+  adedi gerçek kayıtlardan gelir; gecikmiş soruların grafiğe dahil olmadığı açıklanır.
+- `SeviyeDurumuUi` / stateless `SeviyeSayfasi`: yükleniyor, hata/yenileme, tekrar verisi yetersiz,
+  hazır. Boş arşivden soru ekleme; diğer durumda Bugün'e dönüş gerçek route'ları kullanır.
+- Ekran açılışı sahte XP kazancı değildir. Açık ekrandaki gerçek değişiklik 500 ms'lik sonlu
+  animasyon kullanır. Hareket kapalıyken animasyon State'i yerine doğrudan gerçek değer çizilir.
+- Ortak `HareketPolitikasi`, sistem animator ölçeğini ContentObserver ile canlı izler; Seviye,
+  Karne, kutlama ve Odak otomatik kaydırmasında kullanılır. Yeni hareket tercihi dosyası yoktur.
+- Yalnız `src/debug` içinde altı Studio Preview ve örnek veri vardır. Beş native Robolectric
+  çizimi [önizleme belgesinde](docs/ui/p1/README.md). Bunlar fiziksel cihaz ekran görüntüsü
+  veya piksel-golden karşılaştırması değildir; gerçek Compose bileşenlerinin sentetik çıktısıdır.
+
+## Korunan temel davranış
+
+- Offline, tek kullanıcı; hesap/sunucu yok. Alt menü Bugün/Dersler/Filtreli/İlerleme/Ayarlar;
+  yan menü ve sağ üst Ayarlar kısayolları yoktur.
+- LGS/TYT/AYT/KPSS/Tümü ve bütün dersleri kapsayan konu yönetimi/silme Ayarlar'dadır.
+  Kullanılan katalog satırları silinmez. Profil eski soru/konu/tekrarları silmez.
+- Bağımsız yalnız **RAHAT + çözüm açılmamış**. Zorlandım yarım, Çözemedim çözemedi;
+  çözüm açıldıysa destekli. Aynı soru/günde ikinci tekrar engellenir.
+- XP katsayıları, seviye/rütbe eşikleri ve 30 rozet kuralı aynı. Kazanım idempotent; kutlama
+  kapatılması sahipliği silmez; kazanılmamış gizli ad/çizim/erişilebilirlik metni maskelenir.
+- Odak: tek/sıralı soru, akıllı/en eski sıralama, 5/10/20, mola, sona bırak, ayrı değerlendirme/
+  kaydetme, kapanma sonrası devam ve karne. **Sayaç hâlâ delay tabanlı; kalıcı süre verisi yok.**
+- **Room v3 / ZIP v3 / tekrar algoritması v2 aynı.** v2 ZIP import ve migration zinciri korunur.
+  Rozet/hedef/profil/devam noktası cihaz-yerel prefs'tir, ZIP'e dahil değildir.
+
+## Test kanıtı ve açık kapılar
+
+- v1.2.0'ın 130-test tabanı korundu; 27 yeni test: 5 akış, 3 özet/hedef tutarlılığı,
+  3 restore, 11 sunum/hareket/karne ve 5 native önizleme. Mevcut recovery testi ayrıca güçlendirildi.
+- İlk CI `39130524882` 155/1, ikinci `39130869814` 156/1 idi; aynı yeni manuel-saatli XP testi
+  yeniden çizimden önce eski semantics okuyordu. Hareket kapalı sunum doğrudan değerle yapıldı;
+  test Compose redraw ile eşitlendi, sanal zaman sınırı korundu. Normal ilk gösterim ve gerçek
+  XP değişiminin sonlu hareketi için ek testler eklendi. Son CI **157/0**.
+- `tools/statik_kontrol.py`: 592 string/resource, 15 amblem × 5 yoğunluk, 0 hata. Kotlin
+  sözdizimi/TOML/YAML ve diff kontrolü geçti; bunlar derleme yerine sunulmaz.
+- **Gerçek cihaz kabulü bekler:** S24 FE üzerinde kaldırmadan güncelleme, 3-düğmeli/jest nav,
+  yatay ekran, %200 yazı/TalkBack, kutlama, arka plan/süreç ölümü, restore kesintisi ve performans.
+  Native çizimler veya sanal animasyon zamanı gerçek telefon performans ölçümü değildir.
+- **P2–P6 uygulanmadı:** monotonik/fazlı süre ölçümü, Room/ZIP v4, kişisel profiller, gölge v3,
+  kaynak/konu analizleri ve yeni öğrenme önerileri. Tek devam planı:
+  [GELISIM_VE_OGRENME_PLANI.md](docs/GELISIM_VE_OGRENME_PLANI.md).
+- Geçmiş karneler arşivi, seri koruyan mola günü jetonu ve bildirimler hâlâ yoktur.
 
 ## Başlıca dosyalar
 
-- `domain/karne/Rozet.kt`, `data/ilerleme/RozetHizmeti.kt`, `data/prefs/RozetDeposu.kt` — kurallar,
-  geriye dönük toplamlar, idempotent sahiplik ve kutlama kuyruğu.
-- `ui/karne/RozetKutlamasi.kt`, `ui/seviye/{RozetKoleksiyonu,RutbeYolculugu}.kt` — gizli/açık galeri,
-  tam ekran kutlama, rütbe keşfi.
-- `domain/model/SinavProfili.kt`, `data/prefs/SinavProfiliDeposu.kt`, `RoomDersRepository.kt` —
-  format ve veri koruyan ders hazırlama.
-- `ui/ayarlar/KonuMerkeziEkrani.kt` — profil dışı/arşivli dersleri de içeren konu yönetimi girişi.
-- `domain/repeat/AkilliTekrarKurali.kt`, `ui/calisma/OdakOturumuEkrani.kt` — adaptif plan ve odak.
-- `domain/calisma/OdakOturumu.kt`, `data/prefs/OdakOturumuDeposu.kt` — devam/kurtarma.
-- `ui/AltMenu.kt`, `ui/YanlisDefteriUygulamasi.kt` — güvenli insets, gezinme, oturum ve kutlama host'u.
-- `docs/SEVIYE_SISTEMI.md`, `docs/ODAK_STUDYOSU.md` — güncel uygulama kuralları.
-
-## Test durumu ve sıradaki işler
-
-- 130 JVM/Room/Robolectric/Compose testi son CI'da geçti (run `39067624050`). Testler yeni profil/katalog
-  silme, rozet eşiği/sahiplik, algoritma, ZIP'te v2 kayıt, devam noktası ve bağımsız sayımı kapsar.
-- İlk genişletilmiş koşuda bir yeni test hazır **kaynak** bekliyordu; hazırlar yalnız **yanlış
-  nedenleri** olduğu için test fixture'ı düzeltildi. Ürün davranışı gevşetilmedi.
-- Üç UI testi geçti: büyük yazı + sentetik inset; gizli galeri/detay; kazanılan sırrın açılıp
-  kutlamasının kapatılması ve sahipliğin kalması. Ön kontrol run `39067149944` 127 testti.
-- `python3 tools/statik_kontrol.py` kaynak/drawable ve 15 amblemin beş yoğunluğunu kontrol eder;
-  derleme veya cihaz kabulü yerine geçmez.
-- Cihaz kabulü **ayrı ve bekliyor**: S24 FE üzerinde 3-düğmeli/jest nav, yatay ekran, büyük yazı,
-  gerçek fotoğraflar, gizli rozet popup, arka plan/süreç kaybı ve eski sürüm üzerine güncelleme.
-- Geçmiş karneler, mola günü jetonu ve bildirimler yapılmış sayılmaz. Şu an aktif molalı oturum
-  vardır; bu seri koruyan "mola günü jetonu" değildir.
-- Tarihsel sürüm/CI kanıtları `CHANGELOG.md`, kabul kayıtları `docs/TEST_KONTROL_LISTESI.md` içinde.
-
-
-## Bilinen sınırlar / takip notları
-
-- Geri yükleme girişimi başlamadan eski devam noktası temizlenir; restore başarısız olsa da bu
-  devam noktası geri gelmez. Bu, soru/tekrar arşivini silmek değildir; güvenlik yedeği akışı ayrıdır.
-- Rozet gözlem akışı hata halinde snackbar gösterip sonlanır; Bugün/İlerleme ekranına giriş yeniden
-  değerlendirme yapar. Arka planda otomatik retry henüz yoktur.
-- Karne toplam rozet sayısı tek seferlik bir snapshot'tır. Eşzamanlı bir yaşam-boyu ödülü eklenirse
-  karnenin sayacı geçici geride kalabilir; kalıcı sahiplik ve İlerleme akışı doğru kaynaktır.
-- Karne geçmişi ve mola günü jetonları henüz yoktur; mevcut molayı bu özelliklerle karıştırmayın.
+- `data/ilerleme/DayanikliIzleme.kt`, `RozetHizmeti.kt`, `data/seviye/SeviyeHizmeti.kt`.
+- `data/export/YerelYedeklemeHizmeti.kt`, `AppContainer.kt`, `ui/YanlisDefteriUygulamasi.kt`.
+- `ui/tema/{HareketPolitikasi,Renk,Tipografi,Tema}.kt`.
+- `ui/seviye/{SeviyeEkrani,IlerlemeIcerigi,RozetKoleksiyonu,RutbeYolculugu}.kt`.
+- `ui/karne/{KarneEkrani,RozetKutlamasi}.kt`, debug `SeviyeOnizlemeleri.kt`.
+- `docs/SEVIYE_SISTEMI.md`, `ODAK_STUDYOSU.md`, `YEDEK_FORMATI.md`, `TEST_KONTROL_LISTESI.md`.
