@@ -294,6 +294,7 @@ private fun tebrikMetni(seviye: TebrikSeviyesi): Int = when (seviye) {
 
 @Composable
 private fun sayanDeger(hedef: Int, animasyonAcik: Boolean, gecikmeMs: Int): Int {
+    if (!animasyonAcik) return hedef
     var basla by remember(hedef, animasyonAcik) { mutableStateOf(!animasyonAcik) }
     LaunchedEffect(hedef, animasyonAcik) {
         if (animasyonAcik) {
@@ -323,7 +324,7 @@ private fun OranHalkasi(sayilar: KarneSayilari, animasyonAcik: Boolean) {
             ilerleme.snapTo(hedefOran)
         }
     }
-    val oran = ilerleme.value
+    val oran = if (animasyonAcik) ilerleme.value else hedefOran
     Box(Modifier.size(174.dp), contentAlignment = Alignment.Center) {
         Canvas(Modifier.fillMaxSize()) {
             val kalinlik = 14.dp.toPx()
@@ -637,7 +638,7 @@ private fun RozetBolumu(rozetler: List<Rozet>, toplamRozet: Int, animasyonAcik: 
                 RozetGorseli(
                     rozet = rozet,
                     kazanildi = true,
-                    modifier = Modifier.size((52 * olcek).dp),
+                    modifier = Modifier.size((52 * if (animasyonAcik) olcek else 1f).dp),
                 )
                 Text(
                     text = stringResource(rozetMetni(rozet)),

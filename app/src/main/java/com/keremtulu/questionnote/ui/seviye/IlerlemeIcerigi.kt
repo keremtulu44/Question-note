@@ -157,7 +157,8 @@ private fun YeniRutbeKarti(ozet: SeviyeOzeti) {
     val durum = ozet.durum
     val politika = LocalHareketPolitikasi.current
     // Initial values are real values, not fake XP gained from zero on each screen entry.
-    val xp by animateIntAsState(durum.toplamXp, tween(politika.sure(HareketTuru.DEGER)), label = "xp-degisim")
+    val xp = if (politika.azaltildi) durum.toplamXp else
+        animateIntAsState(durum.toplamXp, tween(politika.sure(HareketTuru.DEGER)), label = "xp-degisim").value
     Surface(shape = RoundedCornerShape(28.dp), color = Gece,
         border = BorderStroke(1.dp, BakirIsik.copy(alpha = 0.2f)), modifier = Modifier.fillMaxWidth().testTag("progress-hero")) {
         Box(Modifier.background(Brush.linearGradient(listOf(Murekkep, Gece)))) {
@@ -230,7 +231,8 @@ private fun RutbeBasligi(rutbe: Rutbe, seviye: Int, xp: Int) {
 private fun XpCubugu(oran: Float) {
     val politika = LocalHareketPolitikasi.current
     val hedef = oran.coerceIn(0f, 1f)
-    val ilerleme by animateFloatAsState(hedef, tween(politika.sure(HareketTuru.DEGER)), label = "xp-ilerleme")
+    val ilerleme = if (politika.azaltildi) hedef else
+        animateFloatAsState(hedef, tween(politika.sure(HareketTuru.DEGER)), label = "xp-ilerleme").value
     Box(Modifier.fillMaxWidth().height(9.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.12f))
         .testTag("progress-xp-bar").semantics { progressBarRangeInfo = ProgressBarRangeInfo(hedef, 0f..1f) }) {
         Box(Modifier.fillMaxWidth(ilerleme.coerceIn(0f, 1f)).height(9.dp)

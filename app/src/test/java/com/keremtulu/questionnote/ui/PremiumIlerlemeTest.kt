@@ -88,6 +88,20 @@ class PremiumIlerlemeTest {
         assertEquals(1, deneme)
     }
 
+    @Test fun openingWithMotionEnabledDoesNotPretendTheExistingXpWasJustEarned() {
+        val ozet = ornekIlerlemeOzeti()
+        compose.mainClock.autoAdvance = false
+        compose.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Normal) {
+                SeviyeSayfasi(SeviyeDurumuUi.ozetten(ozet))
+            }
+        }
+        val etiket = context.getString(R.string.progress_total_xp,
+            NumberFormat.getIntegerInstance(Locale.forLanguageTag("tr-TR")).format(ozet.durum.toplamXp))
+        compose.onNodeWithTag("progress-xp-total").assertTextEquals(etiket)
+        compose.mainClock.autoAdvance = true
+    }
+
     @Test fun initialXpIsRealAndReducedMotionAppliesUpdatesWithoutCountingFromZero() {
         val ozet = mutableStateOf(ornekIlerlemeOzeti())
         compose.mainClock.autoAdvance = false

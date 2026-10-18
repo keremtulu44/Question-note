@@ -122,7 +122,7 @@ private fun RozetKutlamasi(rozet: Rozet, kalan: Int, kapanis: Boolean, hata: Boo
                 Text(stringResource(if (rozet.gizli) R.string.badge_celebrate_secret else R.string.badge_celebrate_kicker),
                     color = altin, letterSpacing = 3.sp, style = MaterialTheme.typography.labelLarge)
                 RozetGorseli(rozet, true, Modifier.size(176.dp).graphicsLayer {
-                    scaleX = 0.85f + acilis.value * 0.15f
+                    scaleX = if (hareket) 0.85f + acilis.value * 0.15f else 1f
                     scaleY = scaleX
                 })
                 Text(stringResource(R.string.badge_celebrate_title), color = Color.White.copy(alpha = 0.75f),
