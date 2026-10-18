@@ -26,8 +26,9 @@ cevaplamak ve çözümü öğrenme sürecinden ayrı saklamaktır.
 ## Durum
 
 **Çalışılan aday: 1.5.1/code19.** İlerleme daha az metin, tek çalışma eylemi ve ayrı ayrıntı
-sayfalarıyla sadeleştirildi. İlk CI/native görsel kontrolü bekleniyor; ara yayın kapalı.
-[Değişikliğin sınırı](docs/ILERLEME_SADELESTIRME.md). Aşağıdaki APK önceki doğrulanmış sürümdür.
+sayfalarıyla sadeleştirildi. Ara CI `39156980764`: Debug312/0 + Release258/0, imzalı derleme ve
+native görsel kontrolü başarılı. Final yayın koşusu başlatılıyor; aşağıdaki APK önceki doğrulanmış sürümdür.
+[Değişikliğin sınırı](docs/ILERLEME_SADELESTIRME.md).
 
 **v1.5.0 yayımlandı** (versionCode18). [CI `39144684877`](https://github.com/keremtulu44/Question-note/actions/runs/39144684877):
 **Debug 298/0/0/0 · Release 258/0/0/0**; derleme/imza/sertifika başarılı, yayımlanan asset digest CI ile eşleşti.

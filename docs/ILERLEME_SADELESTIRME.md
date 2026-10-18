@@ -31,7 +31,12 @@ Aday **1.5.1 / code19**. İlk CI `39155923794`, taşınırken eksik kalan dört 
 Sekiz ana native görünüm ve P6 ritmi incelendi: normal yazıda ana görünüm tek viewport'a sığıyor.
 %200'de eski alt menünün kelime bölünmesi görüldü; seçili etikete alan, diğer dört simgeye tam
 semantik ad + 48dp üzeri dokunma alanı veren uyarlama ve gerçek text-layout regresyonu eklendi.
-Bu son rötuşun yeni CI/native çıktısı bekleniyor.
+Son üretim kodu `1c429d0` / CI `39156980764`: **Debug312/0/0/0, Release258/0/0/0**, APK/imza/sertifika başarılı.
+Alt menüde %200 tek satır ve 320dp/48dp hedef testleri geçti; yeni normal/koyu/boş/ayrıntı görünümleri incelendi.
+Son yayın koşusuna yalnız debug önizleme kabuğu düzeltmesi/katı dikey sınır kontrolü eklendi: üretimde zaten
+kullanılan `padding + consumeWindowInsets` düzeni fixture’a da uygulandı. Böylece büyük-yazı görüntüsü
+"görünüyor" semantiğine değil, düğmenin alt menünün tamamen üstünde olmasına dayanır.
+Üretim kodu değişmeden yayın koşusu başlatılıyor; gerçek cihaz kabulü açık.
 Yerelde 147 Kotlin sözdizimi ağacı, XML, workflow YAML/Bash ve kaynak referansları kontrol edildi;
 bu, Kotlin/Android derlemesinin veya cihaz kabulünün yerine geçmez.
 

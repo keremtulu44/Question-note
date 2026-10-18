@@ -3,6 +3,7 @@ package com.keremtulu.questionnote.ui.seviye
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -59,8 +60,12 @@ fun IlerlemeTasarimOnizlemesi(durum: SeviyeDurumuUi, koyu: Boolean = false) {
             Text("YEREL COMPOSE · SENTETİK VERİ", Modifier.fillMaxWidth().padding(12.dp),
                 style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
             Box(Modifier.weight(1f)) {
-                Scaffold(bottomBar = { AltMenu(AltSekme.SEVIYE, {}) }) { padding ->
-                    SeviyeSayfasi(durum, insets = padding)
+                Scaffold(bottomBar = { Box(Modifier.testTag("preview-navigation")) { AltMenu(AltSekme.SEVIYE, {}) } }) { padding ->
+                    // Match the real app shell: the list's viewport ends above the navigation bar.
+                    // Content padding alone lets scroll-to assertions mistake an occluded button for visible.
+                    Box(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding)) {
+                        SeviyeSayfasi(durum)
+                    }
                 }
             }
         }

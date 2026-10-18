@@ -56,6 +56,12 @@ class IlerlemeGorselOnizlemeTest {
         if (olcek >= 1.5f) {
             compose.onNodeWithTag("progress-list").performScrollToNode(hasTestTag("analysis-action"))
             compose.onNodeWithTag("analysis-action").performScrollTo().assertIsDisplayed()
+            val button = compose.onNodeWithTag("analysis-action").getUnclippedBoundsInRoot()
+            val viewport = compose.onNodeWithTag("progress-list").getUnclippedBoundsInRoot()
+            val bar = compose.onNodeWithTag("preview-navigation").getUnclippedBoundsInRoot()
+            assertTrue("The entire large-text action must be above the bottom bar", button.top >= viewport.top &&
+                button.bottom <= viewport.bottom && button.bottom <= bar.top)
+            compose.mainClock.advanceTimeByFrame()
         }
         compose.waitForIdle()
         val bitmap = compose.onNodeWithTag("preview-root").captureToImage().asAndroidBitmap()

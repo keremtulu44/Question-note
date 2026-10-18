@@ -43,7 +43,7 @@ jobs:
         id: release
         shell: bash
         env:
-          PUBLISH_RELEASE: "false" # 1.5.1: verify the simpler overview and native captures before final publication.
+          PUBLISH_RELEASE: "true" # 39156980764: Debug312/0, Release258/0, signed APK + native review. Active-v3 remains CLOSED.
           WRAPPER_VERSION: "9.8.1"
           BUILD_TOOLS_VERSION: "37.0.0"
           EXPECTED_FINGERPRINT: "FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54"

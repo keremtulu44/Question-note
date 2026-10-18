@@ -10,6 +10,7 @@ import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.dp
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.domain.model.SoruCalismaFiltresi
 import com.keremtulu.questionnote.ui.seviye.*
@@ -24,6 +25,7 @@ import org.robolectric.annotation.Config
 /** Guard the information hierarchy, not just the presence of another analytics card. */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], qualifiers = "w393dp-h852dp-mdpi")
+@OptIn(ExperimentalTestApi::class)
 class IlerlemeSadelikTest {
     @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
     private fun text(id: Int, vararg args: Any) = compose.activity.getString(id, *args)
@@ -138,16 +140,17 @@ class IlerlemeSadelikTest {
     @Test fun largeTextKeepsTheSingleActionWithinBoundsAndAtLeast48dp() {
         val sample = ornekIlerlemeOzeti()
         compose.setContent { CompositionLocalProvider(LocalDensity provides Density(1f, 2f)) {
-            YanlisDefteriTema(koyuTema = true, hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
-                SeviyeSayfasi(SeviyeDurumuUi.ozetten(sample))
-            }
+            IlerlemeTasarimOnizlemesi(SeviyeDurumuUi.ozetten(sample), koyu = true)
         } }
         compose.onNodeWithTag("progress-list").performScrollToNode(hasTestTag("analysis-action"))
         compose.onNodeWithTag("analysis-action").performScrollTo().assertIsDisplayed()
-        val button = compose.onNodeWithTag("analysis-action").fetchSemanticsNode().boundsInRoot
-        val root = compose.onNodeWithTag("progress-list").fetchSemanticsNode().boundsInRoot
-        assertTrue(button.height >= 48f && button.width >= 48f)
+        val button = compose.onNodeWithTag("analysis-action").getUnclippedBoundsInRoot()
+        val root = compose.onNodeWithTag("progress-list").getUnclippedBoundsInRoot()
+        assertTrue(button.height >= 48.dp && button.width >= 48.dp)
         assertTrue(button.left >= root.left && button.right <= root.right)
+        assertTrue(button.top >= root.top && button.bottom <= root.bottom)
+        val bar = compose.onNodeWithTag("preview-navigation").getUnclippedBoundsInRoot()
+        assertTrue("The bottom navigation must not cover the CTA", button.bottom <= bar.top)
         compose.onAllNodesWithTag("analysis-action").assertCountEquals(1)
         compose.onNodeWithTag("analysis-section").assertDoesNotExist()
     }

@@ -7,7 +7,9 @@
 
 Kullanıcı İlerleme’yi fazla metinli/karmaşık buldu. Dört bloklu ana görünüm ve isteğe bağlı,
 her seferinde tek bölüm açan ayrıntı gezinmesi uygulandı. [Sözleşme ve kontrol](docs/ILERLEME_SADELESTIRME.md).
-Aday **1.5.1/code19**, `PUBLISH_RELEASE=false`; ilk Debug/Release CI ve yeni native PNG incelemesi bekleniyor.
+Aday **1.5.1/code19**: `1c429d0` / CI `39156980764` **Debug312/0/0/0 + Release258/0/0/0**,
+APK/imza/sertifika başarılı. Sekiz native görünüm/alt menü rötuşu incelendi; fixture viewport’u üretimle eşlendi.
+`PUBLISH_RELEASE=true` ile final yeniden doğrulama/yayın koşusu başlatılıyor; henüz yayın sonucu değil.
 Room/ZIP/domain/veri hizmetleri aynı; XP/rozet/rütbe katsayıları ve etkin-v3 kapıları değişmedi.
 Aday doğrulanmadan mevcut 1.5.0 APK değiştirilmez.
 
