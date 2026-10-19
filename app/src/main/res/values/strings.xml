@@ -142,7 +142,14 @@
     <string name="review_result_easy">Rahat çözdüm</string>
     <string name="review_saving">Tekrar kaydediliyor…</string>
     <string name="review_saved">Tekrar kaydedildi. Sıradaki gün planı güncellendi.</string>
+    <string name="review_saved_on">Tekrar kaydedildi. Sıradaki tekrar: %1$s.</string>
+    <string name="review_undo">Geri al</string>
+    <string name="review_undone">Tekrar kaydı geri alındı.</string>
+    <string name="review_undo_error">Kayıt geri alınamadı; tekrar geçmişinde duruyor.</string>
     <string name="review_save_error">Tekrar kaydedilemedi. Yeniden deneyin.</string>
+    <string name="settings_category_feedback">Ses ve geri bildirim</string>
+    <string name="settings_sound_title">Ses efektleri</string>
+    <string name="settings_sound_note">Tekrar kaydedildiğinde, günlük hedef tamamlandığında ve rozet kutlandığında kısa sesler çalınır. Sistem sessiz modundayken ses çalmaz.</string>
     <string name="question_edit">Düzenle</string>
     <string name="question_delete">Sil</string>
     <string name="question_plan_status">Plan durumu</string>

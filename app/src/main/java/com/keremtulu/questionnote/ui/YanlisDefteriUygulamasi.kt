@@ -31,14 +31,21 @@ import com.keremtulu.questionnote.data.ilerleme.IzlemeDurumu
 import com.keremtulu.questionnote.data.prefs.SinavProfiliDeposu
 import com.keremtulu.questionnote.data.prefs.OdakOturumuDeposu
 import com.keremtulu.questionnote.domain.calisma.OdakOturumu
+import com.keremtulu.questionnote.domain.calisma.YerelTakvimSaati
+import com.keremtulu.questionnote.domain.model.SoruIslemSonucu
+import com.keremtulu.questionnote.data.ses.SesTuru
 import com.keremtulu.questionnote.ui.ayarlar.KonuMerkeziEkrani
 import com.keremtulu.questionnote.ui.calisma.OdakOturumuEkrani
 import com.keremtulu.questionnote.ui.karne.RozetKutlamaHost
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import java.util.UUID
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -148,6 +155,54 @@ fun YanlisDefteriUygulamasi(
     val snackbarHostState = remember { SnackbarHostState() }
     var rozetGozlemYenileme by remember { mutableIntStateOf(0) }
     var rozetGozlemDurdu by remember { mutableStateOf(false) }
+    val ses = LocalUygulamaSesleri.current
+
+    /** Kaydedilen tekrarın kısa kutucuğu: sıradaki tarih + "Geri al" (az önceki kaydı siler). */
+    fun geriAlKutucuguGoster(soruId: String, sonrakiGun: Int?) {
+        ses?.cal(SesTuru.TEKRAR)
+        scope.launch {
+            val tarih = sonrakiGun?.let {
+                LocalDate.ofEpochDay(it.toLong())
+                    .format(DateTimeFormatter.ofPattern("d MMM yyyy", Locale("tr", "TR")))
+            }
+            val mesaj = if (tarih != null) {
+                context.getString(R.string.review_saved_on, tarih)
+            } else {
+                context.getString(R.string.review_saved)
+            }
+            val secim = snackbarHostState.showSnackbar(
+                message = mesaj,
+                actionLabel = context.getString(R.string.review_undo),
+                withDismissAction = true,
+                duration = SnackbarDuration.Long,
+            )
+            if (secim == SnackbarResult.ActionClicked) {
+                when (soruRepository.tekrarGeriAl(soruId)) {
+                    SoruIslemSonucu.Basarili ->
+                        snackbarHostState.showSnackbar(context.getString(R.string.review_undone))
+                    else ->
+                        snackbarHostState.showSnackbar(context.getString(R.string.review_undo_error))
+                }
+            }
+        }
+    }
+
+    // Günlük hedef tamamlandığında tek seferlik kısa ses; kaynak sayaç geçişi (ekranlar arası).
+    val hedefGun = remember { LocalDate.now(YerelTakvimSaati.zone).toEpochDay().toInt() }
+    var sonHedefSayisi: Int? by remember { mutableStateOf(null) }
+    LaunchedEffect(ilerlemeHizmeti, hedefGun, ses) {
+        ilerlemeHizmeti.bugunSayisiIzle(hedefGun)
+            .catch { }
+            .collect { yeni ->
+                val once = sonHedefSayisi
+                val hedef = gunlukHedefDeposu.hedef()
+                if (once != null && once < hedef && yeni >= hedef) {
+                    delay(300)
+                    ses?.cal(SesTuru.HEDEF)
+                }
+                sonHedefSayisi = yeni
+            }
+    }
 
     fun oturumGoster(sorular: List<Soru>, dersler: Map<String, Ders>, oturum: OdakOturumu) {
         val surum = oturumDeposu.hazirla(oturum)
@@ -396,12 +451,8 @@ fun YanlisDefteriUygulamasi(
                         gorselDeposu = gorselDeposu,
                         onGeri = { ekran = current.geri },
                         onDuzenle = { id -> ekran = UygulamaEkrani.SoruFormu(current.ders, id, current) },
-                        onTekrarTamamlandi = { _, _ ->
-                            ekran = current.geri
-                            scope.launch {
-                                snackbarHostState.showSnackbar(context.getString(R.string.review_saved))
-                            }
-                        },
+                        onTekrarTamamlandi = { _, _ -> ekran = current.geri },
+                        onKaydedildi = ::geriAlKutucuguGoster,
                         tekrarOturumunda = current.tekrarOturumunda,
                     )
                     UygulamaEkrani.FiltreliCalisma -> FiltreliCalismaEkrani(
@@ -436,6 +487,7 @@ fun YanlisDefteriUygulamasi(
                                     val yeni = current.oturum.cevapla(OturumSonucu(question.id, sonuc, cozum))
                                     oturumGoster(current.sorular, current.dersler, yeni)
                                 },
+                                onKaydedildi = ::geriAlKutucuguGoster,
                                 onSonaBirak = { oturumGoster(current.sorular, current.dersler, current.oturum.sonaBirak()) },
                                 onAtla = { oturumGoster(current.sorular, current.dersler, current.oturum.atla()) },
                             )

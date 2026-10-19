@@ -2,6 +2,7 @@ package com.keremtulu.questionnote.data.local.dao
 
 import androidx.room.ColumnInfo
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -65,4 +66,7 @@ interface TekrarDao {
 
     @Query("DELETE FROM tekrarlar")
     suspend fun tumunuSil()
+
+    @Delete
+    suspend fun sil(tekrar: TekrarEntity)
 }

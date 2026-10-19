@@ -4,6 +4,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.CompositionLocalProvider
+import com.keremtulu.questionnote.data.ses.SesHizmeti
+import com.keremtulu.questionnote.ui.LocalUygulamaSesleri
 import com.keremtulu.questionnote.ui.YanlisDefteriUygulamasi
 import com.keremtulu.questionnote.ui.tema.YanlisDefteriTema
 
@@ -17,6 +20,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             YanlisDefteriTema {
+                CompositionLocalProvider(LocalUygulamaSesleri provides SesHizmeti.uyygulama(this)) {
                 YanlisDefteriUygulamasi(
                     dersRepository = appContainer.dersRepository,
                     konuRepository = appContainer.konuRepository,
@@ -36,6 +40,7 @@ class MainActivity : ComponentActivity() {
                     gunlukHedefDeposu = appContainer.gunlukHedefDeposu,
                     tercihHedefDeposu = appContainer.tercihHedefDeposu,
                 )
+                }
             }
         }
     }

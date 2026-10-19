@@ -2,6 +2,19 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [Yayımlanmadı] — arena/1c0f41d0 oturumu (2026-10-19)
+
+- **"Geri al" kutucuğu:** tekrar değerlendirmesinden sonra altta kısa onay kutucuğu görünür
+  ("Tekrar kaydedildi. Sıradaki tekrar: …") ve **Geri al** düğmesi vardır. Geri al yalnızca
+  **az önce yapılan kaydı** siler (10 dakika penceresi, en yeni kayıt); plan alanları kayıttan
+  önceki hâline döner, eski geçmişe dokunulmaz. XP/karne sayaçları kayıttan türetildiği için
+  kendiliğinden güncellenir (kazanılmış rozet/rütbe ödül olarak geri alınmaz).
+- **Ses efektleri:** kısa çan sesleri — tekrar kaydı, günlük hedef tamamlandı, rozet/rütbe
+  kutlaması. Ayarlar → **Ses ve geri bildirim** ile açılıp kapatılabilir; sistem sessiz/vibrasyon
+  modunda çalmaz. Varsayılan açık; yeni bağımlılık yok (dahili SoundPool + gömülü WAV).
+- Sürüm: `versionCode 20` / `versionName 1.5.90` — v1.5.1 Release'ine dokunulmadan yeni etiket.
+- Not: parmak izi/açılış kilidi kararı **kalıcı olarak reddedildi**; yapılmayacak.
+
 ## [1.5.1] — 2026-10-18
 
 - İlerleme ana sayfası rütbe, bugünkü hedef ve tek çalışma eylemine indirildi; uzun açıklamalar ve üst üste analitik kartlar kaldırıldı.

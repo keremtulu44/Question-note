@@ -65,8 +65,10 @@ fun KutlamaHost(rozetler: RozetDeposu, rutbeler: RutbeDeposu, goster: Boolean) {
 @Composable
 fun RutbeKutlamasiIcerigi(r: RutbeKutlamasi, mesgul: Boolean = false, hata: Boolean = false, onKapat: () -> Unit) {
     val p = LocalHareketPolitikasi.current
+    val ses = com.keremtulu.questionnote.ui.LocalUygulamaSesleri.current
     val giris = remember(r.son) { Animatable(if (p.azaltildi) 1f else 0f) }
     LaunchedEffect(r.son, p) {
+        ses?.cal(com.keremtulu.questionnote.data.ses.SesTuru.KUTLAMA)
         if (p.azaltildi) giris.snapTo(1f) else giris.animateTo(1f, tween(p.sure(HareketTuru.KUTLAMA)))
     }
     Dialog(onDismissRequest = { if (!mesgul) onKapat() }, properties = DialogProperties(

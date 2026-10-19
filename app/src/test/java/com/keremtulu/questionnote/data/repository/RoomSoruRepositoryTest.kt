@@ -6,6 +6,7 @@ import com.keremtulu.questionnote.data.local.YanlisDefteriDatabase
 import com.keremtulu.questionnote.data.local.entity.TekrarEntity
 import com.keremtulu.questionnote.domain.model.GorselTuru
 import com.keremtulu.questionnote.domain.model.KonuIslemSonucu
+import com.keremtulu.questionnote.domain.model.OgrenmeDurumu
 import com.keremtulu.questionnote.domain.model.SoruGorselGirdisi
 import com.keremtulu.questionnote.domain.model.SoruCalismaFiltresi
 import com.keremtulu.questionnote.domain.model.SoruIslemSonucu
@@ -14,6 +15,7 @@ import com.keremtulu.questionnote.domain.model.SoruPlanDurumu
 import com.keremtulu.questionnote.domain.model.SoruSecenekTuru
 import com.keremtulu.questionnote.domain.model.SoruSecenegiEklemeSonucu
 import com.keremtulu.questionnote.domain.model.TekrarSonucu
+import com.keremtulu.questionnote.domain.calisma.TekrarDenemesi
 import com.keremtulu.questionnote.domain.repository.GorselDosyaYonetimi
 import java.time.Clock
 import java.time.Instant
@@ -434,6 +436,123 @@ class RoomSoruRepositoryTest {
         boyut = boyut,
         sha256 = sha256,
     )
+
+    @Test
+    fun geriAlSonKaydiSilipPlaniEskiHalineDondurur() = runBlocking {
+        val konuRepo = RoomKonuRepository(database)
+        assertEquals(KonuIslemSonucu.Basarili, konuRepo.konuEkle(dersId, "Üslü Sayılar"))
+        val konuId = konuRepo.konulariIzle(dersId, arsivli = false).first().single().id
+        val saved = SoruKaydetmeIstegi(
+            dersId = dersId,
+            konuId = konuId,
+            gorseller = listOf(imageFiles.yeniGorsel(GorselTuru.SORU, 0)),
+        )
+        assertEquals(SoruIslemSonucu.Basarili, repository.soruKaydet(saved))
+        val soru = repository.sorulariIzle(dersId, konuId = konuId).first().single()
+        val baslangicPlani = soru.sonrakiTekrarGun
+        assertNotNull(baslangicPlani)
+
+        val denemeId = UUID.randomUUID().toString()
+        val onizleme = repository.tekrarOnizle(TekrarDenemesi(denemeId, soru.id, TekrarSonucu.RAHAT, false))
+        assertNotNull(onizleme)
+        assertEquals(SoruIslemSonucu.Basarili, repository.tekrarKaydet(onizleme!!))
+        assertEquals(1, database.tekrarDao().sorununTekrarlariniGetir(soru.id).size)
+        assertNotNull(database.tekrarOlcumDao().denemeIleGetir(denemeId))
+        assertNotNull(repository.soruGetir(soru.id)!!.sonTekrarGun)
+
+        assertEquals(SoruIslemSonucu.Basarili, repository.tekrarGeriAl(soru.id))
+        assertEquals(0, database.tekrarDao().sorununTekrarlariniGetir(soru.id).size)
+        assertNull(database.tekrarOlcumDao().denemeIleGetir(denemeId))
+        val geriAlinan = repository.soruGetir(soru.id)!!
+        assertEquals(baslangicPlani, geriAlinan.sonrakiTekrarGun)
+        assertNull(geriAlinan.sonTekrarGun)
+        assertEquals(OgrenmeDurumu.YENI, geriAlinan.ogrenmeDurumu)
+
+        // Geri alınca idempotluk satırı da gider: aynı deneme kimliğiyle yeniden kayıt serbesttir.
+        val yeniden = repository.tekrarOnizle(TekrarDenemesi(denemeId, soru.id, TekrarSonucu.RAHAT, false))
+        assertNotNull(yeniden)
+        assertEquals(SoruIslemSonucu.Basarili, repository.tekrarKaydet(yeniden!!))
+    }
+
+    @Test
+    fun geriAlOnDakikadanEskiKaydiSilmemez() = runBlocking {
+        val konuRepo = RoomKonuRepository(database)
+        assertEquals(KonuIslemSonucu.Basarili, konuRepo.konuEkle(dersId, "Logaritma"))
+        val konuId = konuRepo.konulariIzle(dersId, arsivli = false).first().single().id
+        assertEquals(
+            SoruIslemSonucu.Basarili,
+            repository.soruKaydet(
+                SoruKaydetmeIstegi(
+                    dersId = dersId,
+                    konuId = konuId,
+                    gorseller = listOf(imageFiles.yeniGorsel(GorselTuru.SORU, 0)),
+                ),
+            ),
+        )
+        val soru = repository.sorulariIzle(dersId, konuId = konuId).first().single()
+        val onizleme = repository.tekrarOnizle(
+            TekrarDenemesi(UUID.randomUUID().toString(), soru.id, TekrarSonucu.RAHAT, false),
+        )
+        assertNotNull(onizleme)
+        assertEquals(SoruIslemSonucu.Basarili, repository.tekrarKaydet(onizleme!!))
+
+        // Kayıttan 11 dakika sonra: pencere kapalı, kayıt silinemez.
+        val gecSaatli = RoomSoruRepository(
+            database = database,
+            gorselDosyalari = imageFiles,
+            saat = Clock.fixed(Instant.parse("2026-10-16T12:11:00Z"), ZoneId.of("Europe/Istanbul")),
+        )
+        assertEquals(SoruIslemSonucu.Bulunamadi, gecSaatli.tekrarGeriAl(soru.id))
+        assertEquals(1, database.tekrarDao().sorununTekrarlariniGetir(soru.id).size)
+        assertNotNull(database.tekrarDao().sorununTekrarlariniGetir(soru.id).single().id)
+    }
+
+    @Test
+    fun geriAlCokluGecmisteYalnizcaSonKaydiSilipKalanlarKorur() = runBlocking {
+        val konuRepo = RoomKonuRepository(database)
+        assertEquals(KonuIslemSonucu.Basarili, konuRepo.konuEkle(dersId, "Türev"))
+        val konuId = konuRepo.konulariIzle(dersId, arsivli = false).first().single().id
+        assertEquals(
+            SoruIslemSonucu.Basarili,
+            repository.soruKaydet(
+                SoruKaydetmeIstegi(
+                    dersId = dersId,
+                    konuId = konuId,
+                    gorseller = listOf(imageFiles.yeniGorsel(GorselTuru.SORU, 0)),
+                ),
+            ),
+        )
+        val soru = repository.sorulariIzle(dersId, konuId = konuId).first().single()
+        val ilkOnizleme = repository.tekrarOnizle(
+            TekrarDenemesi(UUID.randomUUID().toString(), soru.id, TekrarSonucu.ZORLANDIM, false),
+        )
+        assertNotNull(ilkOnizleme)
+        assertEquals(SoruIslemSonucu.Basarili, repository.tekrarKaydet(ilkOnizleme!!))
+        assertEquals(1, database.tekrarDao().sorununTekrarlariniGetir(soru.id).size)
+
+        val ikiGunSonra = RoomSoruRepository(
+            database = database,
+            gorselDosyalari = imageFiles,
+            saat = Clock.fixed(Instant.parse("2026-10-18T12:00:00Z"), ZoneId.of("Europe/Istanbul")),
+        )
+        val ikinciOncesi = ikiGunSonra.soruGetir(soru.id)!!
+        val ikinciOnizleme = ikiGunSonra.tekrarOnizle(
+            TekrarDenemesi(UUID.randomUUID().toString(), soru.id, TekrarSonucu.RAHAT, false),
+        )
+        assertNotNull(ikinciOnizleme)
+        assertEquals(SoruIslemSonucu.Basarili, ikiGunSonra.tekrarKaydet(ikinciOnizleme!!))
+        assertEquals(2, database.tekrarDao().sorununTekrarlariniGetir(soru.id).size)
+
+        assertEquals(SoruIslemSonucu.Basarili, ikiGunSonra.tekrarGeriAl(soru.id))
+        val kalan = database.tekrarDao().sorununTekrarlariniGetir(soru.id)
+        assertEquals(1, kalan.size)
+        val geri = ikiGunSonra.soruGetir(soru.id)!!
+        assertEquals(ikinciOncesi.sonrakiTekrarGun, geri.sonrakiTekrarGun)
+        assertNotNull(geri.sonTekrarGun)
+        assertTrue(
+            geri.sonTekrarGun!! < LocalDate.of(2026, 10, 18).toEpochDay().toInt(),
+        )
+    }
 
     private class FakeGorselDosyaYonetimi : GorselDosyaYonetimi {
         val staged = mutableMapOf<String, SoruGorselGirdisi>()

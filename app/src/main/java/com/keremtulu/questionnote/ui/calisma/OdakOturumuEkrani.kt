@@ -110,6 +110,7 @@ fun OdakOturumuEkrani(
     onCozumAcildi: () -> Unit,
     onGeri: () -> Unit,
     onSonuc: (TekrarSonucu, Boolean) -> Unit,
+    onKaydedildi: (soruId: String, sonrakiGun: Int?) -> Unit = { _, _ -> },
     onSonaBirak: () -> Unit,
     onAtla: () -> Unit,
     monotonikSaat: MonotonikSaat = MonotonikSaat { SystemClock.elapsedRealtime() },
@@ -195,7 +196,10 @@ fun OdakOturumuEkrani(
         scope.launch {
             try {
                 when (repository.tekrarKaydet(onizleme)) {
-                    SoruIslemSonucu.Basarili -> onSonuc(sonuc, cozumAcildi || cozumOnceAcildi)
+                    SoruIslemSonucu.Basarili -> {
+                        onKaydedildi(soru.id, onizleme.plan.sonrakiGun)
+                        onSonuc(sonuc, cozumAcildi || cozumOnceAcildi)
+                    }
                     SoruIslemSonucu.AyniGunTekrarVar -> tekrarli = true
                     SoruIslemSonucu.OnizlemeGuncellendi -> { planYenilendi = true; yenileme++ }
                     SoruIslemSonucu.Bulunamadi, SoruIslemSonucu.PlanDurumuKapali -> kullanilamaz = true

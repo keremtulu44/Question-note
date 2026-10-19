@@ -89,6 +89,7 @@ fun SoruDetayEkrani(
     onGeri: () -> Unit,
     onDuzenle: (String) -> Unit,
     onTekrarTamamlandi: (TekrarSonucu, Boolean) -> Unit,
+    onKaydedildi: (soruId: String, sonrakiGun: Int?) -> Unit = { _, _ -> },
     tekrarOturumunda: Boolean = false,
     oturumSira: Int? = null,
     oturumToplam: Int? = null,
@@ -139,9 +140,13 @@ fun SoruDetayEkrani(
         if (tekrarKaydediliyor) return
         tekrarKaydediliyor = true
         scope.launch {
+            var sonrakiGun: Int? = null
             val result = try {
                 val onizleme = soruRepository.tekrarOnizle(TekrarDenemesi(denemeId, soru.id, sonuc, cozumAcildi))
-                if (onizleme == null) SoruIslemSonucu.Bulunamadi else soruRepository.tekrarKaydet(onizleme)
+                if (onizleme == null) SoruIslemSonucu.Bulunamadi else {
+                    sonrakiGun = onizleme.plan.sonrakiGun
+                    soruRepository.tekrarKaydet(onizleme)
+                }
             } catch (cancel: CancellationException) {
                 throw cancel
             } catch (_: Exception) {
@@ -149,6 +154,7 @@ fun SoruDetayEkrani(
             }
             tekrarKaydediliyor = false
             if (result == SoruIslemSonucu.Basarili) {
+                onKaydedildi(soru.id, sonrakiGun)
                 onTekrarTamamlandi(sonuc, cozumAcildi)
             } else {
                 snackbarHostState.showSnackbar(context.getString(errorResource(result)))

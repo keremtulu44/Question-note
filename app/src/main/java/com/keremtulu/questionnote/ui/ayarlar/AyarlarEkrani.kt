@@ -18,6 +18,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -26,6 +27,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.material3.TextButton
 import com.keremtulu.questionnote.data.prefs.SinavProfiliDeposu
 import com.keremtulu.questionnote.domain.model.SinavProfili
+import com.keremtulu.questionnote.ui.LocalUygulamaSesleri
 import com.keremtulu.questionnote.domain.repository.DersRepository
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.CancellationException
@@ -65,6 +67,8 @@ fun AyarlarEkrani(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val sesEfektleri = LocalUygulamaSesleri.current
+    var sesAcik by remember { mutableStateOf(sesEfektleri?.acikMi() ?: false) }
     val secim by profilDeposu.secimIzle.collectAsState()
     var profilKaydediliyor by remember { mutableStateOf(false) }
     var profilHatasi by remember { mutableStateOf(false) }
@@ -182,6 +186,37 @@ fun AyarlarEkrani(
                                 label = { Text(stringResource(R.string.settings_goal_option, secenek)) },
                             )
                         }
+                    }
+                }
+            }
+            if (sesEfektleri != null) item {
+                Bolum(stringResource(R.string.settings_category_feedback)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(Modifier.weight(1f).padding(end = 12.dp)) {
+                            Text(
+                                stringResource(R.string.settings_sound_title),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                            Text(
+                                stringResource(R.string.settings_sound_note),
+                                modifier = Modifier.padding(top = 2.dp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
+                        Switch(
+                            checked = sesAcik,
+                            onCheckedChange = { acik ->
+                                sesAcik = acik
+                                sesEfektleri.ayarla(acik)
+                            },
+                        )
                     }
                 }
             }

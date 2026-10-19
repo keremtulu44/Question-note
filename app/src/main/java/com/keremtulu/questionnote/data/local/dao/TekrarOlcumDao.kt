@@ -54,6 +54,9 @@ interface TekrarOlcumDao {
     suspend fun tumunuGetir(): List<TekrarOlcumEntity>
     @Query("SELECT * FROM tekrar_olcumleri WHERE deneme_id = :denemeId LIMIT 1")
     suspend fun denemeIleGetir(denemeId: String): TekrarOlcumEntity?
+
+    @Query("DELETE FROM tekrar_olcumleri WHERE tekrar_id = :tekrarId")
+    suspend fun tekrarIdIleSil(tekrarId: String)
     @Query("SELECT * FROM tekrarlar WHERE id = :id")
     suspend fun tekrarGetir(id: String): TekrarEntity?
     @Transaction

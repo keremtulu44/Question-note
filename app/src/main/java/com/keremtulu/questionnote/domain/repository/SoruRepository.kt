@@ -47,4 +47,11 @@ interface SoruRepository {
         sonuc: TekrarSonucu,
         cozumAcildi: Boolean,
     ): SoruIslemSonucu
+
+    /**
+     * En son tekrar kaydını geri alır (değerlendirmeden hemen sonra "Geri al").
+     * Yalnızca taze kayıt silinebilir; plan alanları kayıttan önceki hâline döner.
+     * Eski kayıtlar ve geçmiş değiştirilemez.
+     */
+    suspend fun tekrarGeriAl(soruId: String): SoruIslemSonucu
 }

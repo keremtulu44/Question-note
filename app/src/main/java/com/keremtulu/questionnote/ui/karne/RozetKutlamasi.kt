@@ -86,8 +86,10 @@ private fun RozetKutlamasi(rozet: Rozet, kalan: Int, kapanis: Boolean, hata: Boo
     val hareket = politika.hareketAcik
     val acilis = remember { Animatable(if (hareket) 0f else 1f) }
     val haptic = LocalHapticFeedback.current
+    val ses = com.keremtulu.questionnote.ui.LocalUygulamaSesleri.current
     LaunchedEffect(rozet) {
         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+        ses?.cal(com.keremtulu.questionnote.data.ses.SesTuru.KUTLAMA)
     }
     LaunchedEffect(rozet, hareket) {
         if (hareket) acilis.animateTo(1f, tween(politika.sure(HareketTuru.KUTLAMA)))

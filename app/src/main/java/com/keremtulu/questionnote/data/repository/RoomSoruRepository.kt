@@ -62,6 +62,9 @@ import java.util.UUID
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
+/** "Geri al" yalnızca az önce yapılmış kaydı bozabilir; daha eskisi değiştirilemez. */
+private const val GERI_AL_PENCERESI_MS = 10 * 60 * 1000L
+
 class RoomSoruRepository(
     private val database: YanlisDefteriDatabase,
     private val gorselDosyalari: GorselDosyaYonetimi,
@@ -350,6 +353,44 @@ class RoomSoruRepository(
         check(soruDao.guncelle(soru.copy(ogrenmeDurumu = plan.ogrenmeDurumu.name,
             sonTekrarGun = gun, sonrakiTekrarGun = plan.sonrakiGun, guncelleme = now)) == 1)
         SoruIslemSonucu.Basarili
+    }
+
+    /**
+     * Yalnızca az önce yapılan kaydı geri alır: en yeni tekrar satırı [GERI_AL_PENCERESI_MS] içindeyse
+     * silinir (ölçüm satırı FK/DELETE ile birlikte gider), plan alanları kayıttan önceki hâline döner.
+     * Daha eski kayıtlar değişmez — geçmiş yeniden yazılmaz.
+     */
+    override suspend fun tekrarGeriAl(soruId: String): SoruIslemSonucu = database.withTransaction {
+        val simdi = saat.instant().toEpochMilli()
+        val gecmis = tekrarDao.sorununTekrarlariniGetir(soruId)
+        val tekrar = gecmis.maxByOrNull { it.zaman } ?: return@withTransaction SoruIslemSonucu.Bulunamadi
+        if (simdi < tekrar.zaman || simdi - tekrar.zaman > GERI_AL_PENCERESI_MS) {
+            return@withTransaction SoruIslemSonucu.Bulunamadi
+        }
+        val soru = soruDao.idIleGetir(soruId) ?: return@withTransaction SoruIslemSonucu.Bulunamadi
+        val kalanlar = gecmis.filterNot { it.id == tekrar.id }
+        tekrarDao.sil(tekrar)
+        olcumDao.tekrarIdIleSil(tekrar.id)
+        val sonKayit = kalanlar.maxByOrNull { it.zaman }
+        check(soruDao.guncelle(soru.copy(
+            ogrenmeDurumu = ogrenmeDurumunuGeriYukle(sonKayit),
+            sonTekrarGun = kalanlar.maxOfOrNull { it.gun },
+            sonrakiTekrarGun = tekrar.planlananGun,
+            guncelleme = simdi,
+        )) == 1)
+        SoruIslemSonucu.Basarili
+    }
+
+    /** Derived cache restore: same thresholds as the versioned rules, never invented values. */
+    private fun ogrenmeDurumunuGeriYukle(sonKayit: TekrarEntity?): String {
+        sonKayit ?: return OgrenmeDurumu.YENI.name
+        val aralik = sonKayit.sonrakiAralik
+        return when {
+            sonKayit.sonuc == TekrarSonucu.COZEMEDIM.name -> OgrenmeDurumu.OGRENIYOR.name
+            aralik == null || aralik <= 3 -> OgrenmeDurumu.OGRENIYOR.name
+            aralik <= 21 -> OgrenmeDurumu.PEKISIYOR.name
+            else -> OgrenmeDurumu.SAGLAM.name
+        }
     }
 
     private suspend fun onizlemeUret(soru: SoruEntity, istek: TekrarDenemesi): TekrarOnizlemesi {
