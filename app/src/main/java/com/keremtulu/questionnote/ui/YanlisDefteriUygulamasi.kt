@@ -176,7 +176,7 @@ fun YanlisDefteriUygulamasi(
                 withDismissAction = true,
                 duration = SnackbarDuration.Long,
             )
-            if (secim == SnackbarResult.ActionClicked) {
+            if (secim == SnackbarResult.ActionPerformed) {
                 when (soruRepository.tekrarGeriAl(soruId)) {
                     SoruIslemSonucu.Basarili ->
                         snackbarHostState.showSnackbar(context.getString(R.string.review_undone))

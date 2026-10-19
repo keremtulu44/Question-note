@@ -20,7 +20,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             YanlisDefteriTema {
-                CompositionLocalProvider(LocalUygulamaSesleri provides SesHizmeti.uyygulama(this)) {
+                CompositionLocalProvider(LocalUygulamaSesleri provides SesHizmeti.uygulama(this)) {
                 YanlisDefteriUygulamasi(
                     dersRepository = appContainer.dersRepository,
                     konuRepository = appContainer.konuRepository,
