@@ -75,7 +75,7 @@ import com.keremtulu.questionnote.ui.animasyon.springPremium
 import com.keremtulu.questionnote.ui.animasyon.updateParticle
 import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 import com.keremtulu.questionnote.ui.tema.LocalHareketPolitikasi
-import kotlinx.coroutines.withFrameNanos
+import androidx.compose.runtime.withFrameNanos
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
