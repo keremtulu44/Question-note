@@ -180,7 +180,11 @@ fun GradyanKart(
     borderAnimation: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    val pulse = rememberPulse(minAlpha = 0.55f, maxAlpha = 1f, durationMs = 2_200)
+    val pulse = if (borderAnimation) {
+        rememberPulse(minAlpha = 0.55f, maxAlpha = 1f, durationMs = 2_200)
+    } else {
+        remember { mutableStateOf(0.75f) }
+    }
     Box(
         modifier = modifier
             .fillMaxWidth()

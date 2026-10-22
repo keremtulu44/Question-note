@@ -376,10 +376,30 @@ internal fun IlerlemeDurumPaneli(hata: Boolean, insets: PaddingValues, onYenile:
         item { IlerlemePaneli {
             BolumBasligi(stringResource(if (hata) R.string.level_error else R.string.progress_loading))
             if (hata) {
-                Text(stringResource(R.string.progress_error_note), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Button(onClick = onYenile, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text(stringResource(R.string.level_retry)) }
-            } else listOf(1f, .72f, .46f).forEach {
-                Box(Modifier.fillMaxWidth(it).height(12.dp).background(MaterialTheme.colorScheme.surfaceVariant, CircleShape))
+                Text(
+                    stringResource(R.string.progress_error_note),
+                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Assertive },
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Button(onClick = onYenile, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+                    Text(stringResource(R.string.level_retry))
+                }
+            } else {
+                val loadingLabel = stringResource(R.string.progress_loading)
+                Column(
+                    modifier = Modifier.semantics {
+                        contentDescription = loadingLabel
+                        liveRegion = LiveRegionMode.Polite
+                    },
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    listOf(1f, .72f, .46f).forEach { fraction ->
+                        Box(
+                            Modifier.fillMaxWidth(fraction).height(12.dp)
+                                .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape),
+                        )
+                    }
+                }
             }
         } }
     }

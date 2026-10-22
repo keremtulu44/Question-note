@@ -12,43 +12,49 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import com.keremtulu.questionnote.ui.premium.PremiumSwitch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.material3.TextButton
-import com.keremtulu.questionnote.data.prefs.SinavProfiliDeposu
-import com.keremtulu.questionnote.domain.model.SinavProfili
-import com.keremtulu.questionnote.ui.LocalUygulamaSesleri
-import com.keremtulu.questionnote.domain.repository.DersRepository
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.CancellationException
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.keremtulu.questionnote.BuildConfig
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.data.export.SonYedekBilgisi
+import com.keremtulu.questionnote.data.prefs.SinavProfiliDeposu
 import com.keremtulu.questionnote.data.prefs.TercihGunlukHedefDeposu
+import com.keremtulu.questionnote.domain.model.SinavProfili
+import com.keremtulu.questionnote.domain.repository.DersRepository
+import com.keremtulu.questionnote.ui.LocalUygulamaSesleri
+import com.keremtulu.questionnote.ui.bilesenler.premium.CamKarti
+import com.keremtulu.questionnote.ui.bilesenler.premium.CamYukseklik
+import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
+import com.keremtulu.questionnote.ui.premium.EtkilesimTuru
+import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
+import com.keremtulu.questionnote.ui.premium.PremiumOutlinedButton
+import com.keremtulu.questionnote.ui.premium.PremiumSwitch
+import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
 
 @Composable
 fun AyarlarEkrani(
@@ -99,19 +105,32 @@ fun AyarlarEkrani(
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             item {
-                Text(
-                    stringResource(R.string.settings_kicker),
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.labelMedium,
-                    letterSpacing = 1.4.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-                Text(
-                    stringResource(R.string.settings_title),
-                    modifier = Modifier.padding(top = 4.dp),
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.displaySmall,
-                )
+                GradyanKart(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(24.dp),
+                    borderAnimation = false,
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            stringResource(R.string.settings_kicker),
+                            color = PremiumMarkaRenkler.BakirIsik,
+                            style = MaterialTheme.typography.labelMedium,
+                            letterSpacing = 1.4.sp,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Text(
+                            stringResource(R.string.settings_title),
+                            color = PremiumMarkaRenkler.Kagit,
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Text(
+                            stringResource(R.string.settings_header_subtitle),
+                            color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.86f),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                }
             }
             item { MotorAyarlariKarti(tekrarPolitikasi, motorTanisi) }
             item {
@@ -119,9 +138,10 @@ fun AyarlarEkrani(
                     Text(stringResource(R.string.settings_profile_note), style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                     SinavProfili.entries.forEach { profil ->
-                        TextButton(
+                        PremiumTextButton(
                             modifier = Modifier.fillMaxWidth(),
                             enabled = !profilKaydediliyor && !yedeklemeIslemde,
+                            interactionTur = EtkilesimTuru.TIKLAMA,
                             onClick = {
                                 if (secim.profil != profil) {
                                     profilKaydediliyor = true
@@ -152,8 +172,19 @@ fun AyarlarEkrani(
                         Text(secim.profil.dersAdlari.joinToString(" · "), style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
-                    if (profilKaydediliyor) Text(stringResource(R.string.settings_profile_saving))
-                    if (profilHatasi) Text(stringResource(R.string.settings_profile_error), color = MaterialTheme.colorScheme.error)
+                    if (profilKaydediliyor) {
+                        Text(
+                            stringResource(R.string.settings_profile_saving),
+                            modifier = Modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite },
+                        )
+                    }
+                    if (profilHatasi) {
+                        Text(
+                            stringResource(R.string.settings_profile_error),
+                            modifier = Modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Assertive },
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
                 }
             }
             item {
@@ -241,18 +272,30 @@ fun AyarlarEkrani(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodySmall,
                     )
+                    if (yedeklemeIslemde) {
+                        Text(
+                            stringResource(R.string.settings_data_operation_running),
+                            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                                .semantics { liveRegion = LiveRegionMode.Polite },
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        OutlinedButton(
+                        PremiumOutlinedButton(
                             modifier = Modifier.weight(1f),
                             enabled = !yedeklemeIslemde,
+                            interactionTur = EtkilesimTuru.TIKLAMA,
                             onClick = onYedekOlustur,
                         ) { Text(stringResource(R.string.menu_create_backup)) }
-                        OutlinedButton(
+                        PremiumOutlinedButton(
                             modifier = Modifier.weight(1f),
                             enabled = !yedeklemeIslemde,
+                            interactionTur = EtkilesimTuru.TIKLAMA,
                             onClick = onYedekGeriYukle,
                         ) { Text(stringResource(R.string.menu_restore_backup)) }
                     }
@@ -270,7 +313,7 @@ fun AyarlarEkrani(
                             Text(stringResource(R.string.settings_premium_note), style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
-                        OutlinedButton(onClick = onPremiumDemo, enabled = !yedeklemeIslemde) {
+                        PremiumOutlinedButton(onClick = onPremiumDemo, enabled = !yedeklemeIslemde) {
                             Text(stringResource(R.string.settings_premium_open))
                         }
                     }
@@ -284,7 +327,7 @@ fun AyarlarEkrani(
                             color = MaterialTheme.colorScheme.onSurface,
                             style = MaterialTheme.typography.bodyMedium,
                         )
-                        OutlinedButton(onClick = onGorselBakimi, enabled = !yedeklemeIslemde) {
+                        PremiumOutlinedButton(onClick = onGorselBakimi, enabled = !yedeklemeIslemde) {
                             Text(stringResource(R.string.settings_open))
                         }
                     }
@@ -298,7 +341,7 @@ fun AyarlarEkrani(
                             color = MaterialTheme.colorScheme.onSurface,
                             style = MaterialTheme.typography.bodyMedium,
                         )
-                        OutlinedButton(onClick = onKatalog) {
+                        PremiumOutlinedButton(onClick = onKatalog) {
                             Text(stringResource(R.string.settings_open))
                         }
                     }
@@ -312,7 +355,7 @@ fun AyarlarEkrani(
                             Text(stringResource(R.string.settings_topics_note), style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
-                        OutlinedButton(onClick = onKonular, enabled = !yedeklemeIslemde) {
+                        PremiumOutlinedButton(onClick = onKonular, enabled = !yedeklemeIslemde) {
                             Text(stringResource(R.string.settings_open))
                         }
                     }
@@ -347,13 +390,15 @@ private fun Bolum(baslik: String, icerik: @Composable () -> Unit) {
             style = MaterialTheme.typography.labelMedium,
             letterSpacing = 1.sp,
         )
-        Card(
+        CamKarti(
             modifier = Modifier.fillMaxWidth(),
+            elevation = CamYukseklik.DUSUK,
             shape = RoundedCornerShape(22.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         ) {
-            Column(Modifier.padding(16.dp)) { icerik() }
+            Column(
+                Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) { icerik() }
         }
     }
 }

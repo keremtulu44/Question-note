@@ -117,13 +117,18 @@ class OneridenOdagaAkisTest {
             val snapshot = org.json.JSONObject(runBlocking { db.tekrarOlcumDao().tumunuGetir().single().kararJson })
             assertEquals("GOLGE", snapshot.getString("mode"))
             assertEquals(snapshot.getInt("base_interval"), record.sonrakiAralik)
-            // Wait for the async report body so scrolling cannot race its layout expansion.
+            // The report is a lazy list: scroll the stable viewport to its asynchronously loaded progress section.
+            val report = compose.onNodeWithTag("karne-report-list")
             compose.waitUntil(10_000) {
-                compose.onAllNodesWithText(context.getString(R.string.karne_progress_title)).fetchSemanticsNodes().isNotEmpty()
+                report.fetchSemanticsNodes().any { node ->
+                    node.config.contains(SemanticsProperties.StateDescription) &&
+                        node.config[SemanticsProperties.StateDescription] == context.getString(R.string.karne_kicker)
+                }
             }
+            report.performScrollToNode(hasText(context.getString(R.string.karne_progress_title)))
             val back = context.getString(R.string.karne_to_filters)
-            compose.waitUntil(10_000) { compose.onAllNodesWithText(back).fetchSemanticsNodes().isNotEmpty() }
-            compose.onNodeWithText(back).performScrollTo().tikla()
+            report.performScrollToNode(hasText(back))
+            compose.onNodeWithText(back).tikla()
             // The report also has a non-clickable "İlerleme" heading: wait for the actual Filter screen/tab.
             compose.waitUntil(10_000) { compose.onAllNodesWithTag("practice-filter-list").fetchSemanticsNodes().isNotEmpty() }
             compose.waitUntil(10_000) { compose.onAllNodes(progressTab and isEnabled()).fetchSemanticsNodes().isNotEmpty() }

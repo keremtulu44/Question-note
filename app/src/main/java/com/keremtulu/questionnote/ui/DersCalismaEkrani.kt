@@ -2,7 +2,6 @@ package com.keremtulu.questionnote.ui
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -14,14 +13,14 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -31,7 +30,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.keremtulu.questionnote.R
@@ -41,6 +45,16 @@ import com.keremtulu.questionnote.domain.model.Soru
 import com.keremtulu.questionnote.domain.model.SoruPlanDurumu
 import com.keremtulu.questionnote.domain.repository.KonuRepository
 import com.keremtulu.questionnote.domain.repository.SoruRepository
+import com.keremtulu.questionnote.ui.animasyon.animateItemInsertion
+import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
+import com.keremtulu.questionnote.ui.bilesenler.premium.IskeletKart
+import com.keremtulu.questionnote.ui.bilesenler.premium.PremiumBosDurum
+import com.keremtulu.questionnote.ui.bilesenler.premium.VarsayilanIlustrasyon
+import com.keremtulu.questionnote.ui.premium.EtkilesimTuru
+import com.keremtulu.questionnote.ui.premium.PremiumButton
+import com.keremtulu.questionnote.ui.premium.PremiumTextButton
+import com.keremtulu.questionnote.ui.premium.PremiumCard
+import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
@@ -100,30 +114,50 @@ fun DersCalismaEkrani(
         contentWindowInsets = WindowInsets.safeDrawing,
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
-            Column(Modifier.fillMaxWidth().padding(start = 22.dp, top = 10.dp, end = 22.dp, bottom = 8.dp)) {
-                TextButton(onClick = onGeri) { Text(stringResource(R.string.topic_back_to_lessons)) }
-                Text(
-                    text = ders.ad,
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = colors.onBackground,
-                    fontWeight = FontWeight.SemiBold,
-                )
-                Text(
-                    text = if (dersArsivli) stringResource(R.string.lesson_archived_read_only)
-                    else stringResource(R.string.question_screen_subtitle),
-                    modifier = Modifier.padding(top = 3.dp),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colors.onSurfaceVariant,
-                )
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                PremiumTextButton(
+                    onClick = onGeri,
+                    interactionTur = EtkilesimTuru.GERI,
+                ) { Text(stringResource(R.string.topic_back_to_lessons)) }
+                GradyanKart(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(24.dp),
+                    borderAnimation = false,
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(
+                            text = ders.ad,
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = PremiumMarkaRenkler.Kagit,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Text(
+                            text = if (dersArsivli) stringResource(R.string.lesson_archived_read_only)
+                            else stringResource(R.string.question_screen_subtitle),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.86f),
+                        )
+                    }
+                }
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                if (!dersArsivli) {
-                    TextButton(onClick = onKonulariYonet) { Text(stringResource(R.string.topic_screen_title)) }
-                    Button(onClick = onSoruEkle) { Text(stringResource(R.string.question_add)) }
+            if (!dersArsivli) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    PremiumTextButton(
+                        onClick = onKonulariYonet,
+                        modifier = Modifier.weight(1f),
+                        interactionTur = EtkilesimTuru.KART_KAPANIS,
+                    ) { Text(stringResource(R.string.topic_screen_title)) }
+                    PremiumButton(
+                        onClick = onSoruEkle,
+                        modifier = Modifier.weight(1f),
+                    ) { Text(stringResource(R.string.question_add)) }
                 }
             }
 
@@ -134,9 +168,15 @@ fun DersCalismaEkrani(
                     style = MaterialTheme.typography.bodySmall,
                     color = colors.onSurfaceVariant,
                 )
-                KonuListesiDurumu.Hata -> TextButton(onClick = { yenileme++ }) {
-                    Text(stringResource(R.string.topic_load_error))
-                }
+                KonuListesiDurumu.Hata -> PremiumBosDurum(
+                    illustration = { VarsayilanIlustrasyon() },
+                    baslik = stringResource(R.string.topic_screen_title),
+                    aciklama = stringResource(R.string.topic_load_error),
+                    butonMetni = stringResource(R.string.topic_retry),
+                    onButonTikla = { yenileme++ },
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp)
+                        .semantics { liveRegion = LiveRegionMode.Assertive },
+                )
                 is KonuListesiDurumu.Hazir -> {
                     Row(
                         modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
@@ -189,10 +229,19 @@ fun DersCalismaEkrani(
             }
 
             when (val current = sorular) {
-                SoruListesiDurumu.Yukleniyor -> Box(
-                    modifier = Modifier.fillMaxWidth().weight(1f),
-                    contentAlignment = Alignment.Center,
-                ) { CircularProgressIndicator() }
+                SoruListesiDurumu.Yukleniyor -> {
+                    val loadingLabel = stringResource(R.string.question_list_loading_label)
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth().weight(1f).semantics {
+                            contentDescription = loadingLabel
+                            liveRegion = LiveRegionMode.Polite
+                        },
+                        contentPadding = PaddingValues(start = 18.dp, top = 8.dp, end = 18.dp, bottom = 24.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        items(4) { IskeletKart(height = 96, showImage = true) }
+                    }
+                }
                 SoruListesiDurumu.Hata -> DurumKarti(
                     stringResource(R.string.question_list_error),
                     modifier = Modifier.weight(1f),
@@ -204,7 +253,8 @@ fun DersCalismaEkrani(
                     }
                     if (visibleQuestions.isEmpty()) {
                         val emptyMessage = when {
-                            current.sorular.isNotEmpty() -> R.string.question_empty_filtered
+                            current.sorular.isNotEmpty() || planDurumuFiltresi != null || seciliKonuId != null ->
+                                R.string.question_empty_filtered
                             konusuzFiltre -> R.string.question_empty_unassigned
                             dersArsivli -> R.string.question_empty_archived_lesson
                             else -> R.string.question_empty
@@ -219,8 +269,16 @@ fun DersCalismaEkrani(
                             contentPadding = PaddingValues(start = 18.dp, top = 8.dp, end = 18.dp, bottom = 24.dp),
                             verticalArrangement = Arrangement.spacedBy(10.dp),
                         ) {
-                            items(visibleQuestions, key = { it.id }) { soru ->
-                                SoruListeKarti(soru = soru, onClick = { onSoruAc(soru.id) })
+                            itemsIndexed(visibleQuestions, key = { _, question -> question.id }) { index, soru ->
+                                val enter = animateItemInsertion(index)
+                                SoruListeKarti(
+                                    soru = soru,
+                                    onClick = { onSoruAc(soru.id) },
+                                    modifier = Modifier.graphicsLayer {
+                                        alpha = enter.value
+                                        translationY = (1f - enter.value) * 12.dp.toPx()
+                                    },
+                                )
                             }
                         }
                     }
@@ -238,9 +296,18 @@ private fun statusFilterLabel(status: SoruPlanDurumu): Int = when (status) {
 }
 
 @Composable
-private fun SoruListeKarti(soru: Soru, onClick: () -> Unit) {
-    Card(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
-        Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+private fun SoruListeKarti(
+    soru: Soru,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    PremiumCard(
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        interactionTur = EtkilesimTuru.KART_ACILIS,
+    ) {
+        Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
                 text = stringResource(R.string.question_photo_only),
                 style = MaterialTheme.typography.titleMedium,
@@ -258,17 +325,24 @@ private fun SoruListeKarti(soru: Soru, onClick: () -> Unit) {
                 )
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = stringResource(
-                        when (soru.planDurumu) {
-                            com.keremtulu.questionnote.domain.model.SoruPlanDurumu.AKTIF -> R.string.question_status_active
-                            com.keremtulu.questionnote.domain.model.SoruPlanDurumu.ASKIDA -> R.string.question_status_paused
-                            com.keremtulu.questionnote.domain.model.SoruPlanDurumu.TAMAMLANDI -> R.string.question_status_done
-                        },
-                    ),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                )
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                ) {
+                    Text(
+                        text = stringResource(
+                            when (soru.planDurumu) {
+                                SoruPlanDurumu.AKTIF -> R.string.question_status_active
+                                SoruPlanDurumu.ASKIDA -> R.string.question_status_paused
+                                SoruPlanDurumu.TAMAMLANDI -> R.string.question_status_done
+                            },
+                        ),
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+                }
                 Text(
                     text = stringResource(R.string.question_photo_badge),
                     style = MaterialTheme.typography.labelSmall,
@@ -285,10 +359,17 @@ private fun DurumKarti(
     modifier: Modifier = Modifier,
     onRetry: (() -> Unit)? = null,
 ) {
-    Box(modifier.fillMaxWidth().padding(28.dp), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(metin, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
-            onRetry?.let { TextButton(onClick = it) { Text(stringResource(R.string.topic_retry)) } }
-        }
-    }
+    val retryLabel = if (onRetry != null) stringResource(R.string.topic_retry) else null
+    PremiumBosDurum(
+        illustration = { VarsayilanIlustrasyon() },
+        baslik = stringResource(
+            if (onRetry != null) R.string.question_list_error_title else R.string.question_list_empty_title,
+        ),
+        aciklama = metin,
+        butonMetni = retryLabel,
+        onButonTikla = onRetry,
+        modifier = modifier.fillMaxWidth().semantics {
+            liveRegion = if (onRetry != null) LiveRegionMode.Assertive else LiveRegionMode.Polite
+        },
+    )
 }

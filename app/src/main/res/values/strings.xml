@@ -36,6 +36,11 @@
     <string name="lessons_choose_title">Hangi ders?</string>
     <string name="lessons_browse_subtitle">Sorularına göz atmak için bir ders seç.</string>
     <string name="lessons_choose_subtitle">Yeni sorunu doğru yere eklemek için ders seç.</string>
+    <string name="lessons_count">%1$d ders</string>
+    <string name="lessons_empty_title">Henüz etkin ders yok</string>
+    <string name="lessons_empty_description">Ders ayarlarında bir dersi etkinleştirdiğinde soruların burada görünür.</string>
+    <string name="lessons_error_title">Dersler yüklenemedi</string>
+    <string name="lessons_error_description">Yerel ders listesi alınamadı. Yeniden deneyebilirsin.</string>
     <string name="lessons_high_school_badge">Lise · sınav ayrımı yok</string>
     <string name="home_loading_dersler">Dersler yükleniyor…</string>
     <string name="home_error_dersler">Dersler yüklenemedi. Uygulamayı yeniden açmayı deneyin.</string>
@@ -73,6 +78,10 @@
     <string name="filtered_practice_kicker">SORU ARŞİVİ · ODAKLI ÇALIŞMA</string>
     <string name="filtered_practice_title">Filtreli çalışma</string>
     <string name="filtered_practice_subtitle">Konu, kaynak ve ana yanlış nedenine göre sorularını seç.</string>
+    <string name="filtered_practice_filters_title">Çalışma kapsamı</string>
+    <string name="filtered_practice_error_title">Sorular açılamadı</string>
+    <string name="filtered_practice_options_error_title">Filtre seçenekleri açılamadı</string>
+    <string name="filtered_practice_empty_title">Bu seçimde soru yok</string>
     <string name="filtered_practice_filter_topic">Konu</string>
     <string name="filtered_practice_filter_source">Kaynak</string>
     <string name="filtered_practice_filter_reason">Ana yanlış nedeni</string>
@@ -102,6 +111,9 @@
     <string name="question_empty">Bu derste henüz soru yok. İlk sorunu ekleyebilirsin.</string>
     <string name="question_empty_unassigned">Bu derste konusuz soru yok.</string>
     <string name="question_empty_archived_lesson">Arşivlenmiş derste görüntülenecek soru yok.</string>
+    <string name="question_list_empty_title">Burada henüz soru yok</string>
+    <string name="question_list_error_title">Soru listesi açılamadı</string>
+    <string name="question_list_loading_label">Sorular yükleniyor</string>
     <string name="question_list_error">Sorular yüklenemedi.</string>
     <string name="question_photo_only">Fotoğraflı soru</string>
     <string name="question_photo_badge">Fotoğraflar · çözüm gizli</string>
@@ -154,6 +166,11 @@
     <string name="question_delete">Sil</string>
     <string name="question_plan_status">Plan durumu</string>
     <string name="question_not_found">Soru bulunamadı.</string>
+    <string name="question_detail_missing_title">Bu soru artık yok</string>
+    <string name="question_detail_missing_description">Bu soru kaydı artık mevcut değil. Sorular listesine geri dönebilirsin.</string>
+    <string name="question_detail_error_title">Soru ayrıntısı açılamadı</string>
+    <string name="question_detail_error_description">Yerel soru verisine erişilemedi. Yeniden deneyebilir veya geri dönebilirsin.</string>
+    <string name="question_detail_loading_label">Soru ayrıntısı yükleniyor</string>
     <string name="question_detail_error">Soru ayrıntısı yüklenemedi.</string>
     <string name="question_back">← Sorulara dön</string>
     <string name="question_delete_title">Soruyu sil</string>
@@ -436,6 +453,8 @@
 
     <string name="settings_title">Ayarlar</string>
     <string name="settings_kicker">AYARLAR</string>
+    <string name="settings_header_subtitle">Çalışma düzenini, hatırlatıcı hedefini ve yerel verilerini yönet.</string>
+    <string name="settings_data_operation_running">Yedek işlemi sürüyor…</string>
     <string name="settings_goal_title">Günlük hedef</string>
     <string name="settings_goal_note">Bugün ekranındaki hedef halkası bu sayıyı kullanır.</string>
     <string name="settings_goal_option">%1$d soru</string>

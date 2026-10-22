@@ -11,32 +11,26 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableIntStateOf
-import com.keremtulu.questionnote.ui.tema.LocalHareketPolitikasi
-import com.keremtulu.questionnote.ui.tema.HareketTuru
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -47,8 +41,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -71,6 +71,16 @@ import com.keremtulu.questionnote.domain.model.Ders
 import com.keremtulu.questionnote.domain.model.Konu
 import com.keremtulu.questionnote.domain.model.Soru
 import com.keremtulu.questionnote.domain.repository.KonuRepository
+import com.keremtulu.questionnote.ui.bilesenler.premium.CamKarti
+import com.keremtulu.questionnote.ui.bilesenler.premium.CamYukseklik
+import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
+import com.keremtulu.questionnote.ui.bilesenler.premium.IskeletKart
+import com.keremtulu.questionnote.ui.premium.EtkilesimTuru
+import com.keremtulu.questionnote.ui.premium.PremiumButton
+import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
+import com.keremtulu.questionnote.ui.premium.PremiumTextButton
+import com.keremtulu.questionnote.ui.tema.HareketTuru
+import com.keremtulu.questionnote.ui.tema.LocalHareketPolitikasi
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -115,7 +125,6 @@ fun KarneEkrani(
     onFiltrelereDon: () -> Unit,
     onBugun: () -> Unit,
 ) {
-    val context = LocalContext.current
     val sayilar = remember(sonuclar) { KarneHesabi.hesapla(sonuclar) }
     val konuAkimI = remember(konuRepository) { konuRepository.tumunuIzle() }
     val konular = produceState<Map<String, Konu>>(emptyMap(), konuAkimI) {
@@ -152,90 +161,131 @@ fun KarneEkrani(
     val ozet = durum?.ozet
     val konusuzEtiket = stringResource(R.string.karne_no_topic)
     val colors = MaterialTheme.colorScheme
+    val reportState = when {
+        durum == null && !ekBilgiHatasi -> stringResource(R.string.progress_loading)
+        ekBilgiHatasi -> stringResource(R.string.karne_progress_error)
+        else -> stringResource(R.string.karne_kicker)
+    }
 
     Scaffold(
         containerColor = colors.background,
     ) { insets ->
         Box(Modifier.fillMaxSize().padding(insets)) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 20.dp, vertical = 12.dp),
+            LazyColumn(
+                modifier = Modifier.fillMaxSize().testTag("karne-report-list")
+                    .semantics { stateDescription = reportState },
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text(
-                    stringResource(R.string.karne_kicker),
-                    modifier = Modifier.fillMaxWidth(),
-                    color = colors.primary,
-                    style = MaterialTheme.typography.labelMedium,
-                    letterSpacing = 1.4.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-                Spacer(Modifier.height(10.dp))
-                Baslik(sayilar, animasyonAcik)
-                Spacer(Modifier.height(18.dp))
-                OranHalkasi(
-                    sayilar = sayilar,
-                    animasyonAcik = animasyonAcik,
-                )
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    text = stringResource(R.string.karne_partial_explainer),
-                    modifier = Modifier.padding(top = 4.dp),
-                    color = colors.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodySmall,
-                    textAlign = TextAlign.Center,
-                )
-                Spacer(Modifier.height(16.dp))
-                KovaBolumu(sayilar, animasyonAcik)
+                item(key = "hero") {
+                    GradyanKart(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(24.dp),
+                        borderAnimation = false,
+                    ) {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(
+                                stringResource(R.string.karne_kicker),
+                                color = PremiumMarkaRenkler.BakirIsik,
+                                style = MaterialTheme.typography.labelMedium,
+                                letterSpacing = 1.4.sp,
+                                fontWeight = FontWeight.Bold,
+                            )
+                            Baslik(sayilar, animasyonAcik, hero = true)
+                        }
+                    }
+                }
+                item(key = "ratio") {
+                    OranHalkasi(sayilar = sayilar, animasyonAcik = animasyonAcik)
+                }
+                item(key = "explainer") {
+                    Text(
+                        text = stringResource(R.string.karne_partial_explainer),
+                        modifier = Modifier.fillMaxWidth(),
+                        color = colors.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodySmall,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+                item(key = "buckets") { KovaBolumu(sayilar, animasyonAcik) }
                 if (dagilim.nedenler.isNotEmpty()) {
-                    Spacer(Modifier.height(16.dp))
-                    BolumKarti(baslik = stringResource(R.string.karne_reasons_title)) {
-                        dagilim.nedenler.forEach { satir ->
-                            DagilimCubugu(satir)
+                    item(key = "reasons") {
+                        BolumKarti(baslik = stringResource(R.string.karne_reasons_title)) {
+                            dagilim.nedenler.forEach { satir -> DagilimCubugu(satir) }
                         }
                     }
                 }
                 if (dagilim.konular.isNotEmpty()) {
-                    Spacer(Modifier.height(16.dp))
-                    BolumKarti(baslik = stringResource(R.string.karne_topics_title)) {
-                        dagilim.konular.forEach { konu ->
-                            KonuSatiri(
-                                konu = konu,
-                                konusuzEtiket = konusuzEtiket,
-                                onKonudanCalis = onKonudanCalis,
-                            )
+                    item(key = "topics") {
+                        BolumKarti(baslik = stringResource(R.string.karne_topics_title)) {
+                            dagilim.konular.forEach { konu ->
+                                KonuSatiri(konu = konu, konusuzEtiket = konusuzEtiket, onKonudanCalis = onKonudanCalis)
+                            }
                         }
                     }
                 }
                 if (ozet != null) {
-                    Spacer(Modifier.height(16.dp))
-                    HaftaBolumu(ozet)
-                    Spacer(Modifier.height(16.dp))
-                    IlerlemeBolumu(ozet, durum?.hedef ?: 0)
-                    Spacer(Modifier.height(16.dp))
-                    SonYediGunBolumu(ozet)
+                    item(key = "week") { HaftaBolumu(ozet) }
+                    item(key = "progress") { IlerlemeBolumu(ozet, durum?.hedef ?: 0) }
+                    item(key = "last-seven-days") { SonYediGunBolumu(ozet) }
                 }
                 if (durum != null && durum.yeniRozetler.isNotEmpty()) {
-                    Spacer(Modifier.height(16.dp))
-                    KarneRozetBolumu(durum.yeniRozetler, rozetDeposu)
+                    item(key = "badges") { KarneRozetBolumu(durum.yeniRozetler, rozetDeposu) }
+                }
+                if (durum == null && !ekBilgiHatasi) {
+                    item(key = "loading-progress") {
+                        val loadingLabel = stringResource(R.string.progress_loading)
+                        Column(
+                            modifier = Modifier.fillMaxWidth().semantics {
+                                contentDescription = loadingLabel
+                                liveRegion = LiveRegionMode.Polite
+                            },
+                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                        ) {
+                            IskeletKart(height = 92, showImage = false, showSubtitle = true)
+                            IskeletKart(height = 116, showImage = false, showSubtitle = true)
+                        }
+                    }
                 }
                 if (ekBilgiHatasi) {
-                    Text(stringResource(R.string.karne_progress_error), Modifier.padding(top = 12.dp))
-                    TextButton(onClick = { yenileme++ }) { Text(stringResource(R.string.level_retry)) }
+                    item(key = "progress-error") {
+                        CamKarti(
+                            modifier = Modifier.fillMaxWidth(),
+                            elevation = CamYukseklik.DUSUK,
+                            shape = RoundedCornerShape(20.dp),
+                        ) {
+                            Column(
+                                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                Text(
+                                    stringResource(R.string.karne_progress_error),
+                                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Assertive },
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                )
+                                PremiumTextButton(
+                                    onClick = { yenileme++ },
+                                    interactionTur = EtkilesimTuru.TIKLAMA,
+                                ) { Text(stringResource(R.string.level_retry)) }
+                            }
+                        }
+                    }
                 }
-                Spacer(Modifier.height(24.dp))
-                Button(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = onFiltrelereDon,
-                ) {
-                    Text(stringResource(R.string.karne_to_filters))
+                item(key = "return-to-filters") {
+                    PremiumButton(
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+                        onClick = onFiltrelereDon,
+                        interactionTur = EtkilesimTuru.GERI,
+                    ) { Text(stringResource(R.string.karne_to_filters)) }
                 }
-                TextButton(onClick = onBugun) {
-                    Text(stringResource(R.string.menu_today))
+                item(key = "return-to-today") {
+                    PremiumTextButton(
+                        onClick = onBugun,
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                    ) { Text(stringResource(R.string.menu_today)) }
                 }
-                Spacer(Modifier.height(12.dp))
             }
             if (animasyonAcik && sayilar.oran >= KONFETI_ESIGI) {
                 Konfeti(
@@ -249,29 +299,32 @@ fun KarneEkrani(
 private const val KONFETI_ESIGI = 70
 
 @Composable
-private fun Baslik(sayilar: KarneSayilari, animasyonAcik: Boolean) {
+private fun Baslik(sayilar: KarneSayilari, animasyonAcik: Boolean, hero: Boolean = false) {
     val toplam = sayanDeger(sayilar.toplam, animasyonAcik, 0)
     val bagimsiz = sayanDeger(sayilar.bagimsiz, animasyonAcik, 150)
     val colors = MaterialTheme.colorScheme
+    val titleColor = if (hero) PremiumMarkaRenkler.Kagit else colors.onBackground
+    val supportingColor = if (hero) PremiumMarkaRenkler.Kagit.copy(alpha = 0.86f) else colors.onSurfaceVariant
+    val greetingColor = if (hero) PremiumMarkaRenkler.Kagit else colors.onSurface
     if (sayilar.kisaOturum) {
         Text(
             text = stringResource(R.string.karne_short_title),
             modifier = Modifier.fillMaxWidth(),
-            color = colors.onBackground,
+            color = titleColor,
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
         )
         Text(
             text = stringResource(R.string.karne_short_description, toplam, bagimsiz),
             modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-            color = colors.onSurfaceVariant,
+            color = supportingColor,
             style = MaterialTheme.typography.bodyMedium,
         )
     } else {
         Text(
             text = stringResource(R.string.karne_headline, toplam, bagimsiz),
             modifier = Modifier.fillMaxWidth(),
-            color = colors.onBackground,
+            color = titleColor,
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
         )
@@ -279,7 +332,7 @@ private fun Baslik(sayilar: KarneSayilari, animasyonAcik: Boolean) {
     Text(
         text = stringResource(tebrikMetni(KarneHesabi.tebrikSeviyesi(sayilar))),
         modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
-        color = colors.onSurface,
+        color = greetingColor,
         style = MaterialTheme.typography.bodyLarge,
     )
 }
@@ -422,19 +475,18 @@ private fun KovaBolumu(sayilar: KarneSayilari, animasyonAcik: Boolean) {
 
 @Composable
 private fun BolumKarti(baslik: String, icerik: @Composable () -> Unit) {
-    val colors = MaterialTheme.colorScheme
-    Card(
+    CamKarti(
         modifier = Modifier.fillMaxWidth(),
+        elevation = CamYukseklik.DUSUK,
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = colors.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
                 baslik,
-                color = colors.onSurface,
+                color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.semantics { heading() },
             )
             icerik()
         }
@@ -486,7 +538,10 @@ private fun KonuSatiri(
             )
         }
         if (konu.konuId != null) {
-            TextButton(onClick = { onKonudanCalis(konu.konuId) }) {
+            PremiumTextButton(
+                onClick = { onKonudanCalis(konu.konuId) },
+                interactionTur = EtkilesimTuru.KART_ACILIS,
+            ) {
                 Text(stringResource(R.string.karne_topic_study))
             }
         }
