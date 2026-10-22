@@ -120,7 +120,7 @@ class OneridenOdagaAkisTest {
             // The report is a lazy list: scroll the stable viewport to its asynchronously loaded progress section.
             val report = compose.onNodeWithTag("karne-report-list")
             compose.waitUntil(10_000) {
-                report.fetchSemanticsNodes().any { node ->
+                compose.onAllNodesWithTag("karne-report-list").fetchSemanticsNodes().any { node ->
                     node.config.contains(SemanticsProperties.StateDescription) &&
                         node.config[SemanticsProperties.StateDescription] == context.getString(R.string.karne_kicker)
                 }
