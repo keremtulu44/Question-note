@@ -18,7 +18,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
+import com.keremtulu.questionnote.ui.premium.PremiumSwitch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -64,6 +64,7 @@ fun AyarlarEkrani(
     onGorselBakimi: () -> Unit,
     onKatalog: () -> Unit,
     onKonular: () -> Unit,
+    onPremiumDemo: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -210,7 +211,7 @@ fun AyarlarEkrani(
                                 style = MaterialTheme.typography.bodySmall,
                             )
                         }
-                        Switch(
+                        PremiumSwitch(
                             checked = sesAcik,
                             onCheckedChange = { acik ->
                                 sesAcik = acik
@@ -261,6 +262,20 @@ fun AyarlarEkrani(
                 Bolum(stringResource(R.string.settings_category_other)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Column(Modifier.weight(1f).padding(end = 12.dp)) {
+                            Text(stringResource(R.string.settings_premium_title), style = MaterialTheme.typography.bodyMedium)
+                            Text(stringResource(R.string.settings_premium_note), style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        OutlinedButton(onClick = onPremiumDemo, enabled = !yedeklemeIslemde) {
+                            Text(stringResource(R.string.settings_premium_open))
+                        }
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {

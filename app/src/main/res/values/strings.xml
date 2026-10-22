@@ -447,6 +447,9 @@
     <string name="settings_about_data">Veriler yalnızca bu cihazda tutulur. Uygulamayı kaldırırsan yedek almadığın veriler silinir.</string>
     <string name="settings_education_note">Şimdilik lise odağı. Ortaokul/LGS seçenekleri ileride buraya eklenecek.</string>
     <string name="settings_open">Aç</string>
+    <string name="settings_premium_title">Premium etkileşimleri dene</string>
+    <string name="settings_premium_note">Cam yüzeyler, animasyonlar, ses ve titreşim örnekleri</string>
+    <string name="settings_premium_open">Önizle</string>
     <string name="settings_category_goal">HEDEF</string>
     <string name="settings_category_data">VERİ</string>
     <string name="settings_category_other">DİĞER</string>
@@ -512,6 +515,8 @@
     <string name="rank_earned">Bu rütbeye ulaştın</string>
     <string name="level_retry">Yeniden yükle</string>
     <string name="focus_kicker">ODAK STÜDYOSU</string>
+    <string name="focus_ambient_title">Odak ambiyansı</string>
+    <string name="focus_ambient_note">İsteğe bağlı; ses efektleri ayarı açıksa çalar.</string>
     <string name="focus_title">Bir soru. Tam odak.</string>
     <string name="focus_start">Odak oturumunu başlat</string>
     <string name="focus_start_today">Bugünün oturumuna başla</string>

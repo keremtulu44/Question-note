@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -25,6 +26,9 @@ import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.data.prefs.RozetDeposu
 import com.keremtulu.questionnote.data.prefs.RutbeDeposu
 import com.keremtulu.questionnote.data.prefs.RutbeKutlamasi
+import com.keremtulu.questionnote.data.ses.HapticTipi
+import com.keremtulu.questionnote.data.ses.SesTuruGenis
+import com.keremtulu.questionnote.data.ses.SesYoneticisi
 import com.keremtulu.questionnote.ui.tema.HareketTuru
 import com.keremtulu.questionnote.ui.tema.LocalHareketPolitikasi
 import kotlinx.coroutines.CancellationException
@@ -65,10 +69,10 @@ fun KutlamaHost(rozetler: RozetDeposu, rutbeler: RutbeDeposu, goster: Boolean) {
 @Composable
 fun RutbeKutlamasiIcerigi(r: RutbeKutlamasi, mesgul: Boolean = false, hata: Boolean = false, onKapat: () -> Unit) {
     val p = LocalHareketPolitikasi.current
-    val ses = com.keremtulu.questionnote.ui.LocalUygulamaSesleri.current
+    val context = LocalContext.current
     val giris = remember(r.son) { Animatable(if (p.azaltildi) 1f else 0f) }
     LaunchedEffect(r.son, p) {
-        ses?.cal(com.keremtulu.questionnote.data.ses.SesTuru.KUTLAMA)
+        SesYoneticisi.uygulama(context).calPremium(SesTuruGenis.RUTBE_ATLADI, HapticTipi.RUTBE)
         if (p.azaltildi) giris.snapTo(1f) else giris.animateTo(1f, tween(p.sure(HareketTuru.KUTLAMA)))
     }
     Dialog(onDismissRequest = { if (!mesgul) onKapat() }, properties = DialogProperties(

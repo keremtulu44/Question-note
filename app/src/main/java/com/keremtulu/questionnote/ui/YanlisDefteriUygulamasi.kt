@@ -1,6 +1,15 @@
 package com.keremtulu.questionnote.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.tween
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -33,7 +42,9 @@ import com.keremtulu.questionnote.data.prefs.OdakOturumuDeposu
 import com.keremtulu.questionnote.domain.calisma.OdakOturumu
 import com.keremtulu.questionnote.domain.calisma.YerelTakvimSaati
 import com.keremtulu.questionnote.domain.model.SoruIslemSonucu
-import com.keremtulu.questionnote.data.ses.SesTuru
+import com.keremtulu.questionnote.data.ses.HapticTipi
+import com.keremtulu.questionnote.data.ses.SesTuruGenis
+import com.keremtulu.questionnote.data.ses.SesYoneticisi
 import com.keremtulu.questionnote.ui.ayarlar.KonuMerkeziEkrani
 import com.keremtulu.questionnote.ui.calisma.OdakOturumuEkrani
 import com.keremtulu.questionnote.ui.karne.RozetKutlamaHost
@@ -80,6 +91,8 @@ import com.keremtulu.questionnote.domain.repository.SoruRepository
 import com.keremtulu.questionnote.ui.ayarlar.AyarlarEkrani
 import com.keremtulu.questionnote.ui.karne.KarneEkrani
 import com.keremtulu.questionnote.ui.seviye.SeviyeEkrani
+import com.keremtulu.questionnote.ui.tema.HareketTuru
+import com.keremtulu.questionnote.ui.tema.LocalHareketPolitikasi
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -155,11 +168,9 @@ fun YanlisDefteriUygulamasi(
     val snackbarHostState = remember { SnackbarHostState() }
     var rozetGozlemYenileme by remember { mutableIntStateOf(0) }
     var rozetGozlemDurdu by remember { mutableStateOf(false) }
-    val ses = LocalUygulamaSesleri.current
-
     /** Kaydedilen tekrarın kısa kutucuğu: sıradaki tarih + "Geri al" (az önceki kaydı siler). */
     fun geriAlKutucuguGoster(soruId: String, sonrakiGun: Int?) {
-        ses?.cal(SesTuru.TEKRAR)
+        SesYoneticisi.uygulama(context).calPremium(SesTuruGenis.TEKRAR, HapticTipi.BASARI)
         scope.launch {
             val tarih = sonrakiGun?.let {
                 LocalDate.ofEpochDay(it.toLong())
@@ -190,7 +201,7 @@ fun YanlisDefteriUygulamasi(
     // Günlük hedef tamamlandığında tek seferlik kısa ses; kaynak sayaç geçişi (ekranlar arası).
     val hedefGun = remember { LocalDate.now(YerelTakvimSaati.zone).toEpochDay().toInt() }
     var sonHedefSayisi: Int? by remember { mutableStateOf(null) }
-    LaunchedEffect(ilerlemeHizmeti, hedefGun, ses) {
+    LaunchedEffect(ilerlemeHizmeti, hedefGun) {
         ilerlemeHizmeti.bugunSayisiIzle(hedefGun)
             .catch { }
             .collect { yeni ->
@@ -198,7 +209,7 @@ fun YanlisDefteriUygulamasi(
                 val hedef = gunlukHedefDeposu.hedef()
                 if (once != null && once < hedef && yeni >= hedef) {
                     delay(300)
-                    ses?.cal(SesTuru.HEDEF)
+                    SesYoneticisi.uygulama(context).calPremium(SesTuruGenis.HEDEF, HapticTipi.BASARI_GUCLU)
                 }
                 sonHedefSayisi = yeni
             }
@@ -380,6 +391,7 @@ fun YanlisDefteriUygulamasi(
     }
 
     val altMenuGorunur = ekran.altMenuGorunur()
+    val hareketPolitikasi = LocalHareketPolitikasi.current
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -391,6 +403,24 @@ fun YanlisDefteriUygulamasi(
         },
     ) { insets ->
         Box(Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets)) {
+            AnimatedContent(
+                targetState = ekran,
+                transitionSpec = {
+                    if (hareketPolitikasi.hareketAcik) {
+                        val duration = hareketPolitikasi.sure(HareketTuru.GIRIS)
+                        (fadeIn(tween(duration)) + slideInHorizontally(
+                            animationSpec = tween(duration),
+                            initialOffsetX = { width -> width / 18 },
+                        )) togetherWith (fadeOut(tween(duration)) + slideOutHorizontally(
+                            animationSpec = tween(duration),
+                            targetOffsetX = { width -> -width / 24 },
+                        ))
+                    } else {
+                        EnterTransition.None togetherWith ExitTransition.None
+                    }
+                },
+                label = "uygulama-ekran-gecisi",
+            ) { displayedScreen ->
             when (kurtarma) {
                 KurtarmaDurumu.YUKLENIYOR -> UygulamaDurumEkrani(
                     metin = stringResource(R.string.backup_restore_working),
@@ -401,7 +431,7 @@ fun YanlisDefteriUygulamasi(
                     yukleniyor = false,
                     tekrarDene = { scope.launch { kurtarmayiCalistir() } },
                 )
-                KurtarmaDurumu.HAZIR -> when (val current = ekran) {
+                KurtarmaDurumu.HAZIR -> when (val current = displayedScreen) {
                     UygulamaEkrani.Bugun -> BugunEkrani(
                         soruRepository = soruRepository,
                         dersRepository = dersRepository,
@@ -560,8 +590,17 @@ fun YanlisDefteriUygulamasi(
                         onGorselBakimi = { ekranSec(UygulamaEkrani.GorselBakimi) },
                         onKatalog = { ekranSec(UygulamaEkrani.Katalog) },
                         onKonular = { ekranSec(UygulamaEkrani.KonuMerkezi) },
+                        onPremiumDemo = {
+                            context.startActivity(
+                                android.content.Intent(
+                                    context,
+                                    com.keremtulu.questionnote.ui.premium.PremiumDemoActivity::class.java,
+                                ),
+                            )
+                        },
                     )
                 }
+            }
             }
         }
     }

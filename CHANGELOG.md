@@ -2,6 +2,15 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [Yayımlanmadı] — arena/be352b3c oturumu (2026-10-22)
+
+- **Premium deneyim:** sistem azaltılmış-hareket ayarına uyan ekran geçişleri, kademeli liste girişleri, mikro-etkileşimler, shimmer/iskele yükleme durumları ve başarı parçacıkları; cam/gradient/gölge yüzeyler.
+- **Ses ve dokunsal geri bildirim:** kısa UI/başarı sesi kitaplığı genişletildi, stereo yön hissi ve isteğe bağlı Odak ambiyansı eklendi. Farklı dokunsal desenler sistem titreşim ayarına uyar; Ayarlar ve Odak'ta kullanıcı kontrolü vardır.
+- **Gezinme ve demo:** alt menüde kaydırma ile sekme geçişi; Ayarlar'da etkileşimleri deneyen Premium demo. Mevcut ekranlar ve çalışma akışları korunur.
+- **Veri güvenliği:** veritabanı şeması, çalışma kayıtları, yedekler ve öğrenme kuralları değiştirilmedi; yeni bağımlılık eklenmedi.
+- Sürüm: `versionCode 22` / `versionName 1.5.92` — v1.5.91'in üzerine, aynı uygulama kimliği ve imzalama anahtarıyla güncelleme.
+
+
 ## [Yayımlanmadı] — arena/1c0f41d0 oturumu (2026-10-19)
 
 - **Uygulama adı: "Yanlış Defterim"** — launcher etiketi (`app_name`), README başlığı ve Release
