@@ -1,5 +1,7 @@
 package com.keremtulu.questionnote.data.ses
 
+import com.keremtulu.questionnote.R
+
 /**
  * Extended sound types for ultra-premium audio experience.
  * Each sound is designed for a specific UI moment with distinct character.

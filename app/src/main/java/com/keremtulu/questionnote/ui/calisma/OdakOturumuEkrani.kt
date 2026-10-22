@@ -355,7 +355,7 @@ fun OdakOturumuEkrani(
             item { Text(stringResource(R.string.focus_image_hint), style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant) }
             item {
                 PremiumOutlinedButton(onClick = {
-                    if (kaydediliyor || cozumAciliyor) return@OutlinedButton
+                    if (kaydediliyor || cozumAciliyor) return@PremiumOutlinedButton
                     if (cozumGorunur) cozumGorunur = false else {
                         olcum.aktiflik(false)
                         olcum.cozumuAc()

@@ -136,6 +136,41 @@ fun CamKarti(
 
 enum class CamYukseklik { DUSUK, ORTA, YUKSEK, COK_YUKSEK }
 
+/** Glass list row with a clear title/subtitle hierarchy and optional leading/trailing content. */
+@Composable
+fun PremiumListItem(
+    modifier: Modifier = Modifier,
+    title: String,
+    subtitle: String? = null,
+    leading: (@Composable () -> Unit)? = null,
+    trailing: (@Composable () -> Unit)? = null,
+    onClick: (() -> Unit)? = null,
+) {
+    CamKarti(
+        modifier = modifier,
+        elevation = CamYukseklik.DUSUK,
+        onClick = onClick,
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            leading?.invoke()
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                if (!subtitle.isNullOrBlank()) {
+                    Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+            trailing?.invoke()
+        }
+    }
+}
+
 /** Premium gradient surface with a subtle animated gradient edge. */
 @Composable
 fun GradyanKart(

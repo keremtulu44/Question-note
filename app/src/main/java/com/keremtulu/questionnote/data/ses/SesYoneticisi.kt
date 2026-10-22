@@ -89,7 +89,7 @@ class SesYoneticisi private constructor(context: Context) {
                 if (loop || tur.looping) -1 else 0,
                 rate.coerceIn(0.5f, 2f),
             )
-            if (streamId > 0) soundPool.setStereoVolume(streamId, left, right)
+            if (streamId > 0) soundPool.setVolume(streamId, left, right)
         }
     }
 
