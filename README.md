@@ -1,4 +1,4 @@
-# Yanlış Defteri
+# Yanlış Defterim
 
 Android telefon için kişisel **dijital yanlış defteri**.
 

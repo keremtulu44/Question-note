@@ -232,7 +232,7 @@ jobs:
             tag="v${version_name}"
             notes_file="$RUNNER_TEMP/release-notes.md"
             {
-              echo "Yanlış Defteri ${version_name} (${version_code})"
+              echo "Yanlış Defterim ${version_name} (${version_code})"
               echo
               echo "- Derlenen commit: ${GITHUB_SHA}"
               echo "- Debug testleri: ${unit_test_summary}"
@@ -256,7 +256,7 @@ jobs:
               gh release create "$tag" \
                 --repo "$GITHUB_REPOSITORY" \
                 --target "$GITHUB_SHA" \
-                --title "Yanlış Defteri ${version_name}" \
+                --title "Yanlış Defterim ${version_name}" \
                 --notes-file "$notes_file" \
                 "$signed_apk" > "$release_log" 2>&1
               release_exit=$?

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Yanlış Defteri</string>
+    <string name="app_name">Yanlış Defterim</string>
     <string name="home_kicker">YANLIŞ DEFTERİ</string>
     <string name="home_title">Bugün</string>
     <string name="home_subtitle">Bugün tekrar edeceklerine odaklan.</string>

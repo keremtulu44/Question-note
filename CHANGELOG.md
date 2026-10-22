@@ -4,6 +4,12 @@ Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih 
 
 ## [Yayımlanmadı] — arena/1c0f41d0 oturumu (2026-10-19)
 
+- **Uygulama adı: "Yanlış Defterim"** — launcher etiketi (`app_name`), README başlığı ve Release
+  başlıkları bu adı kullanır. `applicationId` değişmez (`com.keremtulu.questionnote`).
+- **Uygulama ikonu eklendi** (önce yoktu): petrol-teal defter + kırmızı X, yazısız; beş yoğunlukta
+  `mipmap-*` (48→192 px), `android:icon` / `roundIcon` manifest'e bağlandı. Kaynak görsel:
+  `assets/ic_launcher_source.png`.
+
 - **"Geri al" kutucuğu:** tekrar değerlendirmesinden sonra altta kısa onay kutucuğu görünür
   ("Tekrar kaydedildi. Sıradaki tekrar: …") ve **Geri al** düğmesi vardır. Geri al yalnızca
   **az önce yapılan kaydı** siler (10 dakika penceresi, en yeni kayıt); plan alanları kayıttan
@@ -12,7 +18,8 @@ Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih 
 - **Ses efektleri:** kısa çan sesleri — tekrar kaydı, günlük hedef tamamlandı, rozet/rütbe
   kutlaması. Ayarlar → **Ses ve geri bildirim** ile açılıp kapatılabilir; sistem sessiz/vibrasyon
   modunda çalmaz. Varsayılan açık; yeni bağımlılık yok (dahili SoundPool + gömülü WAV).
-- Sürüm: `versionCode 20` / `versionName 1.5.90` — v1.5.1 Release'ine dokunulmadan yeni etiket.
+- Sürüm: `versionCode 21` / `versionName 1.5.91` — v1.5.1 ve v1.5.90 Release'lerine dokunulmadan
+  yeni etiket (1.5.90 bu oturdaki ilk `Geri al` + ses paketiydi).
 - Not: parmak izi/açılış kilidi kararı **kalıcı olarak reddedildi**; yapılmayacak.
 
 ## [1.5.1] — 2026-10-18
