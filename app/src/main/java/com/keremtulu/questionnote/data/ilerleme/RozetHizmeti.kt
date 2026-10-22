@@ -1,0 +1,91 @@
+package com.keremtulu.questionnote.data.ilerleme
+
+import com.keremtulu.questionnote.data.prefs.RutbeDeposu
+import com.keremtulu.questionnote.domain.seviye.SeviyeHesabi
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.collect
+import androidx.room.withTransaction
+import com.keremtulu.questionnote.data.local.YanlisDefteriDatabase
+import com.keremtulu.questionnote.data.prefs.GunlukHedefDeposu
+import com.keremtulu.questionnote.data.prefs.RozetDeposu
+import com.keremtulu.questionnote.domain.karne.GunDenge
+import com.keremtulu.questionnote.domain.karne.KarneHesabi
+import com.keremtulu.questionnote.domain.karne.OturumSonucu
+import com.keremtulu.questionnote.domain.karne.Rozet
+import com.keremtulu.questionnote.domain.karne.RozetGirdisi
+import com.keremtulu.questionnote.domain.karne.RozetKurallari
+import com.keremtulu.questionnote.domain.seviye.XpHesabi
+import com.keremtulu.questionnote.domain.calisma.YerelTakvimSaati
+import java.time.Clock
+import java.time.LocalDate
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.withContext
+
+/** A single source for the gallery, retroactive lifetime awards and completed-session awards. */
+class RozetHizmeti(
+    private val database: YanlisDefteriDatabase,
+    private val depo: RozetDeposu,
+    private val hedefDeposu: GunlukHedefDeposu,
+    private val saat: Clock = YerelTakvimSaati,
+    private val rutbeDeposu: RutbeDeposu? = null,
+) {
+    private val odulKilidi = Mutex()
+    private var sonHedef: Int? = null
+    suspend fun girdi(
+        sonuclar: List<OturumSonucu> = emptyList(),
+        hedef: Int = hedefDeposu.hedef(),
+        bugun: LocalDate = LocalDate.now(saat),
+    ): RozetGirdisi = database.withTransaction {
+        val gun = bugun.toEpochDay().toInt()
+        val dao = database.ilerlemeDao()
+        val tekrar = database.tekrarDao()
+        val gunler = tekrar.gunDengeleri(gun - 4, gun).associateBy { it.gun }
+        RozetGirdisi(
+            oturum = KarneHesabi.hesapla(sonuclar),
+            // Lifetime milestones remain attainable for existing users even after a break.
+            seri = XpHesabi.enUzunSeri(tekrar.gunler()),
+            toplamBagimsiz = dao.bagimsizTekrarSayisi(),
+            sonBesGun = (gun - 4..gun).map {
+                GunDenge(it, gunler[it]?.toplam?.toInt() ?: 0, gunler[it]?.bagimsiz?.toInt() ?: 0)
+            },
+            soruSayisi = dao.soruSayisi(),
+            tekrarSayisi = dao.tekrarSayisi(),
+            hedefGunSayisi = dao.hedefTamamlananGunSayisi(hedef),
+            birGundeDersSayisi = dao.enCokGunDersSayisi(),
+            toplamDersSayisi = dao.calisilanDersSayisi(),
+            donusumVar = dao.donusumVar(),
+            bagimsizZincir = RozetKurallari.enUzunBagimsizZincir(sonuclar),
+        )
+    }
+
+    suspend fun degerlendir(sonuclar: List<OturumSonucu> = emptyList(), kutla: Boolean = true): List<Rozet> = odulKilidi.withLock {
+        val hedef = hedefDeposu.hedef()
+        val girdi = girdi(sonuclar, hedef)
+        val seri = XpHesabi.seriBonusu(database.tekrarDao().gunler())
+        val kutlamaAcik = kutla && (sonHedef == null || sonHedef == hedef)
+        withContext(Dispatchers.IO) {
+            val yeni = depo.kaydet(RozetKurallari.kazanilanlar(girdi, depo.sahipOlanlar()), kutlamaAcik)
+            val xp = XpHesabi.kirilim(girdi.soruSayisi, girdi.tekrarSayisi, girdi.toplamBagimsiz,
+                girdi.hedefGunSayisi, seri, depo.sahipOlanlar().size).toplam
+            rutbeDeposu?.guncelle(SeviyeHesabi.durum(xp).rutbe, hedef, kutlamaAcik)
+            sonHedef = hedef
+            yeni
+        }
+    }
+
+    /** Every observation restart begins silently (startup/restore); existing durable pending rewards survive normal startup. */
+    fun degisiklikleriIzle(): Flow<List<Rozet>> = flow {
+        var ilk = true
+        merge(database.ilerlemeDao().soruSayisiIzle(), database.ilerlemeDao().tekrarSayisiIzle(), hedefDeposu.izle())
+            .conflate().collect {
+                emit(degerlendir(kutla = !ilk))
+                ilk = false
+            }
+    }
+}

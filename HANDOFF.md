@@ -1,191 +1,129 @@
 # HANDOFF — Yanlış Defteri
 
-> Yeni bir geliştirme oturumu önce [PROJECT_BRIEF.md](PROJECT_BRIEF.md) ve bu belgeyi okur.
+**Son güncelleme: 2026-10-18.** Önce bu belge, `docs/DERLEME_RAPORU.md` ve
+[P4–P6 sözleşme/kanıt kaydı](docs/P4_P5_P6_UYGULAMA.md) okunur.
 
-- Son güncelleme: 2026-10-16
-- Aktif aşama: **Aşama 0 tamamlandı**, Aşama 1 için kullanıcı onayı bekleniyor
-- Son başarılı derleme: **yok** (henüz derleme yapılmadı)
+## Güncel doğrulanmış teslim: 1.5.1 sade İlerleme
 
----
+**v1.5.1 / code19 yayımlandı.** [Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.5.1) · [APK](https://github.com/keremtulu44/Question-note/releases/download/v1.5.1/yanlis-defteri-1.5.1.apk) · [CI `39158221022`](https://github.com/keremtulu44/Question-note/actions/runs/39158221022)
+**Debug312/0/0/0 · Release258/0/0/0**; APK/imza/sertifika başarılı. Ortak testler iki varyantta tekrar eder, sayılar toplanmaz.
+Kaynak/tag `c25b32bce6c20b0f2c39ff27af6990d13c300074`; asset **654278786**, **10.819.807 bayt**; yayımlanma `2026-10-18T19:22:49Z`.
+SHA-256 `c8d1d45cfd7ad55ab6d3ebba6bf52464fd772d16d23929cbcb406fe8b2a9a053`; GitHub asset digest ve tag referansı CI ile bağımsız eşleştirildi.
 
-## En son ne yapıldı?
+- Kullanıcının fazla metin/karmaşıklık düzeltmesi uygulandı: rütbe, günlük hedef, tek eylem;
+  Koleksiyon/Ayrıntılar ayrı sayfalarda. Yeni veri, puan, şema veya tekrar kuralı yok.
+- %200 alt menü etiketleri düzeltilmiş; tüm sekmeler adlandırılmış ve 48dp üzerinde. Geri,
+  saved-state, yenileme, gerçek sayılar, filtre→Odak→karne ve gizli rozet sözleşmeleri testli.
+- Sekiz native önizleme incelendi. Son büyük-yazı fixture’ı üretimdeki inset düzeniyle aynı;
+  eylemin alt menünün tamamen üstünde olması katı geometrik kontrolden geçer.
+- [Değişiklik/kanıt](docs/ILERLEME_SADELESTIRME.md) · [Native görüntüler](docs/ui/progress/README.md).
+- **Etkin v3 kapalı**, Gölge v2 tarihini uygular. Fiziksel S24 FE/TalkBack/SAF/süreç ölümü/frame-p95 açık.
+- Yayın bayrağı açık. Sonraki kaynak değişikliğinde yeni sürüm/code veya kapalı ara yayın kullan;
+  doğrulanmış 1.5.1 APK’sını yeniden yazma. Merge/PR yapılmadı.
 
-- Proje brifi kullanıcıyla birlikte değerlendirildi; teknik riskler ve gereksiz karmaşıklıklar konuşuldu.
-- Kesinleşen kararlar alındı (bkz. PROJECT_BRIEF §4, §5).
-- Aşama 0 belgeleri oluşturuldu: README, PROJECT_BRIEF, ROADMAP, HANDOFF, BUILDING, CHANGELOG,
-  `docs/` altında veri modeli, yedek formatı, test listesi, kodlama planı, imzalama prosedürü.
-- **Aşama 1 / G1 tamamlandı:** yetki ve CI ortamı ölçüldü; ilk workflow yazıldı ve **çalıştırıldı**
-  (2 başarılı koşu); ölçüm sonucu `docs/ORTAM_RAPORU.md` olarak repoda.
-- **İmzalama anahtarı üretildi** (git dışı `anahtar/` klasöründe); secret'ların eklenmesi bekleniyor.
-- **Uygulama kodu hâlâ yok.** Depoda Gradle dosyası veya `app/` klasörü bulunmuyor.
+## Önceki doğrulanmış teslim: 1.5.0
 
-## Kullanıcıyla netleşen ek kararlar (Aşama 0 sırasında)
+- Kullanıcı: **“P4 P5 ve P6 uygula dikkatli adım adım çalış.”** P0–P3 önceki teslimde tamamlandı.
+- P4 CI `39139377311` / `35896fe`: **240/0/0/0**. P5 CI `39140443680` / `522b009`: **274/0/0/0**.
+  Her ikisinde release derlemesi/imza/sertifika başarılı; ara yayın bilinçli kapalıydı.
+- **P6 son yayın CI `39144684877` / `9c3c51f`: Debug298/0/0/0, Release258/0/0/0**; APK derleme,
+  imza/sertifika ve Release başarılı. İlk birleşik yeşil koşu `39143916007` / `478b86c` idi; final aynı kontrolleri yeniden geçti.
+- **Yayımlanan v1.5.0 / code18**, `2026-10-18T16:24:15Z`. [Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.5.0) · [APK](https://github.com/keremtulu44/Question-note/releases/download/v1.5.0/yanlis-defteri-1.5.0.apk).
+  Kaynak/tag commit'i **`9c3c51f34aa8419c2cab948601823f6fc58351e3`**, asset **653916834**, **10.791.135 bayt**.
+  SHA-256 **`3e7158345d0e0c88bf03698b8ba21db1fedef6a123758de5e7b13f8e5a5470db`**. CI raporu ile GitHub asset digest, boyut/isim ve tag referansı bağımsız API sorgusuyla eşleştirildi.
+- **Etkin v3 kapalı**; Gölge varsayılanı v2 tarihini uygular. Yayın bayrağı bu ayrı motor kapılarını açmaz.
+- Host ölçümü: Debug sıcak medyan575,56 / host-p95 617,73ms; Release521,81 /604,30ms,
+  tam Release İlerleme672,57ms. Dört ince SELECT, 22.749.680 bayt karar JSON'u projeksiyon dışında.
+  Bu **telefon frame-p95 veya cold-start kabulü değildir**; örnekler/planlar iki otomatik raporda.
+- Beş P6 PNG incelendi: açık/koyu/%200/boş/analiz, footer kontrastı ve gerçek eşleşen gün adetleri.
+  Görüntüler native/sentetik; cihaz ekran fotoğrafı değildir. Fiziksel kabul açık.
 
-1. Çok görsel desteği hem şemada hem arayüzde olacak.
-2. Ders ve konular veritabanında, düzenlenebilir; silme yerine arşivleme.
-3. Tekrar değerlendirmesi 3 buton + "çözümü açtım" ayrı işaret.
-4. Geri yükleme yalnızca "tamamen değiştir" + otomatik güvenlik kopyası.
-5. Sabit imzalama anahtarı Aşama 1'de kurulacak (kullanıcı onayladı).
-6. **Aynı gün ikinci deneme yok.** Kullanıcının gerekçesi: amaç unutulanları hatırlamak; çözüm
-   görüldükten sonra aynı oturumda yapılan çözüm gerçek hatırlama değildir. Bu yüzden çözüm
-   açılmışsa sonraki tekrar **1 gün** sonraya planlanır (K19). Model bu sayede sadeleşti.
-7. **Görsel kalite: otomatik optimize** (uzun kenar ~3000 px, JPEG ~%90) — K21, A9 kapandı.
-8. **Askıya alma / tamamlandı işaretleme 1. sürümde olacak** (K17).
+## Çalışma sınırları
 
-## Aşama 1 / G1 — Yetki ve ortam ölçümü (TAMAMLANDI, 2026-10-16)
+- Yalnız **`arena/59c6570d-question-note`**. Merge/PR yok, main'e dokunulmaz. Adım adım onay istenmez.
+- Bash timeout'lu; uzun `gh run watch` yok. Sınırlı durum sorguları; beklerken ~25 s aralık.
+- Java/Android SDK yerelde yok; gerçek Kotlin/Android derleme/test CI'da. Parser/statik başarı derleme değildir.
+- CI botu aynı dala rapor/şema/küçük PNG yazar. `git fetch` + koruyan `rebase --autostash`; merge/reset yok.
+- `testDebug`: tüm ortak testler + debug-only Compose; `testRelease`: ortak testler. **Sayılar toplanmaz.**
+- Gerçek cihaz/SAF/TalkBack/süreç ölümü/frame-p95 henüz yapılmadı. Native sentetik çizim/benchmark telefon kabulü değildir.
 
-### Ölçülen yetki tablosu (Arena token'ı)
+## Korunan P2/P3 temeli
 
-| İşlem | Sonuç | Kanıt |
-|---|---|---|
-| Repo içeriği yazma (push) | ✅ Var | Belge commit'leri itildi |
-| Workflow dosyası yazma | ✅ Var | `.github/workflows/ortam-testi.yml` itildi |
-| PR açma / birleştirme | ✅ Var | PR #1, #2, #3 birleştirildi |
-| Workflow **elle tetikleme** (`dispatches`) | ❌ **403** | `Resource not accessible by integration` |
-| **Secret** okuma/yazma | ❌ **403** | `gh secret list`, `actions/secrets/public-key` |
-| Actions ayarlarını okuma | ❌ 403 | `actions/permissions` |
-| Actions **okuma** (workflow/run listesi) | ✅ Var | `actions/workflows`, `actions/runs` |
-| Derleme **logu indirme** | ❌ Engelli | Log başka bir sunucudan geliyor (sandbox'ta erişilemiyor) |
+- `AktifSureOlcer`: elapsedRealtime segment farkları, UI tick'i yalnız gösterim. Deneme/inceleme ayrı;
+  çözüm ilk açılınca faz geri dönmez. Değerlendirme dondurur; loading/mola/arka plan/kaydetme/zoom hariç.
+- YOK/TAM/KISMI/GECERSIZ; eski null ≠ 0; faz başına 24 saat sınırı. Tam ekran/eksik görsel/kurtarma kısmi.
+  Ölçüm hatası geçerli sonuç/XP kaydını engellemez.
+- Checkpoint2: kimlik/birikim/seçim/faz; monotonik başlangıç yazılmaz. 1 s gösterim/5 s aktif IO;
+  revizyon ve sahiplik eski işin yeni oturumu diriltmesini önler. Çözüm görünmeden açma işareti kalıcıdır.
+- Tekrar + ölçüm/bağlam/karar + plan tek transaction; deneme ID idempotensi ve gerçek same-day kontrolü.
+  Önizleme gün/saat dilimi/politika/geçmiş/bağlam/profil değişince açık yenilenir.
+- Commit–checkpoint kesintisi deneme/oturum kimliğiyle uzlaşır; ilk checkpoint gecikse/duvar saati geri gitse
+  de tamamlanan tekrar tanınır. Eski kimliksiz kayıt zaman fallback'i sürer. Prefs SQLite transaction'ı değildir.
+- Profil politikası1: 60 gün, mevcut deneme hariç, pozitif TAM. Yardımsız Rahat ile tüm-sonuç iş yükü ayrı.
+  Aynı soru/gün tek, sonra soru başına medyan; medyan/çeyrek/MAD. Ders **20/10/5**, konu/kaynak **30/15/7**.
+  Yalnız aynı ders fallback'i; az veride null. NFC/Türkçe harf/ASCII iç boşluk normalizasyonu korunur.
+- Kayıt anı bağlamı değişmez; eski bilinmeyen bağlam uydurulmaz. Kalıcı profil/analitik cache yok.
 
-**Kritik sonuç:** Elle tetikleme izni gerekmiyor. Workflow **push ile otomatik** çalıştırıldığında
-hiçbir özel izin gerekmiyor → **CI çalışıyor.** Denendi ve kanıtlandı: iki başarılı koşu
-(`38919720842`, `38920099577`).
+## P4 — uygulanan korumalar
 
-**İkinci kritik sonuç:** Workflow'un kendi token'ı `permissions: contents: write` ile **repoya commit
-atabildi** (`docs/ORTAM_RAPORU.md` oluştu). Aynı yetki **Release oluşturmak** için de gerekli →
-ileride APK'yı Release'e koyabileceğiz. Arena token'ına ihtiyaç yok.
+- Ayrı `UyarlanabilirTekrarKurali`; v2 temel, v3 aday. Gölge v2 uygular; Etkin için iki default-false kapı.
+  Kapalı snapshot1/V2, Gölge/Etkin snapshot2. Prefs kapı aşamaz; test fixture'ı açık kapıyı ayrıca kurar.
+- Yakın en fazla 5 ayrı gün/90 gün; günün son kaydı, iki son bağımsız başarı güçlüğü kaldırır.
+- Düzeltme yalnız güncel yardımsız Rahat + TAM/pozitif + ≥2 yakın güçlük günü + yeterli finite referans:
+  süre >1,5×medyan **ve** >medyan+max(3MAD,1,5IQR). Hız bonusu/yavaşlık-tek-başına ceza yok.
+- Çözüm/fail 1 gün. Gecikme/Zorlandım düzeltmesiyle birikmez. `floor(base/10)` indirim; 1–180 gün.
+- Açık geçmiş1/2/3 yönlendirmesi; v3 ease okunur. Rollback yalnız yeni kayıtları v2 yapar; geçmiş yeniden yazılmaz.
 
-**Log okuma çözümü:** Derleme çıktısını göremesem de CI kendi raporunu repoya yazıyor
-(`docs/ORTAM_RAPORU.md`). Teşhis döngüsü: CI ölçer → repoya yazar → ben okurum.
+## P5 — uygulanan analitik / eylem / ödül
 
-### Ölçülen CI ortamı
+- Gerçek farklı soru/tekrar/payda/kapsama; geçersiz süre geçerli sonucu paydadan çıkarmaz. Tarihsel grup
+  adları, eksik ve bilinmeyen bağlam ayrı; kitap/öğrenci kalite sıralaması yok.
+- Gerçek 7 gün ritim, bugün eksik. Tamamlanmış −14…−8 ve −7…−1; aynı soru/bağlamın son kaydı eşleştirilir.
+  ≥10 ortak soru ve son değerlendirmelerde her pencerede ≥3 gün; gerçek gün sayısı görünür. Öğrenme artışı hükmü yok.
+- Seçili profil için gerçek uygun plan; gecikenler bugün. Tüm sonuçlardan TAM Q1–Q3 iş yükü;
+  ≥%80 kapsamada yaklaşık toplam, altında yalnız kapsananların ara toplamı; sıfır kapsamada dakika yok.
+- Vade → uygun yakın güçlük grubu → isteğe bağlı küçük tur. Görünür ders/vade/kaynak filtresi, fresh start/save
+  kontrolü; askı/ders arşivi/profil/same-day sınırı aşılmaz. Hedef otomatik artmaz.
+- Tüm arşiv XP/analitiği profille gizlenmez. Grup listesi altılı sayfa, ayrıntılar kapalı; sonlu/reduced motion.
+- `RutbeDeposu` kalıcı üst eşik/tek birleşik bekleyen olay; startup/hedef/restore sessiz taban.
+  Sahiplik korunur, rütbe XP vermez. Badge-priority `KutlamaHost`: iki fullscreen üst üste gelmez.
 
-| Bileşen | Ölçülen değer |
-|---|---|
-| Runner | `ubuntu-latest` (ubuntu24 görüntüsü) |
-| Java (varsayılan) | Temurin **17.0.20.1** — ayrıca 8, 11, 21, 25 kurulu |
-| Android SDK | `/usr/local/lib/android/sdk` (lisanslar mevcut) |
-| build-tools | 34.0.0, 35.0.0, 35.0.1, 36.0.0, 36.1.0, **37.0.0** |
-| platforms | android-34 … **android-37.2** (+ 37.2 beta'ları) |
-| apksigner | 0.9 (build-tools 37.0.0) |
-| Gradle | **9.8.1** önceden kurulu |
-| openssl / keytool | 3.0.13 / var |
+## P6 — kod / gözlenen kanıt / açık kapılar
 
-→ `compileSdk`/`targetSdk` 37.x seçilebilir; sürümler G2'de derlemeyle doğrulanacak.
+- UI testleri `src/testDebug`; Release'e fixture/test Activity taşınmadı. Katı JUnit özetleri ayrı.
+  CI test cache/up-to-date kapalı; benchmark/PNG her koşunun kendi çıktısı olmalı.
+- `MotorTaniHizmeti`: toplam ile zaman damgasına göre son ≤100 örnek ayrı; strict doğrulama, farklı aday/
+  Gölge/Etkin/V2/bozuk sayısı. Count + 1–2 sınırlı Room parent + tek batched relation; N+1 yok.
+- Analiz4 ince SELECT; karar JSON'u/görsel/not yok. SQLite EXPLAIN mevcut ders/gün/PK/same-day indekslerini
+  gösterir. Ana iş parçacığı dışında saf hesap, DB snapshot tutarlılığı korunur; fiziksel maliyet ölçülmedi.
+- Native SDK35 host benchmark: 1.000 soru/20.000 tekrar, 5 sıcak örnek, profil/tam özet maliyeti.
+  `docs/PERFORMANS_DEBUG.md` kaynak SHA ve gerçek ham süreleri içerir. `docs/PERFORMANS_RELEASE.md` de gerçek ölçüm içerir; her rapor kendi kaynak SHA’sını taşır.
+- Birleşik yeşil Debug 298/0: öneri→Filtreli→Odak→Karne→İlerleme; %200/48dp/reduced-motion, tek host, politika gate;
+  broadcast, gece yarısı ve Activity resume; bounded tanı; ZIP snapshot2/active3 rollback/tamper;
+  restore callback kesintisinde marker/kozmetik kuyruklar. Bunlar fiziksel süreç öldürme değildir.
+- `docs/ui/p6`: 5 gerçek Compose/sentetik görüntü. Koyu fixture açıklamasının kontrastı, yeni panel yüzeyleri
+  ve karşılaştırmadaki gerçek gün adetleri görüntü incelemesi sonrası düzeltildi.
+- İlk P6 hataları ve düzeltmeleri saklanır: eksik test context'i; tek-sefer restore hatasının anında iyileşmesi;
+  Room parent cursor tekrarını saymayan beklenti; Release görevinin başlayamaması (düzeltildi); UI testinde aynı adlı başlık/tab ve kaydırma/hazır olma sınırları. Koruma/test silinmedi.
 
-### İmzalama anahtarı (üretildi, secret bekliyor)
+## Sürüm / yedek / ürün değişmezleri
 
-- RSA 2048, PKCS12, alias `yanlisdefteri`, 30 yıl (2056'ya kadar)
-- SHA-256 parmak izi: `FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54`
-- Dosyalar **git dışı** `anahtar/` klasöründe: `yanlis-defteri.p12`, `PAROLA.txt`, `keystore.b64`
-  (puantaj: `git status` temiz, klasör `.gitignore`'da)
-- Ölçüm: base64 uzunluğu **3404 karakter** (RSA 2048). RSA 4096 olsaydı 5696 olurdu → 2048 tercih edildi.
-- Kullanıcıya adım adım talimat: `anahtar/KURULUM_ADIMLARI.md` (git dışı)
+- **Room4**, additive 3→4; 1/2/3→4 ve şemalar korunur. **ZIP4**, v2/v3/v4 açık okuyucu.
+  Ölçüm1, profil1, karar1/2, geçmiş algoritma1/2/3 ayrı kavramlar; yalnız sayı artırılarak uyumluluk iddia edilmez.
+- ZIP hash/FK/null/kalite/sürüm/taşma/snapshot denetimi; eski satırlar değişmez. Rozet/rütbe/politika/hedef/
+  sınav/checkpoint prefs'i dahil değil. Restore tam değişim + safety copy; senkronizasyon/birleştirme değil.
+- Restore yalnız commit doğrulanınca checkpoint ve kozmetik kuyrukları marker kaldırılmadan temizler.
+  Sahiplik kalır; anlık recovery de başarısızsa marker korunur. Precommit hata eski oturumu korur.
+- Offline tek kullanıcı, hesap/sunucu yok. Alt menü5; Ayarlar'da profil/konu yönetimi/yedek.
+- Bağımsız = Rahat + açılmamış çözüm; Zorlandım yarım, Çözemedim çözemedi; açık çözüm destekli.
+- XP soru10/tekrar5/bağımsız+5/hedef25/rozet50, seri3/7/30=30/70/300. Hedef5/10/15/20/30; 15 rütbe/30 rozet/5 sır aynı.
+- Geçmiş karne arşivi, mola günü jetonu ve bildirimler bu pakette yok.
 
-**E1 güncel durum:** Secret'ları ben ekleyemiyorum (403). Kullanıcı **yol B**'yi uygulayacak:
-GitHub web → Settings → Secrets and variables → Actions → 2 secret ekleme
-(`SIGNING_KEYSTORE_BASE64`, `SIGNING_PASSWORD`). Yol A (Arena bağlantı izni) uygulamanın izin
-tanımına bağlı olduğu için kullanıcının vermesiyle değişmeyebilir; pratik yol B.
+## Sonraki somut adım
 
-## Dış inceleme — ikinci görüş (2026-10-16)
+Kod/otomatik teslim tamamlandı, v1.5.0 yayımlandı; merge/PR yapılmadı.
 
-Proje, bağımsız bir yapay zekâya teknik inceleme için gönderildi (`docs/FIKIR_ALMA_METNI.md`).
-Değerlendirme sonucu: teknoloji seçimi onaylandı; önerilerin bir kısmı kabul, bir kısmı gerekçeyle
-reddedildi.
-
-**Kabul edilenler (belgelere işlendi):**
-
-| Öneri | Nereye işlendi |
-|---|---|
-| Sorunun **plan durumu** (aktif/askıda/tamamlandı) öğrenme düzeyinden ayrılmalı | PROJECT_BRIEF K17, VERI_MODELI §2 |
-| Aralık kuralı **sürümlü tek sınıf** olmalı (`algoritma_surumu`) | K18, VERI_MODELI §2/§5 |
-| Çözüm açılarak yapılan tekrar bağımsız sayılmamalı (tavan 1–3 gün) + ikinci bağımsız deneme | K19, VERI_MODELI §5 — *sonradan değişti, bkz. Reddedilenler #5: tavan yerine 1 gün* |
-| Uzun aradan sonra otomatik sıfırlama yapılmamalı | K20, VERI_MODELI §5 |
-| Geri yüklemede **kesintiye dayanıklılık** (işlem sürerken kapanma) | YEDEK_FORMATI §3.1 |
-| ZIP bomb / yol kaçışı / boyut üst sınırı korumaları | YEDEK_FORMATI §3.2 |
-| Manifest'te dosya başına sha256; format sürümü uygulama sürümünden bağımsız | YEDEK_FORMATI §2/§6 |
-| Görsel kaydına `mime_type` ve `sha256` eklenmesi | VERI_MODELI §2 |
-| **Migration testleri otomatik olmalı** (zincir testi dâhil) | VERI_MODELI §6, ROADMAP Aşama 2 |
-| Depolama boyutunun asıl kısıt olduğu; 30–50 gerçek fotoğrafla sıkıştırma testi | ROADMAP Aşama 2, TEST 2.18 |
-| Yedek/geri yükleme mimarisinin baştan veri katmanının parçası olması | PROJECT_BRIEF §5, ROADMAP Aşama 2 |
-| Release çıktısında sürüm + commit + APK SHA-256 | BUILDING §4, TEST 1.4 |
-| Boş/anlamsız yedeğin onaysız uygulanmaması, son yedek bilgisi | YEDEK_FORMATI §3/§4 |
-
-**Reddedilenler (gerekçesiyle):**
-
-1. **Her görsel için ayrı önizleme dosyası üretmek** → v1'de yapılmayacak. Türetilmiş veri kalıcı
-   klasöre yazılırsa yedek boyutu artar ve silme/geri getirme mantığı gerekir. Liste görselleri
-   Coil'in önbelleğinden üretilecek; ölçümde yetersiz kalırsa (Aşama 5) karar yeniden değerlendirilir.
-2. **Emülatörde otomatik test** → öncelik JVM birim testleri ve Robolectric (şema/migration).
-   Emülatör yavaş ve kırılgan; gerçek cihaz testi zaten kullanıcıda.
-3. **Anahtar ve parolayı farklı yerlerde tutma kuralı (birincil kural olarak)** → bu projede tehdit
-   modeli "sızma" değil "kaybetme". Öncelik **yedeklilik**: anahtar + parola iki bağımsız yerde
-   bulunur; parolanın keystore dosyasının yanında düz metin durmaması koşuluyla.
-4. **Tek `data.json`** → veriler ayrı JSON dosyalarında kalacak (incelenebilirlik/karşılaştırma);
-   fark küçük, gerekçe YEDEK_FORMATI §1'de.
-5. **"Çözümü kapat ve tekrar dene" düğmesi** → önce kabul edilmişti, **kullanıcı reddetti**: çözüm
-   görüldükten sonra aynı gün yapılan çözüm gerçek hatırlama sayılmaz. Sonraki tekrar 1 gün sonraya
-   planlanır (K19). Bu, hem bir düğmeyi hem de ek kayıt tipini ortadan kaldırdı.
-
-## Ne test edildi?
-
-**Gerçekten çalıştırılan (ölçüm/kanıt ile):**
-
-- CI iş akışı **iki kez başarıyla çalıştı** (koşular `38919720842`, `38920099577`;
-  "completed / success"). Push ile otomatik tetiklendi — elle tetikleme izni gerekmedi.
-- Workflow token'ı repoya **commit atabildi** → `docs/ORTAM_RAPORU.md` CI tarafından üretildi
-  (contents:write yetkisi doğrulandı; Release oluşturmak için de aynı yetki gerekir).
-- Runner ortamı ölçüldü: Temurin JDK 17 (8/11/21/25 de kurulu), Android SDK (`build-tools` 34→37.0.0,
-  `platforms` android-34→37.2), apksigner 0.9, Gradle 9.8.1 hazır, openssl 3.0.13.
-- Sandbox yetenekleri: `openssl` var, `java`/`keytool` **yok**; Maven/Gradle depoları **kapalı**.
-- Arena token'ı: içerik yazma ✅, workflow dosyası yazma ✅, PR açma/birleştirme ✅;
-  workflow dispatch ❌ 403, secrets ❌ 403, Actions ayarları ❌ 403.
-- İmzalama anahtarı üretildi ve parola ile açılabildiği doğrulandı (parmak izi okundu).
-
-**Yalnızca incelenen / henüz doğrulanmayan:**
-
-- Aday sürümler (AGP 9.2.x, Kotlin 2.4.x, Compose BOM 2026.09.00, activity-compose 1.13.0,
-  lifecycle 2.11.0): kaynaklardan derlendi, **derlemeyle doğrulanmadı** → G2'de ölçülecek.
-- APK'nın telefondan kurulup güncellenmesi → G3/G5'te kullanıcı testi.
-
-## Bilinen hatalar / engeller
-
-- **E1 (G1'de çözüldü, kısmi):** Arena token'ında **Actions/Secrets yazma izni yok** (403).
-  Buna karşılık **gerek olmadığı ölçüldü**: workflow push ile otomatik çalışıyor ve workflow'un kendi
-  token'ı repoya yazabiliyor (Release dâhil). Tek eksik: **secret'ları yalnızca kullanıcı ekleyebilir**
-  (web arayüzü, 2 alan). Adımlar: `anahtar/KURULUM_ADIMLARI.md` (git dışı).
-- **E2 (kısıt, çözümü yok):** Yapay zekâ ortamında derleme/test yapılamaz; ayrıca **derleme logları
-  indirilemiyor** (log sunucusu sandbox'tan erişilemez). Çözüm: CI kendi ölçüm/rapor çıktısını repoya
-  yazar (`docs/ORTAM_RAPORU.md` yaklaşımı) → yeni iş akışları da bu deseni kullanacak.
-- **E3 (izlenecek):** `hasFragileUserData` davranışı gerçek cihazda doğrulanmadı.
-- **E4 (izlenecek):** Android Auto Backup, uygulama başına **25 MB** ile sınırlıdır; fotoğraf arşivi bu
-  kotayı ilk günden aşar. Bu nedenle sistem yedeklemesi birincil mekanizma olarak görülmez ve
-  `allowBackup=false` planlanır.
-
-## Sıradaki somut adım
-
-**Sıra:**
-
-1. **Kullanıcı** 2 secret'ı GitHub web arayüzünden ekler
-   (`SIGNING_KEYSTORE_BASE64`, `SIGNING_PASSWORD`) — `anahtar/KURULUM_ADIMLARI.md`.
-2. **Ben** `gh secret list` ile isimleri ölçerim (değerler görünmez, isimler yeter).
-3. **G2:** Proje iskeleti + ilk CI derlemesi (arayüzsüz) → sürümler doğrulanır.
-4. **G3:** İmzalı APK + Release akışı + parmak izi doğrulaması.
-
-Ayrıntılı sıra: [docs/KODLAMA_PLANI.md](docs/KODLAMA_PLANI.md) §4 (G1…G6).
-
-**Kapananlar:** A1 (uygulama kimliği: `com.keremtulu.questionnote`), G1 (yetki + ortam ölçümü).
-
-## Kullanıcının yapacağı iş (Aşama 1)
-
-**Şimdi (5 dakika):**
-
-- 2 secret'ı GitHub'da ekle: `SIGNING_KEYSTORE_BASE64`, `SIGNING_PASSWORD`
-  → adımlar: `anahtar/KURULUM_ADIMLARI.md` (git dışı klasörde).
-- İmzalama anahtarını ve parolasını **iki bağımsız yerde** sakla (şifre yöneticisi + Drive).
-  Bu, güncellemelerin veriyi koruyarak üzerine kurulabilmesi için şarttır.
-
-**Sonra (APK geldiğinde):**
-
-- İlk APK'yı telefondan indirip kurmak ve 7 ders kartını görmek.
-- İkinci APK geldiğinde **kaldırmadan** üzerine kurmak ve çalıştığını bildirmek.
+1. Fiziksel `P6.D1–D13` kabulünü gerçek S24 FE/TalkBack/SAF ve mümkünse daha düşük güçlü cihazda yürüt.
+2. Gerçek süreç ölümü/reboot/düşük depolama ve cihaz frame-p95 sonuçlarını host ölçümüyle karıştırmadan kaydet.
+3. Gerçek gölge fark/neden/eksik veri/yuvarlama/toparlanma örneklerini uzunlamasına incele.
+4. Bu iki kabul olmadan etkin v3 kapılarını açma. Sorunda Ayarlar → Kapalı/v2; eski APK'ya DB downgrade yapma.

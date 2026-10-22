@@ -1,0 +1,447 @@
+name: Android CI
+
+on:
+  push:
+    branches:
+      - main
+      - arena/0ec2226d-question-note
+      - arena/59c6570d-question-note
+      - arena/1c0f41d0-question-note
+    paths:
+      - 'app/**'
+      - 'tools/junit_ozeti.py'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - 'settings.gradle.kts'
+      - 'build.gradle.kts'
+      - 'gradle.properties'
+      - '.github/workflows/android.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-ci-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Depoyu al
+        uses: actions/checkout@v5
+
+      - name: Temurin JDK 17'i kur
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: A2 testlerini çalıştır, derle, imzala ve yayımla
+        id: release
+        shell: bash
+        env:
+          PUBLISH_RELEASE: "true" # 39156980764: Debug312/0, Release258/0, signed APK + native review. Active-v3 remains CLOSED.
+          WRAPPER_VERSION: "9.8.1"
+          BUILD_TOOLS_VERSION: "37.0.0"
+          EXPECTED_FINGERPRINT: "FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54"
+          SIGNING_KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          set -o pipefail
+          mkdir -p docs
+          wrapper_log="$RUNNER_TEMP/wrapper-bootstrap.log"
+          test_log="$RUNNER_TEMP/android-unit-tests.log"
+          release_test_log="$RUNNER_TEMP/android-release-unit-tests.log"
+          build_log="$RUNNER_TEMP/android-build.log"
+          sign_log="$RUNNER_TEMP/android-sign.log"
+          verify_log="$RUNNER_TEMP/android-verify.log"
+          release_log="$RUNNER_TEMP/github-release.log"
+          gradle_info="$RUNNER_TEMP/gradle-version.txt"
+          apk_info="$RUNNER_TEMP/apk-info.txt"
+          wrapper_exit=0
+          unit_test_exit=125
+          release_test_exit=125
+          release_test_summary="Release JUnit sonucu henüz yok"
+          unit_test_summary="JUnit sonucu henüz yok"
+          unit_test_failure_details="JUnit hata ayrıntısı henüz yok"
+          build_exit=125
+          signing_exit=125
+          zipalign_exit=125
+          apksigner_exit=125
+          verify_exit=125
+          fingerprint_exit=125
+          release_exit=125
+          signing_result="İmzalama henüz çalıştırılmadı"
+          release_result="Yayımlanmadı"
+          release_url=""
+          apk_sha256="bulunamadı"
+          actual_fingerprint_hex=""
+          actual_fingerprint_display="bulunamadı"
+          fingerprint_status="doğrulanmadı"
+          version_name=$(sed -nE 's/^[[:space:]]*versionName = "([^"]+)".*/\1/p' app/build.gradle.kts | head -n 1)
+          version_code=$(sed -nE 's/^[[:space:]]*versionCode = ([0-9]+).*/\1/p' app/build.gradle.kts | head -n 1)
+          unsigned_apk="app/build/outputs/apk/release/app-release-unsigned.apk"
+          signed_apk="app/build/outputs/apk/release/yanlis-defteri-${version_name}.apk"
+          keystore_file="$RUNNER_TEMP/yanlisdefteri.p12"
+          aligned_apk="$RUNNER_TEMP/yanlisdefteri-aligned.apk"
+          expected_fingerprint_hex=$(printf '%s' "$EXPECTED_FINGERPRINT" | tr -cd '[:xdigit:]' | tr '[:lower:]' '[:upper:]')
+
+          if [[ -n "${SIGNING_KEYSTORE_BASE64:-}" && -n "${SIGNING_PASSWORD:-}" ]]; then
+            secret_status="İki gerekli secret dolu (değerler gösterilmez)"
+          else
+            secret_status="Eksik veya boş secret var (değerler gösterilmez)"
+          fi
+
+          gradle --version > "$gradle_info" 2>&1
+
+          if [[ ! -f gradle/wrapper/gradle-wrapper.jar || ! -f gradle/wrapper/gradle-wrapper.properties ]]; then
+            bootstrap_dir="$RUNNER_TEMP/gradle-wrapper-bootstrap"
+            mkdir -p "$bootstrap_dir"
+            printf '// Temporary project used only to generate the official Gradle wrapper.\n' > "$bootstrap_dir/build.gradle"
+            (cd "$bootstrap_dir" && gradle wrapper --gradle-version "$WRAPPER_VERSION" --distribution-type bin) > "$wrapper_log" 2>&1
+            wrapper_exit=$?
+            if [[ "$wrapper_exit" -eq 0 ]]; then
+              mkdir -p gradle/wrapper
+              cp "$bootstrap_dir/gradlew" ./gradlew && \
+                cp "$bootstrap_dir/gradlew.bat" ./gradlew.bat && \
+                cp "$bootstrap_dir/gradle/wrapper/gradle-wrapper.jar" gradle/wrapper/gradle-wrapper.jar && \
+                cp "$bootstrap_dir/gradle/wrapper/gradle-wrapper.properties" gradle/wrapper/gradle-wrapper.properties
+              wrapper_exit=$?
+              if [[ "$wrapper_exit" -eq 0 ]]; then chmod +x ./gradlew; fi
+            fi
+          fi
+
+          if [[ "$wrapper_exit" -eq 0 ]]; then
+            ./gradlew --no-daemon --console=plain --stacktrace :app:testDebugUnitTest > "$test_log" 2>&1
+            unit_test_exit=$?
+            unit_test_summary=$(python3 tools/junit_ozeti.py summary app/build/test-results/testDebugUnitTest \
+              --require-class com.keremtulu.questionnote.ui.OneridenOdagaAkisTest \
+              --require-class com.keremtulu.questionnote.ui.P5P6ArayuzTest \
+              --require-class com.keremtulu.questionnote.ui.IlerlemeSadelikTest \
+              --require-class com.keremtulu.questionnote.ui.IlerlemeGorselOnizlemeTest \
+              --require-class com.keremtulu.questionnote.ui.P6GorselOnizlemeTest \
+              --require-class com.keremtulu.questionnote.data.gelisim.AnalizPerformansTest)
+            test_summary_exit=$?
+            if [[ "$unit_test_exit" -eq 0 && "$test_summary_exit" -ne 0 ]]; then
+              unit_test_exit=1
+            fi
+            if [[ "$unit_test_exit" -eq 0 ]]; then
+              for name in overview-light overview-dark overview-empty overview-error overview-large details comparison plan; do
+                if [[ ! -s "app/build/outputs/progress-previews/$name.png" ]]; then
+                  echo "ERROR: Güncel İlerleme önizlemesi eksik: $name" >> "$test_log"
+                  unit_test_exit=1
+                fi
+              done
+            fi
+            # Run both independent gates even if Debug fails; build/sign/publish still require BOTH.
+            ./gradlew --no-daemon --console=plain --stacktrace :app:testReleaseUnitTest > "$release_test_log" 2>&1
+            release_test_exit=$?
+            release_test_summary=$(python3 tools/junit_ozeti.py summary app/build/test-results/testReleaseUnitTest \
+              --require-class com.keremtulu.questionnote.data.gelisim.AnalizPerformansTest \
+              --require-class com.keremtulu.questionnote.data.gelisim.MotorTaniHizmetiTest \
+              --require-class com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest)
+            release_summary_exit=$?
+            if [[ "$release_test_exit" -eq 0 && "$release_summary_exit" -ne 0 ]]; then release_test_exit=1; fi
+            unit_test_failure_details=$(python3 tools/junit_ozeti.py failures app/build/test-results/testDebugUnitTest app/build/test-results/testReleaseUnitTest)
+            if [[ "$unit_test_exit" -eq 0 && "$release_test_exit" -eq 0 ]]; then
+              ./gradlew --no-daemon --console=plain --stacktrace :app:assembleRelease > "$build_log" 2>&1
+              build_exit=$?
+            else
+              printf '%s\n' "assembleRelease, Debug/Release birim test kapılarından biri geçmediği için çalıştırılmadı." > "$build_log"
+            fi
+          fi
+
+          if [[ "$build_exit" -eq 0 && -f "$unsigned_apk" ]]; then
+            if [[ -z "${SIGNING_KEYSTORE_BASE64:-}" || -z "${SIGNING_PASSWORD:-}" ]]; then
+              signing_exit=2
+              signing_result="Gerekli secret'lardan en az biri eksik veya boş"
+              printf '%s\n' "SIGNING_KEYSTORE_BASE64 ve SIGNING_PASSWORD gereklidir; değerler rapora yazılmadı." > "$sign_log"
+            else
+              signing_result="İmzalama adımı başarısız"
+              printf '%s' "$SIGNING_KEYSTORE_BASE64" | base64 --decode > "$keystore_file" 2> "$sign_log"
+              decode_exit=$?
+              if [[ "$decode_exit" -ne 0 || ! -s "$keystore_file" ]]; then
+                signing_exit=3
+                signing_result="Keystore secret çözülemedi"
+                printf '%s\n' "Base64 keystore çözülemedi veya boş çıktı verdi." >> "$sign_log"
+              else
+                build_tools="$ANDROID_HOME/build-tools/$BUILD_TOOLS_VERSION"
+                if [[ ! -x "$build_tools/zipalign" || ! -x "$build_tools/apksigner" ]]; then
+                  signing_exit=4
+                  signing_result="İmzalama araçları bulunamadı"
+                  printf 'zipalign/apksigner bulunamadı: %s\n' "$build_tools" >> "$sign_log"
+                else
+                  "$build_tools/zipalign" -p -f 4 "$unsigned_apk" "$aligned_apk" >> "$sign_log" 2>&1
+                  zipalign_exit=$?
+                  if [[ "$zipalign_exit" -eq 0 ]]; then
+                    "$build_tools/apksigner" sign \
+                      --ks "$keystore_file" \
+                      --ks-key-alias yanlisdefteri \
+                      --ks-pass env:SIGNING_PASSWORD \
+                      --key-pass env:SIGNING_PASSWORD \
+                      --out "$signed_apk" \
+                      "$aligned_apk" >> "$sign_log" 2>&1
+                    apksigner_exit=$?
+                  fi
+                  if [[ "$apksigner_exit" -eq 0 ]]; then
+                    "$build_tools/apksigner" verify --verbose --print-certs "$signed_apk" > "$verify_log" 2>&1
+                    verify_exit=$?
+                    fingerprint_raw=$(awk -F': ' '/certificate SHA-256 digest:/ {print $NF; exit}' "$verify_log")
+                    actual_fingerprint_hex=$(printf '%s' "$fingerprint_raw" | tr -cd '[:xdigit:]' | tr '[:lower:]' '[:upper:]')
+                    if [[ -n "$actual_fingerprint_hex" ]]; then
+                      actual_fingerprint_display=$(printf '%s' "$actual_fingerprint_hex" | sed 's/../&:/g; s/:$//')
+                    fi
+                    if [[ "$verify_exit" -eq 0 && "$actual_fingerprint_hex" == "$expected_fingerprint_hex" ]]; then
+                      fingerprint_exit=0
+                      fingerprint_status="eşleşti"
+                      signing_exit=0
+                      signing_result="İmzalandı; apksigner doğruladı ve beklenen sertifika eşleşti"
+                    else
+                      fingerprint_exit=1
+                      fingerprint_status="eşleşmedi veya okunamadı"
+                      signing_exit=1
+                      signing_result="İmza doğrulaması veya parmak izi kontrolü başarısız"
+                    fi
+                  else
+                    signing_exit=1
+                    if [[ "$zipalign_exit" -eq 0 ]]; then
+                      signing_result="APK imzalanamadı"
+                    else
+                      signing_result="APK zipalign edilemedi"
+                    fi
+                  fi
+                fi
+              fi
+            fi
+          elif [[ "$build_exit" -eq 0 ]]; then
+            build_exit=1
+            printf '%s\n' "assembleRelease başarılı döndü fakat beklenen imzasız APK bulunamadı: $unsigned_apk" > "$build_log"
+          fi
+
+          rm -f "$keystore_file" "$aligned_apk"
+
+          if [[ "$signing_exit" -eq 0 ]]; then
+            apk_sha256=$(sha256sum "$signed_apk" | awk '{print $1}')
+            printf '%s\n' "APK: $signed_apk" "SHA-256: $apk_sha256" > "$apk_info"
+            tag="v${version_name}"
+            notes_file="$RUNNER_TEMP/release-notes.md"
+            {
+              echo "Yanlış Defterim ${version_name} (${version_code})"
+              echo
+              echo "- Derlenen commit: ${GITHUB_SHA}"
+              echo "- Debug testleri: ${unit_test_summary}"
+              echo "- Release ortak testleri: ${release_test_summary} (ortak testler ikinci kez çalışır; sayılar toplanmaz)"
+              echo "- Varsayılan gölge mod: v2 tarihleri korunur. Etkin v3 gerçek cihaz/gölge kabulü tamamlanana kadar kapalıdır."
+              echo "- Fiziksel cihaz, TalkBack, SAF ve frame-p95 kabulü henüz yapılmadı."
+              echo "- APK SHA-256: ${apk_sha256}"
+              echo "- Sertifika SHA-256: ${actual_fingerprint_display}"
+            } > "$notes_file"
+
+            if [[ "$PUBLISH_RELEASE" != "true" ]]; then
+              release_exit=0
+              release_result="Ara doğrulama başarılı; yayın kapısı kapalı, Release oluşturulmadı"
+              printf '%s\n' "$release_result" > "$release_log"
+            elif gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+              release_exit=0
+              release_result="Bu sürüm etiketi için Release zaten mevcut; yeniden oluşturulmadı"
+              release_url=$(gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json url --jq .url 2>/dev/null)
+              printf '%s\n' "$release_result" > "$release_log"
+            else
+              gh release create "$tag" \
+                --repo "$GITHUB_REPOSITORY" \
+                --target "$GITHUB_SHA" \
+                --title "Yanlış Defterim ${version_name}" \
+                --notes-file "$notes_file" \
+                "$signed_apk" > "$release_log" 2>&1
+              release_exit=$?
+              if [[ "$release_exit" -eq 0 ]]; then
+                release_result="Release oluşturuldu"
+                release_url=$(gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json url --jq .url 2>/dev/null)
+              else
+                release_result="Release oluşturulamadı"
+              fi
+            fi
+          fi
+
+          if [[ "$wrapper_exit" -eq 0 && "$unit_test_exit" -eq 0 && "$release_test_exit" -eq 0 && "$build_exit" -eq 0 && "$signing_exit" -eq 0 && "$fingerprint_exit" -eq 0 && "$release_exit" -eq 0 ]]; then
+            overall="BAŞARILI"
+          else
+            overall="BAŞARISIZ"
+          fi
+
+          {
+            echo "# CI Android Derleme, İmza ve Release Raporu"
+            echo
+            echo "> Bu dosya Android CI tarafından otomatik üretilir. Keystore veya parola değerleri yazılmaz."
+            echo
+            echo "- Zaman (UTC): $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "- Workflow commit'i: $GITHUB_SHA"
+            echo "- Dal: $GITHUB_REF_NAME"
+            echo "- Uygulama sürümü: ${version_name:-bilinmiyor} (versionCode ${version_code:-bilinmiyor})"
+            echo "- Android SDK: compileSdk/targetSdk 37, minSdk 26; build-tools $BUILD_TOOLS_VERSION"
+            echo "- Genel sonuç: **$overall**"
+            echo "- Wrapper çıkış kodu: $wrapper_exit"
+            echo "- testDebugUnitTest çıkış kodu: $unit_test_exit"
+            echo "- Birim test özeti (Debug): $unit_test_summary"
+            echo "- testReleaseUnitTest çıkış kodu: $release_test_exit"
+            echo "- Birim test özeti (Release ortak testler): $release_test_summary"
+            echo "- UI/Preview regresyonları yalnız testDebug; ortak testler iki varyantta çalışır, sayılar toplanmaz."
+            echo "- assembleRelease çıkış kodu: $build_exit"
+            echo "- İmzalama secret durumu: $secret_status"
+            echo "- İmzalama/verify durumu: $signing_result (kod: $signing_exit; apksigner verify: $verify_exit)"
+            echo "- Sertifika parmak izi: $actual_fingerprint_display (beklenen: $EXPECTED_FINGERPRINT; durum: $fingerprint_status)"
+            echo "- Release: $release_result (kod: $release_exit)"
+            echo "- Release URL: ${release_url:-yok}"
+            echo "- İmzalı APK SHA-256: $apk_sha256"
+            echo
+            echo "## Gradle sürümü"
+            echo
+            echo '```text'
+            cat "$gradle_info"
+            echo '```'
+            echo
+            echo "## Birim test çıktısı (hata özeti + başlangıç/son bölüm)"
+            echo
+            echo '```text'
+            if [[ -f "$test_log" ]]; then
+              echo "-- Derleyici/Gradle hata satırları --"
+              grep -nEi '(^e: |error:|unresolved reference|compilation error|what went wrong|failed to)' "$test_log" | head -n 80 || true
+              echo
+              echo "-- İlk 100 satır --"
+              head -n 100 "$test_log"
+              echo
+              echo "-- Son 80 satır --"
+              tail -n 80 "$test_log"
+            else
+              echo "Birim testleri çalıştırılmadı."
+            fi
+            echo '```'
+            echo
+            echo "## Release birim test çıktısı"
+            echo
+            echo '```text'
+            if [[ -f "$release_test_log" ]]; then
+              echo "-- İlk 90 satır (görev/konfigürasyon hataları dahil) --"
+              head -n 90 "$release_test_log"
+              echo "-- Hata satırları ve son bölüm --"
+              grep -nEi '(^e: |error:|unresolved reference|compilation error|what went wrong|failed to)' "$release_test_log" | head -n 80 || true
+              tail -n 100 "$release_test_log"
+            else
+              echo "Release birim testi başlatılmadı."
+            fi
+            echo '```'
+            echo
+            echo "## JUnit başarısızlık ayrıntıları"
+            echo
+            echo '```text'
+            printf '%s\n' "$unit_test_failure_details"
+            echo '```'
+            echo
+            echo "## Derleme çıktısı (son 120 satır)"
+            echo
+            echo '```text'
+            if [[ -f "$build_log" ]]; then tail -n 120 "$build_log"; else echo "Derleme çalıştırılmadı."; fi
+            echo '```'
+            echo
+            echo "## İmzalama çıktısı"
+            echo
+            echo '```text'
+            if [[ -f "$sign_log" ]]; then tail -n 100 "$sign_log"; else echo "İmzalama başlatılmadı."; fi
+            echo '```'
+            echo
+            echo "## Sertifika doğrulama çıktısı"
+            echo
+            echo '```text'
+            if [[ -f "$verify_log" ]]; then cat "$verify_log"; else echo "apksigner verify çalıştırılmadı."; fi
+            echo '```'
+            echo
+            echo "## Release çıktısı"
+            echo
+            echo '```text'
+            if [[ -f "$release_log" ]]; then cat "$release_log"; else echo "Release oluşturulmadı."; fi
+            echo '```'
+            echo
+            echo "## APK özeti"
+            echo
+            echo '```text'
+            if [[ -f "$apk_info" ]]; then cat "$apk_info"; else echo "İmzalı APK yok."; fi
+            echo '```'
+          } > docs/DERLEME_RAPORU.md
+
+          echo "wrapper_exit=$wrapper_exit" >> "$GITHUB_OUTPUT"
+          echo "unit_test_exit=$unit_test_exit" >> "$GITHUB_OUTPUT"
+          echo "release_test_exit=$release_test_exit" >> "$GITHUB_OUTPUT"
+          echo "build_exit=$build_exit" >> "$GITHUB_OUTPUT"
+          echo "signing_exit=$signing_exit" >> "$GITHUB_OUTPUT"
+          echo "fingerprint_exit=$fingerprint_exit" >> "$GITHUB_OUTPUT"
+          echo "release_exit=$release_exit" >> "$GITHUB_OUTPUT"
+
+      - name: Test, derleme, imza veya Release başarısızsa işi kırmızıya çevir
+        if: steps.release.outputs.wrapper_exit != '0' || steps.release.outputs.unit_test_exit != '0' || steps.release.outputs.release_test_exit != '0' || steps.release.outputs.build_exit != '0' || steps.release.outputs.signing_exit != '0' || steps.release.outputs.fingerprint_exit != '0' || steps.release.outputs.release_exit != '0'
+        run: exit 1
+
+      - name: Sade İlerleme yerel Compose önizlemelerini sakla
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in overview-light overview-dark overview-empty overview-error overview-large details comparison plan; do
+            source="app/build/outputs/progress-previews/$name.png"
+            if [[ -f "$source" ]]; then
+              # Small, named documentation previews only; never collect arbitrary build outputs.
+              test "$(stat -c%s "$source")" -lt 1500000
+              mkdir -p docs/ui/progress
+              cp "$source" "docs/ui/progress/$name.png"
+            fi
+          done
+
+      - name: P6 ölçüm ve yerel Compose kanıtlarını sakla
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in p6-action-light p6-action-dark p6-analysis p6-large p6-empty; do
+            source="app/build/outputs/p6-previews/$name.png"
+            if [[ -f "$source" ]]; then
+              test "$(stat -c%s "$source")" -lt 1500000
+              mkdir -p docs/ui/p6
+              cp "$source" "docs/ui/p6/$name.png"
+            fi
+          done
+          for variant in debug release; do
+            source="app/build/outputs/p6-benchmark/$variant.md"
+            if [[ -f "$source" ]]; then
+              test "$(stat -c%s "$source")" -lt 100000
+              cp "$source" "docs/PERFORMANS_${variant^^}.md"
+            fi
+          done
+
+      - name: Wrapper ve raporu repoya yaz
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/DERLEME_RAPORU.md
+          if [[ -d docs/ui/progress ]]; then git add docs/ui/progress; fi
+          if [[ -d docs/ui/p6 ]]; then git add docs/ui/p6; fi
+          for report in docs/PERFORMANS_DEBUG.md docs/PERFORMANS_RELEASE.md; do
+            if [[ -f "$report" ]]; then git add "$report"; fi
+          done
+          if [[ -d app/schemas ]]; then git add app/schemas; fi
+          for path in gradlew gradlew.bat gradle/wrapper/gradle-wrapper.jar gradle/wrapper/gradle-wrapper.properties; do
+            if [[ -f "$path" ]]; then git add "$path"; fi
+          done
+          if git diff --cached --quiet; then
+            echo "Rapor/wrapper değişmedi; commit atlanıyor."
+          else
+            git commit -m "ci: save signed Android build report [skip ci]"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi

@@ -3,17 +3,42 @@
 > Bu belge **değerleri değil**, sırların nerede ve nasıl tutulduğunu anlatır.
 > Hiçbir anahtar, parola veya token bu depoya yazılmaz.
 
-- Son güncelleme: 2026-10-16
-- Durum: Aşama 0. Derleme altyapısı henüz kurulmadı; bu belge planlanan düzeni tanımlar.
+- Son güncelleme: 2026-10-18
+- Son yayımlanan sürüm: **v1.5.1 (versionCode19)**. CI `39158221022`: **Debug312/0/0/0**, **Release258/0/0/0**.
+  APK derlemesi, apksigner, beklenen sertifika, asset digest ve tag kaynağı doğrulandı.
+- [Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.5.1) · [APK indir](https://github.com/keremtulu44/Question-note/releases/download/v1.5.1/yanlis-defteri-1.5.1.apk).
+  APK **10.819.807 bayt**; SHA-256 `c8d1d45cfd7ad55ab6d3ebba6bf52464fd772d16d23929cbcb406fe8b2a9a053`.
+  Tag/derlenen commit `c25b32bce6c20b0f2c39ff27af6990d13c300074`. 1.5.0 APK/tag korunur.
+- 1.5.1 yalnız sunum sadeleştirmesidir; [sekiz native önizleme](docs/ui/progress/README.md) ve
+  büyük-yazı/geri/saved-state/filtre doğrulamaları vardır. Üretim veri/hesaplama hizmetleri değişmedi.
+- P0–P5 ve P6 otomatik kalite kapıları yayımlandı; Room/ZIP4, geçmiş/snapshot uyumluluğu korunur.
+  Varsayılan **Gölge v2 tarihi uygular; etkin v3 kapalıdır**. XP/30 rozet/15 rütbe katsayıları aynı.
+- **Fiziksel cihaz kabulü ayrıdır**; otomatik testin yeşil olması gerçek cihaz testi yapıldığı anlamına gelmez.
+  Ayrıntı `docs/TEST_KONTROL_LISTESI.md`; host benchmark telefon/frame/cold-start ölçümü değildir.
 
 ---
+
+## Varyant ve kanıt kapısı
+
+- 1.5.1/code19, son yayın CI `39158221022`: Debug312/0, Release258/0 ve APK/imza/sertifika/yayın başarılı.
+  Güncel sonuç ve kaynak: [DERLEME_RAPORU.md](docs/DERLEME_RAPORU.md).
+- Debug başarısız olsa da Release testi çalışır; APK için **ikisi de** geçmelidir. CI sırası `:app:testDebugUnitTest` → `:app:testReleaseUnitTest` → `:app:assembleRelease` →
+  imza/sertifika → yayın. Ortak testler iki varyantta; UI/Preview `src/testDebug`'da, sayılar toplanmaz.
+- `androidComponents` host UnitTest seçimi açık. CI test sonuçları cache/up-to-date ile atlanmaz;
+  derleyici/dependency cache korunur. Her benchmark/önizleme o koşuda üretilir.
+- `tools/junit_ozeti.py` eksik/sıfır rapor, başarısız/hatalı/atlanan test ve zorunlu test sınıfının
+  keşfedilmemesini reddeder. Derleme hatası, “0 test başarılı” diye geçilmez.
+- Ara `PUBLISH_RELEASE=false`, başarılı imzalı ara APK'yı yayımlamaz. İki varyant `39143916007` ile
+  birlikte doğrulandı; nihai paket bayrağı açıldı, `39144684877` aynı kapıları yeniden geçerek yayımladı. **Bu yayın bayrağı, ayrı olan etkin-v3 kapılarını açmaz.**
+- Küçük native PNG'ler `docs/ui/progress` (sekiz güncel ekran) ve `docs/ui/p6`, sentetik host ölçümleri `docs/PERFORMANS_DEBUG.md` ve
+  `docs/PERFORMANS_RELEASE.md`. Büyük veri/ZIP/APK Git'e girmez.
 
 ## 1. Genel akış
 
 ```
 Kod değişikliği (yapay zekâ, GitHub)
         ↓
-GitHub Actions: elle tetiklenen derleme (workflow_dispatch)
+GitHub Actions: push ile otomatik derleme
         ↓
 Sabit release anahtarı ile imzalanmış APK
         ↓
@@ -28,7 +53,7 @@ Kullanıcının telefonunda Android SDK, Gradle veya Termux kurması **gerekmez*
 
 - Tek Gradle modülü, Kotlin + Jetpack Compose.
 - Sürümler `gradle/libs.versions.toml` içinde sabitlenir; Gradle wrapper depoda tutulur.
-- minSdk 26; targetSdk ve sürüm kodu Aşama 1'de sabitlenir.
+- minSdk 26, compileSdk/targetSdk 37; yayımlanmış v1.5.1 `versionCode=19` (v1.5.0: 18; v1.4.1: 17; v1.4.0: 16; v1.3.0: 15).
 - Yapay zekâ ortamında Java/Android SDK ve Maven erişimi yoktur → derleme **yalnızca** Actions'ta olur.
 
 ## 3. İmzalama düzeni (kritik)
@@ -52,7 +77,8 @@ Takma ad (`yanlisdefteri`) gizli bilgi olmadığı için workflow içinde sabit 
 Secret'lar **yalnızca kullanıcı** tarafından eklenebilir: Settings → Secrets and variables → Actions →
 New repository secret. Adımlar `anahtar/KURULUM_ADIMLARI.md` içinde (git dışı). Yapay zekânın token'ı
 secret uçlarına erişemiyor (403) ve **bir workflow kendi secret'ını oluşturamaz** (GitHub güvenlik
-kuralı) — bu yüzden bu adım elle yapılır.
+kuralı) — bu yüzden bu adım elle yapılır. Kullanıcı iki secret'ı ekledi; G3 CI keystore'u çözdü,
+APK'yı imzaladı ve beklenen sertifika SHA-256 parmak izinin aynısını doğruladı.
 
 **Kullanıcının sorumluluğu:** Anahtar dosyası ve parolası, telefondan bağımsız **iki ayrı yerde**
 saklanır (ör. şifre yöneticisi + Drive'da bir klasör). Anahtar kaybedilirse:
@@ -65,15 +91,13 @@ için uygun değildir.
 
 ## 4. Actions kullanımı
 
-- Derleme **push ile otomatik** çalışır (`on: push: branches: [main]`). Ölçülen neden: yapay zekânın
-  token'ında elle tetikleme (`workflow_dispatch` çağrısı) izni yok (403) ama push ile otomatik
-  tetikleme için özel izin gerekmiyor. Kullanıcı isterse GitHub arayüzünden "Run workflow" düğmesini
-  de kullanabilir (kendi hesabıyla).
-- Workflow'un **kendi token'ı** `permissions: contents: write` ile repoya yazabiliyor; bu yetki
-  **Release oluşturmak için yeterlidir** (G1'de commit atarak kanıtlandı).
-- **Log okuma deseni:** derleme logları dışarıdan indirilemiyor; bu yüzden her iş akışı ölçüm/özet
-  çıktısını (sürümler, dosya listesi, APK SHA-256, hata metni) **repoya yazar**
-  (ör. `docs/ORTAM_RAPORU.md`, ileride `docs/DERLEME_RAPORU.md`).
+- Derleme **push ile otomatik** çalışır (`main` ve bu oturumun geliştirme dalı; yalnızca workflow'da
+  izlenen dosyalar değişince). Elle tetikleme (`workflow_dispatch`) izni 403 olsa da gerekmez.
+  G2/G3/G4 derlemeleri push ile çalıştı.
+- Workflow'un **kendi token'ı** `permissions: contents: write` ile rapor commit edebiliyor; aynı izinle
+  v1.0.0, v1.0.1, v1.0.2, v1.0.3 ve v1.0.4 GitHub Release'leri oluşturuldu.
+- **Log okuma deseni:** derleme logları dışarıdan indirilemiyor; her iş akışı ölçüm/özet çıktısını
+  (sürümler, APK SHA-256, imza/parmak izi ve hata metni) **`docs/DERLEME_RAPORU.md` dosyasına yazar**.
 - Kotlin/Compose derlemesi hatasız bitmeden "APK hazır" denmez; başarısız derleme için Release
   oluşturulmaz.
 - GitHub Actions kotası ve kullanım koşulları kurulum sırasında kontrol edilir; sınırsız/ücretsiz
@@ -92,6 +116,7 @@ Her Release'de şunlar bulunur:
 - `versionName` ve `versionCode`
 - Derlenen Git commit kimliği
 - APK'nın **SHA-256** özeti (indirilen dosyanın gerçekten üretilen sürüm olduğu doğrulanabilir)
+- Sertifikanın **SHA-256** parmak izi (imzalama kimliği doğrulanabilir)
 
 **Debug ve release APK'ları karıştırılmaz.** Günlük kullanımda her zaman sabit anahtarla imzalanmış
 release APK kullanılır; Actions'ın ürettiği test/debug çıktıları yalnızca geliştirme amaçlıdır ve
@@ -99,20 +124,29 @@ günlük arşivin kurulu olduğu telefonun üzerine kurulmaz.
 
 ## 5. APK'ya telefondan erişim
 
-> Not: İlk CI denemelerinde APK, Actions **artifact** olarak da üretilir (indirmek için ZIP'ten
-> çıkarmak gerekir). Kalıcı yol her zaman **Releases**'tir.
+**Güncel:** [v1.5.0 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.5.0/yanlis-defteri-1.5.0.apk).
+Mevcut uygulamayı kaldırmadan üzerine kur; güncelleme öncesi Ayarlar'dan ZIP yedeği almak önerilir.
 
-1. GitHub'da deponun **Releases** bölümü açılır.
-2. En son sürümdeki `.apk` dosyasına dokunulur (bu doğrudan APK'dır, ZIP değildir).
-3. İndirme tamamlanınca dosya açılarak kurulum yapılır. Android ilk seferde "bilinmeyen kaynaklardan
-   kurulum izni" isteyebilir; bu izin yalnızca kullanılan tarayıcı/dosya yöneticisi için verilir.
-4. Mevcut uygulama **kaldırılmaz**; kurulum doğrudan üzerine yapılır ve veriler korunur.
-5. Depo public olduğu sürece Release dosyalarını bağlantıya sahip herkes görebilir; depo private
-   yapılırsa yalnızca yetkili hesaplar erişir.
+İlk sürümlerin tarihsel Release kayıtları:
 
-**Artifact indirme (yalnızca gerekirse):** Actions çalıştırmasının altındaki artifact bir **ZIP**
-olarak iner ve içinden APK çıkarılması gerekir. Telefonda bu ek adım zahmetli olduğu için birincil
-yol değildir.
+- **v1.0.0 (versionCode 1):** [Release v1.0.0](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.0) — G2'nin arayüzsüz ilk imzalı sürümü.
+- **v1.0.1 (versionCode 2):** [Release v1.0.1](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.1) — açık/koyu temalı 7 ders kartı.
+- **v1.0.2 (versionCode 3):** [Release v1.0.2](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.2) — Aşama 2/3 kodu. APK SHA-256: `264a15082587d3ed4883c783d3d94fea964d0472cf857e802fac1276f77729ac`.
+- **v1.0.3 (versionCode 4):** [Release v1.0.3](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.3) — Bugün ana ekranı, yan menü ve tekrar sonucu kaydı; kullanıcı cihaz adımlarını geçti bildirdi. APK SHA-256: `4641aff60fb38aeb114c765a9721d50849156e9f094b9b99662807cc41724108`.
+- **v1.0.4 (versionCode 5):** [Release v1.0.4](https://github.com/keremtulu44/Question-note/releases/tag/v1.0.4) · [APK indir](https://github.com/keremtulu44/Question-note/releases/download/v1.0.4/yanlis-defteri-1.0.4.apk) — Soru ayrıntısında tekrar geçmişi; yeni history UI cihaz kabulü bekliyor. CI APK SHA-256: `bf6978a506a472834d7c7a952ac59818d69b0d9c205772d4c02ce2767cc27468`.
+
+### G5 — telefonda güncelleme zinciri (**GEÇTİ**, kullanıcı bildirimi 2026-10-16)
+
+Kullanıcı v1.0.0'dan v1.0.1'e uygulamayı kaldırmadan güncelledi; uygulama açıldı ve dersler göründü.
+Bu, kurulum ve güncelleme zincirinin kullanıcı cihazında doğrulandığını gösterir. Release bağlantıları
+ve sürüm ayrıntıları aşağıda korunmuştur.
+
+Android ilk kurulumda "bilinmeyen kaynaklardan kurulum izni" isteyebilir; izni yalnızca kullandığın
+indiriciye ver. Release APK doğrudan `.apk` dosyasıdır, ZIP değildir. Depo public olduğu sürece
+Release dosyalarını bağlantıya sahip herkes görebilir.
+
+**Artifact indirme (yalnızca gerekirse):** Actions artifact'i ZIP olarak iner; içinden APK çıkarmak
+gerekir. Telefonda ek adım gerektirdiği için birincil yol Releases'tir.
 
 ## 6. Sürümleme kuralları
 

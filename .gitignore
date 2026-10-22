@@ -11,6 +11,7 @@ anahtar/
 
 # --- Yedek dosyaları (kullanıcı verisi) ---
 yanlis-defteri-*.zip
+*.zip
 *.apk
 
 # --- Android / Gradle derleme çıktıları ---
@@ -21,3 +22,6 @@ captures/
 *.iml
 .idea/
 .kotlin/
+
+# Generated working assets and local tooling
+.cache/
