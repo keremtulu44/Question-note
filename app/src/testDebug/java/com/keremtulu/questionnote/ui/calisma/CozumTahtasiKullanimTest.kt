@@ -117,7 +117,7 @@ class CozumTahtasiKullanimTest {
         val bounds = canvas.fetchSemanticsNode().boundsInRoot
         canvas.performTouchInput {
             down(Offset(bounds.width * 0.2f, bounds.height * 0.2f))
-            moveTo(Offset(bounds.width * 0.75f, bounds.height * 0.75f), durationMillis = 120)
+            moveTo(Offset(bounds.width * 0.75f, bounds.height * 0.75f), delayMillis = 120)
             up()
         }
         compose.waitUntil(5_000) {
