@@ -2,7 +2,44 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
-## [Yayımlanmadı] — arena/1c0f41d0 oturumu (2026-10-19)
+## [1.5.96] — 2026-10-23
+
+- **Çözüm Atölyesi:** beyaz tahta ekranı, daha belirgin soru/çizim çalışma alanı ve seçili araç durumu olan bir düzene getirildi. Yatay görünümde araçlar, renk/kalınlık ve geri al/yinele/temizle kontrolleri kompakt bir çalışma çubuğunda birleşir; dikey görünümde açıklamalı kontrol grupları korunur.
+- Tahta zemini ve soru önizlemesi iyileştirildi. Erişilebilir araç seçimi ve buton açıklamaları korunurken soru görselleri, çizim katmanları, ayrı geri alma geçmişleri, tekrar aralıkları ve haftalık inceleme davranışı değiştirilmedi.
+- Sürüm: `versionCode 26` / `versionName 1.5.96` — v1.5.95 üzerine, aynı uygulama kimliği ve imzalama anahtarıyla güncelleme.
+
+## [1.5.95] — 2026-10-23
+
+- **Çözüm tahtası kullanılabilirliği:** yatay ekranda soru ve tahta yan yana; dikey ekranda küçük üst simgeden açılan, kaydırılabilir ve ekranı tamamen kaplamayan soru paneli. Soru sayfasına dokununca aynı tahta üzerinde çizim yapılabilir; simgeyle tekrar tahtaya dönülür.
+- Boş tahta ve her soru görselinin çizimleri ayrı tutulur; geri al/yinele aktif yüzeye, temizleme bu soru için tüm geçici çizimlere uygulanır. Özgün görseller, soru verileri, tekrar aralığı ve haftalık inceleme davranışı değiştirilmedi.
+- Sürüm: `versionCode 25` / `versionName 1.5.95` — v1.5.94 üzerine, aynı uygulama kimliği ve imzalama anahtarıyla güncelleme.
+
+## [1.5.94] — 2026-10-23
+
+- **Kırpma ve çözüm tahtası:** eksik görsel ve küçük kırpma alanı durumları mevcut Türkçe kaynak metinlerle gösterilir; ek yinelenen metin kaynakları kaldırıldı. `whiteboard_question_missing`, çizim alanı açıklamasının yanında tutulur.
+- Görsel kırpma özgün dosyayı değiştirmez; beyaz tahta çizimleri geçicidir. Tekrar planı, Room verileri ve yedek biçimi değişmedi.
+- Sürüm: `versionCode 24` / `versionName 1.5.94` — v1.5.93 üzerine, aynı uygulama kimliği ve imzalama anahtarıyla güncelleme.
+
+## [1.5.93] — 2026-10-23
+
+- **Görsel kırpma:** soru ve çözüm görselleri ekleme/düzenleme formunda kırpılabilir. Kırpma ayrı bir geçici kopya oluşturur; kaydedilmiş özgün görsel üzerine yazılmaz.
+- **Çözüm tahtası:** odaklı çözüm ve soru ayrıntılarından açılan tahta; serbest kalem, çizgi, dikdörtgen, üçgen, silgi, üç çizgi kalınlığı ve altı renk. Geri al/yinele/temizle; yatay ekranda soru ve çalışma alanı yan yana. Soru üstü çizimler ayrı katmandır ve özgün görseli değiştirmez.
+- Tekrar aralıkları, haftalık inceleme davranışı, Room verileri ve yedek biçimi değiştirilmedi.
+- Sürüm: `versionCode 23` / `versionName 1.5.93` — v1.5.92 üzerine, aynı uygulama kimliği ve imzalama anahtarıyla güncelleme.
+
+## [1.5.92] — 2026-10-22
+
+- **Premium deneyim:** sistem azaltılmış-hareket ayarına uyan ekran geçişleri, kademeli liste girişleri, mikro-etkileşimler, shimmer/iskele yükleme durumları ve başarı parçacıkları; cam/gradient/gölge yüzeyler.
+- **Ses ve dokunsal geri bildirim:** kısa UI/başarı sesi kitaplığı genişletildi, stereo yön hissi ve isteğe bağlı Odak ambiyansı eklendi. Farklı dokunsal desenler sistem titreşim ayarına uyar; Ayarlar ve Odak'ta kullanıcı kontrolü vardır.
+- **Gezinme ve demo:** alt menüde kaydırma ile sekme geçişi; Ayarlar'da etkileşimleri deneyen Premium demo. Mevcut ekranlar ve çalışma akışları korunur.
+- **Veri güvenliği:** veritabanı şeması, çalışma kayıtları, yedekler ve öğrenme kuralları değiştirilmedi; yeni bağımlılık eklenmedi.
+- Sürüm: `versionCode 22` / `versionName 1.5.92` — v1.5.91'in üzerine, aynı uygulama kimliği ve imzalama anahtarıyla güncelleme.
+- CI `39839941144`: **Debug315/0/0/0 + Release261/0/0/0**; Release APK, `apksigner` ve beklenen sertifika doğrulandı.
+- [İmzalı v1.5.92 APK](https://github.com/keremtulu44/Question-note/releases/download/v1.5.92/yanlis-defteri-1.5.92.apk): **12.636.911 bayt**; SHA-256 `5cbc479d31cddfb56499c2978893556195138a1e644bbf6bd4a256374f272071`. Derlenen commit `682986cef4371a9e01f393f27efd21e1e51a09f2`; sertifika SHA-256 `FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54`.
+- Fiziksel cihaz/TalkBack/SAF/frame-p95 kabulü CI testlerinden ayrıdır; henüz yapılmadı.
+
+
+## [1.5.91] — 2026-10-22
 
 - **Uygulama adı: "Yanlış Defterim"** — launcher etiketi (`app_name`), README başlığı ve Release
   başlıkları bu adı kullanır. `applicationId` değişmez (`com.keremtulu.questionnote`).
@@ -20,6 +57,8 @@ Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih 
   modunda çalmaz. Varsayılan açık; yeni bağımlılık yok (dahili SoundPool + gömülü WAV).
 - Sürüm: `versionCode 21` / `versionName 1.5.91` — v1.5.1 ve v1.5.90 Release'lerine dokunulmadan
   yeni etiket (1.5.90 bu oturdaki ilk `Geri al` + ses paketiydi).
+- CI doğrulaması: Debug315/0/0/0, Release261/0/0/0; APK SHA-256 `b627e1ad6a6eb4e8e9b5da871a459f6d36c879dfbcd119c2a2d4c6bb58343acf`, sertifika `FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54`.
+- [İmzalı v1.5.91 APK](https://github.com/keremtulu44/Question-note/releases/download/v1.5.91/yanlis-defteri-1.5.91.apk): 11.054.007 bayt.
 - Not: parmak izi/açılış kilidi kararı **kalıcı olarak reddedildi**; yapılmayacak.
 
 ## [1.5.1] — 2026-10-18

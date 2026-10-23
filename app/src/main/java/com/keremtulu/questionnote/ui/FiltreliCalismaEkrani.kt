@@ -1,6 +1,5 @@
 package com.keremtulu.questionnote.ui
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,29 +8,20 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -41,7 +31,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
@@ -58,6 +53,21 @@ import com.keremtulu.questionnote.domain.repeat.CalismaSorulariniSirala
 import com.keremtulu.questionnote.domain.repository.DersRepository
 import com.keremtulu.questionnote.domain.repository.KonuRepository
 import com.keremtulu.questionnote.domain.repository.SoruRepository
+import com.keremtulu.questionnote.ui.animasyon.animateItemInsertion
+import com.keremtulu.questionnote.ui.animasyon.rememberShimmer
+import com.keremtulu.questionnote.ui.bilesenler.premium.CamKarti
+import com.keremtulu.questionnote.ui.bilesenler.premium.CamYukseklik
+import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
+import com.keremtulu.questionnote.ui.bilesenler.premium.IskeletKart
+import com.keremtulu.questionnote.ui.bilesenler.premium.IskeletMetin
+import com.keremtulu.questionnote.ui.bilesenler.premium.PremiumBosDurum
+import com.keremtulu.questionnote.ui.bilesenler.premium.VarsayilanIlustrasyon
+import com.keremtulu.questionnote.ui.premium.EtkilesimTuru
+import com.keremtulu.questionnote.ui.premium.PremiumButton
+import com.keremtulu.questionnote.ui.premium.PremiumCard
+import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
+import com.keremtulu.questionnote.ui.premium.PremiumOutlinedButton
+import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import java.time.ZoneId
 import java.time.LocalDate
 import kotlinx.coroutines.flow.catch
@@ -153,7 +163,12 @@ fun FiltreliCalismaEkrani(
         is EkranYukleme.Hazir -> state.deger
         else -> null
     }
-    val dersHaritasi = secenekler?.dersler.orEmpty().associateBy { it.id }
+    val dersHaritasi = remember(secenekler?.dersler) {
+        secenekler?.dersler.orEmpty().associateBy { it.id }
+    }
+    val konuHaritasi = remember(secenekler?.konular) {
+        secenekler?.konular.orEmpty().associateBy { it.id }
+    }
     val tumuSecimi = FiltreSecimi.Hepsi
     val bosSecimi = FiltreSecimi.Belirtilmemis
     val topicSecimi = when {
@@ -253,259 +268,355 @@ fun FiltreliCalismaEkrani(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item {
-                Column {
-                    TextButton(onClick = onGeri) { Text("‹  ${androidx.compose.ui.res.stringResource(R.string.menu_today)}") }
-                    Text(
-                        text = androidx.compose.ui.res.stringResource(R.string.filtered_practice_kicker),
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.labelMedium,
-                        letterSpacing = 1.4.sp,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    Text(
-                        text = androidx.compose.ui.res.stringResource(R.string.filtered_practice_title),
-                        modifier = Modifier.padding(top = 4.dp),
-                        color = MaterialTheme.colorScheme.onBackground,
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                    Text(
-                        text = androidx.compose.ui.res.stringResource(R.string.filtered_practice_subtitle),
-                        modifier = Modifier.padding(top = 4.dp),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    PremiumTextButton(
+                        onClick = onGeri,
+                        interactionTur = EtkilesimTuru.GERI,
+                    ) { Text("‹  ${androidx.compose.ui.res.stringResource(R.string.menu_today)}") }
+                    GradyanKart(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(24.dp),
+                        borderAnimation = false,
+                    ) {
+                        Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                            Text(
+                                text = androidx.compose.ui.res.stringResource(R.string.filtered_practice_kicker),
+                                color = PremiumMarkaRenkler.BakirIsik,
+                                style = MaterialTheme.typography.labelMedium,
+                                letterSpacing = 1.4.sp,
+                                fontWeight = FontWeight.Bold,
+                            )
+                            Text(
+                                text = androidx.compose.ui.res.stringResource(R.string.filtered_practice_title),
+                                color = PremiumMarkaRenkler.Kagit,
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Bold,
+                            )
+                            Text(
+                                text = androidx.compose.ui.res.stringResource(R.string.filtered_practice_subtitle),
+                                color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.86f),
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
+                    }
                 }
             }
 
-            item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(24.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth().padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
+            when (secenekDurumu) {
+                EkranYukleme.Yukleniyor -> item {
+                    val loadingLabel = androidx.compose.ui.res.stringResource(R.string.filtered_practice_loading)
+                    val shimmer = rememberShimmer()
+                    CamKarti(
+                        modifier = Modifier.fillMaxWidth().semantics {
+                            contentDescription = loadingLabel
+                            liveRegion = LiveRegionMode.Polite
+                        },
+                        elevation = CamYukseklik.DUSUK,
+                        shape = RoundedCornerShape(24.dp),
                     ) {
-                        FiltreDropdown(
-                            baslik = androidx.compose.ui.res.stringResource(R.string.analysis_filter_lesson),
-                            secim = ayar.filtre.dersId?.let { FiltreSecimi.Deger(it) } ?: tumuSecimi,
-                            secenekler = listOf(FiltreSecenegi(tumuSecimi, allLabel)) + secenekler?.dersler.orEmpty().map {
-                                FiltreSecenegi(FiltreSecimi.Deger(it.id), it.ad) },
-                            onSecim = { choice -> onAyarDegisti(ayar.copy(filtre = ayar.filtre.copy(
-                                dersId = (choice as? FiltreSecimi.Deger)?.metin, konuId = null, konusuz = false))) },
-                        )
-                        if (ayar.filtre.vadesiGelen) {
-                            Text(androidx.compose.ui.res.stringResource(R.string.analysis_filter_due))
-                            TextButton(onClick = { onAyarDegisti(ayar.copy(filtre = ayar.filtre.copy(vadesiGelen = false))) },
-                                modifier = Modifier.heightIn(min = 48.dp)) { Text(androidx.compose.ui.res.stringResource(R.string.analysis_filter_remove_due)) }
+                        Column(
+                            modifier = Modifier.fillMaxWidth().padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(14.dp),
+                        ) {
+                            IskeletMetin(lines = 1, lineHeight = 20, widthFraction = 0.48f, animation = shimmer)
+                            repeat(4) {
+                                Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                                    IskeletMetin(lines = 1, lineHeight = 14, widthFraction = 0.34f, animation = shimmer)
+                                    IskeletMetin(lines = 1, lineHeight = 48, widthFraction = 1f, animation = shimmer)
+                                }
+                            }
                         }
-                        ayar.filtre.kaynakAnahtari?.let { anahtar ->
-                            Text(androidx.compose.ui.res.stringResource(R.string.analysis_filter_normalized, anahtar))
-                            TextButton(onClick = { onAyarDegisti(ayar.copy(filtre = ayar.filtre.copy(kaynakAnahtari = null))) },
-                                modifier = Modifier.heightIn(min = 48.dp)) { Text(androidx.compose.ui.res.stringResource(R.string.analysis_filter_remove_source)) }
-                        }
-                        FiltreDropdown(
-                            baslik = androidx.compose.ui.res.stringResource(R.string.filtered_practice_filter_topic),
-                            secim = topicSecimi,
-                            secenekler = topicDropdownOptions,
-                            onSecim = { choice ->
-                                val topic = choice as? FiltreSecimi.Deger
-                                onAyarDegisti(
-                                    ayar.copy(
-                                        filtre = ayar.filtre.copy(
-                                            konuId = topic?.metin,
-                                            konusuz = choice == FiltreSecimi.Belirtilmemis,
+                    }
+                }
+                EkranYukleme.Hata -> item {
+                    PremiumBosDurum(
+                        illustration = { VarsayilanIlustrasyon() },
+                        baslik = androidx.compose.ui.res.stringResource(R.string.filtered_practice_options_error_title),
+                        aciklama = androidx.compose.ui.res.stringResource(R.string.filtered_practice_options_error),
+                        butonMetni = androidx.compose.ui.res.stringResource(R.string.topic_retry),
+                        onButonTikla = { yenileme++ },
+                        modifier = Modifier.fillMaxWidth().semantics {
+                            liveRegion = LiveRegionMode.Assertive
+                        },
+                    )
+                }
+                is EkranYukleme.Hazir -> item {
+                    CamKarti(
+                        modifier = Modifier.fillMaxWidth(),
+                        elevation = CamYukseklik.DUSUK,
+                        shape = RoundedCornerShape(24.dp),
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth().padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            Text(
+                                text = androidx.compose.ui.res.stringResource(R.string.filtered_practice_filters_title),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                            FiltreDropdown(
+                                baslik = androidx.compose.ui.res.stringResource(R.string.analysis_filter_lesson),
+                                secim = ayar.filtre.dersId?.let { FiltreSecimi.Deger(it) } ?: tumuSecimi,
+                                secenekler = listOf(FiltreSecenegi(tumuSecimi, allLabel)) + secenekler?.dersler.orEmpty().map {
+                                    FiltreSecenegi(FiltreSecimi.Deger(it.id), it.ad)
+                                },
+                                onSecim = { choice ->
+                                    onAyarDegisti(
+                                        ayar.copy(
+                                            filtre = ayar.filtre.copy(
+                                                dersId = (choice as? FiltreSecimi.Deger)?.metin,
+                                                konuId = null,
+                                                konusuz = false,
+                                            ),
                                         ),
-                                    ),
-                                )
-                            },
-                        )
-                        FiltreDropdown(
-                            baslik = androidx.compose.ui.res.stringResource(R.string.filtered_practice_filter_source),
-                            secim = sourceSecimi,
-                            secenekler = textDropdownOptions(sourceOptions),
-                            onSecim = { choice ->
-                                val source = choice as? FiltreSecimi.Deger
-                                onAyarDegisti(
-                                    ayar.copy(
-                                        filtre = ayar.filtre.copy(
-                                            kaynak = source?.metin,
-                                            kaynakAnahtari = null,
-                                            kaynakBelirtilmemis = choice == FiltreSecimi.Belirtilmemis,
+                                    )
+                                },
+                            )
+                            if (ayar.filtre.vadesiGelen) {
+                                Text(androidx.compose.ui.res.stringResource(R.string.analysis_filter_due))
+                                PremiumTextButton(
+                                    onClick = {
+                                        onAyarDegisti(ayar.copy(filtre = ayar.filtre.copy(vadesiGelen = false)))
+                                    },
+                                    modifier = Modifier.heightIn(min = 48.dp),
+                                ) { Text(androidx.compose.ui.res.stringResource(R.string.analysis_filter_remove_due)) }
+                            }
+                            ayar.filtre.kaynakAnahtari?.let { anahtar ->
+                                Text(androidx.compose.ui.res.stringResource(R.string.analysis_filter_normalized, anahtar))
+                                PremiumTextButton(
+                                    onClick = {
+                                        onAyarDegisti(ayar.copy(filtre = ayar.filtre.copy(kaynakAnahtari = null)))
+                                    },
+                                    modifier = Modifier.heightIn(min = 48.dp),
+                                ) { Text(androidx.compose.ui.res.stringResource(R.string.analysis_filter_remove_source)) }
+                            }
+                            FiltreDropdown(
+                                baslik = androidx.compose.ui.res.stringResource(R.string.filtered_practice_filter_topic),
+                                secim = topicSecimi,
+                                secenekler = topicDropdownOptions,
+                                onSecim = { choice ->
+                                    val topic = choice as? FiltreSecimi.Deger
+                                    onAyarDegisti(
+                                        ayar.copy(
+                                            filtre = ayar.filtre.copy(
+                                                konuId = topic?.metin,
+                                                konusuz = choice == FiltreSecimi.Belirtilmemis,
+                                            ),
                                         ),
-                                    ),
-                                )
-                            },
-                        )
-                        FiltreDropdown(
-                            baslik = androidx.compose.ui.res.stringResource(R.string.filtered_practice_filter_reason),
-                            secim = reasonSecimi,
-                            secenekler = textDropdownOptions(reasonOptions),
-                            onSecim = { choice ->
-                                val reason = choice as? FiltreSecimi.Deger
-                                onAyarDegisti(
-                                    ayar.copy(
-                                        filtre = ayar.filtre.copy(
-                                            yanlisNedeni = reason?.metin,
-                                            yanlisNedeniBelirtilmemis = choice == FiltreSecimi.Belirtilmemis,
+                                    )
+                                },
+                            )
+                            FiltreDropdown(
+                                baslik = androidx.compose.ui.res.stringResource(R.string.filtered_practice_filter_source),
+                                secim = sourceSecimi,
+                                secenekler = textDropdownOptions(sourceOptions),
+                                onSecim = { choice ->
+                                    val source = choice as? FiltreSecimi.Deger
+                                    onAyarDegisti(
+                                        ayar.copy(
+                                            filtre = ayar.filtre.copy(
+                                                kaynak = source?.metin,
+                                                kaynakAnahtari = null,
+                                                kaynakBelirtilmemis = choice == FiltreSecimi.Belirtilmemis,
+                                            ),
                                         ),
-                                    ),
-                                )
-                            },
-                        )
-                        TextButton(onClick = { onAyarDegisti(ayar.copy(filtre = SoruCalismaFiltresi())) }) {
-                            Text(androidx.compose.ui.res.stringResource(R.string.filtered_practice_clear_filters))
+                                    )
+                                },
+                            )
+                            FiltreDropdown(
+                                baslik = androidx.compose.ui.res.stringResource(R.string.filtered_practice_filter_reason),
+                                secim = reasonSecimi,
+                                secenekler = textDropdownOptions(reasonOptions),
+                                onSecim = { choice ->
+                                    val reason = choice as? FiltreSecimi.Deger
+                                    onAyarDegisti(
+                                        ayar.copy(
+                                            filtre = ayar.filtre.copy(
+                                                yanlisNedeni = reason?.metin,
+                                                yanlisNedeniBelirtilmemis = choice == FiltreSecimi.Belirtilmemis,
+                                            ),
+                                        ),
+                                    )
+                                },
+                            )
+                            PremiumTextButton(
+                                onClick = { onAyarDegisti(ayar.copy(filtre = SoruCalismaFiltresi())) },
+                            ) {
+                                Text(androidx.compose.ui.res.stringResource(R.string.filtered_practice_clear_filters))
+                            }
                         }
                     }
                 }
             }
 
             if (onDevam != null) item {
-                OutlinedButton(onClick = onDevam, modifier = Modifier.fillMaxWidth()) {
+                PremiumOutlinedButton(onClick = onDevam, modifier = Modifier.fillMaxWidth()) {
                     Text(androidx.compose.ui.res.stringResource(R.string.focus_continue_session))
                 }
             }
-            item {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FilterChip(ayar.akilliSira, { onAyarDegisti(ayar.copy(akilliSira = true)) },
-                        label = { Text(androidx.compose.ui.res.stringResource(R.string.focus_smart)) })
-                    FilterChip(!ayar.akilliSira, { onAyarDegisti(ayar.copy(akilliSira = false)) },
-                        label = { Text(androidx.compose.ui.res.stringResource(R.string.focus_oldest)) })
-                }
-                Text(androidx.compose.ui.res.stringResource(R.string.focus_order_note), style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    listOf(5, 10, 20).forEach { adet ->
-                        FilterChip(ayar.soruSayisi == adet.toString(), { onAyarDegisti(ayar.copy(soruSayisi = adet.toString())) },
-                            label = { Text("$adet soru") })
-                    }
-                }
-            }
-            when (val current = soruDurumu) {
-                EkranYukleme.Yukleniyor -> item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+            if (secenekDurumu is EkranYukleme.Hazir) item {
+                CamKarti(
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = CamYukseklik.DUSUK,
+                    shape = RoundedCornerShape(24.dp),
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
-                        CircularProgressIndicator(modifier = Modifier.width(20.dp), strokeWidth = 2.dp)
-                        Text(androidx.compose.ui.res.stringResource(R.string.filtered_practice_loading))
-                    }
-                }
-                EkranYukleme.Hata -> item {
-                    Column {
                         Text(
-                            androidx.compose.ui.res.stringResource(R.string.filtered_practice_error),
-                            color = MaterialTheme.colorScheme.error,
-                        )
-                        TextButton(onClick = { yenileme++ }) {
-                            Text(androidx.compose.ui.res.stringResource(R.string.question_review_history_retry))
-                        }
-                    }
-                }
-                is EkranYukleme.Hazir -> item {
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Text(
-                            androidx.compose.ui.res.stringResource(R.string.filtered_practice_matched_count, siraliSorular.size),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onBackground,
-                        )
-                        Text(
-                            androidx.compose.ui.res.stringResource(R.string.filtered_practice_order_note),
+                            text = androidx.compose.ui.res.stringResource(R.string.focus_order_note),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            OutlinedTextField(
-                                modifier = Modifier.weight(1f),
-                                value = ayar.soruSayisi,
-                                onValueChange = { input ->
-                                    onAyarDegisti(ayar.copy(soruSayisi = input.filter { it in '0'..'9' }.take(4)))
-                                },
-                                label = {
-                                    Text(androidx.compose.ui.res.stringResource(R.string.filtered_practice_count_label))
-                                },
-                                singleLine = true,
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            FilterChip(
+                                ayar.akilliSira,
+                                { onAyarDegisti(ayar.copy(akilliSira = true)) },
+                                label = { Text(androidx.compose.ui.res.stringResource(R.string.focus_smart)) },
                             )
-                            Button(
-                                modifier = Modifier.height(56.dp),
-                                enabled = secenekler != null && secilecekSoruSayisi != null,
-                                onClick = {
-                                    val count = secilecekSoruSayisi ?: return@Button
-                                    val lessonMap = secenekler?.dersler.orEmpty().associateBy { it.id }
-                                    val selected = siraliSorular.take(count)
-                                    if (selected.isNotEmpty() && selected.all { it.dersId in lessonMap }) {
-                                        onOturumBaslat(selected, lessonMap)
-                                    }
-                                },
-                            ) {
-                                Text(androidx.compose.ui.res.stringResource(R.string.filtered_practice_start))
+                            FilterChip(
+                                !ayar.akilliSira,
+                                { onAyarDegisti(ayar.copy(akilliSira = false)) },
+                                label = { Text(androidx.compose.ui.res.stringResource(R.string.focus_oldest)) },
+                            )
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            listOf(5, 10, 20).forEach { adet ->
+                                FilterChip(
+                                    ayar.soruSayisi == adet.toString(),
+                                    { onAyarDegisti(ayar.copy(soruSayisi = adet.toString())) },
+                                    label = { Text("$adet soru") },
+                                )
                             }
                         }
-                        if (sayiAsimi) {
-                            Text(
-                                text = androidx.compose.ui.res.stringResource(
-                                    R.string.filtered_practice_count_capped,
-                                    siraliSorular.size,
-                                ),
-                                modifier = Modifier.padding(top = 4.dp),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                style = MaterialTheme.typography.bodySmall,
+                    }
+                }
+            }
+            if (secenekDurumu is EkranYukleme.Hazir) when (soruDurumu) {
+                EkranYukleme.Yukleniyor -> item {
+                    val loadingLabel = androidx.compose.ui.res.stringResource(R.string.filtered_practice_loading)
+                    Column(
+                        modifier = Modifier.fillMaxWidth().semantics {
+                            contentDescription = loadingLabel
+                            liveRegion = LiveRegionMode.Polite
+                        },
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        repeat(3) { IskeletKart(height = 92, showImage = false, showSubtitle = true) }
+                    }
+                }
+                EkranYukleme.Hata -> item {
+                    PremiumBosDurum(
+                        illustration = { VarsayilanIlustrasyon() },
+                        baslik = androidx.compose.ui.res.stringResource(R.string.filtered_practice_error_title),
+                        aciklama = androidx.compose.ui.res.stringResource(R.string.filtered_practice_error),
+                        butonMetni = androidx.compose.ui.res.stringResource(R.string.topic_retry),
+                        onButonTikla = { yenileme++ },
+                        modifier = Modifier.fillMaxWidth().semantics {
+                            liveRegion = LiveRegionMode.Assertive
+                        },
+                    )
+                }
+                is EkranYukleme.Hazir -> {
+                    if (siraliSorular.isEmpty()) {
+                        item {
+                            val hasActiveFilters = ayar.filtre != SoruCalismaFiltresi()
+                            PremiumBosDurum(
+                                illustration = { VarsayilanIlustrasyon() },
+                                baslik = androidx.compose.ui.res.stringResource(R.string.filtered_practice_empty_title),
+                                aciklama = androidx.compose.ui.res.stringResource(R.string.filtered_practice_no_matches),
+                                ikincilButonMetni = if (hasActiveFilters) {
+                                    androidx.compose.ui.res.stringResource(R.string.filtered_practice_clear_filters)
+                                } else {
+                                    null
+                                },
+                                onIkincilButon = if (hasActiveFilters) {
+                                    { onAyarDegisti(ayar.copy(filtre = SoruCalismaFiltresi())) }
+                                } else {
+                                    null
+                                },
+                                modifier = Modifier.fillMaxWidth(),
                             )
                         }
-                    }
-                }
-            }
-
-            if (secenekDurumu is EkranYukleme.Hata) {
-                item {
-                    Column {
-                        Text(
-                            androidx.compose.ui.res.stringResource(R.string.filtered_practice_options_error),
-                            color = MaterialTheme.colorScheme.error,
-                        )
-                        TextButton(onClick = { yenileme++ }) {
-                            Text(androidx.compose.ui.res.stringResource(R.string.question_review_history_retry))
+                    } else {
+                        item {
+                            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                                Text(
+                                    androidx.compose.ui.res.stringResource(R.string.filtered_practice_matched_count, siraliSorular.size),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                )
+                                Text(
+                                    androidx.compose.ui.res.stringResource(R.string.filtered_practice_order_note),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    OutlinedTextField(
+                                        modifier = Modifier.weight(1f),
+                                        value = ayar.soruSayisi,
+                                        onValueChange = { input ->
+                                            onAyarDegisti(ayar.copy(soruSayisi = input.filter { it in '0'..'9' }.take(4)))
+                                        },
+                                        label = {
+                                            Text(androidx.compose.ui.res.stringResource(R.string.filtered_practice_count_label))
+                                        },
+                                        singleLine = true,
+                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                    )
+                                    PremiumButton(
+                                        modifier = Modifier.heightIn(min = 56.dp),
+                                        enabled = secenekler != null && secilecekSoruSayisi != null,
+                                        onClick = {
+                                            val count = secilecekSoruSayisi ?: return@PremiumButton
+                                            val lessonMap = secenekler?.dersler.orEmpty().associateBy { it.id }
+                                            val selected = siraliSorular.take(count)
+                                            if (selected.isNotEmpty() && selected.all { it.dersId in lessonMap }) {
+                                                onOturumBaslat(selected, lessonMap)
+                                            }
+                                        },
+                                    ) {
+                                        Text(androidx.compose.ui.res.stringResource(R.string.filtered_practice_start))
+                                    }
+                                }
+                                if (sayiAsimi) {
+                                    Text(
+                                        text = androidx.compose.ui.res.stringResource(
+                                            R.string.filtered_practice_count_capped,
+                                            siraliSorular.size,
+                                        ),
+                                        modifier = Modifier.padding(top = 4.dp),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
+                                }
+                            }
+                        }
+                        itemsIndexed(siraliSorular, key = { _, question -> question.id }) { index, question ->
+                            val lesson = dersHaritasi[question.dersId]
+                            if (lesson != null) {
+                                val topic = question.konuId?.let(konuHaritasi::get)
+                                val enter = animateItemInsertion(index)
+                                CalismaSoruKarti(
+                                    soru = question,
+                                    ders = lesson,
+                                    konu = topic,
+                                    onClick = { onOturumBaslat(listOf(question), mapOf(lesson.id to lesson)) },
+                                    modifier = Modifier.graphicsLayer {
+                                        alpha = enter.value
+                                        translationY = (1f - enter.value) * 12.dp.toPx()
+                                    },
+                                )
+                            }
                         }
                     }
-                }
-            }
-
-            if (soruDurumu is EkranYukleme.Hazir && siraliSorular.isEmpty()) {
-                item {
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                    ) {
-                        Text(
-                            androidx.compose.ui.res.stringResource(R.string.filtered_practice_no_matches),
-                            modifier = Modifier.padding(18.dp),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    }
-                }
-            }
-
-            items(siraliSorular, key = { it.id }) { question ->
-                val lesson = dersHaritasi[question.dersId]
-                if (lesson != null) {
-                    val topic = secenekler?.konular?.firstOrNull { it.id == question.konuId }
-                    CalismaSoruKarti(
-                        soru = question,
-                        ders = lesson,
-                        konu = topic,
-                        onClick = { onOturumBaslat(listOf(question), mapOf(lesson.id to lesson)) },
-                    )
                 }
             }
         }
@@ -530,10 +641,10 @@ private fun FiltreDropdown(
             fontWeight = FontWeight.SemiBold,
         )
         Box {
-            OutlinedButton(
-                modifier = Modifier.fillMaxWidth(),
+            PremiumOutlinedButton(
+                modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
                 onClick = { acik = true },
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                interactionTur = EtkilesimTuru.TIKLAMA,
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -574,11 +685,13 @@ private fun CalismaSoruKarti(
     ders: Ders,
     konu: Konu?,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+    PremiumCard(
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        interactionTur = EtkilesimTuru.KART_ACILIS,
     ) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(16.dp),

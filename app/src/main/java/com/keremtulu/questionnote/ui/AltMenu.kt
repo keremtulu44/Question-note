@@ -25,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -35,6 +36,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -44,6 +46,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.keremtulu.questionnote.R
+import com.keremtulu.questionnote.data.ses.HapticTipi
+import com.keremtulu.questionnote.data.ses.SesTuruGenis
+import com.keremtulu.questionnote.data.ses.SesYoneticisi
+import com.keremtulu.questionnote.ui.animasyon.horizontalSwipeNavigation
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -57,9 +63,22 @@ fun AltMenu(
     systemInsets: WindowInsets = WindowInsets.navigationBars.union(WindowInsets.displayCutout),
 ) {
     val colors = MaterialTheme.colorScheme
+    val context = LocalContext.current
+    val feedbackScope = rememberCoroutineScope()
     // At large font scales keep all five 48dp+ destinations, but give the selected label room
     // rather than splitting words or silently shrinking the user's chosen text size.
     val buyukYazi = LocalDensity.current.fontScale >= 1.5f
+    fun sekmeyeGec(hedef: AltSekme) {
+        if (hedef == secili) return
+        val pan = if (hedef.ordinal < secili.ordinal) -0.18f else 0.18f
+        SesYoneticisi.uygulama(context).calPremium(
+            SesTuruGenis.SAYFA_GECIS,
+            HapticTipi.SWIPE,
+            feedbackScope,
+            pan,
+        )
+        onSec(hedef)
+    }
     Surface(color = colors.surface, tonalElevation = 2.dp) {
         Column(
             Modifier.windowInsetsPadding(
@@ -67,7 +86,16 @@ fun AltMenu(
             ),
         ) {
             HorizontalDivider(color = colors.outlineVariant.copy(alpha = 0.5f))
-            Row(Modifier.fillMaxWidth().selectableGroup().padding(horizontal = 4.dp)) {
+            Row(
+                Modifier.fillMaxWidth()
+                    .selectableGroup()
+                    .horizontalSwipeNavigation(
+                        thresholdDp = 56f,
+                        onSwipeLeft = { AltSekme.entries.getOrNull(secili.ordinal + 1)?.let(::sekmeyeGec) },
+                        onSwipeRight = { AltSekme.entries.getOrNull(secili.ordinal - 1)?.let(::sekmeyeGec) },
+                    )
+                    .padding(horizontal = 4.dp),
+            ) {
                 AltSekme.entries.forEach { sekme ->
                     val aktif = sekme == secili
                     val etiket = stringResource(when (sekme) {
@@ -80,7 +108,7 @@ fun AltMenu(
                     Column(
                         Modifier.weight(if (buyukYazi && aktif) 2f else 1f).heightIn(min = 72.dp)
                             .semantics { if (buyukYazi && !aktif) contentDescription = etiket }
-                            .selectable(selected = aktif, role = Role.Tab, onClick = { onSec(sekme) })
+                            .selectable(selected = aktif, role = Role.Tab, onClick = { sekmeyeGec(sekme) })
                             .padding(horizontal = 2.dp, vertical = 8.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(4.dp),

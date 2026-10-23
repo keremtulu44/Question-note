@@ -94,7 +94,11 @@ class OneridenOdagaAkisTest {
             ilerlemeyiBekle()
             compose.onNodeWithTag("progress-list").performScrollToNode(hasTestTag("analysis-action"))
             compose.onNodeWithTag("analysis-action").tikla()
-            compose.onNodeWithText(context.getString(R.string.analysis_filter_due)).assertExists()
+            val dueFilter = context.getString(R.string.analysis_filter_due)
+            compose.waitUntil(10_000) {
+                compose.onAllNodes(hasText(dueFilter), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
+            }
+            compose.onNodeWithText(dueFilter, useUnmergedTree = true).assertExists()
             val start = context.getString(R.string.filtered_practice_start)
             compose.onNodeWithTag("practice-filter-list").performScrollToNode(hasText(start))
             compose.waitUntil(10_000) { compose.onAllNodes(hasText(start) and isEnabled()).fetchSemanticsNodes().isNotEmpty() }
@@ -117,13 +121,18 @@ class OneridenOdagaAkisTest {
             val snapshot = org.json.JSONObject(runBlocking { db.tekrarOlcumDao().tumunuGetir().single().kararJson })
             assertEquals("GOLGE", snapshot.getString("mode"))
             assertEquals(snapshot.getInt("base_interval"), record.sonrakiAralik)
-            // Wait for the async report body so scrolling cannot race its layout expansion.
+            // The report is a lazy list: scroll the stable viewport to its asynchronously loaded progress section.
+            val report = compose.onNodeWithTag("karne-report-list")
             compose.waitUntil(10_000) {
-                compose.onAllNodesWithText(context.getString(R.string.karne_progress_title)).fetchSemanticsNodes().isNotEmpty()
+                compose.onAllNodesWithTag("karne-report-list").fetchSemanticsNodes().any { node ->
+                    node.config.contains(SemanticsProperties.StateDescription) &&
+                        node.config[SemanticsProperties.StateDescription] == context.getString(R.string.karne_kicker)
+                }
             }
+            report.performScrollToNode(hasText(context.getString(R.string.karne_progress_title)))
             val back = context.getString(R.string.karne_to_filters)
-            compose.waitUntil(10_000) { compose.onAllNodesWithText(back).fetchSemanticsNodes().isNotEmpty() }
-            compose.onNodeWithText(back).performScrollTo().tikla()
+            report.performScrollToNode(hasText(back))
+            compose.onNodeWithText(back).tikla()
             // The report also has a non-clickable "İlerleme" heading: wait for the actual Filter screen/tab.
             compose.waitUntil(10_000) { compose.onAllNodesWithTag("practice-filter-list").fetchSemanticsNodes().isNotEmpty() }
             compose.waitUntil(10_000) { compose.onAllNodes(progressTab and isEnabled()).fetchSemanticsNodes().isNotEmpty() }
