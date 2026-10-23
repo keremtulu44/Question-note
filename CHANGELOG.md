@@ -2,6 +2,12 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.5.95] — 2026-10-23
+
+- **Çözüm tahtası kullanılabilirliği:** yatay ekranda soru ve tahta yan yana; dikey ekranda küçük üst simgeden açılan, kaydırılabilir ve ekranı tamamen kaplamayan soru paneli. Soru sayfasına dokununca aynı tahta üzerinde çizim yapılabilir; simgeyle tekrar tahtaya dönülür.
+- Boş tahta ve her soru görselinin çizimleri ayrı tutulur; geri al/yinele aktif yüzeye, temizleme bu soru için tüm geçici çizimlere uygulanır. Özgün görseller, soru verileri, tekrar aralığı ve haftalık inceleme davranışı değiştirilmedi.
+- Sürüm: `versionCode 25` / `versionName 1.5.95` — v1.5.94 üzerine, aynı uygulama kimliği ve imzalama anahtarıyla güncelleme.
+
 ## [1.5.94] — 2026-10-23
 
 - **Kırpma ve çözüm tahtası:** eksik görsel ve küçük kırpma alanı durumları mevcut Türkçe kaynak metinlerle gösterilir; ek yinelenen metin kaynakları kaldırıldı. `whiteboard_question_missing`, çizim alanı açıklamasının yanında tutulur.

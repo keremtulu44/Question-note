@@ -1,6 +1,15 @@
 package com.keremtulu.questionnote.ui.calisma
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.aspectRatio
@@ -25,20 +34,20 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -62,6 +71,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.role
@@ -71,13 +81,14 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
 import com.keremtulu.questionnote.domain.model.GorselTuru
 import com.keremtulu.questionnote.domain.model.Soru
 import com.keremtulu.questionnote.domain.model.SoruGorseli
 import com.keremtulu.questionnote.ui.bilesenler.SoruGorselResmi
+import com.keremtulu.questionnote.ui.tema.HareketTuru
+import com.keremtulu.questionnote.ui.tema.LocalHareketPolitikasi
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -91,6 +102,12 @@ private data class TahtaVurusu(
     val noktalar: List<TahtaNoktasi>,
     val renk: Color,
     val kalinlikDp: Float,
+)
+
+/** Drawing history belongs to one surface: the blank board or one specific question image. */
+private data class TahtaYuzeyCizimi(
+    val kalemler: List<TahtaVurusu> = emptyList(),
+    val geriAlinanlar: List<TahtaVurusu> = emptyList(),
 )
 
 private data class TahtaRengi(val ad: Int, val renk: Color)
@@ -112,8 +129,14 @@ fun CozumTahtasiDialog(
     visible: Boolean,
     onDismiss: () -> Unit,
 ) {
-    val kalemler = remember(soru.id) { mutableStateListOf<TahtaVurusu>() }
-    val geriAlinanlar = remember(soru.id) { mutableStateListOf<TahtaVurusu>() }
+    val cizimKatmanlari = remember(soru.id) { mutableStateMapOf<String, TahtaYuzeyCizimi>() }
+    val soruGorselleri = remember(soru.id, soru.gorseller) {
+        soru.gorseller.filter { it.tur == GorselTuru.SORU }
+    }
+    var seciliGorselId by remember(soru.id, soru.gorseller) {
+        mutableStateOf(soruGorselleri.firstOrNull()?.id)
+    }
+    val seciliGorsel = soruGorselleri.firstOrNull { it.id == seciliGorselId } ?: soruGorselleri.firstOrNull()
     var etkinVurus by remember(soru.id) { mutableStateOf<TahtaVurusu?>(null) }
     var arac by remember(soru.id) { mutableStateOf(TahtaAraci.KALEM) }
     var renk by remember(soru.id) { mutableStateOf(TahtaKalemRenkleri.first().renk) }
@@ -121,14 +144,84 @@ fun CozumTahtasiDialog(
     var temizlemeOnayi by remember(soru.id) { mutableStateOf(false) }
     var cizimSiniriUyarisi by remember(soru.id) { mutableStateOf(false) }
     var soruUzerindeCizim by remember(soru.id) { mutableStateOf(false) }
-    val ilkSoruGorseli = remember(soru.id, soru.gorseller) { soru.gorseller.firstOrNull { it.tur == GorselTuru.SORU } }
+    var soruPaneliAcik by remember(soru.id) { mutableStateOf(false) }
     if (!visible) return
 
     val context = LocalContext.current
     val colors = MaterialTheme.colorScheme
-    val soruGorseliDosyasi = ilkSoruGorseli?.let { gorselDeposu.dosyaGoruntuIcin(it.dosyaAdi) }
+    val hareket = LocalHareketPolitikasi.current
+    val hareketSuresi = hareket.sure(HareketTuru.GIRIS)
+    val panelGirisi = if (hareket.azaltildi) EnterTransition.None else {
+        slideInVertically(animationSpec = tween(hareketSuresi)) { it } + fadeIn(tween(hareketSuresi))
+    }
+    val panelCikisi = if (hareket.azaltildi) ExitTransition.None else {
+        slideOutVertically(animationSpec = tween(hareketSuresi)) { it } + fadeOut(tween(hareketSuresi))
+    }
+    val perdeGirisi = if (hareket.azaltildi) EnterTransition.None else fadeIn(tween(hareketSuresi))
+    val perdeCikisi = if (hareket.azaltildi) ExitTransition.None else fadeOut(tween(hareketSuresi))
+    val seciliGorselDosyasi = seciliGorsel?.let { gorselDeposu.dosyaGoruntuIcin(it.dosyaAdi) }
+    val soruZeminiKullanilabilir = seciliGorsel != null && seciliGorselDosyasi != null
+    val etkinKatmanAnahtari = if (soruUzerindeCizim && seciliGorsel != null) {
+        "soru:${seciliGorsel.id}"
+    } else {
+        BOS_TAHTA_KATMANI
+    }
+    val etkinKatman = cizimKatmanlari[etkinKatmanAnahtari] ?: TahtaYuzeyCizimi()
+
+    fun soruGorseliniSec(gorsel: SoruGorseli) {
+        seciliGorselId = gorsel.id
+        soruUzerindeCizim = true
+        soruPaneliAcik = false
+        etkinVurus = null
+        cizimSiniriUyarisi = false
+    }
+
+    fun cizimZemininiDegistir() {
+        if (!soruUzerindeCizim && !soruZeminiKullanilabilir) return
+        soruUzerindeCizim = !soruUzerindeCizim
+        etkinVurus = null
+        cizimSiniriUyarisi = false
+    }
+
+    fun vurusBitti(yeniVurus: TahtaVurusu?) {
+        etkinVurus = null
+        if (yeniVurus == null) return
+        val katman = cizimKatmanlari[etkinKatmanAnahtari] ?: TahtaYuzeyCizimi()
+        if (katman.kalemler.size >= MAX_TAHTA_VURUSU) {
+            cizimSiniriUyarisi = true
+            return
+        }
+        cizimKatmanlari[etkinKatmanAnahtari] = katman.copy(
+            kalemler = katman.kalemler + yeniVurus,
+            geriAlinanlar = emptyList(),
+        )
+        cizimSiniriUyarisi = false
+    }
+
+    fun geriAl() {
+        val sonVurus = etkinKatman.kalemler.lastOrNull() ?: return
+        cizimKatmanlari[etkinKatmanAnahtari] = etkinKatman.copy(
+            kalemler = etkinKatman.kalemler.dropLast(1),
+            geriAlinanlar = etkinKatman.geriAlinanlar + sonVurus,
+        )
+    }
+
+    fun yinele() {
+        val sonVurus = etkinKatman.geriAlinanlar.lastOrNull() ?: return
+        cizimKatmanlari[etkinKatmanAnahtari] = etkinKatman.copy(
+            kalemler = etkinKatman.kalemler + sonVurus,
+            geriAlinanlar = etkinKatman.geriAlinanlar.dropLast(1),
+        )
+    }
+
+    val temizlenebilir = cizimKatmanlari.values.any {
+        it.kalemler.isNotEmpty() || it.geriAlinanlar.isNotEmpty()
+    } || etkinVurus != null
+
     androidx.compose.ui.window.Dialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = {
+            if (soruPaneliAcik) soruPaneliAcik = false else onDismiss()
+        },
         properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
     ) {
         Surface(
@@ -146,7 +239,7 @@ fun CozumTahtasiDialog(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Column(Modifier.weight(1f).padding(end = 12.dp)) {
+                    Column(Modifier.weight(1f).padding(end = 8.dp)) {
                         Text(
                             stringResource(R.string.whiteboard_title),
                             style = MaterialTheme.typography.titleLarge,
@@ -156,33 +249,27 @@ fun CozumTahtasiDialog(
                             stringResource(R.string.whiteboard_subtitle),
                             style = MaterialTheme.typography.bodySmall,
                             color = colors.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
-                    FilterChip(
-                        selected = soruUzerindeCizim,
-                        onClick = { soruUzerindeCizim = !soruUzerindeCizim },
-                        enabled = ilkSoruGorseli != null && soruGorseliDosyasi != null,
-                        modifier = Modifier.testTag("whiteboard-surface-toggle").semantics {
+                    IconButton(
+                        onClick = { soruPaneliAcik = !soruPaneliAcik },
+                        modifier = Modifier.testTag("whiteboard-question-preview-toggle").semantics {
                             contentDescription = context.getString(
-                                if (soruUzerindeCizim) R.string.whiteboard_surface_switch_to_blank
-                                else R.string.whiteboard_surface_switch_to_question,
-                            )
-                            stateDescription = context.getString(
-                                if (soruUzerindeCizim) R.string.whiteboard_surface_question
-                                else R.string.whiteboard_surface_blank,
+                                if (soruPaneliAcik) R.string.common_close else R.string.question_form_question_images,
                             )
                         },
-                        label = {
-                            Text(
-                                stringResource(
-                                    if (soruUzerindeCizim) R.string.whiteboard_surface_question
-                                    else R.string.whiteboard_surface_blank,
-                                ),
-                                maxLines = 1,
-                            )
+                    ) {
+                        SoruPaneliDugmeIkonu(acik = soruPaneliAcik)
+                    }
+                    TextButton(
+                        onClick = {
+                            soruPaneliAcik = false
+                            onDismiss()
                         },
-                    )
-                    TextButton(onClick = onDismiss, modifier = Modifier.heightIn(min = 48.dp)) {
+                        modifier = Modifier.heightIn(min = 48.dp),
+                    ) {
                         Text(stringResource(R.string.whiteboard_close))
                     }
                 }
@@ -196,95 +283,95 @@ fun CozumTahtasiDialog(
                         ) {
                             SoruOnizlemesi(
                                 soru = soru,
+                                gorseller = soruGorselleri,
+                                seciliGorselId = seciliGorsel?.id,
                                 gorselDeposu = gorselDeposu,
-                                landscape = true,
-                                modifier = Modifier.weight(0.38f).fillMaxHeight(),
+                                onGorselSec = ::soruGorseliniSec,
+                                modifier = Modifier.weight(0.34f).fillMaxHeight(),
                             )
                             TahtaCalismaAlani(
-                                kalemler = kalemler,
-                                geriAlinanlar = geriAlinanlar,
+                                kalemler = etkinKatman.kalemler,
+                                geriAlinanlar = etkinKatman.geriAlinanlar,
                                 etkinVurus = etkinVurus,
                                 arac = arac,
                                 renk = renk,
                                 kalinlik = kalinlik,
                                 gorselDeposu = gorselDeposu,
-                                arkaPlanGorseli = ilkSoruGorseli,
+                                soruGorseli = seciliGorsel,
                                 soruUzerindeCizim = soruUzerindeCizim,
+                                soruZeminiKullanilabilir = soruZeminiKullanilabilir,
                                 cizimSiniriUyarisi = cizimSiniriUyarisi,
+                                temizlenebilir = temizlenebilir,
+                                onYuzeyDegistir = ::cizimZemininiDegistir,
                                 onAracSec = { arac = it },
                                 onRenkSec = { renk = it },
                                 onKalinlikSec = { kalinlik = it },
                                 onVurusDegisti = { etkinVurus = it },
-                                onVurusBitti = { yeni ->
-                                    etkinVurus = null
-                                    if (yeni != null) {
-                                        if (kalemler.size >= MAX_TAHTA_VURUSU) {
-                                            cizimSiniriUyarisi = true
-                                        } else {
-                                            kalemler += yeni
-                                            geriAlinanlar.clear()
-                                            cizimSiniriUyarisi = false
-                                        }
-                                    }
-                                },
-                                onGeriAl = {
-                                    if (kalemler.isNotEmpty()) geriAlinanlar += kalemler.removeAt(kalemler.lastIndex)
-                                },
-                                onYinele = {
-                                    if (geriAlinanlar.isNotEmpty()) kalemler += geriAlinanlar.removeAt(geriAlinanlar.lastIndex)
-                                },
+                                onVurusBitti = ::vurusBitti,
+                                onGeriAl = ::geriAl,
+                                onYinele = ::yinele,
                                 onTemizle = { temizlemeOnayi = true },
-                                modifier = Modifier.weight(0.62f).fillMaxHeight(),
+                                modifier = Modifier.weight(0.66f).fillMaxHeight(),
                             )
                         }
                     } else {
-                        Column(
+                        TahtaCalismaAlani(
+                            kalemler = etkinKatman.kalemler,
+                            geriAlinanlar = etkinKatman.geriAlinanlar,
+                            etkinVurus = etkinVurus,
+                            arac = arac,
+                            renk = renk,
+                            kalinlik = kalinlik,
+                            gorselDeposu = gorselDeposu,
+                            soruGorseli = seciliGorsel,
+                            soruUzerindeCizim = soruUzerindeCizim,
+                            soruZeminiKullanilabilir = soruZeminiKullanilabilir,
+                            cizimSiniriUyarisi = cizimSiniriUyarisi,
+                            temizlenebilir = temizlenebilir,
+                            onYuzeyDegistir = ::cizimZemininiDegistir,
+                            onAracSec = { arac = it },
+                            onRenkSec = { renk = it },
+                            onKalinlikSec = { kalinlik = it },
+                            onVurusDegisti = { etkinVurus = it },
+                            onVurusBitti = ::vurusBitti,
+                            onGeriAl = ::geriAl,
+                            onYinele = ::yinele,
+                            onTemizle = { temizlemeOnayi = true },
                             modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            SoruOnizlemesi(
-                                soru = soru,
-                                gorselDeposu = gorselDeposu,
-                                landscape = false,
-                                modifier = Modifier.fillMaxWidth().heightIn(min = 126.dp, max = 190.dp),
-                            )
-                            TahtaCalismaAlani(
-                                kalemler = kalemler,
-                                geriAlinanlar = geriAlinanlar,
-                                etkinVurus = etkinVurus,
-                                arac = arac,
-                                renk = renk,
-                                kalinlik = kalinlik,
-                                gorselDeposu = gorselDeposu,
-                                arkaPlanGorseli = ilkSoruGorseli,
-                                soruUzerindeCizim = soruUzerindeCizim,
-                                cizimSiniriUyarisi = cizimSiniriUyarisi,
-                                onAracSec = { arac = it },
-                                onRenkSec = { renk = it },
-                                onKalinlikSec = { kalinlik = it },
-                                onVurusDegisti = { etkinVurus = it },
-                                onVurusBitti = { yeni ->
-                                    etkinVurus = null
-                                    if (yeni != null) {
-                                        if (kalemler.size >= MAX_TAHTA_VURUSU) {
-                                            cizimSiniriUyarisi = true
-                                        } else {
-                                            kalemler += yeni
-                                            geriAlinanlar.clear()
-                                            cizimSiniriUyarisi = false
-                                        }
-                                    }
-                                },
-                                onGeriAl = {
-                                    if (kalemler.isNotEmpty()) geriAlinanlar += kalemler.removeAt(kalemler.lastIndex)
-                                },
-                                onYinele = {
-                                    if (geriAlinanlar.isNotEmpty()) kalemler += geriAlinanlar.removeAt(geriAlinanlar.lastIndex)
-                                },
-                                onTemizle = { temizlemeOnayi = true },
-                                modifier = Modifier.fillMaxWidth().weight(1f),
-                            )
-                        }
+                        )
+                    }
+
+                    AnimatedVisibility(
+                        visible = soruPaneliAcik,
+                        modifier = Modifier.matchParentSize(),
+                        enter = perdeGirisi,
+                        exit = perdeCikisi,
+                    ) {
+                        Box(
+                            Modifier.fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.34f))
+                                .clickable(role = Role.Button, onClick = { soruPaneliAcik = false })
+                                .semantics { contentDescription = context.getString(R.string.common_close) }
+                                .testTag("whiteboard-question-scrim"),
+                        )
+                    }
+                    AnimatedVisibility(
+                        visible = soruPaneliAcik,
+                        modifier = Modifier.align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .fillMaxHeight(0.78f),
+                        enter = panelGirisi,
+                        exit = panelCikisi,
+                    ) {
+                        SoruAltPaneli(
+                            soru = soru,
+                            gorseller = soruGorselleri,
+                            seciliGorselId = seciliGorsel?.id,
+                            gorselDeposu = gorselDeposu,
+                            onGorselSec = ::soruGorseliniSec,
+                            onKapat = { soruPaneliAcik = false },
+                            modifier = Modifier.fillMaxSize().testTag("whiteboard-question-sheet"),
+                        )
                     }
                 }
             }
@@ -298,8 +385,7 @@ fun CozumTahtasiDialog(
             text = { Text(stringResource(R.string.whiteboard_clear_confirm)) },
             confirmButton = {
                 TextButton(onClick = {
-                    kalemler.clear()
-                    geriAlinanlar.clear()
+                    cizimKatmanlari.clear()
                     etkinVurus = null
                     temizlemeOnayi = false
                     cizimSiniriUyarisi = false
@@ -313,13 +399,48 @@ fun CozumTahtasiDialog(
 }
 
 @Composable
+private fun SoruPaneliDugmeIkonu(acik: Boolean) {
+    val color = MaterialTheme.colorScheme.onSurface
+    Canvas(Modifier.size(22.dp)) {
+        val stroke = 1.8.dp.toPx()
+        val center = Offset(size.width * 0.4f, size.height * 0.4f)
+        val radius = size.minDimension * 0.23f
+        drawCircle(color = color, radius = radius, center = center, style = Stroke(width = stroke))
+        drawLine(
+            color = color,
+            start = Offset(center.x + radius * 0.7f, center.y + radius * 0.7f),
+            end = Offset(size.width * 0.9f, size.height * 0.9f),
+            strokeWidth = stroke,
+            cap = StrokeCap.Round,
+        )
+        drawLine(
+            color = color,
+            start = Offset(center.x - radius * 0.45f, center.y),
+            end = Offset(center.x + radius * 0.45f, center.y),
+            strokeWidth = stroke,
+            cap = StrokeCap.Round,
+        )
+        if (!acik) {
+            drawLine(
+                color = color,
+                start = Offset(center.x, center.y - radius * 0.45f),
+                end = Offset(center.x, center.y + radius * 0.45f),
+                strokeWidth = stroke,
+                cap = StrokeCap.Round,
+            )
+        }
+    }
+}
+
+@Composable
 private fun SoruOnizlemesi(
     soru: Soru,
+    gorseller: List<SoruGorseli>,
+    seciliGorselId: String?,
     gorselDeposu: LocalSoruGorselDeposu,
-    landscape: Boolean,
+    onGorselSec: (SoruGorseli) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val images = soru.gorseller.filter { it.tur == GorselTuru.SORU }
     val colors = MaterialTheme.colorScheme
     Surface(
         modifier = modifier,
@@ -342,11 +463,13 @@ private fun SoruOnizlemesi(
                     modifier = Modifier.fillMaxWidth(),
                     style = MaterialTheme.typography.bodySmall,
                     color = colors.onSurfaceVariant,
-                    maxLines = if (landscape) 3 else 1,
+                    maxLines = 3,
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            val source = listOfNotNull(soru.kaynak, soru.kaynakKonumu).filter(String::isNotBlank).joinToString(" · ")
+            val source = listOfNotNull(soru.kaynak, soru.kaynakKonumu)
+                .filter(String::isNotBlank)
+                .joinToString(" · ")
             if (source.isNotBlank()) {
                 Text(
                     source,
@@ -357,30 +480,124 @@ private fun SoruOnizlemesi(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            if (images.isEmpty()) {
+            if (gorseller.isEmpty()) {
                 Text(
                     stringResource(R.string.whiteboard_question_missing),
                     modifier = Modifier.weight(1f).fillMaxWidth().padding(vertical = 12.dp),
                     style = MaterialTheme.typography.bodySmall,
                     color = colors.error,
                 )
-            } else if (landscape) {
+            } else {
                 LazyColumn(
                     modifier = Modifier.weight(1f).fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(bottom = 4.dp),
                 ) {
-                    items(images, key = SoruGorseli::id) { image ->
-                        SoruOnizlemeGorseli(image, gorselDeposu, Modifier.fillMaxWidth())
+                    items(gorseller, key = SoruGorseli::id) { image ->
+                        SoruOnizlemeGorseli(
+                            image = image,
+                            gorselDeposu = gorselDeposu,
+                            selected = image.id == seciliGorselId,
+                            onSelect = { onGorselSec(image) },
+                            modifier = Modifier.fillMaxWidth(),
+                        )
                     }
                 }
-            } else {
-                LazyRow(
-                    modifier = Modifier.weight(1f).fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+            }
+        }
+    }
+}
+
+@Composable
+private fun SoruAltPaneli(
+    soru: Soru,
+    gorseller: List<SoruGorseli>,
+    seciliGorselId: String?,
+    gorselDeposu: LocalSoruGorselDeposu,
+    onGorselSec: (SoruGorseli) -> Unit,
+    onKapat: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = MaterialTheme.colorScheme
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        color = colors.surface,
+        tonalElevation = 14.dp,
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Box(Modifier.fillMaxWidth().height(16.dp), contentAlignment = Alignment.Center) {
+                Box(
+                    Modifier.size(width = 38.dp, height = 4.dp)
+                        .clip(CircleShape)
+                        .background(colors.outlineVariant),
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Column(Modifier.weight(1f).padding(end = 8.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(
+                        stringResource(R.string.whiteboard_question_section),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    soru.soruNotu?.takeIf(String::isNotBlank)?.let { note ->
+                        Text(
+                            note,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = colors.onSurfaceVariant,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                    val source = listOfNotNull(soru.kaynak, soru.kaynakKonumu)
+                        .filter(String::isNotBlank)
+                        .joinToString(" · ")
+                    if (source.isNotBlank()) {
+                        Text(
+                            source,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = colors.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                }
+                TextButton(onClick = onKapat, modifier = Modifier.heightIn(min = 48.dp)) {
+                    Text(stringResource(R.string.common_close))
+                }
+            }
+            if (gorseller.isEmpty()) {
+                Box(
+                    Modifier.fillMaxWidth().weight(1f),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    items(images, key = SoruGorseli::id) { image ->
-                        SoruOnizlemeGorseli(image, gorselDeposu, Modifier.fillMaxHeight().width(240.dp))
+                    Text(
+                        stringResource(R.string.whiteboard_question_missing),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = colors.error,
+                    )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth().weight(1f).testTag("whiteboard-question-pages"),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(bottom = 12.dp),
+                ) {
+                    items(gorseller, key = SoruGorseli::id) { image ->
+                        SoruOnizlemeGorseli(
+                            image = image,
+                            gorselDeposu = gorselDeposu,
+                            selected = image.id == seciliGorselId,
+                            onSelect = { onGorselSec(image) },
+                            modifier = Modifier.fillMaxWidth(),
+                        )
                     }
                 }
             }
@@ -392,18 +609,38 @@ private fun SoruOnizlemesi(
 private fun SoruOnizlemeGorseli(
     image: SoruGorseli,
     gorselDeposu: LocalSoruGorselDeposu,
+    selected: Boolean,
+    onSelect: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val ratio = (image.genislik.toFloat() / image.yukseklik.coerceAtLeast(1)).coerceIn(0.45f, 2.5f)
-    SoruGorselResmi(
-        file = gorselDeposu.dosyaGoruntuIcin(image.dosyaAdi),
-        contentDescription = stringResource(
-            if (image.tur == GorselTuru.SORU) R.string.question_image_description else R.string.solution_image_description,
-        ),
-        modifier = modifier.clip(RoundedCornerShape(12.dp)).heightIn(min = 90.dp).aspectRatio(ratio),
-        contentScale = androidx.compose.ui.layout.ContentScale.Fit,
-        maxDecodeEdge = 1_200,
-    )
+    val colors = MaterialTheme.colorScheme
+    val actionLabel = stringResource(R.string.whiteboard_surface_switch_to_question)
+    val ratio = (image.genislik.toFloat() / image.yukseklik.coerceAtLeast(1)).coerceIn(0.25f, 4f)
+    val shape = RoundedCornerShape(12.dp)
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .testTag("whiteboard-question-image-${image.id}")
+            .clip(shape)
+            .border(
+                width = if (selected) 2.dp else 1.dp,
+                color = if (selected) colors.primary else colors.outlineVariant,
+                shape = shape,
+            )
+            .clickable(role = Role.Button, onClick = onSelect)
+            .semantics {
+                contentDescription = actionLabel
+                this.selected = selected
+            },
+    ) {
+        SoruGorselResmi(
+            file = gorselDeposu.dosyaGoruntuIcin(image.dosyaAdi),
+            contentDescription = actionLabel,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 90.dp).aspectRatio(ratio),
+            contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+            maxDecodeEdge = 1_800,
+        )
+    }
 }
 
 @Composable
@@ -415,9 +652,12 @@ private fun TahtaCalismaAlani(
     renk: Color,
     kalinlik: Float,
     gorselDeposu: LocalSoruGorselDeposu,
-    arkaPlanGorseli: SoruGorseli?,
+    soruGorseli: SoruGorseli?,
     soruUzerindeCizim: Boolean,
+    soruZeminiKullanilabilir: Boolean,
     cizimSiniriUyarisi: Boolean,
+    temizlenebilir: Boolean,
+    onYuzeyDegistir: () -> Unit,
     onAracSec: (TahtaAraci) -> Unit,
     onRenkSec: (Color) -> Unit,
     onKalinlikSec: (Float) -> Unit,
@@ -436,6 +676,30 @@ private fun TahtaCalismaAlani(
             horizontalArrangement = Arrangement.spacedBy(5.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            FilterChip(
+                selected = soruUzerindeCizim,
+                onClick = onYuzeyDegistir,
+                enabled = soruUzerindeCizim || soruZeminiKullanilabilir,
+                modifier = Modifier.testTag("whiteboard-surface-toggle").semantics {
+                    contentDescription = context.getString(
+                        if (soruUzerindeCizim) R.string.whiteboard_surface_switch_to_blank
+                        else R.string.whiteboard_surface_switch_to_question,
+                    )
+                    stateDescription = context.getString(
+                        if (soruUzerindeCizim) R.string.whiteboard_surface_question
+                        else R.string.whiteboard_surface_blank,
+                    )
+                },
+                label = {
+                    Text(
+                        stringResource(
+                            if (soruUzerindeCizim) R.string.whiteboard_surface_question
+                            else R.string.whiteboard_surface_blank,
+                        ),
+                        maxLines = 1,
+                    )
+                },
+            )
             TahtaAraci.entries.forEach { tool ->
                 val label = stringResource(tool.stringResource())
                 FilterChip(
@@ -496,10 +760,10 @@ private fun TahtaCalismaAlani(
             context.getString(R.string.whiteboard_mark_count, kalemler.size)
         }
         val backgroundFile = if (soruUzerindeCizim) {
-            arkaPlanGorseli?.let { gorselDeposu.dosyaGoruntuIcin(it.dosyaAdi) }
+            soruGorseli?.let { gorselDeposu.dosyaGoruntuIcin(it.dosyaAdi) }
         } else null
         val imageRatio = if (soruUzerindeCizim) {
-            arkaPlanGorseli?.let { (it.genislik.toFloat() / it.yukseklik.coerceAtLeast(1)).takeIf { ratio -> ratio.isFinite() } }
+            soruGorseli?.let { (it.genislik.toFloat() / it.yukseklik.coerceAtLeast(1)).takeIf { ratio -> ratio.isFinite() } }
                 ?.takeIf { it > 0f }
         } else null
         val boardAspectRatio = imageRatio?.coerceIn(0.45f, 2.5f)
@@ -533,7 +797,7 @@ private fun TahtaCalismaAlani(
                             contentDescription = context.getString(R.string.whiteboard_canvas_description)
                             stateDescription = countDescription
                         }
-                        .pointerInput(arac, renk, kalinlik, imageRatio) {
+                        .pointerInput(arac, renk, kalinlik, imageRatio, soruUzerindeCizim, soruGorseli?.id) {
                             var baslangic: TahtaNoktasi? = null
                             var sonVurus: TahtaVurusu? = null
                             val viewport = fittedImageBounds(Size(size.width.toFloat(), size.height.toFloat()), imageRatio)
@@ -624,7 +888,7 @@ private fun TahtaCalismaAlani(
             TextButton(onClick = onYinele, enabled = geriAlinanlar.isNotEmpty()) {
                 Text(stringResource(R.string.whiteboard_redo))
             }
-            TextButton(onClick = onTemizle, enabled = kalemler.isNotEmpty() || etkinVurus != null) {
+            TextButton(onClick = onTemizle, enabled = temizlenebilir) {
                 Text(stringResource(R.string.whiteboard_clear))
             }
         }
@@ -730,6 +994,7 @@ private fun DrawScope.drawVurus(vurus: TahtaVurusu, viewport: Rect) {
     }
 }
 
+private const val BOS_TAHTA_KATMANI = "tahta:bos"
 private const val MAX_TAHTA_VURUSU = 250
 private const val MAX_POINTS_PER_STROKE = 2_048
 private const val MIN_POINT_DISTANCE_PX = 1.5f
