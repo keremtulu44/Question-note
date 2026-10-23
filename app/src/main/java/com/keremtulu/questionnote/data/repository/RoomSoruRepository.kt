@@ -21,7 +21,6 @@ import com.keremtulu.questionnote.data.prefs.SinavProfiliDeposu
 import com.keremtulu.questionnote.domain.model.CalismaSorusu
 import com.keremtulu.questionnote.domain.model.CalismaUygunlugu
 import com.keremtulu.questionnote.domain.model.SinavSecimi
-import com.keremtulu.questionnote.domain.model.SinavProfili
 import com.keremtulu.questionnote.domain.model.Ders
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
@@ -93,7 +92,7 @@ class RoomSoruRepository(
         val gun = LocalDate.now(saat).toEpochDay().toInt()
         val rows = soruDao.filtreliCalismaSorulariniIzle(gun, filtre.konuId, filtre.konusuz, filtre.kaynak,
             filtre.yanlisNedeni, filtre.yanlisNedeniBelirtilmemis, filtre.dersId, filtre.vadesiGelen)
-        emitAll(combine(rows, dersDao.dersleriIzle(false), sinav?.secimIzle ?: flowOf(SinavSecimi(SinavProfili.SERBEST))) { qs, ds, secim ->
+        emitAll(combine(rows, dersDao.dersleriIzle(false), sinav?.secimIzle ?: flowOf(SinavSecimi.Tumu)) { qs, ds, secim ->
             val dersler = ds.associate { it.ders.id to Ders(it.ders.id, it.ders.ad, it.ders.sira, it.soruSayisi, it.ders.arsivli) }
             qs.filter { row ->
                 val q = row.soru.calismaSorusu()
@@ -104,7 +103,7 @@ class RoomSoruRepository(
 
     override fun bugunTekrarlanacaklariIzle(bugun: Int): Flow<List<Soru>> =
         combine(soruDao.bugunTekrarlanacaklariIzle(bugun), dersDao.dersleriIzle(false),
-            sinav?.secimIzle ?: flowOf(SinavSecimi(SinavProfili.SERBEST))) { qs, ds, secim ->
+            sinav?.secimIzle ?: flowOf(SinavSecimi.Tumu)) { qs, ds, secim ->
             val dersler = ds.associate { it.ders.id to Ders(it.ders.id, it.ders.ad, it.ders.sira, it.soruSayisi, it.ders.arsivli) }
             qs.filter { CalismaUygunlugu.uygun(it.soru.calismaSorusu(), dersler[it.soru.dersId], secim, bugun, false) }
                 .map { it.soru.toDomain(it.gorseller.map { g -> g.toDomain() }) }
@@ -327,7 +326,7 @@ class RoomSoruRepository(
         val gun = simdi.gun
         if (tekrarDao.ayniGunTekrarVar(soru.id, gun)) return@withTransaction SoruIslemSonucu.AyniGunTekrarVar
         val ders = dersDao.idIleGetir(soru.dersId)
-        val secim = sinav?.secimIzle?.value ?: SinavSecimi(SinavProfili.SERBEST)
+        val secim = sinav?.secimIzle?.value ?: SinavSecimi.Tumu
         if (!CalismaUygunlugu.uygun(soru.calismaSorusu(), ders?.let { Ders(it.id, it.ad, it.sira, 0, it.arsivli) }, secim, gun, false))
             return@withTransaction SoruIslemSonucu.PlanDurumuKapali
         if (simdi != onizleme) return@withTransaction SoruIslemSonucu.OnizlemeGuncellendi

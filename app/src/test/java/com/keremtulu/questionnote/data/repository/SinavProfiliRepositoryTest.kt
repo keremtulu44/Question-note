@@ -54,10 +54,10 @@ class SinavProfiliRepositoryTest {
         val first = repo.dersleriIzle(false).first().map { it.id }.toSet()
         repo.sinavProfiliniUygula(SinavProfili.LGS)
         assertEquals(first, repo.dersleriIzle(false).first().map { it.id }.toSet())
-        repo.sinavProfiliniUygula(SinavProfili.TYT)
-        assertEquals(SinavProfili.TYT.dersAdlari.toSet(), repo.aktifDersleriIzle().first().map { it.ad }.toSet())
-        repo.sinavProfiliniUygula(SinavProfili.SERBEST)
-        assertEquals(repo.dersleriIzle(false).first(), repo.aktifDersleriIzle().first())
+        repo.sinavProfiliniUygula(SinavProfili.YKS)
+        assertEquals(SinavProfili.YKS.dersAdlari.toSet(), repo.aktifDersleriIzle().first().map { it.ad }.toSet())
+        repo.sinavProfiliniUygula(SinavProfili.SINIF_9_10)
+        assertEquals(SinavProfili.SINIF_9_10.dersAdlari.toSet(), repo.aktifDersleriIzle().first().map { it.ad }.toSet())
     }
 
     @Test fun archivedLessonsStayArchivedAndRenamedSelectedLessonKeepsItsMembership() = runBlocking {

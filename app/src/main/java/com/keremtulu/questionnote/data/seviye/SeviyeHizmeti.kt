@@ -68,7 +68,7 @@ class SeviyeHizmeti(
             sahipRozetler = sahip,
             sureKapsami = profilHizmeti.kapsam(bugun.toEpochDay().toInt()),
             analiz = analizHizmeti.hesapla(bugun.toEpochDay().toInt(), sinav?.secimIzle?.value ?:
-                com.keremtulu.questionnote.domain.model.SinavSecimi(com.keremtulu.questionnote.domain.model.SinavProfili.SERBEST)),
+                com.keremtulu.questionnote.domain.model.SinavSecimi.Tumu),
         )
     }
 

@@ -138,13 +138,15 @@ fun AyarlarEkrani(
                 Bolum(stringResource(R.string.settings_profile_title)) {
                     Text(stringResource(R.string.settings_profile_note), style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Row(
+                        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
                     SinavProfili.entries.forEach { profil ->
-                        PremiumTextButton(
-                            modifier = Modifier.fillMaxWidth(),
-                            enabled = !profilKaydediliyor && !yedeklemeIslemde,
-                            interactionTur = EtkilesimTuru.TIKLAMA,
+                        FilterChip(
+                            selected = secim.profil == profil,
                             onClick = {
-                                if (secim.profil != profil) {
+                                if (secim.profil != profil && !profilKaydediliyor && !yedeklemeIslemde) {
                                     profilKaydediliyor = true
                                     profilHatasi = false
                                     scope.launch {
@@ -160,16 +162,16 @@ fun AyarlarEkrani(
                                     }
                                 }
                             },
-                        ) {
-                            Column(Modifier.weight(1f)) {
-                                Text(profil.ad, fontWeight = FontWeight.SemiBold)
-                                Text(profil.aciklama, color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    style = MaterialTheme.typography.bodySmall)
-                            }
-                            if (secim.profil == profil) Text("✓", style = MaterialTheme.typography.titleLarge, fontFamily = PremiumSembolAilesi)
-                                else Text("›", style = MaterialTheme.typography.titleLarge)
-                        }
+                            enabled = !profilKaydediliyor && !yedeklemeIslemde,
+                            label = { Text(profil.ad, fontWeight = FontWeight.SemiBold) },
+                        )
                     }
+                    }
+                    Text(
+                        secim.profil.aciklama,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                     if (secim.profil.dersAdlari.isNotEmpty()) {
                         Text(secim.profil.dersAdlari.joinToString(" · "), style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant)

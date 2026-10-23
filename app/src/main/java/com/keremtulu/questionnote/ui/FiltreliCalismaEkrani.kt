@@ -283,8 +283,9 @@ fun FiltreliCalismaEkrani(
                                 text = androidx.compose.ui.res.stringResource(R.string.filtered_practice_kicker),
                                 color = PremiumMarkaRenkler.BakirIsik,
                                 style = MaterialTheme.typography.labelMedium,
-                                letterSpacing = 1.4.sp,
                                 fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
                             )
                             Text(
                                 text = androidx.compose.ui.res.stringResource(R.string.filtered_practice_title),
@@ -470,7 +471,10 @@ fun FiltreliCalismaEkrani(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
                             FilterChip(
                                 ayar.akilliSira,
                                 { onAyarDegisti(ayar.copy(akilliSira = true)) },
@@ -482,7 +486,10 @@ fun FiltreliCalismaEkrani(
                                 label = { Text(androidx.compose.ui.res.stringResource(R.string.focus_oldest)) },
                             )
                         }
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
                             listOf(5, 10, 20).forEach { adet ->
                                 FilterChip(
                                     ayar.soruSayisi == adet.toString(),
@@ -647,19 +654,13 @@ private fun FiltreDropdown(
                 onClick = { acik = true },
                 interactionTur = EtkilesimTuru.TIKLAMA,
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        selectedLabel,
-                        modifier = Modifier.weight(1f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Text("↓", modifier = Modifier.padding(start = 8.dp))
-                }
+                Text(
+                    selectedLabel,
+                    modifier = Modifier.weight(1f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text("▾", modifier = Modifier.padding(start = 8.dp))
             }
             DropdownMenu(
                 expanded = acik,
@@ -709,18 +710,13 @@ private fun CalismaSoruKarti(
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.SemiBold,
             )
-            Text(
-                text = androidx.compose.ui.res.stringResource(R.string.question_photo_only),
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.bodyLarge,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
             soru.kaynak?.takeIf { it.isNotBlank() }?.let { source ->
                 Text(
                     androidx.compose.ui.res.stringResource(R.string.filtered_practice_source_value, source),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.bodyLarge,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
             soru.yanlisNedeni?.takeIf { it.isNotBlank() }?.let { reason ->

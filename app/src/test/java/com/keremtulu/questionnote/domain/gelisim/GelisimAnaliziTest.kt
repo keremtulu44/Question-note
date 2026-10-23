@@ -9,7 +9,7 @@ class GelisimAnaliziTest {
     private val gun = 20_744
     private val dersler = listOf(Ders("m", "Matematik", 0, 0), Ders("f", "Fizik", 1, 0), Ders("archive", "Arşiv", 2, 0, true))
     private val b = TarihselBaglam("m", "Matematik", "topic", "Sayılar", "ışık test", "IŞIK TEST")
-    private val secim = SinavSecimi(SinavProfili.SERBEST)
+    private val secim = SinavSecimi.Tumu
     private fun q(id: String = "q", ders: String = "m", vade: Int? = gun + 3) =
         CalismaSorusu(id, ders, "topic", "  IŞIK   TEST  ", SoruPlanDurumu.AKTIF, null, vade)
     private fun r(id: String, q: String = "q", g: Int = gun - 1, s: TekrarSonucu = TekrarSonucu.RAHAT,

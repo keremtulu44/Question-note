@@ -24,7 +24,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -86,9 +85,6 @@ fun GorselKirpmaDialog(
     val bitmap by produceState<Bitmap?>(null, file.absolutePath, file.length(), file.lastModified()) {
         value = withContext(Dispatchers.IO) { decodePreview(file) }
         previewError = value == null
-    }
-    DisposableEffect(bitmap) {
-        onDispose { bitmap?.let { if (!it.isRecycled) it.recycle() } }
     }
     var selection by remember(file.absolutePath) { mutableStateOf(GorselKirpmaAlani.Tamami) }
     val fullImageSelected = selection == GorselKirpmaAlani.Tamami
@@ -164,10 +160,19 @@ fun GorselKirpmaDialog(
                             }
                         }
                         else -> {
-                            val maxHeight = minOf(maxHeight, 420.dp)
+                            if (image.isRecycled || image.width <= 0 || image.height <= 0 ||
+                                maxWidth <= 0.dp || maxHeight <= 0.dp
+                            ) {
+                                Text(
+                                    stringResource(R.string.question_form_crop_error),
+                                    color = MaterialTheme.colorScheme.error,
+                                )
+                                return@BoxWithConstraints
+                            }
+                            val availableHeight = minOf(maxHeight, 420.dp).coerceAtLeast(1.dp)
                             val ratio = image.width.toFloat() / image.height.coerceAtLeast(1)
-                            val previewWidth = minOf(maxWidth, maxHeight * ratio).coerceAtLeast(1.dp)
-                            val previewHeight = (previewWidth / ratio).coerceAtMost(maxHeight).coerceAtLeast(1.dp)
+                            val previewWidth = minOf(maxWidth, availableHeight * ratio).coerceAtLeast(1.dp)
+                            val previewHeight = (previewWidth / ratio).coerceAtMost(availableHeight).coerceAtLeast(1.dp)
                             val selectionText = stringResource(R.string.question_form_crop_canvas_description)
                             CropSelectionCanvas(
                                 bitmap = image,
@@ -284,6 +289,7 @@ private fun CropSelectionCanvas(
             )
         },
     ) {
+        if (bitmap.isRecycled || bitmap.width <= 0 || bitmap.height <= 0) return@Canvas
         drawImage(
             image = bitmap.asImageBitmap(),
             dstOffset = IntOffset.Zero,

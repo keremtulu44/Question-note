@@ -47,7 +47,7 @@ class AnalizPerformansTest {
                 override fun onQuery(sqlQuery: String, bindArgs: List<Any?>) { queries.add(Sorgu(sqlQuery, bindArgs.toList())) }
             }, Executor { it.run() }).build()
         val gun = LocalDate.of(2026, 10, 18).toEpochDay().toInt()
-        val profile = SinavSecimi(SinavProfili.SERBEST)
+        val profile = SinavSecimi.Tumu
         val hizmet = GelisimAnaliziHizmeti(db)
         val times = linkedMapOf<String, List<Double>>()
         fun ms(start: Long) = (System.nanoTime() - start) / 1_000_000.0
