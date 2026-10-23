@@ -2,6 +2,13 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.5.93] — 2026-10-23
+
+- **Görsel kırpma:** soru ve çözüm görselleri ekleme/düzenleme formunda kırpılabilir. Kırpma ayrı bir geçici kopya oluşturur; kaydedilmiş özgün görsel üzerine yazılmaz.
+- **Çözüm tahtası:** odaklı çözüm ve soru ayrıntılarından açılan tahta; serbest kalem, çizgi, dikdörtgen, üçgen, silgi, üç çizgi kalınlığı ve altı renk. Geri al/yinele/temizle; yatay ekranda soru ve çalışma alanı yan yana. Soru üstü çizimler ayrı katmandır ve özgün görseli değiştirmez.
+- Tekrar aralıkları, haftalık inceleme davranışı, Room verileri ve yedek biçimi değiştirilmedi.
+- Sürüm: `versionCode 23` / `versionName 1.5.93` — v1.5.92 üzerine, aynı uygulama kimliği ve imzalama anahtarıyla güncelleme.
+
 ## [1.5.92] — 2026-10-22
 
 - **Premium deneyim:** sistem azaltılmış-hareket ayarına uyan ekran geçişleri, kademeli liste girişleri, mikro-etkileşimler, shimmer/iskele yükleme durumları ve başarı parçacıkları; cam/gradient/gölge yüzeyler.
