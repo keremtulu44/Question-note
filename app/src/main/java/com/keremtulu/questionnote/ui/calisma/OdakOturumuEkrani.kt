@@ -355,40 +355,40 @@ fun OdakOturumuEkrani(
             }
             item { Text(stringResource(R.string.focus_image_hint), style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant) }
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    PremiumOutlinedButton(
-                        onClick = { beyazTahtaAcik = true },
-                        enabled = !mesgul && !tekrarli && !kullanilamaz,
-                        modifier = Modifier.fillMaxWidth(),
-                        interactionTur = EtkilesimTuru.TIKLAMA,
-                    ) { Text(stringResource(R.string.focus_whiteboard_open)) }
-                    PremiumOutlinedButton(onClick = {
-                        if (kaydediliyor || cozumAciliyor) return@PremiumOutlinedButton
-                        if (cozumGorunur) cozumGorunur = false else {
-                            olcum.aktiflik(false)
-                            olcum.cozumuAc()
-                            cozumAciliyor = true
-                            cozumKayitHatasi = false
-                            scope.launch {
-                                try {
-                                    if (olcum.cozumIzni()) {
-                                        cozumGorunur = true
-                                        onCozumAcildi()
-                                    } else cozumKayitHatasi = true
-                                } finally { cozumAciliyor = false }
-                            }
+                PremiumOutlinedButton(
+                    onClick = { beyazTahtaAcik = true },
+                    enabled = !mesgul && !tekrarli && !kullanilamaz,
+                    modifier = Modifier.fillMaxWidth(),
+                    interactionTur = EtkilesimTuru.TIKLAMA,
+                ) { Text(stringResource(R.string.focus_whiteboard_open)) }
+            }
+            item {
+                PremiumOutlinedButton(onClick = {
+                    if (kaydediliyor || cozumAciliyor) return@PremiumOutlinedButton
+                    if (cozumGorunur) cozumGorunur = false else {
+                        olcum.aktiflik(false)
+                        olcum.cozumuAc()
+                        cozumAciliyor = true
+                        cozumKayitHatasi = false
+                        scope.launch {
+                            try {
+                                if (olcum.cozumIzni()) {
+                                    cozumGorunur = true
+                                    onCozumAcildi()
+                                } else cozumKayitHatasi = true
+                            } finally { cozumAciliyor = false }
                         }
-                    }, enabled = cozumVar && !mesgul, modifier = Modifier.fillMaxWidth(),
-                        interactionTur = if (cozumGorunur) EtkilesimTuru.KART_KAPANIS else EtkilesimTuru.COZUM_ACILDI) {
-                        Text(stringResource(if (cozumAciliyor) R.string.measure_solution_preparing
-                            else if (cozumGorunur) R.string.question_hide_solution else R.string.focus_reveal))
                     }
-                    if (cozumKayitHatasi) Text(stringResource(R.string.measure_solution_checkpoint_error), color = colors.error,
-                        style = MaterialTheme.typography.bodySmall)
-                    if (!cozumVar) Text(stringResource(R.string.focus_no_solution), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
-                    if (cozumAcildi || cozumOnceAcildi) Text(stringResource(R.string.focus_solution_note), style = MaterialTheme.typography.bodySmall,
-                        color = colors.primary, modifier = Modifier.padding(top = 8.dp))
+                }, enabled = cozumVar && !mesgul, modifier = Modifier.fillMaxWidth(),
+                    interactionTur = if (cozumGorunur) EtkilesimTuru.KART_KAPANIS else EtkilesimTuru.COZUM_ACILDI) {
+                    Text(stringResource(if (cozumAciliyor) R.string.measure_solution_preparing
+                        else if (cozumGorunur) R.string.question_hide_solution else R.string.focus_reveal))
                 }
+                if (cozumKayitHatasi) Text(stringResource(R.string.measure_solution_checkpoint_error), color = colors.error,
+                    style = MaterialTheme.typography.bodySmall)
+                if (!cozumVar) Text(stringResource(R.string.focus_no_solution), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+                if (cozumAcildi || cozumOnceAcildi) Text(stringResource(R.string.focus_solution_note), style = MaterialTheme.typography.bodySmall,
+                    color = colors.primary, modifier = Modifier.padding(top = 8.dp))
             }
             if (cozumGorunur) {
                 if (!soru.cozumNotu.isNullOrBlank()) item {
