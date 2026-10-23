@@ -400,8 +400,8 @@ fun YanlisDefteriUygulamasi(
     val hareketPolitikasi = LocalHareketPolitikasi.current
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        snackbarHost = { hostState ->
-            SnackbarHost(hostState) { data ->
+        snackbarHost = {
+            SnackbarHost(snackbarHostState) { data ->
                 Surface(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
                     shape = MaterialTheme.shapes.medium,
