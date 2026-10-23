@@ -2,9 +2,9 @@
 
 > Bu dosya Android CI tarafından otomatik üretilir. Keystore veya parola değerleri yazılmaz.
 
-- Zaman (UTC): 2026-10-23T14:46:31Z
-- Workflow commit'i: 66a54645fc3709b552dacd4b8faa4500664a6b67
-- Dal: arena/be352b3c-question-note
+- Zaman (UTC): 2026-10-23T14:54:20Z
+- Workflow commit'i: b22d8f6bc8f016a831e5a6b526bc45588d2b7ef0
+- Dal: main
 - Uygulama sürümü: 1.5.96 (versionCode 26)
 - Android SDK: compileSdk/targetSdk 37, minSdk 26; build-tools 37.0.0
 - Genel sonuç: **BAŞARILI**
@@ -20,7 +20,7 @@
 - Sertifika parmak izi: FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54 (beklenen: FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54; durum: eşleşti)
 - Release: Bu sürüm etiketi için Release zaten mevcut; yeniden oluşturulmadı (kod: 0)
 - Release URL: https://github.com/keremtulu44/Question-note/releases/tag/v1.5.96
-- İmzalı APK SHA-256: ab1a0ffd085c239fd3862a1357bb74cef14256dd65d9311abd958b71354f3304
+- İmzalı APK SHA-256: 503df830b1b7836e1359fdebede9f69716cb90e96416737f67f1e9cf29260e0a
 
 ## Gradle sürümü
 
@@ -62,27 +62,27 @@ To honour the JVM settings for this build a single-use Daemon process will be fo
 Daemon will be stopped at the end of the build 
 > Task :app:preBuild UP-TO-DATE
 > Task :app:preDebugBuild UP-TO-DATE
-> Task :app:generateDebugBuildConfig FROM-CACHE
+> Task :app:generateDebugBuildConfig
 > Task :app:generateDebugResources
 > Task :app:packageDebugResources
 > Task :app:processDebugNavigationResources
-> Task :app:javaPreCompileDebug FROM-CACHE
-> Task :app:mapDebugSourceSetPaths
-> Task :app:compileDebugNavigationResources FROM-CACHE
-> Task :app:checkDebugAarMetadata
 > Task :app:parseDebugLocalResources
+> Task :app:javaPreCompileDebug
+> Task :app:generateDebugRFile
+> Task :app:checkDebugAarMetadata
+> Task :app:mapDebugSourceSetPaths
+> Task :app:compileDebugNavigationResources
 > Task :app:createDebugCompatibleScreenManifests
-> Task :app:extractDeepLinksDebug FROM-CACHE
-> Task :app:processDebugMainManifest FROM-CACHE
-> Task :app:processDebugManifest FROM-CACHE
-> Task :app:processDebugManifestForPackage FROM-CACHE
+> Task :app:extractDeepLinksDebug
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
 > Task :app:preDebugUnitTestBuild UP-TO-DATE
-> Task :app:javaPreCompileDebugUnitTest FROM-CACHE
+> Task :app:javaPreCompileDebugUnitTest
+> Task :app:processDebugManifestForPackage
 > Task :app:generateDebugAssets UP-TO-DATE
 > Task :app:mergeDebugAssets
-> Task :app:generateDebugRFile
-> Task :app:processDebugUnitTestManifest
 > Task :app:mergeDebugResources
+> Task :app:processDebugUnitTestManifest
 > Task :app:processDebugResources
 > Task :app:packageDebugUnitTestForUnitTest
 > Task :app:generateDebugUnitTestConfig
@@ -118,8 +118,8 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/premium/PremiumEntegrasyon.kt:240:81 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
 
 > Task :app:compileDebugJavaWithJavac
-> Task :app:bundleDebugClassesToRuntimeJar
 > Task :app:processDebugJavaRes
+> Task :app:bundleDebugClassesToRuntimeJar
 > Task :app:bundleDebugClassesToCompileJar
 > Task :app:kspDebugUnitTestKotlin
 
@@ -151,20 +151,20 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 2m 20s
-32 actionable tasks: 24 executed, 8 from cache
+BUILD SUCCESSFUL in 3m 22s
+32 actionable tasks: 32 executed
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 
 -- Son 80 satır --
-> Task :app:processDebugManifest FROM-CACHE
-> Task :app:processDebugManifestForPackage FROM-CACHE
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
 > Task :app:preDebugUnitTestBuild UP-TO-DATE
-> Task :app:javaPreCompileDebugUnitTest FROM-CACHE
+> Task :app:javaPreCompileDebugUnitTest
+> Task :app:processDebugManifestForPackage
 > Task :app:generateDebugAssets UP-TO-DATE
 > Task :app:mergeDebugAssets
-> Task :app:generateDebugRFile
-> Task :app:processDebugUnitTestManifest
 > Task :app:mergeDebugResources
+> Task :app:processDebugUnitTestManifest
 > Task :app:processDebugResources
 > Task :app:packageDebugUnitTestForUnitTest
 > Task :app:generateDebugUnitTestConfig
@@ -200,8 +200,8 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/premium/PremiumEntegrasyon.kt:240:81 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
 
 > Task :app:compileDebugJavaWithJavac
-> Task :app:bundleDebugClassesToRuntimeJar
 > Task :app:processDebugJavaRes
+> Task :app:bundleDebugClassesToRuntimeJar
 > Task :app:bundleDebugClassesToCompileJar
 > Task :app:kspDebugUnitTestKotlin
 
@@ -233,8 +233,8 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 2m 20s
-32 actionable tasks: 24 executed, 8 from cache
+BUILD SUCCESSFUL in 3m 22s
+32 actionable tasks: 32 executed
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 ```
 
@@ -246,7 +246,7 @@ To honour the JVM settings for this build a single-use Daemon process will be fo
 Daemon will be stopped at the end of the build 
 > Task :app:preBuild UP-TO-DATE
 > Task :app:preReleaseBuild UP-TO-DATE
-> Task :app:generateReleaseBuildConfig FROM-CACHE
+> Task :app:generateReleaseBuildConfig
 > Task :app:generateReleaseResources FROM-CACHE
 > Task :app:packageReleaseResources
 > Task :app:processReleaseNavigationResources FROM-CACHE
@@ -258,11 +258,11 @@ Daemon will be stopped at the end of the build
 > Task :app:checkReleaseAarMetadata
 > Task :app:createReleaseCompatibleScreenManifests
 > Task :app:extractDeepLinksRelease FROM-CACHE
-> Task :app:processReleaseMainManifest FROM-CACHE
-> Task :app:processReleaseManifest FROM-CACHE
-> Task :app:processReleaseManifestForPackage FROM-CACHE
+> Task :app:processReleaseMainManifest
+> Task :app:processReleaseManifest
 > Task :app:preReleaseUnitTestBuild UP-TO-DATE
 > Task :app:javaPreCompileReleaseUnitTest FROM-CACHE
+> Task :app:processReleaseManifestForPackage
 > Task :app:generateReleaseAssets UP-TO-DATE
 > Task :app:mergeReleaseAssets
 > Task :app:mergeReleaseResources
@@ -325,15 +325,15 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 1m 52s
-32 actionable tasks: 20 executed, 12 from cache
+BUILD SUCCESSFUL in 1m 43s
+32 actionable tasks: 24 executed, 8 from cache
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 -- Hata satırları ve son bölüm --
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
 Daemon will be stopped at the end of the build 
 > Task :app:preBuild UP-TO-DATE
 > Task :app:preReleaseBuild UP-TO-DATE
-> Task :app:generateReleaseBuildConfig FROM-CACHE
+> Task :app:generateReleaseBuildConfig
 > Task :app:generateReleaseResources FROM-CACHE
 > Task :app:packageReleaseResources
 > Task :app:processReleaseNavigationResources FROM-CACHE
@@ -345,11 +345,11 @@ Daemon will be stopped at the end of the build
 > Task :app:checkReleaseAarMetadata
 > Task :app:createReleaseCompatibleScreenManifests
 > Task :app:extractDeepLinksRelease FROM-CACHE
-> Task :app:processReleaseMainManifest FROM-CACHE
-> Task :app:processReleaseManifest FROM-CACHE
-> Task :app:processReleaseManifestForPackage FROM-CACHE
+> Task :app:processReleaseMainManifest
+> Task :app:processReleaseManifest
 > Task :app:preReleaseUnitTestBuild UP-TO-DATE
 > Task :app:javaPreCompileReleaseUnitTest FROM-CACHE
+> Task :app:processReleaseManifestForPackage
 > Task :app:generateReleaseAssets UP-TO-DATE
 > Task :app:mergeReleaseAssets
 > Task :app:mergeReleaseResources
@@ -412,8 +412,8 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 1m 52s
-32 actionable tasks: 20 executed, 12 from cache
+BUILD SUCCESSFUL in 1m 43s
+32 actionable tasks: 24 executed, 8 from cache
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 ```
 
@@ -440,9 +440,9 @@ Daemon will be stopped at the end of the build
 Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so. Run with --info option to learn more.
 
 > Task :app:packageReleaseResources UP-TO-DATE
-> Task :app:extractReleaseNativeSymbolTables FROM-CACHE
-> Task :app:mergeReleaseNativeDebugMetadata NO-SOURCE
+> Task :app:extractReleaseNativeSymbolTables
 > Task :app:processReleaseNavigationResources UP-TO-DATE
+> Task :app:mergeReleaseNativeDebugMetadata NO-SOURCE
 > Task :app:parseReleaseLocalResources UP-TO-DATE
 > Task :app:generateReleaseRFile UP-TO-DATE
 > Task :app:kspReleaseKotlin UP-TO-DATE
@@ -460,14 +460,14 @@ Unable to strip the following libraries, packaging them as they are: libandroidx
 > Task :app:processReleaseManifestForPackage UP-TO-DATE
 > Task :app:processReleaseResources UP-TO-DATE
 > Task :app:dexBuilderRelease
-> Task :app:desugarReleaseFileDependencies FROM-CACHE
+> Task :app:desugarReleaseFileDependencies
 > Task :app:mergeReleaseStartupProfile
-> Task :app:mergeExtDexRelease FROM-CACHE
+> Task :app:mergeExtDexRelease
 > Task :app:mergeReleaseArtProfile
-> Task :app:mergeReleaseGlobalSynthetics FROM-CACHE
 > Task :app:generateReleaseAssets UP-TO-DATE
+> Task :app:mergeReleaseGlobalSynthetics
 > Task :app:mergeReleaseAssets UP-TO-DATE
-> Task :app:compressReleaseAssets FROM-CACHE
+> Task :app:compressReleaseAssets
 > Task :app:extractReleaseVersionControlInfo
 > Task :app:extractProguardFiles
 > Task :app:generateReleaseLintVitalReportModel
@@ -495,8 +495,8 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 1m 11s
-50 actionable tasks: 23 executed, 5 from cache, 22 up-to-date
+BUILD SUCCESSFUL in 1m 46s
+50 actionable tasks: 28 executed, 22 up-to-date
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 ```
 
@@ -538,5 +538,5 @@ Bu sürüm etiketi için Release zaten mevcut; yeniden oluşturulmadı
 
 ```text
 APK: app/build/outputs/apk/release/yanlis-defteri-1.5.96.apk
-SHA-256: ab1a0ffd085c239fd3862a1357bb74cef14256dd65d9311abd958b71354f3304
+SHA-256: 503df830b1b7836e1359fdebede9f69716cb90e96416737f67f1e9cf29260e0a
 ```
