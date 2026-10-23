@@ -44,6 +44,15 @@ prefs, gezinme durum makinesi ve ölçüm mantığına dokunulmadı; test metinl
   giriş fade'i ile belirir; kaydırma yeniden girince tekrar oynamaz (hareket sözleşmesi §10.3),
   gizli içerik ve ölçüm eşikleri (`gorselDurumlari`, `olcum`) değişmedi.
 
+## Uygulama simgesi (launcher icon)
+
+- Yeni tasarım: **sıcak kağıt kapak + derin petrol zemin** — koyu üstü koyu sorunu kalkadı, renk
+  ayrımı küçük boyutta bile net. Bakır sayfa kenarı, kırmızı ayraç ve kırmızı düzeltme çizgisi
+  (büyük X motifi kullanıcı isteğiyle kaldırıldı).
+- Kaynak: `assets/ic_launcher_source.png` (1254×1254). Tüm `mipmap-*` yoğunlukları (48→192)
+  bu kaynaktan LANCZOS ile üretildi; `ic_launcher_round.png` 4× supersample daire maskeli.
+- APK'ya yalnızca mipmap PNG'leri girer; repo-root `assets/` paketlenmez.
+
 ## Korunan sözleşmeler
 
 - `HareketPolitikasi`: tüm yeni animasyonlar `animateFloatPremium`/`tweenPremium` üzerinden;
