@@ -3,12 +3,12 @@
 > Bu belge **değerleri değil**, sırların nerede ve nasıl tutulduğunu anlatır.
 > Hiçbir anahtar, parola veya token bu depoya yazılmaz.
 
-- Son güncelleme: 2026-10-22
-- Son yayımlanan sürüm: **v1.5.92 (versionCode 22)**. CI `39839941144`: **Debug315/0/0/0**, **Release261/0/0/0**; Release derlemesi, imza ve sertifika doğrulandı.
-- [Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.5.92) · [APK indir](https://github.com/keremtulu44/Question-note/releases/download/v1.5.92/yanlis-defteri-1.5.92.apk).
-  APK **12.636.911 bayt**; SHA-256 `5cbc479d31cddfb56499c2978893556195138a1e644bbf6bd4a256374f272071`.
-  Tag/derlenen commit `682986cef4371a9e01f393f27efd21e1e51a09f2`; sertifika SHA-256 `FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54`.
-- 1.5.92 premium tema, hareket azaltma uyumlu geçişler, iskelet yüklemeler, dokunsal/işitsel geri bildirim ve isteğe bağlı Odak ambiyansı ekler. Uygulama kimliği, Room/ZIP şeması ve kullanıcı çalışma verileri değiştirilmedi.
+- Son güncelleme: 2026-10-23
+- Son yayımlanan sürüm: **v1.5.96 (versionCode 26)**. CI `39957379330`: **Debug320/0/0/0**, **Release262/0/0/0**; Release derlemesi, imza ve sertifika doğrulandı.
+- [Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.5.96) · [APK indir](https://github.com/keremtulu44/Question-note/releases/download/v1.5.96/yanlis-defteri-1.5.96.apk).
+  APK **12.780.271 bayt**; SHA-256 `5f0f1a8fc7206aa414511fedebc7bf52ac3269e914ac5bdf5cda5acc6c996143`.
+  Derlenen commit `67607f36291f63456648859590cd4c4618484e9a`; sertifika SHA-256 `FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54`.
+- 1.5.96 çözüm atölyesi düzenini iyileştirir. Uygulama kimliği, Room/ZIP şeması, kullanıcı çalışma verileri ve tekrar kuralları değiştirilmedi.
 - P0–P5 ve P6 otomatik kalite kapıları yayımlandı; Room/ZIP4, geçmiş/snapshot uyumluluğu korunur.
   Varsayılan **Gölge v2 tarihi uygular; etkin v3 kapalıdır**. XP/30 rozet/15 rütbe katsayıları aynı.
 - **Fiziksel cihaz kabulü ayrıdır**; otomatik testin yeşil olması gerçek cihaz testi yapıldığı anlamına gelmez.
@@ -18,7 +18,7 @@
 
 ## Varyant ve kanıt kapısı
 
-- 1.5.92/code22, son yayın CI `39839941144`: Debug315/0, Release261/0 ve APK/imza/sertifika/yayın başarılı.
+- 1.5.96/code26, son yayın CI `39957379330`: Debug320/0, Release262/0 ve APK/imza/sertifika/yayın başarılı.
   Güncel sonuç ve kaynak: [DERLEME_RAPORU.md](docs/DERLEME_RAPORU.md).
 - Debug başarısız olsa da Release testi çalışır; APK için **ikisi de** geçmelidir. CI sırası `:app:testDebugUnitTest` → `:app:testReleaseUnitTest` → `:app:assembleRelease` →
   imza/sertifika → yayın. Ortak testler iki varyantta; UI/Preview `src/testDebug`'da, sayılar toplanmaz.
