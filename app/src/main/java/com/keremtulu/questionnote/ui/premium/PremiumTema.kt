@@ -119,6 +119,10 @@ object PremiumMarkaRenkler {
     val Grafit = Color(0xFF1E293B)
 }
 
+// Manrope'ta check/ok gibi sembol glifleri yok; tek basina kullanilanlar sistem ailesinden
+// ayinsel olarak aileye uygun gorunur (harf karisimini onler).
+val PremiumSembolAilesi = FontFamily.Default
+
 val PremiumTipografi: Typography = Typography().let { base ->
     fun androidx.compose.ui.text.TextStyle.yaziAilesi(
         ozellikler: String? = null,

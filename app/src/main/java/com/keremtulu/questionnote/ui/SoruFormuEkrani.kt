@@ -63,6 +63,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.keremtulu.questionnote.R
+import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
 import com.keremtulu.questionnote.data.images.KameraCekimi
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
 import com.keremtulu.questionnote.domain.model.Ders
@@ -978,7 +979,7 @@ private fun FormKonuSecicisi(
                             overflow = TextOverflow.Ellipsis,
                         )
                         Text(
-                            "⌄",
+                            "↓",
                             modifier = Modifier.padding(start = 12.dp),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             style = MaterialTheme.typography.titleMedium,
@@ -1068,7 +1069,7 @@ private fun SoruSecenegiSecici(
                             overflow = TextOverflow.Ellipsis,
                         )
                         Text(
-                            "⌄",
+                            "↓",
                             modifier = Modifier.padding(start = 10.dp),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -1222,7 +1223,7 @@ private fun ImageSection(
                                     onClick = { onCrop(image) },
                                     modifier = Modifier.semantics { contentDescription = cropImageDescription },
                                 ) {
-                                    Text("✂", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleMedium)
+                                    Text("✂", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleMedium, fontFamily = PremiumSembolAilesi)
                                 }
                                 IconButton(
                                     enabled = enabled && image.sira > 0,

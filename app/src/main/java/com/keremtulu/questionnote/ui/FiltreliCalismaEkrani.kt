@@ -272,7 +272,7 @@ fun FiltreliCalismaEkrani(
                     PremiumTextButton(
                         onClick = onGeri,
                         interactionTur = EtkilesimTuru.GERI,
-                    ) { Text("‹  ${androidx.compose.ui.res.stringResource(R.string.menu_today)}") }
+                    ) { Text("‹ ${androidx.compose.ui.res.stringResource(R.string.menu_today)}") }
                     GradyanKart(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(24.dp),
@@ -658,7 +658,7 @@ private fun FiltreDropdown(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
-                    Text("⌄", modifier = Modifier.padding(start = 8.dp))
+                    Text("↓", modifier = Modifier.padding(start = 8.dp))
                 }
             }
             DropdownMenu(

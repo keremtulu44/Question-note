@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.keremtulu.questionnote.R
+import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
 import com.keremtulu.questionnote.ui.premium.EtkilesimTuru
 import com.keremtulu.questionnote.ui.premium.PremiumCard
 
@@ -82,6 +83,7 @@ internal fun DersKarti(
                         color = vurguRengi,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
+                        fontFamily = PremiumSembolAilesi,
                     )
                 }
                 Surface(

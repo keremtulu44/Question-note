@@ -94,7 +94,7 @@ fun RozetKoleksiyonu(sahip: Set<Rozet>, girdi: RozetGirdisi, kazanilmaZamani: (R
                             Text(stringResource(if (gizli) R.string.badge_hidden else rozetAdi(rozet)),
                                 style = MaterialTheme.typography.titleSmall, textAlign = TextAlign.Center, fontWeight = FontWeight.SemiBold)
                             // Unlock instructions belong in the existing detail dialog, not on every tile.
-                            if (kazanildi) Text("✓ " + stringResource(R.string.badge_earned),
+                            if (kazanildi) Text(stringResource(R.string.badge_earned),
                                 color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium)
                             else if (!gizli && rozet !in oturumRozetleri) {
                                 val ilerleme = RozetKurallari.ilerleme(rozet, girdi)
@@ -124,7 +124,7 @@ fun RozetKoleksiyonu(sahip: Set<Rozet>, girdi: RozetGirdisi, kazanilmaZamani: (R
                     Text(stringResource(if (gizli) R.string.badge_hidden_desc else rozetAciklamasi(rozet)))
                     if (!gizli) {
                         if (kazanildi) {
-                            Text("✓ " + stringResource(R.string.badge_earned))
+                            Text(stringResource(R.string.badge_earned))
                             kazanilmaZamani(rozet)?.let {
                                 val tarih = Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
                                 Text(stringResource(R.string.badge_earned_date, tarih))

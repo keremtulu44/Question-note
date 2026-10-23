@@ -64,6 +64,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.keremtulu.questionnote.R
+import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
 import com.keremtulu.questionnote.data.prefs.OdakOturumuDeposu
 import com.keremtulu.questionnote.data.ses.SesTuruGenis
 import com.keremtulu.questionnote.data.ses.SesYoneticisi
@@ -461,7 +462,7 @@ fun OdakOturumuEkrani(
                                 Column(horizontalAlignment = Alignment.End) {
                                     Text(if (plan == null) "—" else if (plan.sonrakiAralik == 1) stringResource(R.string.focus_tomorrow)
                                     else stringResource(R.string.focus_next_days, plan.sonrakiAralik), style = MaterialTheme.typography.labelSmall)
-                                    if (secili) Text("✓", color = colors.primary)
+                                    if (secili) Text("✓", color = colors.primary, fontFamily = PremiumSembolAilesi)
                                 }
                             }
                         }

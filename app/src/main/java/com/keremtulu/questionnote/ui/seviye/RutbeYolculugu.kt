@@ -28,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.keremtulu.questionnote.R
+import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
 import com.keremtulu.questionnote.domain.seviye.Rutbe
 import com.keremtulu.questionnote.domain.seviye.SeviyeDurumu
 import com.keremtulu.questionnote.domain.seviye.SeviyeHesabi
@@ -53,7 +54,8 @@ fun RutbeYolculugu(durum: SeviyeDurumu, baslikGoster: Boolean = true) {
                             modifier = Modifier.size(80.dp).alpha(if (aktif) 1f else 0.45f))
                         Text(rutbe.ad, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                         Text(stringResource(R.string.level_number, rutbe.baslangicSeviye), style = MaterialTheme.typography.labelSmall)
-                        Text(if (aktif) "✓" else "◇", color = MaterialTheme.colorScheme.primary)
+                        if (aktif) Text("✓", color = MaterialTheme.colorScheme.primary, fontFamily = PremiumSembolAilesi)
+                            else Text("◊", color = MaterialTheme.colorScheme.primary)
                     }
                 }
             }

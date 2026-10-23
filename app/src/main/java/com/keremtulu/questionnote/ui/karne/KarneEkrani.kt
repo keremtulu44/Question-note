@@ -54,6 +54,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.keremtulu.questionnote.R
+import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
 import com.keremtulu.questionnote.data.ilerleme.IlerlemeHizmeti
 import com.keremtulu.questionnote.data.ilerleme.RozetHizmeti
 import com.keremtulu.questionnote.data.prefs.GunlukHedefDeposu
@@ -458,7 +459,7 @@ private fun KovaBolumu(sayilar: KarneSayilari, animasyonAcik: Boolean) {
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            Text(isaret, color = colors.primary, style = MaterialTheme.typography.titleMedium)
+                            Text(isaret, color = colors.primary, style = MaterialTheme.typography.titleMedium, fontFamily = PremiumSembolAilesi)
                             Text(
                                 etiket,
                                 color = colors.onSurface,

@@ -53,6 +53,20 @@ prefs, gezinme durum makinesi ve ölçüm mantığına dokunulmadı; test metinl
   bu kaynaktan LANCZOS ile üretildi; `ic_launcher_round.png` 4× supersample daire maskeli.
 - APK'ya yalnızca mipmap PNG'leri girer; repo-root `assets/` paketlenmez.
 
+## Sembol/tipografi tutarlılığı + Bugün tek karta indirme (2. tur geri bildirim)
+
+- **Kök neden:** Manrope'ta `⌄ ✓  ◇ ✂` yok; bu glifler sisteme düşüp yanında Manrope harflerle
+  farklı görünüyor ("harf karmaşası"). Çözüm: `PremiumTema.PremiumSembolAilesi = FontFamily.Default`
+  ortak anahtarı + kapsam dışı gliflerin Manrope'ta olanlarla değişimi.
+- Filtreli: `⌄`→`↓`, `‹  ` çift boşluğu `‹ ` oldu. SoruFormu: iki `⌄`→`↓`, `✂` sembol ailesiyle.
+- Ayarlar/Odak/Rutbe/Adım göstergesi: `✓` sembol ailesiyle; Rutbe'de `◇`→`◊` (Manrope'ta var).
+- Rozet/Karne/Ders kartı: `✓ ` ön eki kaldırıldı veya tek aileye alındı; strings.xml'deki `◎ ± ★ ✗`
+  tek gliflik kutularda tutarlı aileden çiziliyor.
+- **Bugün:** 5 kart → **2 kart**. Hero (kicker+tarih birleşti) + tek "gün kartı": odak özeti,
+  hedef halkası (animasyon+kutlama aynen), soru satırları ve gradyan başlatma CTA'sı tek kartta.
+  Veri akışları, sıralama (`akilliOncelik`, take((hedef-gunluk).coerceIn(5,30))), tıklama sözleşmesi,
+  tüm string kaynakları ve hata/boş durumları korundu. Sürüm 1.5.98 (code 28).
+
 ## Korunan sözleşmeler
 
 - `HareketPolitikasi`: tüm yeni animasyonlar `animateFloatPremium`/`tweenPremium` üzerinden;
