@@ -10,7 +10,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,6 +29,7 @@ import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 
 /** P3 foundation, not the P5 source/topic dashboard or a general exam-speed score. */
 @Composable
@@ -55,7 +55,7 @@ internal fun SureProfiliKarti(kapsam: SureKapsami, baslikGoster: Boolean = true)
                     ProfilSatiri(stringResource(R.string.profile_workload), ders.profil.isYuku.istenen)
                 }
             }
-            if (kapsam.dersler.size > 3) TextButton(onClick = { tumu = !tumu }, modifier = Modifier.heightIn(min = 48.dp)) {
+            if (kapsam.dersler.size > 3) PremiumTextButton(onClick = { tumu = !tumu }, modifier = Modifier.heightIn(min = 48.dp)) {
                 Text(stringResource(if (tumu) R.string.progress_hide_details else R.string.progress_all_lessons))
             }
             Text(stringResource(R.string.profile_policy_note), style = MaterialTheme.typography.bodySmall, color = renk.onSurfaceVariant)

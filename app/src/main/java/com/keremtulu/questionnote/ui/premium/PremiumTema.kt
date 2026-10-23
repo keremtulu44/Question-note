@@ -13,9 +13,23 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.keremtulu.questionnote.R
+
+/**
+ * Display family for titles, kickers and labels. Static faces cover Latin Extended-A so Turkish
+ * glyphs (ğşıİçöü) render from the bundle, not from fallback; body copy stays on the system font.
+ */
+val PremiumYaziAilesi = FontFamily(
+    Font(R.font.manrope_regular, FontWeight.Normal),
+    Font(R.font.manrope_medium, FontWeight.Medium),
+    Font(R.font.manrope_semi_bold, FontWeight.SemiBold),
+    Font(R.font.manrope_bold, FontWeight.Bold),
+)
 
 /** Refined visual system used by the premium app theme and reusable UI components. */
 val PremiumAcikRenkSemasi = lightColorScheme(
@@ -106,26 +120,37 @@ object PremiumMarkaRenkler {
 }
 
 val PremiumTipografi: Typography = Typography().let { base ->
+    fun androidx.compose.ui.text.TextStyle.yaziAilesi(
+        ozellikler: String? = null,
+    ): androidx.compose.ui.text.TextStyle = copy(
+        fontFamily = PremiumYaziAilesi,
+        fontFeatureSettings = ozellikler,
+    )
     base.copy(
         displaySmall = base.displaySmall.copy(
             fontSize = 34.sp,
             lineHeight = 40.sp,
             letterSpacing = (-0.5).sp,
             fontWeight = FontWeight.Bold,
-        ),
+        ).yaziAilesi("tnum"),
         headlineLarge = base.headlineLarge.copy(
             fontSize = 30.sp,
             lineHeight = 38.sp,
             letterSpacing = (-0.4).sp,
             fontWeight = FontWeight.Bold,
-        ),
+        ).yaziAilesi("tnum"),
+        headlineMedium = base.headlineMedium.copy().yaziAilesi(),
         headlineSmall = base.headlineSmall.copy(
             fontSize = 24.sp,
             lineHeight = 32.sp,
             fontWeight = FontWeight.SemiBold,
-        ),
-        titleMedium = base.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-        labelLarge = base.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+        ).yaziAilesi(),
+        titleLarge = base.titleLarge.copy().yaziAilesi(),
+        titleMedium = base.titleMedium.copy(fontWeight = FontWeight.SemiBold).yaziAilesi("tnum"),
+        titleSmall = base.titleSmall.copy().yaziAilesi(),
+        labelLarge = base.labelLarge.copy(fontWeight = FontWeight.SemiBold).yaziAilesi("tnum"),
+        labelMedium = base.labelMedium.copy().yaziAilesi("tnum"),
+        labelSmall = base.labelSmall.copy().yaziAilesi("tnum"),
     )
 }
 

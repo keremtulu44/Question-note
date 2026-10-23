@@ -44,6 +44,8 @@ import com.keremtulu.questionnote.ui.karne.RozetGorseli
 import com.keremtulu.questionnote.ui.tema.*
 import java.text.NumberFormat
 import java.util.Locale
+import com.keremtulu.questionnote.ui.premium.PremiumTextButton
+import com.keremtulu.questionnote.ui.premium.PremiumButton
 
 // Established petrol/copper hero palette; deliberately independent of the page's light/dark surfaces.
 private val Murekkep = Color(0xFF153544)
@@ -92,7 +94,7 @@ internal fun IlerlemeIcerigi(
                     if (ozet.soruSayisi == 0) {
                         BolumBasligi(stringResource(R.string.progress_first_step))
                         Text(stringResource(R.string.progress_empty_archive), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Button(onClick = onSoruEkle, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+                        PremiumButton(onClick = onSoruEkle, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
                             Text(stringResource(R.string.progress_add_question))
                         }
                     } else {
@@ -103,7 +105,7 @@ internal fun IlerlemeIcerigi(
                         if (ozet.analiz != null) SonrakiAdimIcerigi(ozet.analiz, onCalis)
                         else {
                             if (yetersizVeri) Text(stringResource(R.string.progress_no_reviews), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Button(onClick = onBugun, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+                            PremiumButton(onClick = onBugun, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
                                 Text(stringResource(R.string.progress_go_today))
                             }
                         }
@@ -213,7 +215,7 @@ private fun IlerlemeBasligi() {
 @Composable
 private fun AyrintiBasligi(baslik: String, onGeri: () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        TextButton(onClick = onGeri, contentPadding = PaddingValues(horizontal = 0.dp),
+        PremiumTextButton(onClick = onGeri, contentPadding = PaddingValues(horizontal = 0.dp),
             modifier = Modifier.heightIn(min = 48.dp).testTag("progress-back")) { Text(stringResource(R.string.common_back)) }
         Text(baslik, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, modifier = Modifier.semantics { heading() })
     }
@@ -381,7 +383,7 @@ internal fun IlerlemeDurumPaneli(hata: Boolean, insets: PaddingValues, onYenile:
                     modifier = Modifier.semantics { liveRegion = LiveRegionMode.Assertive },
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Button(onClick = onYenile, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+                PremiumButton(onClick = onYenile, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
                     Text(stringResource(R.string.level_retry))
                 }
             } else {

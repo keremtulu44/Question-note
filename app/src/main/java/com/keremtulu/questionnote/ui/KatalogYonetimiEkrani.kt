@@ -18,7 +18,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,6 +40,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 
 private sealed interface KatalogDurumu {
     data object Yukleniyor : KatalogDurumu
@@ -76,7 +76,7 @@ fun KatalogYonetimiEkrani(
     ) { insets ->
         Column(Modifier.fillMaxSize().padding(insets)) {
             Column(Modifier.fillMaxWidth().padding(start = 22.dp, top = 8.dp, end = 22.dp, bottom = 8.dp)) {
-                TextButton(onClick = onGeri) {
+                PremiumTextButton(onClick = onGeri) {
                     Text(stringResource(R.string.topic_back_to_lessons))
                 }
                 Text(
@@ -138,7 +138,7 @@ fun KatalogYonetimiEkrani(
             title = { Text(stringResource(R.string.catalog_delete_title)) },
             text = { Text(stringResource(R.string.catalog_delete_message, secenek.ad)) },
             confirmButton = {
-                TextButton(
+                PremiumTextButton(
                     onClick = {
                         silinecek = null
                         scope.launch {
@@ -172,7 +172,7 @@ fun KatalogYonetimiEkrani(
                 ) { Text(stringResource(R.string.catalog_delete), color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = {
-                TextButton(onClick = { silinecek = null }) {
+                PremiumTextButton(onClick = { silinecek = null }) {
                     Text(stringResource(R.string.topic_cancel))
                 }
             },
@@ -185,7 +185,7 @@ fun KatalogYonetimiEkrani(
             title = { Text(stringResource(R.string.catalog_delete_in_use_title)) },
             text = { Text(metin) },
             confirmButton = {
-                TextButton(onClick = { uyariMetni = null }) {
+                PremiumTextButton(onClick = { uyariMetni = null }) {
                     Text(stringResource(R.string.topic_cancel))
                 }
             },
@@ -240,7 +240,7 @@ private fun KatalogSatiri(secenek: SoruSecenegi, onSil: () -> Unit) {
                 }
             }
             if (!secenek.varsayilan) {
-                TextButton(onClick = onSil) {
+                PremiumTextButton(onClick = onSil) {
                     Text(
                         stringResource(R.string.catalog_delete),
                         color = MaterialTheme.colorScheme.error,

@@ -29,24 +29,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -92,6 +87,10 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import com.keremtulu.questionnote.ui.premium.PremiumTextButton
+import com.keremtulu.questionnote.ui.premium.PremiumOutlinedButton
+import com.keremtulu.questionnote.ui.premium.PremiumButton
+import com.keremtulu.questionnote.ui.premium.PremiumCard
 
 private sealed interface KonuSecenekleriDurumu {
     data object Yukleniyor : KonuSecenekleriDurumu
@@ -448,7 +447,7 @@ fun SoruFormuEkrani(
                                 style = MaterialTheme.typography.bodySmall,
                             )
                         }
-                        Button(
+                        PremiumButton(
                             onClick = ::saveQuestion,
                             modifier = Modifier.fillMaxWidth(),
                             enabled = !kaydediliyor,
@@ -491,7 +490,7 @@ fun SoruFormuEkrani(
                 verticalArrangement = Arrangement.Center,
             ) {
                 Text(stringResource(R.string.question_not_found), color = MaterialTheme.colorScheme.error)
-                TextButton(onClick = onGeri) { Text(stringResource(R.string.question_back)) }
+                PremiumTextButton(onClick = onGeri) { Text(stringResource(R.string.question_back)) }
             }
             yuklemeBasarisiz -> Column(
                 modifier = Modifier.fillMaxSize().padding(padding).padding(24.dp),
@@ -499,7 +498,7 @@ fun SoruFormuEkrani(
                 verticalArrangement = Arrangement.Center,
             ) {
                 Text(stringResource(R.string.question_error_generic), color = MaterialTheme.colorScheme.error)
-                TextButton(onClick = onGeri) { Text(stringResource(R.string.question_back)) }
+                PremiumTextButton(onClick = onGeri) { Text(stringResource(R.string.question_back)) }
             }
             else -> LazyColumn(
                 modifier = Modifier.fillMaxSize().padding(padding),
@@ -508,7 +507,7 @@ fun SoruFormuEkrani(
             ) {
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        TextButton(
+                        PremiumTextButton(
                             onClick = ::cancelAndReturn,
                             enabled = !kaydediliyor,
                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
@@ -607,7 +606,7 @@ fun SoruFormuEkrani(
                                         color = MaterialTheme.colorScheme.error,
                                         style = MaterialTheme.typography.bodySmall,
                                     )
-                                    TextButton(
+                                    PremiumTextButton(
                                         enabled = !kaydediliyor,
                                         onClick = { konuAkisiYenileme++ },
                                     ) { Text(stringResource(R.string.topic_retry)) }
@@ -757,7 +756,7 @@ fun SoruFormuEkrani(
                 title = { Text(stringResource(R.string.question_form_crop_title)) },
                 text = { Text(stringResource(R.string.question_form_crop_error)) },
                 confirmButton = {
-                    TextButton(onClick = { kirpmaHedefi = null }) {
+                    PremiumTextButton(onClick = { kirpmaHedefi = null }) {
                         Text(stringResource(R.string.common_close))
                     }
                 },
@@ -799,7 +798,7 @@ fun SoruFormuEkrani(
                 }
             },
             confirmButton = {
-                TextButton(
+                PremiumTextButton(
                     enabled = !konuKaydediliyor,
                     onClick = ::saveTopic,
                 ) {
@@ -811,7 +810,7 @@ fun SoruFormuEkrani(
                 }
             },
             dismissButton = {
-                TextButton(
+                PremiumTextButton(
                     enabled = !konuKaydediliyor,
                     onClick = { konuEklemeDialogu = false },
                 ) { Text(stringResource(R.string.topic_cancel)) }
@@ -843,10 +842,10 @@ fun SoruFormuEkrani(
                 }
             },
             confirmButton = {
-                TextButton(
+                PremiumTextButton(
                     enabled = !katalogKaydediliyor,
                     onClick = {
-                        if (katalogKaydediliyor) return@TextButton
+                        if (katalogKaydediliyor) return@PremiumTextButton
                         katalogKaydediliyor = true
                         katalogDialogHatasi = null
                         scope.launch {
@@ -879,7 +878,7 @@ fun SoruFormuEkrani(
                 ) { Text(stringResource(R.string.question_form_catalog_save)) }
             },
             dismissButton = {
-                TextButton(
+                PremiumTextButton(
                     enabled = !katalogKaydediliyor,
                     onClick = { katalogDialogTuru = null },
                 ) { Text(stringResource(R.string.question_form_catalog_cancel)) }
@@ -896,7 +895,7 @@ private fun SoruFormBolumu(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
-    Card(
+    PremiumCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = colors.surface),
@@ -960,7 +959,7 @@ private fun FormKonuSecicisi(
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             Box(Modifier.weight(1f)) {
-                OutlinedButton(
+                PremiumOutlinedButton(
                     onClick = { onMenuExpandedChange(true) },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = enabled,
@@ -1014,7 +1013,7 @@ private fun FormKonuSecicisi(
                     }
                 }
             }
-            TextButton(onClick = onAddTopic, enabled = enabled) {
+            PremiumTextButton(onClick = onAddTopic, enabled = enabled) {
                 Text(
                     stringResource(R.string.question_form_add_topic),
                     maxLines = 1,
@@ -1050,7 +1049,7 @@ private fun SoruSecenegiSecici(
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             Box(Modifier.weight(1f)) {
-                OutlinedButton(
+                PremiumOutlinedButton(
                     onClick = { menuAcik = true },
                     enabled = etkin,
                     modifier = Modifier.fillMaxWidth(),
@@ -1097,7 +1096,7 @@ private fun SoruSecenegiSecici(
                     }
                 }
             }
-            TextButton(onClick = onEkle, enabled = etkin) {
+            PremiumTextButton(onClick = onEkle, enabled = etkin) {
                 Text(ekleEtiketi, maxLines = 1)
             }
         }
@@ -1124,11 +1123,15 @@ private fun ImageSection(
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         title?.let { Text(it, style = MaterialTheme.typography.labelLarge) }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilledTonalButton(
+            PremiumButton(
                 onClick = onCamera,
                 enabled = enabled,
                 modifier = Modifier.weight(1f).heightIn(min = 50.dp),
                 shape = RoundedCornerShape(16.dp),
+                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ),
                 contentPadding = PaddingValues(horizontal = 10.dp, vertical = 10.dp),
             ) {
                 Text(
@@ -1137,7 +1140,7 @@ private fun ImageSection(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            OutlinedButton(
+            PremiumOutlinedButton(
                 onClick = onPicker,
                 enabled = enabled,
                 modifier = Modifier.weight(1f).heightIn(min = 50.dp),
@@ -1188,7 +1191,7 @@ private fun ImageSection(
             LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 items(images, key = { it.id }) { image ->
                     val file = imageStore.dosyaGoruntuIcin(image)
-                    Card(
+                    PremiumCard(
                         modifier = Modifier.width(220.dp),
                         shape = RoundedCornerShape(20.dp),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),

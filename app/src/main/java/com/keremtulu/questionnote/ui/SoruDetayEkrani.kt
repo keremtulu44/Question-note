@@ -13,7 +13,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
@@ -76,6 +75,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlinx.coroutines.CancellationException
+import com.keremtulu.questionnote.ui.premium.PremiumCard
 
 private sealed interface SoruDetayDurumu {
     data object Yukleniyor : SoruDetayDurumu
@@ -426,7 +426,7 @@ fun SoruDetayEkrani(
                         (tekrarOturumunda || soru.sonrakiTekrarGun?.let { it <= today } == true)
                     ) {
                         item {
-                            Card(
+                            PremiumCard(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = androidx.compose.foundation.shape.RoundedCornerShape(24.dp),
                                 colors = androidx.compose.material3.CardDefaults.cardColors(
@@ -576,7 +576,7 @@ private fun TekrarGecmisiKarti(record: TekrarKaydi) {
     }
     val plannedDay = record.planlananGun?.let(::gunTarihi)
         ?: stringResource(R.string.question_review_history_no_planned_day)
-    Card(
+    PremiumCard(
         modifier = Modifier.fillMaxWidth(),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(18.dp),
         colors = androidx.compose.material3.CardDefaults.cardColors(

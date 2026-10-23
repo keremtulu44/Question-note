@@ -4,9 +4,12 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -36,6 +39,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
@@ -120,6 +125,7 @@ fun PremiumButton(
     enabled: Boolean = true,
     shape: androidx.compose.ui.graphics.Shape = MaterialTheme.shapes.large,
     colors: ButtonColors = ButtonDefaults.buttonColors(),
+    contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     interactionTur: EtkilesimTuru = EtkilesimTuru.TIKLAMA,
     content: @Composable RowScope.() -> Unit,
 ) {
@@ -131,6 +137,7 @@ fun PremiumButton(
         enabled = enabled,
         shape = shape,
         colors = colors,
+        contentPadding = contentPadding,
         content = content,
     )
 }
@@ -141,6 +148,7 @@ fun PremiumOutlinedButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     shape: androidx.compose.ui.graphics.Shape = MaterialTheme.shapes.large,
+    contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     interactionTur: EtkilesimTuru = EtkilesimTuru.TIKLAMA,
     content: @Composable RowScope.() -> Unit,
 ) {
@@ -151,6 +159,7 @@ fun PremiumOutlinedButton(
         modifier = modifier,
         enabled = enabled,
         shape = shape,
+        contentPadding = contentPadding,
         content = content,
     )
 }
@@ -160,6 +169,8 @@ fun PremiumTextButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    shape: androidx.compose.ui.graphics.Shape = MaterialTheme.shapes.large,
+    contentPadding: PaddingValues = ButtonDefaults.TextButtonContentPadding,
     interactionTur: EtkilesimTuru = EtkilesimTuru.TIKLAMA,
     content: @Composable RowScope.() -> Unit,
 ) {
@@ -169,8 +180,46 @@ fun PremiumTextButton(
         onClick = { premiumGeriBildirim(context, interactionTur, scope); onClick() },
         modifier = modifier,
         enabled = enabled,
+        shape = shape,
+        contentPadding = contentPadding,
         content = content,
     )
+}
+
+/**
+ * Primary call-to-action over the brand gradient; the flat fill keeps both themes legible while
+ * the shared feedback profile stays identical to [PremiumButton].
+ */
+@Composable
+fun PremiumGradyanButon(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
+    interactionTur: EtkilesimTuru = EtkilesimTuru.TIKLAMA,
+    gradyan: Brush = com.keremtulu.questionnote.ui.premium.PremiumGradyanlar.BUTON_BIRINCI,
+    content: @Composable RowScope.() -> Unit,
+) {
+    Box(
+        modifier
+            .clip(MaterialTheme.shapes.large)
+            .background(gradyan),
+    ) {
+        PremiumButton(
+            onClick = onClick,
+            modifier = Modifier.fillMaxWidth(),
+            enabled = enabled,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent,
+                contentColor = Color.White,
+                disabledContainerColor = Color.White.copy(alpha = 0.28f),
+                disabledContentColor = Color.White.copy(alpha = 0.70f),
+            ),
+            contentPadding = contentPadding,
+            interactionTur = interactionTur,
+            content = content,
+        )
+    }
 }
 
 @Composable

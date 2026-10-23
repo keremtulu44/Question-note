@@ -35,6 +35,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.keremtulu.questionnote.ui.premium.PremiumButton
 
 /** One owner chooses ONE fullscreen dialog. Badges have priority; a pending rank stays durable. */
 @Composable
@@ -92,7 +93,7 @@ fun RutbeKutlamasiIcerigi(r: RutbeKutlamasi, mesgul: Boolean = false, hata: Bool
             Text(stringResource(R.string.rank_celebration_note), color = Color(0xFFE8DCCB), textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodyMedium)
             if (hata) Text(stringResource(R.string.rank_celebration_error), color = Color(0xFFFFDAD6))
-            Button(onClick = onKapat, enabled = !mesgul, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+            PremiumButton(onClick = onKapat, enabled = !mesgul, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEFC18A), contentColor = Color(0xFF0C202C))) {
                 Text(stringResource(R.string.rank_celebration_continue))
             }

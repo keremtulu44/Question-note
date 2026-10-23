@@ -14,8 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
@@ -24,7 +22,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -49,6 +46,9 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import com.keremtulu.questionnote.ui.premium.PremiumTextButton
+import com.keremtulu.questionnote.ui.premium.PremiumButton
+import com.keremtulu.questionnote.ui.premium.PremiumCard
 
 private sealed interface KonuEkraniDurumu {
     data object Yukleniyor : KonuEkraniDurumu
@@ -103,7 +103,7 @@ fun KonuYonetimiEkrani(
                     .fillMaxWidth()
                     .padding(start = 22.dp, top = 8.dp, end = 22.dp, bottom = 12.dp),
             ) {
-                TextButton(onClick = onGeri) {
+                PremiumTextButton(onClick = onGeri) {
                     Text(text = stringResource(R.string.topic_back_to_lessons))
                 }
                 Text(
@@ -139,7 +139,7 @@ fun KonuYonetimiEkrani(
             }
 
             if (!arsivlilerGosteriliyor) {
-                Button(
+                PremiumButton(
                     onClick = { konuFormu = KonuFormu(ad = "") },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -169,7 +169,7 @@ fun KonuYonetimiEkrani(
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodyLarge,
                     )
-                    TextButton(onClick = { akisYenileme++ }) {
+                    PremiumTextButton(onClick = { akisYenileme++ }) {
                         Text(text = stringResource(R.string.topic_retry))
                     }
                 }
@@ -239,7 +239,7 @@ fun KonuYonetimiEkrani(
             title = { Text(stringResource(R.string.topic_delete_title)) },
             text = { Text(stringResource(R.string.topic_delete_message, konu.ad)) },
             confirmButton = {
-                TextButton(
+                PremiumTextButton(
                     onClick = {
                         silinecekKonu = null
                         scope.launch {
@@ -267,7 +267,7 @@ fun KonuYonetimiEkrani(
                 ) { Text(stringResource(R.string.topic_delete_confirm), color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = {
-                TextButton(onClick = { silinecekKonu = null }) {
+                PremiumTextButton(onClick = { silinecekKonu = null }) {
                     Text(stringResource(R.string.topic_cancel))
                 }
             },
@@ -280,7 +280,7 @@ fun KonuYonetimiEkrani(
             title = { Text(stringResource(R.string.topic_delete_in_use_title)) },
             text = { Text(stringResource(R.string.topic_delete_in_use_message, adet)) },
             confirmButton = {
-                TextButton(
+                PremiumTextButton(
                     onClick = {
                         kullanimdakiKonu = null
                         scope.launch {
@@ -305,7 +305,7 @@ fun KonuYonetimiEkrani(
                 ) { Text(stringResource(R.string.topic_delete_archive)) }
             },
             dismissButton = {
-                TextButton(onClick = { kullanimdakiKonu = null }) {
+                PremiumTextButton(onClick = { kullanimdakiKonu = null }) {
                     Text(stringResource(R.string.topic_cancel))
                 }
             },
@@ -346,10 +346,10 @@ fun KonuYonetimiEkrani(
                 }
             },
             confirmButton = {
-                TextButton(
+                PremiumTextButton(
                     enabled = !form.kaydediliyor,
                     onClick = {
-                        if (konuFormu?.kaydediliyor == true) return@TextButton
+                        if (konuFormu?.kaydediliyor == true) return@PremiumTextButton
                         konuFormu = form.copy(kaydediliyor = true, hata = null)
                         scope.launch {
                             val sonuc = try {
@@ -387,7 +387,7 @@ fun KonuYonetimiEkrani(
                 }
             },
             dismissButton = {
-                TextButton(
+                PremiumTextButton(
                     enabled = !form.kaydediliyor,
                     onClick = { konuFormu = null },
                 ) {
@@ -405,7 +405,7 @@ private fun KonuListeSatiri(
     onDuzenle: () -> Unit,
     onArsivDurumunuDegistir: () -> Unit,
 ) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+    PremiumCard(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -429,17 +429,17 @@ private fun KonuListeSatiri(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
             ) {
-                TextButton(onClick = onDuzenle) {
+                PremiumTextButton(onClick = onDuzenle) {
                     Text(text = stringResource(R.string.topic_edit))
                 }
-                TextButton(onClick = onArsivDurumunuDegistir) {
+                PremiumTextButton(onClick = onArsivDurumunuDegistir) {
                     Text(
                         text = stringResource(
                             if (konu.arsivli) R.string.topic_restore else R.string.topic_archive,
                         ),
                     )
                 }
-                TextButton(onClick = onSil) {
+                PremiumTextButton(onClick = onSil) {
                     Text(
                         text = stringResource(R.string.topic_delete),
                         color = MaterialTheme.colorScheme.error,

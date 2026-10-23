@@ -17,17 +17,17 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import com.keremtulu.questionnote.domain.repeat.CalismaSorulariniSirala
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -46,11 +46,18 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.keremtulu.questionnote.R
+import com.keremtulu.questionnote.ui.animasyon.SureToken
+import com.keremtulu.questionnote.ui.animasyon.animateFloatPremium
+import com.keremtulu.questionnote.ui.animasyon.tweenPremium
+import com.keremtulu.questionnote.ui.bilesenler.premium.BosDurumSoruYok
+import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
 import com.keremtulu.questionnote.ui.bilesenler.premium.IskeletKart
+import com.keremtulu.questionnote.ui.bilesenler.premium.KutlamaParcaciklari
 import com.keremtulu.questionnote.ui.premium.EtkilesimTuru
-import com.keremtulu.questionnote.ui.premium.PremiumButton
 import com.keremtulu.questionnote.ui.premium.PremiumCard
 import com.keremtulu.questionnote.ui.premium.PremiumExtendedFloatingActionButton
+import com.keremtulu.questionnote.ui.premium.PremiumGradyanButon
+import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 import com.keremtulu.questionnote.ui.premium.PremiumOutlinedButton
 import com.keremtulu.questionnote.data.ilerleme.IlerlemeHizmeti
 import com.keremtulu.questionnote.data.prefs.GunlukHedefDeposu
@@ -68,6 +75,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
+import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 
 private data class BugunSoruSatiri(
     val soru: Soru,
@@ -150,15 +158,11 @@ fun BugunEkrani(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
+                GradyanKart(modifier = Modifier.fillMaxWidth(), borderAnimation = false) {
                     Column {
                         Text(
                             text = stringResource(R.string.today_kicker),
-                            color = MaterialTheme.colorScheme.primary,
+                            color = PremiumMarkaRenkler.BakirIsik,
                             style = MaterialTheme.typography.labelMedium,
                             letterSpacing = 1.4.sp,
                             fontWeight = FontWeight.Bold,
@@ -166,17 +170,16 @@ fun BugunEkrani(
                         Text(
                             text = stringResource(R.string.today_title),
                             modifier = Modifier.padding(top = 4.dp),
-                            color = MaterialTheme.colorScheme.onBackground,
+                            color = PremiumMarkaRenkler.Kagit,
                             style = MaterialTheme.typography.displaySmall,
                         )
                         Text(
                             text = dateText,
                             modifier = Modifier.padding(top = 2.dp),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.74f),
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     }
-
                 }
             }
             item {
@@ -198,10 +201,9 @@ fun BugunEkrani(
                     val dersler = ready.sorular.associate { it.ders.id to it.ders }
                     val sorular = CalismaSorulariniSirala.akilliOncelik(ready.sorular.map { it.soru }, bugunGun)
                         .take((hedef - gunluk).coerceIn(5, 30))
-                    PremiumButton(
+                    PremiumGradyanButon(
                         onClick = { onOturumBaslat(sorular, dersler) },
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(18.dp),
                         interactionTur = EtkilesimTuru.ODAK_BASLADI,
                     ) {
                         Column(Modifier.padding(vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -249,7 +251,7 @@ fun BugunEkrani(
                 }
                 is BugunDurumu.Hazir -> {
                     if (current.sorular.isEmpty()) {
-                        item { BugunBosDurumu() }
+                        item { BosDurumSoruYok(onSoruEkle) }
                     } else {
                         items(current.sorular, key = { it.soru.id }) { row ->
                             BugunSoruKarti(
@@ -271,41 +273,61 @@ private fun BugunIlerlemeKarti(hedef: Int, yapilan: Int, seri: Int) {
     val guvenliHedef = hedef.coerceAtLeast(1)
     val oran = (yapilan.toFloat() / guvenliHedef).coerceIn(0f, 1f)
     val tamamlandi = yapilan >= guvenliHedef
-    Card(
+    // Celebrate only a fresh crossing of the goal, never a re-entry while it is already complete.
+    var oncekiTamam by remember { mutableStateOf(tamamlandi) }
+    var kutlama by remember { mutableStateOf(false) }
+    LaunchedEffect(tamamlandi) {
+        if (tamamlandi && !oncekiTamam) {
+            kutlama = true
+            delay(2_200)
+            kutlama = false
+        }
+        oncekiTamam = tamamlandi
+    }
+    // One calm sweep on entry; later goal changes keep animating from wherever the ring is.
+    var halkaGoster by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { halkaGoster = true }
+    val halka = animateFloatPremium(
+        target = if (halkaGoster) oran else 0f,
+        animationSpec = tweenPremium(SureToken.VERY_SLOW),
+        label = "bugun-hedef-halkasi",
+    )
+    PremiumCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(22.dp),
+        shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(containerColor = colors.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp).fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Box(Modifier.size(72.dp), contentAlignment = Alignment.Center) {
-                Canvas(Modifier.fillMaxSize()) {
-                    val kalinlik = 8.dp.toPx()
-                    val inset = kalinlik / 2f
-                    val boyut = Size(size.width - kalinlik, size.height - kalinlik)
-                    drawArc(
-                        color = colors.surfaceVariant,
-                        startAngle = -90f,
-                        sweepAngle = 360f,
-                        useCenter = false,
-                        topLeft = Offset(inset, inset),
-                        size = boyut,
-                        style = Stroke(width = kalinlik),
-                    )
-                    drawArc(
-                        color = if (tamamlandi) colors.primary else colors.secondary,
-                        startAngle = -90f,
-                        sweepAngle = 360f * oran,
-                        useCenter = false,
-                        topLeft = Offset(inset, inset),
-                        size = boyut,
-                        style = Stroke(width = kalinlik, cap = StrokeCap.Round),
-                    )
-                }
+        Box {
+            Row(
+                modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                Box(Modifier.size(72.dp), contentAlignment = Alignment.Center) {
+                    Canvas(Modifier.fillMaxSize()) {
+                        val kalinlik = 8.dp.toPx()
+                        val inset = kalinlik / 2f
+                        val boyut = Size(size.width - kalinlik, size.height - kalinlik)
+                        drawArc(
+                            color = colors.surfaceVariant,
+                            startAngle = -90f,
+                            sweepAngle = 360f,
+                            useCenter = false,
+                            topLeft = Offset(inset, inset),
+                            size = boyut,
+                            style = Stroke(width = kalinlik),
+                        )
+                        drawArc(
+                            color = if (tamamlandi) colors.primary else colors.secondary,
+                            startAngle = -90f,
+                            sweepAngle = 360f * halka.value,
+                            useCenter = false,
+                            topLeft = Offset(inset, inset),
+                            size = boyut,
+                            style = Stroke(width = kalinlik, cap = StrokeCap.Round),
+                        )
+                    }
                 Text(
                     text = "$yapilan/$guvenliHedef",
                     color = colors.onSurface,
@@ -340,6 +362,11 @@ private fun BugunIlerlemeKarti(hedef: Int, yapilan: Int, seri: Int) {
                     fontWeight = FontWeight.SemiBold,
                 )
             }
+            }
+            KutlamaParcaciklari(
+                visible = kutlama,
+                modifier = Modifier.matchParentSize(),
+            )
         }
     }
 }
@@ -351,9 +378,9 @@ private fun BugunOdakKarti(
 ) {
     val colors = MaterialTheme.colorScheme
     val count = (state as? BugunDurumu.Hazir)?.sorular?.size
-    Card(
+    PremiumCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
+        shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.cardColors(containerColor = colors.primaryContainer),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
@@ -479,57 +506,18 @@ private fun BugunSoruKarti(
 }
 
 @Composable
-private fun BugunBosDurumu() {
-    val colors = MaterialTheme.colorScheme
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = colors.surface),
-        border = androidx.compose.foundation.BorderStroke(1.dp, colors.outlineVariant.copy(alpha = 0.65f)),
-    ) {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 30.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Surface(shape = CircleShape, color = colors.tertiaryContainer) {
-                Text(
-                    text = "✓",
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-                    color = colors.onTertiaryContainer,
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
-            Text(
-                text = stringResource(R.string.today_empty_title),
-                color = colors.onSurface,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold,
-            )
-            Text(
-                text = stringResource(R.string.today_empty_description),
-                color = colors.onSurfaceVariant,
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-            )
-        }
-    }
-}
-
-@Composable
 private fun DurumKarti(
     metin: String,
     onRetry: () -> Unit,
 ) {
-    Card(
+    PremiumCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
+        shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
     ) {
         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(metin, color = MaterialTheme.colorScheme.onErrorContainer)
-            TextButton(onClick = onRetry) { Text(stringResource(R.string.topic_retry)) }
+            PremiumTextButton(onClick = onRetry) { Text(stringResource(R.string.topic_retry)) }
         }
     }
 }

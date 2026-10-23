@@ -33,6 +33,9 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.ceil
 import kotlin.math.floor
+import com.keremtulu.questionnote.ui.premium.PremiumTextButton
+import com.keremtulu.questionnote.ui.premium.PremiumOutlinedButton
+import com.keremtulu.questionnote.ui.premium.PremiumButton
 
 enum class AnalizBolumu { RITIM, DONEM, PLAN, GRUPLAR }
 
@@ -70,7 +73,7 @@ internal fun SonrakiAdimIcerigi(a: GelisimAnalizi, onCalis: (SoruCalismaFiltresi
             OneriTuru.KUCUK_TUR -> R.string.progress_action_small
         }, o.uygunSoru), style = MaterialTheme.typography.bodyMedium)
         o.etiket?.let { Text(it, style = MaterialTheme.typography.titleSmall) }
-        Button(onClick = { onCalis(o.filtre, o.turBoyutu) }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+        PremiumButton(onClick = { onCalis(o.filtre, o.turBoyutu) }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
             .testTag("analysis-action")) { Text(stringResource(R.string.progress_action_inspect, o.turBoyutu)) }
     }
 }
@@ -232,7 +235,7 @@ private fun GrupListesi(a: GelisimAnalizi, onCalis: (SoruCalismaFiltresi, Int) -
                     Column(Modifier.padding(top = 12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text(stringResource(R.string.analysis_independent_fraction, g.sayac.bagimsiz, g.sayac.tekrar),
                             style = MaterialTheme.typography.bodyMedium)
-                        if (g.filtre != null && g.uygunSoru > 0) Button(onClick = { onCalis(g.filtre, minOf(5, g.uygunSoru)) },
+                        if (g.filtre != null && g.uygunSoru > 0) PremiumButton(onClick = { onCalis(g.filtre, minOf(5, g.uygunSoru)) },
                             modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
                             Text(stringResource(R.string.analysis_group_action, g.uygunSoru))
                         } else Text(stringResource(if (g.anahtar.bilinen) R.string.analysis_no_eligible_group else R.string.analysis_unknown_no_route),
@@ -259,9 +262,9 @@ private fun GrupListesi(a: GelisimAnalizi, onCalis: (SoruCalismaFiltresi, Int) -
         if (sonSayfa > 0) {
             Text(stringResource(R.string.analysis_page, guncelSayfa + 1, sonSayfa + 1), style = MaterialTheme.typography.labelMedium)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = { sayfa = guncelSayfa - 1; secili = null }, enabled = guncelSayfa > 0,
+                PremiumOutlinedButton(onClick = { sayfa = guncelSayfa - 1; secili = null }, enabled = guncelSayfa > 0,
                     modifier = Modifier.weight(1f).heightIn(min = 48.dp)) { Text(stringResource(R.string.analysis_previous)) }
-                OutlinedButton(onClick = { sayfa = guncelSayfa + 1; secili = null }, enabled = guncelSayfa < sonSayfa,
+                PremiumOutlinedButton(onClick = { sayfa = guncelSayfa + 1; secili = null }, enabled = guncelSayfa < sonSayfa,
                     modifier = Modifier.weight(1f).heightIn(min = 48.dp)) { Text(stringResource(R.string.analysis_next)) }
             }
         }
@@ -280,7 +283,7 @@ private fun BilgiAciklamasi(baslik: Int, tag: String, content: @Composable Colum
     var acik by rememberSaveable { mutableStateOf(false) }
     val durum = stringResource(if (acik) R.string.progress_details_open else R.string.progress_details_closed)
     Column {
-        TextButton(onClick = { acik = !acik }, modifier = Modifier.heightIn(min = 48.dp).testTag(tag)
+        PremiumTextButton(onClick = { acik = !acik }, modifier = Modifier.heightIn(min = 48.dp).testTag(tag)
             .semantics { stateDescription = durum }) { Text(stringResource(baslik)) }
         AcilanIcerik(acik) { Column(verticalArrangement = Arrangement.spacedBy(10.dp), content = content) }
     }
