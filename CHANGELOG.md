@@ -2,6 +2,12 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.5.94] — 2026-10-23
+
+- **Kırpma ve çözüm tahtası:** eksik görsel ve küçük kırpma alanı durumları mevcut Türkçe kaynak metinlerle gösterilir; ek yinelenen metin kaynakları kaldırıldı. `whiteboard_question_missing`, çizim alanı açıklamasının yanında tutulur.
+- Görsel kırpma özgün dosyayı değiştirmez; beyaz tahta çizimleri geçicidir. Tekrar planı, Room verileri ve yedek biçimi değişmedi.
+- Sürüm: `versionCode 24` / `versionName 1.5.94` — v1.5.93 üzerine, aynı uygulama kimliği ve imzalama anahtarıyla güncelleme.
+
 ## [1.5.93] — 2026-10-23
 
 - **Görsel kırpma:** soru ve çözüm görselleri ekleme/düzenleme formunda kırpılabilir. Kırpma ayrı bir geçici kopya oluşturur; kaydedilmiş özgün görsel üzerine yazılmaz.

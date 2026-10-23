@@ -239,7 +239,6 @@
     <string name="question_form_crop_loading">Görsel hazırlanıyor…</string>
     <string name="question_form_crop_full_selection">Tam görsel seçili.</string>
     <string name="question_form_crop_area_selection">Sürüklediğin alan kırpılacak.</string>
-    <string name="question_form_crop_small_selection">Kırpma alanı çok küçük; daha geniş bir alan seç.</string>
     <string name="question_form_crop_working">İşleniyor…</string>
     <string name="question_form_crop_saving">Kırpılmış görsel güvenli biçimde kaydediliyor…</string>
     <string name="question_form_crop_error">Görsel kırpılamadı. Özgün görsel korunuyor; yeniden deneyebilirsin.</string>
@@ -592,7 +591,6 @@
     <string name="whiteboard_surface_switch_to_blank">Çizim zeminini beyaz tahtaya geçir</string>
     <string name="whiteboard_surface_switch_to_question">Çizim zeminini soru görseline geçir</string>
     <string name="whiteboard_question_section">Soru</string>
-    <string name="whiteboard_question_missing">Bu soruda gösterilecek görsel yok.</string>
     <string name="whiteboard_temporary_note">Çizimler bu oturumda kalır; özgün görsel değişmez.</string>
     <string name="whiteboard_tool_pencil">Kalem</string>
     <string name="whiteboard_tool_line">Çizgi</string>
@@ -612,7 +610,7 @@
     <string name="whiteboard_width_normal">Normal</string>
     <string name="whiteboard_width_thick">Kalın</string>
     <string name="whiteboard_canvas_description">Çözüm çizim alanı</string>
-    <string name="whiteboard_canvas_hint">Sürükleyerek çiz. Şekiller için sürükleme başlangıcı ve bitişi iki köşeyi belirler.</string>
+    <string name="whiteboard_question_missing">Bu soruda gösterilecek görsel yok.</string>
     <string name="whiteboard_mark_count">%1$d çizim işareti</string>
     <string name="whiteboard_mark_limit">Tahta sınırına ulaşıldı. Yeni çizim için bir işareti geri al veya tahtayı temizle.</string>
     <string name="whiteboard_undo">Geri al</string>
@@ -623,8 +621,6 @@
     <string name="whiteboard_clear_confirm">Bu soru için çizdiğin tüm geçici işaretler kaldırılacak. Özgün soru görseli etkilenmez.</string>
     <string name="whiteboard_clear_action">Tümünü temizle</string>
     <string name="whiteboard_no_marks">Çözümünü çizmek için alanı sürükle.</string>
-    <string name="whiteboard_question_draw_hint">Soru görseli üzerine çizmek için sürükle.</string>
-    <string name="whiteboard_question_background_missing">Soru görseli yüklenemedi. Beyaz tahtaya dönüp çizime devam edebilirsin.</string>
     <string name="focus_no_questions">Bu oturumdaki sorular artık kullanılabilir değil.</string>
     <string name="focus_restore_note">Yarım kalan odak oturumun geri getirildi.</string>
     <string name="focus_continue_session">Yarım kalan oturuma dön</string>

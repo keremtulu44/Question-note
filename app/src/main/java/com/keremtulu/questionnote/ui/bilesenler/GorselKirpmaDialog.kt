@@ -99,7 +99,7 @@ fun GorselKirpmaDialog(
     val selectionDescription = stringResource(
         when {
             fullImageSelected -> R.string.question_form_crop_full_selection
-            selectionTooSmall -> R.string.question_form_crop_small_selection
+            selectionTooSmall -> R.string.question_form_crop_error
             else -> R.string.question_form_crop_area_selection
         },
     )

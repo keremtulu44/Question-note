@@ -578,17 +578,14 @@ private fun TahtaCalismaAlani(
                 }
                 if (soruUzerindeCizim && backgroundFile == null) {
                     Text(
-                        stringResource(R.string.whiteboard_question_background_missing),
+                        stringResource(R.string.whiteboard_question_missing),
                         modifier = Modifier.align(Alignment.Center).padding(12.dp),
                         color = colors.error,
                         style = MaterialTheme.typography.bodySmall,
                     )
                 } else if (kalemler.isEmpty() && etkinVurus == null) {
                     Text(
-                        stringResource(
-                            if (soruUzerindeCizim) R.string.whiteboard_question_draw_hint
-                            else R.string.whiteboard_no_marks,
-                        ),
+                        stringResource(R.string.whiteboard_no_marks),
                         modifier = Modifier.align(if (soruUzerindeCizim) Alignment.BottomCenter else Alignment.Center)
                             .padding(14.dp)
                             .background(Color.White.copy(alpha = 0.86f), RoundedCornerShape(10.dp))
