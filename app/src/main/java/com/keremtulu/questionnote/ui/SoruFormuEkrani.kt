@@ -84,6 +84,8 @@ import com.keremtulu.questionnote.domain.model.SoruSecenegiEklemeSonucu
 import com.keremtulu.questionnote.domain.model.normalizeSoruSecenegiAdi
 import com.keremtulu.questionnote.domain.repository.KonuRepository
 import com.keremtulu.questionnote.domain.repository.SoruRepository
+import com.keremtulu.questionnote.ui.bilesenler.GorselKirpmaAlani
+import com.keremtulu.questionnote.ui.bilesenler.GorselKirpmaDialog
 import com.keremtulu.questionnote.ui.bilesenler.SoruGorselResmi
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.catch
@@ -133,6 +135,8 @@ fun SoruFormuEkrani(
     var favori by remember(soruId) { mutableStateOf(false) }
     var soruGorselleri by remember(soruId) { mutableStateOf<List<SoruGorselGirdisi>>(emptyList()) }
     var cozumGorselleri by remember(soruId) { mutableStateOf<List<SoruGorselGirdisi>>(emptyList()) }
+    var kirpmaHedefi by remember(soruId) { mutableStateOf<SoruGorselGirdisi?>(null) }
+    var kirpmaIsleniyor by remember(soruId) { mutableStateOf(false) }
     var konuMenu by remember { mutableStateOf(false) }
     var konuEklemeDialogu by remember { mutableStateOf(false) }
     var yeniKonuAdi by remember { mutableStateOf("") }
@@ -287,6 +291,40 @@ fun SoruFormuEkrani(
     fun launchPicker(tur: GorselTuru) {
         galeriTuru = tur
         photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+    }
+
+    fun applyImageCrop(target: SoruGorselGirdisi, area: GorselKirpmaAlani) {
+        if (kirpmaIsleniyor) return
+        kirpmaIsleniyor = true
+        scope.launch {
+            var output: SoruGorselGirdisi? = null
+            var replaced = false
+            try {
+                val cropped = gorselDeposu.kirp(target, area.sol, area.ust, area.sag, area.alt)
+                output = cropped
+                val images = if (target.tur == GorselTuru.SORU) soruGorselleri else cozumGorselleri
+                val index = images.indexOfFirst { it.id == target.id }
+                check(index >= 0) { "Kırpılan görsel formda artık bulunmuyor." }
+                val updated = images.toMutableList().apply { this[index] = cropped.copy(sira = index) }
+                if (target.tur == GorselTuru.SORU) soruGorselleri = updated else cozumGorselleri = updated
+                replaced = true
+                if (target.gecici && cropped.id != target.id) {
+                    runCatching { gorselDeposu.geciciDosyayiSil(target.dosyaAdi) }
+                }
+                kirpmaHedefi = null
+            } catch (cancel: CancellationException) {
+                throw cancel
+            } catch (_: Exception) {
+                snackbarHostState.showSnackbar(context.getString(R.string.question_form_crop_error))
+            } finally {
+                if (!replaced) {
+                    output?.takeIf { it.gecici && it.id != target.id }?.let {
+                        runCatching { gorselDeposu.geciciDosyayiSil(it.dosyaAdi) }
+                    }
+                }
+                kirpmaIsleniyor = false
+            }
+        }
     }
 
     fun addCatalogOption(tur: SoruSecenekTuru) {
@@ -541,6 +579,7 @@ fun SoruFormuEkrani(
                             enabled = !kaydediliyor,
                             onCamera = { launchCamera(GorselTuru.SORU) },
                             onPicker = { launchPicker(GorselTuru.SORU) },
+                            onCrop = { kirpmaHedefi = it },
                             onImagesChanged = {
                                 soruGorselleri = it
                                 if (it.isNotEmpty() && formHatasi == R.string.question_error_photo_required) {
@@ -658,6 +697,7 @@ fun SoruFormuEkrani(
                                 enabled = !kaydediliyor,
                                 onCamera = { launchCamera(GorselTuru.COZUM) },
                                 onPicker = { launchPicker(GorselTuru.COZUM) },
+                                onCrop = { kirpmaHedefi = it },
                                 onImagesChanged = { cozumGorselleri = it },
                             )
                         }
@@ -699,6 +739,29 @@ fun SoruFormuEkrani(
                     }
                 }
             }
+        }
+    }
+
+    kirpmaHedefi?.let { target ->
+        val file = gorselDeposu.dosyaGoruntuIcin(target)
+        if (file != null) {
+            GorselKirpmaDialog(
+                file = file,
+                isSaving = kirpmaIsleniyor,
+                onDismiss = { if (!kirpmaIsleniyor) kirpmaHedefi = null },
+                onApply = { area -> applyImageCrop(target, area) },
+            )
+        } else {
+            AlertDialog(
+                onDismissRequest = { kirpmaHedefi = null },
+                title = { Text(stringResource(R.string.question_form_crop_title)) },
+                text = { Text(stringResource(R.string.question_form_crop_error)) },
+                confirmButton = {
+                    TextButton(onClick = { kirpmaHedefi = null }) {
+                        Text(stringResource(R.string.common_close))
+                    }
+                },
+            )
         }
     }
 
@@ -1049,9 +1112,11 @@ private fun ImageSection(
     enabled: Boolean,
     onCamera: () -> Unit,
     onPicker: () -> Unit,
+    onCrop: (SoruGorselGirdisi) -> Unit,
     onImagesChanged: (List<SoruGorselGirdisi>) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+    val cropImageDescription = stringResource(R.string.question_form_crop_image)
     val removeImageDescription = stringResource(R.string.question_form_remove_image)
     val moveUpDescription = stringResource(R.string.question_form_image_order_up)
     val moveDownDescription = stringResource(R.string.question_form_image_order_down)
@@ -1149,6 +1214,13 @@ private fun ImageSection(
                                 horizontalArrangement = Arrangement.SpaceEvenly,
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
+                                IconButton(
+                                    enabled = enabled,
+                                    onClick = { onCrop(image) },
+                                    modifier = Modifier.semantics { contentDescription = cropImageDescription },
+                                ) {
+                                    Text("✂", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleMedium)
+                                }
                                 IconButton(
                                     enabled = enabled && image.sira > 0,
                                     onClick = {

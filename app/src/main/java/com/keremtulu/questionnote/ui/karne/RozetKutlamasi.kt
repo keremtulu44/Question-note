@@ -33,8 +33,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -46,6 +45,9 @@ import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.ui.tema.LocalHareketPolitikasi
 import com.keremtulu.questionnote.ui.tema.HareketTuru
 import com.keremtulu.questionnote.data.prefs.RozetDeposu
+import com.keremtulu.questionnote.data.ses.HapticTipi
+import com.keremtulu.questionnote.data.ses.SesTuruGenis
+import com.keremtulu.questionnote.data.ses.SesYoneticisi
 import com.keremtulu.questionnote.domain.karne.Rozet
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -85,11 +87,9 @@ private fun RozetKutlamasi(rozet: Rozet, kalan: Int, kapanis: Boolean, hata: Boo
     val politika = LocalHareketPolitikasi.current
     val hareket = politika.hareketAcik
     val acilis = remember { Animatable(if (hareket) 0f else 1f) }
-    val haptic = LocalHapticFeedback.current
-    val ses = com.keremtulu.questionnote.ui.LocalUygulamaSesleri.current
+    val context = LocalContext.current
     LaunchedEffect(rozet) {
-        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-        ses?.cal(com.keremtulu.questionnote.data.ses.SesTuru.KUTLAMA)
+        SesYoneticisi.uygulama(context).calPremium(SesTuruGenis.ROZET_KAZANDI, HapticTipi.KUTLAMA)
     }
     LaunchedEffect(rozet, hareket) {
         if (hareket) acilis.animateTo(1f, tween(politika.sure(HareketTuru.KUTLAMA)))

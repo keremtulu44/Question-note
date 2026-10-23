@@ -2,7 +2,6 @@ package com.keremtulu.questionnote.ui
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -11,17 +10,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.IconButton
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -30,8 +26,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -41,6 +40,11 @@ import com.keremtulu.questionnote.domain.model.Ders
 import com.keremtulu.questionnote.domain.repository.DersRepository
 import com.keremtulu.questionnote.ui.bilesenler.DersKartVerisi
 import com.keremtulu.questionnote.ui.bilesenler.DersKarti
+import com.keremtulu.questionnote.ui.animasyon.animateItemInsertion
+import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
+import com.keremtulu.questionnote.ui.bilesenler.premium.IskeletKart
+import com.keremtulu.questionnote.ui.bilesenler.premium.PremiumBosDurum
+import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 import com.keremtulu.questionnote.ui.tema.DersRenkleri
 import java.util.Locale
 import kotlinx.coroutines.flow.catch
@@ -90,71 +94,97 @@ fun DerslerEkrani(
     val koyuTema = isSystemInDarkTheme()
     val colors = MaterialTheme.colorScheme
 
+    val loadingLabel = stringResource(R.string.home_loading_dersler)
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = colors.background,
         contentWindowInsets = WindowInsets.safeDrawing,
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(start = 20.dp, top = 10.dp, end = 20.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+            GradyanKart(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 10.dp),
+                borderAnimation = false,
             ) {
-                Column {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
                         text = stringResource(R.string.lessons_kicker),
-                        color = colors.primary,
+                        color = PremiumMarkaRenkler.BakirIsik,
                         style = MaterialTheme.typography.labelMedium,
                         letterSpacing = 1.4.sp,
                         fontWeight = FontWeight.Bold,
                     )
                     Text(
                         text = stringResource(if (soruEkleModu) R.string.lessons_choose_title else R.string.lessons_title),
-                        modifier = Modifier.padding(top = 4.dp),
-                        color = colors.onBackground,
+                        color = PremiumMarkaRenkler.Kagit,
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                     )
+                    Text(
+                        text = stringResource(if (soruEkleModu) R.string.lessons_choose_subtitle else R.string.lessons_browse_subtitle),
+                        color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.86f),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        if (profilAdi.isNotBlank()) {
+                            Surface(
+                                shape = androidx.compose.foundation.shape.CircleShape,
+                                color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.14f),
+                            ) {
+                                Text(
+                                    text = profilAdi,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
+                                    color = PremiumMarkaRenkler.Kagit,
+                                    style = MaterialTheme.typography.labelMedium,
+                                )
+                            }
+                        }
+                        if (durum is DersSecimDurumu.Hazir) {
+                            Surface(
+                                shape = androidx.compose.foundation.shape.CircleShape,
+                                color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.14f),
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.lessons_count, durum.dersler.size),
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
+                                    color = PremiumMarkaRenkler.Kagit,
+                                    style = MaterialTheme.typography.labelMedium,
+                                )
+                            }
+                        }
+                    }
                 }
-
-            }
-            Text(
-                text = stringResource(if (soruEkleModu) R.string.lessons_choose_subtitle else R.string.lessons_browse_subtitle),
-                modifier = Modifier.fillMaxWidth().padding(start = 20.dp, top = 5.dp, end = 20.dp),
-                color = colors.onSurfaceVariant,
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            Surface(
-                modifier = Modifier.padding(start = 20.dp, top = 12.dp, end = 20.dp),
-                shape = androidx.compose.foundation.shape.CircleShape,
-                color = colors.secondaryContainer,
-            ) {
-                Text(
-                    text = profilAdi,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
-                    color = colors.onSecondaryContainer,
-                    style = MaterialTheme.typography.labelMedium,
-                )
             }
             when (val current = durum) {
-                DersSecimDurumu.Yukleniyor -> Box(
-                    modifier = Modifier.fillMaxWidth().weight(1f),
-                    contentAlignment = Alignment.Center,
-                ) { CircularProgressIndicator() }
-                DersSecimDurumu.Hata -> Column(
-                    modifier = Modifier.fillMaxWidth().weight(1f).padding(28.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
+                DersSecimDurumu.Yukleniyor -> LazyVerticalGrid(
+                    columns = GridCells.Adaptive(minSize = 156.dp),
+                    modifier = Modifier.fillMaxWidth().weight(1f)
+                        .semantics {
+                            contentDescription = loadingLabel
+                            liveRegion = LiveRegionMode.Polite
+                        },
+                    contentPadding = PaddingValues(start = 18.dp, top = 18.dp, end = 18.dp, bottom = 24.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    Text(stringResource(R.string.home_error_dersler), color = colors.onSurfaceVariant)
-                    TextButton(onClick = { yenileme++ }) { Text(stringResource(R.string.topic_retry)) }
+                    items(6) { IskeletKart(height = 132, showImage = true, showSubtitle = false) }
                 }
+                DersSecimDurumu.Hata -> PremiumBosDurum(
+                    modifier = Modifier.fillMaxWidth().weight(1f).semantics {
+                        liveRegion = LiveRegionMode.Assertive
+                    },
+                    baslik = stringResource(R.string.lessons_error_title),
+                    aciklama = stringResource(R.string.lessons_error_description),
+                    butonMetni = stringResource(R.string.topic_retry),
+                    onButonTikla = { yenileme++ },
+                )
                 is DersSecimDurumu.Hazir -> {
                     if (current.dersler.isEmpty()) {
-                        Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
-                            Text(stringResource(R.string.home_empty_dersler), color = colors.onSurfaceVariant)
-                        }
+                        PremiumBosDurum(
+                            modifier = Modifier.fillMaxWidth().weight(1f),
+                            baslik = stringResource(R.string.lessons_empty_title),
+                            aciklama = stringResource(R.string.lessons_empty_description),
+                        )
                     } else {
                         LazyVerticalGrid(
                             columns = GridCells.Adaptive(minSize = 156.dp),
@@ -163,9 +193,10 @@ fun DerslerEkrani(
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
-                            items(current.dersler, key = { it.id }) { ders ->
+                            itemsIndexed(current.dersler, key = { _, ders -> ders.id }) { index, ders ->
                                 val style = dersKartStilleri[ders.ad.trim().lowercase(Locale.ROOT)]
                                     ?: varsayilanDersKartStili
+                                val enter = animateItemInsertion(index)
                                 DersKarti(
                                     veri = DersKartVerisi(
                                         ad = ders.ad,
@@ -176,6 +207,10 @@ fun DerslerEkrani(
                                     ),
                                     koyuTema = koyuTema,
                                     onClick = { onDersSecildi(ders) },
+                                    modifier = Modifier.graphicsLayer {
+                                        alpha = enter.value
+                                        translationY = (1f - enter.value) * 14.dp.toPx()
+                                    },
                                 )
                             }
                         }

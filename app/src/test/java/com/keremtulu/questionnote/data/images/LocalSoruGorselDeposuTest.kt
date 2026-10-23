@@ -74,6 +74,36 @@ class LocalSoruGorselDeposuTest {
     }
 
     @Test
+    fun cropCreatesVerifiedStagingCopyWithoutChangingTheSavedOriginal() = runBlocking {
+        val context = RuntimeEnvironment.getApplication()
+        val store = LocalSoruGorselDeposu(context)
+        val source = createTextImage(context.cacheDir, 160, 120)
+        var staged: com.keremtulu.questionnote.domain.model.SoruGorselGirdisi? = null
+        var crop: com.keremtulu.questionnote.domain.model.SoruGorselGirdisi? = null
+        var permanentName: String? = null
+        try {
+            staged = store.dosyadanHazirla(source, GorselTuru.SORU, 0)
+            permanentName = store.kaliciyaKopyala(staged.dosyaAdi)
+            val original = staged.copy(dosyaAdi = requireNotNull(permanentName), gecici = false)
+
+            val cropped = store.kirp(original, sol = 0.25f, ust = 0.25f, sag = 0.75f, alt = 0.75f)
+            crop = cropped
+
+            assertEquals(80, cropped.genislik)
+            assertEquals(60, cropped.yukseklik)
+            assertTrue(cropped.gecici)
+            assertTrue(store.geciciDosyayiDogrula(cropped))
+            assertTrue(store.kaliciDosyayiDogrula(original))
+            assertEquals(original.id, store.kirp(original, 0f, 0f, 1f, 1f).id)
+        } finally {
+            source.delete()
+            staged?.let { store.geciciDosyayiSil(it.dosyaAdi) }
+            crop?.let { store.geciciDosyayiSil(it.dosyaAdi) }
+            permanentName?.let { store.kaliciDosyayiSil(it) }
+        }
+    }
+
+    @Test
     fun nonImageInputIsRejectedAndStaleStagesAreOnlyRemovedAfterOneDay() = runBlocking {
         val context = RuntimeEnvironment.getApplication()
         val store = LocalSoruGorselDeposu(context)

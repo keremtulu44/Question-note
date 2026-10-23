@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -30,6 +29,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.keremtulu.questionnote.R
+import com.keremtulu.questionnote.ui.premium.EtkilesimTuru
+import com.keremtulu.questionnote.ui.premium.PremiumCard
 
 internal data class DersKartVerisi(
     val ad: String,
@@ -49,15 +50,14 @@ internal fun DersKarti(
     val vurguRengi = if (koyuTema) veri.koyuRenk else veri.acikRenk
     val renkler = MaterialTheme.colorScheme
 
-    Card(
+    PremiumCard(
         onClick = onClick,
-        modifier = modifier
-            .fillMaxWidth()
-            .height(132.dp),
+        modifier = modifier.fillMaxWidth().height(132.dp),
         shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(containerColor = renkler.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp, pressedElevation = 5.dp),
         border = BorderStroke(1.dp, renkler.outlineVariant.copy(alpha = 0.8f)),
+        interactionTur = EtkilesimTuru.KART_ACILIS,
     ) {
         Column(
             modifier = Modifier

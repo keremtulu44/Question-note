@@ -3,14 +3,12 @@
 > Bu belge **değerleri değil**, sırların nerede ve nasıl tutulduğunu anlatır.
 > Hiçbir anahtar, parola veya token bu depoya yazılmaz.
 
-- Son güncelleme: 2026-10-18
-- Son yayımlanan sürüm: **v1.5.1 (versionCode19)**. CI `39158221022`: **Debug312/0/0/0**, **Release258/0/0/0**.
-  APK derlemesi, apksigner, beklenen sertifika, asset digest ve tag kaynağı doğrulandı.
-- [Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.5.1) · [APK indir](https://github.com/keremtulu44/Question-note/releases/download/v1.5.1/yanlis-defteri-1.5.1.apk).
-  APK **10.819.807 bayt**; SHA-256 `c8d1d45cfd7ad55ab6d3ebba6bf52464fd772d16d23929cbcb406fe8b2a9a053`.
-  Tag/derlenen commit `c25b32bce6c20b0f2c39ff27af6990d13c300074`. 1.5.0 APK/tag korunur.
-- 1.5.1 yalnız sunum sadeleştirmesidir; [sekiz native önizleme](docs/ui/progress/README.md) ve
-  büyük-yazı/geri/saved-state/filtre doğrulamaları vardır. Üretim veri/hesaplama hizmetleri değişmedi.
+- Son güncelleme: 2026-10-22
+- Son yayımlanan sürüm: **v1.5.92 (versionCode 22)**. CI `39839941144`: **Debug315/0/0/0**, **Release261/0/0/0**; Release derlemesi, imza ve sertifika doğrulandı.
+- [Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.5.92) · [APK indir](https://github.com/keremtulu44/Question-note/releases/download/v1.5.92/yanlis-defteri-1.5.92.apk).
+  APK **12.636.911 bayt**; SHA-256 `5cbc479d31cddfb56499c2978893556195138a1e644bbf6bd4a256374f272071`.
+  Tag/derlenen commit `682986cef4371a9e01f393f27efd21e1e51a09f2`; sertifika SHA-256 `FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54`.
+- 1.5.92 premium tema, hareket azaltma uyumlu geçişler, iskelet yüklemeler, dokunsal/işitsel geri bildirim ve isteğe bağlı Odak ambiyansı ekler. Uygulama kimliği, Room/ZIP şeması ve kullanıcı çalışma verileri değiştirilmedi.
 - P0–P5 ve P6 otomatik kalite kapıları yayımlandı; Room/ZIP4, geçmiş/snapshot uyumluluğu korunur.
   Varsayılan **Gölge v2 tarihi uygular; etkin v3 kapalıdır**. XP/30 rozet/15 rütbe katsayıları aynı.
 - **Fiziksel cihaz kabulü ayrıdır**; otomatik testin yeşil olması gerçek cihaz testi yapıldığı anlamına gelmez.
@@ -20,7 +18,7 @@
 
 ## Varyant ve kanıt kapısı
 
-- 1.5.1/code19, son yayın CI `39158221022`: Debug312/0, Release258/0 ve APK/imza/sertifika/yayın başarılı.
+- 1.5.92/code22, son yayın CI `39839941144`: Debug315/0, Release261/0 ve APK/imza/sertifika/yayın başarılı.
   Güncel sonuç ve kaynak: [DERLEME_RAPORU.md](docs/DERLEME_RAPORU.md).
 - Debug başarısız olsa da Release testi çalışır; APK için **ikisi de** geçmelidir. CI sırası `:app:testDebugUnitTest` → `:app:testReleaseUnitTest` → `:app:assembleRelease` →
   imza/sertifika → yayın. Ortak testler iki varyantta; UI/Preview `src/testDebug`'da, sayılar toplanmaz.
@@ -53,7 +51,7 @@ Kullanıcının telefonunda Android SDK, Gradle veya Termux kurması **gerekmez*
 
 - Tek Gradle modülü, Kotlin + Jetpack Compose.
 - Sürümler `gradle/libs.versions.toml` içinde sabitlenir; Gradle wrapper depoda tutulur.
-- minSdk 26, compileSdk/targetSdk 37; yayımlanmış v1.5.1 `versionCode=19` (v1.5.0: 18; v1.4.1: 17; v1.4.0: 16; v1.3.0: 15).
+- minSdk 26, compileSdk/targetSdk 37; yayımlanmış v1.5.92 `versionCode=22` (v1.5.91: 21; v1.5.90: 20; v1.5.1: 19).
 - Yapay zekâ ortamında Java/Android SDK ve Maven erişimi yoktur → derleme **yalnızca** Actions'ta olur.
 
 ## 3. İmzalama düzeni (kritik)
@@ -124,8 +122,8 @@ günlük arşivin kurulu olduğu telefonun üzerine kurulmaz.
 
 ## 5. APK'ya telefondan erişim
 
-**Güncel:** [v1.5.0 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.5.0/yanlis-defteri-1.5.0.apk).
-Mevcut uygulamayı kaldırmadan üzerine kur; güncelleme öncesi Ayarlar'dan ZIP yedeği almak önerilir.
+**Güncel:** [v1.5.92 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.5.92/yanlis-defteri-1.5.92.apk) · [Release ayrıntıları](https://github.com/keremtulu44/Question-note/releases/tag/v1.5.92).
+Aynı uygulama kimliği ve imza ile güncelleme olarak kur; güvenlik için güncelleme öncesi Ayarlar'dan ZIP yedeği almak yine önerilir.
 
 İlk sürümlerin tarihsel Release kayıtları:
 

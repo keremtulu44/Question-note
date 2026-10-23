@@ -3,9 +3,11 @@ package com.keremtulu.questionnote.data.images
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.BitmapRegionDecoder
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Matrix
+import android.graphics.Rect
 import android.net.Uri
 import androidx.core.content.FileProvider
 import androidx.exifinterface.media.ExifInterface
@@ -88,6 +90,73 @@ class LocalSoruGorselDeposu(context: Context) : GorselDosyaYonetimi {
         } catch (error: Exception) {
             staged.delete()
             throw error
+        }
+    }
+
+    /**
+     * Creates a cropped staging copy without ever modifying the selected or already-saved original.
+     * Coordinates are normalized to the oriented JPEG that the form preview displays.
+     */
+    suspend fun kirp(
+        gorsel: SoruGorselGirdisi,
+        sol: Float,
+        ust: Float,
+        sag: Float,
+        alt: Float,
+    ): SoruGorselGirdisi = withContext(Dispatchers.IO) {
+        val oranlar = listOf(sol, ust, sag, alt)
+        require(oranlar.all { it.isFinite() } && sol >= 0f && ust >= 0f && sag <= 1f && alt <= 1f && sag > sol && alt > ust) {
+            "Kırpma alanı görsel sınırlarının dışında."
+        }
+        val source = (if (gorsel.gecici) geciciDosyasi(gorsel.dosyaAdi) else kaliciDosyasi(gorsel.dosyaAdi))
+            ?: throw IOException("Kırpılacak görsel bulunamadı.")
+        if (gorsel.genislik <= 0 || gorsel.yukseklik <= 0 || !source.isFile || gorsel.mimeType != MIME_JPEG ||
+            !boyutlarEslesiyor(source, gorsel.genislik, gorsel.yukseklik)
+        ) {
+            throw IOException("Kırpılacak görsel doğrulanamadı.")
+        }
+        val left = (sol * gorsel.genislik).toInt().coerceIn(0, gorsel.genislik - 1)
+        val top = (ust * gorsel.yukseklik).toInt().coerceIn(0, gorsel.yukseklik - 1)
+        val right = (sag * gorsel.genislik).toInt().coerceIn(left + 1, gorsel.genislik)
+        val bottom = (alt * gorsel.yukseklik).toInt().coerceIn(top + 1, gorsel.yukseklik)
+        if (left == 0 && top == 0 && right == gorsel.genislik && bottom == gorsel.yukseklik) return@withContext gorsel
+        if (right - left < MIN_KIRPMA_KENARI || bottom - top < MIN_KIRPMA_KENARI) {
+            throw IOException("Kırpma alanı çok küçük. Daha geniş bir alan seçin.")
+        }
+
+        val id = UUID.randomUUID().toString()
+        val staged = File(geciciDizin, "$id.jpg")
+        var decoder: BitmapRegionDecoder? = null
+        var cropped: Bitmap? = null
+        try {
+            val regionDecoder = BitmapRegionDecoder.newInstance(source.absolutePath, false)
+                ?: throw IOException("Görsel kırpma için açılamadı.")
+            decoder = regionDecoder
+            val cropBitmap = regionDecoder.decodeRegion(
+                Rect(left, top, right, bottom),
+                BitmapFactory.Options().apply { inPreferredConfig = Bitmap.Config.ARGB_8888 },
+            ) ?: throw IOException("Seçilen kırpma alanı okunamadı.")
+            cropped = cropBitmap
+            FileOutputStream(staged).use { output ->
+                BufferedOutputStream(output).use { buffered ->
+                    if (!cropBitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, buffered)) {
+                        throw IOException("Kırpılan görsel kaydedilemedi.")
+                    }
+                    buffered.flush()
+                    output.fd.sync()
+                }
+            }
+            if (staged.length() <= 0L) throw IOException("Kırpılan görsel boş.")
+            staged.toGirdi(id, gorsel.tur, gorsel.sira)
+        } catch (error: OutOfMemoryError) {
+            staged.delete()
+            throw IOException("Görsel bellekte güvenle kırpılamadı.", error)
+        } catch (error: Exception) {
+            staged.delete()
+            throw error
+        } finally {
+            cropped?.recycle()
+            decoder?.recycle()
         }
     }
 
@@ -423,6 +492,7 @@ class LocalSoruGorselDeposu(context: Context) : GorselDosyaYonetimi {
         private const val MAX_GIRDI_BOYUTU = 100L * 1024L * 1024L
         private const val MAX_DECODE_EDGE = 4_096
         private const val MAX_SAKLAMA_KENARI = 3_000
+        private const val MIN_KIRPMA_KENARI = 32
         private const val JPEG_QUALITY = 90
         private const val MIME_JPEG = "image/jpeg"
         private const val GECICI_YAS_SINIRI = 24L * 60L * 60L * 1000L

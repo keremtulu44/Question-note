@@ -16,13 +16,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedButton
 import com.keremtulu.questionnote.domain.repeat.CalismaSorulariniSirala
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -50,6 +46,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.keremtulu.questionnote.R
+import com.keremtulu.questionnote.ui.bilesenler.premium.IskeletKart
+import com.keremtulu.questionnote.ui.premium.EtkilesimTuru
+import com.keremtulu.questionnote.ui.premium.PremiumButton
+import com.keremtulu.questionnote.ui.premium.PremiumCard
+import com.keremtulu.questionnote.ui.premium.PremiumExtendedFloatingActionButton
+import com.keremtulu.questionnote.ui.premium.PremiumOutlinedButton
 import com.keremtulu.questionnote.data.ilerleme.IlerlemeHizmeti
 import com.keremtulu.questionnote.data.prefs.GunlukHedefDeposu
 import com.keremtulu.questionnote.domain.model.Ders
@@ -127,7 +129,7 @@ fun BugunEkrani(
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets.safeDrawing,
         floatingActionButton = {
-            ExtendedFloatingActionButton(
+            PremiumExtendedFloatingActionButton(
                 onClick = onSoruEkle,
                 shape = RoundedCornerShape(20.dp),
                 containerColor = MaterialTheme.colorScheme.primary,
@@ -187,7 +189,7 @@ fun BugunEkrani(
                 )
             }
             if (onDevam != null) item {
-                OutlinedButton(onClick = onDevam, modifier = Modifier.fillMaxWidth()) {
+                PremiumOutlinedButton(onClick = onDevam, modifier = Modifier.fillMaxWidth()) {
                     Text(stringResource(R.string.focus_continue_session))
                 }
             }
@@ -196,7 +198,12 @@ fun BugunEkrani(
                     val dersler = ready.sorular.associate { it.ders.id to it.ders }
                     val sorular = CalismaSorulariniSirala.akilliOncelik(ready.sorular.map { it.soru }, bugunGun)
                         .take((hedef - gunluk).coerceIn(5, 30))
-                    Button(onClick = { onOturumBaslat(sorular, dersler) }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp)) {
+                    PremiumButton(
+                        onClick = { onOturumBaslat(sorular, dersler) },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(18.dp),
+                        interactionTur = EtkilesimTuru.ODAK_BASLADI,
+                    ) {
                         Column(Modifier.padding(vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(stringResource(R.string.focus_start_today), fontWeight = FontWeight.Bold)
                             Text(stringResource(R.string.focus_start_count, sorular.size), style = MaterialTheme.typography.labelSmall)
@@ -229,10 +236,10 @@ fun BugunEkrani(
             }
             when (val current = state) {
                 BugunDurumu.Yukleniyor -> item {
-                    Box(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 42.dp),
-                        contentAlignment = Alignment.Center,
-                    ) { CircularProgressIndicator() }
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        IskeletKart(height = 88)
+                        IskeletKart(height = 88, showImage = false)
+                    }
                 }
                 BugunDurumu.Hata -> item {
                     DurumKarti(
@@ -407,13 +414,14 @@ private fun BugunSoruKarti(
     val colors = MaterialTheme.colorScheme
     val dueDay = row.soru.sonrakiTekrarGun ?: today.toEpochDay().toInt()
     val lateDays = (today.toEpochDay().toInt() - dueDay).coerceAtLeast(0)
-    Card(
+    PremiumCard(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(containerColor = colors.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp, pressedElevation = 4.dp),
         border = androidx.compose.foundation.BorderStroke(1.dp, colors.outlineVariant.copy(alpha = 0.65f)),
+        interactionTur = EtkilesimTuru.KART_ACILIS,
     ) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(16.dp),

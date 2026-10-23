@@ -9,22 +9,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,6 +34,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.keremtulu.questionnote.R
@@ -56,6 +56,18 @@ import com.keremtulu.questionnote.domain.repository.KonuRepository
 import com.keremtulu.questionnote.domain.repository.SoruRepository
 import com.keremtulu.questionnote.ui.bilesenler.SoruGorselResmi
 import com.keremtulu.questionnote.ui.bilesenler.SoruGorselTamEkran
+import com.keremtulu.questionnote.ui.calisma.CozumTahtasiDialog
+import com.keremtulu.questionnote.ui.bilesenler.premium.CamKarti
+import com.keremtulu.questionnote.ui.bilesenler.premium.CamYukseklik
+import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
+import com.keremtulu.questionnote.ui.bilesenler.premium.IskeletKart
+import com.keremtulu.questionnote.ui.bilesenler.premium.PremiumBosDurum
+import com.keremtulu.questionnote.ui.bilesenler.premium.VarsayilanIlustrasyon
+import com.keremtulu.questionnote.ui.premium.EtkilesimTuru
+import com.keremtulu.questionnote.ui.premium.PremiumButton
+import com.keremtulu.questionnote.ui.premium.PremiumOutlinedButton
+import com.keremtulu.questionnote.ui.premium.PremiumTextButton
+import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
@@ -98,6 +110,7 @@ fun SoruDetayEkrani(
     var yenileme by remember(soruId) { mutableIntStateOf(0) }
     var cozumAcik by remember(soruId) { mutableStateOf(false) }
     var cozumAcildi by remember(soruId) { mutableStateOf(false) }
+    var beyazTahtaAcik by remember(soruId) { mutableStateOf(false) }
     var tekrarKaydediliyor by remember(soruId) { mutableStateOf(false) }
     var silmeOnayi by remember { mutableStateOf(false) }
     var durumMenusu by remember { mutableStateOf(false) }
@@ -168,29 +181,42 @@ fun SoruDetayEkrani(
         contentWindowInsets = androidx.compose.foundation.layout.WindowInsets.safeDrawing,
     ) { padding ->
         when (val state = detail) {
-            SoruDetayDurumu.Yukleniyor -> Column(
-                modifier = Modifier.fillMaxSize().padding(padding),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) { CircularProgressIndicator() }
-
-            SoruDetayDurumu.Bulunamadi -> Column(
-                modifier = Modifier.fillMaxSize().padding(padding).padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) {
-                Text(stringResource(R.string.question_not_found), color = MaterialTheme.colorScheme.error)
-                TextButton(onClick = onGeri) { Text(stringResource(R.string.common_back)) }
+            SoruDetayDurumu.Yukleniyor -> {
+                val loadingLabel = stringResource(R.string.question_detail_loading_label)
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize().padding(padding).semantics {
+                        contentDescription = loadingLabel
+                        liveRegion = LiveRegionMode.Polite
+                    },
+                    contentPadding = PaddingValues(start = 20.dp, top = 16.dp, end = 20.dp, bottom = 32.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    item { IskeletKart(height = 220, showImage = true, showSubtitle = false) }
+                    items(3) { IskeletKart(height = 86, showImage = false, showSubtitle = true) }
+                }
             }
 
-            SoruDetayDurumu.Hata -> Column(
-                modifier = Modifier.fillMaxSize().padding(padding).padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) {
-                Text(stringResource(R.string.question_detail_error), color = MaterialTheme.colorScheme.error)
-                TextButton(onClick = { yenileme++ }) { Text(stringResource(R.string.topic_retry)) }
-            }
+            SoruDetayDurumu.Bulunamadi -> PremiumBosDurum(
+                illustration = { VarsayilanIlustrasyon() },
+                baslik = stringResource(R.string.question_detail_missing_title),
+                aciklama = stringResource(R.string.question_detail_missing_description),
+                butonMetni = stringResource(R.string.common_back),
+                onButonTikla = onGeri,
+                modifier = Modifier.fillMaxSize().padding(padding)
+                    .semantics { liveRegion = LiveRegionMode.Assertive },
+            )
+
+            SoruDetayDurumu.Hata -> PremiumBosDurum(
+                illustration = { VarsayilanIlustrasyon() },
+                baslik = stringResource(R.string.question_detail_error_title),
+                aciklama = stringResource(R.string.question_detail_error_description),
+                butonMetni = stringResource(R.string.topic_retry),
+                onButonTikla = { yenileme++ },
+                ikincilButonMetni = stringResource(R.string.common_back),
+                onIkincilButon = onGeri,
+                modifier = Modifier.fillMaxSize().padding(padding)
+                    .semantics { liveRegion = LiveRegionMode.Assertive },
+            )
 
             is SoruDetayDurumu.Hazir -> {
                 val soru = state.soru
@@ -200,8 +226,11 @@ fun SoruDetayEkrani(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     item {
-                        Column {
-                            TextButton(onClick = onGeri) { Text(stringResource(R.string.question_back)) }
+                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            PremiumTextButton(
+                                onClick = onGeri,
+                                interactionTur = EtkilesimTuru.GERI,
+                            ) { Text(stringResource(R.string.question_back)) }
                             if (oturumSira != null && oturumToplam != null) {
                                 Text(
                                     text = stringResource(R.string.filtered_practice_session_progress, oturumSira, oturumToplam),
@@ -210,27 +239,35 @@ fun SoruDetayEkrani(
                                     fontWeight = FontWeight.SemiBold,
                                 )
                             }
-                            Text(
-                                text = stringResource(R.string.question_photo_only),
-                                style = MaterialTheme.typography.headlineSmall,
-                                color = MaterialTheme.colorScheme.onBackground,
-                                fontWeight = FontWeight.SemiBold,
-                            )
-                            Text(
-                                text = stringResource(R.string.question_lesson_label, ders.ad),
-                                modifier = Modifier.padding(top = 4.dp),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            soru.konuId?.let { id ->
-                                topicMap[id]?.let { topic ->
+                            GradyanKart(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(24.dp),
+                                borderAnimation = false,
+                            ) {
+                                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                     Text(
-                                        text = stringResource(
-                                            if (topic.arsivli) R.string.topic_name_archived else R.string.question_topic_label,
-                                            topic.ad,
-                                        ),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        text = stringResource(R.string.question_photo_only),
+                                        style = MaterialTheme.typography.headlineSmall,
+                                        color = PremiumMarkaRenkler.Kagit,
+                                        fontWeight = FontWeight.Bold,
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.question_lesson_label, ders.ad),
+                                        color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.86f),
                                         style = MaterialTheme.typography.bodyMedium,
                                     )
+                                    soru.konuId?.let { id ->
+                                        topicMap[id]?.let { topic ->
+                                            Text(
+                                                text = stringResource(
+                                                    if (topic.arsivli) R.string.topic_name_archived else R.string.question_topic_label,
+                                                    topic.ad,
+                                                ),
+                                                color = PremiumMarkaRenkler.BakirIsik,
+                                                style = MaterialTheme.typography.labelMedium,
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -263,17 +300,28 @@ fun SoruDetayEkrani(
                         )
                     }
                     item {
+                        PremiumOutlinedButton(
+                            onClick = { beyazTahtaAcik = true },
+                            enabled = !tekrarKaydediliyor,
+                            modifier = Modifier.fillMaxWidth(),
+                            interactionTur = EtkilesimTuru.TIKLAMA,
+                        ) { Text(stringResource(R.string.focus_whiteboard_open)) }
+                    }
+                    item {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Button(onClick = {
-                                if (!cozumAcik && (soru.cozumNotu != null || soru.gorseller.any { it.tur == com.keremtulu.questionnote.domain.model.GorselTuru.COZUM })) {
-                                    cozumAcildi = true
-                                }
-                                cozumAcik = !cozumAcik
-                            }) {
+                            PremiumButton(
+                                onClick = {
+                                    if (!cozumAcik && (soru.cozumNotu != null || soru.gorseller.any { it.tur == com.keremtulu.questionnote.domain.model.GorselTuru.COZUM })) {
+                                        cozumAcildi = true
+                                    }
+                                    cozumAcik = !cozumAcik
+                                },
+                                interactionTur = EtkilesimTuru.TIKLAMA,
+                            ) {
                                 Text(stringResource(if (cozumAcik) R.string.question_hide_solution else R.string.question_show_solution))
                             }
                             Text(
@@ -322,23 +370,37 @@ fun SoruDetayEkrani(
                     }
                     when (val history = tekrarGecmisi) {
                         TekrarGecmisiDurumu.Yukleniyor -> item {
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
-                                Text(stringResource(R.string.question_review_history_loading))
-                            }
+                            val historyLoadingLabel = stringResource(R.string.question_review_history_loading)
+                            IskeletKart(
+                                modifier = Modifier.semantics {
+                                    contentDescription = historyLoadingLabel
+                                    liveRegion = LiveRegionMode.Polite
+                                },
+                                height = 82,
+                                showImage = false,
+                                showSubtitle = true,
+                            )
                         }
                         TekrarGecmisiDurumu.Hata -> item {
-                            Column {
-                                Text(
-                                    stringResource(R.string.question_review_history_load_error),
-                                    color = MaterialTheme.colorScheme.error,
-                                )
-                                TextButton(onClick = { tekrarGecmisiYenileme++ }) {
-                                    Text(stringResource(R.string.question_review_history_retry))
+                            CamKarti(
+                                modifier = Modifier.fillMaxWidth(),
+                                elevation = CamYukseklik.DUSUK,
+                                shape = RoundedCornerShape(18.dp),
+                            ) {
+                                Column(
+                                    Modifier.fillMaxWidth().padding(14.dp),
+                                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                                ) {
+                                    Text(
+                                        stringResource(R.string.question_review_history_load_error),
+                                        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Assertive },
+                                        color = MaterialTheme.colorScheme.error,
+                                    )
+                                    PremiumTextButton(
+                                        onClick = { tekrarGecmisiYenileme++ },
+                                    ) {
+                                        Text(stringResource(R.string.question_review_history_retry))
+                                    }
                                 }
                             }
                         }
@@ -389,19 +451,22 @@ fun SoruDetayEkrani(
                                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.78f),
                                         style = MaterialTheme.typography.bodySmall,
                                     )
-                                    OutlinedButton(
+                                    PremiumOutlinedButton(
                                         modifier = Modifier.fillMaxWidth(),
                                         enabled = !tekrarKaydediliyor,
+                                        interactionTur = EtkilesimTuru.TIKLAMA,
                                         onClick = { tekrarSonucunuKaydet(soru, TekrarSonucu.COZEMEDIM) },
                                     ) { Text(stringResource(R.string.review_result_not_solved)) }
-                                    OutlinedButton(
+                                    PremiumOutlinedButton(
                                         modifier = Modifier.fillMaxWidth(),
                                         enabled = !tekrarKaydediliyor,
+                                        interactionTur = EtkilesimTuru.TIKLAMA,
                                         onClick = { tekrarSonucunuKaydet(soru, TekrarSonucu.ZORLANDIM) },
                                     ) { Text(stringResource(R.string.review_result_struggled)) }
-                                    Button(
+                                    PremiumButton(
                                         modifier = Modifier.fillMaxWidth(),
                                         enabled = !tekrarKaydediliyor,
+                                        interactionTur = EtkilesimTuru.TIKLAMA,
                                         onClick = { tekrarSonucunuKaydet(soru, TekrarSonucu.RAHAT) },
                                     ) {
                                         Text(
@@ -417,8 +482,12 @@ fun SoruDetayEkrani(
                     if (!dersArsivli) {
                         item {
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Button(onClick = { onDuzenle(soru.id) }) { Text(stringResource(R.string.question_edit)) }
-                                TextButton(onClick = { durumMenusu = true }) { Text(stringResource(R.string.question_plan_status)) }
+                                PremiumButton(onClick = { onDuzenle(soru.id) }) {
+                                    Text(stringResource(R.string.question_edit))
+                                }
+                                PremiumTextButton(onClick = { durumMenusu = true }) {
+                                    Text(stringResource(R.string.question_plan_status))
+                                }
                                 DropdownMenu(expanded = durumMenusu, onDismissRequest = { durumMenusu = false }) {
                                     SoruPlanDurumu.entries.forEach { newStatus ->
                                         DropdownMenuItem(
@@ -440,7 +509,9 @@ fun SoruDetayEkrani(
                                         )
                                     }
                                 }
-                                TextButton(onClick = { silmeOnayi = true }) { Text(stringResource(R.string.question_delete)) }
+                                PremiumTextButton(onClick = { silmeOnayi = true }) {
+                                    Text(stringResource(R.string.question_delete))
+                                }
                             }
                         }
                     }
@@ -455,7 +526,7 @@ fun SoruDetayEkrani(
             title = { Text(stringResource(R.string.question_delete_title)) },
             text = { Text(stringResource(R.string.question_delete_confirm, currentQuestion.gorseller.size)) },
             confirmButton = {
-                TextButton(onClick = {
+                PremiumTextButton(onClick = {
                     silmeOnayi = false
                     scope.launch {
                         val result = try {
@@ -470,7 +541,7 @@ fun SoruDetayEkrani(
                     }
                 }) { Text(stringResource(R.string.question_delete)) }
             },
-            dismissButton = { TextButton(onClick = { silmeOnayi = false }) { Text(stringResource(R.string.topic_cancel)) } },
+            dismissButton = { PremiumTextButton(onClick = { silmeOnayi = false }) { Text(stringResource(R.string.topic_cancel)) } },
         )
     }
 
@@ -485,6 +556,14 @@ fun SoruDetayEkrani(
         } else {
             LaunchedEffect(image) { tamEkranGorsel = null }
         }
+    }
+    currentQuestion?.let { question ->
+        CozumTahtasiDialog(
+            soru = question,
+            gorselDeposu = gorselDeposu,
+            visible = beyazTahtaAcik,
+            onDismiss = { beyazTahtaAcik = false },
+        )
     }
 }
 
