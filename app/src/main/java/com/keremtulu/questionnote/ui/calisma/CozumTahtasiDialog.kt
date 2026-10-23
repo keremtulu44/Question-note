@@ -13,6 +13,8 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
@@ -46,6 +48,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -69,6 +72,7 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -96,11 +100,11 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-private enum class TahtaAraci { KALEM, CIZGI, DIKDORTGEN, UCGEN, SILGI }
+internal enum class TahtaAraci { KALEM, CIZGI, DIKDORTGEN, UCGEN, SILGI }
 
-private data class TahtaNoktasi(val x: Float, val y: Float)
+internal data class TahtaNoktasi(val x: Float, val y: Float)
 
-private data class TahtaVurusu(
+internal data class TahtaVurusu(
     val araci: TahtaAraci,
     val noktalar: List<TahtaNoktasi>,
     val renk: Color,
@@ -108,10 +112,19 @@ private data class TahtaVurusu(
 )
 
 /** Drawing history belongs to one surface: the blank board or one specific question image. */
-private data class TahtaYuzeyCizimi(
+internal data class TahtaYuzeyCizimi(
     val kalemler: List<TahtaVurusu> = emptyList(),
     val geriAlinanlar: List<TahtaVurusu> = emptyList(),
 )
+
+/** Holds temporary whiteboard strokes for each question while a multi-question session stays open. */
+class TahtaOturumCizimBellegi internal constructor() {
+    private val soruKatmanlari = mutableMapOf<String, MutableMap<String, TahtaYuzeyCizimi>>()
+
+    @Synchronized
+    internal fun soruKatmanlariniAl(soruId: String): MutableMap<String, TahtaYuzeyCizimi> =
+        soruKatmanlari.getOrPut(soruId) { mutableStateMapOf() }
+}
 
 private data class TahtaRengi(val ad: Int, val renk: Color)
 
@@ -130,9 +143,14 @@ fun CozumTahtasiDialog(
     soru: Soru,
     gorselDeposu: LocalSoruGorselDeposu,
     visible: Boolean,
+    oturumSira: Int? = null,
+    oturumToplam: Int? = null,
+    oturumCizimBellegi: TahtaOturumCizimBellegi? = null,
     onDismiss: () -> Unit,
 ) {
-    val cizimKatmanlari = remember(soru.id) { mutableStateMapOf<String, TahtaYuzeyCizimi>() }
+    val cizimKatmanlari = remember(soru.id, oturumCizimBellegi) {
+        oturumCizimBellegi?.soruKatmanlariniAl(soru.id) ?: mutableStateMapOf()
+    }
     val soruGorselleri = remember(soru.id, soru.gorseller) {
         soru.gorseller.filter { it.tur == GorselTuru.SORU }
     }
@@ -239,6 +257,8 @@ fun CozumTahtasiDialog(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 TahtaCalismaBasligi(
+                    oturumSira = oturumSira,
+                    oturumToplam = oturumToplam,
                     soruPaneliAcik = soruPaneliAcik,
                     onSoruPaneliTikla = { soruPaneliAcik = !soruPaneliAcik },
                     onKapat = {
@@ -378,6 +398,8 @@ fun CozumTahtasiDialog(
 
 @Composable
 private fun TahtaCalismaBasligi(
+    oturumSira: Int?,
+    oturumToplam: Int?,
     soruPaneliAcik: Boolean,
     onSoruPaneliTikla: () -> Unit,
     onKapat: () -> Unit,
@@ -388,6 +410,11 @@ private fun TahtaCalismaBasligi(
         if (soruPaneliAcik) R.string.common_close else R.string.question_form_question_images,
     )
     val closeLabel = stringResource(R.string.whiteboard_close)
+    val subtitle = if (oturumSira != null && oturumToplam != null) {
+        stringResource(R.string.whiteboard_session_progress, oturumSira, oturumToplam)
+    } else {
+        stringResource(R.string.whiteboard_subtitle)
+    }
     Box(
         modifier = modifier
             .clip(shape)
@@ -420,7 +447,7 @@ private fun TahtaCalismaBasligi(
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    stringResource(R.string.whiteboard_subtitle),
+                    subtitle,
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.White.copy(alpha = 0.76f),
                     maxLines = 1,
@@ -816,7 +843,7 @@ private fun TahtaYuzeyGecisIkonu(soruUzerinde: Boolean, color: Color) {
     Canvas(Modifier.size(width = 22.dp, height = 18.dp)) {
         val stroke = 1.8.dp.toPx()
         val y = size.height / 2f
-        if (soruUzerinde) {
+        if (!soruUzerinde) {
             drawLine(color, Offset(size.width * 0.82f, y), Offset(size.width * 0.18f, y), strokeWidth = stroke, cap = StrokeCap.Round)
             drawLine(color, Offset(size.width * 0.18f, y), Offset(size.width * 0.42f, y - size.height * 0.28f), strokeWidth = stroke, cap = StrokeCap.Round)
             drawLine(color, Offset(size.width * 0.18f, y), Offset(size.width * 0.42f, y + size.height * 0.28f), strokeWidth = stroke, cap = StrokeCap.Round)
@@ -897,7 +924,7 @@ private fun TahtaKompaktYuzeyDugmesi(
         tonalElevation = 1.dp,
     ) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            TahtaYuzeyIkonu(soruUzerindeCizim, colors.primary, Modifier.size(20.dp))
+            TahtaYuzeyIkonu(!soruUzerindeCizim, colors.primary, Modifier.size(20.dp))
         }
     }
 }
@@ -1176,6 +1203,69 @@ private fun TahtaKompaktKontrolCubugu(
 }
 
 @Composable
+private fun TahtaZumKontrolleri(
+    zoom: Float,
+    panMode: Boolean,
+    onZoomOut: () -> Unit,
+    onZoomIn: () -> Unit,
+    onReset: () -> Unit,
+    onTogglePanMode: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = MaterialTheme.colorScheme
+    val zoomOutLabel = stringResource(R.string.whiteboard_zoom_out)
+    val zoomInLabel = stringResource(R.string.whiteboard_zoom_in)
+    val resetLabel = stringResource(R.string.whiteboard_zoom_reset)
+    val panModeLabel = stringResource(if (panMode) R.string.whiteboard_draw_mode else R.string.whiteboard_pan_mode)
+    Surface(
+        modifier = modifier.testTag("whiteboard-zoom-controls"),
+        shape = RoundedCornerShape(15.dp),
+        color = colors.surface.copy(alpha = 0.96f),
+        border = BorderStroke(1.dp, colors.outlineVariant.copy(alpha = 0.7f)),
+        shadowElevation = 3.dp,
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            Text(
+                "${(zoom * 100f).toInt()}%",
+                modifier = Modifier.width(38.dp).testTag("whiteboard-zoom-level"),
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = colors.onSurfaceVariant,
+                maxLines = 1,
+            )
+            IconButton(
+                onClick = onZoomOut,
+                modifier = Modifier.size(36.dp).testTag("whiteboard-zoom-out")
+                    .semantics { contentDescription = zoomOutLabel },
+            ) { Text("−", style = MaterialTheme.typography.titleLarge) }
+            IconButton(
+                onClick = onZoomIn,
+                modifier = Modifier.size(36.dp).testTag("whiteboard-zoom-in")
+                    .semantics { contentDescription = zoomInLabel },
+            ) { Text("+", style = MaterialTheme.typography.titleLarge) }
+            TextButton(
+                onClick = onReset,
+                modifier = Modifier.testTag("whiteboard-zoom-reset"),
+                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 6.dp),
+            ) { Text(resetLabel, style = MaterialTheme.typography.labelSmall, maxLines = 1) }
+            TextButton(
+                onClick = onTogglePanMode,
+                modifier = Modifier.testTag("whiteboard-pan-mode")
+                    .semantics {
+                        contentDescription = panModeLabel
+                        selected = panMode
+                    },
+                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 6.dp),
+            ) { Text(panModeLabel, style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+        }
+    }
+}
+
+@Composable
 private fun TahtaRenkSecimi(
     item: TahtaRengi,
     selected: Boolean,
@@ -1395,6 +1485,17 @@ private fun TahtaCalismaAlani(
 ) {
     val context = LocalContext.current
     val colors = MaterialTheme.colorScheme
+    var zoom by remember(soruGorseli?.id) { mutableStateOf(1f) }
+    var zoomOffset by remember(soruGorseli?.id) { mutableStateOf(Offset.Zero) }
+    var panMode by remember(soruGorseli?.id) { mutableStateOf(false) }
+    var zoomViewport by remember(soruGorseli?.id) { mutableStateOf(Size.Zero) }
+    LaunchedEffect(soruGorseli?.id, soruUzerindeCizim) {
+        if (!soruUzerindeCizim) {
+            zoom = 1f
+            zoomOffset = Offset.Zero
+            panMode = false
+        }
+    }
     val mergedCompactControls = compact && brushTekSatir
     Column(modifier, verticalArrangement = Arrangement.spacedBy(if (compact) 5.dp else 8.dp)) {
         if (!compact) {
@@ -1450,16 +1551,38 @@ private fun TahtaCalismaAlani(
             soruGorseli?.let { (it.genislik.toFloat() / it.yukseklik.coerceAtLeast(1)).takeIf { ratio -> ratio.isFinite() } }
                 ?.takeIf { it > 0f }
         } else null
-        val boardAspectRatio = imageRatio?.coerceIn(0.45f, 2.5f)
-        BoxWithConstraints(
-            modifier = Modifier.fillMaxWidth().weight(1f),
-            contentAlignment = Alignment.Center,
-        ) {
-            val boardWidth = boardAspectRatio?.let { minOf(maxWidth, maxHeight * it) } ?: maxWidth
-            val boardHeight = boardAspectRatio?.let { (boardWidth / it).coerceAtMost(maxHeight) } ?: maxHeight
+        val zoomEnabled = soruUzerindeCizim && backgroundFile != null
+        val transformState = rememberTransformableState { zoomChange, panChange, _ ->
+            val nextZoom = (zoom * zoomChange).coerceIn(1f, 5f)
+            val ratio = nextZoom / zoom
+            zoomOffset = constrainedZoomOffset(
+                Offset(zoomOffset.x * ratio + panChange.x, zoomOffset.y * ratio + panChange.y),
+                nextZoom,
+                zoomViewport,
+                imageRatio,
+            )
+            zoom = nextZoom
+        }
+        fun changeZoom(multiplier: Float) {
+            val nextZoom = (zoom * multiplier).coerceIn(1f, 5f)
+            val ratio = nextZoom / zoom
+            zoomOffset = constrainedZoomOffset(
+                Offset(zoomOffset.x * ratio, zoomOffset.y * ratio),
+                nextZoom,
+                zoomViewport,
+                imageRatio,
+            )
+            zoom = nextZoom
+        }
+        fun resetZoom() {
+            zoom = 1f
+            zoomOffset = Offset.Zero
+            panMode = false
+        }
+        Box(Modifier.fillMaxWidth().weight(1f)) {
             val boardShape = RoundedCornerShape(18.dp)
             Box(
-                modifier = Modifier.size(boardWidth, boardHeight)
+                modifier = Modifier.fillMaxSize()
                     .shadow(8.dp, boardShape)
                     .clip(boardShape)
                     .background(Color(0xFFFFFEFB))
@@ -1481,65 +1604,80 @@ private fun TahtaCalismaAlani(
                         }
                     }
                 }
-                if (backgroundFile != null) {
-                    SoruGorselResmi(
-                        file = backgroundFile,
-                        contentDescription = stringResource(R.string.question_image_description),
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = androidx.compose.ui.layout.ContentScale.Fit,
-                        maxDecodeEdge = 1_800,
-                    )
-                }
-                Canvas(
+                Box(
                     modifier = Modifier.fillMaxSize()
-                        .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-                        .testTag("solution-whiteboard-canvas")
-                        .semantics {
-                            contentDescription = context.getString(R.string.whiteboard_canvas_description)
-                            stateDescription = countDescription
+                        .onSizeChanged { zoomViewport = Size(it.width.toFloat(), it.height.toFloat()) }
+                        .graphicsLayer {
+                            val drawScale = if (zoomEnabled) zoom else 1f
+                            scaleX = drawScale
+                            scaleY = drawScale
+                            translationX = if (zoomEnabled) zoomOffset.x else 0f
+                            translationY = if (zoomEnabled) zoomOffset.y else 0f
                         }
-                        .pointerInput(arac, renk, kalinlik, imageRatio, soruUzerindeCizim, soruGorseli?.id) {
-                            var baslangic: TahtaNoktasi? = null
-                            var sonVurus: TahtaVurusu? = null
-                            val viewport = fittedImageBounds(Size(size.width.toFloat(), size.height.toFloat()), imageRatio)
-                            detectDragGestures(
-                                onDragStart = { pos ->
-                                    val start = normalizedPoint(pos, viewport, clampToBounds = false)
-                                        ?: return@detectDragGestures
-                                    baslangic = start
-                                    sonVurus = TahtaVurusu(arac, listOf(start), renk, kalinlik)
-                                    onVurusDegisti(sonVurus)
-                                },
-                                onDrag = { change, _ ->
-                                    change.consume()
-                                    val start = baslangic ?: return@detectDragGestures
-                                    val current = normalizedPoint(change.position, viewport, clampToBounds = true)
-                                        ?: return@detectDragGestures
-                                    val previous = sonVurus ?: TahtaVurusu(arac, listOf(start), renk, kalinlik)
-                                    val next = when (arac) {
-                                        TahtaAraci.KALEM, TahtaAraci.SILGI -> previous.copy(
-                                            noktalar = appendPoint(previous.noktalar, current, viewport.width, viewport.height),
-                                        )
-                                        else -> previous.copy(noktalar = listOf(start, current))
-                                    }
-                                    sonVurus = next
-                                    onVurusDegisti(next)
-                                },
-                                onDragEnd = {
-                                    onVurusBitti(sonVurus)
-                                    sonVurus = null
-                                    baslangic = null
-                                },
-                                onDragCancel = {
-                                    onVurusDegisti(null)
-                                    sonVurus = null
-                                    baslangic = null
-                                },
-                            )
-                        },
+                        .transformable(state = transformState, enabled = zoomEnabled && panMode),
                 ) {
-                    val viewport = fittedImageBounds(size, imageRatio)
-                    (kalemler + listOfNotNull(etkinVurus)).forEach { drawVurus(it, viewport) }
+                    if (backgroundFile != null) {
+                        SoruGorselResmi(
+                            file = backgroundFile,
+                            contentDescription = stringResource(R.string.question_image_description),
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+                            maxDecodeEdge = if (zoom >= 2f) 3_000 else 1_800,
+                        )
+                    }
+                    Canvas(
+                        modifier = Modifier.fillMaxSize()
+                            .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                            .testTag("solution-whiteboard-canvas")
+                            .semantics {
+                                contentDescription = context.getString(R.string.whiteboard_canvas_description)
+                                stateDescription = countDescription
+                            }
+                            .pointerInput(arac, renk, kalinlik, imageRatio, soruUzerindeCizim, soruGorseli?.id, panMode) {
+                                if (!panMode) {
+                                    var baslangic: TahtaNoktasi? = null
+                                    var sonVurus: TahtaVurusu? = null
+                                    val viewport = fittedImageBounds(Size(size.width.toFloat(), size.height.toFloat()), imageRatio)
+                                    detectDragGestures(
+                                        onDragStart = { pos ->
+                                            val start = normalizedPoint(pos, viewport, clampToBounds = false)
+                                                ?: return@detectDragGestures
+                                            baslangic = start
+                                            sonVurus = TahtaVurusu(arac, listOf(start), renk, kalinlik)
+                                            onVurusDegisti(sonVurus)
+                                        },
+                                        onDrag = { change, _ ->
+                                            change.consume()
+                                            val start = baslangic ?: return@detectDragGestures
+                                            val current = normalizedPoint(change.position, viewport, clampToBounds = true)
+                                                ?: return@detectDragGestures
+                                            val previous = sonVurus ?: TahtaVurusu(arac, listOf(start), renk, kalinlik)
+                                            val next = when (arac) {
+                                                TahtaAraci.KALEM, TahtaAraci.SILGI -> previous.copy(
+                                                    noktalar = appendPoint(previous.noktalar, current, viewport.width, viewport.height),
+                                                )
+                                                else -> previous.copy(noktalar = listOf(start, current))
+                                            }
+                                            sonVurus = next
+                                            onVurusDegisti(next)
+                                        },
+                                        onDragEnd = {
+                                            onVurusBitti(sonVurus)
+                                            sonVurus = null
+                                            baslangic = null
+                                        },
+                                        onDragCancel = {
+                                            onVurusDegisti(null)
+                                            sonVurus = null
+                                            baslangic = null
+                                        },
+                                    )
+                                }
+                            },
+                    ) {
+                        val viewport = fittedImageBounds(size, imageRatio)
+                        (kalemler + listOfNotNull(etkinVurus)).forEach { drawVurus(it, viewport) }
+                    }
                 }
                 if (soruUzerindeCizim && backgroundFile == null) {
                     Text(
@@ -1565,6 +1703,17 @@ private fun TahtaCalismaAlani(
                             fontWeight = FontWeight.Medium,
                         )
                     }
+                }
+                if (zoomEnabled) {
+                    TahtaZumKontrolleri(
+                        zoom = zoom,
+                        panMode = panMode,
+                        onZoomOut = { changeZoom(1f / 1.25f) },
+                        onZoomIn = { changeZoom(1.25f) },
+                        onReset = ::resetZoom,
+                        onTogglePanMode = { panMode = !panMode },
+                        modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
+                    )
                 }
             }
         }
@@ -1625,6 +1774,13 @@ private fun fittedImageBounds(canvasSize: Size, imageRatio: Float?): Rect {
     val left = (width - contentWidth) / 2f
     val top = (height - contentHeight) / 2f
     return Rect(left, top, left + contentWidth, top + contentHeight)
+}
+
+private fun constrainedZoomOffset(offset: Offset, zoom: Float, viewport: Size, imageRatio: Float?): Offset {
+    val imageBounds = fittedImageBounds(viewport, imageRatio)
+    val maxX = ((imageBounds.width * zoom - viewport.width) / 2f).coerceAtLeast(0f)
+    val maxY = ((imageBounds.height * zoom - viewport.height) / 2f).coerceAtLeast(0f)
+    return Offset(offset.x.coerceIn(-maxX, maxX), offset.y.coerceIn(-maxY, maxY))
 }
 
 private fun normalizedPoint(position: Offset, viewport: Rect, clampToBounds: Boolean): TahtaNoktasi? {

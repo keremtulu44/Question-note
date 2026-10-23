@@ -2,6 +2,7 @@ package com.keremtulu.questionnote.ui.calisma
 
 import android.content.Context
 import android.graphics.Bitmap
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.*
@@ -86,6 +87,113 @@ class CozumTahtasiKullanimTest {
     }
 
     @Test
+    fun questionSurfaceCanZoomAndShowsTheFiveQuestionSessionPosition() {
+        val depot = LocalSoruGorselDeposu(context)
+        val image = questionImage(sira = 0, width = 320, height = 480)
+        compose.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                CozumTahtasiDialog(
+                    soru = soru(listOf(image)),
+                    gorselDeposu = depot,
+                    visible = true,
+                    oturumSira = 3,
+                    oturumToplam = 5,
+                    onDismiss = {},
+                )
+            }
+        }
+
+        compose.onNodeWithText(context.getString(R.string.whiteboard_session_progress, 3, 5)).assertIsDisplayed()
+        val surfaceToggle = compose.onNodeWithTag("whiteboard-surface-toggle")
+        assertEquals(
+            context.getString(R.string.whiteboard_surface_blank),
+            surfaceToggle.fetchSemanticsNode().config[SemanticsProperties.StateDescription],
+        )
+        assertEquals(
+            listOf(context.getString(R.string.whiteboard_surface_switch_to_question)),
+            surfaceToggle.fetchSemanticsNode().config[SemanticsProperties.ContentDescription],
+        )
+
+        surfaceToggle.performClick()
+        assertEquals(
+            context.getString(R.string.whiteboard_surface_question),
+            surfaceToggle.fetchSemanticsNode().config[SemanticsProperties.StateDescription],
+        )
+        assertEquals(
+            listOf(context.getString(R.string.whiteboard_surface_switch_to_blank)),
+            surfaceToggle.fetchSemanticsNode().config[SemanticsProperties.ContentDescription],
+        )
+        compose.onNodeWithTag("whiteboard-zoom-controls").assertIsDisplayed()
+        val zoomLevel = compose.onNodeWithTag("whiteboard-zoom-level")
+        zoomLevel.assertTextEquals("100%")
+        compose.onNodeWithTag("whiteboard-zoom-in").performClick()
+        zoomLevel.assertTextEquals("125%")
+        compose.onNodeWithTag("whiteboard-zoom-out").performClick()
+        zoomLevel.assertTextEquals("100%")
+        compose.onNodeWithTag("whiteboard-zoom-in").performClick()
+        zoomLevel.assertTextEquals("125%")
+        compose.onNodeWithTag("whiteboard-pan-mode").performClick()
+        compose.onNodeWithText(context.getString(R.string.whiteboard_draw_mode)).assertExists()
+        compose.onNodeWithTag("whiteboard-pan-mode").performClick()
+        compose.onNodeWithTag("whiteboard-zoom-reset").performClick()
+        zoomLevel.assertTextEquals("100%")
+    }
+
+    @Test
+    fun sessionWhiteboardKeepsSeparateDrawingsForEachQuestion() {
+        val depot = LocalSoruGorselDeposu(context)
+        val image = questionImage(sira = 0, width = 320, height = 480)
+        val firstQuestion = soru(listOf(image))
+        val secondQuestion = firstQuestion.copy(id = "question-2")
+        val currentQuestion = mutableStateOf(firstQuestion)
+        val sessionMemory = TahtaOturumCizimBellegi()
+        compose.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                CozumTahtasiDialog(
+                    soru = currentQuestion.value,
+                    gorselDeposu = depot,
+                    visible = true,
+                    oturumCizimBellegi = sessionMemory,
+                    onDismiss = {},
+                )
+            }
+        }
+
+        val canvas = compose.onNodeWithTag("solution-whiteboard-canvas")
+        val noMarks = context.getString(R.string.whiteboard_no_marks)
+        val oneMark = context.getString(R.string.whiteboard_mark_count, 1)
+        fun drawMark() {
+            val bounds = canvas.fetchSemanticsNode().boundsInRoot
+            canvas.performTouchInput {
+                down(Offset(bounds.width * 0.20f, bounds.height * 0.20f))
+                moveTo(Offset(bounds.width * 0.75f, bounds.height * 0.75f), delayMillis = 120)
+                up()
+            }
+        }
+
+        drawMark()
+        compose.waitUntil(5_000) {
+            canvas.fetchSemanticsNode().config[SemanticsProperties.StateDescription] == oneMark
+        }
+        compose.runOnIdle { currentQuestion.value = secondQuestion }
+        compose.waitUntil(5_000) {
+            canvas.fetchSemanticsNode().config[SemanticsProperties.StateDescription] == noMarks
+        }
+        drawMark()
+        compose.waitUntil(5_000) {
+            canvas.fetchSemanticsNode().config[SemanticsProperties.StateDescription] == oneMark
+        }
+        compose.runOnIdle { currentQuestion.value = firstQuestion }
+        compose.waitUntil(5_000) {
+            canvas.fetchSemanticsNode().config[SemanticsProperties.StateDescription] == oneMark
+        }
+        compose.runOnIdle { currentQuestion.value = secondQuestion }
+        compose.waitUntil(5_000) {
+            canvas.fetchSemanticsNode().config[SemanticsProperties.StateDescription] == oneMark
+        }
+    }
+
+    @Test
     fun drawingDockHasClearToolSelectionAndGroupedStyleControls() {
         val depot = LocalSoruGorselDeposu(context)
         compose.setContent {
@@ -151,6 +259,20 @@ class CozumTahtasiKullanimTest {
         compose.onNodeWithTag("whiteboard-surface-toggle").performClick()
         compose.waitUntil(5_000) {
             canvas.fetchSemanticsNode().config[SemanticsProperties.StateDescription] == noMarks
+        }
+        compose.onNodeWithTag("whiteboard-zoom-in").performClick()
+        val zoomedBounds = canvas.fetchSemanticsNode().boundsInRoot
+        canvas.performTouchInput {
+            down(Offset(zoomedBounds.width * 0.35f, zoomedBounds.height * 0.40f))
+            moveTo(Offset(zoomedBounds.width * 0.62f, zoomedBounds.height * 0.58f), delayMillis = 120)
+            up()
+        }
+        compose.waitUntil(5_000) {
+            canvas.fetchSemanticsNode().config[SemanticsProperties.StateDescription] == oneMark
+        }
+        compose.onNodeWithTag("whiteboard-surface-toggle").performClick()
+        compose.waitUntil(5_000) {
+            canvas.fetchSemanticsNode().config[SemanticsProperties.StateDescription] == oneMark
         }
         compose.onNodeWithTag("whiteboard-surface-toggle").performClick()
         compose.waitUntil(5_000) {

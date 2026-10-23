@@ -47,6 +47,7 @@ import com.keremtulu.questionnote.data.ses.SesTuruGenis
 import com.keremtulu.questionnote.data.ses.SesYoneticisi
 import com.keremtulu.questionnote.ui.ayarlar.KonuMerkeziEkrani
 import com.keremtulu.questionnote.ui.calisma.OdakOturumuEkrani
+import com.keremtulu.questionnote.ui.calisma.TahtaOturumCizimBellegi
 import com.keremtulu.questionnote.ui.karne.RozetKutlamaHost
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -153,6 +154,8 @@ fun YanlisDefteriUygulamasi(
     tercihHedefDeposu: TercihGunlukHedefDeposu,
 ) {
     var ekran by remember { mutableStateOf<UygulamaEkrani>(UygulamaEkrani.Bugun) }
+    val tahtaOturumId = (ekran as? UygulamaEkrani.FiltreliOturum)?.oturum?.id
+    val tahtaOturumCizimBellegi = remember(tahtaOturumId) { TahtaOturumCizimBellegi() }
     val profilSecimi by profilDeposu.secimIzle.collectAsState()
     var bekleyenOturum by remember { mutableStateOf<UygulamaEkrani.FiltreliOturum?>(null) }
     var filtreliCalismaAyar by remember { mutableStateOf(FiltreliCalismaEkraniAyar()) }
@@ -509,6 +512,7 @@ fun YanlisDefteriUygulamasi(
                                 sira = current.sira + 1, toplam = current.oturum.soruIdleri.size, sonuclar = current.sonuclar,
                                 oturumId = current.oturum.id,
                                 oturumDeposu = oturumDeposu,
+                                oturumCizimBellegi = tahtaOturumCizimBellegi,
                                 disDuraklatildi = oturumCikisHedefi != null,
                                 cozumOnceAcildi = question.id in current.oturum.cozumAcilanlar,
                                 onCozumAcildi = { oturumGoster(current.sorular, current.dersler, current.oturum.cozumuAc()) },

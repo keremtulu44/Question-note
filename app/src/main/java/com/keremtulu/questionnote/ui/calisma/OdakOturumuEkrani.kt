@@ -117,6 +117,7 @@ fun OdakOturumuEkrani(
     onKaydedildi: (soruId: String, sonrakiGun: Int?) -> Unit = { _, _ -> },
     onSonaBirak: () -> Unit,
     onAtla: () -> Unit,
+    oturumCizimBellegi: TahtaOturumCizimBellegi? = null,
     monotonikSaat: MonotonikSaat = MonotonikSaat { SystemClock.elapsedRealtime() },
 ) {
     val context = LocalContext.current
@@ -452,6 +453,9 @@ fun OdakOturumuEkrani(
         soru = soru,
         gorselDeposu = gorselDeposu,
         visible = beyazTahtaAcik,
+        oturumSira = sira,
+        oturumToplam = toplam,
+        oturumCizimBellegi = oturumCizimBellegi,
         onDismiss = { beyazTahtaAcik = false },
     )
     if (mola) AlertDialog(onDismissRequest = { mola = false },
