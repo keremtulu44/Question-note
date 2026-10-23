@@ -15,12 +15,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,6 +44,8 @@ import com.keremtulu.questionnote.ui.karne.rozetAdi
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import com.keremtulu.questionnote.ui.premium.PremiumTextButton
+import com.keremtulu.questionnote.ui.premium.PremiumCard
 
 private val oturumRozetleri = setOf(Rozet.ILK_KARNE, Rozet.KUSURSUZ_TUR, Rozet.ON_BAGIMSIZ,
     Rozet.YIRMI_SORU, Rozet.COZUMSUZ, Rozet.ZINCIR_10, Rozet.KUSURSUZ_20)
@@ -82,7 +82,7 @@ fun RozetKoleksiyonu(sahip: Set<Rozet>, girdi: RozetGirdisi, kazanilmaZamani: (R
                 satir.forEach { rozet ->
                     val kazanildi = rozet in sahip
                     val gizli = rozet.gizli && !kazanildi
-                    Card(
+                    PremiumCard(
                         onClick = { detay = rozet }, modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(22.dp),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -94,7 +94,7 @@ fun RozetKoleksiyonu(sahip: Set<Rozet>, girdi: RozetGirdisi, kazanilmaZamani: (R
                             Text(stringResource(if (gizli) R.string.badge_hidden else rozetAdi(rozet)),
                                 style = MaterialTheme.typography.titleSmall, textAlign = TextAlign.Center, fontWeight = FontWeight.SemiBold)
                             // Unlock instructions belong in the existing detail dialog, not on every tile.
-                            if (kazanildi) Text("✓ " + stringResource(R.string.badge_earned),
+                            if (kazanildi) Text(stringResource(R.string.badge_earned),
                                 color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium)
                             else if (!gizli && rozet !in oturumRozetleri) {
                                 val ilerleme = RozetKurallari.ilerleme(rozet, girdi)
@@ -124,7 +124,7 @@ fun RozetKoleksiyonu(sahip: Set<Rozet>, girdi: RozetGirdisi, kazanilmaZamani: (R
                     Text(stringResource(if (gizli) R.string.badge_hidden_desc else rozetAciklamasi(rozet)))
                     if (!gizli) {
                         if (kazanildi) {
-                            Text("✓ " + stringResource(R.string.badge_earned))
+                            Text(stringResource(R.string.badge_earned))
                             kazanilmaZamani(rozet)?.let {
                                 val tarih = Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
                                 Text(stringResource(R.string.badge_earned_date, tarih))
@@ -138,7 +138,7 @@ fun RozetKoleksiyonu(sahip: Set<Rozet>, girdi: RozetGirdisi, kazanilmaZamani: (R
                     }
                 }
             },
-            confirmButton = { TextButton(onClick = { detay = null }) { Text(stringResource(R.string.common_back)) } },
+            confirmButton = { PremiumTextButton(onClick = { detay = null }) { Text(stringResource(R.string.common_back)) } },
         )
     }
 }

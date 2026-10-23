@@ -28,7 +28,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import com.keremtulu.questionnote.ui.premium.EtkilesimTuru
 import com.keremtulu.questionnote.ui.premium.PremiumButton
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -37,7 +36,6 @@ import com.keremtulu.questionnote.ui.premium.PremiumSwitch
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -66,6 +64,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.keremtulu.questionnote.R
+import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
 import com.keremtulu.questionnote.data.prefs.OdakOturumuDeposu
 import com.keremtulu.questionnote.data.ses.SesTuruGenis
 import com.keremtulu.questionnote.data.ses.SesYoneticisi
@@ -77,6 +76,11 @@ import com.keremtulu.questionnote.ui.bilesenler.GorselHazirligi
 import android.os.SystemClock
 import com.keremtulu.questionnote.ui.tema.LocalHareketPolitikasi
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
+import com.keremtulu.questionnote.ui.animasyon.SureToken
+import com.keremtulu.questionnote.ui.animasyon.animateFloatPremium
+import com.keremtulu.questionnote.ui.animasyon.tweenPremium
+import com.keremtulu.questionnote.ui.premium.PremiumGradyanButon
+import androidx.compose.ui.graphics.graphicsLayer
 import com.keremtulu.questionnote.domain.karne.KarneHesabi
 import com.keremtulu.questionnote.domain.karne.OturumSonucu
 import com.keremtulu.questionnote.domain.model.Ders
@@ -96,6 +100,8 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import com.keremtulu.questionnote.ui.premium.PremiumTextButton
+import com.keremtulu.questionnote.ui.premium.PremiumCard
 
 /** A focused review surface; no archive/delete controls, no forced solution reveal, no speed score. */
 @Composable
@@ -188,6 +194,18 @@ fun OdakOturumuEkrani(
     }
 
     val hareket = LocalHareketPolitikasi.current
+    // Enter-only fades composed at screen level: scrolling away and back never replays them,
+    // and hidden content stays hidden exactly as before (measurement gating is untouched).
+    val cozumGirisi = animateFloatPremium(
+        target = if (cozumGorunur) 1f else 0f,
+        animationSpec = tweenPremium(SureToken.MEDIUM),
+        label = "cozum-girisi",
+    )
+    val degerlendirmeGirisi = animateFloatPremium(
+        target = if (degerlendirme) 1f else 0f,
+        animationSpec = tweenPremium(SureToken.MEDIUM),
+        label = "degerlendirme-girisi",
+    )
     LaunchedEffect(degerlendirme, hareket) {
         if (degerlendirme) {
             delay(100) // wait for newly composed assessment items; only the scroll motion is optional
@@ -241,14 +259,14 @@ fun OdakOturumuEkrani(
                     if (planYenilendi) Text(stringResource(R.string.measure_plan_changed), color = colors.primary, style = MaterialTheme.typography.bodySmall)
                     if (planHatasi) {
                         Text(stringResource(R.string.measure_preview_error), color = colors.error, style = MaterialTheme.typography.bodySmall)
-                        TextButton(onClick = { yenileme++ }) { Text(stringResource(R.string.level_retry)) }
+                        PremiumTextButton(onClick = { yenileme++ }) { Text(stringResource(R.string.level_retry)) }
                     }
                     if (kayitHatasi) Text(stringResource(R.string.focus_save_error), color = colors.error, style = MaterialTheme.typography.bodySmall)
                     if (tekrarli || kullanilamaz) {
                         Text(stringResource(if (kullanilamaz) R.string.filtered_practice_question_unavailable else R.string.focus_duplicate), style = MaterialTheme.typography.bodySmall)
                         PremiumButton(onClick = { olcum.aktiflik(false); onAtla() }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.focus_skip)) }
                     } else if (!degerlendirme) {
-                        PremiumButton(onClick = {
+                        PremiumGradyanButon(onClick = {
                             if (!gorselHazir) olcum.kismi(OlcumNedeni.GORSEL_EKSIK)
                             olcum.dondur()
                         }, enabled = oncekiKayitlar != null && !mesgul,
@@ -256,9 +274,9 @@ fun OdakOturumuEkrani(
                             interactionTur = EtkilesimTuru.DEGERLENDIRME) { Text(stringResource(R.string.focus_assess)) }
                     } else {
                         Text(stringResource(R.string.focus_plan_note), style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant)
-                        PremiumButton(onClick = ::kaydet, enabled = secim != null && !mesgul && onizlemeler != null,
+                        PremiumGradyanButon(onClick = ::kaydet, enabled = secim != null && !mesgul && onizlemeler != null,
                             modifier = Modifier.fillMaxWidth(), interactionTur = EtkilesimTuru.TIKLAMA) {
-                            if (kaydediliyor) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                            if (kaydediliyor) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp, color = Color.White)
                             Text(stringResource(when {
                                 kaydediliyor -> R.string.focus_saving
                                 sira == toplam -> R.string.focus_save_last
@@ -279,10 +297,10 @@ fun OdakOturumuEkrani(
             item {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween) {
-                    TextButton(onClick = { if (!kaydediliyor && !cozumAciliyor) { olcum.aktiflik(false); onGeri() } }, enabled = !mesgul) { Text(stringResource(R.string.common_back)) }
+                    PremiumTextButton(onClick = { if (!kaydediliyor && !cozumAciliyor) { olcum.aktiflik(false); onGeri() } }, enabled = !mesgul) { Text(stringResource(R.string.common_back)) }
                     Text(stringResource(R.string.filtered_practice_session_progress, sira, toplam),
                         style = MaterialTheme.typography.labelLarge, color = colors.primary)
-                    TextButton(onClick = { if (!kaydediliyor && !cozumAciliyor) { olcum.aktiflik(false); mola = true } }, enabled = !mesgul) { Text(stringResource(R.string.focus_pause)) }
+                    PremiumTextButton(onClick = { if (!kaydediliyor && !cozumAciliyor) { olcum.aktiflik(false); mola = true } }, enabled = !mesgul) { Text(stringResource(R.string.focus_pause)) }
                 }
             }
             item {
@@ -311,8 +329,8 @@ fun OdakOturumuEkrani(
                 }
             }
             item {
-                Card(
-                    shape = RoundedCornerShape(18.dp),
+                PremiumCard(
+                    shape = MaterialTheme.shapes.large,
                     colors = CardDefaults.cardColors(containerColor = colors.surfaceVariant.copy(alpha = 0.62f)),
                 ) {
                     Row(
@@ -334,7 +352,7 @@ fun OdakOturumuEkrani(
                 }
             }
             if (yakinGecmis.tekrarGucluk) item {
-                Card(colors = CardDefaults.cardColors(containerColor = colors.secondaryContainer), shape = RoundedCornerShape(20.dp)) {
+                PremiumCard(colors = CardDefaults.cardColors(containerColor = colors.secondaryContainer), shape = MaterialTheme.shapes.large) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text(stringResource(R.string.focus_difficult), fontWeight = FontWeight.Bold)
                         Text(stringResource(R.string.recent_difficulty_hint), style = MaterialTheme.typography.bodySmall)
@@ -393,28 +411,36 @@ fun OdakOturumuEkrani(
             }
             if (cozumGorunur) {
                 if (!soru.cozumNotu.isNullOrBlank()) item {
-                    Card(shape = RoundedCornerShape(20.dp)) {
+                    PremiumCard(
+                        shape = MaterialTheme.shapes.large,
+                        modifier = Modifier.graphicsLayer { alpha = cozumGirisi.value },
+                    ) {
                         Text(soru.cozumNotu.orEmpty(), Modifier.padding(18.dp), style = MaterialTheme.typography.bodyLarge)
                     }
                 }
                 items(soru.gorseller.filter { it.tur == GorselTuru.COZUM }, key = { it.id }) { image ->
-                    OdakGorseli(image, gorselDeposu, stringResource(R.string.solution_image_description),
-                        onDurum = { durum ->
-                            gorselDurumlari = if (durum == null) gorselDurumlari - image.id else gorselDurumlari + (image.id to durum)
-                            if (durum == GorselHazirligi.HATA) olcum.kismi(OlcumNedeni.GORSEL_EKSIK)
-                        }) { olcum.tamEkran(); gorsel = image }
+                    Box(Modifier.fillMaxWidth().graphicsLayer { alpha = cozumGirisi.value }) {
+                        OdakGorseli(image, gorselDeposu, stringResource(R.string.solution_image_description),
+                            onDurum = { durum ->
+                                gorselDurumlari = if (durum == null) gorselDurumlari - image.id else gorselDurumlari + (image.id to durum)
+                                if (durum == GorselHazirligi.HATA) olcum.kismi(OlcumNedeni.GORSEL_EKSIK)
+                            }) { olcum.tamEkran(); gorsel = image }
+                    }
                 }
             }
             if (yuklemeHatasi) item {
                 Text(stringResource(R.string.focus_load_error), color = colors.error)
-                TextButton(onClick = { yenileme++ }) { Text(stringResource(R.string.topic_retry)) }
+                PremiumTextButton(onClick = { yenileme++ }) { Text(stringResource(R.string.topic_retry)) }
             }
             if (degerlendirme && oncekiKayitlar != null && !tekrarli && !kullanilamaz) item {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().graphicsLayer { alpha = degerlendirmeGirisi.value },
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
                     Text(stringResource(R.string.focus_assess_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     Text(stringResource(R.string.focus_assess_note), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
                     Text(stringResource(R.string.measure_frozen_note), style = MaterialTheme.typography.bodySmall)
-                    TextButton(onClick = { olcum.calismayaDon(); planYenilendi = false }, enabled = !mesgul) {
+                    PremiumTextButton(onClick = { olcum.calismayaDon(); planYenilendi = false }, enabled = !mesgul) {
                         Text(stringResource(R.string.measure_return_to_study))
                     }
                     if (onizlemeler == null && !planHatasi) Text(stringResource(R.string.measure_preparing))
@@ -422,9 +448,9 @@ fun OdakOturumuEkrani(
                     TekrarSonucu.entries.forEach { sonuc ->
                         val plan = onizlemeler?.get(sonuc)?.plan
                         val secili = secim == sonuc
-                        Card(onClick = { olcum.dondur(sonuc) }, enabled = !mesgul && plan != null,
+                        PremiumCard(onClick = { olcum.dondur(sonuc) }, enabled = !mesgul && plan != null,
                             modifier = Modifier.fillMaxWidth().semantics { selected = secili; role = Role.RadioButton },
-                            shape = RoundedCornerShape(18.dp),
+                            shape = MaterialTheme.shapes.large,
                             colors = CardDefaults.cardColors(containerColor = if (secili) colors.primaryContainer else colors.surface)) {
                             Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween) {
@@ -436,7 +462,7 @@ fun OdakOturumuEkrani(
                                 Column(horizontalAlignment = Alignment.End) {
                                     Text(if (plan == null) "—" else if (plan.sonrakiAralik == 1) stringResource(R.string.focus_tomorrow)
                                     else stringResource(R.string.focus_next_days, plan.sonrakiAralik), style = MaterialTheme.typography.labelSmall)
-                                    if (secili) Text("✓", color = colors.primary)
+                                    if (secili) Text("✓", color = colors.primary, fontFamily = PremiumSembolAilesi)
                                 }
                             }
                         }
@@ -444,7 +470,7 @@ fun OdakOturumuEkrani(
                 }
             }
             if (sira < toplam) item {
-                TextButton(onClick = { if (!kaydediliyor && !cozumAciliyor) { olcum.aktiflik(false); onSonaBirak() } }, enabled = !mesgul, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.focus_defer)) }
+                PremiumTextButton(onClick = { if (!kaydediliyor && !cozumAciliyor) { olcum.aktiflik(false); onSonaBirak() } }, enabled = !mesgul, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.focus_defer)) }
                 Text(stringResource(R.string.focus_defer_note), style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant)
             }
         }
@@ -461,7 +487,7 @@ fun OdakOturumuEkrani(
     if (mola) AlertDialog(onDismissRequest = { mola = false },
         title = { Text(stringResource(R.string.focus_paused_title)) },
         text = { Text(stringResource(R.string.focus_paused_note)) },
-        confirmButton = { TextButton(onClick = { mola = false }) { Text(stringResource(R.string.focus_resume)) } })
+        confirmButton = { PremiumTextButton(onClick = { mola = false }) { Text(stringResource(R.string.focus_resume)) } })
     gorsel?.let { image ->
         val file = gorselDeposu.dosyaGoruntuIcin(image.dosyaAdi)
         if (file != null) SoruGorselTamEkran(file = file,

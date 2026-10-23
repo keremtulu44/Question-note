@@ -63,7 +63,7 @@ import com.keremtulu.questionnote.ui.bilesenler.premium.IskeletMetin
 import com.keremtulu.questionnote.ui.bilesenler.premium.PremiumBosDurum
 import com.keremtulu.questionnote.ui.bilesenler.premium.VarsayilanIlustrasyon
 import com.keremtulu.questionnote.ui.premium.EtkilesimTuru
-import com.keremtulu.questionnote.ui.premium.PremiumButton
+import com.keremtulu.questionnote.ui.premium.PremiumGradyanButon
 import com.keremtulu.questionnote.ui.premium.PremiumCard
 import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 import com.keremtulu.questionnote.ui.premium.PremiumOutlinedButton
@@ -272,7 +272,7 @@ fun FiltreliCalismaEkrani(
                     PremiumTextButton(
                         onClick = onGeri,
                         interactionTur = EtkilesimTuru.GERI,
-                    ) { Text("‹  ${androidx.compose.ui.res.stringResource(R.string.menu_today)}") }
+                    ) { Text("‹ ${androidx.compose.ui.res.stringResource(R.string.menu_today)}") }
                     GradyanKart(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(24.dp),
@@ -571,11 +571,12 @@ fun FiltreliCalismaEkrani(
                                         singleLine = true,
                                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                     )
-                                    PremiumButton(
+                                    PremiumGradyanButon(
                                         modifier = Modifier.heightIn(min = 56.dp),
                                         enabled = secenekler != null && secilecekSoruSayisi != null,
+                                        contentPadding = PaddingValues(vertical = 18.dp),
                                         onClick = {
-                                            val count = secilecekSoruSayisi ?: return@PremiumButton
+                                            val count = secilecekSoruSayisi ?: return@PremiumGradyanButon
                                             val lessonMap = secenekler?.dersler.orEmpty().associateBy { it.id }
                                             val selected = siraliSorular.take(count)
                                             if (selected.isNotEmpty() && selected.all { it.dersId in lessonMap }) {
@@ -657,7 +658,7 @@ private fun FiltreDropdown(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
-                    Text("⌄", modifier = Modifier.padding(start = 8.dp))
+                    Text("↓", modifier = Modifier.padding(start = 8.dp))
                 }
             }
             DropdownMenu(

@@ -46,7 +46,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -99,6 +98,7 @@ import com.keremtulu.questionnote.ui.tema.LocalHareketPolitikasi
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 
 internal enum class TahtaAraci { KALEM, CIZGI, DIKDORTGEN, UCGEN, SILGI }
 
@@ -384,7 +384,7 @@ fun CozumTahtasiDialog(
             title = { Text(stringResource(R.string.whiteboard_clear_title)) },
             text = { Text(stringResource(R.string.whiteboard_clear_confirm)) },
             confirmButton = {
-                TextButton(onClick = {
+                PremiumTextButton(onClick = {
                     cizimKatmanlari.clear()
                     etkinVurus = null
                     temizlemeOnayi = false
@@ -392,7 +392,7 @@ fun CozumTahtasiDialog(
                 }) { Text(stringResource(R.string.whiteboard_clear_action)) }
             },
             dismissButton = {
-                TextButton(onClick = { temizlemeOnayi = false }) { Text(stringResource(R.string.question_form_cancel)) }
+                PremiumTextButton(onClick = { temizlemeOnayi = false }) { Text(stringResource(R.string.question_form_cancel)) }
             },
         )
     }
@@ -682,7 +682,7 @@ private fun SoruAltPaneli(
                         )
                     }
                 }
-                TextButton(onClick = onKapat, modifier = Modifier.heightIn(min = 48.dp)) {
+                PremiumTextButton(onClick = onKapat, modifier = Modifier.heightIn(min = 48.dp)) {
                     Text(stringResource(R.string.common_close))
                 }
             }
@@ -1249,12 +1249,12 @@ private fun TahtaZumKontrolleri(
                 modifier = Modifier.size(36.dp).testTag("whiteboard-zoom-in")
                     .semantics { contentDescription = zoomInLabel },
             ) { Text("+", style = MaterialTheme.typography.titleLarge) }
-            TextButton(
+            PremiumTextButton(
                 onClick = onReset,
                 modifier = Modifier.testTag("whiteboard-zoom-reset"),
                 contentPadding = PaddingValues(horizontal = 6.dp, vertical = 6.dp),
             ) { Text(resetLabel, style = MaterialTheme.typography.labelSmall, maxLines = 1) }
-            TextButton(
+            PremiumTextButton(
                 onClick = onTogglePanMode,
                 modifier = Modifier.testTag("whiteboard-pan-mode")
                     .semantics {
@@ -1626,6 +1626,7 @@ private fun TahtaCalismaAlani(
                             modifier = Modifier.fillMaxSize(),
                             contentScale = androidx.compose.ui.layout.ContentScale.Fit,
                             maxDecodeEdge = if (zoom >= 2f) 3_000 else 1_800,
+                            cerceve = false,
                         )
                     }
                     Canvas(

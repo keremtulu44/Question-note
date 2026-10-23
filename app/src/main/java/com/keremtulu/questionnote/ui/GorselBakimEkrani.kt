@@ -11,14 +11,12 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,6 +34,8 @@ import com.keremtulu.questionnote.data.images.GorselBakimRaporu
 import com.keremtulu.questionnote.data.images.GorselTutarliligiHizmeti
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
+import com.keremtulu.questionnote.ui.premium.PremiumTextButton
+import com.keremtulu.questionnote.ui.premium.PremiumButton
 
 @Composable
 fun GorselBakimEkrani(
@@ -75,7 +75,7 @@ fun GorselBakimEkrani(
             modifier = Modifier.fillMaxSize().padding(padding),
         ) {
             Column(Modifier.fillMaxWidth().padding(start = 22.dp, top = 8.dp, end = 22.dp, bottom = 12.dp)) {
-                TextButton(onClick = onGeri) { Text(stringResource(R.string.topic_back_to_lessons)) }
+                PremiumTextButton(onClick = onGeri) { Text(stringResource(R.string.topic_back_to_lessons)) }
                 Text(
                     stringResource(R.string.image_maintenance_title),
                     style = MaterialTheme.typography.headlineSmall,
@@ -93,7 +93,7 @@ fun GorselBakimEkrani(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 22.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Button(onClick = ::runAudit, enabled = !loading) { Text(stringResource(R.string.image_audit_action)) }
+                PremiumButton(onClick = ::runAudit, enabled = !loading) { Text(stringResource(R.string.image_audit_action)) }
             }
             if (loading) {
                 Column(
@@ -145,7 +145,7 @@ fun GorselBakimEkrani(
                                 )
                             }
                             item {
-                                Button(onClick = { confirmDelete = true }) {
+                                PremiumButton(onClick = { confirmDelete = true }) {
                                     Text(stringResource(R.string.image_orphan_delete_action, current.onayBekleyenYetimler.size))
                                 }
                             }
@@ -166,7 +166,7 @@ fun GorselBakimEkrani(
             title = { Text(stringResource(R.string.image_orphan_confirm_title)) },
             text = { Text(stringResource(R.string.image_orphan_confirm, selectedNames.size)) },
             confirmButton = {
-                TextButton(onClick = {
+                PremiumTextButton(onClick = {
                     confirmDelete = false
                     scope.launch {
                         try {
@@ -181,7 +181,7 @@ fun GorselBakimEkrani(
                     }
                 }) { Text(stringResource(R.string.image_orphan_delete_confirm)) }
             },
-            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.topic_cancel)) } },
+            dismissButton = { PremiumTextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.topic_cancel)) } },
         )
     }
 }

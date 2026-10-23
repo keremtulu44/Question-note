@@ -15,13 +15,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -29,8 +29,8 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.key
@@ -70,6 +70,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.data.export.GeriYuklemeOnizlemesi
@@ -97,6 +98,8 @@ import com.keremtulu.questionnote.ui.tema.LocalHareketPolitikasi
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
+import com.keremtulu.questionnote.ui.premium.PremiumTextButton
+import com.keremtulu.questionnote.ui.premium.PremiumButton
 
 private sealed interface UygulamaEkrani {
     data object Bugun : UygulamaEkrani
@@ -397,7 +400,40 @@ fun YanlisDefteriUygulamasi(
     val hareketPolitikasi = LocalHareketPolitikasi.current
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        snackbarHost = {
+            SnackbarHost(snackbarHostState) { data ->
+                Surface(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                    shape = MaterialTheme.shapes.medium,
+                    color = MaterialTheme.colorScheme.inverseSurface,
+                    contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+                    shadowElevation = 6.dp,
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
+                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            data.visuals.message,
+                            modifier = Modifier.weight(1f),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                        data.visuals.actionLabel?.let { etiket ->
+                            PremiumTextButton(
+                                onClick = { data.performAction() },
+                                interactionTur = com.keremtulu.questionnote.ui.premium.EtkilesimTuru.GERI,
+                            ) {
+                                Text(
+                                    etiket,
+                                    color = MaterialTheme.colorScheme.inversePrimary,
+                                    fontWeight = FontWeight.SemiBold,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        },
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             if (altMenuGorunur) {
@@ -623,7 +659,7 @@ fun YanlisDefteriUygulamasi(
             title = { Text(stringResource(R.string.filtered_practice_exit_title)) },
             text = { Text(stringResource(R.string.filtered_practice_exit_message, kalanSoru)) },
             confirmButton = {
-                TextButton(
+                PremiumTextButton(
                     onClick = {
                         bekleyenOturum = oturum
                         oturumCikisHedefi = null
@@ -632,7 +668,7 @@ fun YanlisDefteriUygulamasi(
                 ) { Text(stringResource(R.string.filtered_practice_exit_confirm)) }
             },
             dismissButton = {
-                TextButton(onClick = { oturumCikisHedefi = null }) {
+                PremiumTextButton(onClick = { oturumCikisHedefi = null }) {
                     Text(stringResource(R.string.filtered_practice_exit_cancel))
                 }
             },
@@ -671,7 +707,7 @@ fun YanlisDefteriUygulamasi(
                 }
             },
             confirmButton = {
-                Button(
+                PremiumButton(
                     enabled = !yedeklemeIslemde,
                     onClick = {
                         scope.launch {
@@ -719,7 +755,7 @@ fun YanlisDefteriUygulamasi(
                 ) { Text(stringResource(if (yedeklemeIslemde) R.string.topic_saving else R.string.backup_restore_action)) }
             },
             dismissButton = {
-                TextButton(enabled = !yedeklemeIslemde, onClick = {
+                PremiumTextButton(enabled = !yedeklemeIslemde, onClick = {
                     geriYuklemeOnizlemesi = null
                     scope.launch { disaAktarmaHizmeti.hazirlananYedegiIptalEt(preview.id) }
                 }) { Text(stringResource(R.string.topic_cancel)) }
@@ -788,7 +824,7 @@ private fun UygulamaDurumEkrani(
         if (yukleniyor) CircularProgressIndicator()
         Text(metin, modifier = Modifier.padding(top = 16.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
         tekrarDene?.let { retry ->
-            TextButton(onClick = retry) { Text(stringResource(R.string.backup_restore_retry)) }
+            PremiumTextButton(onClick = retry) { Text(stringResource(R.string.backup_restore_retry)) }
         }
     }
 }

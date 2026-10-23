@@ -5,9 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -22,6 +20,8 @@ import com.keremtulu.questionnote.data.prefs.TekrarPolitikasiDeposu
 import com.keremtulu.questionnote.domain.repeat.TekrarMotorModu
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
+import com.keremtulu.questionnote.ui.premium.PremiumOutlinedButton
+import com.keremtulu.questionnote.ui.premium.PremiumCard
 
 @Composable
 fun MotorAyarlariKarti(depo: TekrarPolitikasiDeposu, taniHizmeti: com.keremtulu.questionnote.data.gelisim.MotorTaniHizmeti? = null) {
@@ -43,13 +43,13 @@ fun MotorAyarlariKarti(depo: TekrarPolitikasiDeposu, taniHizmeti: com.keremtulu.
             }
         }
     }
-    Card(Modifier.fillMaxWidth()) {
+    PremiumCard(modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(stringResource(R.string.motor_title), style = MaterialTheme.typography.titleMedium)
             Text(stringResource(R.string.motor_shadow_note), style = MaterialTheme.typography.bodySmall)
             TekrarMotorModu.entries.forEach { mod ->
                 val acik = mod != TekrarMotorModu.ETKIN || ayar.kapi.etkinAcik
-                OutlinedButton(onClick = {
+                PremiumOutlinedButton(onClick = {
                     if (!mesgul) {
                         mesgul = true
                         scope.launch {
@@ -81,7 +81,7 @@ fun MotorAyarlariKarti(depo: TekrarPolitikasiDeposu, taniHizmeti: com.keremtulu.
                 Text(stringResource(R.string.motor_diagnostics_note), style = MaterialTheme.typography.bodySmall)
             }
             if (taniHatasi) Text(stringResource(R.string.motor_diagnostics_error), color = MaterialTheme.colorScheme.error)
-            if (taniHizmeti != null) OutlinedButton(onClick = { taniYenile++ }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+            if (taniHizmeti != null) PremiumOutlinedButton(onClick = { taniYenile++ }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
                 Text(stringResource(R.string.motor_refresh_diagnostics))
             }
         }

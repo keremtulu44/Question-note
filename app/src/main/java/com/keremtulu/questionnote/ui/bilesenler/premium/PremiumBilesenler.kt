@@ -64,6 +64,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import com.keremtulu.questionnote.R
+import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
 import com.keremtulu.questionnote.ui.animasyon.Parcacik
 import com.keremtulu.questionnote.ui.animasyon.ParcacikSekli
 import com.keremtulu.questionnote.ui.animasyon.animateFloatPremium
@@ -418,6 +419,7 @@ fun AdimIlerlemeGostergesi(
                                     color = if (active) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
+                                    fontFamily = PremiumSembolAilesi,
                                 )
                             }
                         }

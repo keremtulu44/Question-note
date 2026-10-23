@@ -11,11 +11,9 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,9 +28,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.keremtulu.questionnote.R
+import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
 import com.keremtulu.questionnote.domain.seviye.Rutbe
 import com.keremtulu.questionnote.domain.seviye.SeviyeDurumu
 import com.keremtulu.questionnote.domain.seviye.SeviyeHesabi
+import com.keremtulu.questionnote.ui.premium.PremiumTextButton
+import com.keremtulu.questionnote.ui.premium.PremiumCard
 
 @Composable
 fun RutbeYolculugu(durum: SeviyeDurumu, baslikGoster: Boolean = true) {
@@ -45,7 +46,7 @@ fun RutbeYolculugu(durum: SeviyeDurumu, baslikGoster: Boolean = true) {
         LazyRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             items(Rutbe.entries.toList(), key = { it.anahtar }) { rutbe ->
                 val aktif = durum.seviye >= rutbe.baslangicSeviye
-                Card(onClick = { detay = rutbe }, modifier = Modifier.width(kartGenisligi), shape = RoundedCornerShape(22.dp),
+                PremiumCard(onClick = { detay = rutbe }, modifier = Modifier.width(kartGenisligi), shape = RoundedCornerShape(22.dp),
                     colors = CardDefaults.cardColors(containerColor = if (rutbe == durum.rutbe) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface)) {
                     Column(Modifier.fillMaxWidth().padding(14.dp), horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -53,7 +54,8 @@ fun RutbeYolculugu(durum: SeviyeDurumu, baslikGoster: Boolean = true) {
                             modifier = Modifier.size(80.dp).alpha(if (aktif) 1f else 0.45f))
                         Text(rutbe.ad, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                         Text(stringResource(R.string.level_number, rutbe.baslangicSeviye), style = MaterialTheme.typography.labelSmall)
-                        Text(if (aktif) "✓" else "◇", color = MaterialTheme.colorScheme.primary)
+                        if (aktif) Text("✓", color = MaterialTheme.colorScheme.primary, fontFamily = PremiumSembolAilesi)
+                            else Text("◊", color = MaterialTheme.colorScheme.primary)
                     }
                 }
             }
@@ -72,7 +74,7 @@ fun RutbeYolculugu(durum: SeviyeDurumu, baslikGoster: Boolean = true) {
                     else Text(stringResource(R.string.rank_remaining, esik - durum.toplamXp))
                 }
             },
-            confirmButton = { TextButton(onClick = { detay = null }) { Text(stringResource(R.string.common_back)) } },
+            confirmButton = { PremiumTextButton(onClick = { detay = null }) { Text(stringResource(R.string.common_back)) } },
         )
     }
 }

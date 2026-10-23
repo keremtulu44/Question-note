@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -53,6 +52,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.keremtulu.questionnote.ui.premium.PremiumButton
 
 @Composable
 fun RozetKutlamaHost(depo: RozetDeposu, goster: Boolean) {
@@ -136,7 +136,7 @@ private fun RozetKutlamasi(rozet: Rozet, kalan: Int, kapanis: Boolean, hata: Boo
                 Text(stringResource(R.string.badge_celebrate_xp), color = altin, style = MaterialTheme.typography.titleSmall)
                 if (kalan > 1) Text(stringResource(R.string.karne_badge_more, kalan - 1), color = Color.White.copy(alpha = 0.65f))
                 if (hata) Text(stringResource(R.string.badge_celebrate_error), color = altin)
-                Button(onClick = onKapat, enabled = !kapanis, modifier = Modifier.fillMaxWidth(),
+                PremiumButton(onClick = onKapat, enabled = !kapanis, modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = altin, contentColor = Color(0xFF152536))) {
                     Text(stringResource(R.string.badge_celebrate_continue), modifier = Modifier.padding(vertical = 6.dp))
                 }

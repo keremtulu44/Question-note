@@ -9,13 +9,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -33,6 +31,8 @@ import com.keremtulu.questionnote.domain.repository.DersRepository
 import com.keremtulu.questionnote.domain.repository.KonuRepository
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import com.keremtulu.questionnote.ui.premium.PremiumTextButton
+import com.keremtulu.questionnote.ui.premium.PremiumCard
 
 private data class KonuMerkeziSatiri(val ders: Ders, val arsivli: Boolean, val konuSayisi: Int)
 
@@ -65,7 +65,7 @@ fun KonuMerkeziEkrani(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item {
-                TextButton(onClick = onGeri) { Text(stringResource(R.string.common_back)) }
+                PremiumTextButton(onClick = onGeri) { Text(stringResource(R.string.common_back)) }
                 Text(stringResource(R.string.settings_topics), style = MaterialTheme.typography.headlineMedium)
                 Text(stringResource(R.string.topics_center_note), style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -75,14 +75,14 @@ fun KonuMerkeziEkrani(
                     label = { Text(stringResource(R.string.topics_search)) }, singleLine = true)
             }
             if (hata) {
-                item { TextButton(onClick = { yenile++ }) { Text(stringResource(R.string.topic_retry)) } }
+                item { PremiumTextButton(onClick = { yenile++ }) { Text(stringResource(R.string.topic_retry)) } }
             } else if (dersler == null) {
                 item { CircularProgressIndicator() }
             } else {
                 val bulunanlar = dersler.orEmpty().filter { it.ders.ad.contains(arama, ignoreCase = true) }
                 if (bulunanlar.isEmpty()) item { Text(stringResource(R.string.topics_search_empty)) }
                 items(bulunanlar, key = { it.ders.id }) { satir ->
-                    Card(onClick = { onDers(satir.ders) }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp)) {
+                    PremiumCard(onClick = { onDers(satir.ders) }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp)) {
                         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Text(satir.ders.ad, style = MaterialTheme.typography.titleMedium)
                             Text(stringResource(R.string.topics_center_count, satir.konuSayisi, satir.ders.soruSayisi),

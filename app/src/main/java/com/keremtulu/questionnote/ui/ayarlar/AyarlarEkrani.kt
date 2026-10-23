@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.keremtulu.questionnote.BuildConfig
 import com.keremtulu.questionnote.R
+import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
 import com.keremtulu.questionnote.data.export.SonYedekBilgisi
 import com.keremtulu.questionnote.data.prefs.SinavProfiliDeposu
 import com.keremtulu.questionnote.data.prefs.TercihGunlukHedefDeposu
@@ -165,7 +166,8 @@ fun AyarlarEkrani(
                                 Text(profil.aciklama, color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     style = MaterialTheme.typography.bodySmall)
                             }
-                            Text(if (secim.profil == profil) "✓" else "›", style = MaterialTheme.typography.titleLarge)
+                            if (secim.profil == profil) Text("✓", style = MaterialTheme.typography.titleLarge, fontFamily = PremiumSembolAilesi)
+                                else Text("›", style = MaterialTheme.typography.titleLarge)
                         }
                     }
                     if (secim.profil.dersAdlari.isNotEmpty()) {

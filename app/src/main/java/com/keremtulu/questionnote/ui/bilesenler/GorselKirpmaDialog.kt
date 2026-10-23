@@ -19,13 +19,10 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -59,6 +56,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.math.min
 import kotlin.math.roundToInt
+import com.keremtulu.questionnote.ui.premium.PremiumTextButton
+import com.keremtulu.questionnote.ui.premium.PremiumOutlinedButton
+import com.keremtulu.questionnote.ui.premium.PremiumButton
 
 /** Normalized crop bounds; these coordinates correspond to the orientation-corrected preview. */
 data class GorselKirpmaAlani(
@@ -128,7 +128,7 @@ fun GorselKirpmaDialog(
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                     )
-                    TextButton(onClick = onDismiss, enabled = !isSaving) {
+                    PremiumTextButton(onClick = onDismiss, enabled = !isSaving) {
                         Text(stringResource(R.string.common_close))
                     }
                 }
@@ -195,7 +195,7 @@ fun GorselKirpmaDialog(
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                    TextButton(
+                    PremiumTextButton(
                         onClick = { selection = GorselKirpmaAlani.Tamami },
                         enabled = !isSaving && bitmap != null,
                     ) { Text(stringResource(R.string.question_form_crop_reset)) }
@@ -204,12 +204,12 @@ fun GorselKirpmaDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    OutlinedButton(
+                    PremiumOutlinedButton(
                         onClick = onDismiss,
                         enabled = !isSaving,
                         modifier = Modifier.weight(1f).height(52.dp),
                     ) { Text(stringResource(R.string.question_form_cancel)) }
-                    Button(
+                    PremiumButton(
                         onClick = { onApply(selection) },
                         enabled = cropReady && !isSaving,
                         modifier = Modifier.weight(1f).height(52.dp),
