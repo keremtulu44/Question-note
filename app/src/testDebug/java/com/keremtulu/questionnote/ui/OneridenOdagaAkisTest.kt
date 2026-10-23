@@ -94,7 +94,11 @@ class OneridenOdagaAkisTest {
             ilerlemeyiBekle()
             compose.onNodeWithTag("progress-list").performScrollToNode(hasTestTag("analysis-action"))
             compose.onNodeWithTag("analysis-action").tikla()
-            compose.onNodeWithText(context.getString(R.string.analysis_filter_due), useUnmergedTree = true).assertExists()
+            val dueFilter = context.getString(R.string.analysis_filter_due)
+            compose.waitUntil(10_000) {
+                compose.onAllNodes(hasText(dueFilter), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
+            }
+            compose.onNodeWithText(dueFilter, useUnmergedTree = true).assertExists()
             val start = context.getString(R.string.filtered_practice_start)
             compose.onNodeWithTag("practice-filter-list").performScrollToNode(hasText(start))
             compose.waitUntil(10_000) { compose.onAllNodes(hasText(start) and isEnabled()).fetchSemanticsNodes().isNotEmpty() }
