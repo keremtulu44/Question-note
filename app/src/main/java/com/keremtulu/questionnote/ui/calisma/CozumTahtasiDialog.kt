@@ -250,6 +250,7 @@ fun CozumTahtasiDialog(
 
                 BoxWithConstraints(Modifier.fillMaxWidth().weight(1f)) {
                     val landscape = maxWidth > maxHeight && maxWidth >= 480.dp
+                    val compactControls = maxWidth >= 760.dp
                     if (landscape) {
                         Row(
                             modifier = Modifier.fillMaxSize(),
@@ -271,7 +272,7 @@ fun CozumTahtasiDialog(
                                 renk = renk,
                                 kalinlik = kalinlik,
                                 compact = true,
-                                brushTekSatir = maxWidth >= 760.dp,
+                                brushTekSatir = compactControls,
                                 gorselDeposu = gorselDeposu,
                                 soruGorseli = seciliGorsel,
                                 soruUzerindeCizim = soruUzerindeCizim,
