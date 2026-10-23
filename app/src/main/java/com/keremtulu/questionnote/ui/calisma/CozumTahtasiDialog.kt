@@ -341,7 +341,7 @@ fun CozumTahtasiDialog(
                         )
                     }
 
-                    AnimatedVisibility(
+                    SoruPaneliAnimasyonu(
                         visible = soruPaneliAcik,
                         modifier = Modifier.matchParentSize(),
                         enter = perdeGirisi,
@@ -355,7 +355,7 @@ fun CozumTahtasiDialog(
                                 .testTag("whiteboard-question-scrim"),
                         )
                     }
-                    AnimatedVisibility(
+                    SoruPaneliAnimasyonu(
                         visible = soruPaneliAcik,
                         modifier = Modifier.align(Alignment.BottomCenter)
                             .fillMaxWidth()
@@ -395,6 +395,24 @@ fun CozumTahtasiDialog(
                 TextButton(onClick = { temizlemeOnayi = false }) { Text(stringResource(R.string.question_form_cancel)) }
             },
         )
+    }
+}
+
+@Composable
+private fun SoruPaneliAnimasyonu(
+    visible: Boolean,
+    modifier: Modifier,
+    enter: EnterTransition,
+    exit: ExitTransition,
+    content: @Composable () -> Unit,
+) {
+    AnimatedVisibility(
+        visible = visible,
+        modifier = modifier,
+        enter = enter,
+        exit = exit,
+    ) {
+        content()
     }
 }
 
