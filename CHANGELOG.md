@@ -2,6 +2,12 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.5.96] — 2026-10-23
+
+- **Çözüm Atölyesi:** beyaz tahta ekranı, daha belirgin soru/çizim çalışma alanı ve seçili araç durumu olan bir düzene getirildi. Yatay görünümde araçlar, renk/kalınlık ve geri al/yinele/temizle kontrolleri kompakt bir çalışma çubuğunda birleşir; dikey görünümde açıklamalı kontrol grupları korunur.
+- Tahta zemini ve soru önizlemesi iyileştirildi. Erişilebilir araç seçimi ve buton açıklamaları korunurken soru görselleri, çizim katmanları, ayrı geri alma geçmişleri, tekrar aralıkları ve haftalık inceleme davranışı değiştirilmedi.
+- Sürüm: `versionCode 26` / `versionName 1.5.96` — v1.5.95 üzerine, aynı uygulama kimliği ve imzalama anahtarıyla güncelleme.
+
 ## [1.5.95] — 2026-10-23
 
 - **Çözüm tahtası kullanılabilirliği:** yatay ekranda soru ve tahta yan yana; dikey ekranda küçük üst simgeden açılan, kaydırılabilir ve ekranı tamamen kaplamayan soru paneli. Soru sayfasına dokununca aynı tahta üzerinde çizim yapılabilir; simgeyle tekrar tahtaya dönülür.

@@ -81,6 +81,30 @@ class CozumTahtasiKullanimTest {
 
         compose.onNodeWithTag("whiteboard-question-image-${image.id}").assertIsDisplayed()
         compose.onNodeWithTag("solution-whiteboard-canvas").assertIsDisplayed()
+        compose.onNodeWithTag("whiteboard-style-dock").assertIsDisplayed()
+        compose.onNodeWithTag("whiteboard-actions").assertIsDisplayed()
+    }
+
+    @Test
+    fun drawingDockHasClearToolSelectionAndGroupedStyleControls() {
+        val depot = LocalSoruGorselDeposu(context)
+        compose.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                CozumTahtasiDialog(
+                    soru = soru(),
+                    gorselDeposu = depot,
+                    visible = true,
+                    onDismiss = {},
+                )
+            }
+        }
+
+        compose.onNodeWithTag("whiteboard-tool-palette").assertIsDisplayed()
+        compose.onNodeWithTag("whiteboard-style-dock").assertIsDisplayed()
+        compose.onNodeWithTag("whiteboard-actions").assertIsDisplayed()
+        compose.onNodeWithTag("whiteboard-tool-kalem").assertIsSelected()
+        compose.onNodeWithTag("whiteboard-tool-silgi").performClick().assertIsSelected()
+        compose.onNodeWithTag("whiteboard-tool-kalem").assertIsNotSelected()
     }
 
     @Test

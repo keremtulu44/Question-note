@@ -8,6 +8,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
@@ -39,7 +40,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -54,11 +54,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.Path
@@ -87,6 +89,7 @@ import com.keremtulu.questionnote.domain.model.GorselTuru
 import com.keremtulu.questionnote.domain.model.Soru
 import com.keremtulu.questionnote.domain.model.SoruGorseli
 import com.keremtulu.questionnote.ui.bilesenler.SoruGorselResmi
+import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 import com.keremtulu.questionnote.ui.tema.HareketTuru
 import com.keremtulu.questionnote.ui.tema.LocalHareketPolitikasi
 import kotlin.math.abs
@@ -227,52 +230,23 @@ fun CozumTahtasiDialog(
         Surface(
             modifier = Modifier.fillMaxSize().padding(8.dp),
             color = colors.background,
-            shape = RoundedCornerShape(26.dp),
-            tonalElevation = 6.dp,
+            shape = RoundedCornerShape(30.dp),
+            tonalElevation = 3.dp,
+            border = BorderStroke(1.dp, colors.outlineVariant.copy(alpha = 0.62f)),
         ) {
             Column(
-                modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing).padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing).padding(14.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Row(
+                TahtaCalismaBasligi(
+                    soruPaneliAcik = soruPaneliAcik,
+                    onSoruPaneliTikla = { soruPaneliAcik = !soruPaneliAcik },
+                    onKapat = {
+                        soruPaneliAcik = false
+                        onDismiss()
+                    },
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Column(Modifier.weight(1f).padding(end = 8.dp)) {
-                        Text(
-                            stringResource(R.string.whiteboard_title),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Text(
-                            stringResource(R.string.whiteboard_subtitle),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = colors.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
-                    IconButton(
-                        onClick = { soruPaneliAcik = !soruPaneliAcik },
-                        modifier = Modifier.testTag("whiteboard-question-preview-toggle").semantics {
-                            contentDescription = context.getString(
-                                if (soruPaneliAcik) R.string.common_close else R.string.question_form_question_images,
-                            )
-                        },
-                    ) {
-                        SoruPaneliDugmeIkonu(acik = soruPaneliAcik)
-                    }
-                    TextButton(
-                        onClick = {
-                            soruPaneliAcik = false
-                            onDismiss()
-                        },
-                        modifier = Modifier.heightIn(min = 48.dp),
-                    ) {
-                        Text(stringResource(R.string.whiteboard_close))
-                    }
-                }
+                )
 
                 BoxWithConstraints(Modifier.fillMaxWidth().weight(1f)) {
                     val landscape = maxWidth > maxHeight && maxWidth >= 480.dp
@@ -296,6 +270,8 @@ fun CozumTahtasiDialog(
                                 arac = arac,
                                 renk = renk,
                                 kalinlik = kalinlik,
+                                compact = true,
+                                brushTekSatir = maxWidth >= 760.dp,
                                 gorselDeposu = gorselDeposu,
                                 soruGorseli = seciliGorsel,
                                 soruUzerindeCizim = soruUzerindeCizim,
@@ -322,6 +298,7 @@ fun CozumTahtasiDialog(
                             arac = arac,
                             renk = renk,
                             kalinlik = kalinlik,
+                            compact = false,
                             gorselDeposu = gorselDeposu,
                             soruGorseli = seciliGorsel,
                             soruUzerindeCizim = soruUzerindeCizim,
@@ -399,6 +376,91 @@ fun CozumTahtasiDialog(
 }
 
 @Composable
+private fun TahtaCalismaBasligi(
+    soruPaneliAcik: Boolean,
+    onSoruPaneliTikla: () -> Unit,
+    onKapat: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val shape = RoundedCornerShape(22.dp)
+    val panelButtonLabel = stringResource(
+        if (soruPaneliAcik) R.string.common_close else R.string.question_form_question_images,
+    )
+    val closeLabel = stringResource(R.string.whiteboard_close)
+    Box(
+        modifier = modifier
+            .clip(shape)
+            .background(Brush.horizontalGradient(listOf(PremiumMarkaRenkler.MurekkepKoyu, PremiumMarkaRenkler.MurekkepAcik)))
+            .border(1.dp, PremiumMarkaRenkler.BakirIsik.copy(alpha = 0.34f), shape),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 11.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Surface(
+                shape = RoundedCornerShape(14.dp),
+                color = PremiumMarkaRenkler.DenizAcik.copy(alpha = 0.16f),
+            ) {
+                Box(Modifier.size(42.dp), contentAlignment = Alignment.Center) {
+                    TahtaAraciIkonu(TahtaAraci.KALEM, PremiumMarkaRenkler.DenizAcik, Modifier.size(24.dp))
+                }
+            }
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                Text(
+                    stringResource(R.string.whiteboard_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    stringResource(R.string.whiteboard_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.White.copy(alpha = 0.76f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            IconButton(
+                onClick = onSoruPaneliTikla,
+                modifier = Modifier.size(46.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.12f))
+                    .testTag("whiteboard-question-preview-toggle")
+                    .semantics { contentDescription = panelButtonLabel },
+            ) {
+                SoruPaneliDugmeIkonu(acik = soruPaneliAcik, color = Color.White)
+            }
+            IconButton(
+                onClick = onKapat,
+                modifier = Modifier.size(46.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.12f))
+                    .testTag("whiteboard-close")
+                    .semantics { contentDescription = closeLabel },
+            ) {
+                TahtaKapatIkonu(Color.White)
+            }
+        }
+    }
+}
+
+@Composable
+private fun TahtaKapatIkonu(color: Color) {
+    Canvas(Modifier.size(20.dp)) {
+        val inset = size.minDimension * 0.24f
+        val stroke = 2.dp.toPx()
+        drawLine(color, Offset(inset, inset), Offset(size.width - inset, size.height - inset), strokeWidth = stroke, cap = StrokeCap.Round)
+        drawLine(color, Offset(size.width - inset, inset), Offset(inset, size.height - inset), strokeWidth = stroke, cap = StrokeCap.Round)
+    }
+}
+
+@Composable
 private fun SoruPaneliAnimasyonu(
     visible: Boolean,
     modifier: Modifier,
@@ -417,8 +479,10 @@ private fun SoruPaneliAnimasyonu(
 }
 
 @Composable
-private fun SoruPaneliDugmeIkonu(acik: Boolean) {
-    val color = MaterialTheme.colorScheme.onSurface
+private fun SoruPaneliDugmeIkonu(
+    acik: Boolean,
+    color: Color = MaterialTheme.colorScheme.onSurface,
+) {
     Canvas(Modifier.size(22.dp)) {
         val stroke = 1.8.dp.toPx()
         val center = Offset(size.width * 0.4f, size.height * 0.4f)
@@ -462,12 +526,13 @@ private fun SoruOnizlemesi(
     val colors = MaterialTheme.colorScheme
     Surface(
         modifier = modifier,
-        color = colors.surfaceVariant.copy(alpha = 0.62f),
-        shape = RoundedCornerShape(20.dp),
-        tonalElevation = 1.dp,
+        color = colors.surface,
+        shape = RoundedCornerShape(22.dp),
+        border = BorderStroke(1.dp, colors.outlineVariant.copy(alpha = 0.72f)),
+        tonalElevation = 2.dp,
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(10.dp),
+            modifier = Modifier.fillMaxSize().padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             Text(
@@ -662,6 +727,645 @@ private fun SoruOnizlemeGorseli(
 }
 
 @Composable
+private fun TahtaYuzeySecici(
+    soruUzerindeCizim: Boolean,
+    soruZeminiKullanilabilir: Boolean,
+    kompakt: Boolean,
+    arac: TahtaAraci,
+    onClick: () -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    val title = stringResource(if (soruUzerindeCizim) R.string.whiteboard_surface_question else R.string.whiteboard_surface_blank)
+    val action = stringResource(
+        if (soruUzerindeCizim) R.string.whiteboard_surface_switch_to_blank else R.string.whiteboard_surface_switch_to_question,
+    )
+    val enabled = soruUzerindeCizim || soruZeminiKullanilabilir
+    Surface(
+        modifier = Modifier.fillMaxWidth()
+            .testTag("whiteboard-surface-toggle")
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+            .semantics {
+                contentDescription = action
+                stateDescription = title
+            },
+        shape = RoundedCornerShape(if (kompakt) 15.dp else 18.dp),
+        color = if (soruUzerindeCizim) colors.primaryContainer else colors.surface,
+        border = BorderStroke(
+            1.dp,
+            if (soruUzerindeCizim) colors.primary.copy(alpha = 0.28f) else colors.outlineVariant.copy(alpha = 0.72f),
+        ),
+        tonalElevation = 1.dp,
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth()
+                .heightIn(min = if (kompakt) 42.dp else 54.dp)
+                .padding(horizontal = 12.dp, vertical = if (kompakt) 6.dp else 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Box(
+                Modifier.size(if (kompakt) 28.dp else 34.dp)
+                    .clip(CircleShape)
+                    .background(colors.primary.copy(alpha = 0.10f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                TahtaYuzeyIkonu(soruUzerindeCizim, colors.primary, Modifier.size(18.dp))
+            }
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
+                Text(title, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, maxLines = 1)
+                Text(
+                    if (kompakt) stringResource(arac.stringResource()) else action,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = colors.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            TahtaYuzeyGecisIkonu(soruUzerindeCizim, colors.primary)
+        }
+    }
+}
+
+@Composable
+private fun TahtaYuzeyIkonu(soruUzerinde: Boolean, color: Color, modifier: Modifier = Modifier) {
+    Canvas(modifier) {
+        val stroke = 1.7.dp.toPx()
+        val left = size.width * 0.16f
+        val top = size.height * 0.12f
+        val width = size.width * 0.68f
+        val height = size.height * 0.76f
+        drawRoundRect(
+            color = color,
+            topLeft = Offset(left, top),
+            size = Size(width, height),
+            cornerRadius = androidx.compose.ui.geometry.CornerRadius(3.dp.toPx()),
+            style = Stroke(width = stroke),
+        )
+        if (soruUzerinde) {
+            drawLine(color, Offset(left + width * 0.22f, top + height * 0.28f), Offset(left + width * 0.78f, top + height * 0.28f), strokeWidth = stroke)
+            drawLine(color, Offset(left + width * 0.22f, top + height * 0.52f), Offset(left + width * 0.62f, top + height * 0.52f), strokeWidth = stroke)
+        } else {
+            drawLine(color, Offset(left + width * 0.18f, top + height * 0.70f), Offset(left + width * 0.82f, top + height * 0.70f), strokeWidth = stroke)
+        }
+    }
+}
+
+@Composable
+private fun TahtaYuzeyGecisIkonu(soruUzerinde: Boolean, color: Color) {
+    Canvas(Modifier.size(width = 22.dp, height = 18.dp)) {
+        val stroke = 1.8.dp.toPx()
+        val y = size.height / 2f
+        if (soruUzerinde) {
+            drawLine(color, Offset(size.width * 0.82f, y), Offset(size.width * 0.18f, y), strokeWidth = stroke, cap = StrokeCap.Round)
+            drawLine(color, Offset(size.width * 0.18f, y), Offset(size.width * 0.42f, y - size.height * 0.28f), strokeWidth = stroke, cap = StrokeCap.Round)
+            drawLine(color, Offset(size.width * 0.18f, y), Offset(size.width * 0.42f, y + size.height * 0.28f), strokeWidth = stroke, cap = StrokeCap.Round)
+        } else {
+            drawLine(color, Offset(size.width * 0.18f, y), Offset(size.width * 0.82f, y), strokeWidth = stroke, cap = StrokeCap.Round)
+            drawLine(color, Offset(size.width * 0.82f, y), Offset(size.width * 0.58f, y - size.height * 0.28f), strokeWidth = stroke, cap = StrokeCap.Round)
+            drawLine(color, Offset(size.width * 0.82f, y), Offset(size.width * 0.58f, y + size.height * 0.28f), strokeWidth = stroke, cap = StrokeCap.Round)
+        }
+    }
+}
+
+@Composable
+private fun TahtaAracPaleti(
+    seciliArac: TahtaAraci,
+    soruUzerindeCizim: Boolean,
+    soruZeminiKullanilabilir: Boolean,
+    kompakt: Boolean,
+    onYuzeyDegistir: () -> Unit,
+    onAracSec: (TahtaAraci) -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    Surface(
+        modifier = Modifier.fillMaxWidth().testTag("whiteboard-tool-palette"),
+        shape = RoundedCornerShape(21.dp),
+        color = colors.surface,
+        border = BorderStroke(1.dp, colors.outlineVariant.copy(alpha = 0.72f)),
+        tonalElevation = 2.dp,
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
+                .padding(if (kompakt) 4.dp else 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(if (kompakt) 2.dp else 5.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (kompakt) {
+                TahtaKompaktYuzeyDugmesi(
+                    soruUzerindeCizim = soruUzerindeCizim,
+                    soruZeminiKullanilabilir = soruZeminiKullanilabilir,
+                    onClick = onYuzeyDegistir,
+                )
+            }
+            TahtaAraci.entries.forEach { tool ->
+                TahtaAraciDugmesi(
+                    arac = tool,
+                    secili = tool == seciliArac,
+                    kompakt = kompakt,
+                    onClick = { onAracSec(tool) },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun TahtaKompaktYuzeyDugmesi(
+    soruUzerindeCizim: Boolean,
+    soruZeminiKullanilabilir: Boolean,
+    onClick: () -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    val title = stringResource(if (soruUzerindeCizim) R.string.whiteboard_surface_question else R.string.whiteboard_surface_blank)
+    val action = stringResource(
+        if (soruUzerindeCizim) R.string.whiteboard_surface_switch_to_blank else R.string.whiteboard_surface_switch_to_question,
+    )
+    val enabled = soruUzerindeCizim || soruZeminiKullanilabilir
+    val shape = RoundedCornerShape(14.dp)
+    Surface(
+        modifier = Modifier.size(48.dp)
+            .testTag("whiteboard-surface-toggle")
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+            .semantics {
+                contentDescription = action
+                stateDescription = title
+            },
+        shape = shape,
+        color = if (soruUzerindeCizim) colors.primaryContainer else colors.surfaceVariant.copy(alpha = 0.56f),
+        border = BorderStroke(1.dp, colors.outlineVariant.copy(alpha = 0.65f)),
+        tonalElevation = 1.dp,
+    ) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            TahtaYuzeyIkonu(soruUzerindeCizim, colors.primary, Modifier.size(20.dp))
+        }
+    }
+}
+
+@Composable
+private fun TahtaAraciDugmesi(
+    arac: TahtaAraci,
+    secili: Boolean,
+    kompakt: Boolean,
+    onClick: () -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    val label = stringResource(arac.stringResource())
+    val shape = RoundedCornerShape(if (kompakt) 14.dp else 16.dp)
+    val buttonModifier = Modifier.width(
+        when {
+            !kompakt -> 60.dp
+            secili -> 92.dp
+            else -> 44.dp
+        },
+    ).height(if (kompakt) 44.dp else 62.dp)
+        .clip(shape)
+        .background(if (secili) colors.primaryContainer else Color.Transparent)
+        .border(
+            1.dp,
+            if (secili) colors.primary.copy(alpha = 0.26f) else colors.outlineVariant.copy(alpha = 0.24f),
+            shape,
+        )
+        .clickable(role = Role.RadioButton, onClick = onClick)
+        .semantics {
+            contentDescription = label
+            selected = secili
+            role = Role.RadioButton
+        }
+        .testTag("whiteboard-tool-${arac.name.lowercase()}")
+    if (kompakt && secili) {
+        Row(
+            modifier = buttonModifier.padding(horizontal = 7.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            TahtaAraciIkonu(
+                arac = arac,
+                color = colors.onPrimaryContainer,
+                modifier = Modifier.size(20.dp),
+            )
+            Text(
+                label,
+                style = MaterialTheme.typography.labelSmall,
+                color = colors.onPrimaryContainer,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+    } else {
+        Column(
+            modifier = buttonModifier,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            TahtaAraciIkonu(
+                arac = arac,
+                color = if (secili) colors.onPrimaryContainer else colors.onSurfaceVariant,
+                modifier = Modifier.size(if (kompakt) 20.dp else 22.dp),
+            )
+            if (!kompakt) {
+                Text(
+                    label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (secili) colors.onPrimaryContainer else colors.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun TahtaAraciIkonu(arac: TahtaAraci, color: Color, modifier: Modifier = Modifier) {
+    Canvas(modifier) {
+        val stroke = 2.dp.toPx()
+        val left = size.width * 0.18f
+        val right = size.width * 0.82f
+        val top = size.height * 0.18f
+        val bottom = size.height * 0.82f
+        when (arac) {
+            TahtaAraci.KALEM -> {
+                val path = Path().apply {
+                    moveTo(left, bottom)
+                    lineTo(right * 0.78f, top * 1.18f)
+                    lineTo(right, top)
+                    lineTo(left * 1.34f, bottom * 0.78f)
+                    close()
+                }
+                drawPath(path, color, style = Stroke(width = stroke, join = StrokeJoin.Round))
+                drawLine(color, Offset(left * 1.18f, bottom * 0.84f), Offset(left, bottom), strokeWidth = stroke, cap = StrokeCap.Round)
+            }
+            TahtaAraci.CIZGI -> drawLine(
+                color,
+                Offset(left, bottom),
+                Offset(right, top),
+                strokeWidth = stroke,
+                cap = StrokeCap.Round,
+            )
+            TahtaAraci.DIKDORTGEN -> drawRoundRect(
+                color,
+                topLeft = Offset(left, top),
+                size = Size(right - left, bottom - top),
+                cornerRadius = androidx.compose.ui.geometry.CornerRadius(2.dp.toPx()),
+                style = Stroke(width = stroke),
+            )
+            TahtaAraci.UCGEN -> {
+                val path = Path().apply {
+                    moveTo(size.width * 0.5f, top)
+                    lineTo(right, bottom)
+                    lineTo(left, bottom)
+                    close()
+                }
+                drawPath(path, color, style = Stroke(width = stroke, join = StrokeJoin.Round))
+            }
+            TahtaAraci.SILGI -> {
+                val path = Path().apply {
+                    moveTo(size.width * 0.34f, top)
+                    lineTo(right, size.height * 0.50f)
+                    lineTo(size.width * 0.66f, bottom)
+                    lineTo(left, size.height * 0.50f)
+                    close()
+                }
+                drawPath(path, color, style = Stroke(width = stroke, join = StrokeJoin.Round))
+                drawLine(color, Offset(size.width * 0.50f, size.height * 0.27f), Offset(size.width * 0.80f, size.height * 0.62f), strokeWidth = stroke)
+            }
+        }
+    }
+}
+
+@Composable
+private fun TahtaCizimStili(
+    seciliRenk: Color,
+    kalinlik: Float,
+    tekSatir: Boolean,
+    kompakt: Boolean,
+    onRenkSec: (Color) -> Unit,
+    onKalinlikSec: (Float) -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    Surface(
+        modifier = Modifier.fillMaxWidth().testTag("whiteboard-style-dock"),
+        shape = RoundedCornerShape(18.dp),
+        color = colors.surface,
+        border = BorderStroke(1.dp, colors.outlineVariant.copy(alpha = 0.68f)),
+        tonalElevation = 1.dp,
+    ) {
+        if (tekSatir) {
+            Row(
+                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
+                    .padding(horizontal = 9.dp, vertical = 5.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(3.dp),
+            ) {
+                Text(stringResource(R.string.whiteboard_color_label), style = MaterialTheme.typography.labelSmall)
+                TahtaKalemRenkleri.forEach { item ->
+                    TahtaRenkSecimi(item, selected = seciliRenk == item.renk, targetSize = 40.dp) {
+                        onRenkSec(item.renk)
+                    }
+                }
+                Spacer(Modifier.padding(horizontal = 3.dp).width(1.dp).height(23.dp).background(colors.outlineVariant))
+                Text(
+                    stringResource(R.string.whiteboard_width_label),
+                    modifier = Modifier.width(58.dp),
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                kalinlikSecenekleri().forEach { (width, label) ->
+                    TahtaKalinlikSecimi(width, label, selected = kalinlik == width, width = 34.dp) {
+                        onKalinlikSec(width)
+                    }
+                }
+            }
+        } else {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 5.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                Row(Modifier.fillMaxWidth().height(38.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        stringResource(R.string.whiteboard_color_label),
+                        modifier = Modifier.width(if (kompakt) 62.dp else 52.dp),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = colors.onSurfaceVariant,
+                    )
+                    TahtaKalemRenkleri.forEach { item ->
+                        TahtaRenkSecimi(item, selected = seciliRenk == item.renk, targetSize = if (kompakt) 38.dp else 44.dp) {
+                            onRenkSec(item.renk)
+                        }
+                    }
+                }
+                Spacer(Modifier.fillMaxWidth().height(1.dp).background(colors.outlineVariant.copy(alpha = 0.45f)))
+                Row(Modifier.fillMaxWidth().height(38.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        stringResource(R.string.whiteboard_width_label),
+                        modifier = Modifier.width(if (kompakt) 62.dp else 52.dp),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = colors.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    kalinlikSecenekleri().forEach { (width, label) ->
+                        TahtaKalinlikSecimi(width, label, selected = kalinlik == width, width = 48.dp) {
+                            onKalinlikSec(width)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TahtaKompaktKontrolCubugu(
+    seciliRenk: Color,
+    kalinlik: Float,
+    geriAlEtkin: Boolean,
+    yineleEtkin: Boolean,
+    temizleEtkin: Boolean,
+    onRenkSec: (Color) -> Unit,
+    onKalinlikSec: (Float) -> Unit,
+    onGeriAl: () -> Unit,
+    onYinele: () -> Unit,
+    onTemizle: () -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    Surface(
+        modifier = Modifier.fillMaxWidth().testTag("whiteboard-style-dock"),
+        shape = RoundedCornerShape(17.dp),
+        color = colors.surface,
+        border = BorderStroke(1.dp, colors.outlineVariant.copy(alpha = 0.68f)),
+        tonalElevation = 1.dp,
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
+                .padding(horizontal = 4.dp, vertical = 2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(1.dp),
+        ) {
+            TahtaKalemRenkleri.forEach { item ->
+                TahtaRenkSecimi(item, selected = seciliRenk == item.renk, targetSize = 36.dp) {
+                    onRenkSec(item.renk)
+                }
+            }
+            Spacer(
+                Modifier.padding(horizontal = 2.dp).width(1.dp).height(22.dp)
+                    .background(colors.outlineVariant),
+            )
+            kalinlikSecenekleri().forEach { (width, label) ->
+                TahtaKalinlikSecimi(width, label, selected = kalinlik == width, width = 31.dp) {
+                    onKalinlikSec(width)
+                }
+            }
+            Spacer(
+                Modifier.padding(horizontal = 2.dp).width(1.dp).height(22.dp)
+                    .background(colors.outlineVariant),
+            )
+            Row(
+                modifier = Modifier.testTag("whiteboard-actions"),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(1.dp),
+            ) {
+                TahtaIslemDugmesi(R.string.whiteboard_undo, TahtaIslemi.GERI_AL, geriAlEtkin, true, onGeriAl)
+                TahtaIslemDugmesi(R.string.whiteboard_redo, TahtaIslemi.YINELE, yineleEtkin, true, onYinele)
+                TahtaIslemDugmesi(R.string.whiteboard_clear, TahtaIslemi.TEMIZLE, temizleEtkin, true, onTemizle)
+            }
+        }
+    }
+}
+
+@Composable
+private fun TahtaRenkSecimi(
+    item: TahtaRengi,
+    selected: Boolean,
+    targetSize: androidx.compose.ui.unit.Dp,
+    onClick: () -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    val label = stringResource(item.ad)
+    val description = if (selected) stringResource(R.string.whiteboard_selected_color, label) else label
+    Box(
+        modifier = Modifier.size(targetSize)
+            .clip(CircleShape)
+            .clickable(role = Role.RadioButton, onClick = onClick)
+            .semantics {
+                contentDescription = description
+                this.selected = selected
+                role = Role.RadioButton
+            },
+        contentAlignment = Alignment.Center,
+    ) {
+        Canvas(Modifier.size(24.dp)) {
+            if (selected) drawCircle(colors.primary, style = Stroke(width = 2.dp.toPx()))
+            drawCircle(item.renk, radius = size.minDimension * if (selected) 0.31f else 0.35f)
+            if (!selected) drawCircle(colors.outline.copy(alpha = 0.55f), style = Stroke(width = 0.75.dp.toPx()))
+        }
+    }
+}
+
+@Composable
+private fun TahtaKalinlikSecimi(
+    kalinlik: Float,
+    etiket: Int,
+    selected: Boolean,
+    width: androidx.compose.ui.unit.Dp,
+    onClick: () -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    val description = stringResource(etiket)
+    val shape = RoundedCornerShape(11.dp)
+    Box(
+        modifier = Modifier.width(width).height(32.dp)
+            .clip(shape)
+            .background(if (selected) colors.primaryContainer else Color.Transparent)
+            .border(1.dp, if (selected) colors.primary.copy(alpha = 0.22f) else Color.Transparent, shape)
+            .clickable(role = Role.RadioButton, onClick = onClick)
+            .semantics {
+                contentDescription = description
+                this.selected = selected
+                role = Role.RadioButton
+            },
+        contentAlignment = Alignment.Center,
+    ) {
+        Canvas(Modifier.size(width = 22.dp, height = 20.dp)) {
+            drawLine(
+                if (selected) colors.onPrimaryContainer else colors.onSurfaceVariant,
+                Offset(size.width * 0.12f, size.height * 0.5f),
+                Offset(size.width * 0.88f, size.height * 0.5f),
+                strokeWidth = kalinlik.dp.toPx(),
+                cap = StrokeCap.Round,
+            )
+        }
+    }
+}
+
+@Composable
+private fun TahtaIslemPaneli(
+    geriAlEtkin: Boolean,
+    yineleEtkin: Boolean,
+    temizleEtkin: Boolean,
+    kompakt: Boolean,
+    onGeriAl: () -> Unit,
+    onYinele: () -> Unit,
+    onTemizle: () -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    Surface(
+        modifier = Modifier.fillMaxWidth().testTag("whiteboard-actions"),
+        shape = RoundedCornerShape(18.dp),
+        color = colors.surface,
+        border = BorderStroke(1.dp, colors.outlineVariant.copy(alpha = 0.68f)),
+        tonalElevation = 1.dp,
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 5.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            TahtaIslemDugmesi(R.string.whiteboard_undo, TahtaIslemi.GERI_AL, geriAlEtkin, kompakt, onGeriAl)
+            TahtaIslemDugmesi(R.string.whiteboard_redo, TahtaIslemi.YINELE, yineleEtkin, kompakt, onYinele)
+            Spacer(Modifier.weight(1f))
+            TahtaIslemDugmesi(R.string.whiteboard_clear, TahtaIslemi.TEMIZLE, temizleEtkin, kompakt, onTemizle)
+        }
+    }
+}
+
+private enum class TahtaIslemi { GERI_AL, YINELE, TEMIZLE }
+
+@Composable
+private fun TahtaIslemDugmesi(
+    etiket: Int,
+    islem: TahtaIslemi,
+    etkin: Boolean,
+    kompakt: Boolean,
+    onClick: () -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    val label = stringResource(etiket)
+    val shape = RoundedCornerShape(14.dp)
+    val bg = when {
+        !etkin -> Color.Transparent
+        islem == TahtaIslemi.TEMIZLE -> colors.error.copy(alpha = 0.10f)
+        else -> colors.surfaceVariant.copy(alpha = 0.66f)
+    }
+    Surface(
+        modifier = Modifier.heightIn(min = 42.dp)
+            .clip(shape)
+            .clickable(enabled = etkin, role = Role.Button, onClick = onClick)
+            .semantics { contentDescription = label }
+            .testTag(
+                when (islem) {
+                    TahtaIslemi.GERI_AL -> "whiteboard-undo"
+                    TahtaIslemi.YINELE -> "whiteboard-redo"
+                    TahtaIslemi.TEMIZLE -> "whiteboard-clear"
+                },
+            ),
+        shape = shape,
+        color = bg,
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = if (kompakt) 11.dp else 12.dp, vertical = 9.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            TahtaIslemIkonu(islem, if (etkin) colors.onSurface else colors.onSurfaceVariant.copy(alpha = 0.44f))
+            if (!kompakt) {
+                Text(label, style = MaterialTheme.typography.labelMedium, color = if (etkin) colors.onSurface else colors.onSurfaceVariant.copy(alpha = 0.44f))
+            }
+        }
+    }
+}
+
+@Composable
+private fun TahtaIslemIkonu(islem: TahtaIslemi, color: Color) {
+    Canvas(Modifier.size(18.dp)) {
+        val stroke = 1.8.dp.toPx()
+        val box = size.minDimension * 0.56f
+        val left = (size.width - box) / 2f
+        val top = (size.height - box) / 2f
+        when (islem) {
+            TahtaIslemi.GERI_AL, TahtaIslemi.YINELE -> {
+                val reverse = islem == TahtaIslemi.GERI_AL
+                val startX = if (reverse) size.width * 0.78f else size.width * 0.22f
+                val endX = if (reverse) size.width * 0.22f else size.width * 0.78f
+                drawArc(
+                    color = color,
+                    startAngle = if (reverse) 205f else -25f,
+                    sweepAngle = if (reverse) 235f else -235f,
+                    useCenter = false,
+                    topLeft = Offset(left, top),
+                    size = Size(box, box),
+                    style = Stroke(width = stroke, cap = StrokeCap.Round),
+                )
+                val tip = Offset(endX, size.height * 0.28f)
+                val direction = if (reverse) 1f else -1f
+                drawLine(color, tip, Offset(tip.x + direction * size.width * 0.20f, tip.y), strokeWidth = stroke, cap = StrokeCap.Round)
+                drawLine(color, tip, Offset(tip.x, tip.y + size.height * 0.18f), strokeWidth = stroke, cap = StrokeCap.Round)
+            }
+            TahtaIslemi.TEMIZLE -> {
+                drawLine(color, Offset(size.width * 0.18f, size.height * 0.30f), Offset(size.width * 0.82f, size.height * 0.30f), strokeWidth = stroke, cap = StrokeCap.Round)
+                drawLine(color, Offset(size.width * 0.34f, size.height * 0.19f), Offset(size.width * 0.66f, size.height * 0.19f), strokeWidth = stroke, cap = StrokeCap.Round)
+                drawRoundRect(
+                    color,
+                    topLeft = Offset(size.width * 0.27f, size.height * 0.34f),
+                    size = Size(size.width * 0.46f, size.height * 0.49f),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(2.dp.toPx()),
+                    style = Stroke(width = stroke),
+                )
+                drawLine(color, Offset(size.width * 0.44f, size.height * 0.45f), Offset(size.width * 0.44f, size.height * 0.72f), strokeWidth = stroke)
+                drawLine(color, Offset(size.width * 0.56f, size.height * 0.45f), Offset(size.width * 0.56f, size.height * 0.72f), strokeWidth = stroke)
+            }
+        }
+    }
+}
+
+private fun kalinlikSecenekleri() = listOf(
+    2f to R.string.whiteboard_width_thin,
+    4f to R.string.whiteboard_width_normal,
+    8f to R.string.whiteboard_width_thick,
+)
+
+@Composable
 private fun TahtaCalismaAlani(
     kalemler: List<TahtaVurusu>,
     geriAlinanlar: List<TahtaVurusu>,
@@ -669,6 +1373,8 @@ private fun TahtaCalismaAlani(
     arac: TahtaAraci,
     renk: Color,
     kalinlik: Float,
+    compact: Boolean,
+    brushTekSatir: Boolean = compact,
     gorselDeposu: LocalSoruGorselDeposu,
     soruGorseli: SoruGorseli?,
     soruUzerindeCizim: Boolean,
@@ -688,88 +1394,47 @@ private fun TahtaCalismaAlani(
 ) {
     val context = LocalContext.current
     val colors = MaterialTheme.colorScheme
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(5.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            FilterChip(
-                selected = soruUzerindeCizim,
+    val mergedCompactControls = compact && brushTekSatir
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(if (compact) 5.dp else 8.dp)) {
+        if (!compact) {
+            TahtaYuzeySecici(
+                soruUzerindeCizim = soruUzerindeCizim,
+                soruZeminiKullanilabilir = soruZeminiKullanilabilir,
+                kompakt = false,
+                arac = arac,
                 onClick = onYuzeyDegistir,
-                enabled = soruUzerindeCizim || soruZeminiKullanilabilir,
-                modifier = Modifier.testTag("whiteboard-surface-toggle").semantics {
-                    contentDescription = context.getString(
-                        if (soruUzerindeCizim) R.string.whiteboard_surface_switch_to_blank
-                        else R.string.whiteboard_surface_switch_to_question,
-                    )
-                    stateDescription = context.getString(
-                        if (soruUzerindeCizim) R.string.whiteboard_surface_question
-                        else R.string.whiteboard_surface_blank,
-                    )
-                },
-                label = {
-                    Text(
-                        stringResource(
-                            if (soruUzerindeCizim) R.string.whiteboard_surface_question
-                            else R.string.whiteboard_surface_blank,
-                        ),
-                        maxLines = 1,
-                    )
-                },
             )
-            TahtaAraci.entries.forEach { tool ->
-                val label = stringResource(tool.stringResource())
-                FilterChip(
-                    selected = arac == tool,
-                    onClick = { onAracSec(tool) },
-                    modifier = Modifier.semantics { selected = arac == tool; role = androidx.compose.ui.semantics.Role.RadioButton },
-                    label = { Text(label, maxLines = 1) },
-                )
-            }
         }
-        Row(
-            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(stringResource(R.string.whiteboard_color_label), style = MaterialTheme.typography.labelSmall)
-            TahtaKalemRenkleri.forEach { item ->
-                val label = stringResource(item.ad)
-                FilterChip(
-                    selected = renk == item.renk,
-                    onClick = { onRenkSec(item.renk) },
-                    modifier = Modifier.semantics {
-                        contentDescription = context.getString(R.string.whiteboard_selected_color, label)
-                        selected = renk == item.renk
-                        role = androidx.compose.ui.semantics.Role.RadioButton
-                    },
-                    label = {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                            Surface(
-                                modifier = Modifier.size(16.dp).border(1.dp, colors.outline.copy(alpha = 0.6f), CircleShape),
-                                shape = CircleShape,
-                                color = item.renk,
-                            ) {}
-                            Text(label, maxLines = 1)
-                        }
-                    },
-                )
-            }
-            Spacer(Modifier.width(4.dp))
-            Text(stringResource(R.string.whiteboard_width_label), style = MaterialTheme.typography.labelSmall)
-            listOf(2f to R.string.whiteboard_width_thin, 4f to R.string.whiteboard_width_normal, 8f to R.string.whiteboard_width_thick)
-                .forEach { (width, label) ->
-                    FilterChip(
-                        selected = kalinlik == width,
-                        onClick = { onKalinlikSec(width) },
-                        modifier = Modifier.semantics {
-                            selected = kalinlik == width
-                            role = androidx.compose.ui.semantics.Role.RadioButton
-                        },
-                        label = { Text(stringResource(label)) },
-                    )
-                }
+        TahtaAracPaleti(
+            seciliArac = arac,
+            soruUzerindeCizim = soruUzerindeCizim,
+            soruZeminiKullanilabilir = soruZeminiKullanilabilir,
+            kompakt = compact,
+            onYuzeyDegistir = onYuzeyDegistir,
+            onAracSec = onAracSec,
+        )
+        if (mergedCompactControls) {
+            TahtaKompaktKontrolCubugu(
+                seciliRenk = renk,
+                kalinlik = kalinlik,
+                geriAlEtkin = kalemler.isNotEmpty(),
+                yineleEtkin = geriAlinanlar.isNotEmpty(),
+                temizleEtkin = temizlenebilir,
+                onRenkSec = onRenkSec,
+                onKalinlikSec = onKalinlikSec,
+                onGeriAl = onGeriAl,
+                onYinele = onYinele,
+                onTemizle = onTemizle,
+            )
+        } else {
+            TahtaCizimStili(
+                seciliRenk = renk,
+                kalinlik = kalinlik,
+                tekSatir = brushTekSatir,
+                kompakt = compact,
+                onRenkSec = onRenkSec,
+                onKalinlikSec = onKalinlikSec,
+            )
         }
 
         val countDescription = if (kalemler.isEmpty()) {
@@ -794,10 +1459,27 @@ private fun TahtaCalismaAlani(
             val boardShape = RoundedCornerShape(18.dp)
             Box(
                 modifier = Modifier.size(boardWidth, boardHeight)
+                    .shadow(8.dp, boardShape)
                     .clip(boardShape)
-                    .background(Color.White)
-                    .border(1.dp, colors.outlineVariant, boardShape),
+                    .background(Color(0xFFFFFEFB))
+                    .border(1.dp, colors.outlineVariant.copy(alpha = 0.78f), boardShape),
             ) {
+                if (backgroundFile == null) {
+                    Canvas(Modifier.fillMaxSize()) {
+                        val step = 28.dp.toPx()
+                        val gridColor = colors.primary.copy(alpha = 0.075f)
+                        var x = step
+                        while (x < size.width) {
+                            drawLine(gridColor, Offset(x, 0f), Offset(x, size.height), strokeWidth = 0.8.dp.toPx())
+                            x += step
+                        }
+                        var y = step
+                        while (y < size.height) {
+                            drawLine(gridColor, Offset(0f, y), Offset(size.width, y), strokeWidth = 0.8.dp.toPx())
+                            y += step
+                        }
+                    }
+                }
                 if (backgroundFile != null) {
                     SoruGorselResmi(
                         file = backgroundFile,
@@ -866,49 +1548,60 @@ private fun TahtaCalismaAlani(
                         style = MaterialTheme.typography.bodySmall,
                     )
                 } else if (kalemler.isEmpty() && etkinVurus == null) {
-                    Text(
-                        stringResource(R.string.whiteboard_no_marks),
+                    Surface(
                         modifier = Modifier.align(if (soruUzerindeCizim) Alignment.BottomCenter else Alignment.Center)
-                            .padding(14.dp)
-                            .background(Color.White.copy(alpha = 0.86f), RoundedCornerShape(10.dp))
-                            .padding(horizontal = 10.dp, vertical = 6.dp),
-                        color = Color(0xFF52616B),
-                        style = MaterialTheme.typography.bodySmall,
-                    )
+                            .padding(14.dp),
+                        shape = RoundedCornerShape(14.dp),
+                        color = Color.White.copy(alpha = 0.94f),
+                        border = BorderStroke(1.dp, PremiumMarkaRenkler.Murekkep.copy(alpha = 0.08f)),
+                        shadowElevation = 2.dp,
+                    ) {
+                        Text(
+                            stringResource(R.string.whiteboard_no_marks),
+                            modifier = Modifier.padding(horizontal = 13.dp, vertical = 9.dp),
+                            color = PremiumMarkaRenkler.Murekkep,
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Medium,
+                        )
+                    }
                 }
             }
         }
         if (cizimSiniriUyarisi) {
-            Text(
-                stringResource(R.string.whiteboard_mark_limit),
+            Surface(
+                color = colors.errorContainer.copy(alpha = 0.78f),
+                shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
-                color = colors.error,
-                style = MaterialTheme.typography.labelSmall,
-            )
-        } else {
+            ) {
+                Text(
+                    stringResource(R.string.whiteboard_mark_limit),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 7.dp),
+                    color = colors.onErrorContainer,
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        } else if (!compact) {
             Text(
                 stringResource(R.string.whiteboard_temporary_note),
                 modifier = Modifier.fillMaxWidth(),
-                color = colors.onSurfaceVariant,
+                color = colors.onSurfaceVariant.copy(alpha = 0.78f),
                 style = MaterialTheme.typography.labelSmall,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
         }
-        Row(
-            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            TextButton(onClick = onGeriAl, enabled = kalemler.isNotEmpty()) {
-                Text(stringResource(R.string.whiteboard_undo))
-            }
-            TextButton(onClick = onYinele, enabled = geriAlinanlar.isNotEmpty()) {
-                Text(stringResource(R.string.whiteboard_redo))
-            }
-            TextButton(onClick = onTemizle, enabled = temizlenebilir) {
-                Text(stringResource(R.string.whiteboard_clear))
-            }
+        if (!mergedCompactControls) {
+            TahtaIslemPaneli(
+                geriAlEtkin = kalemler.isNotEmpty(),
+                yineleEtkin = geriAlinanlar.isNotEmpty(),
+                temizleEtkin = temizlenebilir,
+                kompakt = compact,
+                onGeriAl = onGeriAl,
+                onYinele = onYinele,
+                onTemizle = onTemizle,
+            )
         }
     }
 }
