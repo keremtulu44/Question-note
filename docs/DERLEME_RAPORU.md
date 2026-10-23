@@ -2,10 +2,10 @@
 
 > Bu dosya Android CI tarafından otomatik üretilir. Keystore veya parola değerleri yazılmaz.
 
-- Zaman (UTC): 2026-10-23T16:10:33Z
-- Workflow commit'i: 858ae221c47573758f1e2cfac49ba928aeb730b0
+- Zaman (UTC): 2026-10-23T17:56:23Z
+- Workflow commit'i: d39edd00dc06055a5577de1ea8bc5984c0bd38e3
 - Dal: arena/abf7be2d-question-note
-- Uygulama sürümü: 1.5.97 (versionCode 27)
+- Uygulama sürümü: 1.5.98 (versionCode 28)
 - Android SDK: compileSdk/targetSdk 37, minSdk 26; build-tools 37.0.0
 - Genel sonuç: **BAŞARILI**
 - Wrapper çıkış kodu: 0
@@ -19,8 +19,8 @@
 - İmzalama/verify durumu: İmzalandı; apksigner doğruladı ve beklenen sertifika eşleşti (kod: 0; apksigner verify: 0)
 - Sertifika parmak izi: FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54 (beklenen: FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54; durum: eşleşti)
 - Release: Release oluşturuldu (kod: 0)
-- Release URL: https://github.com/keremtulu44/Question-note/releases/tag/v1.5.97
-- İmzalı APK SHA-256: 2ebd37187309a7c461964fc57050ca9aaa7db583bfc016b98422d4a713f576ec
+- Release URL: https://github.com/keremtulu44/Question-note/releases/tag/v1.5.98
+- İmzalı APK SHA-256: 98058f00015d2b04195ac2e871845128ff6c9650d9655dce2f94b96882aecf9b
 
 ## Gradle sürümü
 
@@ -74,6 +74,7 @@ Daemon will be stopped at the end of the build
 > Task :app:compileDebugNavigationResources
 > Task :app:createDebugCompatibleScreenManifests
 > Task :app:extractDeepLinksDebug
+> Task :app:mergeDebugResources
 > Task :app:processDebugMainManifest
 > Task :app:processDebugManifest
 > Task :app:preDebugUnitTestBuild UP-TO-DATE
@@ -81,9 +82,8 @@ Daemon will be stopped at the end of the build
 > Task :app:processDebugManifestForPackage
 > Task :app:generateDebugAssets UP-TO-DATE
 > Task :app:mergeDebugAssets
-> Task :app:mergeDebugResources
-> Task :app:processDebugUnitTestManifest
 > Task :app:processDebugResources
+> Task :app:processDebugUnitTestManifest
 > Task :app:packageDebugUnitTestForUnitTest
 > Task :app:generateDebugUnitTestConfig
 > Task :app:kspDebugKotlin
@@ -112,9 +112,9 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/SoruDetayEkrani.kt:654:89 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/YanlisDefteriUygulamasi.kt:183:71 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/bilesenler/SoruGorselBileseni.kt:135:26 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
-w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/bilesenler/premium/PremiumBilesenler.kt:105:28 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/bilesenler/premium/PremiumBilesenler.kt:106:28 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/calisma/CozumTahtasiDialog.kt:1558:30 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
-w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/karne/KarneEkrani.kt:230:72 Unnecessary safe call on a non-null receiver of type 'KarneVerisi'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/karne/KarneEkrani.kt:231:72 Unnecessary safe call on a non-null receiver of type 'KarneVerisi'.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/premium/PremiumEntegrasyon.kt:289:81 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
 
 > Task :app:compileDebugJavaWithJavac
@@ -151,11 +151,12 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 3m 22s
+BUILD SUCCESSFUL in 2m 32s
 32 actionable tasks: 32 executed
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 
 -- Son 80 satır --
+> Task :app:mergeDebugResources
 > Task :app:processDebugMainManifest
 > Task :app:processDebugManifest
 > Task :app:preDebugUnitTestBuild UP-TO-DATE
@@ -163,9 +164,8 @@ Consider enabling configuration cache to speed up this build: https://docs.gradl
 > Task :app:processDebugManifestForPackage
 > Task :app:generateDebugAssets UP-TO-DATE
 > Task :app:mergeDebugAssets
-> Task :app:mergeDebugResources
-> Task :app:processDebugUnitTestManifest
 > Task :app:processDebugResources
+> Task :app:processDebugUnitTestManifest
 > Task :app:packageDebugUnitTestForUnitTest
 > Task :app:generateDebugUnitTestConfig
 > Task :app:kspDebugKotlin
@@ -194,9 +194,9 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/SoruDetayEkrani.kt:654:89 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/YanlisDefteriUygulamasi.kt:183:71 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/bilesenler/SoruGorselBileseni.kt:135:26 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
-w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/bilesenler/premium/PremiumBilesenler.kt:105:28 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/bilesenler/premium/PremiumBilesenler.kt:106:28 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/calisma/CozumTahtasiDialog.kt:1558:30 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
-w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/karne/KarneEkrani.kt:230:72 Unnecessary safe call on a non-null receiver of type 'KarneVerisi'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/karne/KarneEkrani.kt:231:72 Unnecessary safe call on a non-null receiver of type 'KarneVerisi'.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/premium/PremiumEntegrasyon.kt:289:81 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
 
 > Task :app:compileDebugJavaWithJavac
@@ -233,7 +233,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 3m 22s
+BUILD SUCCESSFUL in 2m 32s
 32 actionable tasks: 32 executed
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 ```
@@ -253,8 +253,8 @@ Daemon will be stopped at the end of the build
 > Task :app:parseReleaseLocalResources FROM-CACHE
 > Task :app:generateReleaseRFile FROM-CACHE
 > Task :app:javaPreCompileRelease FROM-CACHE
-> Task :app:checkReleaseAarMetadata
 > Task :app:mapReleaseSourceSetPaths
+> Task :app:checkReleaseAarMetadata
 > Task :app:compileReleaseNavigationResources FROM-CACHE
 > Task :app:createReleaseCompatibleScreenManifests
 > Task :app:extractDeepLinksRelease FROM-CACHE
@@ -296,15 +296,15 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/SoruDetayEkrani.kt:654:89 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/YanlisDefteriUygulamasi.kt:183:71 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/bilesenler/SoruGorselBileseni.kt:135:26 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
-w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/bilesenler/premium/PremiumBilesenler.kt:105:28 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/bilesenler/premium/PremiumBilesenler.kt:106:28 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/calisma/CozumTahtasiDialog.kt:1558:30 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
-w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/karne/KarneEkrani.kt:230:72 Unnecessary safe call on a non-null receiver of type 'KarneVerisi'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/karne/KarneEkrani.kt:231:72 Unnecessary safe call on a non-null receiver of type 'KarneVerisi'.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/premium/PremiumEntegrasyon.kt:289:81 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
 
 > Task :app:compileReleaseJavaWithJavac
+> Task :app:bundleReleaseClassesToRuntimeJar
 > Task :app:processReleaseJavaRes
 > Task :app:bundleReleaseClassesToCompileJar
-> Task :app:bundleReleaseClassesToRuntimeJar
 > Task :app:kspReleaseUnitTestKotlin
 
 > Task :app:compileReleaseUnitTestKotlin
@@ -325,7 +325,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 1m 47s
+BUILD SUCCESSFUL in 1m 13s
 32 actionable tasks: 24 executed, 8 from cache
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 -- Hata satırları ve son bölüm --
@@ -340,8 +340,8 @@ Daemon will be stopped at the end of the build
 > Task :app:parseReleaseLocalResources FROM-CACHE
 > Task :app:generateReleaseRFile FROM-CACHE
 > Task :app:javaPreCompileRelease FROM-CACHE
-> Task :app:checkReleaseAarMetadata
 > Task :app:mapReleaseSourceSetPaths
+> Task :app:checkReleaseAarMetadata
 > Task :app:compileReleaseNavigationResources FROM-CACHE
 > Task :app:createReleaseCompatibleScreenManifests
 > Task :app:extractDeepLinksRelease FROM-CACHE
@@ -383,15 +383,15 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/SoruDetayEkrani.kt:654:89 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/YanlisDefteriUygulamasi.kt:183:71 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/bilesenler/SoruGorselBileseni.kt:135:26 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
-w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/bilesenler/premium/PremiumBilesenler.kt:105:28 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/bilesenler/premium/PremiumBilesenler.kt:106:28 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/calisma/CozumTahtasiDialog.kt:1558:30 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
-w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/karne/KarneEkrani.kt:230:72 Unnecessary safe call on a non-null receiver of type 'KarneVerisi'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/karne/KarneEkrani.kt:231:72 Unnecessary safe call on a non-null receiver of type 'KarneVerisi'.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/premium/PremiumEntegrasyon.kt:289:81 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
 
 > Task :app:compileReleaseJavaWithJavac
+> Task :app:bundleReleaseClassesToRuntimeJar
 > Task :app:processReleaseJavaRes
 > Task :app:bundleReleaseClassesToCompileJar
-> Task :app:bundleReleaseClassesToRuntimeJar
 > Task :app:kspReleaseUnitTestKotlin
 
 > Task :app:compileReleaseUnitTestKotlin
@@ -412,7 +412,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 1m 47s
+BUILD SUCCESSFUL in 1m 13s
 32 actionable tasks: 24 executed, 8 from cache
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 ```
@@ -462,7 +462,6 @@ Unable to strip the following libraries, packaging them as they are: libandroidx
 > Task :app:dexBuilderRelease
 > Task :app:desugarReleaseFileDependencies
 > Task :app:mergeReleaseStartupProfile
-> Task :app:mergeExtDexRelease
 > Task :app:mergeReleaseArtProfile
 > Task :app:generateReleaseAssets UP-TO-DATE
 > Task :app:mergeReleaseGlobalSynthetics
@@ -471,6 +470,7 @@ Unable to strip the following libraries, packaging them as they are: libandroidx
 > Task :app:extractReleaseVersionControlInfo
 > Task :app:extractProguardFiles
 > Task :app:generateReleaseLintVitalReportModel
+> Task :app:mergeExtDexRelease
 > Task :app:processReleaseJavaRes UP-TO-DATE
 > Task :app:optimizeReleaseResources
 > Task :app:collectReleaseDependencies
@@ -495,7 +495,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 1m 51s
+BUILD SUCCESSFUL in 1m 17s
 50 actionable tasks: 28 executed, 22 up-to-date
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 ```
@@ -531,12 +531,12 @@ V3.0 Signer: public key MD5 digest: efca2e07ac5a04473681ddaf5ff0157e
 ## Release çıktısı
 
 ```text
-https://github.com/keremtulu44/Question-note/releases/tag/v1.5.97
+https://github.com/keremtulu44/Question-note/releases/tag/v1.5.98
 ```
 
 ## APK özeti
 
 ```text
-APK: app/build/outputs/apk/release/yanlis-defteri-1.5.97.apk
-SHA-256: 2ebd37187309a7c461964fc57050ca9aaa7db583bfc016b98422d4a713f576ec
+APK: app/build/outputs/apk/release/yanlis-defteri-1.5.98.apk
+SHA-256: 98058f00015d2b04195ac2e871845128ff6c9650d9655dce2f94b96882aecf9b
 ```
