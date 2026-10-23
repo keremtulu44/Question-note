@@ -291,6 +291,7 @@ fun CozumTahtasiDialog(
                                 arac = arac,
                                 renk = renk,
                                 kalinlik = kalinlik,
+                                soruId = soru.id,
                                 compact = true,
                                 brushTekSatir = compactControls,
                                 gorselDeposu = gorselDeposu,
@@ -319,6 +320,7 @@ fun CozumTahtasiDialog(
                             arac = arac,
                             renk = renk,
                             kalinlik = kalinlik,
+                            soruId = soru.id,
                             compact = false,
                             gorselDeposu = gorselDeposu,
                             soruGorseli = seciliGorsel,
@@ -1464,6 +1466,7 @@ private fun TahtaCalismaAlani(
     arac: TahtaAraci,
     renk: Color,
     kalinlik: Float,
+    soruId: String,
     compact: Boolean,
     brushTekSatir: Boolean = compact,
     gorselDeposu: LocalSoruGorselDeposu,
@@ -1485,11 +1488,11 @@ private fun TahtaCalismaAlani(
 ) {
     val context = LocalContext.current
     val colors = MaterialTheme.colorScheme
-    var zoom by remember(soruGorseli?.id) { mutableStateOf(1f) }
-    var zoomOffset by remember(soruGorseli?.id) { mutableStateOf(Offset.Zero) }
-    var panMode by remember(soruGorseli?.id) { mutableStateOf(false) }
-    var zoomViewport by remember(soruGorseli?.id) { mutableStateOf(Size.Zero) }
-    LaunchedEffect(soruGorseli?.id, soruUzerindeCizim) {
+    var zoom by remember(soruId, soruGorseli?.id) { mutableStateOf(1f) }
+    var zoomOffset by remember(soruId, soruGorseli?.id) { mutableStateOf(Offset.Zero) }
+    var panMode by remember(soruId, soruGorseli?.id) { mutableStateOf(false) }
+    var zoomViewport by remember(soruId, soruGorseli?.id) { mutableStateOf(Size.Zero) }
+    LaunchedEffect(soruId, soruGorseli?.id, soruUzerindeCizim) {
         if (!soruUzerindeCizim) {
             zoom = 1f
             zoomOffset = Offset.Zero
@@ -1633,7 +1636,7 @@ private fun TahtaCalismaAlani(
                                 contentDescription = context.getString(R.string.whiteboard_canvas_description)
                                 stateDescription = countDescription
                             }
-                            .pointerInput(arac, renk, kalinlik, imageRatio, soruUzerindeCizim, soruGorseli?.id, panMode) {
+                            .pointerInput(soruId, arac, renk, kalinlik, imageRatio, soruUzerindeCizim, soruGorseli?.id, panMode) {
                                 if (!panMode) {
                                     var baslangic: TahtaNoktasi? = null
                                     var sonVurus: TahtaVurusu? = null
