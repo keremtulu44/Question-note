@@ -24,6 +24,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.domain.model.Ders
@@ -31,6 +32,8 @@ import com.keremtulu.questionnote.domain.repository.DersRepository
 import com.keremtulu.questionnote.domain.repository.KonuRepository
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
+import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import com.keremtulu.questionnote.ui.premium.PremiumCard
 
@@ -65,10 +68,24 @@ fun KonuMerkeziEkrani(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item {
-                PremiumTextButton(onClick = onGeri) { Text(stringResource(R.string.common_back)) }
-                Text(stringResource(R.string.settings_topics), style = MaterialTheme.typography.headlineMedium)
-                Text(stringResource(R.string.topics_center_note), style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    PremiumTextButton(onClick = onGeri) { Text(stringResource(R.string.common_back)) }
+                    GradyanKart(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), borderAnimation = false) {
+                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text(
+                                stringResource(R.string.settings_topics),
+                                color = PremiumMarkaRenkler.Kagit,
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Bold,
+                            )
+                            Text(
+                                stringResource(R.string.topics_center_note),
+                                color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.86f),
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
+                    }
+                }
             }
             item {
                 OutlinedTextField(arama, { arama = it }, Modifier.fillMaxWidth(),

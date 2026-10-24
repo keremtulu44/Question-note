@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
@@ -34,6 +35,8 @@ import com.keremtulu.questionnote.data.images.GorselBakimRaporu
 import com.keremtulu.questionnote.data.images.GorselTutarliligiHizmeti
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
+import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
+import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import com.keremtulu.questionnote.ui.premium.PremiumButton
 
@@ -74,20 +77,23 @@ fun GorselBakimEkrani(
         Column(
             modifier = Modifier.fillMaxSize().padding(padding),
         ) {
-            Column(Modifier.fillMaxWidth().padding(start = 22.dp, top = 8.dp, end = 22.dp, bottom = 12.dp)) {
-                PremiumTextButton(onClick = onGeri) { Text(stringResource(R.string.topic_back_to_lessons)) }
-                Text(
-                    stringResource(R.string.image_maintenance_title),
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontWeight = FontWeight.SemiBold,
-                )
-                Text(
-                    stringResource(R.string.image_maintenance_description),
-                    modifier = Modifier.padding(top = 6.dp),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+            Column(Modifier.fillMaxWidth().padding(start = 20.dp, top = 8.dp, end = 20.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                PremiumTextButton(onClick = onGeri) { Text(stringResource(R.string.common_back)) }
+                GradyanKart(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), borderAnimation = false) {
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(
+                            stringResource(R.string.image_maintenance_title),
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = PremiumMarkaRenkler.Kagit,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Text(
+                            stringResource(R.string.image_maintenance_description),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.86f),
+                        )
+                    }
+                }
             }
             Row(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 22.dp),

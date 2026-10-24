@@ -270,7 +270,7 @@ fun FiltreliCalismaEkrani(
                     PremiumTextButton(
                         onClick = onGeri,
                         interactionTur = EtkilesimTuru.GERI,
-                    ) { Text("‹ ${androidx.compose.ui.res.stringResource(R.string.menu_today)}") }
+                    ) { Text(androidx.compose.ui.res.stringResource(R.string.common_back)) }
                     GradyanKart(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(24.dp),

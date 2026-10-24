@@ -36,7 +36,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.keremtulu.questionnote.BuildConfig
 import com.keremtulu.questionnote.R
-import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
 import com.keremtulu.questionnote.data.export.SonYedekBilgisi
 import com.keremtulu.questionnote.data.prefs.SinavProfiliDeposu
 import com.keremtulu.questionnote.data.prefs.TercihGunlukHedefDeposu

@@ -2,6 +2,13 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.5.101] — 2026-10-24
+
+- Ders listesinde sahte “Fotoğraflı soru” başlığı yerine not/kaynak; favori yongası ve not/kaynak araması.
+- Katalog, konu, görsel bakım ve konu merkezi kahraman kartlı; yanlış “derslere dön” etiketleri düzeltildi.
+- Sürüm: `versionCode 31` / `versionName 1.5.101`.
+
+
 ## [1.5.100] — 2026-10-24
 
 - **Filtreli çalışma:** “Kaç soru?” alanı, yanındaki tam genişlik Başlat düğmesi tarafından ezilip ekranın ortasında dikey harf harf görünüyordu. Sayı artık 5 / 10 / 20 / Tümü yongaları; Başlat tam genişlikte ayrı satırda.

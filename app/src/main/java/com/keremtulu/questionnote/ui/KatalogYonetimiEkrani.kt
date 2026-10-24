@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
@@ -40,6 +41,8 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
+import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 
 private sealed interface KatalogDurumu {
@@ -75,22 +78,25 @@ fun KatalogYonetimiEkrani(
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { insets ->
         Column(Modifier.fillMaxSize().padding(insets)) {
-            Column(Modifier.fillMaxWidth().padding(start = 22.dp, top = 8.dp, end = 22.dp, bottom = 8.dp)) {
+            Column(Modifier.fillMaxWidth().padding(start = 20.dp, top = 8.dp, end = 20.dp, bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 PremiumTextButton(onClick = onGeri) {
-                    Text(stringResource(R.string.topic_back_to_lessons))
+                    Text(stringResource(R.string.common_back))
                 }
-                Text(
-                    stringResource(R.string.catalog_manage_title),
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.SemiBold,
-                )
-                Text(
-                    stringResource(R.string.catalog_manage_subtitle),
-                    modifier = Modifier.padding(top = 4.dp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodySmall,
-                )
+                GradyanKart(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), borderAnimation = false) {
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(
+                            stringResource(R.string.catalog_manage_title),
+                            color = PremiumMarkaRenkler.Kagit,
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Text(
+                            stringResource(R.string.catalog_manage_subtitle),
+                            color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.86f),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                }
             }
             when (val current = durum) {
                 KatalogDurumu.Yukleniyor -> Box(

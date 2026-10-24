@@ -246,10 +246,12 @@ fun SoruDetayEkrani(
                             ) {
                                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                     Text(
-                                        text = stringResource(R.string.question_photo_only),
+                                        text = soru.soruNotu?.takeIf { it.isNotBlank() }
+                                            ?: stringResource(R.string.question_untitled),
                                         style = MaterialTheme.typography.headlineSmall,
                                         color = PremiumMarkaRenkler.Kagit,
                                         fontWeight = FontWeight.Bold,
+                                        maxLines = 2,
                                     )
                                     Text(
                                         text = stringResource(R.string.question_lesson_label, ders.ad),

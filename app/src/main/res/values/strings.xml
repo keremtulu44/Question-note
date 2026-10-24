@@ -75,6 +75,9 @@
     <string name="question_filter_all">Tümü</string>
     <string name="question_filter_unassigned">Konusuz</string>
     <string name="question_filter_all_statuses">Tüm planlar</string>
+    <string name="question_filter_favorites">Favoriler</string>
+    <string name="question_search">Not veya kaynak ara</string>
+    <string name="question_untitled">Soru</string>
     <string name="filtered_practice_kicker">Odaklı çalışma</string>
     <string name="filtered_practice_title">Filtreli çalışma</string>
     <string name="filtered_practice_subtitle">Konu, kaynak ve ana yanlış nedenine göre sorularını seç.</string>

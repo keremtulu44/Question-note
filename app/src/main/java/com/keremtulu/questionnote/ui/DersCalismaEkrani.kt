@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.rememberScrollState
@@ -18,6 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -37,6 +39,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.domain.model.Ders
@@ -85,6 +88,8 @@ fun DersCalismaEkrani(
     var seciliKonuId by remember(ders.id) { mutableStateOf<String?>(null) }
     var konusuzFiltre by remember(ders.id) { mutableStateOf(false) }
     var planDurumuFiltresi by remember(ders.id) { mutableStateOf<SoruPlanDurumu?>(null) }
+    var sadeceFavori by remember(ders.id) { mutableStateOf(false) }
+    var arama by remember(ders.id) { mutableStateOf("") }
     var yenileme by remember { mutableIntStateOf(0) }
     val konuAkisi = remember(konuRepository, ders.id, yenileme) {
         combine(
@@ -226,7 +231,19 @@ fun DersCalismaEkrani(
                         label = { Text(stringResource(statusFilterLabel(status))) },
                     )
                 }
+                FilterChip(
+                    selected = sadeceFavori,
+                    onClick = { sadeceFavori = !sadeceFavori },
+                    label = { Text(stringResource(R.string.question_filter_favorites), maxLines = 1) },
+                )
             }
+            OutlinedTextField(
+                value = arama,
+                onValueChange = { arama = it.take(80) },
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 4.dp).heightIn(min = 56.dp),
+                label = { Text(stringResource(R.string.question_search), maxLines = 1) },
+                singleLine = true,
+            )
 
             when (val current = sorular) {
                 SoruListesiDurumu.Yukleniyor -> {
@@ -248,8 +265,14 @@ fun DersCalismaEkrani(
                     onRetry = { yenileme++ },
                 )
                 is SoruListesiDurumu.Hazir -> {
+                    val query = arama.trim()
                     val visibleQuestions = current.sorular.filter { question ->
-                        planDurumuFiltresi == null || question.planDurumu == planDurumuFiltresi
+                        (planDurumuFiltresi == null || question.planDurumu == planDurumuFiltresi) &&
+                            (!sadeceFavori || question.favori) &&
+                            (query.isEmpty() ||
+                                question.soruNotu.orEmpty().contains(query, ignoreCase = true) ||
+                                question.kaynak.orEmpty().contains(query, ignoreCase = true) ||
+                                question.yanlisNedeni.orEmpty().contains(query, ignoreCase = true))
                     }
                     if (visibleQuestions.isEmpty()) {
                         val emptyMessage = when {
@@ -308,20 +331,36 @@ private fun SoruListeKarti(
         interactionTur = EtkilesimTuru.KART_ACILIS,
     ) {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(
-                text = stringResource(R.string.question_photo_only),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            soru.kaynak?.takeIf { it.isNotBlank() }?.let {
-                Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = soru.soruNotu?.takeIf { it.isNotBlank() }
+                        ?: soru.kaynak?.takeIf { it.isNotBlank() }
+                        ?: stringResource(R.string.question_untitled),
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                if (soru.favori) {
+                    Text("★", color = PremiumMarkaRenkler.Bakir, style = MaterialTheme.typography.titleMedium)
+                }
+            }
+            soru.kaynak?.takeIf { it.isNotBlank() && it != soru.soruNotu }?.let {
+                Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             soru.kaynakKonumu?.takeIf { it.isNotBlank() }?.let {
                 Text(
                     stringResource(R.string.question_source_location) + ": " + it,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
