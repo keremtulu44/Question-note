@@ -1,5 +1,6 @@
 package com.keremtulu.questionnote.ui
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,13 +14,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,10 +38,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.domain.model.Ders
 import com.keremtulu.questionnote.domain.model.Konu
@@ -464,7 +462,7 @@ fun FiltreliCalismaEkrani(
                 ) {
                     Column(
                         modifier = Modifier.fillMaxWidth().padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         Text(
                             text = androidx.compose.ui.res.stringResource(R.string.focus_order_note),
@@ -472,7 +470,7 @@ fun FiltreliCalismaEkrani(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             FilterChip(
@@ -486,17 +484,33 @@ fun FiltreliCalismaEkrani(
                                 label = { Text(androidx.compose.ui.res.stringResource(R.string.focus_oldest)) },
                             )
                         }
+                        Text(
+                            text = androidx.compose.ui.res.stringResource(R.string.filtered_practice_count_label),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold,
+                        )
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            listOf(5, 10, 20).forEach { adet ->
+                            listOf("5", "10", "20").forEach { adet ->
+
                                 FilterChip(
-                                    ayar.soruSayisi == adet.toString(),
-                                    { onAyarDegisti(ayar.copy(soruSayisi = adet.toString())) },
-                                    label = { Text("$adet soru") },
+                                    selected = ayar.soruSayisi == adet,
+                                    onClick = { onAyarDegisti(ayar.copy(soruSayisi = adet)) },
+                                    label = { Text(adet, maxLines = 1) },
                                 )
                             }
+                            FilterChip(
+                                selected = ayar.soruSayisi.isBlank(),
+                                onClick = { onAyarDegisti(ayar.copy(soruSayisi = "")) },
+                                label = {
+                                    Text(
+                                        androidx.compose.ui.res.stringResource(R.string.filtered_practice_all_count),
+                                        maxLines = 1,
+                                    )
+                                },
+                            )
                         }
                     }
                 }
@@ -561,48 +575,34 @@ fun FiltreliCalismaEkrani(
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    OutlinedTextField(
-                                        modifier = Modifier.weight(1f),
-                                        value = ayar.soruSayisi,
-                                        onValueChange = { input ->
-                                            onAyarDegisti(ayar.copy(soruSayisi = input.filter { it in '0'..'9' }.take(4)))
-                                        },
-                                        label = {
-                                            Text(androidx.compose.ui.res.stringResource(R.string.filtered_practice_count_label))
-                                        },
-                                        singleLine = true,
-                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                    )
-                                    PremiumGradyanButon(
-                                        modifier = Modifier.heightIn(min = 56.dp),
-                                        enabled = secenekler != null && secilecekSoruSayisi != null,
-                                        contentPadding = PaddingValues(vertical = 18.dp),
-                                        onClick = {
-                                            val count = secilecekSoruSayisi ?: return@PremiumGradyanButon
-                                            val lessonMap = secenekler?.dersler.orEmpty().associateBy { it.id }
-                                            val selected = siraliSorular.take(count)
-                                            if (selected.isNotEmpty() && selected.all { it.dersId in lessonMap }) {
-                                                onOturumBaslat(selected, lessonMap)
-                                            }
-                                        },
-                                    ) {
-                                        Text(androidx.compose.ui.res.stringResource(R.string.filtered_practice_start))
-                                    }
-                                }
                                 if (sayiAsimi) {
                                     Text(
                                         text = androidx.compose.ui.res.stringResource(
                                             R.string.filtered_practice_count_capped,
                                             siraliSorular.size,
                                         ),
-                                        modifier = Modifier.padding(top = 4.dp),
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         style = MaterialTheme.typography.bodySmall,
+                                    )
+                                }
+                                PremiumGradyanButon(
+                                    modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+                                    enabled = secenekler != null && secilecekSoruSayisi != null,
+                                    contentPadding = PaddingValues(vertical = 16.dp),
+                                    onClick = {
+                                        val count = secilecekSoruSayisi ?: return@PremiumGradyanButon
+                                        val lessonMap = secenekler?.dersler.orEmpty().associateBy { it.id }
+                                        val selected = siraliSorular.take(count)
+                                        if (selected.isNotEmpty() && selected.all { it.dersId in lessonMap }) {
+                                            onOturumBaslat(selected, lessonMap)
+                                        }
+                                    },
+                                ) {
+                                    Text(
+                                        androidx.compose.ui.res.stringResource(R.string.filtered_practice_start),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        fontWeight = FontWeight.Bold,
                                     )
                                 }
                             }
@@ -699,23 +699,44 @@ private fun CalismaSoruKarti(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(5.dp),
         ) {
-            Text(
-                text = androidx.compose.ui.res.stringResource(
-                    R.string.filtered_practice_course_topic,
-                    ders.ad,
-                    konu?.let { if (it.arsivli) "${it.ad} (arşivli)" else it.ad }
-                        ?: androidx.compose.ui.res.stringResource(R.string.question_filter_unassigned),
-                ),
-                color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.SemiBold,
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = androidx.compose.ui.res.stringResource(
+                        R.string.filtered_practice_course_topic,
+                        ders.ad,
+                        konu?.let { if (it.arsivli) "${it.ad} (arşivli)" else it.ad }
+                            ?: androidx.compose.ui.res.stringResource(R.string.question_filter_unassigned),
+                    ),
+                    modifier = Modifier.weight(1f),
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                if (soru.favori) {
+                    Text("★", color = PremiumMarkaRenkler.Bakir, style = MaterialTheme.typography.titleMedium)
+                }
+            }
+            soru.soruNotu?.takeIf { it.isNotBlank() }?.let { note ->
+                Text(
+                    note,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
             soru.kaynak?.takeIf { it.isNotBlank() }?.let { source ->
                 Text(
                     androidx.compose.ui.res.stringResource(R.string.filtered_practice_source_value, source),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.bodyLarge,
-                    maxLines = 2,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
             }

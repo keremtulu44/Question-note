@@ -2,6 +2,12 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.5.100] — 2026-10-24
+
+- **Filtreli çalışma:** “Kaç soru?” alanı, yanındaki tam genişlik Başlat düğmesi tarafından ezilip ekranın ortasında dikey harf harf görünüyordu. Sayı artık 5 / 10 / 20 / Tümü yongaları; Başlat tam genişlikte ayrı satırda.
+- Sürüm: `versionCode 30` / `versionName 1.5.100`.
+
+
 ## [1.5.99] — 2026-10-24
 
 - **Görünüm:** Bugün, Dersler, Filtreli, İlerleme, Odak, Ayarlar ve alt menü daha sakin, cam/gradyan kartlı ve tutarlı bir premium düzene çekildi. Ders kartlarında renk şeridi, kahraman kartlarında bakır/deniz parıltısı.

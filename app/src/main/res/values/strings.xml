@@ -90,8 +90,10 @@
     <string name="filtered_practice_clear_filters">Filtreleri temizle</string>
     <string name="filtered_practice_matched_count">Eşleşen %1$d soru</string>
     <string name="filtered_practice_order_note">En uzun süredir çalışılmayandan başlanır. Tekrar planında etkin ve bugün çözülmemiş sorular gösterilir.</string>
-    <string name="filtered_practice_count_label">Kaç soru?</string>
+    <string name="filtered_practice_count_label">Oturum uzunluğu</string>
+    <string name="filtered_practice_all_count">Tümü</string>
     <string name="filtered_practice_start">Başlat</string>
+    <string name="filtered_practice_start_n">%1$d soru ile başla</string>
     <string name="filtered_practice_loading">Filtreli sorular yükleniyor…</string>
     <string name="filtered_practice_error">Sorular yüklenemedi.</string>
     <string name="filtered_practice_options_error">Filtre seçenekleri yüklenemedi.</string>
