@@ -534,7 +534,6 @@ fun SoruFormuEkrani(
                                     stringResource(R.string.question_form_header_kicker),
                                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                                     style = MaterialTheme.typography.labelMedium,
-                                    letterSpacing = 1.2.sp,
                                 )
                                 Text(
                                     stringResource(

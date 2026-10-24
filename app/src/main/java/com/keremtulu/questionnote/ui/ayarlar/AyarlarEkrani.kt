@@ -116,8 +116,8 @@ fun AyarlarEkrani(
                             stringResource(R.string.settings_kicker),
                             color = PremiumMarkaRenkler.BakirIsik,
                             style = MaterialTheme.typography.labelMedium,
-                            letterSpacing = 1.4.sp,
                             fontWeight = FontWeight.Bold,
+                            maxLines = 1,
                         )
                         Text(
                             stringResource(R.string.settings_title),

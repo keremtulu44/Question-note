@@ -165,8 +165,8 @@ fun BugunEkrani(
                             text = stringResource(R.string.today_kicker),
                             color = PremiumMarkaRenkler.BakirIsik,
                             style = MaterialTheme.typography.labelMedium,
-                            letterSpacing = 1.4.sp,
                             fontWeight = FontWeight.Bold,
+                            maxLines = 1,
                         )
                         Text(
                             text = stringResource(R.string.today_title),

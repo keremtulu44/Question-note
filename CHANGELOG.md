@@ -2,6 +2,12 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.5.99] — 2026-10-24
+
+- **Görünüm:** Bugün, Dersler, Filtreli, İlerleme, Odak, Ayarlar ve alt menü daha sakin, cam/gradyan kartlı ve tutarlı bir premium düzene çekildi. Ders kartlarında renk şeridi, kahraman kartlarında bakır/deniz parıltısı.
+- **Sınav seçimi:** LGS, AYT/TYT ve 9./10. sınıf. Filtreli çalışma dropdown düzeni ve görsel kırpma çökmesi giderildi.
+- Sürüm: `versionCode 29` / `versionName 1.5.99` — aynı uygulama kimliği ve imzalama anahtarıyla güncelleme.
+
 ## [1.5.96] — 2026-10-23
 
 - **Çözüm Atölyesi:** beyaz tahta ekranı, daha belirgin soru/çizim çalışma alanı ve seçili araç durumu olan bir düzene getirildi. Yatay görünümde araçlar, renk/kalınlık ve geri al/yinele/temizle kontrolleri kompakt bir çalışma çubuğunda birleşir; dikey görünümde açıklamalı kontrol grupları korunur.

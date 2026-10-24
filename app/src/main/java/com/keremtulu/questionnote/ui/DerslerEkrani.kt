@@ -111,8 +111,8 @@ fun DerslerEkrani(
                         text = stringResource(R.string.lessons_kicker),
                         color = PremiumMarkaRenkler.BakirIsik,
                         style = MaterialTheme.typography.labelMedium,
-                        letterSpacing = 1.4.sp,
                         fontWeight = FontWeight.Bold,
+                        maxLines = 1,
                     )
                     Text(
                         text = stringResource(if (soruEkleModu) R.string.lessons_choose_title else R.string.lessons_title),

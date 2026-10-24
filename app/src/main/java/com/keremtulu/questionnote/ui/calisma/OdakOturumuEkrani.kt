@@ -308,8 +308,8 @@ fun OdakOturumuEkrani(
                     Modifier.fillMaxWidth().background(Brush.linearGradient(listOf(Color(0xFF173A49), Color(0xFF2C5D69))), RoundedCornerShape(24.dp)).padding(20.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Text(stringResource(R.string.focus_kicker), color = Color(0xFFEDD09A), letterSpacing = 2.sp,
-                        style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.focus_kicker), color = Color(0xFFEDD09A),
+                        style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, maxLines = 1)
                     Text(ders.ad, color = Color.White, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                     Text(stringResource(R.string.measure_phase_times,
                         sureMetni(olcum.nokta.olcum.denemeAktifMs), sureMetni(olcum.nokta.olcum.incelemeAktifMs)),
