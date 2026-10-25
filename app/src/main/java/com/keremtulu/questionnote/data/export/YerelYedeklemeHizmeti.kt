@@ -240,9 +240,9 @@ class YerelYedeklemeHizmeti(
             yedek = verified.summary.copy(dosyaAdi = displayName.takeIf { it.isNotBlank() } ?: archive.name),
             mevcut = current,
             yedekOgretmenGrupSayisi = verified.data.ogretmenVerisi.gruplar.size,
-            yedekOgretmenSoruSayisi = verified.data.ogretmenVerisi.gruplar.sumOf { it.sorular.size },
+            yedekOgretmenSoruSayisi = verified.data.ogretmenVerisi.sorular.size,
             mevcutOgretmenGrupSayisi = mevcutOgretmen.gruplar.size,
-            mevcutOgretmenSoruSayisi = mevcutOgretmen.gruplar.sumOf { it.sorular.size },
+            mevcutOgretmenSoruSayisi = mevcutOgretmen.sorular.size,
         )
     }
 

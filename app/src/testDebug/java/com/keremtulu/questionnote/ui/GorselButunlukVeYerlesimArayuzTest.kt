@@ -41,6 +41,7 @@ import com.keremtulu.questionnote.data.repository.RoomSoruRepository
 import com.keremtulu.questionnote.domain.calisma.OdakOturumu
 import com.keremtulu.questionnote.domain.model.GorselTuru
 import com.keremtulu.questionnote.domain.model.OgretmenZorluk
+import com.keremtulu.questionnote.domain.model.SinavProfili
 import com.keremtulu.questionnote.ui.bilesenler.SoruGorselTamEkran
 import com.keremtulu.questionnote.ui.calisma.OdakOturumuEkrani
 import com.keremtulu.questionnote.ui.ogretmen.OgretmenAnaEkrani
@@ -178,7 +179,7 @@ class GorselButunlukVeYerlesimArayuzTest {
                 OdakOturumuEkrani(
                     soru = soru,
                     ders = ders,
-                    soruRepository = soruRepository,
+                    repository = soruRepository,
                     gorselDeposu = gorselDeposu,
                     oturumId = "geometri-test",
                     oturumDeposu = oturumDeposu,
@@ -304,7 +305,7 @@ class GorselButunlukVeYerlesimArayuzTest {
         try {
             runBlocking {
                 val grup = requireNotNull(ogretmenDeposu.grupEkle("8D", "Fen sınıfı"))
-                val gorsel = gorselDeposu.ogretmenDosyadanHazirla(kaynakGorsel, 0)
+                val gorsel = gorselDeposu.dosyadanHazirla(kaynakGorsel, GorselTuru.SORU, 0)
                 requireNotNull(
                     ogretmenDeposu.soruKaydet(
                         grupId = grup.id,
@@ -370,7 +371,7 @@ class GorselButunlukVeYerlesimArayuzTest {
 
     @Test
     fun buyukYaziOlcegindeDerslerEkraniTasmazVeManropeTablosuTutarlidir() {
-        runBlocking { dersRepository.kataloguHazirla() }
+        runBlocking { dersRepository.sinavProfiliniUygula(SinavProfili.YKS) }
 
         compose.setContent {
             CompositionLocalProvider(LocalDensity provides Density(1f, 1.6f)) {
