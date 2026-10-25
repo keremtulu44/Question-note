@@ -2,6 +2,12 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.5.102] — 2026-10-25
+
+- İlk açılışta ~24 derslik katalogdan çoklu seçim; sınıf/sınav profili zorunlu değil.
+- Deneme kaydı: ad, 4’te 1 / 3’te 1 / netsiz, ders bazında doğru-yanlış-soru (boş hesaplanır). Yanlış ve boşlar için panelden klasik soru ekleme; kaynak otomatik deneme adı.
+- Sürüm: `versionCode 32` / `versionName 1.5.102`.
+
 ## [1.5.101] — 2026-10-24
 
 - Ders listesinde sahte “Fotoğraflı soru” başlığı yerine not/kaynak; favori yongası ve not/kaynak araması.

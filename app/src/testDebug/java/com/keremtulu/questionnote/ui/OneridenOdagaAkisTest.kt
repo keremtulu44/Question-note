@@ -86,6 +86,7 @@ class OneridenOdagaAkisTest {
                         rozetDeposu = badges, rutbeDeposu = ranks, rozetHizmeti = awards, profilDeposu = profile,
                         tekrarPolitikasi = motor, motorTanisi = diagnostics, oturumDeposu = sessions,
                         gunlukHedefDeposu = goals, tercihHedefDeposu = goals,
+                        denemeDeposu = DenemeDeposu(context),
                     )
                 }
             }

@@ -17,10 +17,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -39,7 +41,7 @@ import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.data.export.SonYedekBilgisi
 import com.keremtulu.questionnote.data.prefs.SinavProfiliDeposu
 import com.keremtulu.questionnote.data.prefs.TercihGunlukHedefDeposu
-import com.keremtulu.questionnote.domain.model.SinavProfili
+import com.keremtulu.questionnote.domain.model.Ders
 import com.keremtulu.questionnote.domain.repository.DersRepository
 import com.keremtulu.questionnote.ui.LocalUygulamaSesleri
 import com.keremtulu.questionnote.ui.bilesenler.premium.CamKarti
@@ -77,6 +79,7 @@ fun AyarlarEkrani(
     val sesEfektleri = LocalUygulamaSesleri.current
     var sesAcik by remember { mutableStateOf(sesEfektleri?.acikMi() ?: false) }
     val secim by profilDeposu.secimIzle.collectAsState()
+    LaunchedEffect(Unit) { runCatching { dersRepository.kataloguHazirla() } }
     var profilKaydediliyor by remember { mutableStateOf(false) }
     var profilHatasi by remember { mutableStateOf(false) }
     var hedef by remember { mutableIntStateOf(gunlukHedefDeposu.hedef()) }
@@ -134,46 +137,38 @@ fun AyarlarEkrani(
             }
             item { MotorAyarlariKarti(tekrarPolitikasi, motorTanisi) }
             item {
+                val tumDersler by produceState(emptyList<Ders>()) {
+                    dersRepository.dersleriIzle(false).collect { value = it }
+                }
                 Bolum(stringResource(R.string.settings_profile_title)) {
                     Text(stringResource(R.string.settings_profile_note), style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Row(
-                        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                    SinavProfili.entries.forEach { profil ->
+                    tumDersler.forEach { ders ->
+                        val acik = secim.dersIdleri.isEmpty() || ders.id in secim.dersIdleri || secim.herDersiGoster
                         FilterChip(
-                            selected = secim.profil == profil,
+                            selected = acik && (secim.dersIdleri.isEmpty() || ders.id in secim.dersIdleri),
                             onClick = {
-                                if (secim.profil != profil && !profilKaydediliyor && !yedeklemeIslemde) {
-                                    profilKaydediliyor = true
-                                    profilHatasi = false
-                                    scope.launch {
-                                        try {
-                                            dersRepository.sinavProfiliniUygula(profil)
-                                        } catch (iptal: CancellationException) {
-                                            throw iptal
-                                        } catch (_: Exception) {
-                                            profilHatasi = true
-                                        } finally {
-                                            profilKaydediliyor = false
-                                        }
+                                if (profilKaydediliyor || yedeklemeIslemde) return@FilterChip
+                                profilKaydediliyor = true
+                                profilHatasi = false
+                                val simdiki = if (secim.dersIdleri.isEmpty()) tumDersler.map { it.id }.toSet() else secim.dersIdleri
+                                val yeni = if (ders.id in simdiki) simdiki - ders.id else simdiki + ders.id
+                                scope.launch {
+                                    try {
+                                        if (yeni.isNotEmpty()) dersRepository.dersSeciminiKaydet(yeni)
+                                    } catch (iptal: CancellationException) {
+                                        throw iptal
+                                    } catch (_: Exception) {
+                                        profilHatasi = true
+                                    } finally {
+                                        profilKaydediliyor = false
                                     }
                                 }
                             },
                             enabled = !profilKaydediliyor && !yedeklemeIslemde,
-                            label = { Text(profil.ad, fontWeight = FontWeight.SemiBold) },
+                            label = { Text(ders.ad) },
+                            modifier = Modifier.fillMaxWidth(),
                         )
-                    }
-                    }
-                    Text(
-                        secim.profil.aciklama,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    if (secim.profil.dersAdlari.isNotEmpty()) {
-                        Text(secim.profil.dersAdlari.joinToString(" · "), style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     if (profilKaydediliyor) {
                         Text(

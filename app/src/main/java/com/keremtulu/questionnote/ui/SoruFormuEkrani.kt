@@ -123,7 +123,7 @@ fun SoruFormuEkrani(
     var formHatasi by remember { mutableStateOf<Int?>(null) }
     var kaydediliyor by remember { mutableStateOf(false) }
     var cozumNotu by remember(soruId) { mutableStateOf("") }
-    var kaynak by remember(soruId) { mutableStateOf("") }
+    var kaynak by remember(soruId) { mutableStateOf(gizliKaynak.orEmpty()) }
     var kaynakKonumu by remember(soruId) { mutableStateOf("") }
     var yanlisNedeni by remember(soruId) { mutableStateOf("") }
     var katalogDialogTuru by remember { mutableStateOf<SoruSecenekTuru?>(null) }
@@ -634,6 +634,7 @@ fun SoruFormuEkrani(
                                     )
                                 }
                             }
+                            if (gizliKaynak == null) {
                             SoruSecenegiSecici(
                                 baslik = stringResource(R.string.question_form_source_label),
                                 secimYok = stringResource(R.string.question_form_source_choose),
@@ -658,6 +659,7 @@ fun SoruFormuEkrani(
                                 label = { Text(stringResource(R.string.question_form_source_location_label)) },
                                 shape = RoundedCornerShape(16.dp),
                             )
+                            }
                             SoruSecenegiSecici(
                                 baslik = stringResource(R.string.question_form_reason_label),
                                 secimYok = stringResource(R.string.question_form_reason_choose),

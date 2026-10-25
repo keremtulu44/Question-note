@@ -5,6 +5,11 @@ import java.util.Locale
 
 /** Profiles are a view of the lesson catalogue, never an instruction to delete/archive data. */
 enum class SinavProfili(val ad: String, val aciklama: String, val dersAdlari: List<String>) {
+    OZEL(
+        "Derslerim",
+        "Kurulumda seçtiğin dersler",
+        emptyList(),
+    ),
     LGS(
         "LGS", "Ortaokul · liseye hazırlık",
         listOf("Türkçe", "Matematik", "Fen Bilimleri", "T.C. İnkılap Tarihi ve Atatürkçülük", "Din Kültürü ve Ahlak Bilgisi", "İngilizce"),
@@ -33,6 +38,7 @@ enum class SinavProfili(val ad: String, val aciklama: String, val dersAdlari: Li
 
     companion object {
         fun anahtarla(anahtar: String?): SinavProfili = when (anahtar) {
+            OZEL.name -> OZEL
             LGS.name -> LGS
             SINIF_9_10.name -> SINIF_9_10
             YKS.name, "TYT", "AYT", "SERBEST", "KPSS" -> YKS

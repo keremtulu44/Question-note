@@ -26,6 +26,7 @@ class AppContainer(context: Context) {
 
     val gorselDeposu = LocalSoruGorselDeposu(context)
     val profilDeposu = SinavProfiliDeposu(context)
+    val denemeDeposu = com.keremtulu.questionnote.data.prefs.DenemeDeposu(context)
     val oturumDeposu = OdakOturumuDeposu(context)
     val tekrarPolitikasi = TekrarPolitikasiDeposu(context)
     val motorTanisi = com.keremtulu.questionnote.data.gelisim.MotorTaniHizmeti(database)
