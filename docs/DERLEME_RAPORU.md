@@ -2,8 +2,8 @@
 
 > Bu dosya Android CI tarafından otomatik üretilir. Keystore veya parola değerleri yazılmaz.
 
-- Zaman (UTC): 2026-10-25T13:41:20Z
-- Workflow commit'i: 7ec7754ebdb550017e3d68548f957c3a5586b43c
+- Zaman (UTC): 2026-10-25T13:47:18Z
+- Workflow commit'i: 6dd5efc195aa3e6cf2439a58f2e9316c886fb4aa
 - Dal: arena/9d4e7eac-question-note
 - Uygulama sürümü: 1.5.104 (versionCode 34)
 - Android SDK: compileSdk/targetSdk 37, minSdk 26; build-tools 37.0.0
@@ -56,30 +56,15 @@ OS:            Linux 6.17.0-1022-azure amd64
 
 ```text
 -- Derleyici/Gradle hata satırları --
-32:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/BugunEkrani.kt:519:68 Function invocation 'toplamNet()' expected.
-33:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:188:37 No parameter with name 'arsivliDahil' found.
-34:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:188:37 No value passed for parameter 'arsivli'.
-35:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:298:86 Function invocation 'toplamNet()' expected.
-36:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:299:87 Function invocation 'toplamNet()' expected.
-37:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:314:57 Function invocation 'toplamNet()' expected.
-38:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:315:72 Function invocation 'toplamNet()' expected.
-39:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:315:87 Function invocation 'toplamNet()' expected.
-40:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:394:57 Function invocation 'toplamNet()' expected.
-41:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:394:72 Function invocation 'toplamNet()' expected.
-42:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:421:31 Unresolved reference 'toplamYuklenecek'.
-43:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:458:44 Function invocation 'toplamNet()' expected.
-44:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:581:42 Function invocation 'toplamNet()' expected.
-45:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:687:46 Unresolved reference 'sembolRes'.
-46:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:820:37 No parameter with name 'arsivliDahil' found.
-47:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:820:37 No value passed for parameter 'arsivli'.
-48:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:835:21 No parameter with name 'olusturma' found.
-49:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:836:21 No parameter with name 'guncelleme' found.
-50:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:836:21 No value passed for parameter 'soruSayisi'.
-51:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:1242:38 Unresolved reference 'sembolRes'.
-52:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/kurulum/DersKurulumEkrani.kt:319:38 Unresolved reference 'sembolRes'.
-60:* What went wrong:
-63:   > Compilation error. See log for more details
-219:Caused by: org.jetbrains.kotlin.gradle.tasks.CompilationErrorException: Compilation error. See log for more details
+67:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/export/YerelYedeklemeHizmetiTest.kt:783:36 Unresolved reference 'yedekOlustur'.
+68:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/export/YerelYedeklemeHizmetiTest.kt:783:51 Cannot infer type for type parameter 'T'. Specify it explicitly.
+69:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/export/YerelYedeklemeHizmetiTest.kt:783:72 None of the following candidates is applicable:
+76:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomSoruRepositoryTest.kt:558:83 Cannot infer type for type parameter 'T'. Specify it explicitly.
+77:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomSoruRepositoryTest.kt:581:9 Unresolved reference 'assertFalse'.
+78:e: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/com/keremtulu/questionnote/ui/DenemeVeKurulumArayuzTest.kt:114:33 Unresolved reference 'kurulumTamam'.
+84:* What went wrong:
+87:   > Compilation error. See log for more details
+273:Caused by: org.jetbrains.kotlin.gradle.tasks.CompilationErrorException: Compilation error. See log for more details
 
 -- İlk 100 satır --
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
@@ -111,38 +96,62 @@ Daemon will be stopped at the end of the build
 > Task :app:packageDebugUnitTestForUnitTest
 > Task :app:generateDebugUnitTestConfig
 > Task :app:kspDebugKotlin
-
 > Task :app:compileDebugKotlin
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/BugunEkrani.kt:519:68 Function invocation 'toplamNet()' expected.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:188:37 No parameter with name 'arsivliDahil' found.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:188:37 No value passed for parameter 'arsivli'.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:298:86 Function invocation 'toplamNet()' expected.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:299:87 Function invocation 'toplamNet()' expected.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:314:57 Function invocation 'toplamNet()' expected.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:315:72 Function invocation 'toplamNet()' expected.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:315:87 Function invocation 'toplamNet()' expected.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:394:57 Function invocation 'toplamNet()' expected.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:394:72 Function invocation 'toplamNet()' expected.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:421:31 Unresolved reference 'toplamYuklenecek'.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:458:44 Function invocation 'toplamNet()' expected.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:581:42 Function invocation 'toplamNet()' expected.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:687:46 Unresolved reference 'sembolRes'.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:820:37 No parameter with name 'arsivliDahil' found.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:820:37 No value passed for parameter 'arsivli'.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:835:21 No parameter with name 'olusturma' found.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:836:21 No parameter with name 'guncelleme' found.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:836:21 No value passed for parameter 'soruSayisi'.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:1242:38 Unresolved reference 'sembolRes'.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/kurulum/DersKurulumEkrani.kt:319:38 Unresolved reference 'sembolRes'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/export/YerelYedeklemeHizmeti.kt:67:34 Non-public primary constructor is exposed via the generated 'copy()' method of the 'data' class.
 
-> Task :app:compileDebugKotlin FAILED
+The generated 'copy()' will change its visibility in future releases.
+
+To suppress the warning do one of the following:
+- Annotate the data class with the '@ConsistentCopyVisibility' annotation.
+- Use the '-Xconsistent-data-class-copy-visibility' compiler flag.
+- Annotate the data class with the '@ExposedCopyVisibility' annotation 
+  (Discouraged, but can be used to keep binary compatibility).
+
+To learn more, see the documentation of the '@ConsistentCopyVisibility' and '@ExposedCopyVisibility' annotations.
+
+This will become an error in language version 2.5. See https://youtrack.jetbrains.com/issue/KT-11914.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/images/LocalSoruGorselDeposu.kt:133:57 'static fun newInstance(p0: String, p1: Boolean): BitmapRegionDecoder' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/images/LocalSoruGorselDeposu.kt:134:21 Elvis operator (?:) always returns the left operand of non-nullable type 'BitmapRegionDecoder'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/images/LocalSoruGorselDeposu.kt:367:35 Elvis operator (?:) always returns the left operand of non-nullable type 'Bitmap'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/local/YanlisDefteriMigrations.kt:12:30 The corresponding parameter in the supertype 'Migration' is named 'db'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/local/YanlisDefteriMigrations.kt:25:30 The corresponding parameter in the supertype 'Migration' is named 'db'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/local/YanlisDefteriMigrations.kt:105:30 The corresponding parameter in the supertype 'Migration' is named 'db'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/ses/SesYoneticisi.kt:252:64 'static field VIBRATOR_SERVICE: String' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/ses/SesYoneticisi.kt:260:33 'static field HAPTIC_FEEDBACK_ENABLED: String' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/SoruDetayEkrani.kt:663:89 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/YanlisDefteriUygulamasi.kt:193:71 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/bilesenler/SoruGorselBileseni.kt:135:26 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/bilesenler/premium/PremiumBilesenler.kt:106:28 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/calisma/CozumTahtasiDialog.kt:1558:30 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/karne/KarneEkrani.kt:231:72 Unnecessary safe call on a non-null receiver of type 'KarneVerisi'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/premium/PremiumEntegrasyon.kt:290:81 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
+
+> Task :app:compileDebugJavaWithJavac
+> Task :app:processDebugJavaRes
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:kspDebugUnitTestKotlin
+
+> Task :app:compileDebugUnitTestKotlin FAILED
+e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/export/YerelYedeklemeHizmetiTest.kt:783:36 Unresolved reference 'yedekOlustur'.
+e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/export/YerelYedeklemeHizmetiTest.kt:783:51 Cannot infer type for type parameter 'T'. Specify it explicitly.
+e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/export/YerelYedeklemeHizmetiTest.kt:783:72 None of the following candidates is applicable:
+
+fun add(element: File): Boolean:
+  Inapplicable candidate(s): fun add(element: File): Boolean
+
+fun add(index: Int, element: File): Unit:
+  Inapplicable candidate(s): fun add(index: Int, element: File): Unit
+e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomSoruRepositoryTest.kt:558:83 Cannot infer type for type parameter 'T'. Specify it explicitly.
+e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomSoruRepositoryTest.kt:581:9 Unresolved reference 'assertFalse'.
+e: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/com/keremtulu/questionnote/ui/DenemeVeKurulumArayuzTest.kt:114:33 Unresolved reference 'kurulumTamam'.
 
 [Incubating] Problems report is available at: file:///home/runner/work/Question-note/Question-note/build/reports/problems/problems-report.html
 
 FAILURE: Build failed with an exception.
 
 * What went wrong:
-Execution failed for task ':app:compileDebugKotlin' (registered by plugin 'com.android.internal.application').
+Execution failed for task ':app:compileDebugUnitTestKotlin' (registered by plugin 'com.android.internal.application').
 > A failure occurred while executing org.jetbrains.kotlin.compilerRunner.btapi.BuildToolsApiCompilationWork
    > Compilation error. See log for more details
 
@@ -152,36 +161,12 @@ Execution failed for task ':app:compileDebugKotlin' (registered by plugin 'com.a
 > Get more help at https://help.gradle.org.
 
 * Exception is:
-org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':app:compileDebugKotlin' (registered by plugin 'com.android.internal.application').
+org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':app:compileDebugUnitTestKotlin' (registered by plugin 'com.android.internal.application').
 	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.lambda$doExecute$1(DefaultTaskNodeExecutor.java:367)
 	at org.gradle.internal.Try$Failure.ifSuccessfulOrElse(Try.java:288)
 	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.doExecute(DefaultTaskNodeExecutor.java:365)
 	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.executeTrackingTaskIdentity(DefaultTaskNodeExecutor.java:332)
 	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.executeFinalizingProperties(DefaultTaskNodeExecutor.java:318)
-	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.executeSkippingWithNoActions(DefaultTaskNodeExecutor.java:289)
-	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.executeSkippingOnlyIf(DefaultTaskNodeExecutor.java:272)
-	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.executeCatchingFailures(DefaultTaskNodeExecutor.java:228)
-	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.executeWithFallbackOperationId(DefaultTaskNodeExecutor.java:197)
-	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.executeWithLifecycle(DefaultTaskNodeExecutor.java:171)
-	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.access$000(DefaultTaskNodeExecutor.java:67)
-	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor$1.run(DefaultTaskNodeExecutor.java:136)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:30)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:27)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.run(DefaultBuildOperationRunner.java:48)
-	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.execute(DefaultTaskNodeExecutor.java:133)
-	at org.gradle.execution.plan.LocalTaskNode.execute(LocalTaskNode.java:229)
-	at org.gradle.execution.DefaultBuildWorkExecutor.lambda$executePlan$0(DefaultBuildWorkExecutor.java:153)
-	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.lambda$execute$0(DefaultPlanExecutor.java:476)
-	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:85)
-	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.execute(DefaultPlanExecutor.java:475)
-	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.run(DefaultPlanExecutor.java:392)
-	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:65)
-	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:47)
-Caused by: org.gradle.workers.internal.DefaultWorkerExecutor$WorkExecutionException: A failure occurred while executing org.jetbrains.kotlin.compilerRunner.btapi.BuildToolsApiCompilationWork
 
 -- Son 80 satır --
 	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
@@ -219,7 +204,7 @@ Caused by: org.gradle.workers.internal.DefaultWorkerExecutor$WorkExecutionExcept
 	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:38)
 	at org.gradle.internal.execution.impl.DefaultExecutionEngine$1.execute(DefaultExecutionEngine.java:68)
 	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.doExecute(DefaultTaskNodeExecutor.java:364)
-	... 25 more
+	... 55 more
 Caused by: org.jetbrains.kotlin.gradle.tasks.CompilationErrorException: Compilation error. See log for more details
 	at org.jetbrains.kotlin.gradle.tasks.TasksUtilsKt.throwExceptionIfCompilationFailed(tasksUtils.kt:21)
 	at org.jetbrains.kotlin.compilerRunner.btapi.BuildToolsApiCompilationWork.execute(BuildToolsApiCompilationWork.kt:320)
@@ -262,8 +247,8 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD FAILED in 56s
-24 actionable tasks: 16 executed, 8 from cache
+BUILD FAILED in 1m 41s
+30 actionable tasks: 22 executed, 8 from cache
 ```
 
 ## Release birim test çıktısı
@@ -282,8 +267,8 @@ Daemon will be stopped at the end of the build
 > Task :app:generateReleaseRFile FROM-CACHE
 > Task :app:javaPreCompileRelease FROM-CACHE
 > Task :app:mapReleaseSourceSetPaths
-> Task :app:checkReleaseAarMetadata
 > Task :app:compileReleaseNavigationResources FROM-CACHE
+> Task :app:checkReleaseAarMetadata
 > Task :app:createReleaseCompatibleScreenManifests
 > Task :app:extractDeepLinksRelease FROM-CACHE
 > Task :app:processReleaseMainManifest FROM-CACHE
@@ -293,98 +278,82 @@ Daemon will be stopped at the end of the build
 > Task :app:javaPreCompileReleaseUnitTest FROM-CACHE
 > Task :app:generateReleaseAssets UP-TO-DATE
 > Task :app:mergeReleaseAssets
-> Task :app:mergeReleaseResources
 > Task :app:processReleaseUnitTestManifest
+> Task :app:mergeReleaseResources
 > Task :app:processReleaseResources
 > Task :app:packageReleaseUnitTestForUnitTest
 > Task :app:generateReleaseUnitTestConfig
 > Task :app:kspReleaseKotlin
+> Task :app:compileReleaseKotlin
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/export/YerelYedeklemeHizmeti.kt:67:34 Non-public primary constructor is exposed via the generated 'copy()' method of the 'data' class.
 
-> Task :app:compileReleaseKotlin FAILED
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/BugunEkrani.kt:519:68 Function invocation 'toplamNet()' expected.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:188:37 No parameter with name 'arsivliDahil' found.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:188:37 No value passed for parameter 'arsivli'.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:298:86 Function invocation 'toplamNet()' expected.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:299:87 Function invocation 'toplamNet()' expected.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:314:57 Function invocation 'toplamNet()' expected.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:315:72 Function invocation 'toplamNet()' expected.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:315:87 Function invocation 'toplamNet()' expected.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:394:57 Function invocation 'toplamNet()' expected.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:394:72 Function invocation 'toplamNet()' expected.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:421:31 Unresolved reference 'toplamYuklenecek'.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:458:44 Function invocation 'toplamNet()' expected.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:581:42 Function invocation 'toplamNet()' expected.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:687:46 Unresolved reference 'sembolRes'.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:820:37 No parameter with name 'arsivliDahil' found.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:820:37 No value passed for parameter 'arsivli'.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:835:21 No parameter with name 'olusturma' found.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:836:21 No parameter with name 'guncelleme' found.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:836:21 No value passed for parameter 'soruSayisi'.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:1242:38 Unresolved reference 'sembolRes'.
-e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/kurulum/DersKurulumEkrani.kt:319:38 Unresolved reference 'sembolRes'.
+The generated 'copy()' will change its visibility in future releases.
+
+To suppress the warning do one of the following:
+- Annotate the data class with the '@ConsistentCopyVisibility' annotation.
+- Use the '-Xconsistent-data-class-copy-visibility' compiler flag.
+- Annotate the data class with the '@ExposedCopyVisibility' annotation 
+  (Discouraged, but can be used to keep binary compatibility).
+
+To learn more, see the documentation of the '@ConsistentCopyVisibility' and '@ExposedCopyVisibility' annotations.
+
+This will become an error in language version 2.5. See https://youtrack.jetbrains.com/issue/KT-11914.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/images/LocalSoruGorselDeposu.kt:133:57 'static fun newInstance(p0: String, p1: Boolean): BitmapRegionDecoder' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/images/LocalSoruGorselDeposu.kt:134:21 Elvis operator (?:) always returns the left operand of non-nullable type 'BitmapRegionDecoder'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/images/LocalSoruGorselDeposu.kt:367:35 Elvis operator (?:) always returns the left operand of non-nullable type 'Bitmap'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/local/YanlisDefteriMigrations.kt:12:30 The corresponding parameter in the supertype 'Migration' is named 'db'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/local/YanlisDefteriMigrations.kt:25:30 The corresponding parameter in the supertype 'Migration' is named 'db'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/local/YanlisDefteriMigrations.kt:105:30 The corresponding parameter in the supertype 'Migration' is named 'db'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/ses/SesYoneticisi.kt:252:64 'static field VIBRATOR_SERVICE: String' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/ses/SesYoneticisi.kt:260:33 'static field HAPTIC_FEEDBACK_ENABLED: String' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/SoruDetayEkrani.kt:663:89 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/YanlisDefteriUygulamasi.kt:193:71 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/bilesenler/SoruGorselBileseni.kt:135:26 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/bilesenler/premium/PremiumBilesenler.kt:106:28 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/calisma/CozumTahtasiDialog.kt:1558:30 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/karne/KarneEkrani.kt:231:72 Unnecessary safe call on a non-null receiver of type 'KarneVerisi'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/premium/PremiumEntegrasyon.kt:290:81 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
+
+> Task :app:compileReleaseJavaWithJavac
+> Task :app:processReleaseJavaRes
+> Task :app:bundleReleaseClassesToRuntimeJar
+> Task :app:bundleReleaseClassesToCompileJar
+> Task :app:kspReleaseUnitTestKotlin
+
+> Task :app:compileReleaseUnitTestKotlin FAILED
+e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/export/YerelYedeklemeHizmetiTest.kt:783:36 Unresolved reference 'yedekOlustur'.
+e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/export/YerelYedeklemeHizmetiTest.kt:783:51 Cannot infer type for type parameter 'T'. Specify it explicitly.
+e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/export/YerelYedeklemeHizmetiTest.kt:783:72 None of the following candidates is applicable:
+
+fun add(element: File): Boolean:
+  Inapplicable candidate(s): fun add(element: File): Boolean
+
+fun add(index: Int, element: File): Unit:
+  Inapplicable candidate(s): fun add(index: Int, element: File): Unit
+e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomSoruRepositoryTest.kt:558:83 Cannot infer type for type parameter 'T'. Specify it explicitly.
+e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomSoruRepositoryTest.kt:581:9 Unresolved reference 'assertFalse'.
 
 [Incubating] Problems report is available at: file:///home/runner/work/Question-note/Question-note/build/reports/problems/problems-report.html
 
 FAILURE: Build failed with an exception.
 
 * What went wrong:
-Execution failed for task ':app:compileReleaseKotlin' (registered by plugin 'com.android.internal.application').
+Execution failed for task ':app:compileReleaseUnitTestKotlin' (registered by plugin 'com.android.internal.application').
 > A failure occurred while executing org.jetbrains.kotlin.compilerRunner.btapi.BuildToolsApiCompilationWork
    > Compilation error. See log for more details
 
 * Try:
 > Run with --info or --debug option to get more log output.
 > Run with --scan to get full insights from a Build Scan (powered by Develocity).
-> Get more help at https://help.gradle.org.
-
-* Exception is:
-org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':app:compileReleaseKotlin' (registered by plugin 'com.android.internal.application').
-	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.lambda$doExecute$1(DefaultTaskNodeExecutor.java:367)
-	at org.gradle.internal.Try$Failure.ifSuccessfulOrElse(Try.java:288)
-	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.doExecute(DefaultTaskNodeExecutor.java:365)
-	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.executeTrackingTaskIdentity(DefaultTaskNodeExecutor.java:332)
-	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.executeFinalizingProperties(DefaultTaskNodeExecutor.java:318)
-	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.executeSkippingWithNoActions(DefaultTaskNodeExecutor.java:289)
-	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.executeSkippingOnlyIf(DefaultTaskNodeExecutor.java:272)
-	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.executeCatchingFailures(DefaultTaskNodeExecutor.java:228)
-	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.executeWithFallbackOperationId(DefaultTaskNodeExecutor.java:197)
-	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.executeWithLifecycle(DefaultTaskNodeExecutor.java:171)
-	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.access$000(DefaultTaskNodeExecutor.java:67)
-	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor$1.run(DefaultTaskNodeExecutor.java:136)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:30)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:27)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.run(DefaultBuildOperationRunner.java:48)
-	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.execute(DefaultTaskNodeExecutor.java:133)
-	at org.gradle.execution.plan.LocalTaskNode.execute(LocalTaskNode.java:229)
 -- Hata satırları ve son bölüm --
-32:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/BugunEkrani.kt:519:68 Function invocation 'toplamNet()' expected.
-33:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:188:37 No parameter with name 'arsivliDahil' found.
-34:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:188:37 No value passed for parameter 'arsivli'.
-35:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:298:86 Function invocation 'toplamNet()' expected.
-36:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:299:87 Function invocation 'toplamNet()' expected.
-37:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:314:57 Function invocation 'toplamNet()' expected.
-38:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:315:72 Function invocation 'toplamNet()' expected.
-39:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:315:87 Function invocation 'toplamNet()' expected.
-40:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:394:57 Function invocation 'toplamNet()' expected.
-41:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:394:72 Function invocation 'toplamNet()' expected.
-42:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:421:31 Unresolved reference 'toplamYuklenecek'.
-43:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:458:44 Function invocation 'toplamNet()' expected.
-44:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:581:42 Function invocation 'toplamNet()' expected.
-45:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:687:46 Unresolved reference 'sembolRes'.
-46:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:820:37 No parameter with name 'arsivliDahil' found.
-47:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:820:37 No value passed for parameter 'arsivli'.
-48:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:835:21 No parameter with name 'olusturma' found.
-49:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:836:21 No parameter with name 'guncelleme' found.
-50:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:836:21 No value passed for parameter 'soruSayisi'.
-51:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/deneme/DenemeEkranlari.kt:1242:38 Unresolved reference 'sembolRes'.
-52:e: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/kurulum/DersKurulumEkrani.kt:319:38 Unresolved reference 'sembolRes'.
-58:* What went wrong:
-61:   > Compilation error. See log for more details
-217:Caused by: org.jetbrains.kotlin.gradle.tasks.CompilationErrorException: Compilation error. See log for more details
+67:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/export/YerelYedeklemeHizmetiTest.kt:783:36 Unresolved reference 'yedekOlustur'.
+68:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/export/YerelYedeklemeHizmetiTest.kt:783:51 Cannot infer type for type parameter 'T'. Specify it explicitly.
+69:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/export/YerelYedeklemeHizmetiTest.kt:783:72 None of the following candidates is applicable:
+76:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomSoruRepositoryTest.kt:558:83 Cannot infer type for type parameter 'T'. Specify it explicitly.
+77:e: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/repository/RoomSoruRepositoryTest.kt:581:9 Unresolved reference 'assertFalse'.
+83:* What went wrong:
+86:   > Compilation error. See log for more details
+272:Caused by: org.jetbrains.kotlin.gradle.tasks.CompilationErrorException: Compilation error. See log for more details
 	at org.gradle.internal.execution.steps.BuildCacheStep.lambda$execute$0(BuildCacheStep.java:75)
 	at org.gradle.internal.Either$Left.fold(Either.java:116)
 	at org.gradle.internal.execution.caching.CachingState.fold(CachingState.java:62)
@@ -440,7 +409,7 @@ org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':app:com
 	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:38)
 	at org.gradle.internal.execution.impl.DefaultExecutionEngine$1.execute(DefaultExecutionEngine.java:68)
 	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.doExecute(DefaultTaskNodeExecutor.java:364)
-	... 25 more
+	... 55 more
 Caused by: org.jetbrains.kotlin.gradle.tasks.CompilationErrorException: Compilation error. See log for more details
 	at org.jetbrains.kotlin.gradle.tasks.TasksUtilsKt.throwExceptionIfCompilationFailed(tasksUtils.kt:21)
 	at org.jetbrains.kotlin.compilerRunner.btapi.BuildToolsApiCompilationWork.execute(BuildToolsApiCompilationWork.kt:320)
@@ -483,8 +452,8 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD FAILED in 53s
-24 actionable tasks: 12 executed, 12 from cache
+BUILD FAILED in 1m 32s
+30 actionable tasks: 18 executed, 12 from cache
 ```
 
 ## JUnit başarısızlık ayrıntıları
