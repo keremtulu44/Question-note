@@ -140,11 +140,11 @@ import com.keremtulu.questionnote.ui.bilesenler.premium.CamKarti
 import com.keremtulu.questionnote.ui.bilesenler.premium.CamYukseklik
 import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
 import com.keremtulu.questionnote.ui.bilesenler.premium.PremiumBosDurum
-import com.keremtulu.questionnote.ui.bilesenler.premium.PremiumGradyanButon
 import com.keremtulu.questionnote.ui.premium.EtkilesimTuru
 import com.keremtulu.questionnote.ui.premium.PremiumButton
 import com.keremtulu.questionnote.ui.premium.PremiumCard
 import com.keremtulu.questionnote.ui.premium.PremiumExtendedFloatingActionButton
+import com.keremtulu.questionnote.ui.premium.PremiumGradyanButon
 import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 import com.keremtulu.questionnote.ui.premium.PremiumOutlinedButton
 import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
@@ -574,7 +574,7 @@ private fun OgretmenGruplarEkrani(
                             if (toplamSoru > 0) {
                                 val oran = animateFloatPremium(
                                     target = toplamCozulmus.toFloat() / toplamSoru.toFloat(),
-                                    animationSpec = tweenPremium(SureToken.YAVAS),
+                                    animationSpec = tweenPremium(SureToken.MEDIUM),
                                     label = "ogretmen-toplam-ilerleme",
                                 )
                                 Box(
