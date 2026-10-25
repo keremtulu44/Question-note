@@ -624,8 +624,11 @@ fun YanlisDefteriUygulamasi(
                         dersRepository = dersRepository,
                         soruRepository = soruRepository,
                         onGeri = { ekran = UygulamaEkrani.Denemeler },
-                        onSoruEkle = { ders, kaynak ->
-                            ekran = UygulamaEkrani.SoruFormu(ders, null, current, kaynak)
+                        onKaydedildi = { id ->
+                            if (current.denemeId != id) ekran = UygulamaEkrani.DenemeDetay(id)
+                        },
+                        onSoruEkle = { ders, kaynak, id ->
+                            ekran = UygulamaEkrani.SoruFormu(ders, null, UygulamaEkrani.DenemeDetay(id), kaynak)
                         },
                     )
                     UygulamaEkrani.GorselBakimi -> GorselBakimEkrani(

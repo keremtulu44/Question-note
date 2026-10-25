@@ -394,7 +394,7 @@ fun SoruFormuEkrani(
                         dersId = ders.id,
                         konuId = konuId,
                         cozumNotu = cozumNotu,
-                        kaynak = kaynak,
+                        kaynak = gizliKaynak ?: kaynak,
                         kaynakKonumu = kaynakKonumu,
                         yanlisNedeni = yanlisNedeni,
                         planDurumu = planDurumu,

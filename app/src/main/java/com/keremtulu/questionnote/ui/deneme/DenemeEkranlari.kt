@@ -160,19 +160,20 @@ fun DenemeDetayEkrani(
     dersRepository: DersRepository,
     soruRepository: SoruRepository,
     onGeri: () -> Unit,
-    onSoruEkle: (Ders, String) -> Unit,
+    onSoruEkle: (Ders, String, String) -> Unit,
+    onKaydedildi: (String) -> Unit = {},
 ) {
     val dersler by produceState(emptyList<Ders>()) {
         dersRepository.aktifDersleriIzle().collect { value = it }
     }
     val mevcut = denemeId?.let { denemeDeposu.getir(it) }
-    var ad by remember { mutableStateOf(mevcut?.ad.orEmpty()) }
-    var kural by remember { mutableStateOf(mevcut?.kural ?: NetKurali.DORTTE_BIR) }
-    var gun by remember { mutableIntStateOf(mevcut?.gun ?: LocalDate.now().toEpochDay().toInt()) }
-    val dogru = remember { mutableStateMapOf<String, String>() }
-    val yanlis = remember { mutableStateMapOf<String, String>() }
-    val soruSayisi = remember { mutableStateMapOf<String, String>() }
-    var kayitId by remember { mutableStateOf(mevcut?.id) }
+    var ad by remember(denemeId) { mutableStateOf(mevcut?.ad.orEmpty()) }
+    var kural by remember(denemeId) { mutableStateOf(mevcut?.kural ?: NetKurali.DORTTE_BIR) }
+    var gun by remember(denemeId) { mutableIntStateOf(mevcut?.gun ?: LocalDate.now().toEpochDay().toInt()) }
+    val dogru = remember(denemeId) { mutableStateMapOf<String, String>() }
+    val yanlis = remember(denemeId) { mutableStateMapOf<String, String>() }
+    val soruSayisi = remember(denemeId) { mutableStateMapOf<String, String>() }
+    var kayitId by remember(denemeId) { mutableStateOf(mevcut?.id) }
     var hata by remember { mutableStateOf<Int?>(null) }
     var ozet by remember { mutableStateOf<String?>(null) }
     if (mevcut != null && dogru.isEmpty()) {
@@ -264,7 +265,7 @@ fun DenemeDetayEkrani(
                     )
                     if (kayitli != null && kalan > 0) {
                         PremiumOutlinedButton(
-                            onClick = { onSoruEkle(ders, kayitli.ad) },
+                            onClick = { onSoruEkle(ders, kayitli.ad, kayitli.id) },
                             modifier = Modifier.fillMaxWidth(),
                         ) {
                             Text(stringResource(R.string.deneme_add_photo, kalan))
@@ -306,6 +307,7 @@ fun DenemeDetayEkrani(
                         )
                         denemeDeposu.kaydet(kayit)
                         kayitId = id
+                        onKaydedildi(id)
                         val zayif = kayit.enZayif()
                         val zayifAd = dersler.firstOrNull { it.id == zayif?.dersId }?.ad
                         val onceki = liste.oncekiAyniKural(kayit)

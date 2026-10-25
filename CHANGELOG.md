@@ -2,6 +2,11 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.5.104] — 2026-10-25
+
+- Yeni deneme kaydından sonra fotoğraf ekleyip dönünce formun sıfırlanması düzeltildi; kaynak her zaman deneme adı.
+- Sürüm: `versionCode 34` / `versionName 1.5.104`.
+
 ## [1.5.103] — 2026-10-25
 
 - Deneme günü otomatik; listede tarih. Toplam net çizgisi ve ders neti çubukları (önceki ortalama).
