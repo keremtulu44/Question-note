@@ -108,6 +108,7 @@ import com.keremtulu.questionnote.ui.premium.PremiumGradyanButon
 import com.keremtulu.questionnote.ui.premium.PremiumOutlinedButton
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
+import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -720,6 +721,7 @@ private fun DersNetBarlari(
                                 style = MaterialTheme.typography.labelSmall,
                                 color = vurgu,
                                 fontWeight = FontWeight.Bold,
+                                fontFamily = PremiumSembolAilesi,
                             )
                         }
                         Text(
@@ -1231,7 +1233,6 @@ fun DenemeDetayEkrani(
                 }
 
                 item {
-                    Spacer(Modifier.height(4.dp))
                     PremiumGradyanButon(
                         enabled = !islemde,
                         onClick = {
@@ -1248,7 +1249,9 @@ fun DenemeDetayEkrani(
                                 }
                             }
                         },
-                        modifier = Modifier.testTag("deneme-save-button"),
+                        modifier = Modifier
+                            .padding(top = 4.dp)
+                            .testTag("deneme-save-button"),
                     ) {
                         Text(
                             text = stringResource(R.string.deneme_save),
@@ -1328,6 +1331,7 @@ private fun DenemeDersSkorKarti(
                             style = MaterialTheme.typography.labelLarge,
                             color = vurgu,
                             fontWeight = FontWeight.Bold,
+                            fontFamily = PremiumSembolAilesi,
                         )
                     }
                     Column {

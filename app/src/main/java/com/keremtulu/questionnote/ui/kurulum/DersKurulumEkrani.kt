@@ -53,6 +53,7 @@ import com.keremtulu.questionnote.ui.premium.EtkilesimTuru
 import com.keremtulu.questionnote.ui.premium.PremiumCard
 import com.keremtulu.questionnote.ui.premium.PremiumGradyanButon
 import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
+import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import kotlinx.coroutines.launch
 
@@ -353,6 +354,7 @@ private fun KurulumDersKarti(
                     style = MaterialTheme.typography.labelLarge,
                     color = vurgu,
                     fontWeight = FontWeight.Bold,
+                    fontFamily = PremiumSembolAilesi,
                 )
             }
             Text(
@@ -376,6 +378,7 @@ private fun KurulumDersKarti(
                         style = MaterialTheme.typography.labelSmall,
                         color = ColorOnAccent(koyu),
                         fontWeight = FontWeight.Bold,
+                        fontFamily = PremiumSembolAilesi,
                     )
                 }
             }
@@ -385,4 +388,4 @@ private fun KurulumDersKarti(
 
 @Composable
 private fun ColorOnAccent(koyu: Boolean) =
-    if (koyu) MaterialTheme.colorScheme.inverseOnSurface else PremiumMarkaRenkler.Kagit
+    if (koyu) PremiumMarkaRenkler.Gece else PremiumMarkaRenkler.Kagit

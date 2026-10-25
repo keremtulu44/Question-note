@@ -1,6 +1,7 @@
 package com.keremtulu.questionnote.ui.deneme
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -20,6 +21,8 @@ import com.keremtulu.questionnote.domain.model.DenemeKaydi
 import com.keremtulu.questionnote.domain.model.Soru
 import com.keremtulu.questionnote.domain.model.denemeHatirlatmaIndeksi
 import com.keremtulu.questionnote.domain.model.kaynakla
+import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
+import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
 
 fun Soru.denemeKaydi(denemeler: List<DenemeKaydi>): DenemeKaydi? = denemeler.kaynakla(kaynak)
 
@@ -45,6 +48,7 @@ fun DenemeDamgaYazi(
                 style = MaterialTheme.typography.labelSmall,
                 color = colors.primary,
                 fontWeight = FontWeight.Bold,
+                fontFamily = PremiumSembolAilesi,
             )
             Text(
                 text = stringResource(R.string.deneme_stamp, deneme.ad, denemeTarihYazi(deneme.gun)),
@@ -71,11 +75,12 @@ fun DenemeHatirlatmaYazi(
         else -> R.string.deneme_recall_3
     }
     val colors = MaterialTheme.colorScheme
+    val vurgu = if (isSystemInDarkTheme()) PremiumMarkaRenkler.BakirIsik else PremiumMarkaRenkler.Bakir
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(14.dp),
         color = colors.secondaryContainer.copy(alpha = 0.55f),
-        border = BorderStroke(1.dp, colors.secondary.copy(alpha = 0.26f)),
+        border = BorderStroke(1.dp, vurgu.copy(alpha = 0.28f)),
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
@@ -85,8 +90,9 @@ fun DenemeHatirlatmaYazi(
             Text(
                 text = "◈",
                 style = MaterialTheme.typography.labelMedium,
-                color = colors.secondary,
+                color = vurgu,
                 fontWeight = FontWeight.Bold,
+                fontFamily = PremiumSembolAilesi,
             )
             Text(
                 text = stringResource(id, deneme.ad, denemeTarihYazi(deneme.gun)),

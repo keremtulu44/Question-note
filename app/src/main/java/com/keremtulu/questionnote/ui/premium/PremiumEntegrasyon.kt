@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -148,6 +149,11 @@ fun PremiumOutlinedButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     shape: androidx.compose.ui.graphics.Shape = MaterialTheme.shapes.large,
+    colors: ButtonColors = ButtonDefaults.outlinedButtonColors(),
+    border: BorderStroke? = BorderStroke(
+        width = 1.dp,
+        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.85f),
+    ),
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     interactionTur: EtkilesimTuru = EtkilesimTuru.TIKLAMA,
     content: @Composable RowScope.() -> Unit,
@@ -159,6 +165,8 @@ fun PremiumOutlinedButton(
         modifier = modifier,
         enabled = enabled,
         shape = shape,
+        colors = colors,
+        border = border,
         contentPadding = contentPadding,
         content = content,
     )
@@ -170,6 +178,7 @@ fun PremiumTextButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     shape: androidx.compose.ui.graphics.Shape = MaterialTheme.shapes.large,
+    colors: ButtonColors = ButtonDefaults.textButtonColors(),
     contentPadding: PaddingValues = ButtonDefaults.TextButtonContentPadding,
     interactionTur: EtkilesimTuru = EtkilesimTuru.TIKLAMA,
     content: @Composable RowScope.() -> Unit,
@@ -181,6 +190,7 @@ fun PremiumTextButton(
         modifier = modifier,
         enabled = enabled,
         shape = shape,
+        colors = colors,
         contentPadding = contentPadding,
         content = content,
     )
@@ -200,26 +210,42 @@ fun PremiumGradyanButon(
     gradyan: Brush = com.keremtulu.questionnote.ui.premium.PremiumGradyanlar.BUTON_BIRINCI,
     content: @Composable RowScope.() -> Unit,
 ) {
-    Box(
-        modifier
-            .fillMaxWidth()
-            .clip(MaterialTheme.shapes.large)
-            .background(gradyan),
+    val renkSemasi = MaterialTheme.colorScheme
+    val sekil = MaterialTheme.shapes.large
+    val arkaPlan = if (enabled) {
+        Modifier.background(gradyan)
+    } else {
+        Modifier.background(renkSemasi.surfaceVariant)
+    }
+    PremiumButton(
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth(),
+        enabled = enabled,
+        shape = sekil,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.Transparent,
+            contentColor = Color.White,
+            disabledContainerColor = Color.Transparent,
+            disabledContentColor = renkSemasi.onSurfaceVariant.copy(alpha = 0.56f),
+        ),
+        contentPadding = PaddingValues(0.dp),
+        interactionTur = interactionTur,
     ) {
-        PremiumButton(
-            onClick = onClick,
-            modifier = Modifier.fillMaxWidth(),
-            enabled = enabled,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Transparent,
-                contentColor = Color.White,
-                disabledContainerColor = Color.White.copy(alpha = 0.28f),
-                disabledContentColor = Color.White.copy(alpha = 0.70f),
-            ),
-            contentPadding = contentPadding,
-            interactionTur = interactionTur,
-            content = content,
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .defaultMinSize(minHeight = ButtonDefaults.MinHeight)
+                .clip(sekil)
+                .then(arkaPlan)
+                .padding(contentPadding),
+            contentAlignment = Alignment.Center,
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+                content = content,
+            )
+        }
     }
 }
 
