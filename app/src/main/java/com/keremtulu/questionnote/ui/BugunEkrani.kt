@@ -1,6 +1,8 @@
 package com.keremtulu.questionnote.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,6 +40,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -99,6 +102,7 @@ fun BugunEkrani(
     onOturumBaslat: (List<Soru>, Map<String, Ders>) -> Unit,
     onDevam: (() -> Unit)? = null,
     onDeneme: () -> Unit = {},
+    denemeler: List<com.keremtulu.questionnote.domain.model.DenemeKaydi> = emptyList(),
 ) {
     val today = com.keremtulu.questionnote.ui.bilesenler.hatirlaYerelGun()
     val dateText = remember(today) {
@@ -184,11 +188,6 @@ fun BugunEkrani(
                     }
                 }
             }
-            item {
-                PremiumOutlinedButton(onClick = onDeneme, modifier = Modifier.fillMaxWidth()) {
-                    Text(stringResource(R.string.deneme_open))
-                }
-            }
             if (onDevam != null) item {
                 PremiumOutlinedButton(onClick = onDevam, modifier = Modifier.fillMaxWidth()) {
                     Text(stringResource(R.string.focus_continue_session))
@@ -203,6 +202,12 @@ fun BugunEkrani(
                     seri = seri,
                     state = state,
                     onOturumBaslat = onOturumBaslat,
+                )
+            }
+            item {
+                BugunDenemeKarti(
+                    denemeler = denemeler,
+                    onClick = onDeneme,
                 )
             }
             when (val current = state) {
@@ -496,3 +501,79 @@ private fun DurumKarti(
         }
     }
 }
+
+@Composable
+private fun BugunDenemeKarti(
+    denemeler: List<com.keremtulu.questionnote.domain.model.DenemeKaydi>,
+    onClick: () -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    val sonDeneme = denemeler.firstOrNull()
+    val altMetin = if (sonDeneme == null) {
+        stringResource(R.string.today_deneme_subtitle_empty)
+    } else {
+        stringResource(
+            R.string.today_deneme_subtitle_summary,
+            denemeler.size,
+            sonDeneme.ad,
+            com.keremtulu.questionnote.ui.deneme.netYazi(sonDeneme.toplamNet),
+        )
+    }
+
+    PremiumCard(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("today-deneme-card"),
+        colors = CardDefaults.cardColors(containerColor = colors.surface),
+        border = BorderStroke(1.dp, colors.outlineVariant.copy(alpha = 0.55f)),
+        interactionTur = EtkilesimTuru.KART_ACILIS,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(PremiumMarkaRenkler.Bakir.copy(alpha = 0.14f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = "◈",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = PremiumMarkaRenkler.Bakir,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.deneme_open),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    text = altMetin,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            Text(
+                text = "→",
+                style = MaterialTheme.typography.titleMedium,
+                color = colors.primary,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+    }
+}
+

@@ -495,6 +495,7 @@ fun YanlisDefteriUygulamasi(
                         gunlukHedefDeposu = gunlukHedefDeposu,
                         onSoruEkle = { ekran = UygulamaEkrani.DersSecimi(soruEkleModu = true) },
                         onDeneme = { ekran = UygulamaEkrani.Denemeler },
+                        denemeler = denemeler,
                         onOturumBaslat = { sorular, dersler -> oturumBaslat(sorular, dersler, bugunden = true) },
                         onDevam = bekleyenOturum?.let { onceki -> { ekran = onceki; bekleyenOturum = null } },
                     )
@@ -614,6 +615,7 @@ fun YanlisDefteriUygulamasi(
                     UygulamaEkrani.Denemeler -> com.keremtulu.questionnote.ui.deneme.DenemeListesiEkrani(
                         denemeDeposu = denemeDeposu,
                         dersRepository = dersRepository,
+                        soruRepository = soruRepository,
                         onGeri = { ekran = UygulamaEkrani.Bugun },
                         onYeni = { ekran = UygulamaEkrani.DenemeDetay(null) },
                         onAc = { ekran = UygulamaEkrani.DenemeDetay(it) },
@@ -629,6 +631,12 @@ fun YanlisDefteriUygulamasi(
                         },
                         onSoruEkle = { ders, kaynak, id ->
                             ekran = UygulamaEkrani.SoruFormu(ders, null, UygulamaEkrani.DenemeDetay(id), kaynak)
+                        },
+                        onDenemeyiCalis = { kaynakAdi ->
+                            filtreliCalismaAyar = FiltreliCalismaEkraniAyar(
+                                filtre = SoruCalismaFiltresi(kaynak = kaynakAdi),
+                            )
+                            ekran = UygulamaEkrani.FiltreliCalisma
                         },
                     )
                     UygulamaEkrani.GorselBakimi -> GorselBakimEkrani(
