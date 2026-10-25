@@ -181,6 +181,8 @@ class KirpmaSorulacakVeOgretmenArayuzTest {
                 )
             }
 
+            val ilerlemeHizmeti = IlerlemeHizmeti(database)
+            val gunlukHedefDeposu = TercihGunlukHedefDeposu(context)
             var sorulacakEkraniAcik by mutableStateOf(false)
             compose.setContent {
                 YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
@@ -188,8 +190,8 @@ class KirpmaSorulacakVeOgretmenArayuzTest {
                         BugunEkrani(
                             soruRepository = soruRepository,
                             dersRepository = dersRepository,
-                            ilerlemeHizmeti = IlerlemeHizmeti(database),
-                            gunlukHedefDeposu = TercihGunlukHedefDeposu(context),
+                            ilerlemeHizmeti = ilerlemeHizmeti,
+                            gunlukHedefDeposu = gunlukHedefDeposu,
                             onSoruEkle = {},
                             onOturumBaslat = { _, _ -> },
                             onSorulacaklar = { sorulacakEkraniAcik = true },
@@ -213,14 +215,16 @@ class KirpmaSorulacakVeOgretmenArayuzTest {
             compose.onNodeWithTag("bugun_sorulacaklar_karti").performClick()
 
             compose.waitUntil(5_000) {
-                compose.onAllNodesWithText("Matematik (1)").fetchSemanticsNodes().isNotEmpty()
+                compose.onAllNodesWithText("Fizik (1)").fetchSemanticsNodes().isNotEmpty()
             }
-            compose.onNodeWithText("Matematik (1)").assertIsDisplayed()
             compose.onNodeWithText("Fizik (1)").assertIsDisplayed()
 
             val matSoruId = runBlocking {
                 soruRepository.ogretmeneSorulacaklariIzle().first().first { it.dersId == mat.id }.id
             }
+            compose.onNodeWithTag("sorulacaklar_liste")
+                .performScrollToNode(hasTestTag("sorulacak_cozdurdum_$matSoruId"))
+            compose.onNodeWithText("Matematik (1)").assertIsDisplayed()
             compose.onNodeWithTag("sorulacak_cozdurdum_$matSoruId").performClick()
             compose.waitUntil(5_000) {
                 compose.onAllNodesWithTag("cozdurdum_fotografsiz_onay").fetchSemanticsNodes().isNotEmpty()

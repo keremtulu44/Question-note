@@ -147,7 +147,7 @@ fun SorulacaklarEkrani(
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { insets ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(insets),
+            modifier = Modifier.fillMaxSize().padding(insets).testTag("sorulacaklar_liste"),
             contentPadding = PaddingValues(start = 18.dp, top = 8.dp, end = 18.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
