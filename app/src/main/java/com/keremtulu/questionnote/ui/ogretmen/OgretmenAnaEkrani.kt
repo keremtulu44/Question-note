@@ -7,41 +7,64 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -60,13 +83,29 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -79,6 +118,9 @@ import com.keremtulu.questionnote.data.export.SonYedekBilgisi
 import com.keremtulu.questionnote.data.images.KameraCekimi
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
 import com.keremtulu.questionnote.data.prefs.OgretmenDeposu
+import com.keremtulu.questionnote.data.ses.HapticTipi
+import com.keremtulu.questionnote.data.ses.SesTuruGenis
+import com.keremtulu.questionnote.data.ses.SesYoneticisi
 import com.keremtulu.questionnote.domain.model.GorselTuru
 import com.keremtulu.questionnote.domain.model.OgretmenGrubu
 import com.keremtulu.questionnote.domain.model.OgretmenSorusu
@@ -86,6 +128,10 @@ import com.keremtulu.questionnote.domain.model.OgretmenVerisi
 import com.keremtulu.questionnote.domain.model.OgretmenZorluk
 import com.keremtulu.questionnote.domain.model.SoruGorselGirdisi
 import com.keremtulu.questionnote.ui.LocalUygulamaSesleri
+import com.keremtulu.questionnote.ui.animasyon.SureToken
+import com.keremtulu.questionnote.ui.animasyon.animateFloatPremium
+import com.keremtulu.questionnote.ui.animasyon.horizontalSwipeNavigation
+import com.keremtulu.questionnote.ui.animasyon.tweenPremium
 import com.keremtulu.questionnote.ui.bilesenler.GorselKirpmaAlani
 import com.keremtulu.questionnote.ui.bilesenler.GorselKirpmaDialog
 import com.keremtulu.questionnote.ui.bilesenler.GorselSecimBolumu
@@ -94,17 +140,24 @@ import com.keremtulu.questionnote.ui.bilesenler.premium.CamKarti
 import com.keremtulu.questionnote.ui.bilesenler.premium.CamYukseklik
 import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
 import com.keremtulu.questionnote.ui.bilesenler.premium.PremiumBosDurum
+import com.keremtulu.questionnote.ui.bilesenler.premium.PremiumGradyanButon
 import com.keremtulu.questionnote.ui.premium.EtkilesimTuru
 import com.keremtulu.questionnote.ui.premium.PremiumButton
 import com.keremtulu.questionnote.ui.premium.PremiumCard
 import com.keremtulu.questionnote.ui.premium.PremiumExtendedFloatingActionButton
 import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 import com.keremtulu.questionnote.ui.premium.PremiumOutlinedButton
+import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
 import com.keremtulu.questionnote.ui.premium.PremiumSwitch
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
+import com.keremtulu.questionnote.ui.tema.HareketTuru
+import com.keremtulu.questionnote.ui.tema.LocalHareketPolitikasi
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.sin
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
@@ -114,6 +167,8 @@ private sealed interface OgretmenEkranDurumu {
     data class GrupDetay(val grupId: String) : OgretmenEkranDurumu
     data class SoruFormu(val grupId: String, val soruId: String?) : OgretmenEkranDurumu
 }
+
+private enum class OgretmenAltSekme { GRUPLAR, AYARLAR }
 
 @Composable
 fun OgretmenAnaEkrani(
@@ -128,6 +183,8 @@ fun OgretmenAnaEkrani(
     val veri by ogretmenDeposu.veriIzle.collectAsState()
     var altEkran by remember { mutableStateOf<OgretmenEkranDurumu>(OgretmenEkranDurumu.Gruplar) }
     val snackbarHostState = remember { SnackbarHostState() }
+    val hareketPolitikasi = LocalHareketPolitikasi.current
+    val klavyeAcik = WindowInsets.ime.getBottom(LocalDensity.current) > 0
 
     BackHandler(enabled = altEkran != OgretmenEkranDurumu.Gruplar) {
         altEkran = when (val mevcut = altEkran) {
@@ -138,75 +195,285 @@ fun OgretmenAnaEkrani(
         }
     }
 
-    val ustMenuGorunur = altEkran == OgretmenEkranDurumu.Gruplar || altEkran == OgretmenEkranDurumu.Ayarlar
+    val altMenuGorunur = (altEkran == OgretmenEkranDurumu.Gruplar || altEkran == OgretmenEkranDurumu.Ayarlar) &&
+        !klavyeAcik
+    val aktifSekme = if (altEkran == OgretmenEkranDurumu.Ayarlar) {
+        OgretmenAltSekme.AYARLAR
+    } else {
+        OgretmenAltSekme.GRUPLAR
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        bottomBar = {
-            if (ustMenuGorunur) {
-                NavigationBar {
-                    NavigationBarItem(
-                        selected = altEkran == OgretmenEkranDurumu.Gruplar,
-                        onClick = { altEkran = OgretmenEkranDurumu.Gruplar },
-                        icon = { Text("◈", fontWeight = FontWeight.Bold) },
-                        label = { Text(stringResource(R.string.teacher_nav_groups)) },
-                    )
-                    NavigationBarItem(
-                        selected = altEkran == OgretmenEkranDurumu.Ayarlar,
-                        onClick = { altEkran = OgretmenEkranDurumu.Ayarlar },
-                        icon = { Text("⚙", fontWeight = FontWeight.Bold) },
-                        label = { Text(stringResource(R.string.teacher_nav_settings)) },
-                    )
+        snackbarHost = {
+            SnackbarHost(snackbarHostState) { data ->
+                Surface(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                    shape = MaterialTheme.shapes.medium,
+                    color = MaterialTheme.colorScheme.inverseSurface,
+                    contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+                    shadowElevation = 6.dp,
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = data.visuals.message,
+                            modifier = Modifier.weight(1f),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                        data.visuals.actionLabel?.let { etiket ->
+                            PremiumTextButton(
+                                onClick = { data.performAction() },
+                                interactionTur = EtkilesimTuru.GERI,
+                            ) {
+                                Text(
+                                    text = etiket,
+                                    color = MaterialTheme.colorScheme.inversePrimary,
+                                    fontWeight = FontWeight.SemiBold,
+                                )
+                            }
+                        }
+                    }
                 }
             }
         },
+        bottomBar = {
+            if (altMenuGorunur) {
+                OgretmenAltMenu(
+                    secili = aktifSekme,
+                    onSec = { hedef ->
+                        altEkran = when (hedef) {
+                            OgretmenAltSekme.GRUPLAR -> OgretmenEkranDurumu.Gruplar
+                            OgretmenAltSekme.AYARLAR -> OgretmenEkranDurumu.Ayarlar
+                        }
+                    },
+                )
+            }
+        },
     ) { insets ->
-        Box(Modifier.fillMaxSize().padding(insets)) {
-            when (val mevcut = altEkran) {
-                OgretmenEkranDurumu.Gruplar -> OgretmenGruplarEkrani(
-                    veri = veri,
-                    ogretmenDeposu = ogretmenDeposu,
-                    onGrupAc = { grupId -> altEkran = OgretmenEkranDurumu.GrupDetay(grupId) },
-                )
-                OgretmenEkranDurumu.Ayarlar -> OgretmenAyarlarEkrani(
-                    sonYedek = sonYedek,
-                    yedeklemeIslemde = yedeklemeIslemde,
-                    onOgrenciModunaGec = onOgrenciModunaGec,
-                    onYedekOlustur = onYedekOlustur,
-                    onYedekGeriYukle = onYedekGeriYukle,
-                )
-                is OgretmenEkranDurumu.GrupDetay -> {
-                    val grup = veri.gruplar.firstOrNull { it.id == mevcut.grupId }
-                    if (grup == null) {
-                        altEkran = OgretmenEkranDurumu.Gruplar
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(insets)
+                .consumeWindowInsets(insets),
+        ) {
+            AnimatedContent(
+                targetState = altEkran,
+                transitionSpec = {
+                    if (hareketPolitikasi.hareketAcik) {
+                        val duration = hareketPolitikasi.sure(HareketTuru.GIRIS)
+                        (fadeIn(tween(duration)) + slideInHorizontally(
+                            animationSpec = tween(duration),
+                            initialOffsetX = { width -> width / 18 },
+                        )) togetherWith (fadeOut(tween(duration)) + slideOutHorizontally(
+                            animationSpec = tween(duration),
+                            targetOffsetX = { width -> -width / 24 },
+                        ))
                     } else {
-                        OgretmenGrupDetayEkrani(
-                            grup = grup,
-                            veri = veri,
-                            ogretmenDeposu = ogretmenDeposu,
-                            gorselDeposu = gorselDeposu,
-                            snackbarHostState = snackbarHostState,
-                            onGeri = { altEkran = OgretmenEkranDurumu.Gruplar },
-                            onSoruEkle = { altEkran = OgretmenEkranDurumu.SoruFormu(grup.id, null) },
-                            onSoruDuzenle = { soruId -> altEkran = OgretmenEkranDurumu.SoruFormu(grup.id, soruId) },
-                        )
+                        EnterTransition.None togetherWith ExitTransition.None
+                    }
+                },
+                label = "ogretmen-ekran-gecisi",
+            ) { mevcut ->
+                when (mevcut) {
+                    OgretmenEkranDurumu.Gruplar -> OgretmenGruplarEkrani(
+                        veri = veri,
+                        ogretmenDeposu = ogretmenDeposu,
+                        onGrupAc = { grupId -> altEkran = OgretmenEkranDurumu.GrupDetay(grupId) },
+                    )
+                    OgretmenEkranDurumu.Ayarlar -> OgretmenAyarlarEkrani(
+                        veri = veri,
+                        sonYedek = sonYedek,
+                        yedeklemeIslemde = yedeklemeIslemde,
+                        onOgrenciModunaGec = onOgrenciModunaGec,
+                        onYedekOlustur = onYedekOlustur,
+                        onYedekGeriYukle = onYedekGeriYukle,
+                    )
+                    is OgretmenEkranDurumu.GrupDetay -> {
+                        val grup = veri.gruplar.firstOrNull { it.id == mevcut.grupId }
+                        if (grup == null) {
+                            altEkran = OgretmenEkranDurumu.Gruplar
+                        } else {
+                            OgretmenGrupDetayEkrani(
+                                grup = grup,
+                                veri = veri,
+                                ogretmenDeposu = ogretmenDeposu,
+                                gorselDeposu = gorselDeposu,
+                                snackbarHostState = snackbarHostState,
+                                onGeri = { altEkran = OgretmenEkranDurumu.Gruplar },
+                                onSoruEkle = { altEkran = OgretmenEkranDurumu.SoruFormu(grup.id, null) },
+                                onSoruDuzenle = { soruId -> altEkran = OgretmenEkranDurumu.SoruFormu(grup.id, soruId) },
+                            )
+                        }
+                    }
+                    is OgretmenEkranDurumu.SoruFormu -> {
+                        val grup = veri.gruplar.firstOrNull { it.id == mevcut.grupId }
+                        if (grup == null) {
+                            altEkran = OgretmenEkranDurumu.Gruplar
+                        } else {
+                            OgretmenSoruFormuEkrani(
+                                grup = grup,
+                                mevcutSoru = mevcut.soruId?.let { aranan ->
+                                    veri.sorular.firstOrNull { it.id == aranan }
+                                },
+                                ogretmenDeposu = ogretmenDeposu,
+                                gorselDeposu = gorselDeposu,
+                                onGeri = { altEkran = OgretmenEkranDurumu.GrupDetay(grup.id) },
+                            )
+                        }
                     }
                 }
-                is OgretmenEkranDurumu.SoruFormu -> {
-                    val grup = veri.gruplar.firstOrNull { it.id == mevcut.grupId }
-                    if (grup == null) {
-                        altEkran = OgretmenEkranDurumu.Gruplar
-                    } else {
-                        OgretmenSoruFormuEkrani(
-                            grup = grup,
-                            mevcutSoru = mevcut.soruId?.let { aranan -> veri.sorular.firstOrNull { it.id == aranan } },
-                            ogretmenDeposu = ogretmenDeposu,
-                            gorselDeposu = gorselDeposu,
-                            onGeri = { altEkran = OgretmenEkranDurumu.GrupDetay(grup.id) },
-                        )
+            }
+        }
+    }
+}
+
+@Composable
+private fun OgretmenAltMenu(
+    secili: OgretmenAltSekme,
+    onSec: (OgretmenAltSekme) -> Unit,
+    systemInsets: WindowInsets = WindowInsets.navigationBars.union(WindowInsets.displayCutout),
+) {
+    val colors = MaterialTheme.colorScheme
+    val context = LocalContext.current
+    val feedbackScope = rememberCoroutineScope()
+    val buyukYazi = LocalDensity.current.fontScale >= 1.5f
+
+    fun sekmeyeGec(hedef: OgretmenAltSekme) {
+        if (hedef == secili) return
+        val pan = if (hedef.ordinal < secili.ordinal) -0.18f else 0.18f
+        SesYoneticisi.uygulama(context).calPremium(
+            SesTuruGenis.SAYFA_GECIS,
+            HapticTipi.SWIPE,
+            feedbackScope,
+            pan,
+        )
+        onSec(hedef)
+    }
+
+    Surface(color = colors.surface, tonalElevation = 4.dp, shadowElevation = 10.dp) {
+        Column(
+            Modifier.windowInsetsPadding(
+                systemInsets.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal),
+            ),
+        ) {
+            HorizontalDivider(color = colors.outlineVariant.copy(alpha = 0.35f))
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .selectableGroup()
+                    .horizontalSwipeNavigation(
+                        thresholdDp = 56f,
+                        onSwipeLeft = { OgretmenAltSekme.entries.getOrNull(secili.ordinal + 1)?.let(::sekmeyeGec) },
+                        onSwipeRight = { OgretmenAltSekme.entries.getOrNull(secili.ordinal - 1)?.let(::sekmeyeGec) },
+                    )
+                    .padding(horizontal = 12.dp),
+            ) {
+                OgretmenAltSekme.entries.forEach { sekme ->
+                    val aktif = sekme == secili
+                    val etiket = stringResource(
+                        when (sekme) {
+                            OgretmenAltSekme.GRUPLAR -> R.string.teacher_nav_groups
+                            OgretmenAltSekme.AYARLAR -> R.string.teacher_nav_settings
+                        },
+                    )
+                    val gosterge = animateFloatPremium(
+                        target = if (aktif) 1f else 0f,
+                        animationSpec = tweenPremium(SureToken.NORMAL),
+                        label = "ogretmen-alt-menu",
+                    )
+                    Column(
+                        Modifier
+                            .weight(if (buyukYazi && aktif) 1.5f else 1f)
+                            .heightIn(min = 72.dp)
+                            .semantics { if (buyukYazi && !aktif) contentDescription = etiket }
+                            .selectable(selected = aktif, role = Role.Tab, onClick = { sekmeyeGec(sekme) })
+                            .padding(horizontal = 4.dp, vertical = 8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Box(
+                            Modifier
+                                .size(56.dp, 32.dp)
+                                .drawBehind {
+                                    drawRoundRect(
+                                        color = colors.primary.copy(alpha = 0.16f * gosterge.value),
+                                        cornerRadius = CornerRadius(16.dp.toPx()),
+                                    )
+                                },
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            OgretmenMenuSimgesi(sekme, if (aktif) colors.primary else colors.onSurfaceVariant)
+                        }
+                        if (!buyukYazi || aktif) {
+                            Text(
+                                text = etiket,
+                                fontSize = 11.sp,
+                                lineHeight = 14.sp,
+                                textAlign = TextAlign.Center,
+                                color = if (aktif) colors.primary else colors.onSurfaceVariant,
+                                fontWeight = if (aktif) FontWeight.Bold else FontWeight.Medium,
+                                maxLines = 1,
+                            )
+                        }
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun OgretmenMenuSimgesi(sekme: OgretmenAltSekme, renk: Color) {
+    Canvas(Modifier.size(22.dp)) {
+        val kalinlik = 1.9.dp.toPx()
+        val firca = Stroke(width = kalinlik, cap = StrokeCap.Round, join = StrokeJoin.Round)
+        val w = size.width
+        val h = size.height
+        when (sekme) {
+            OgretmenAltSekme.GRUPLAR -> {
+                drawRoundRect(
+                    color = renk.copy(alpha = 0.45f),
+                    topLeft = Offset(w * 0.24f, h * 0.14f),
+                    size = Size(w * 0.62f, h * 0.50f),
+                    cornerRadius = CornerRadius(3.dp.toPx()),
+                    style = firca,
+                )
+                drawRoundRect(
+                    color = renk,
+                    topLeft = Offset(w * 0.12f, h * 0.30f),
+                    size = Size(w * 0.66f, h * 0.56f),
+                    cornerRadius = CornerRadius(3.dp.toPx()),
+                    style = firca,
+                )
+                drawLine(
+                    color = renk,
+                    start = Offset(w * 0.28f, h * 0.55f),
+                    end = Offset(w * 0.62f, h * 0.55f),
+                    strokeWidth = kalinlik,
+                    cap = StrokeCap.Round,
+                )
+            }
+            OgretmenAltSekme.AYARLAR -> {
+                val m = Offset(w / 2f, h / 2f)
+                drawCircle(renk, radius = w * 0.25f, center = m, style = firca)
+                drawCircle(renk, radius = 1.8.dp.toPx(), center = m)
+                for (i in 0 until 6) {
+                    val aci = Math.toRadians((i * 60.0) - 90.0)
+                    val ic = Offset(
+                        (m.x + cos(aci) * w * 0.28f).toFloat(),
+                        (m.y + sin(aci) * h * 0.28f).toFloat(),
+                    )
+                    val dis = Offset(
+                        (m.x + cos(aci) * w * 0.41f).toFloat(),
+                        (m.y + sin(aci) * h * 0.41f).toFloat(),
+                    )
+                    drawLine(renk, ic, dis, strokeWidth = kalinlik, cap = StrokeCap.Round)
                 }
             }
         }
@@ -220,47 +487,49 @@ private fun OgretmenGruplarEkrani(
     onGrupAc: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current
+    val klavyeAcik = WindowInsets.ime.getBottom(LocalDensity.current) > 0
+    val koyuTema = isSystemInDarkTheme()
     var grupDialogAcik by remember { mutableStateOf(false) }
-    var grupAdi by remember { mutableStateOf("") }
-    var grupAciklama by remember { mutableStateOf("") }
-    var grupHatasi by remember { mutableStateOf(false) }
-    var kaydediliyor by remember { mutableStateOf(false) }
+    var grupArama by remember { mutableStateOf("") }
 
-    val hazirOneriler = listOf("6A", "6B", "7A", "7B", "8A", "8B", "Özel Ders (Ahmet)")
+    val toplamCozulmemis = remember(veri.sorular) { veri.sorular.count { !it.cozuldu } }
+    val toplamCozulmus = remember(veri.sorular) { veri.sorular.count { it.cozuldu } }
+    val toplamSoru = toplamCozulmemis + toplamCozulmus
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets.safeDrawing,
         floatingActionButton = {
-            PremiumExtendedFloatingActionButton(
-                onClick = {
-                    grupAdi = ""
-                    grupAciklama = ""
-                    grupHatasi = false
-                    grupDialogAcik = true
-                },
-                modifier = Modifier.testTag("ogretmen_grup_ekle_fab"),
-                shape = RoundedCornerShape(20.dp),
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-            ) {
-                Text("+", fontSize = 24.sp, fontWeight = FontWeight.Light)
-                Text(
-                    text = stringResource(R.string.teacher_add_group),
-                    modifier = Modifier.padding(start = 8.dp),
-                    style = MaterialTheme.typography.labelLarge,
-                )
+            if (!klavyeAcik) {
+                PremiumExtendedFloatingActionButton(
+                    onClick = { grupDialogAcik = true },
+                    modifier = Modifier.testTag("ogretmen_grup_ekle_fab"),
+                    shape = RoundedCornerShape(20.dp),
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                ) {
+                    Text("+", fontSize = 24.sp, fontWeight = FontWeight.Light)
+                    Text(
+                        text = stringResource(R.string.teacher_add_group),
+                        modifier = Modifier.padding(start = 8.dp),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
             }
         },
     ) { insets ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(insets),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(insets)
+                .consumeWindowInsets(insets),
             contentPadding = PaddingValues(start = 20.dp, top = 12.dp, end = 20.dp, bottom = 104.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             item {
                 GradyanKart(modifier = Modifier.fillMaxWidth(), borderAnimation = false) {
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         Text(
                             text = stringResource(R.string.teacher_kicker),
                             color = PremiumMarkaRenkler.BakirIsik,
@@ -275,9 +544,82 @@ private fun OgretmenGruplarEkrani(
                         )
                         Text(
                             text = stringResource(R.string.teacher_home_subtitle),
-                            color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.84f),
+                            color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.85f),
                             style = MaterialTheme.typography.bodyMedium,
                         )
+                        if (veri.gruplar.isNotEmpty()) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            ) {
+                                HeroSayacKutusu(
+                                    deger = veri.gruplar.size,
+                                    etiket = stringResource(R.string.teacher_stat_groups),
+                                    vurgu = PremiumMarkaRenkler.Kagit,
+                                    modifier = Modifier.weight(1f),
+                                )
+                                HeroSayacKutusu(
+                                    deger = toplamCozulmemis,
+                                    etiket = stringResource(R.string.teacher_stat_unsolved),
+                                    vurgu = PremiumMarkaRenkler.BakirIsik,
+                                    modifier = Modifier.weight(1f),
+                                )
+                                HeroSayacKutusu(
+                                    deger = toplamCozulmus,
+                                    etiket = stringResource(R.string.teacher_stat_solved),
+                                    vurgu = PremiumMarkaRenkler.YesilAcik,
+                                    modifier = Modifier.weight(1f),
+                                )
+                            }
+                            if (toplamSoru > 0) {
+                                val oran = animateFloatPremium(
+                                    target = toplamCozulmus.toFloat() / toplamSoru.toFloat(),
+                                    animationSpec = tweenPremium(SureToken.YAVAS),
+                                    label = "ogretmen-toplam-ilerleme",
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(6.dp)
+                                        .clip(CircleShape)
+                                        .background(PremiumMarkaRenkler.Kagit.copy(alpha = 0.16f)),
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth(oran.value.coerceIn(0f, 1f))
+                                            .height(6.dp)
+                                            .clip(CircleShape)
+                                            .background(PremiumMarkaRenkler.YesilAcik),
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (veri.gruplar.size >= 4) {
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        OutlinedTextField(
+                            value = grupArama,
+                            onValueChange = { grupArama = it.take(60) },
+                            modifier = Modifier.weight(1f),
+                            singleLine = true,
+                            placeholder = { Text(stringResource(R.string.teacher_group_search_placeholder)) },
+                            shape = RoundedCornerShape(16.dp),
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                            keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
+                        )
+                        if (klavyeAcik) {
+                            PremiumTextButton(onClick = { focusManager.clearFocus() }) {
+                                Text(stringResource(R.string.common_hide_keyboard), fontWeight = FontWeight.SemiBold)
+                            }
+                        }
                     }
                 }
             }
@@ -289,80 +631,38 @@ private fun OgretmenGruplarEkrani(
                         baslik = stringResource(R.string.teacher_groups_empty_title),
                         aciklama = stringResource(R.string.teacher_groups_empty_subtitle),
                         butonMetni = stringResource(R.string.teacher_add_group),
-                        onButonTikla = {
-                            grupAdi = ""
-                            grupAciklama = ""
-                            grupHatasi = false
-                            grupDialogAcik = true
-                        },
+                        onButonTikla = { grupDialogAcik = true },
                     )
                 }
             } else {
-                val siraliGruplar = veri.gruplar.sortedWith(compareBy<OgretmenGrubu> { it.sira }.thenBy { it.ad })
-                items(siraliGruplar, key = { it.id }) { grup ->
-                    val grupSorulari = veri.sorular.filter { it.grupId == grup.id }
-                    val cozulmemis = grupSorulari.count { !it.cozuldu }
-                    val cozulmus = grupSorulari.count { it.cozuldu }
-                    PremiumCard(
-                        onClick = { onGrupAc(grup.id) },
-                        modifier = Modifier.fillMaxWidth().testTag("ogretmen_grup_${grup.id}"),
-                        shape = RoundedCornerShape(22.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.65f)),
-                        interactionTur = EtkilesimTuru.KART_ACILIS,
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(18.dp),
-                            horizontalArrangement = Arrangement.spacedBy(14.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(48.dp)
-                                    .clip(RoundedCornerShape(14.dp))
-                                    .background(MaterialTheme.colorScheme.primaryContainer),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Text(
-                                    text = grup.ad.take(3).uppercase(Locale.forLanguageTag("tr-TR")),
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                )
-                            }
-                            Column(
-                                modifier = Modifier.weight(1f),
-                                verticalArrangement = Arrangement.spacedBy(4.dp),
-                            ) {
-                                Text(
-                                    text = grup.ad,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                )
-                                grup.aciklama?.let { not ->
-                                    Text(
-                                        text = not,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                    )
-                                }
-                                Text(
-                                    text = stringResource(R.string.teacher_group_counts, cozulmemis, cozulmus),
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.primary,
-                                )
-                            }
-                            Text(
-                                text = "→",
-                                style = MaterialTheme.typography.titleLarge,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Bold,
-                            )
-                        }
+                val aranan = grupArama.trim()
+                val siraliGruplar = veri.gruplar
+                    .sortedWith(compareBy<OgretmenGrubu> { it.sira }.thenBy { it.ad })
+                    .filter { grup ->
+                        aranan.isEmpty() ||
+                            grup.ad.contains(aranan, ignoreCase = true) ||
+                            grup.aciklama.orEmpty().contains(aranan, ignoreCase = true)
+                    }
+                if (siraliGruplar.isEmpty()) {
+                    item {
+                        PremiumBosDurum(
+                            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                            baslik = stringResource(R.string.teacher_search_empty_title),
+                            aciklama = stringResource(R.string.teacher_search_empty_subtitle),
+                        )
+                    }
+                } else {
+                    items(siraliGruplar, key = { it.id }) { grup ->
+                        val grupSorulari = veri.sorular.filter { it.grupId == grup.id }
+                        val cozulmemis = grupSorulari.count { !it.cozuldu }
+                        val cozulmus = grupSorulari.count { it.cozuldu }
+                        OgretmenGrupKarti(
+                            grup = grup,
+                            cozulmemis = cozulmemis,
+                            cozulmus = cozulmus,
+                            koyuTema = koyuTema,
+                            onClick = { onGrupAc(grup.id) },
+                        )
                     }
                 }
             }
@@ -370,26 +670,281 @@ private fun OgretmenGruplarEkrani(
     }
 
     if (grupDialogAcik) {
-        AlertDialog(
-            onDismissRequest = { if (!kaydediliyor) grupDialogAcik = false },
-            title = { Text(stringResource(R.string.teacher_add_group), fontWeight = FontWeight.Bold) },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        GrupFormDialog(
+            baslik = stringResource(R.string.teacher_add_group),
+            baslangicAd = "",
+            baslangicAciklama = "",
+            hazirOnerileriGoster = true,
+            onDismiss = { grupDialogAcik = false },
+            onKaydet = { ad, aciklama ->
+                ogretmenDeposu.grupEkle(ad, aciklama) != null
+            },
+        )
+    }
+}
+
+@Composable
+private fun HeroSayacKutusu(
+    deger: Int,
+    etiket: String,
+    vurgu: Color,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.11f),
+        border = BorderStroke(1.dp, PremiumMarkaRenkler.Kagit.copy(alpha = 0.16f)),
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            Text(
+                text = deger.toString(),
+                color = vurgu,
+                style = MaterialTheme.typography.titleLarge.copy(fontFeatureSettings = "tnum"),
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                text = etiket,
+                color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.80f),
+                style = MaterialTheme.typography.labelSmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+    }
+}
+
+@Composable
+private fun OgretmenGrupKarti(
+    grup: OgretmenGrubu,
+    cozulmemis: Int,
+    cozulmus: Int,
+    koyuTema: Boolean,
+    onClick: () -> Unit,
+) {
+    val vurgu = grupVurguRengi(grup.ad, koyuTema)
+    val cozulmusRenk = if (koyuTema) PremiumMarkaRenkler.YesilAcik else PremiumMarkaRenkler.Yesil
+    val bekleyenRenk = if (koyuTema) PremiumMarkaRenkler.BakirIsik else PremiumMarkaRenkler.Bakir
+    val toplam = cozulmemis + cozulmus
+
+    PremiumCard(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth().testTag("ogretmen_grup_${grup.id}"),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(
+            width = 1.dp,
+            color = if (cozulmemis > 0) vurgu.copy(alpha = 0.42f)
+            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.65f),
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        interactionTur = EtkilesimTuru.KART_ACILIS,
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(52.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(vurgu.copy(alpha = 0.16f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = grupMonogram(grup.ad),
+                        color = vurgu,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                    )
+                }
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Text(
+                        text = grup.ad,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    grup.aciklama?.takeIf { it.isNotBlank() }?.let { not ->
+                        Text(
+                            text = not,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
                     Row(
-                        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        hazirOneriler.forEach { oneri ->
-                            FilterChip(
-                                selected = grupAdi == oneri,
-                                onClick = {
-                                    grupAdi = oneri
-                                    grupHatasi = false
-                                },
-                                label = { Text(oneri) },
+                        if (toplam == 0) {
+                            Text(
+                                text = stringResource(R.string.teacher_group_empty_badge),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        } else {
+                            DurumRozeti(
+                                metin = stringResource(R.string.teacher_group_pending_badge, cozulmemis),
+                                renk = if (cozulmemis > 0) bekleyenRenk else MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            DurumRozeti(
+                                metin = stringResource(R.string.teacher_group_solved_badge, cozulmus),
+                                renk = cozulmusRenk,
                             )
                         }
                     }
+                }
+                Surface(
+                    shape = CircleShape,
+                    color = vurgu.copy(alpha = 0.12f),
+                ) {
+                    Box(Modifier.size(34.dp), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "→",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontFamily = PremiumSembolAilesi,
+                            color = vurgu,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                }
+            }
+            if (toplam > 0) {
+                val oran = cozulmus.toFloat() / toplam.toFloat()
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(5.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(oran.coerceIn(0f, 1f))
+                            .height(5.dp)
+                            .clip(CircleShape)
+                            .background(cozulmusRenk),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DurumRozeti(metin: String, renk: Color) {
+    Surface(
+        shape = CircleShape,
+        color = renk.copy(alpha = 0.13f),
+    ) {
+        Text(
+            text = metin,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp),
+            color = renk,
+            style = MaterialTheme.typography.labelSmall.copy(fontFeatureSettings = "tnum"),
+            fontWeight = FontWeight.SemiBold,
+        )
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun GrupFormDialog(
+    baslik: String,
+    baslangicAd: String,
+    baslangicAciklama: String,
+    hazirOnerileriGoster: Boolean,
+    onDismiss: () -> Unit,
+    onKaydet: suspend (String, String) -> Boolean,
+) {
+    val scope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current
+    var grupAdi by remember { mutableStateOf(baslangicAd) }
+    var grupAciklama by remember { mutableStateOf(baslangicAciklama) }
+    var grupHatasi by remember { mutableStateOf(false) }
+    var kaydediliyor by remember { mutableStateOf(false) }
+
+    val hazirOneriler = remember {
+        listOf("6A", "6B", "7A", "7B", "8A", "8B", "9A", "10A", "11A", "12A", "TYT Grup", "Özel Ders")
+    }
+
+    fun kaydet() {
+        if (kaydediliyor) return
+        kaydediliyor = true
+        scope.launch {
+            try {
+                if (onKaydet(grupAdi, grupAciklama)) {
+                    onDismiss()
+                } else {
+                    grupHatasi = true
+                }
+            } finally {
+                kaydediliyor = false
+            }
+        }
+    }
+
+    Dialog(
+        onDismissRequest = { if (!kaydediliyor) onDismiss() },
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .windowInsetsPadding(WindowInsets.safeDrawing)
+                .padding(horizontal = 20.dp, vertical = 16.dp),
+            shape = RoundedCornerShape(24.dp),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 6.dp,
+        ) {
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                item {
+                    Text(
+                        text = baslik,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+                if (hazirOnerileriGoster) {
+                    item {
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            hazirOneriler.forEach { oneri ->
+                                FilterChip(
+                                    selected = grupAdi == oneri,
+                                    onClick = {
+                                        grupAdi = oneri
+                                        grupHatasi = false
+                                    },
+                                    label = { Text(oneri) },
+                                )
+                            }
+                        }
+                    }
+                }
+                item {
                     OutlinedTextField(
                         value = grupAdi,
                         onValueChange = {
@@ -401,7 +956,13 @@ private fun OgretmenGruplarEkrani(
                         isError = grupHatasi,
                         label = { Text(stringResource(R.string.teacher_group_name_label)) },
                         shape = RoundedCornerShape(14.dp),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions(
+                            onNext = { focusManager.moveFocus(FocusDirection.Down) },
+                        ),
                     )
+                }
+                item {
                     OutlinedTextField(
                         value = grupAciklama,
                         onValueChange = { grupAciklama = it },
@@ -409,8 +970,17 @@ private fun OgretmenGruplarEkrani(
                         singleLine = true,
                         label = { Text(stringResource(R.string.teacher_group_desc_label)) },
                         shape = RoundedCornerShape(14.dp),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(
+                            onDone = {
+                                focusManager.clearFocus()
+                                kaydet()
+                            },
+                        ),
                     )
-                    if (grupHatasi) {
+                }
+                if (grupHatasi) {
+                    item {
                         Text(
                             text = stringResource(R.string.teacher_group_name_error),
                             color = MaterialTheme.colorScheme.error,
@@ -418,35 +988,27 @@ private fun OgretmenGruplarEkrani(
                         )
                     }
                 }
-            },
-            confirmButton = {
-                PremiumButton(
-                    enabled = !kaydediliyor,
-                    modifier = Modifier.testTag("ogretmen_grup_kaydet_buton"),
-                    onClick = {
-                        kaydediliyor = true
-                        scope.launch {
-                            try {
-                                val eklenen = ogretmenDeposu.grupEkle(grupAdi, grupAciklama)
-                                if (eklenen != null) {
-                                    grupDialogAcik = false
-                                } else {
-                                    grupHatasi = true
-                                }
-                            } finally {
-                                kaydediliyor = false
-                            }
-                        }
-                    },
-                ) { Text(stringResource(R.string.teacher_group_save)) }
-            },
-            dismissButton = {
-                PremiumTextButton(
-                    enabled = !kaydediliyor,
-                    onClick = { grupDialogAcik = false },
-                ) { Text(stringResource(R.string.question_form_cancel)) }
-            },
-        )
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        PremiumTextButton(
+                            enabled = !kaydediliyor,
+                            onClick = onDismiss,
+                        ) { Text(stringResource(R.string.question_form_cancel)) }
+                        PremiumButton(
+                            enabled = !kaydediliyor,
+                            modifier = Modifier
+                                .padding(start = 8.dp)
+                                .testTag("ogretmen_grup_kaydet_buton"),
+                            onClick = ::kaydet,
+                        ) { Text(stringResource(R.string.teacher_group_save)) }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -463,8 +1025,12 @@ private fun OgretmenGrupDetayEkrani(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current
+    val koyuTema = isSystemInDarkTheme()
+    val klavyeAcik = WindowInsets.ime.getBottom(LocalDensity.current) > 0
     var cozulmusSekmesi by remember(grup.id) { mutableStateOf(false) }
     var zorlukFiltresi by remember(grup.id) { mutableStateOf<OgretmenZorluk?>(null) }
+    var soruArama by remember(grup.id) { mutableStateOf("") }
     var tamEkranSoruId by remember(grup.id) { mutableStateOf<String?>(null) }
     var kopyaSoru by remember(grup.id) { mutableStateOf<OgretmenSorusu?>(null) }
     var silinecekSoru by remember(grup.id) { mutableStateOf<OgretmenSorusu?>(null) }
@@ -476,33 +1042,44 @@ private fun OgretmenGrupDetayEkrani(
     }
     val cozulmemisler = remember(grupSorulari) { grupSorulari.filter { !it.cozuldu } }
     val cozulmusler = remember(grupSorulari) { grupSorulari.filter { it.cozuldu } }
-    val aktifListe = remember(cozulmusSekmesi, cozulmemisler, cozulmusler, zorlukFiltresi) {
+    val aktifListe = remember(cozulmusSekmesi, cozulmemisler, cozulmusler, zorlukFiltresi, soruArama) {
         val baz = if (cozulmusSekmesi) cozulmusler else cozulmemisler
-        if (zorlukFiltresi == null) baz else baz.filter { it.zorluk == zorlukFiltresi }
+        val aranan = soruArama.trim()
+        baz.filter { soru ->
+            (zorlukFiltresi == null || soru.zorluk == zorlukFiltresi) &&
+                (aranan.isEmpty() ||
+                    soru.baslik.orEmpty().contains(aranan, ignoreCase = true) ||
+                    soru.cevap.orEmpty().contains(aranan, ignoreCase = true))
+        }
     }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets.safeDrawing,
         floatingActionButton = {
-            PremiumExtendedFloatingActionButton(
-                onClick = onSoruEkle,
-                modifier = Modifier.testTag("ogretmen_soru_ekle_fab"),
-                shape = RoundedCornerShape(20.dp),
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-            ) {
-                Text("+", fontSize = 24.sp, fontWeight = FontWeight.Light)
-                Text(
-                    text = stringResource(R.string.teacher_add_question),
-                    modifier = Modifier.padding(start = 8.dp),
-                    style = MaterialTheme.typography.labelLarge,
-                )
+            if (!klavyeAcik) {
+                PremiumExtendedFloatingActionButton(
+                    onClick = onSoruEkle,
+                    modifier = Modifier.testTag("ogretmen_soru_ekle_fab"),
+                    shape = RoundedCornerShape(20.dp),
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                ) {
+                    Text("+", fontSize = 24.sp, fontWeight = FontWeight.Light)
+                    Text(
+                        text = stringResource(R.string.teacher_add_question),
+                        modifier = Modifier.padding(start = 8.dp),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
             }
         },
     ) { insets ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(insets),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(insets)
+                .consumeWindowInsets(insets),
             contentPadding = PaddingValues(start = 18.dp, top = 8.dp, end = 18.dp, bottom = 104.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -512,10 +1089,18 @@ private fun OgretmenGrupDetayEkrani(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    PremiumTextButton(onClick = onGeri) {
+                    PremiumTextButton(onClick = onGeri, interactionTur = EtkilesimTuru.GERI) {
                         Text("← " + stringResource(R.string.common_back))
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        if (klavyeAcik) {
+                            PremiumTextButton(onClick = { focusManager.clearFocus() }) {
+                                Text(
+                                    stringResource(R.string.common_hide_keyboard),
+                                    fontWeight = FontWeight.SemiBold,
+                                )
+                            }
+                        }
                         PremiumTextButton(onClick = { grupDuzenleAcik = true }) {
                             Text(stringResource(R.string.teacher_edit_group))
                         }
@@ -530,77 +1115,139 @@ private fun OgretmenGrupDetayEkrani(
             }
             item {
                 GradyanKart(modifier = Modifier.fillMaxWidth(), borderAnimation = false) {
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text(
-                            text = stringResource(R.string.teacher_kicker),
-                            color = PremiumMarkaRenkler.BakirIsik,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Text(
-                            text = grup.ad,
-                            color = PremiumMarkaRenkler.Kagit,
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        grup.aciklama?.let { not ->
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(46.dp)
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(PremiumMarkaRenkler.Kagit.copy(alpha = 0.16f)),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text(
+                                    text = grupMonogram(grup.ad),
+                                    color = PremiumMarkaRenkler.Kagit,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                            }
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(R.string.teacher_kicker),
+                                    color = PremiumMarkaRenkler.BakirIsik,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                                Text(
+                                    text = grup.ad,
+                                    color = PremiumMarkaRenkler.Kagit,
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                            }
+                        }
+                        grup.aciklama?.takeIf { it.isNotBlank() }?.let { not ->
                             Text(
                                 text = not,
-                                color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.84f),
+                                color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.85f),
                                 style = MaterialTheme.typography.bodyMedium,
                             )
+                        }
+                        if (grupSorulari.isNotEmpty()) {
+                            val oran = cozulmusler.size.toFloat() / grupSorulari.size.toFloat()
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Text(
+                                    text = stringResource(
+                                        R.string.teacher_group_counts,
+                                        cozulmemisler.size,
+                                        cozulmusler.size,
+                                    ),
+                                    color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.90f),
+                                    style = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum"),
+                                    fontWeight = FontWeight.SemiBold,
+                                )
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(6.dp)
+                                    .clip(CircleShape)
+                                    .background(PremiumMarkaRenkler.Kagit.copy(alpha = 0.18f)),
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth(oran.coerceIn(0f, 1f))
+                                        .height(6.dp)
+                                        .clip(CircleShape)
+                                        .background(PremiumMarkaRenkler.YesilAcik),
+                                )
+                            }
                         }
                     }
                 }
             }
             item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
-                    PremiumButton(
-                        onClick = { cozulmusSekmesi = false },
-                        modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("sekme_cozmediklerim"),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (!cozulmusSekmesi) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.surfaceVariant
-                            },
-                            contentColor = if (!cozulmusSekmesi) {
-                                MaterialTheme.colorScheme.onPrimary
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            },
-                        ),
+                CamKarti(modifier = Modifier.fillMaxWidth(), elevation = CamYukseklik.DUSUK) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        Text(
-                            stringResource(R.string.teacher_tab_unsolved, cozulmemisler.size),
-                            fontWeight = FontWeight.Bold,
-                        )
-                    }
-                    PremiumButton(
-                        onClick = { cozulmusSekmesi = true },
-                        modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("sekme_cozduklerim"),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (cozulmusSekmesi) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.surfaceVariant
-                            },
-                            contentColor = if (cozulmusSekmesi) {
-                                MaterialTheme.colorScheme.onPrimary
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            },
-                        ),
-                    ) {
-                        Text(
-                            stringResource(R.string.teacher_tab_solved, cozulmusler.size),
-                            fontWeight = FontWeight.Bold,
-                        )
+                        PremiumButton(
+                            onClick = { cozulmusSekmesi = false },
+                            modifier = Modifier.weight(1f).heightIn(min = 46.dp).testTag("sekme_cozmediklerim"),
+                            shape = RoundedCornerShape(18.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (!cozulmusSekmesi) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    Color.Transparent
+                                },
+                                contentColor = if (!cozulmusSekmesi) {
+                                    MaterialTheme.colorScheme.onPrimary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                },
+                            ),
+                        ) {
+                            Text(
+                                text = stringResource(R.string.teacher_tab_unsolved, cozulmemisler.size),
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                        PremiumButton(
+                            onClick = { cozulmusSekmesi = true },
+                            modifier = Modifier.weight(1f).heightIn(min = 46.dp).testTag("sekme_cozduklerim"),
+                            shape = RoundedCornerShape(18.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (cozulmusSekmesi) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    Color.Transparent
+                                },
+                                contentColor = if (cozulmusSekmesi) {
+                                    MaterialTheme.colorScheme.onPrimary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                },
+                            ),
+                        ) {
+                            Text(
+                                text = stringResource(R.string.teacher_tab_solved, cozulmusler.size),
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
                     }
                 }
             }
@@ -623,19 +1270,46 @@ private fun OgretmenGrupDetayEkrani(
                     }
                 }
             }
+            if (grupSorulari.size >= 3) {
+                item {
+                    OutlinedTextField(
+                        value = soruArama,
+                        onValueChange = { soruArama = it.take(60) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        placeholder = { Text(stringResource(R.string.teacher_question_search_placeholder)) },
+                        shape = RoundedCornerShape(16.dp),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
+                    )
+                }
+            }
 
             if (aktifListe.isEmpty()) {
                 item {
+                    val filtreAktif = zorlukFiltresi != null || soruArama.isNotBlank()
                     PremiumBosDurum(
                         modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                         baslik = stringResource(
-                            if (cozulmusSekmesi) R.string.teacher_solved_empty_title
-                            else R.string.teacher_unsolved_empty_title,
+                            when {
+                                filtreAktif -> R.string.teacher_search_empty_title
+                                cozulmusSekmesi -> R.string.teacher_solved_empty_title
+                                else -> R.string.teacher_unsolved_empty_title
+                            },
                         ),
                         aciklama = stringResource(
-                            if (cozulmusSekmesi) R.string.teacher_solved_empty_subtitle
-                            else R.string.teacher_unsolved_empty_subtitle,
+                            when {
+                                filtreAktif -> R.string.teacher_search_empty_subtitle
+                                cozulmusSekmesi -> R.string.teacher_solved_empty_subtitle
+                                else -> R.string.teacher_unsolved_empty_subtitle
+                            },
                         ),
+                        butonMetni = if (!filtreAktif && !cozulmusSekmesi) {
+                            stringResource(R.string.teacher_add_question)
+                        } else {
+                            null
+                        },
+                        onButonTikla = if (!filtreAktif && !cozulmusSekmesi) onSoruEkle else null,
                     )
                 }
             } else {
@@ -643,6 +1317,7 @@ private fun OgretmenGrupDetayEkrani(
                     OgretmenSoruKarti(
                         siraNo = idx + 1,
                         soru = soru,
+                        koyuTema = koyuTema,
                         gorselDeposu = gorselDeposu,
                         onTamEkran = { tamEkranSoruId = soru.id },
                         onCozulduDegistir = { yeniDurum ->
@@ -722,58 +1397,14 @@ private fun OgretmenGrupDetayEkrani(
     }
 
     if (grupDuzenleAcik) {
-        var yeniAd by remember(grup.id) { mutableStateOf(grup.ad) }
-        var yeniAciklama by remember(grup.id) { mutableStateOf(grup.aciklama.orEmpty()) }
-        var hata by remember(grup.id) { mutableStateOf(false) }
-        AlertDialog(
-            onDismissRequest = { grupDuzenleAcik = false },
-            title = { Text(stringResource(R.string.teacher_edit_group)) },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    OutlinedTextField(
-                        value = yeniAd,
-                        onValueChange = {
-                            yeniAd = it
-                            hata = false
-                        },
-                        singleLine = true,
-                        isError = hata,
-                        label = { Text(stringResource(R.string.teacher_group_name_label)) },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    OutlinedTextField(
-                        value = yeniAciklama,
-                        onValueChange = { yeniAciklama = it },
-                        singleLine = true,
-                        label = { Text(stringResource(R.string.teacher_group_desc_label)) },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    if (hata) {
-                        Text(
-                            stringResource(R.string.teacher_group_name_error),
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                }
-            },
-            confirmButton = {
-                PremiumButton(
-                    onClick = {
-                        scope.launch {
-                            if (ogretmenDeposu.grupGuncelle(grup.id, yeniAd, yeniAciklama)) {
-                                grupDuzenleAcik = false
-                            } else {
-                                hata = true
-                            }
-                        }
-                    },
-                ) { Text(stringResource(R.string.teacher_group_save)) }
-            },
-            dismissButton = {
-                PremiumTextButton(onClick = { grupDuzenleAcik = false }) {
-                    Text(stringResource(R.string.question_form_cancel))
-                }
+        GrupFormDialog(
+            baslik = stringResource(R.string.teacher_edit_group),
+            baslangicAd = grup.ad,
+            baslangicAciklama = grup.aciklama.orEmpty(),
+            hazirOnerileriGoster = false,
+            onDismiss = { grupDuzenleAcik = false },
+            onKaydet = { yeniAd, yeniAciklama ->
+                ogretmenDeposu.grupGuncelle(grup.id, yeniAd, yeniAciklama)
             },
         )
     }
@@ -807,6 +1438,7 @@ private fun OgretmenGrupDetayEkrani(
 private fun OgretmenSoruKarti(
     siraNo: Int,
     soru: OgretmenSorusu,
+    koyuTema: Boolean,
     gorselDeposu: LocalSoruGorselDeposu,
     onTamEkran: () -> Unit,
     onCozulduDegistir: (Boolean) -> Unit,
@@ -814,24 +1446,27 @@ private fun OgretmenSoruKarti(
     onDuzenle: () -> Unit,
     onSil: () -> Unit,
 ) {
-    val ilkDosya = soru.gorseller.minByOrNull { it.sira }?.let { gorselDeposu.dosyaGoruntuIcin(it.dosyaAdi) }
+    val siraliGorseller = remember(soru.gorseller) { soru.gorseller.sortedBy { it.sira } }
+    val ilkDosya = siraliGorseller.firstOrNull()?.let { gorselDeposu.dosyaGoruntuIcin(it.dosyaAdi) }
 
     PremiumCard(
         onClick = onTamEkran,
         modifier = Modifier.fillMaxWidth().testTag("ogretmen_soru_kart_${soru.id}"),
-        shape = RoundedCornerShape(22.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.65f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        interactionTur = EtkilesimTuru.KART_ACILIS,
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(14.dp),
+            modifier = Modifier.fillMaxWidth().padding(15.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(190.dp)
-                    .clip(RoundedCornerShape(16.dp))
+                    .height(196.dp)
+                    .clip(RoundedCornerShape(18.dp))
                     .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.44f)),
             ) {
                 SoruGorselResmi(
@@ -843,6 +1478,23 @@ private fun OgretmenSoruKarti(
                     cerceve = false,
                     onClick = onTamEkran,
                 )
+                if (siraliGorseller.size > 1) {
+                    Surface(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(10.dp),
+                        shape = CircleShape,
+                        color = PremiumMarkaRenkler.MurekkepKoyu.copy(alpha = 0.78f),
+                    ) {
+                        Text(
+                            text = stringResource(R.string.teacher_photo_count_badge, siraliGorseller.size),
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                            color = PremiumMarkaRenkler.Kagit,
+                            style = MaterialTheme.typography.labelSmall.copy(fontFeatureSettings = "tnum"),
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
+                }
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -853,20 +1505,27 @@ private fun OgretmenSoruKarti(
                     text = soru.baslik ?: stringResource(R.string.teacher_question_default_title, siraNo),
                     modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
                 soru.zorluk?.let { z ->
-                    ZorlukRozeti(z)
+                    ZorlukRozeti(z, koyuTema = koyuTema)
                 }
             }
             if (!soru.cevap.isNullOrBlank()) {
-                Text(
-                    text = stringResource(R.string.teacher_answer_hidden_badge),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.55f),
+                ) {
+                    Text(
+                        text = stringResource(R.string.teacher_answer_hidden_badge),
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    )
+                }
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -874,7 +1533,7 @@ private fun OgretmenSoruKarti(
             ) {
                 PremiumOutlinedButton(
                     onClick = onTamEkran,
-                    modifier = Modifier.weight(1f).heightIn(min = 44.dp),
+                    modifier = Modifier.weight(1f).heightIn(min = 46.dp),
                     shape = RoundedCornerShape(14.dp),
                 ) {
                     Text(stringResource(R.string.ask_teacher_open_fullscreen))
@@ -883,9 +1542,10 @@ private fun OgretmenSoruKarti(
                     onClick = { onCozulduDegistir(!soru.cozuldu) },
                     modifier = Modifier
                         .weight(1f)
-                        .heightIn(min = 44.dp)
+                        .heightIn(min = 46.dp)
                         .testTag("ogretmen_cozuldu_degistir_${soru.id}"),
                     shape = RoundedCornerShape(14.dp),
+                    interactionTur = if (soru.cozuldu) EtkilesimTuru.TIKLAMA else EtkilesimTuru.BASARI,
                 ) {
                     Text(
                         stringResource(
@@ -896,6 +1556,7 @@ private fun OgretmenSoruKarti(
                     )
                 }
             }
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -905,9 +1566,12 @@ private fun OgretmenSoruKarti(
                     onClick = onBaskaGrubaEkle,
                     modifier = Modifier.testTag("ogretmen_baska_gruba_ekle_${soru.id}"),
                 ) {
-                    Text(stringResource(R.string.teacher_copy_to_group))
+                    Text(
+                        text = stringResource(R.string.teacher_copy_to_group),
+                        fontWeight = FontWeight.SemiBold,
+                    )
                 }
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                     PremiumTextButton(onClick = onDuzenle) {
                         Text(stringResource(R.string.question_edit))
                     }
@@ -924,16 +1588,12 @@ private fun OgretmenSoruKarti(
 }
 
 @Composable
-private fun ZorlukRozeti(zorluk: OgretmenZorluk) {
-    val renk = when (zorluk) {
-        OgretmenZorluk.KOLAY -> Color(0xFF2E7D32)
-        OgretmenZorluk.ORTA -> Color(0xFFEF6C00)
-        OgretmenZorluk.ZOR -> Color(0xFFC62828)
-    }
+private fun ZorlukRozeti(zorluk: OgretmenZorluk, koyuTema: Boolean = false) {
+    val renk = zorlukRengi(zorluk, koyuTema)
     Surface(
         shape = CircleShape,
-        color = renk.copy(alpha = 0.14f),
-        border = BorderStroke(1.dp, renk.copy(alpha = 0.35f)),
+        color = renk.copy(alpha = 0.15f),
+        border = BorderStroke(1.dp, renk.copy(alpha = 0.36f)),
     ) {
         Text(
             text = stringResource(zorlukEtiketi(zorluk)),
@@ -981,7 +1641,7 @@ private fun OgretmenTamEkranSoruDialog(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFF0E141B))
+                .background(PremiumMarkaRenkler.MurekkepKoyu)
                 .windowInsetsPadding(WindowInsets.safeDrawing)
                 .padding(14.dp),
             verticalArrangement = Arrangement.SpaceBetween,
@@ -994,28 +1654,65 @@ private fun OgretmenTamEkranSoruDialog(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = listOfNotNull(grupAdi, soru.baslik).joinToString(" · "),
-                        color = Color.White,
+                        color = PremiumMarkaRenkler.Kagit,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
-                    if (gorseller.size > 1) {
-                        Text(
-                            text = stringResource(R.string.ask_teacher_page_indicator, sayfa + 1, gorseller.size),
-                            color = Color.White.copy(alpha = 0.72f),
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
+                    Text(
+                        text = if (gorseller.size > 1) {
+                            stringResource(R.string.ask_teacher_page_indicator, sayfa + 1, gorseller.size)
+                        } else {
+                            stringResource(R.string.teacher_zoom_hint)
+                        },
+                        color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.68f),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
                 }
-                soru.zorluk?.let { ZorlukRozeti(it) }
-                PremiumTextButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.common_close), color = Color.White)
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (scale > 1.05f) {
+                        PremiumTextButton(
+                            onClick = {
+                                scale = 1f
+                                offsetX = 0f
+                                offsetY = 0f
+                            },
+                        ) {
+                            Text(
+                                text = stringResource(R.string.teacher_zoom_reset),
+                                color = PremiumMarkaRenkler.BakirIsik,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                        }
+                    }
+                    soru.zorluk?.let { ZorlukRozeti(it, koyuTema = true) }
+                    PremiumTextButton(onClick = onDismiss) {
+                        Text(stringResource(R.string.common_close), color = PremiumMarkaRenkler.Kagit)
+                    }
                 }
             }
 
             Box(
-                modifier = Modifier.fillMaxWidth().weight(1f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .pointerInput(aktifGorsel?.id) {
+                        detectTapGestures(
+                            onDoubleTap = {
+                                if (scale > 1.05f) {
+                                    scale = 1f
+                                    offsetX = 0f
+                                    offsetY = 0f
+                                } else {
+                                    scale = 2.4f
+                                }
+                            },
+                        )
+                    },
                 contentAlignment = Alignment.Center,
             ) {
                 SoruGorselResmi(
@@ -1036,74 +1733,96 @@ private fun OgretmenTamEkranSoruDialog(
                 )
             }
 
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (gorseller.size > 1) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        PremiumTextButton(
-                            onClick = { if (sayfa > 0) sayfa-- },
-                            enabled = sayfa > 0,
-                        ) { Text(stringResource(R.string.ask_teacher_prev_page), color = Color.White) }
-                        PremiumTextButton(
-                            onClick = { if (sayfa < gorseller.lastIndex) sayfa++ },
-                            enabled = sayfa < gorseller.lastIndex,
-                        ) { Text(stringResource(R.string.ask_teacher_next_page), color = Color.White) }
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(22.dp),
+                color = PremiumMarkaRenkler.Murekkep.copy(alpha = 0.92f),
+                border = BorderStroke(1.dp, PremiumMarkaRenkler.Kagit.copy(alpha = 0.14f)),
+            ) {
+                Column(
+                    modifier = Modifier.padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    if (gorseller.size > 1) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            PremiumTextButton(
+                                onClick = { if (sayfa > 0) sayfa-- },
+                                enabled = sayfa > 0,
+                            ) {
+                                Text(
+                                    stringResource(R.string.ask_teacher_prev_page),
+                                    color = PremiumMarkaRenkler.Kagit,
+                                )
+                            }
+                            PremiumTextButton(
+                                onClick = { if (sayfa < gorseller.lastIndex) sayfa++ },
+                                enabled = sayfa < gorseller.lastIndex,
+                            ) {
+                                Text(
+                                    stringResource(R.string.ask_teacher_next_page),
+                                    color = PremiumMarkaRenkler.Kagit,
+                                )
+                            }
+                        }
                     }
-                }
-                if (!soru.cevap.isNullOrBlank()) {
-                    if (cevapAcik) {
-                        Surface(
-                            modifier = Modifier.fillMaxWidth().testTag("ogretmen_cevap_kutusu"),
+                    if (!soru.cevap.isNullOrBlank()) {
+                        if (cevapAcik) {
+                            Surface(
+                                modifier = Modifier.fillMaxWidth().testTag("ogretmen_cevap_kutusu"),
+                                shape = RoundedCornerShape(14.dp),
+                                color = PremiumMarkaRenkler.Bakir.copy(alpha = 0.22f),
+                                border = BorderStroke(1.dp, PremiumMarkaRenkler.BakirIsik.copy(alpha = 0.45f)),
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.teacher_answer_prefix, soru.cevap),
+                                    modifier = Modifier.padding(14.dp),
+                                    color = PremiumMarkaRenkler.Kagit,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.SemiBold,
+                                )
+                            }
+                        }
+                        PremiumOutlinedButton(
+                            onClick = { cevapAcik = !cevapAcik },
+                            modifier = Modifier.fillMaxWidth().testTag("ogretmen_cevabi_goster"),
                             shape = RoundedCornerShape(14.dp),
-                            color = Color(0xFF1F2B38),
                         ) {
                             Text(
-                                text = stringResource(R.string.teacher_answer_prefix, soru.cevap),
-                                modifier = Modifier.padding(14.dp),
-                                color = Color.White,
-                                style = MaterialTheme.typography.bodyLarge,
+                                stringResource(
+                                    if (cevapAcik) R.string.teacher_hide_answer else R.string.teacher_show_answer,
+                                ),
+                                color = PremiumMarkaRenkler.Kagit,
                                 fontWeight = FontWeight.SemiBold,
                             )
                         }
                     }
-                    PremiumOutlinedButton(
-                        onClick = { cevapAcik = !cevapAcik },
-                        modifier = Modifier.fillMaxWidth().testTag("ogretmen_cevabi_goster"),
-                        shape = RoundedCornerShape(14.dp),
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        Text(
-                            stringResource(
-                                if (cevapAcik) R.string.teacher_hide_answer else R.string.teacher_show_answer,
-                            ),
-                            color = Color.White,
-                        )
-                    }
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    PremiumOutlinedButton(
-                        onClick = onBaskaGrubaEkle,
-                        modifier = Modifier.weight(1f).heightIn(min = 48.dp),
-                        shape = RoundedCornerShape(14.dp),
-                    ) {
-                        Text(stringResource(R.string.teacher_copy_to_group), color = Color.White)
-                    }
-                    PremiumButton(
-                        onClick = { onCozulduDegistir(!soru.cozuldu) },
-                        modifier = Modifier.weight(1f).heightIn(min = 48.dp),
-                        shape = RoundedCornerShape(14.dp),
-                    ) {
-                        Text(
-                            stringResource(
-                                if (soru.cozuldu) R.string.teacher_mark_unsolved
-                                else R.string.teacher_mark_solved,
-                            ),
-                            fontWeight = FontWeight.Bold,
-                        )
+                        PremiumOutlinedButton(
+                            onClick = onBaskaGrubaEkle,
+                            modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                            shape = RoundedCornerShape(14.dp),
+                        ) {
+                            Text(stringResource(R.string.teacher_copy_to_group), color = PremiumMarkaRenkler.Kagit)
+                        }
+                        PremiumButton(
+                            onClick = { onCozulduDegistir(!soru.cozuldu) },
+                            modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                            shape = RoundedCornerShape(14.dp),
+                        ) {
+                            Text(
+                                stringResource(
+                                    if (soru.cozuldu) R.string.teacher_mark_unsolved
+                                    else R.string.teacher_mark_solved,
+                                ),
+                                fontWeight = FontWeight.Bold,
+                            )
+                        }
                     }
                 }
             }
@@ -1118,23 +1837,47 @@ private fun BaskaGrubaEkleDialog(
     onOnayla: (Set<String>) -> Unit,
 ) {
     var secilenler by remember { mutableStateOf<Set<String>>(emptySet()) }
-    AlertDialog(
+    Dialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.teacher_copy_dialog_title), fontWeight = FontWeight.Bold) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    stringResource(R.string.teacher_copy_dialog_subtitle),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                if (digerGruplar.isEmpty()) {
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .windowInsetsPadding(WindowInsets.safeDrawing)
+                .padding(horizontal = 20.dp, vertical = 20.dp),
+            shape = RoundedCornerShape(24.dp),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 6.dp,
+        ) {
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(20.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                item {
                     Text(
-                        stringResource(R.string.teacher_copy_no_other_groups),
-                        style = MaterialTheme.typography.bodyMedium,
+                        text = stringResource(R.string.teacher_copy_dialog_title),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
                     )
+                }
+                item {
+                    Text(
+                        text = stringResource(R.string.teacher_copy_dialog_subtitle),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                if (digerGruplar.isEmpty()) {
+                    item {
+                        Text(
+                            text = stringResource(R.string.teacher_copy_no_other_groups),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
                 } else {
-                    digerGruplar.forEach { hedef ->
+                    items(digerGruplar, key = { it.id }) { hedef ->
                         val isaretli = hedef.id in secilenler
                         Surface(
                             onClick = {
@@ -1142,40 +1885,63 @@ private fun BaskaGrubaEkleDialog(
                             },
                             modifier = Modifier.fillMaxWidth().testTag("hedef_grup_${hedef.id}"),
                             shape = RoundedCornerShape(14.dp),
-                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+                            color = if (isaretli) {
+                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
+                            } else {
+                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+                            },
+                            border = BorderStroke(
+                                1.dp,
+                                if (isaretli) MaterialTheme.colorScheme.primary.copy(alpha = 0.55f)
+                                else Color.Transparent,
+                            ),
                         ) {
                             Row(
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Checkbox(checked = isaretli, onCheckedChange = null)
-                                Text(
-                                    text = hedef.ad,
-                                    modifier = Modifier.padding(start = 8.dp),
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.SemiBold,
-                                )
+                                Column(modifier = Modifier.padding(start = 8.dp)) {
+                                    Text(
+                                        text = hedef.ad,
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.SemiBold,
+                                    )
+                                    hedef.aciklama?.takeIf { it.isNotBlank() }?.let { not ->
+                                        Text(
+                                            text = not,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
                 }
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        PremiumTextButton(onClick = onDismiss) {
+                            Text(stringResource(R.string.question_form_cancel))
+                        }
+                        if (digerGruplar.isNotEmpty()) {
+                            PremiumButton(
+                                enabled = secilenler.isNotEmpty(),
+                                modifier = Modifier
+                                    .padding(start = 8.dp)
+                                    .testTag("hedef_gruplara_kopyala_onay"),
+                                onClick = { onOnayla(secilenler) },
+                            ) { Text(stringResource(R.string.teacher_copy_confirm)) }
+                        }
+                    }
+                }
             }
-        },
-        confirmButton = {
-            if (digerGruplar.isNotEmpty()) {
-                PremiumButton(
-                    enabled = secilenler.isNotEmpty(),
-                    modifier = Modifier.testTag("hedef_gruplara_kopyala_onay"),
-                    onClick = { onOnayla(secilenler) },
-                ) { Text(stringResource(R.string.teacher_copy_confirm)) }
-            }
-        },
-        dismissButton = {
-            PremiumTextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.question_form_cancel))
-            }
-        },
-    )
+        }
+    }
 }
 
 @Composable
@@ -1188,6 +1954,9 @@ private fun OgretmenSoruFormuEkrani(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current
+    val koyuTema = isSystemInDarkTheme()
+    val klavyeAcik = WindowInsets.ime.getBottom(LocalDensity.current) > 0
     val snackbarHostState = remember { SnackbarHostState() }
     var gorseller by remember(mevcutSoru?.id) {
         mutableStateOf(mevcutSoru?.gorseller.orEmpty().sortedBy { it.sira }.map { it.toGirdi() })
@@ -1207,6 +1976,34 @@ private fun OgretmenSoruFormuEkrani(
             geciciler.forEach { runCatching { gorselDeposu.geciciDosyayiSil(it.dosyaAdi) } }
         }
         onGeri()
+    }
+
+    fun soruyuKaydet() {
+        if (kaydediliyor || kirpmaIsleniyor) return
+        if (gorseller.isEmpty()) {
+            formHatasi = R.string.question_error_photo_required
+            return
+        }
+        kaydediliyor = true
+        scope.launch {
+            try {
+                val sonuc = ogretmenDeposu.soruKaydet(
+                    id = mevcutSoru?.id,
+                    grupId = grup.id,
+                    baslik = baslik,
+                    zorluk = zorluk,
+                    cevap = cevap,
+                    gorseller = gorseller,
+                )
+                if (sonuc != null) {
+                    onGeri()
+                } else {
+                    formHatasi = R.string.question_error_generic
+                }
+            } finally {
+                kaydediliyor = false
+            }
+        }
     }
 
     BackHandler(enabled = !kaydediliyor && !kirpmaIsleniyor) { iptalEtVeDon() }
@@ -1289,68 +2086,63 @@ private fun OgretmenSoruFormuEkrani(
         contentWindowInsets = WindowInsets.safeDrawing,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
-            Surface(tonalElevation = 3.dp, shadowElevation = 4.dp) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .imePadding()
-                        .navigationBarsPadding()
-                        .padding(horizontal = 20.dp, vertical = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+            if (!klavyeAcik) {
+                Surface(
+                    color = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 3.dp,
+                    shadowElevation = 4.dp,
                 ) {
-                    formHatasi?.let { hataId ->
-                        Text(
-                            text = stringResource(hataId),
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                    PremiumButton(
-                        onClick = {
-                            if (kaydediliyor) return@PremiumButton
-                            if (gorseller.isEmpty()) {
-                                formHatasi = R.string.question_error_photo_required
-                                return@PremiumButton
-                            }
-                            kaydediliyor = true
-                            scope.launch {
-                                try {
-                                    val sonuc = ogretmenDeposu.soruKaydet(
-                                        id = mevcutSoru?.id,
-                                        grupId = grup.id,
-                                        baslik = baslik,
-                                        zorluk = zorluk,
-                                        cevap = cevap,
-                                        gorseller = gorseller,
-                                    )
-                                    if (sonuc != null) {
-                                        onGeri()
-                                    } else {
-                                        formHatasi = R.string.question_error_generic
-                                    }
-                                } finally {
-                                    kaydediliyor = false
-                                }
-                            }
-                        },
-                        enabled = !kaydediliyor && !kirpmaIsleniyor,
-                        modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp).testTag("ogretmen_soru_kaydet"),
-                        shape = RoundedCornerShape(16.dp),
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .navigationBarsPadding()
+                            .padding(horizontal = 20.dp, vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        Text(stringResource(R.string.teacher_question_save), fontWeight = FontWeight.Bold)
+                        formHatasi?.let { hataId ->
+                            Text(
+                                text = stringResource(hataId),
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
+                        PremiumGradyanButon(
+                            onClick = ::soruyuKaydet,
+                            enabled = !kaydediliyor && !kirpmaIsleniyor,
+                            modifier = Modifier.fillMaxWidth().testTag("ogretmen_soru_kaydet"),
+                        ) {
+                            Text(stringResource(R.string.teacher_question_save), fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
             }
         },
     ) { padding ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(padding),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .consumeWindowInsets(padding),
             contentPadding = PaddingValues(start = 18.dp, top = 8.dp, end = 18.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             item {
-                PremiumTextButton(onClick = ::iptalEtVeDon, enabled = !kaydediliyor) {
-                    Text("← " + stringResource(R.string.question_form_cancel))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    PremiumTextButton(onClick = ::iptalEtVeDon, enabled = !kaydediliyor) {
+                        Text("← " + stringResource(R.string.question_form_cancel))
+                    }
+                    if (klavyeAcik) {
+                        PremiumTextButton(onClick = { focusManager.clearFocus() }) {
+                            Text(
+                                stringResource(R.string.common_hide_keyboard),
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                        }
+                    }
                 }
             }
             item {
@@ -1410,13 +2202,34 @@ private fun OgretmenSoruFormuEkrani(
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.SemiBold,
                         )
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
                             OgretmenZorluk.entries.forEach { secenek ->
-                                FilterChip(
-                                    selected = zorluk == secenek,
-                                    onClick = { zorluk = if (zorluk == secenek) null else secenek },
-                                    label = { Text(stringResource(zorlukEtiketi(secenek))) },
-                                )
+                                val secili = zorluk == secenek
+                                val zRenk = zorlukRengi(secenek, koyuTema)
+                                Surface(
+                                    onClick = { zorluk = if (secili) null else secenek },
+                                    modifier = Modifier.weight(1f).heightIn(min = 44.dp),
+                                    shape = RoundedCornerShape(14.dp),
+                                    color = if (secili) zRenk.copy(alpha = 0.18f)
+                                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+                                    border = BorderStroke(
+                                        width = if (secili) 1.5.dp else 1.dp,
+                                        color = if (secili) zRenk
+                                        else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                                    ),
+                                ) {
+                                    Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(vertical = 10.dp)) {
+                                        Text(
+                                            text = stringResource(zorlukEtiketi(secenek)),
+                                            color = if (secili) zRenk else MaterialTheme.colorScheme.onSurfaceVariant,
+                                            style = MaterialTheme.typography.labelLarge,
+                                            fontWeight = if (secili) FontWeight.Bold else FontWeight.Medium,
+                                        )
+                                    }
+                                }
                             }
                         }
                         OutlinedTextField(
@@ -1436,7 +2249,41 @@ private fun OgretmenSoruFormuEkrani(
                             singleLine = true,
                             label = { Text(stringResource(R.string.teacher_question_title_label)) },
                             shape = RoundedCornerShape(14.dp),
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                         )
+                    }
+                }
+            }
+            if (klavyeAcik) {
+                item {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        formHatasi?.let { hataId ->
+                            Text(
+                                text = stringResource(hataId),
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            PremiumTextButton(
+                                onClick = { focusManager.clearFocus() },
+                                modifier = Modifier.heightIn(min = 48.dp),
+                            ) {
+                                Text(stringResource(R.string.common_hide_keyboard))
+                            }
+                            PremiumButton(
+                                onClick = ::soruyuKaydet,
+                                enabled = !kaydediliyor && !kirpmaIsleniyor,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .heightIn(min = 48.dp)
+                                    .testTag("ogretmen_soru_kaydet"),
+                                shape = RoundedCornerShape(16.dp),
+                            ) {
+                                Text(stringResource(R.string.teacher_question_save), fontWeight = FontWeight.Bold)
+                            }
+                        }
                     }
                 }
             }
@@ -1491,6 +2338,7 @@ private fun OgretmenSoruFormuEkrani(
 
 @Composable
 private fun OgretmenAyarlarEkrani(
+    veri: OgretmenVerisi,
     sonYedek: SonYedekBilgisi?,
     yedeklemeIslemde: Boolean,
     onOgrenciModunaGec: () -> Unit,
@@ -1519,7 +2367,10 @@ private fun OgretmenAyarlarEkrani(
         contentWindowInsets = WindowInsets.safeDrawing,
     ) { insets ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(insets),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(insets)
+                .consumeWindowInsets(insets),
             contentPadding = PaddingValues(horizontal = 20.dp, vertical = 14.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
@@ -1540,7 +2391,7 @@ private fun OgretmenAyarlarEkrani(
                         )
                         Text(
                             text = stringResource(R.string.settings_role_current_teacher),
-                            color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.85f),
+                            color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.86f),
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     }
@@ -1548,7 +2399,7 @@ private fun OgretmenAyarlarEkrani(
             }
             item {
                 CamKarti(modifier = Modifier.fillMaxWidth(), elevation = CamYukseklik.DUSUK) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         Text(
                             text = stringResource(R.string.settings_role_section_title),
                             style = MaterialTheme.typography.titleMedium,
@@ -1571,23 +2422,32 @@ private fun OgretmenAyarlarEkrani(
             }
             item {
                 CamKarti(modifier = Modifier.fillMaxWidth(), elevation = CamYukseklik.DUSUK) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         Text(
                             text = stringResource(R.string.settings_backup_title),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                         )
                         Text(
+                            text = stringResource(
+                                R.string.teacher_settings_workspace_summary,
+                                veri.gruplar.size,
+                                veri.sorular.size,
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Text(
                             text = sonYedekMetni,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
-                        PremiumButton(
+                        PremiumGradyanButon(
                             onClick = onYedekOlustur,
                             enabled = !yedeklemeIslemde,
                             modifier = Modifier.fillMaxWidth(),
                         ) {
-                            Text(stringResource(R.string.menu_create_backup))
+                            Text(stringResource(R.string.menu_create_backup), fontWeight = FontWeight.Bold)
                         }
                         PremiumOutlinedButton(
                             onClick = onYedekGeriYukle,
@@ -1602,7 +2462,7 @@ private fun OgretmenAyarlarEkrani(
             item {
                 CamKarti(modifier = Modifier.fillMaxWidth(), elevation = CamYukseklik.DUSUK) {
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        modifier = Modifier.fillMaxWidth().padding(18.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
@@ -1630,6 +2490,51 @@ private fun OgretmenAyarlarEkrani(
             }
         }
     }
+}
+
+private fun grupMonogram(ad: String): String {
+    val temiz = ad.trim()
+    if (temiz.isEmpty()) return "GR"
+    val parcalar = temiz.split(Regex("[\\s()\\-/]+")).filter { it.isNotEmpty() }
+    if (parcalar.size == 1 && temiz.length <= 3) {
+        return temiz.uppercase(Locale.forLanguageTag("tr-TR"))
+    }
+    if (parcalar.size >= 2) {
+        val ilk = parcalar[0]
+        if (ilk.length <= 2 && ilk.any { it.isDigit() }) {
+            return ilk.uppercase(Locale.forLanguageTag("tr-TR"))
+        }
+        return (parcalar[0].take(1) + parcalar[1].take(1)).uppercase(Locale.forLanguageTag("tr-TR"))
+    }
+    return temiz.take(2).uppercase(Locale.forLanguageTag("tr-TR"))
+}
+
+private fun grupVurguRengi(ad: String, koyuTema: Boolean): Color {
+    val acikPalet = listOf(
+        PremiumMarkaRenkler.Petrol,
+        PremiumMarkaRenkler.Bakir,
+        PremiumMarkaRenkler.Deniz,
+        PremiumMarkaRenkler.Yesil,
+        Color(0xFF5C6BC0),
+        Color(0xFF7B5EA7),
+    )
+    val koyuPalet = listOf(
+        PremiumMarkaRenkler.DenizAcik,
+        PremiumMarkaRenkler.BakirIsik,
+        PremiumMarkaRenkler.PetrolParlak,
+        PremiumMarkaRenkler.YesilAcik,
+        Color(0xFF9FA8DA),
+        PremiumMarkaRenkler.MorAcik,
+    )
+    val palet = if (koyuTema) koyuPalet else acikPalet
+    val indeks = abs(ad.trim().lowercase(Locale.forLanguageTag("tr-TR")).hashCode()) % palet.size
+    return palet[indeks]
+}
+
+private fun zorlukRengi(zorluk: OgretmenZorluk, koyuTema: Boolean): Color = when (zorluk) {
+    OgretmenZorluk.KOLAY -> if (koyuTema) PremiumMarkaRenkler.YesilAcik else PremiumMarkaRenkler.Yesil
+    OgretmenZorluk.ORTA -> if (koyuTema) PremiumMarkaRenkler.BakirIsik else PremiumMarkaRenkler.Bakir
+    OgretmenZorluk.ZOR -> if (koyuTema) PremiumMarkaRenkler.MercanAcik else Color(0xFFC62828)
 }
 
 @androidx.annotation.StringRes
