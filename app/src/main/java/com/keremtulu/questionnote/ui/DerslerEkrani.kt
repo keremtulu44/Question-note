@@ -6,11 +6,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.itemsIndexed
@@ -124,9 +126,10 @@ fun DerslerEkrani(
         containerColor = colors.background,
         contentWindowInsets = WindowInsets.safeDrawing,
     ) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding)) {
+        @Composable
+        fun DerslerUstBaslik(modifier: Modifier = Modifier) {
             GradyanKart(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 10.dp),
+                modifier = modifier.fillMaxWidth(),
                 borderAnimation = false,
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -178,6 +181,9 @@ fun DerslerEkrani(
                     }
                 }
             }
+        }
+
+        Column(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding)) {
             when (val current = durum) {
                 DersSecimDurumu.Yukleniyor -> LazyVerticalGrid(
                     columns = GridCells.Adaptive(minSize = 156.dp),
@@ -186,23 +192,30 @@ fun DerslerEkrani(
                             contentDescription = loadingLabel
                             liveRegion = LiveRegionMode.Polite
                         },
-                    contentPadding = PaddingValues(start = 18.dp, top = 18.dp, end = 18.dp, bottom = 24.dp),
+                    contentPadding = PaddingValues(start = 18.dp, top = 10.dp, end = 18.dp, bottom = 24.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        DerslerUstBaslik(Modifier.padding(bottom = 4.dp))
+                    }
                     items(6) { IskeletKart(height = 132, showImage = true, showSubtitle = false) }
                 }
-                DersSecimDurumu.Hata -> PremiumBosDurum(
-                    modifier = Modifier.fillMaxWidth().weight(1f).semantics {
-                        liveRegion = LiveRegionMode.Assertive
-                    },
-                    baslik = stringResource(R.string.lessons_error_title),
-                    aciklama = stringResource(R.string.lessons_error_description),
-                    butonMetni = stringResource(R.string.topic_retry),
-                    onButonTikla = { yenileme++ },
-                )
+                DersSecimDurumu.Hata -> {
+                    DerslerUstBaslik(Modifier.padding(horizontal = 20.dp, vertical = 10.dp))
+                    PremiumBosDurum(
+                        modifier = Modifier.fillMaxWidth().weight(1f).semantics {
+                            liveRegion = LiveRegionMode.Assertive
+                        },
+                        baslik = stringResource(R.string.lessons_error_title),
+                        aciklama = stringResource(R.string.lessons_error_description),
+                        butonMetni = stringResource(R.string.topic_retry),
+                        onButonTikla = { yenileme++ },
+                    )
+                }
                 is DersSecimDurumu.Hazir -> {
                     if (current.dersler.isEmpty()) {
+                        DerslerUstBaslik(Modifier.padding(horizontal = 20.dp, vertical = 10.dp))
                         PremiumBosDurum(
                             modifier = Modifier.fillMaxWidth().weight(1f),
                             baslik = stringResource(R.string.lessons_empty_title),
@@ -212,10 +225,13 @@ fun DerslerEkrani(
                         LazyVerticalGrid(
                             columns = GridCells.Adaptive(minSize = 156.dp),
                             modifier = Modifier.fillMaxWidth().weight(1f),
-                            contentPadding = PaddingValues(start = 18.dp, top = 18.dp, end = 18.dp, bottom = 24.dp),
+                            contentPadding = PaddingValues(start = 18.dp, top = 10.dp, end = 18.dp, bottom = 24.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
+                            item(span = { GridItemSpan(maxLineSpan) }, key = "dersler-baslik") {
+                                DerslerUstBaslik(Modifier.padding(bottom = 4.dp))
+                            }
                             itemsIndexed(current.dersler, key = { _, ders -> ders.id }) { index, ders ->
                                 val style = dersKartStiliGetir(ders.ad)
                                 val enter = animateItemInsertion(index)

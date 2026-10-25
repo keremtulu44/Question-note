@@ -1,6 +1,8 @@
 package com.keremtulu.questionnote.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,6 +23,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -63,6 +66,7 @@ import com.keremtulu.questionnote.ui.premium.PremiumButton
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import com.keremtulu.questionnote.ui.premium.PremiumCard
 import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
+import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
@@ -370,10 +374,13 @@ private fun SoruListeKarti(
     modifier: Modifier = Modifier,
     denemeler: List<com.keremtulu.questionnote.domain.model.DenemeKaydi> = emptyList(),
 ) {
+    val bakirVurgu = if (isSystemInDarkTheme()) PremiumMarkaRenkler.BakirIsik else PremiumMarkaRenkler.Bakir
     PremiumCard(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f)),
         interactionTur = EtkilesimTuru.KART_ACILIS,
     ) {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -394,7 +401,12 @@ private fun SoruListeKarti(
                     overflow = TextOverflow.Ellipsis,
                 )
                 if (soru.favori) {
-                    Text("★", color = PremiumMarkaRenkler.Bakir, style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        text = "★",
+                        color = bakirVurgu,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontFamily = PremiumSembolAilesi,
+                    )
                 }
             }
             val deneme = denemeler.kaynakla(soru.kaynak)

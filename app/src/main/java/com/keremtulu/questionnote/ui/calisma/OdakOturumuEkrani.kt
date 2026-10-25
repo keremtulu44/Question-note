@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -291,7 +292,7 @@ fun OdakOturumuEkrani(
         },
     ) { insets ->
         LazyColumn(
-            Modifier.fillMaxSize().padding(insets),
+            Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets),
             state = liste,
             contentPadding = PaddingValues(18.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
@@ -392,32 +393,37 @@ fun OdakOturumuEkrani(
                 ) { Text(stringResource(R.string.focus_whiteboard_open)) }
             }
             item {
-                PremiumOutlinedButton(onClick = {
-                    if (kaydediliyor || cozumAciliyor) return@PremiumOutlinedButton
-                    if (cozumGorunur) cozumGorunur = false else {
-                        olcum.aktiflik(false)
-                        olcum.cozumuAc()
-                        cozumAciliyor = true
-                        cozumKayitHatasi = false
-                        scope.launch {
-                            try {
-                                if (olcum.cozumIzni()) {
-                                    cozumGorunur = true
-                                    onCozumAcildi()
-                                } else cozumKayitHatasi = true
-                            } finally { cozumAciliyor = false }
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    PremiumOutlinedButton(onClick = {
+                        if (kaydediliyor || cozumAciliyor) return@PremiumOutlinedButton
+                        if (cozumGorunur) cozumGorunur = false else {
+                            olcum.aktiflik(false)
+                            olcum.cozumuAc()
+                            cozumAciliyor = true
+                            cozumKayitHatasi = false
+                            scope.launch {
+                                try {
+                                    if (olcum.cozumIzni()) {
+                                        cozumGorunur = true
+                                        onCozumAcildi()
+                                    } else cozumKayitHatasi = true
+                                } finally { cozumAciliyor = false }
+                            }
                         }
+                    }, enabled = cozumVar && !mesgul, modifier = Modifier.fillMaxWidth(),
+                        interactionTur = if (cozumGorunur) EtkilesimTuru.KART_KAPANIS else EtkilesimTuru.COZUM_ACILDI) {
+                        Text(stringResource(if (cozumAciliyor) R.string.measure_solution_preparing
+                            else if (cozumGorunur) R.string.question_hide_solution else R.string.focus_reveal))
                     }
-                }, enabled = cozumVar && !mesgul, modifier = Modifier.fillMaxWidth(),
-                    interactionTur = if (cozumGorunur) EtkilesimTuru.KART_KAPANIS else EtkilesimTuru.COZUM_ACILDI) {
-                    Text(stringResource(if (cozumAciliyor) R.string.measure_solution_preparing
-                        else if (cozumGorunur) R.string.question_hide_solution else R.string.focus_reveal))
+                    if (cozumKayitHatasi) Text(stringResource(R.string.measure_solution_checkpoint_error), color = colors.error,
+                        style = MaterialTheme.typography.bodySmall)
+                    if (!cozumVar) Text(stringResource(R.string.focus_no_solution), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+                    if (cozumAcildi || cozumOnceAcildi) Text(stringResource(R.string.focus_solution_note), style = MaterialTheme.typography.bodySmall,
+                        color = colors.primary)
                 }
-                if (cozumKayitHatasi) Text(stringResource(R.string.measure_solution_checkpoint_error), color = colors.error,
-                    style = MaterialTheme.typography.bodySmall)
-                if (!cozumVar) Text(stringResource(R.string.focus_no_solution), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
-                if (cozumAcildi || cozumOnceAcildi) Text(stringResource(R.string.focus_solution_note), style = MaterialTheme.typography.bodySmall,
-                    color = colors.primary, modifier = Modifier.padding(top = 8.dp))
             }
             if (cozumGorunur) {
                 if (!soru.cozumNotu.isNullOrBlank()) item {
@@ -439,8 +445,10 @@ fun OdakOturumuEkrani(
                 }
             }
             if (yuklemeHatasi) item {
-                Text(stringResource(R.string.focus_load_error), color = colors.error)
-                PremiumTextButton(onClick = { yenileme++ }) { Text(stringResource(R.string.topic_retry)) }
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(stringResource(R.string.focus_load_error), color = colors.error)
+                    PremiumTextButton(onClick = { yenileme++ }) { Text(stringResource(R.string.topic_retry)) }
+                }
             }
             if (degerlendirme && oncekiKayitlar != null && !tekrarli && !kullanilamaz) item {
                 Column(
@@ -480,8 +488,14 @@ fun OdakOturumuEkrani(
                 }
             }
             if (sira < toplam) item {
-                PremiumTextButton(onClick = { if (!kaydediliyor && !cozumAciliyor) { olcum.aktiflik(false); onSonaBirak() } }, enabled = !mesgul, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.focus_defer)) }
-                Text(stringResource(R.string.focus_defer_note), style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant)
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    PremiumTextButton(onClick = { if (!kaydediliyor && !cozumAciliyor) { olcum.aktiflik(false); onSonaBirak() } }, enabled = !mesgul, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.focus_defer)) }
+                    Text(stringResource(R.string.focus_defer_note), style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant)
+                }
             }
         }
     }

@@ -4,12 +4,14 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -60,6 +62,7 @@ import com.keremtulu.questionnote.ui.premium.PremiumExtendedFloatingActionButton
 import com.keremtulu.questionnote.ui.premium.PremiumGradyanButon
 import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 import com.keremtulu.questionnote.ui.premium.PremiumOutlinedButton
+import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import com.keremtulu.questionnote.data.ilerleme.IlerlemeHizmeti
 import com.keremtulu.questionnote.data.prefs.GunlukHedefDeposu
@@ -171,7 +174,7 @@ fun BugunEkrani(
         },
     ) { insets ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(insets),
+            modifier = Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets),
             contentPadding = PaddingValues(start = 20.dp, top = 10.dp, end = 20.dp, bottom = 104.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
@@ -469,7 +472,9 @@ private fun GunSoruSatiri(
                 fontWeight = FontWeight.SemiBold,
             )
             Text(
-                text = stringResource(R.string.question_photo_only),
+                text = row.soru.soruNotu?.trim()?.takeIf { it.isNotEmpty() }
+                    ?: row.soru.kaynak?.trim()?.takeIf { it.isNotEmpty() }
+                    ?: stringResource(R.string.question_photo_only),
                 color = colors.onPrimaryContainer,
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = 2,
@@ -480,12 +485,17 @@ private fun GunSoruSatiri(
                     text = stringResource(R.string.today_photo_count, row.soru.gorseller.count { it.tur == GorselTuru.SORU }),
                     color = colors.onPrimaryContainer.copy(alpha = 0.72f),
                     style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
                 Text("·", color = colors.onPrimaryContainer.copy(alpha = 0.72f))
                 Text(
                     text = stringResource(R.string.today_tap_to_review),
+                    modifier = Modifier.weight(1f, fill = false),
                     color = colors.onPrimaryContainer.copy(alpha = 0.72f),
                     style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }
@@ -556,18 +566,20 @@ private fun BugunDenemeKarti(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            val bakirVurgu = if (isSystemInDarkTheme()) PremiumMarkaRenkler.BakirIsik else PremiumMarkaRenkler.Bakir
             Box(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(PremiumMarkaRenkler.Bakir.copy(alpha = 0.14f)),
+                    .background(bakirVurgu.copy(alpha = 0.16f)),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = "◈",
                     style = MaterialTheme.typography.titleMedium,
-                    color = PremiumMarkaRenkler.Bakir,
+                    color = bakirVurgu,
                     fontWeight = FontWeight.Bold,
+                    fontFamily = PremiumSembolAilesi,
                 )
             }
             Column(
@@ -603,6 +615,7 @@ private fun BugunSorulacaklarKarti(
     onClick: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
+    val bakirVurgu = if (isSystemInDarkTheme()) PremiumMarkaRenkler.BakirIsik else PremiumMarkaRenkler.Bakir
     val toplamSoru = gruplar.sumOf { it.second }
     val dersOzeti = remember(gruplar) {
         gruplar.joinToString(" · ") { (ders, adet) -> "${ders.ad} ($adet)" }
@@ -613,7 +626,7 @@ private fun BugunSorulacaklarKarti(
         modifier = Modifier.fillMaxWidth().testTag("bugun_sorulacaklar_karti"),
         shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(containerColor = colors.secondaryContainer.copy(alpha = 0.65f)),
-        border = BorderStroke(1.2.dp, PremiumMarkaRenkler.Bakir.copy(alpha = 0.45f)),
+        border = BorderStroke(1.2.dp, bakirVurgu.copy(alpha = 0.45f)),
         interactionTur = EtkilesimTuru.KART_ACILIS,
     ) {
         Column(
@@ -629,13 +642,13 @@ private fun BugunSorulacaklarKarti(
                     modifier = Modifier
                         .size(42.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(PremiumMarkaRenkler.Bakir.copy(alpha = 0.18f)),
+                        .background(bakirVurgu.copy(alpha = 0.18f)),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
                         text = "?",
                         style = MaterialTheme.typography.titleLarge,
-                        color = PremiumMarkaRenkler.Bakir,
+                        color = bakirVurgu,
                         fontWeight = FontWeight.ExtraBold,
                     )
                 }

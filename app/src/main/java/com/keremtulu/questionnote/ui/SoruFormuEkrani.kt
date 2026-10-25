@@ -667,6 +667,7 @@ fun SoruFormuEkrani(
                                         },
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Bold,
+                                        fontFamily = PremiumSembolAilesi,
                                     )
                                 }
                             }
@@ -736,31 +737,60 @@ fun SoruFormuEkrani(
                                 }
                             }
                             if (gizliKaynak == null) {
-                            SoruSecenegiSecici(
-                                baslik = stringResource(R.string.question_form_source_label),
-                                secimYok = stringResource(R.string.question_form_source_choose),
-                                secimiTemizle = stringResource(R.string.question_form_source_clear),
-                                ekleEtiketi = stringResource(R.string.question_form_add_source),
-                                bosListeMesaji = stringResource(R.string.question_form_catalog_no_options),
-                                secenekler = catalog?.kaynaklar.orEmpty(),
-                                secilenAd = kaynak,
-                                etkin = !kaydediliyor,
-                                onSec = {
-                                    kaynak = it
-                                    if (it.isBlank()) kaynakKonumu = ""
-                                },
-                                onEkle = { addCatalogOption(SoruSecenekTuru.KAYNAK) },
-                            )
+                                SoruSecenegiSecici(
+                                    baslik = stringResource(R.string.question_form_source_label),
+                                    secimYok = stringResource(R.string.question_form_source_choose),
+                                    secimiTemizle = stringResource(R.string.question_form_source_clear),
+                                    ekleEtiketi = stringResource(R.string.question_form_add_source),
+                                    bosListeMesaji = stringResource(R.string.question_form_catalog_no_options),
+                                    secenekler = catalog?.kaynaklar.orEmpty(),
+                                    secilenAd = kaynak,
+                                    etkin = !kaydediliyor,
+                                    onSec = {
+                                        kaynak = it
+                                        if (it.isBlank()) kaynakKonumu = ""
+                                    },
+                                    onEkle = { addCatalogOption(SoruSecenekTuru.KAYNAK) },
+                                )
+                            } else {
+                                Surface(
+                                    modifier = Modifier.fillMaxWidth().testTag("soru_formu_deneme_kaynak_rozeti"),
+                                    shape = RoundedCornerShape(14.dp),
+                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.24f)),
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        Text(
+                                            text = "◈",
+                                            color = MaterialTheme.colorScheme.primary,
+                                            style = MaterialTheme.typography.labelLarge,
+                                            fontWeight = FontWeight.Bold,
+                                            fontFamily = PremiumSembolAilesi,
+                                        )
+                                        Text(
+                                            text = stringResource(R.string.question_form_deneme_source_badge, gizliKaynak),
+                                            color = MaterialTheme.colorScheme.primary,
+                                            style = MaterialTheme.typography.labelLarge,
+                                            fontWeight = FontWeight.SemiBold,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                        )
+                                    }
+                                }
+                            }
                             OutlinedTextField(
                                 value = kaynakKonumu,
                                 onValueChange = { kaynakKonumu = it },
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth().testTag("soru_formu_kaynak_konumu"),
                                 enabled = !kaydediliyor,
                                 singleLine = true,
                                 label = { Text(stringResource(R.string.question_form_source_location_label)) },
                                 shape = RoundedCornerShape(16.dp),
                             )
-                            }
                             SoruSecenegiSecici(
                                 baslik = stringResource(R.string.question_form_reason_label),
                                 secimYok = stringResource(R.string.question_form_reason_choose),

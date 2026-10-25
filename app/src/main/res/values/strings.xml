@@ -1058,4 +1058,6 @@
     <string name="teacher_zoom_reset">1x Sıfırla</string>
     <string name="teacher_zoom_hint">Çift dokun veya iki parmakla yakınlaştır</string>
     <string name="teacher_settings_workspace_summary">Çalışma alanında %1$d grup ve %2$d soru kayıtlı. Tüm veriler ve fotoğraflar ZIP yedeğine dahildir.</string>
+    <string name="topic_with_archived_suffix">%1$s (arşivli)</string>
+    <string name="question_form_deneme_source_badge">Deneme kaynağı: %1$s</string>
 </resources>

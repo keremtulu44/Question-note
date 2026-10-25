@@ -1,6 +1,8 @@
 package com.keremtulu.questionnote.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -66,6 +69,7 @@ import com.keremtulu.questionnote.ui.premium.PremiumGradyanButon
 import com.keremtulu.questionnote.ui.premium.PremiumCard
 import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 import com.keremtulu.questionnote.ui.premium.PremiumOutlinedButton
+import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import java.time.ZoneId
 import java.time.LocalDate
@@ -665,7 +669,11 @@ private fun FiltreDropdown(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Text("▾", modifier = Modifier.padding(start = 8.dp))
+                Text(
+                    text = "↓",
+                    modifier = Modifier.padding(start = 8.dp),
+                    fontFamily = PremiumSembolAilesi,
+                )
             }
             DropdownMenu(
                 expanded = acik,
@@ -694,10 +702,13 @@ private fun CalismaSoruKarti(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val bakirVurgu = if (isSystemInDarkTheme()) PremiumMarkaRenkler.BakirIsik else PremiumMarkaRenkler.Bakir
     PremiumCard(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f)),
         interactionTur = EtkilesimTuru.KART_ACILIS,
     ) {
         Column(
@@ -713,8 +724,13 @@ private fun CalismaSoruKarti(
                     text = androidx.compose.ui.res.stringResource(
                         R.string.filtered_practice_course_topic,
                         ders.ad,
-                        konu?.let { if (it.arsivli) "${it.ad} (arşivli)" else it.ad }
-                            ?: androidx.compose.ui.res.stringResource(R.string.question_filter_unassigned),
+                        konu?.let {
+                            if (it.arsivli) {
+                                androidx.compose.ui.res.stringResource(R.string.topic_with_archived_suffix, it.ad)
+                            } else {
+                                it.ad
+                            }
+                        } ?: androidx.compose.ui.res.stringResource(R.string.question_filter_unassigned),
                     ),
                     modifier = Modifier.weight(1f),
                     color = MaterialTheme.colorScheme.primary,
@@ -724,7 +740,12 @@ private fun CalismaSoruKarti(
                     overflow = TextOverflow.Ellipsis,
                 )
                 if (soru.favori) {
-                    Text("★", color = PremiumMarkaRenkler.Bakir, style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        text = "★",
+                        color = bakirVurgu,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontFamily = PremiumSembolAilesi,
+                    )
                 }
             }
             soru.soruNotu?.takeIf { it.isNotBlank() }?.let { note ->
