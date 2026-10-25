@@ -1,9 +1,18 @@
 # HANDOFF — Yanlış Defteri
 
-**Son güncelleme: 2026-10-18.** Önce bu belge, `docs/DERLEME_RAPORU.md` ve
-[P4–P6 sözleşme/kanıt kaydı](docs/P4_P5_P6_UYGULAMA.md) okunur.
+**Son güncelleme: 2026-10-25.** Önce bu belge, `docs/DERLEME_RAPORU.md`,
+`docs/PREMIUM_GORSEL_GELISTIRME.md` ve [P4–P6 sözleşme/kanıt kaydı](docs/P4_P5_P6_UYGULAMA.md) okunur.
 
-## Güncel doğrulanmış teslim: 1.5.1 sade İlerleme
+## Güncel doğrulanmış teslim: 1.5.105 Deneme & İlk Kurulum Premium Yükseltmesi
+
+- **Sürüm:** `versionName = "1.5.105"` (`versionCode = 35`), çalışma dalı `arena/9d4e7eac-question-note`.
+- **Doğrulanan test kapsamı:** Debug `332/0/0/0`, Release ortak `269/0/0/0`; `assembleRelease`, `apksigner` doğrulaması ve beklenen sertifika parmak izi eşleşmesi başarılı.
+- **Korunan şema sözleşmeleri:** Room şeması `4` ve ZIP yedek formatı `4` (`REQUIRED_CSV_FILES` değişmedi). `data.json` ve kurtarma günlüğü (`geri-yukleme.json`) içinde isteğe bağlı `"mock_exams"` alanı geriye dönük uyumlu biçimde desteklenir; geri yüklemede deneme ders kimlikleri ders adına göre uzlaştırılır.
+- **Özel ders görünürlüğü (`SinavProfili.OZEL`):** `SinavProfiliDeposu` hem `dersler` kimlik kümesini hem `ozel_ders_adlari` ad kümesini saklar; farklı cihazdan yedek geri yüklendiğinde seçili dersler ad üzerinden yeniden eşleştirilir ve ders ekranı asla tamamen boş kalmaz.
+- **Deneme–Kaynak senkronizasyonu:** Deneme oluşturma/yeniden adlandırma `SoruRepository.kaynakAdiDegistir` ile kaynak kataloğunu ve mevcut deneme sorularının `kaynak` alanını atomik günceller; `RoomSoruRepository.soruKaydet` genel katalog sayısını bozmaz.
+- **Premium arayüz ve ton:** 24 derslik katalog için tam açık/koyu renk ve tipografik sembol eşlemesi (`dersKartStiliGetir`), cam/gradyan kartlı `DenemeListesiEkrani` ve `DenemeDetayEkrani`, negatif net destekli grafikler, gruplanmış `DersKurulumEkrani`, Bugün ekranında sakin Deneme özet kartı ve destekleyici Türkçe metin dili uygulandı.
+
+## Önceki temel: 1.5.1 sade İlerleme
 
 **v1.5.1 / code19 yayımlandı.** [Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.5.1) · [APK](https://github.com/keremtulu44/Question-note/releases/download/v1.5.1/yanlis-defteri-1.5.1.apk) · [CI `39158221022`](https://github.com/keremtulu44/Question-note/actions/runs/39158221022)
 **Debug312/0/0/0 · Release258/0/0/0**; APK/imza/sertifika başarılı. Ortak testler iki varyantta tekrar eder, sayılar toplanmaz.

@@ -2,6 +2,15 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.5.105] — 2026-10-25
+
+- **Deneme ekranları (Premium tasarım):** Deneme listesi, net gidişatı çizgisi ve ders karşılaştırma çubukları cam/gradyan kartlara yükseltildi; negatif net desteği, kural filtresi, ders renk/sembol rozetleri, yüklenecek soru durumu ve doğrudan “Bu denemeyi çalış” kısayolu eklendi.
+- **Deneme detay ve doğruluk düzeltmeleri:** Tarih seçici (`DatePickerDialog`), silme onay penceresi, anlık net özeti, gizli/arşivli ders satırlarının düzenlemede korunması ve ekran döndürmede form durumunun saklanması sağlandı.
+- **Veri ve yedekleme bütünlüğü:** Deneme adı oluşturulduğunda veya değiştirildiğinde kaynak kataloğu ve bağlı sorular otomatik senkronize edilir; en eski denemede ileri tarihli denemeyle yanlış kıyaslama hatası giderildi; deneme kayıtları ZIP yedekleme/geri yükleme (`mock_exams`) akışına dahil edildi.
+- **İlk kurulum ve özel ders seçimi:** 24 derslik katalog 5 ders grubuna ayrılmış renkli/sembollü Premium kartlara dönüştürüldü; yedek geri yükleme sonrasında özel ders seçiminin (`SinavProfili.OZEL`) farklı ders kimliklerinde boş ekran bırakmaması sağlandı.
+- **Metin ve odak görünümü:** Deneme ve kurulum ekranlarındaki sert/iğneleyici metinler sakin ve destekleyici Türkçe çalışma tonuna çekildi; Odak ekranında deneme damgası varken soru konumunun (`kaynakKonumu`) gizlenmesi düzeltildi.
+- Sürüm: `versionCode 35` / `versionName 1.5.105`.
+
 ## [1.5.104] — 2026-10-25
 
 - Yeni deneme kaydından sonra fotoğraf ekleyip dönünce formun sıfırlanması düzeltildi; kaynak her zaman deneme adı.
