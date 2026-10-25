@@ -161,7 +161,7 @@ class KirpmaSorulacakVeOgretmenArayuzTest {
         try {
             val mat = runBlocking { database.dersDao().tumunuGetir().first { it.ad == "Matematik" } }
             val fiz = runBlocking { database.dersDao().tumunuGetir().first { it.ad == "Fizik" } }
-            profilDeposu.kaydet(SinavProfili.SAYISAL, setOf(mat.id, fiz.id))
+            profilDeposu.kaydet(SinavProfili.OZEL, setOf(mat.id, fiz.id))
             runBlocking {
                 val g1 = gorselDeposu.dosyadanHazirla(kaynak1, GorselTuru.SORU, 0)
                 val g2 = gorselDeposu.dosyadanHazirla(kaynak2, GorselTuru.SORU, 0)
