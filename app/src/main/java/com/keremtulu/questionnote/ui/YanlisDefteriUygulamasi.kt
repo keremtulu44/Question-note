@@ -139,6 +139,7 @@ private sealed interface UygulamaEkrani {
     data object Ayarlar : UygulamaEkrani
     data object Denemeler : UygulamaEkrani
     data class DenemeDetay(val denemeId: String?) : UygulamaEkrani
+    data object Sorulacaklar : UygulamaEkrani
 }
 
 private enum class KurtarmaDurumu { YUKLENIYOR, HAZIR, HATA }
@@ -495,9 +496,19 @@ fun YanlisDefteriUygulamasi(
                         gunlukHedefDeposu = gunlukHedefDeposu,
                         onSoruEkle = { ekran = UygulamaEkrani.DersSecimi(soruEkleModu = true) },
                         onDeneme = { ekran = UygulamaEkrani.Denemeler },
+                        onSorulacaklar = { ekran = UygulamaEkrani.Sorulacaklar },
                         denemeler = denemeler,
                         onOturumBaslat = { sorular, dersler -> oturumBaslat(sorular, dersler, bugunden = true) },
                         onDevam = bekleyenOturum?.let { onceki -> { ekran = onceki; bekleyenOturum = null } },
+                    )
+                    UygulamaEkrani.Sorulacaklar -> SorulacaklarEkrani(
+                        soruRepository = soruRepository,
+                        dersRepository = dersRepository,
+                        gorselDeposu = gorselDeposu,
+                        onGeri = { ekran = UygulamaEkrani.Bugun },
+                        onSoruDetayAc = { ders, id ->
+                            ekran = UygulamaEkrani.SoruAyrintisi(ders, id, UygulamaEkrani.Sorulacaklar)
+                        },
                     )
                     is UygulamaEkrani.DersSecimi -> DerslerEkrani(
                         repository = dersRepository,
@@ -824,8 +835,8 @@ private fun UygulamaEkrani.aktifSekme(): AltSekme = when (this) {
     -> AltSekme.FILTRELI
     UygulamaEkrani.Seviye -> AltSekme.SEVIYE
     UygulamaEkrani.Ayarlar, UygulamaEkrani.Katalog, UygulamaEkrani.GorselBakimi, UygulamaEkrani.KonuMerkezi -> AltSekme.AYARLAR
-    UygulamaEkrani.Denemeler, is UygulamaEkrani.DenemeDetay -> AltSekme.BUGUN
-    is UygulamaEkrani.SoruAyrintisi -> if (tekrarOturumunda) AltSekme.FILTRELI else AltSekme.DERSLER
+    UygulamaEkrani.Denemeler, is UygulamaEkrani.DenemeDetay, UygulamaEkrani.Sorulacaklar -> AltSekme.BUGUN
+    is UygulamaEkrani.SoruAyrintisi -> if (tekrarOturumunda) AltSekme.FILTRELI else if (geri is UygulamaEkrani.Sorulacaklar) AltSekme.BUGUN else AltSekme.DERSLER
     is UygulamaEkrani.SoruFormu -> if (geri is UygulamaEkrani.FiltreliOturum) {
         AltSekme.FILTRELI
     } else if (geri is UygulamaEkrani.DenemeDetay) {
@@ -863,6 +874,7 @@ private fun UygulamaEkrani.geriHedefi(): UygulamaEkrani = when (this) {
     UygulamaEkrani.Ayarlar -> UygulamaEkrani.Bugun
     UygulamaEkrani.Denemeler -> UygulamaEkrani.Bugun
     is UygulamaEkrani.DenemeDetay -> UygulamaEkrani.Denemeler
+    UygulamaEkrani.Sorulacaklar -> UygulamaEkrani.Bugun
 }
 
 @Composable

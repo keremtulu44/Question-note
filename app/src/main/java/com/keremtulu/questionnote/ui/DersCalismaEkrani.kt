@@ -317,6 +317,7 @@ fun DersCalismaEkrani(
 @androidx.annotation.StringRes
 private fun statusFilterLabel(status: SoruPlanDurumu): Int = when (status) {
     SoruPlanDurumu.AKTIF -> R.string.question_status_active
+    SoruPlanDurumu.OGRETMENE_SORULACAK -> R.string.question_status_ask_teacher
     SoruPlanDurumu.ASKIDA -> R.string.question_status_paused
     SoruPlanDurumu.TAMAMLANDI -> R.string.question_status_done
 }
@@ -381,6 +382,7 @@ private fun SoruListeKarti(
                         text = stringResource(
                             when (soru.planDurumu) {
                                 SoruPlanDurumu.AKTIF -> R.string.question_status_active
+                                SoruPlanDurumu.OGRETMENE_SORULACAK -> R.string.question_status_ask_teacher
                                 SoruPlanDurumu.ASKIDA -> R.string.question_status_paused
                                 SoruPlanDurumu.TAMAMLANDI -> R.string.question_status_done
                             },

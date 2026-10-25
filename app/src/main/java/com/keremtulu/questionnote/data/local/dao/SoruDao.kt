@@ -52,6 +52,18 @@ interface SoruDao {
         SELECT sorular.* FROM sorular
         INNER JOIN dersler ON dersler.id = sorular.ders_id
         WHERE dersler.arsivli = 0
+          AND sorular.plan_durumu = 'OGRETMENE_SORULACAK'
+        ORDER BY sorular.olusturma DESC, sorular.id ASC
+        """,
+    )
+    @Transaction
+    fun ogretmeneSorulacaklariIzle(): Flow<List<SoruVeGorsellerEntity>>
+
+    @Query(
+        """
+        SELECT sorular.* FROM sorular
+        INNER JOIN dersler ON dersler.id = sorular.ders_id
+        WHERE dersler.arsivli = 0
           AND sorular.plan_durumu = 'AKTIF'
           AND NOT EXISTS (SELECT 1 FROM tekrarlar t WHERE t.soru_id = sorular.id AND t.gun = :bugun)
           AND (sorular.son_tekrar_gun IS NULL OR sorular.son_tekrar_gun < :bugun)

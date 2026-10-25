@@ -109,6 +109,21 @@ class RoomSoruRepository(
                 .map { it.soru.toDomain(it.gorseller.map { g -> g.toDomain() }) }
         }
 
+    override fun ogretmeneSorulacaklariIzle(): Flow<List<Soru>> =
+        combine(
+            soruDao.ogretmeneSorulacaklariIzle(),
+            dersDao.dersleriIzle(false),
+            sinav?.secimIzle ?: flowOf(SinavSecimi.Tumu),
+        ) { qs, ds, secim ->
+            val dersler = ds.associate {
+                it.ders.id to Ders(it.ders.id, it.ders.ad, it.ders.sira, it.soruSayisi, it.ders.arsivli)
+            }
+            qs.filter { row ->
+                val ders = dersler[row.soru.dersId]
+                ders != null && !ders.arsivli && secim.gorunur(ders)
+            }.map { it.soru.toDomain(it.gorseller.map { g -> g.toDomain() }) }
+        }
+
     private fun SoruEntity.calismaSorusu() = CalismaSorusu(id, dersId, konuId, kaynak, SoruPlanDurumu.valueOf(planDurumu), sonTekrarGun, sonrakiTekrarGun)
 
     override fun tekrarGecmisiniIzle(soruId: String): Flow<List<TekrarKaydi>> =
@@ -269,8 +284,13 @@ class RoomSoruRepository(
                     planDurumu = istek.planDurumu.name,
                     ogrenmeDurumu = guncelEskiSoru?.ogrenmeDurumu ?: OgrenmeDurumu.YENI.name,
                     sonTekrarGun = guncelEskiSoru?.sonTekrarGun,
-                    sonrakiTekrarGun = guncelEskiSoru?.sonrakiTekrarGun
-                        ?: TekrarKurali.ilkTekrarGunu(bugun),
+                    sonrakiTekrarGun = when {
+                        istek.planDurumu == SoruPlanDurumu.OGRETMENE_SORULACAK ->
+                            guncelEskiSoru?.sonrakiTekrarGun
+                        guncelEskiSoru?.planDurumu == SoruPlanDurumu.OGRETMENE_SORULACAK.name ->
+                            TekrarKurali.ilkTekrarGunu(bugun)
+                        else -> guncelEskiSoru?.sonrakiTekrarGun ?: TekrarKurali.ilkTekrarGunu(bugun)
+                    },
                     olusturma = guncelEskiSoru?.olusturma ?: now,
                     guncelleme = now,
                 )
@@ -329,12 +349,105 @@ class RoomSoruRepository(
     override suspend fun planDurumunuAyarla(soruId: String, durum: SoruPlanDurumu): SoruIslemSonucu =
         database.withTransaction {
             val soru = soruDao.idIleGetir(soruId) ?: return@withTransaction SoruIslemSonucu.Bulunamadi
-            if (soruDao.guncelle(soru.copy(planDurumu = durum.name, guncelleme = System.currentTimeMillis())) == 1) {
+            val bugun = LocalDate.now(saat)
+            val sonrakiGun = if (
+                durum == SoruPlanDurumu.AKTIF &&
+                (soru.sonrakiTekrarGun == null || soru.planDurumu == SoruPlanDurumu.OGRETMENE_SORULACAK.name)
+            ) {
+                TekrarKurali.ilkTekrarGunu(bugun)
+            } else {
+                soru.sonrakiTekrarGun
+            }
+            if (
+                soruDao.guncelle(
+                    soru.copy(
+                        planDurumu = durum.name,
+                        sonrakiTekrarGun = sonrakiGun,
+                        guncelleme = saat.millis(),
+                    ),
+                ) == 1
+            ) {
                 SoruIslemSonucu.Basarili
             } else {
                 SoruIslemSonucu.Bulunamadi
             }
         }
+
+    override suspend fun ogretmeneCozduruldu(
+        soruId: String,
+        yeniCozumGorselleri: List<SoruGorselGirdisi>,
+        cozumNotuEki: String?,
+    ): SoruIslemSonucu {
+        if (yeniCozumGorselleri.size > 20 || yeniCozumGorselleri.distinctBy { it.id }.size != yeniCozumGorselleri.size) {
+            return SoruIslemSonucu.GorselGecersiz
+        }
+        for (secim in yeniCozumGorselleri) {
+            if (!secim.gecici || !gorselDosyalari.geciciDosyayiDogrula(secim)) {
+                return SoruIslemSonucu.GorselGecersiz
+            }
+        }
+        val yeniKaliciDosyalar = mutableMapOf<String, String>()
+        var kaydedildi = false
+        try {
+            for (gorsel in yeniCozumGorselleri) {
+                val kaliciAd = gorselDosyalari.kaliciyaKopyala(gorsel.dosyaAdi)
+                    ?: return SoruIslemSonucu.GorselGecersiz
+                yeniKaliciDosyalar[gorsel.id] = kaliciAd
+            }
+            val now = saat.millis()
+            val yarin = TekrarKurali.ilkTekrarGunu(LocalDate.now(saat))
+            val sonuc = database.withTransaction {
+                val soru = soruDao.idIleGetir(soruId) ?: return@withTransaction SoruIslemSonucu.Bulunamadi
+                val mevcutGorseller = gorselDao.sorununGorselleriniGetir(soruId)
+                val mevcutCozumSayisi = mevcutGorseller.count { it.tur == GorselTuru.COZUM.name }
+                if (mevcutCozumSayisi + yeniCozumGorselleri.size > 20) {
+                    return@withTransaction SoruIslemSonucu.GorselGecersiz
+                }
+                val temizEk = cozumNotuEki?.temizMetin()
+                val birlesikNot = when {
+                    temizEk == null -> soru.cozumNotu
+                    soru.cozumNotu.isNullOrBlank() -> temizEk
+                    else -> "${soru.cozumNotu}\n\n$temizEk"
+                }
+                val guncelSoru = soru.copy(
+                    planDurumu = SoruPlanDurumu.AKTIF.name,
+                    sonrakiTekrarGun = yarin,
+                    cozumNotu = birlesikNot,
+                    guncelleme = now,
+                )
+                if (soruDao.guncelle(guncelSoru) != 1) {
+                    return@withTransaction SoruIslemSonucu.Bulunamadi
+                }
+                if (yeniCozumGorselleri.isNotEmpty()) {
+                    val eklenecek = yeniCozumGorselleri.mapIndexed { idx, gorsel ->
+                        GorselEntity(
+                            id = gorsel.id,
+                            soruId = soruId,
+                            tur = GorselTuru.COZUM.name,
+                            sira = mevcutCozumSayisi + idx,
+                            dosyaAdi = requireNotNull(yeniKaliciDosyalar[gorsel.id]),
+                            mimeType = gorsel.mimeType,
+                            genislik = gorsel.genislik,
+                            yukseklik = gorsel.yukseklik,
+                            boyut = gorsel.boyut,
+                            sha256 = gorsel.sha256,
+                            olusturma = now,
+                        )
+                    }
+                    gorselDao.ekle(eklenecek)
+                }
+                SoruIslemSonucu.Basarili
+            }
+            if (sonuc != SoruIslemSonucu.Basarili) return sonuc
+            kaydedildi = true
+            yeniCozumGorselleri.forEach { runCatching { gorselDosyalari.geciciDosyayiSil(it.dosyaAdi) } }
+            return SoruIslemSonucu.Basarili
+        } finally {
+            if (!kaydedildi) {
+                yeniKaliciDosyalar.values.forEach { runCatching { gorselDosyalari.kaliciDosyayiSil(it) } }
+            }
+        }
+    }
 
     override suspend fun tekrarOnizle(deneme: TekrarDenemesi): TekrarOnizlemesi? = database.withTransaction {
         val soru = soruDao.idIleGetir(deneme.soruId) ?: return@withTransaction null

@@ -102,6 +102,7 @@ fun BugunEkrani(
     onOturumBaslat: (List<Soru>, Map<String, Ders>) -> Unit,
     onDevam: (() -> Unit)? = null,
     onDeneme: () -> Unit = {},
+    onSorulacaklar: () -> Unit = {},
     denemeler: List<com.keremtulu.questionnote.domain.model.DenemeKaydi> = emptyList(),
 ) {
     val today = com.keremtulu.questionnote.ui.bilesenler.hatirlaYerelGun()
@@ -114,6 +115,17 @@ fun BugunEkrani(
         soruRepository.bugunTekrarlanacaklariIzle(today.toEpochDay().toInt())
     }
     val lessonsFlow = remember(dersRepository) { dersRepository.aktifDersleriIzle() }
+    val sorulacaklarFlow = remember(soruRepository, lessonsFlow, yenileme) {
+        combine(soruRepository.ogretmeneSorulacaklariIzle(), lessonsFlow) { questions, lessons ->
+            val byId = lessons.associateBy { it.id }
+            questions.groupBy { it.dersId }
+                .mapNotNull { (dersId, liste) -> byId[dersId]?.let { it to liste.size } }
+                .sortedWith(compareBy<Pair<Ders, Int>> { it.first.sira }.thenBy { it.first.ad })
+        }
+    }
+    val sorulacakGruplar by produceState<List<Pair<Ders, Int>>>(emptyList(), sorulacaklarFlow) {
+        sorulacaklarFlow.catch { emit(emptyList()) }.collect { value = it }
+    }
     val homeFlow = remember(questionsFlow, lessonsFlow) {
         combine(questionsFlow, lessonsFlow) { questions, lessons ->
             val byId = lessons.associateBy { it.id }
@@ -203,6 +215,14 @@ fun BugunEkrani(
                     state = state,
                     onOturumBaslat = onOturumBaslat,
                 )
+            }
+            if (sorulacakGruplar.isNotEmpty()) {
+                item(key = "bugun_sorulacaklar") {
+                    BugunSorulacaklarKarti(
+                        gruplar = sorulacakGruplar,
+                        onClick = onSorulacaklar,
+                    )
+                }
             }
             item {
                 BugunDenemeKarti(
@@ -576,4 +596,93 @@ private fun BugunDenemeKarti(
         }
     }
 }
+
+@Composable
+private fun BugunSorulacaklarKarti(
+    gruplar: List<Pair<Ders, Int>>,
+    onClick: () -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    val toplamSoru = gruplar.sumOf { it.second }
+    val dersOzeti = remember(gruplar) {
+        gruplar.joinToString(" · ") { (ders, adet) -> "${ders.ad} ($adet)" }
+    }
+
+    PremiumCard(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth().testTag("bugun_sorulacaklar_karti"),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = colors.secondaryContainer.copy(alpha = 0.65f)),
+        border = BorderStroke(1.2.dp, PremiumMarkaRenkler.Bakir.copy(alpha = 0.45f)),
+        interactionTur = EtkilesimTuru.KART_ACILIS,
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(42.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(PremiumMarkaRenkler.Bakir.copy(alpha = 0.18f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = "?",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = PremiumMarkaRenkler.Bakir,
+                        fontWeight = FontWeight.ExtraBold,
+                    )
+                }
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
+                    Text(
+                        text = stringResource(R.string.today_ask_teacher_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = colors.onSurface,
+                    )
+                    Text(
+                        text = stringResource(R.string.today_ask_teacher_subtitle, gruplar.size, toplamSoru),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colors.onSurfaceVariant,
+                    )
+                }
+            }
+            Text(
+                text = dersOzeti,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = colors.primary,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    color = colors.primary,
+                ) {
+                    Text(
+                        text = stringResource(R.string.today_ask_teacher_action) + " →",
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = colors.onPrimary,
+                    )
+                }
+            }
+        }
+    }
+}
+
 

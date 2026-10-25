@@ -22,6 +22,14 @@ interface SoruRepository {
 
     fun bugunTekrarlanacaklariIzle(bugun: Int): Flow<List<Soru>>
 
+    fun ogretmeneSorulacaklariIzle(): Flow<List<Soru>> = kotlinx.coroutines.flow.flowOf(emptyList())
+
+    suspend fun ogretmeneCozduruldu(
+        soruId: String,
+        yeniCozumGorselleri: List<com.keremtulu.questionnote.domain.model.SoruGorselGirdisi> = emptyList(),
+        cozumNotuEki: String? = null,
+    ): SoruIslemSonucu = planDurumunuAyarla(soruId, SoruPlanDurumu.AKTIF)
+
     fun tekrarGecmisiniIzle(soruId: String): Flow<List<TekrarKaydi>>
 
     suspend fun soruGetir(soruId: String): Soru?

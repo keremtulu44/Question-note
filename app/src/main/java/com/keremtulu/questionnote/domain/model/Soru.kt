@@ -2,6 +2,7 @@ package com.keremtulu.questionnote.domain.model
 
 enum class SoruPlanDurumu {
     AKTIF,
+    OGRETMENE_SORULACAK,
     ASKIDA,
     TAMAMLANDI,
 }

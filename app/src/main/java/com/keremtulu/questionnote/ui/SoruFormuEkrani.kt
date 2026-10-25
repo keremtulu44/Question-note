@@ -58,6 +58,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -590,6 +591,81 @@ fun SoruFormuEkrani(
                                 }
                             },
                         )
+                    }
+                }
+                item {
+                    val sorulacakSecili = planDurumu == SoruPlanDurumu.OGRETMENE_SORULACAK
+                    PremiumCard(
+                        onClick = {
+                            if (!kaydediliyor) {
+                                planDurumu = if (sorulacakSecili) {
+                                    SoruPlanDurumu.AKTIF
+                                } else {
+                                    SoruPlanDurumu.OGRETMENE_SORULACAK
+                                }
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth().testTag("form_ogretmene_sorulacak_karti"),
+                        shape = RoundedCornerShape(22.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (sorulacakSecili) {
+                                MaterialTheme.colorScheme.secondaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.surface
+                            },
+                        ),
+                        border = BorderStroke(
+                            width = if (sorulacakSecili) 1.5.dp else 1.dp,
+                            color = if (sorulacakSecili) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.65f)
+                            },
+                        ),
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Surface(
+                                shape = CircleShape,
+                                color = if (sorulacakSecili) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.primaryContainer
+                                },
+                            ) {
+                                Box(Modifier.width(38.dp).height(38.dp), contentAlignment = Alignment.Center) {
+                                    Text(
+                                        text = if (sorulacakSecili) "✓" else "?",
+                                        color = if (sorulacakSecili) {
+                                            MaterialTheme.colorScheme.onPrimary
+                                        } else {
+                                            MaterialTheme.colorScheme.onPrimaryContainer
+                                        },
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                    )
+                                }
+                            }
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(4.dp),
+                            ) {
+                                Text(
+                                    stringResource(R.string.question_form_ask_teacher_title),
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                )
+                                Text(
+                                    stringResource(R.string.question_form_ask_teacher_subtitle),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
                     }
                 }
                 item {
@@ -1148,6 +1224,7 @@ private fun com.keremtulu.questionnote.domain.model.SoruGorseli.toGirdi() = Soru
 @androidx.annotation.StringRes
 private fun statusLabel(status: SoruPlanDurumu): Int = when (status) {
     SoruPlanDurumu.AKTIF -> R.string.question_status_active
+    SoruPlanDurumu.OGRETMENE_SORULACAK -> R.string.question_status_ask_teacher
     SoruPlanDurumu.ASKIDA -> R.string.question_status_paused
     SoruPlanDurumu.TAMAMLANDI -> R.string.question_status_done
 }

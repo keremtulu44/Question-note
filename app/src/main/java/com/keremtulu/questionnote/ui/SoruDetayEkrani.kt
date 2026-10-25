@@ -337,6 +337,7 @@ fun SoruDetayEkrani(
                                 text = stringResource(
                                     when (soru.planDurumu) {
                                         SoruPlanDurumu.AKTIF -> R.string.question_status_active
+                                        SoruPlanDurumu.OGRETMENE_SORULACAK -> R.string.question_status_ask_teacher
                                         SoruPlanDurumu.ASKIDA -> R.string.question_status_paused
                                         SoruPlanDurumu.TAMAMLANDI -> R.string.question_status_done
                                     },
@@ -666,6 +667,7 @@ private fun gunTarihi(day: Int): String = runCatching {
 @androidx.annotation.StringRes
 private fun statusResource(status: SoruPlanDurumu): Int = when (status) {
     SoruPlanDurumu.AKTIF -> R.string.question_status_active
+    SoruPlanDurumu.OGRETMENE_SORULACAK -> R.string.question_status_ask_teacher
     SoruPlanDurumu.ASKIDA -> R.string.question_status_paused
     SoruPlanDurumu.TAMAMLANDI -> R.string.question_status_done
 }
