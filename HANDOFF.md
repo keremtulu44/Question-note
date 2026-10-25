@@ -3,7 +3,15 @@
 **Son güncelleme: 2026-10-25.** Önce bu belge, `docs/DERLEME_RAPORU.md`,
 `docs/PREMIUM_GORSEL_GELISTIRME.md` ve [P4–P6 sözleşme/kanıt kaydı](docs/P4_P5_P6_UYGULAMA.md) okunur.
 
-## Güncel doğrulanmış teslim: 1.5.105 Deneme & İlk Kurulum Premium Yükseltmesi
+## Güncel doğrulanmış teslim: 1.5.106 Görsel Kırpma, Öğretmene Sorulacaklar & Öğretmen Modu
+
+- **Sürüm:** `versionName = "1.5.106"` (`versionCode = 36`), çalışma dalı `arena/9d4e7eac-question-note`.
+- **Görsel kırpma kararlılığı ve UX:** `SoruGorselBileseni` ve `GorselKirpmaDialog` içinde `asImageBitmap()` ile sarılan `Bitmap` örneklerinde erken `recycle()` kaldırılarak `RenderThread` çökmesi giderildi; `LocalSoruGorselDeposu.kirp` bellek-güvenli alt-örneklemeli çözme ve OOM korumasıyla güçlendirildi; `GorselSecimBolumu` bileşeninde `✂ Görseli kırp` düğmesi her görsel kartının altına ortalanmış birincil konumda sunuldu.
+- **Öğrenci — Öğretmene Sorulacaklar (`SoruPlanDurumu.OGRETMENE_SORULACAK`):** Bu durumdaki sorular `sonrakiTekrarGun = null` ile günlük tekrardan ayrı tutulur, `SorulacaklarEkrani` içinde ders ders gruplanır, `Bugün` ekranında hatırlatıcı kartla gösterilir, tam ekran yakınlaştırılabilir sunumla açılır ve `SoruRepository.ogretmeneCozduruldu` ile (çözüm fotoğrafıyla veya fotoğrafsız) ertesi gün (`bugün + 1`) aktif tekrar planına geçirilir.
+- **Rol Seçimi & Öğretmen Çalışma Alanı (`KullaniciRolu`, `OgretmenDeposu`):** İlk kurulumda `RolSecimEkrani` (`Öğrenciyim` / `Öğretmenim`) gösterilir; mevcut kurulumlu kullanıcılar geriye dönük uyumlu biçimde `OGRENCI` olarak devam eder ve `Ayarlar` ekranından modlar arasında geçiş yapabilir. Öğretmen modu (`OgretmenAnaEkrani`) XP/rütbe/tekrar motorundan bağımsızdır; grup bazlı `Çözmediklerim` / `Çözdüklerim`, zorluk filtresi, tam ekran yakınlaştırmada `Cevabı göster` gizliliği ve bağımsız çözüldü durumuyla `Başka Gruba Ekle` kopyalamasını destekler.
+- **Korunan şema ve yedekleme sözleşmeleri:** Room şeması `4` ve ZIP yedek formatı `4` (`REQUIRED_CSV_FILES` değişmedi). Kalıcı öğretmen görselleri `filesDir/ogretmen-img/<uuid>.jpg` altında referans sayımlı tutulur (öğrenci yetim görsel taramasından izoledir) ve ZIP yedeklerde `data.json -> teacher_workspace` + `manifest.json -> counts.teacher_images` + kurtarma günlüğü (`geri-yukleme.json`) ile tam atomik yedeklenir/geri yüklenir.
+
+## Önceki doğrulanmış teslim: 1.5.105 Deneme & İlk Kurulum Premium Yükseltmesi
 
 - **Sürüm:** `versionName = "1.5.105"` (`versionCode = 35`), çalışma dalı `arena/9d4e7eac-question-note`.
 - **Doğrulanan test kapsamı:** Debug `332/0/0/0`, Release ortak `269/0/0/0`; `assembleRelease`, `apksigner` doğrulaması ve beklenen sertifika parmak izi eşleşmesi başarılı.

@@ -2,6 +2,14 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.5.106] — 2026-10-25
+
+- **Görsel kırpma çökme düzeltmesi ve merkezi erişim:** Kırpma uygulandığında veya küçük önizleme güncellendiğinde `RenderThread` üzerinde geri dönüştürülmüş `Bitmap` (`Canvas: trying to use a recycled bitmap`) ve büyük fotoğraflarda bellek taşması kaynaklı çökmeler giderildi; `✂ Görseli kırp` butonu her görsel kartının altına ortalanmış ve belirgin şekilde taşındı.
+- **Öğrenci tarafı — Öğretmene Sorulacaklar:** Soru eklerken veya detay ekranında sorular `Öğretmene sorulacak` olarak işaretlenebilir; bu sorular aktif günlük tekrar planına girmeden ders ders ayrı listelenir. `Bugün` ekranında bekleyen sorular için **“Bu soruları hocana çözdürdün mü?”** hatırlatıcısı görünür; tam ekran yakınlaştırılabilir sunum ve **“Çözdürdüm”** akışıyla (isteğe bağlı çözüm fotoğrafı ekleyerek ya da fotoğrafsız) soru ertesi gün aktif tekrar planına alınır.
+- **Rol seçimi ve Öğretmen Modu (`Öğretmenim`):** İlk açılışta **Öğrenciyim / Öğretmenim** rol seçimi ve `Ayarlar` ekranından çift yönlü rol geçişi eklendi. Öğretmen modunda XP/rütbe/seri olmadan sınıf ve özel ders grupları (`6B`, `7C`, `Özel Ders` vb.), yalnızca fotoğraf zorunlu hızlı soru kaydı (isteğe bağlı zorluk, cevap ve başlık), **Çözmediklerim / Çözdüklerim** ayrımı, tam ekran yakınlaştırmalı görüntüleyicide varsayılan gizli cevap (**“Cevabı göster”**) ve grup bazında bağımsız çözüldü durumuyla **Başka Gruba Ekle** kopyalama akışı sunuldu.
+- **Yedekleme ve geri yükleme uyumu:** Öğretmen çalışma alanı (`teacher_workspace`) ve kalıcı öğretmen görselleri (`ogretmen-img/` ↔ ZIP `images/`) atomik ZIP yedekleme ve kurtarma günlüğü (`geri-yukleme.json`) kapsamına alındı.
+- Sürüm: `versionCode 36` / `versionName 1.5.106`.
+
 ## [1.5.105] — 2026-10-25
 
 - **Deneme ekranları (Premium tasarım):** Deneme listesi, net gidişatı çizgisi ve ders karşılaştırma çubukları cam/gradyan kartlara yükseltildi; negatif net desteği, kural filtresi, ders renk/sembol rozetleri, yüklenecek soru durumu ve doğrudan “Bu denemeyi çalış” kısayolu eklendi.
