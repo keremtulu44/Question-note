@@ -14,6 +14,7 @@ class SinavProfiliDeposu(context: Context) {
         SinavSecimi(
             profil = SinavProfili.anahtarla(prefs.getString("secili", null)),
             dersIdleri = prefs.getStringSet("dersler", emptySet()).orEmpty().toSet(),
+            ozelDersAdlari = prefs.getStringSet("ozel_ders_adlari", emptySet()).orEmpty().toSet(),
         ),
     )
     val secimIzle: StateFlow<SinavSecimi> = secim.asStateFlow()
@@ -22,14 +23,21 @@ class SinavProfiliDeposu(context: Context) {
     fun kurulumGerekli(): Boolean =
         !prefs.getBoolean("kurulum", false) && prefs.getString("secili", null) == null
 
-    fun kaydet(profil: SinavProfili, dersIdleri: Set<String>) {
+    fun kaydet(
+        profil: SinavProfili,
+        dersIdleri: Set<String>,
+        ozelDersAdlari: Set<String> = emptySet(),
+    ) {
+        val kopyaIdler = dersIdleri.toSet()
+        val kopyaAdlar = ozelDersAdlari.toSet()
         check(
             prefs.edit()
                 .putString("secili", profil.name)
-                .putStringSet("dersler", dersIdleri)
+                .putStringSet("dersler", kopyaIdler)
+                .putStringSet("ozel_ders_adlari", kopyaAdlar)
                 .putBoolean("kurulum", true)
                 .commit(),
         )
-        secim.value = SinavSecimi(profil, dersIdleri.toSet())
+        secim.value = SinavSecimi(profil, kopyaIdler, ozelDersAdlari = kopyaAdlar)
     }
 }

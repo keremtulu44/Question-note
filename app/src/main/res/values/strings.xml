@@ -366,13 +366,30 @@
     <string name="lesson_cografya">Coğrafya</string>
     <string name="lesson_tarih">Tarih</string>
 
+    <string name="symbol_turkce">Tr</string>
     <string name="symbol_edebiyat">Aa</string>
+    <string name="symbol_paragraf">§</string>
     <string name="symbol_matematik">∑</string>
+    <string name="symbol_geometri">Δ</string>
+    <string name="symbol_problemler">ƒ</string>
     <string name="symbol_biyoloji">β</string>
     <string name="symbol_kimya">H₂</string>
     <string name="symbol_fizik">λ</string>
+    <string name="symbol_fen">Φ</string>
     <string name="symbol_cografya">◎</string>
     <string name="symbol_tarih">M</string>
+    <string name="symbol_inkilap">TC</string>
+    <string name="symbol_felsefe">φ</string>
+    <string name="symbol_felsefe_grubu">Ψ</string>
+    <string name="symbol_din">◊</string>
+    <string name="symbol_ingilizce">EN</string>
+    <string name="symbol_almanca">DE</string>
+    <string name="symbol_fransizca">FR</string>
+    <string name="symbol_vatandaslik">Vt</string>
+    <string name="symbol_rehberlik">Rh</string>
+    <string name="symbol_muzik">Mz</string>
+    <string name="symbol_sanat">Gs</string>
+    <string name="symbol_spor">Sp</string>
     <string name="symbol_diger">•</string>
 
     <plurals name="lesson_count">

@@ -144,14 +144,14 @@ fun AyarlarEkrani(
                     Text(stringResource(R.string.settings_profile_note), style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                     tumDersler.forEach { ders ->
-                        val acik = secim.dersIdleri.isEmpty() || ders.id in secim.dersIdleri || secim.herDersiGoster
+                        val acik = secim.gorunur(ders)
                         FilterChip(
-                            selected = acik && (secim.dersIdleri.isEmpty() || ders.id in secim.dersIdleri),
+                            selected = acik,
                             onClick = {
                                 if (profilKaydediliyor || yedeklemeIslemde) return@FilterChip
                                 profilKaydediliyor = true
                                 profilHatasi = false
-                                val simdiki = if (secim.dersIdleri.isEmpty()) tumDersler.map { it.id }.toSet() else secim.dersIdleri
+                                val simdiki = tumDersler.filter(secim::gorunur).map { it.id }.toSet()
                                 val yeni = if (ders.id in simdiki) simdiki - ders.id else simdiki + ders.id
                                 scope.launch {
                                     try {

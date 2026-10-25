@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.domain.model.Ders
+import com.keremtulu.questionnote.domain.model.dersAnahtari
 import com.keremtulu.questionnote.domain.repository.DersRepository
 import com.keremtulu.questionnote.ui.bilesenler.DersKartVerisi
 import com.keremtulu.questionnote.ui.bilesenler.DersKarti
@@ -46,7 +47,6 @@ import com.keremtulu.questionnote.ui.bilesenler.premium.IskeletKart
 import com.keremtulu.questionnote.ui.bilesenler.premium.PremiumBosDurum
 import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 import com.keremtulu.questionnote.ui.tema.DersRenkleri
-import java.util.Locale
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 
@@ -56,20 +56,40 @@ private sealed interface DersSecimDurumu {
     data object Hata : DersSecimDurumu
 }
 
-private data class DersKartStili(
+internal data class DersKartStili(
     val isaret: Int,
     val acikRenk: androidx.compose.ui.graphics.Color,
     val koyuRenk: androidx.compose.ui.graphics.Color,
-)
+) {
+    fun vurgu(koyuTema: Boolean): androidx.compose.ui.graphics.Color =
+        if (koyuTema) koyuRenk else acikRenk
+}
 
 private val dersKartStilleri = mapOf(
+    "türkçe" to DersKartStili(R.string.symbol_turkce, DersRenkleri.TurkceAcik, DersRenkleri.TurkceKoyu),
     "edebiyat" to DersKartStili(R.string.symbol_edebiyat, DersRenkleri.EdebiyatAcik, DersRenkleri.EdebiyatKoyu),
+    "paragraf" to DersKartStili(R.string.symbol_paragraf, DersRenkleri.ParagrafAcik, DersRenkleri.ParagrafKoyu),
     "matematik" to DersKartStili(R.string.symbol_matematik, DersRenkleri.MatematikAcik, DersRenkleri.MatematikKoyu),
+    "geometri" to DersKartStili(R.string.symbol_geometri, DersRenkleri.GeometriAcik, DersRenkleri.GeometriKoyu),
+    "problemler" to DersKartStili(R.string.symbol_problemler, DersRenkleri.ProblemlerAcik, DersRenkleri.ProblemlerKoyu),
     "biyoloji" to DersKartStili(R.string.symbol_biyoloji, DersRenkleri.BiyolojiAcik, DersRenkleri.BiyolojiKoyu),
     "kimya" to DersKartStili(R.string.symbol_kimya, DersRenkleri.KimyaAcik, DersRenkleri.KimyaKoyu),
     "fizik" to DersKartStili(R.string.symbol_fizik, DersRenkleri.FizikAcik, DersRenkleri.FizikKoyu),
+    "fen bilimleri" to DersKartStili(R.string.symbol_fen, DersRenkleri.FenAcik, DersRenkleri.FenKoyu),
     "coğrafya" to DersKartStili(R.string.symbol_cografya, DersRenkleri.CografyaAcik, DersRenkleri.CografyaKoyu),
     "tarih" to DersKartStili(R.string.symbol_tarih, DersRenkleri.TarihAcik, DersRenkleri.TarihKoyu),
+    "t.c. inkılap tarihi ve atatürkçülük" to DersKartStili(R.string.symbol_inkilap, DersRenkleri.InkilapAcik, DersRenkleri.InkilapKoyu),
+    "felsefe" to DersKartStili(R.string.symbol_felsefe, DersRenkleri.FelsefeAcik, DersRenkleri.FelsefeKoyu),
+    "felsefe grubu" to DersKartStili(R.string.symbol_felsefe_grubu, DersRenkleri.FelsefeAcik, DersRenkleri.FelsefeKoyu),
+    "din kültürü ve ahlak bilgisi" to DersKartStili(R.string.symbol_din, DersRenkleri.DinAcik, DersRenkleri.DinKoyu),
+    "ingilizce" to DersKartStili(R.string.symbol_ingilizce, DersRenkleri.DilAcik, DersRenkleri.DilKoyu),
+    "almanca" to DersKartStili(R.string.symbol_almanca, DersRenkleri.DilAcik, DersRenkleri.DilKoyu),
+    "fransızca" to DersKartStili(R.string.symbol_fransizca, DersRenkleri.DilAcik, DersRenkleri.DilKoyu),
+    "vatandaşlık" to DersKartStili(R.string.symbol_vatandaslik, DersRenkleri.TarihAcik, DersRenkleri.TarihKoyu),
+    "rehberlik" to DersKartStili(R.string.symbol_rehberlik, DersRenkleri.GenelAcik, DersRenkleri.GenelKoyu),
+    "müzik" to DersKartStili(R.string.symbol_muzik, DersRenkleri.SanatSporAcik, DersRenkleri.SanatSporKoyu),
+    "görsel sanatlar" to DersKartStili(R.string.symbol_sanat, DersRenkleri.SanatSporAcik, DersRenkleri.SanatSporKoyu),
+    "beden eğitimi" to DersKartStili(R.string.symbol_spor, DersRenkleri.SanatSporAcik, DersRenkleri.SanatSporKoyu),
 )
 
 private val varsayilanDersKartStili = DersKartStili(
@@ -77,6 +97,9 @@ private val varsayilanDersKartStili = DersKartStili(
     DersRenkleri.GenelAcik,
     DersRenkleri.GenelKoyu,
 )
+
+internal fun dersKartStiliGetir(dersAdi: String): DersKartStili =
+    dersKartStilleri[dersAdi.dersAnahtari()] ?: varsayilanDersKartStili
 
 @Composable
 fun DerslerEkrani(
@@ -194,8 +217,7 @@ fun DerslerEkrani(
                             verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
                             itemsIndexed(current.dersler, key = { _, ders -> ders.id }) { index, ders ->
-                                val style = dersKartStilleri[ders.ad.trim().lowercase(Locale.ROOT)]
-                                    ?: varsayilanDersKartStili
+                                val style = dersKartStiliGetir(ders.ad)
                                 val enter = animateItemInsertion(index)
                                 DersKarti(
                                     veri = DersKartVerisi(
