@@ -34,6 +34,7 @@ data class KameraCekimi(
 class LocalSoruGorselDeposu(context: Context) : GorselDosyaYonetimi {
     private val appContext = context.applicationContext
     private val kaliciDizin = File(appContext.filesDir, KALICI_DIZIN).apply { mkdirs() }
+    private val ogretmenKaliciDizin = File(appContext.filesDir, OGRETMEN_KALICI_DIZIN).apply { mkdirs() }
     private val geciciDizin = File(appContext.cacheDir, GECICI_DIZIN).apply { mkdirs() }
     private val kameraDizin = File(appContext.cacheDir, KAMERA_DIZIN).apply { mkdirs() }
 
@@ -108,7 +109,7 @@ class LocalSoruGorselDeposu(context: Context) : GorselDosyaYonetimi {
         require(oranlar.all { it.isFinite() } && sol >= 0f && ust >= 0f && sag <= 1f && alt <= 1f && sag > sol && alt > ust) {
             "Kırpma alanı görsel sınırlarının dışında."
         }
-        val source = (if (gorsel.gecici) geciciDosyasi(gorsel.dosyaAdi) else kaliciDosyasi(gorsel.dosyaAdi))
+        val source = (if (gorsel.gecici) geciciDosyasi(gorsel.dosyaAdi) else tumKaliciDosyasi(gorsel.dosyaAdi))
             ?: throw IOException("Kırpılacak görsel bulunamadı.")
         if (gorsel.genislik <= 0 || gorsel.yukseklik <= 0 || !source.isFile || gorsel.mimeType != MIME_JPEG ||
             !boyutlarEslesiyor(source, gorsel.genislik, gorsel.yukseklik)
@@ -133,17 +134,43 @@ class LocalSoruGorselDeposu(context: Context) : GorselDosyaYonetimi {
                 val regionDecoder = BitmapRegionDecoder.newInstance(source.absolutePath, false)
                     ?: throw IOException("Görsel kırpma için açılamadı.")
                 decoder = regionDecoder
-                regionDecoder.decodeRegion(
-                    Rect(left, top, right, bottom),
-                    BitmapFactory.Options().apply { inPreferredConfig = Bitmap.Config.ARGB_8888 },
-                ) ?: throw IOException("Seçilen kırpma alanı okunamadı.")
-            } catch (_: Exception) {
-                val full = BitmapFactory.decodeFile(source.absolutePath)
-                    ?: throw IOException("Görsel kırpma için açılamadı.")
                 try {
-                    Bitmap.createBitmap(full, left, top, right - left, bottom - top)
+                    regionDecoder.decodeRegion(
+                        Rect(left, top, right, bottom),
+                        BitmapFactory.Options().apply { inPreferredConfig = Bitmap.Config.ARGB_8888 },
+                    )
+                } catch (_: OutOfMemoryError) {
+                    regionDecoder.decodeRegion(
+                        Rect(left, top, right, bottom),
+                        BitmapFactory.Options().apply { inPreferredConfig = Bitmap.Config.RGB_565 },
+                    )
+                } ?: throw IOException("Seçilen kırpma alanı okunamadı.")
+            } catch (_: Throwable) {
+                var sample = 1
+                val full = try {
+                    BitmapFactory.decodeFile(
+                        source.absolutePath,
+                        BitmapFactory.Options().apply { inPreferredConfig = Bitmap.Config.ARGB_8888 },
+                    )
+                } catch (_: OutOfMemoryError) {
+                    sample = 2
+                    BitmapFactory.decodeFile(
+                        source.absolutePath,
+                        BitmapFactory.Options().apply {
+                            inSampleSize = sample
+                            inPreferredConfig = Bitmap.Config.RGB_565
+                        },
+                    )
+                } ?: throw IOException("Görsel kırpma için açılamadı.")
+                var created: Bitmap? = null
+                try {
+                    val sLeft = (left / sample).coerceIn(0, (full.width - 1).coerceAtLeast(0))
+                    val sTop = (top / sample).coerceIn(0, (full.height - 1).coerceAtLeast(0))
+                    val sRight = (right / sample).coerceIn(sLeft + 1, full.width.coerceAtLeast(1))
+                    val sBottom = (bottom / sample).coerceIn(sTop + 1, full.height.coerceAtLeast(1))
+                    Bitmap.createBitmap(full, sLeft, sTop, sRight - sLeft, sBottom - sTop).also { created = it }
                 } finally {
-                    if (!full.isRecycled) full.recycle()
+                    if (created !== full && !full.isRecycled) full.recycle()
                 }
             }
             cropped = cropBitmap
@@ -164,9 +191,12 @@ class LocalSoruGorselDeposu(context: Context) : GorselDosyaYonetimi {
         } catch (error: Exception) {
             staged.delete()
             throw error
+        } catch (error: Throwable) {
+            staged.delete()
+            throw IOException("Görsel kırpılırken beklenmeyen hata oluştu.", error)
         } finally {
-            cropped?.recycle()
-            decoder?.recycle()
+            cropped?.takeIf { !it.isRecycled }?.recycle()
+            runCatching { decoder?.recycle() }
         }
     }
 
@@ -208,12 +238,12 @@ class LocalSoruGorselDeposu(context: Context) : GorselDosyaYonetimi {
     }
 
     fun dosyaGoruntuIcin(gorsel: SoruGorselGirdisi): File? {
-        val file = (if (gorsel.gecici) geciciDosyasi(gorsel.dosyaAdi) else kaliciDosyasi(gorsel.dosyaAdi))
+        val file = (if (gorsel.gecici) geciciDosyasi(gorsel.dosyaAdi) else tumKaliciDosyasi(gorsel.dosyaAdi))
             ?: return null
         return file.takeIf { it.isFile }
     }
 
-    fun dosyaGoruntuIcin(dosyaAdi: String): File? = kaliciDosyasi(dosyaAdi)?.takeIf { it.isFile }
+    fun dosyaGoruntuIcin(dosyaAdi: String): File? = tumKaliciDosyasi(dosyaAdi)?.takeIf { it.isFile }
 
     override suspend fun geciciDosyayiDogrula(gorsel: SoruGorselGirdisi): Boolean = withContext(Dispatchers.IO) {
         val file = geciciDosyasi(gorsel.dosyaAdi) ?: return@withContext false
@@ -281,6 +311,71 @@ class LocalSoruGorselDeposu(context: Context) : GorselDosyaYonetimi {
             pending.delete()
             null
         }
+    }
+
+    suspend fun ogretmenKaliciyaKopyala(geciciDosyaAdi: String): String? = withContext(Dispatchers.IO) {
+        val source = geciciDosyasi(geciciDosyaAdi) ?: return@withContext null
+        if (!source.isFile) return@withContext null
+        val id = runCatching { UUID.fromString(geciciDosyaAdi.removeSuffix(".jpg")) }.getOrNull()
+            ?: return@withContext null
+        val name = "$OGRETMEN_KALICI_DIZIN/$id.jpg"
+        val destination = ogretmenKaliciDosyasi(name) ?: return@withContext null
+        if (destination.exists()) return@withContext null
+        ogretmenKaliciDizin.mkdirs()
+        val pending = File(ogretmenKaliciDizin, "$id.pending")
+        try {
+            Files.copy(source.toPath(), pending.toPath())
+            Files.move(pending.toPath(), destination.toPath(), ATOMIC_MOVE)
+            name
+        } catch (_: Exception) {
+            pending.delete()
+            null
+        }
+    }
+
+    suspend fun ogretmenKaliciDosyayiDogrula(gorsel: SoruGorselGirdisi): Boolean = withContext(Dispatchers.IO) {
+        val file = ogretmenKaliciDosyasi(gorsel.dosyaAdi) ?: return@withContext false
+        file.isFile && gorsel.mimeType == MIME_JPEG && file.length() == gorsel.boyut &&
+            sha256(file) == gorsel.sha256 && boyutlarEslesiyor(file, gorsel.genislik, gorsel.yukseklik)
+    }
+
+    suspend fun ogretmenKaliciDosyayiSil(dosyaAdi: String): Boolean = withContext(Dispatchers.IO) {
+        val file = ogretmenKaliciDosyasi(dosyaAdi) ?: return@withContext false
+        !file.exists() || file.delete()
+    }
+
+    suspend fun ogretmenYedektenKaliciyaKopyala(
+        source: File,
+        beklenen: SoruGorselGirdisi,
+        hedefDosyaAdi: String? = null,
+    ): String? = withContext(Dispatchers.IO) {
+        if (
+            !source.isFile ||
+            source.length() != beklenen.boyut ||
+            beklenen.mimeType != MIME_JPEG ||
+            sha256(source) != beklenen.sha256 ||
+            !boyutlarEslesiyor(source, beklenen.genislik, beklenen.yukseklik)
+        ) return@withContext null
+        val id = UUID.randomUUID()
+        val name = hedefDosyaAdi ?: "$OGRETMEN_KALICI_DIZIN/$id.jpg"
+        val destination = ogretmenKaliciDosyasi(name) ?: return@withContext null
+        if (destination.exists()) return@withContext null
+        ogretmenKaliciDizin.mkdirs()
+        val pending = File(ogretmenKaliciDizin, "${UUID.randomUUID()}.pending")
+        try {
+            Files.copy(source.toPath(), pending.toPath())
+            Files.move(pending.toPath(), destination.toPath(), ATOMIC_MOVE)
+            name
+        } catch (_: Exception) {
+            pending.delete()
+            null
+        }
+    }
+
+    suspend fun ogretmenKaliciDosyalariListele(): List<String> = withContext(Dispatchers.IO) {
+        ogretmenKaliciDizin.listFiles().orEmpty()
+            .filter { it.isFile && it.name.matches(Regex("[0-9a-fA-F-]{36}\\.jpg")) }
+            .map { "$OGRETMEN_KALICI_DIZIN/${it.name}" }
     }
 
     suspend fun kaliciDosyalariListele(): List<KaliciGorselDosyasi> = withContext(Dispatchers.IO) {
@@ -483,6 +578,13 @@ class LocalSoruGorselDeposu(context: Context) : GorselDosyaYonetimi {
         relativeName.takeIf { it.matches(Regex("img/[0-9a-fA-F-]{36}\\.jpg")) }
             ?.let { File(kaliciDizin.parentFile, it) }
 
+    private fun ogretmenKaliciDosyasi(relativeName: String): File? =
+        relativeName.takeIf { it.matches(Regex("ogretmen-img/[0-9a-fA-F-]{36}\\.jpg")) }
+            ?.let { File(ogretmenKaliciDizin.parentFile, it) }
+
+    private fun tumKaliciDosyasi(relativeName: String): File? =
+        kaliciDosyasi(relativeName) ?: ogretmenKaliciDosyasi(relativeName)
+
     private fun kameraDosyasi(id: String): File {
         val uuid = UUID.fromString(id)
         return File(kameraDizin, "$uuid.jpg")
@@ -497,6 +599,7 @@ class LocalSoruGorselDeposu(context: Context) : GorselDosyaYonetimi {
 
     companion object {
         private const val KALICI_DIZIN = "img"
+        private const val OGRETMEN_KALICI_DIZIN = "ogretmen-img"
         private const val GECICI_DIZIN = "yanlis-defteri/staging"
         private const val KAMERA_DIZIN = "yanlis-defteri/camera"
         private const val MAX_GIRDI_BOYUTU = 100L * 1024L * 1024L

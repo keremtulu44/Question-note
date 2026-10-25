@@ -949,4 +949,6 @@
     <string name="progress_sample_details">Süre ve örneklem ayrıntıları</string>
     <string name="progress_details_open">Açık</string>
     <string name="progress_details_closed">Kapalı</string>
+    <string name="question_form_crop_center_hint">Sorunun kenar boşluklarını temizlemek için kırpabilirsin.</string>
+    <string name="question_form_zoom_image">Tam ekran incele</string>
 </resources>

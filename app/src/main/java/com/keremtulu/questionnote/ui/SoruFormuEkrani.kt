@@ -309,13 +309,13 @@ fun SoruFormuEkrani(
                 val updated = images.toMutableList().apply { this[index] = cropped.copy(sira = index) }
                 if (target.tur == GorselTuru.SORU) soruGorselleri = updated else cozumGorselleri = updated
                 replaced = true
+                kirpmaHedefi = null
                 if (target.gecici && cropped.id != target.id) {
                     runCatching { gorselDeposu.geciciDosyayiSil(target.dosyaAdi) }
                 }
-                kirpmaHedefi = null
             } catch (cancel: CancellationException) {
                 throw cancel
-            } catch (_: Exception) {
+            } catch (_: Throwable) {
                 snackbarHostState.showSnackbar(context.getString(R.string.question_form_crop_error))
             } finally {
                 if (!replaced) {
@@ -1120,164 +1120,17 @@ private fun ImageSection(
     onCrop: (SoruGorselGirdisi) -> Unit,
     onImagesChanged: (List<SoruGorselGirdisi>) -> Unit,
 ) {
-    val scope = rememberCoroutineScope()
-    val cropImageDescription = stringResource(R.string.question_form_crop_image)
-    val removeImageDescription = stringResource(R.string.question_form_remove_image)
-    val moveUpDescription = stringResource(R.string.question_form_image_order_up)
-    val moveDownDescription = stringResource(R.string.question_form_image_order_down)
-
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        title?.let { Text(it, style = MaterialTheme.typography.labelLarge) }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            PremiumButton(
-                onClick = onCamera,
-                enabled = enabled,
-                modifier = Modifier.weight(1f).heightIn(min = 50.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                ),
-                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 10.dp),
-            ) {
-                Text(
-                    stringResource(R.string.question_form_take_photo),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            PremiumOutlinedButton(
-                onClick = onPicker,
-                enabled = enabled,
-                modifier = Modifier.weight(1f).heightIn(min = 50.dp),
-                shape = RoundedCornerShape(16.dp),
-                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 10.dp),
-            ) {
-                Text(
-                    stringResource(R.string.question_form_pick_photos),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-        }
-        if (images.isEmpty()) {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(18.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.48f),
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(14.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Surface(shape = CircleShape, color = MaterialTheme.colorScheme.primaryContainer) {
-                        Box(Modifier.width(42.dp).height(42.dp), contentAlignment = Alignment.Center) {
-                            Text(
-                                "+",
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                style = MaterialTheme.typography.headlineSmall,
-                            )
-                        }
-                    }
-                    Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                        Text(
-                            stringResource(R.string.question_form_no_photos),
-                            style = MaterialTheme.typography.labelLarge,
-                        )
-                        Text(
-                            stringResource(R.string.question_form_photo_empty_hint),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                }
-            }
-        } else {
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                items(images, key = { it.id }) { image ->
-                    val file = imageStore.dosyaGoruntuIcin(image)
-                    PremiumCard(
-                        modifier = Modifier.width(220.dp),
-                        shape = RoundedCornerShape(20.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.65f)),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth().padding(8.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            SoruGorselResmi(
-                                file = file,
-                                contentDescription = stringResource(R.string.question_image_description),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(148.dp)
-                                    .clip(RoundedCornerShape(14.dp)),
-                                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
-                                maxDecodeEdge = 480,
-                            )
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceEvenly,
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                IconButton(
-                                    enabled = enabled,
-                                    onClick = { onCrop(image) },
-                                    modifier = Modifier.semantics { contentDescription = cropImageDescription },
-                                ) {
-                                    Text("✂", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleMedium, fontFamily = PremiumSembolAilesi)
-                                }
-                                IconButton(
-                                    enabled = enabled && image.sira > 0,
-                                    onClick = {
-                                        val index = images.indexOfFirst { it.id == image.id }
-                                        if (index > 0) onImagesChanged(images.swapped(index, index - 1))
-                                    },
-                                    modifier = Modifier.semantics { contentDescription = moveUpDescription },
-                                ) {
-                                    Text("↑", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleMedium)
-                                }
-                                IconButton(
-                                    enabled = enabled && image.sira < images.lastIndex,
-                                    onClick = {
-                                        val index = images.indexOfFirst { it.id == image.id }
-                                        if (index in 0 until images.lastIndex) onImagesChanged(images.swapped(index, index + 1))
-                                    },
-                                    modifier = Modifier.semantics { contentDescription = moveDownDescription },
-                                ) {
-                                    Text("↓", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleMedium)
-                                }
-                                IconButton(
-                                    enabled = enabled,
-                                    onClick = {
-                                        if (image.gecici) scope.launch { imageStore.geciciDosyayiSil(image.dosyaAdi) }
-                                        onImagesChanged(
-                                            images.filterNot { it.id == image.id }
-                                                .mapIndexed { order, item -> item.copy(sira = order) },
-                                        )
-                                    },
-                                    modifier = Modifier.semantics { contentDescription = removeImageDescription },
-                                ) {
-                                    Text("×", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.titleLarge)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+    com.keremtulu.questionnote.ui.bilesenler.GorselSecimBolumu(
+        images = images,
+        imageStore = imageStore,
+        enabled = enabled,
+        onCamera = onCamera,
+        onPicker = onPicker,
+        onCrop = onCrop,
+        onImagesChanged = onImagesChanged,
+        title = title,
+    )
 }
-
-private fun List<SoruGorselGirdisi>.swapped(first: Int, second: Int): List<SoruGorselGirdisi> =
-    toMutableList().also { items ->
-        val current = items[first]
-        items[first] = items[second]
-        items[second] = current
-    }.mapIndexed { index, item -> item.copy(sira = index) }
 
 private fun com.keremtulu.questionnote.domain.model.SoruGorseli.toGirdi() = SoruGorselGirdisi(
     id = id,

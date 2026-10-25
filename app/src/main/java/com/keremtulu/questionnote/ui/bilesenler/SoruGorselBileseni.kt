@@ -61,23 +61,39 @@ fun SoruGorselResmi(
     cerceve: Boolean = true,
 ) {
     val durumBildir by rememberUpdatedState(onDurum)
-    var yukleniyor by remember(file?.absolutePath, maxDecodeEdge) { mutableStateOf(true) }
-    val bitmapState = produceState<Bitmap?>(initialValue = null, file?.absolutePath, maxDecodeEdge) {
+    var yukleniyor by remember(file?.absolutePath, file?.length(), file?.lastModified(), maxDecodeEdge) {
+        mutableStateOf(true)
+    }
+    val bitmapState = produceState<Bitmap?>(
+        initialValue = null,
+        file?.absolutePath,
+        file?.length(),
+        file?.lastModified(),
+        maxDecodeEdge,
+    ) {
         yukleniyor = true
         value = if (file == null) null else withContext(Dispatchers.IO) {
-            runCatching { cozumle(file, maxDecodeEdge) }.getOrNull()
+            cozumleGuvenli(file, maxDecodeEdge)
         }
         yukleniyor = false
     }
     val bitmap = bitmapState.value
-    LaunchedEffect(bitmap, yukleniyor) {
-        durumBildir?.invoke(if (yukleniyor) GorselHazirligi.YUKLENIYOR else if (bitmap != null) GorselHazirligi.HAZIR else GorselHazirligi.HATA)
+    val imageBitmap = remember(bitmap) {
+        if (bitmap != null && !bitmap.isRecycled && bitmap.width > 0 && bitmap.height > 0) {
+            runCatching { bitmap.asImageBitmap() }.getOrNull()
+        } else {
+            null
+        }
+    }
+    LaunchedEffect(imageBitmap, yukleniyor) {
+        durumBildir?.invoke(
+            if (yukleniyor) GorselHazirligi.YUKLENIYOR
+            else if (imageBitmap != null) GorselHazirligi.HAZIR
+            else GorselHazirligi.HATA,
+        )
     }
     DisposableEffect(file?.absolutePath) { onDispose { durumBildir?.invoke(null) } }
-    DisposableEffect(bitmap) {
-        onDispose { bitmap?.recycle() }
-    }
-    if (bitmap == null) {
+    if (imageBitmap == null) {
         // A quiet breathing placeholder while decoding; the status text stays for TalkBack/tests.
         val shimmer = rememberShimmer()
         val parilti = if (yukleniyor) {
@@ -114,7 +130,7 @@ fun SoruGorselResmi(
         }
         Box(modifier = modifier.then(cerceveModu)) {
             Image(
-                bitmap = bitmap.asImageBitmap(),
+                bitmap = imageBitmap,
                 contentDescription = contentDescription,
                 modifier = Modifier.matchParentSize().then(clickModifier),
                 contentScale = contentScale,
@@ -172,18 +188,40 @@ fun SoruGorselTamEkran(
     }
 }
 
-private fun cozumle(file: File, maxEdge: Int): Bitmap? {
+private fun cozumleGuvenli(file: File, maxEdge: Int): Bitmap? {
+    if (!file.isFile) return null
+    val guvenliHedef = maxEdge.coerceIn(64, 3_000)
     val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-    BitmapFactory.decodeFile(file.absolutePath, bounds)
+    try {
+        BitmapFactory.decodeFile(file.absolutePath, bounds)
+    } catch (_: Throwable) {
+        return null
+    }
     if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
     var sample = 1
     // Hedef kenarı aşmayacak şekilde küçült; eski eşik hedefin 2 katına kadar izin veriyordu.
-    while (maxOf(bounds.outWidth, bounds.outHeight) / sample > maxEdge) sample *= 2
-    return BitmapFactory.decodeFile(
-        file.absolutePath,
-        BitmapFactory.Options().apply {
-            inSampleSize = sample
-            inPreferredConfig = Bitmap.Config.ARGB_8888
-        },
-    )
+    while (maxOf(bounds.outWidth, bounds.outHeight) / sample > guvenliHedef) sample *= 2
+    try {
+        return BitmapFactory.decodeFile(
+            file.absolutePath,
+            BitmapFactory.Options().apply {
+                inSampleSize = sample
+                inPreferredConfig = Bitmap.Config.ARGB_8888
+            },
+        )
+    } catch (_: OutOfMemoryError) {
+        return try {
+            BitmapFactory.decodeFile(
+                file.absolutePath,
+                BitmapFactory.Options().apply {
+                    inSampleSize = (sample * 2).coerceAtLeast(2)
+                    inPreferredConfig = Bitmap.Config.RGB_565
+                },
+            )
+        } catch (_: Throwable) {
+            null
+        }
+    } catch (_: Throwable) {
+        return null
+    }
 }
