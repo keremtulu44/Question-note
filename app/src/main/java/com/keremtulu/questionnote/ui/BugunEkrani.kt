@@ -1,13 +1,17 @@
 package com.keremtulu.questionnote.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -38,6 +42,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -57,6 +62,7 @@ import com.keremtulu.questionnote.ui.premium.PremiumExtendedFloatingActionButton
 import com.keremtulu.questionnote.ui.premium.PremiumGradyanButon
 import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 import com.keremtulu.questionnote.ui.premium.PremiumOutlinedButton
+import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import com.keremtulu.questionnote.data.ilerleme.IlerlemeHizmeti
 import com.keremtulu.questionnote.data.prefs.GunlukHedefDeposu
@@ -99,6 +105,8 @@ fun BugunEkrani(
     onOturumBaslat: (List<Soru>, Map<String, Ders>) -> Unit,
     onDevam: (() -> Unit)? = null,
     onDeneme: () -> Unit = {},
+    onSorulacaklar: () -> Unit = {},
+    denemeler: List<com.keremtulu.questionnote.domain.model.DenemeKaydi> = emptyList(),
 ) {
     val today = com.keremtulu.questionnote.ui.bilesenler.hatirlaYerelGun()
     val dateText = remember(today) {
@@ -110,6 +118,17 @@ fun BugunEkrani(
         soruRepository.bugunTekrarlanacaklariIzle(today.toEpochDay().toInt())
     }
     val lessonsFlow = remember(dersRepository) { dersRepository.aktifDersleriIzle() }
+    val sorulacaklarFlow = remember(soruRepository, lessonsFlow, yenileme) {
+        combine(soruRepository.ogretmeneSorulacaklariIzle(), lessonsFlow) { questions, lessons ->
+            val byId = lessons.associateBy { it.id }
+            questions.groupBy { it.dersId }
+                .mapNotNull { (dersId, liste) -> byId[dersId]?.let { it to liste.size } }
+                .sortedWith(compareBy<Pair<Ders, Int>> { it.first.sira }.thenBy { it.first.ad })
+        }
+    }
+    val sorulacakGruplar by produceState<List<Pair<Ders, Int>>>(emptyList(), sorulacaklarFlow) {
+        sorulacaklarFlow.catch { emit(emptyList()) }.collect { value = it }
+    }
     val homeFlow = remember(questionsFlow, lessonsFlow) {
         combine(questionsFlow, lessonsFlow) { questions, lessons ->
             val byId = lessons.associateBy { it.id }
@@ -155,7 +174,7 @@ fun BugunEkrani(
         },
     ) { insets ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(insets),
+            modifier = Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets),
             contentPadding = PaddingValues(start = 20.dp, top = 10.dp, end = 20.dp, bottom = 104.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
@@ -184,11 +203,6 @@ fun BugunEkrani(
                     }
                 }
             }
-            item {
-                PremiumOutlinedButton(onClick = onDeneme, modifier = Modifier.fillMaxWidth()) {
-                    Text(stringResource(R.string.deneme_open))
-                }
-            }
             if (onDevam != null) item {
                 PremiumOutlinedButton(onClick = onDevam, modifier = Modifier.fillMaxWidth()) {
                     Text(stringResource(R.string.focus_continue_session))
@@ -203,6 +217,20 @@ fun BugunEkrani(
                     seri = seri,
                     state = state,
                     onOturumBaslat = onOturumBaslat,
+                )
+            }
+            if (sorulacakGruplar.isNotEmpty()) {
+                item(key = "bugun_sorulacaklar") {
+                    BugunSorulacaklarKarti(
+                        gruplar = sorulacakGruplar,
+                        onClick = onSorulacaklar,
+                    )
+                }
+            }
+            item {
+                BugunDenemeKarti(
+                    denemeler = denemeler,
+                    onClick = onDeneme,
                 )
             }
             when (val current = state) {
@@ -444,7 +472,9 @@ private fun GunSoruSatiri(
                 fontWeight = FontWeight.SemiBold,
             )
             Text(
-                text = stringResource(R.string.question_photo_only),
+                text = row.soru.soruNotu?.trim()?.takeIf { it.isNotEmpty() }
+                    ?: row.soru.kaynak?.trim()?.takeIf { it.isNotEmpty() }
+                    ?: stringResource(R.string.question_photo_only),
                 color = colors.onPrimaryContainer,
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = 2,
@@ -455,12 +485,17 @@ private fun GunSoruSatiri(
                     text = stringResource(R.string.today_photo_count, row.soru.gorseller.count { it.tur == GorselTuru.SORU }),
                     color = colors.onPrimaryContainer.copy(alpha = 0.72f),
                     style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
                 Text("·", color = colors.onPrimaryContainer.copy(alpha = 0.72f))
                 Text(
                     text = stringResource(R.string.today_tap_to_review),
+                    modifier = Modifier.weight(1f, fill = false),
                     color = colors.onPrimaryContainer.copy(alpha = 0.72f),
                     style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }
@@ -496,3 +531,171 @@ private fun DurumKarti(
         }
     }
 }
+
+@Composable
+private fun BugunDenemeKarti(
+    denemeler: List<com.keremtulu.questionnote.domain.model.DenemeKaydi>,
+    onClick: () -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    val sonDeneme = denemeler.firstOrNull()
+    val altMetin = if (sonDeneme == null) {
+        stringResource(R.string.today_deneme_subtitle_empty)
+    } else {
+        stringResource(
+            R.string.today_deneme_subtitle_summary,
+            denemeler.size,
+            sonDeneme.ad,
+            com.keremtulu.questionnote.ui.deneme.netYazi(sonDeneme.toplamNet()),
+        )
+    }
+
+    PremiumCard(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("today-deneme-card"),
+        colors = CardDefaults.cardColors(containerColor = colors.surface),
+        border = BorderStroke(1.dp, colors.outlineVariant.copy(alpha = 0.55f)),
+        interactionTur = EtkilesimTuru.KART_ACILIS,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            val bakirVurgu = if (isSystemInDarkTheme()) PremiumMarkaRenkler.BakirIsik else PremiumMarkaRenkler.Bakir
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(bakirVurgu.copy(alpha = 0.16f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = "◈",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = bakirVurgu,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = PremiumSembolAilesi,
+                )
+            }
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.deneme_open),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    text = altMetin,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            Text(
+                text = "→",
+                style = MaterialTheme.typography.titleMedium,
+                color = colors.primary,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+    }
+}
+
+@Composable
+private fun BugunSorulacaklarKarti(
+    gruplar: List<Pair<Ders, Int>>,
+    onClick: () -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    val bakirVurgu = if (isSystemInDarkTheme()) PremiumMarkaRenkler.BakirIsik else PremiumMarkaRenkler.Bakir
+    val toplamSoru = gruplar.sumOf { it.second }
+    val dersOzeti = remember(gruplar) {
+        gruplar.joinToString(" · ") { (ders, adet) -> "${ders.ad} ($adet)" }
+    }
+
+    PremiumCard(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth().testTag("bugun_sorulacaklar_karti"),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = colors.secondaryContainer.copy(alpha = 0.65f)),
+        border = BorderStroke(1.2.dp, bakirVurgu.copy(alpha = 0.45f)),
+        interactionTur = EtkilesimTuru.KART_ACILIS,
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(42.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(bakirVurgu.copy(alpha = 0.18f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = "?",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = bakirVurgu,
+                        fontWeight = FontWeight.ExtraBold,
+                    )
+                }
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
+                    Text(
+                        text = stringResource(R.string.today_ask_teacher_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = colors.onSurface,
+                    )
+                    Text(
+                        text = stringResource(R.string.today_ask_teacher_subtitle, gruplar.size, toplamSoru),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colors.onSurfaceVariant,
+                    )
+                }
+            }
+            Text(
+                text = dersOzeti,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = colors.primary,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    color = colors.primary,
+                ) {
+                    Text(
+                        text = stringResource(R.string.today_ask_teacher_action) + " →",
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = colors.onPrimary,
+                    )
+                }
+            }
+        }
+    }
+}
+
+

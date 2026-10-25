@@ -7,9 +7,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -53,14 +53,14 @@ internal fun DersKarti(
 
     PremiumCard(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth().height(140.dp),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = renkler.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp, pressedElevation = 7.dp),
         border = BorderStroke(1.dp, vurguRengi.copy(alpha = 0.28f)),
         interactionTur = EtkilesimTuru.KART_ACILIS,
     ) {
-        Box(Modifier.fillMaxSize()) {
+        Box(Modifier.fillMaxWidth()) {
             Box(
                 Modifier
                     .align(Alignment.TopStart)
@@ -68,57 +68,60 @@ internal fun DersKarti(
                     .height(4.dp)
                     .background(vurguRengi.copy(alpha = 0.85f)),
             )
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(start = 16.dp, top = 18.dp, end = 16.dp, bottom = 16.dp),
-            verticalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 144.dp)
+                    .padding(start = 16.dp, top = 18.dp, end = 16.dp, bottom = 16.dp),
+                verticalArrangement = Arrangement.SpaceBetween,
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(42.dp)
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(vurguRengi.copy(alpha = 0.13f)),
-                    contentAlignment = Alignment.Center,
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(
-                        text = stringResource(veri.isaret),
-                        color = vurguRengi,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = PremiumSembolAilesi,
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(42.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(vurguRengi.copy(alpha = 0.13f)),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = stringResource(veri.isaret),
+                            color = vurguRengi,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = PremiumSembolAilesi,
+                        )
+                    }
+                    Surface(
+                        shape = CircleShape,
+                        color = renkler.surfaceVariant,
+                    ) {
+                        Text(
+                            text = pluralStringResource(
+                                R.plurals.question_count,
+                                veri.soruSayisi,
+                                veri.soruSayisi,
+                            ),
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                            color = renkler.onSurfaceVariant,
+                            style = MaterialTheme.typography.labelMedium,
+                            maxLines = 1,
+                        )
+                    }
                 }
-                Surface(
-                    shape = CircleShape,
-                    color = renkler.surfaceVariant,
-                ) {
-                    Text(
-                        text = pluralStringResource(
-                            R.plurals.question_count,
-                            veri.soruSayisi,
-                            veri.soruSayisi,
-                        ),
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                        color = renkler.onSurfaceVariant,
-                        style = MaterialTheme.typography.labelMedium,
-                    )
-                }
+                Text(
+                    text = veri.ad,
+                    modifier = Modifier.padding(top = 10.dp),
+                    color = renkler.onSurface,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
             }
-            Text(
-                text = veri.ad,
-                color = renkler.onSurface,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
         }
     }
 }

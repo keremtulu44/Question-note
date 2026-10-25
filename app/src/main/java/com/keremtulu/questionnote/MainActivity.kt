@@ -43,6 +43,7 @@ class MainActivity : ComponentActivity() {
                         gunlukHedefDeposu = appContainer.gunlukHedefDeposu,
                         tercihHedefDeposu = appContainer.tercihHedefDeposu,
                         denemeDeposu = appContainer.denemeDeposu,
+                        ogretmenDeposu = appContainer.ogretmenDeposu,
                     )
                 }
             }

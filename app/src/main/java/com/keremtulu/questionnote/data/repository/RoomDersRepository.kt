@@ -33,6 +33,20 @@ class RoomDersRepository(
 
     /** Reuse existing IDs, names, topics and questions. Switching profiles is non-destructive. */
     override suspend fun sinavProfiliniUygula(profil: SinavProfili) = withContext(Dispatchers.IO) {
+        if (profil == SinavProfili.OZEL) {
+            val mevcut = profilDeposu?.secimIzle?.value
+            val seciliIdler = mevcut?.dersIdleri.orEmpty()
+            val seciliAnahtarlar = mevcut?.ozelDersAdlari.orEmpty().map { it.anahtar() }.toSet()
+            val (ids, adlar) = database.withTransaction {
+                val etkinler = dersDao.tumunuGetir().filter { !it.arsivli }
+                val eslesenler = etkinler.filter { ders ->
+                    ders.id in seciliIdler || ders.ad.anahtar() in seciliAnahtarlar
+                }.ifEmpty { etkinler }
+                eslesenler.map { it.id }.toSet() to eslesenler.map { it.ad }.toSet()
+            }
+            profilDeposu?.kaydet(SinavProfili.OZEL, ids, adlar)
+            return@withContext
+        }
         val ids = database.withTransaction {
             val dersler = dersDao.tumunuGetir().toMutableList()
             profil.dersAdlari.map { ad ->
@@ -81,8 +95,15 @@ class RoomDersRepository(
         }
     }
 
-    override suspend fun dersSeciminiKaydet(dersIdleri: Set<String>) {
-        profilDeposu?.kaydet(SinavProfili.OZEL, dersIdleri)
+    override suspend fun dersSeciminiKaydet(dersIdleri: Set<String>) = withContext(Dispatchers.IO) {
+        val adlar = database.withTransaction {
+            dersDao.tumunuGetir()
+                .filter { it.id in dersIdleri }
+                .map { it.ad }
+                .toSet()
+        }
+        profilDeposu?.kaydet(SinavProfili.OZEL, dersIdleri, adlar)
+        Unit
     }
 
     override fun dersleriIzle(arsivli: Boolean): Flow<List<Ders>> =
@@ -92,14 +113,15 @@ class RoomDersRepository(
         val temizAd = ad.trim()
         if (temizAd.isEmpty()) return DersIslemSonucu.BosAd
 
-        return database.withTransaction {
+        val yeniId = UUID.randomUUID().toString()
+        val sonuc = database.withTransaction {
             if (dersDao.tumunuGetir().any { it.ad.anahtar() == temizAd.anahtar() }) {
                 return@withTransaction DersIslemSonucu.AyniAdVar
             }
             val now = System.currentTimeMillis()
             dersDao.ekle(
                 DersEntity(
-                    id = UUID.randomUUID().toString(),
+                    id = yeniId,
                     ad = temizAd,
                     sira = (dersDao.tumunuGetir().maxOfOrNull { it.sira } ?: -1) + 1,
                     arsivli = false,
@@ -109,13 +131,24 @@ class RoomDersRepository(
             )
             DersIslemSonucu.Basarili
         }
+        if (sonuc == DersIslemSonucu.Basarili) {
+            val mevcut = profilDeposu?.secimIzle?.value
+            if (mevcut != null && mevcut.profil == SinavProfili.OZEL && mevcut.dersIdleri.isNotEmpty()) {
+                profilDeposu.kaydet(
+                    SinavProfili.OZEL,
+                    mevcut.dersIdleri + yeniId,
+                    mevcut.ozelDersAdlari + temizAd,
+                )
+            }
+        }
+        return sonuc
     }
 
     override suspend fun dersYenidenAdlandir(dersId: String, ad: String): DersIslemSonucu {
         val temizAd = ad.trim()
         if (temizAd.isEmpty()) return DersIslemSonucu.BosAd
 
-        return database.withTransaction {
+        val sonuc = database.withTransaction {
             val ders = dersDao.idIleGetir(dersId) ?: return@withTransaction DersIslemSonucu.Bulunamadi
             if (dersDao.tumunuGetir().any { it.id != dersId && it.ad.anahtar() == temizAd.anahtar() }) {
                 return@withTransaction DersIslemSonucu.AyniAdVar
@@ -126,6 +159,19 @@ class RoomDersRepository(
                 DersIslemSonucu.Bulunamadi
             }
         }
+        if (sonuc == DersIslemSonucu.Basarili) {
+            val mevcut = profilDeposu?.secimIzle?.value
+            if (mevcut != null && mevcut.profil == SinavProfili.OZEL && dersId in mevcut.dersIdleri) {
+                val guncelAdlar = database.withTransaction {
+                    dersDao.tumunuGetir()
+                        .filter { it.id in mevcut.dersIdleri }
+                        .map { it.ad }
+                        .toSet()
+                }
+                profilDeposu.kaydet(SinavProfili.OZEL, mevcut.dersIdleri, guncelAdlar)
+            }
+        }
+        return sonuc
     }
 
     override suspend fun dersArsivDurumunuDegistir(

@@ -1,9 +1,13 @@
 package com.keremtulu.questionnote.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -222,8 +226,13 @@ fun SoruDetayEkrani(
 
             is SoruDetayDurumu.Hazir -> {
                 val soru = state.soru
+                val today = com.keremtulu.questionnote.ui.bilesenler.hatirlaYerelGun().toEpochDay().toInt()
+                val cozumGorselleri = remember(soru.gorseller) {
+                    soru.gorseller.filter { it.tur == com.keremtulu.questionnote.domain.model.GorselTuru.COZUM }
+                }
+                val cozumVar = !soru.cozumNotu.isNullOrBlank() || cozumGorselleri.isNotEmpty()
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize().padding(padding),
+                    modifier = Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding),
                     contentPadding = PaddingValues(start = 20.dp, top = 8.dp, end = 20.dp, bottom = 32.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
@@ -337,6 +346,7 @@ fun SoruDetayEkrani(
                                 text = stringResource(
                                     when (soru.planDurumu) {
                                         SoruPlanDurumu.AKTIF -> R.string.question_status_active
+                                        SoruPlanDurumu.OGRETMENE_SORULACAK -> R.string.question_status_ask_teacher
                                         SoruPlanDurumu.ASKIDA -> R.string.question_status_paused
                                         SoruPlanDurumu.TAMAMLANDI -> R.string.question_status_done
                                     },
@@ -347,17 +357,27 @@ fun SoruDetayEkrani(
                         }
                     }
                     if (cozumAcik) {
-                        if (soru.cozumNotu != null) item { BilgiAlani(R.string.question_solution_note, soru.cozumNotu) }
-                        items(soru.gorseller.filter { it.tur == com.keremtulu.questionnote.domain.model.GorselTuru.COZUM }, key = { it.id }) { image ->
-                            val file = gorselDeposu.dosyaGoruntuIcin(image.dosyaAdi)
-                            SoruGorselResmi(
-                                file = file,
-                                contentDescription = stringResource(R.string.solution_image_description),
-                                modifier = Modifier.fillMaxWidth().height(250.dp),
-                                contentScale = androidx.compose.ui.layout.ContentScale.Fit,
-                                maxDecodeEdge = 1_200,
-                                onClick = { if (file != null) tamEkranGorsel = image },
-                            )
+                        if (!cozumVar) {
+                            item {
+                                Text(
+                                    text = stringResource(R.string.focus_no_solution),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                )
+                            }
+                        } else {
+                            if (soru.cozumNotu != null) item { BilgiAlani(R.string.question_solution_note, soru.cozumNotu) }
+                            items(cozumGorselleri, key = { it.id }) { image ->
+                                val file = gorselDeposu.dosyaGoruntuIcin(image.dosyaAdi)
+                                SoruGorselResmi(
+                                    file = file,
+                                    contentDescription = stringResource(R.string.solution_image_description),
+                                    modifier = Modifier.fillMaxWidth().height(250.dp),
+                                    contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+                                    maxDecodeEdge = 1_200,
+                                    onClick = { if (file != null) tamEkranGorsel = image },
+                                )
+                            }
                         }
                     }
                     item {
@@ -429,7 +449,6 @@ fun SoruDetayEkrani(
                             }
                         }
                     }
-                    val today = LocalDate.now().toEpochDay().toInt()
                     if (
                         !dersArsivli && soru.planDurumu == SoruPlanDurumu.AKTIF &&
                         (tekrarOturumunda || soru.sonrakiTekrarGun?.let { it <= today } == true)
@@ -490,36 +509,45 @@ fun SoruDetayEkrani(
                     }
                     if (!dersArsivli) {
                         item {
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            @OptIn(ExperimentalLayoutApi::class)
+                            FlowRow(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(6.dp),
+                            ) {
                                 PremiumButton(onClick = { onDuzenle(soru.id) }) {
                                     Text(stringResource(R.string.question_edit))
                                 }
-                                PremiumTextButton(onClick = { durumMenusu = true }) {
-                                    Text(stringResource(R.string.question_plan_status))
-                                }
-                                DropdownMenu(expanded = durumMenusu, onDismissRequest = { durumMenusu = false }) {
-                                    SoruPlanDurumu.entries.forEach { newStatus ->
-                                        DropdownMenuItem(
-                                            text = { Text(stringResource(statusResource(newStatus))) },
-                                            onClick = {
-                                                durumMenusu = false
-                                                scope.launch {
-                                                    val result = try {
-                                                        soruRepository.planDurumunuAyarla(soru.id, newStatus)
-                                                    } catch (cancel: CancellationException) {
-                                                        throw cancel
-                                                    } catch (_: Exception) {
-                                                        null
+                                Box {
+                                    PremiumTextButton(onClick = { durumMenusu = true }) {
+                                        Text(stringResource(R.string.question_plan_status))
+                                    }
+                                    DropdownMenu(expanded = durumMenusu, onDismissRequest = { durumMenusu = false }) {
+                                        SoruPlanDurumu.entries.forEach { newStatus ->
+                                            DropdownMenuItem(
+                                                text = { Text(stringResource(statusResource(newStatus))) },
+                                                onClick = {
+                                                    durumMenusu = false
+                                                    scope.launch {
+                                                        val result = try {
+                                                            soruRepository.planDurumunuAyarla(soru.id, newStatus)
+                                                        } catch (cancel: CancellationException) {
+                                                            throw cancel
+                                                        } catch (_: Exception) {
+                                                            null
+                                                        }
+                                                        if (result == SoruIslemSonucu.Basarili) yenileme++
+                                                        else snackbarHostState.showSnackbar(context.getString(errorResource(result)))
                                                     }
-                                                    if (result == SoruIslemSonucu.Basarili) yenileme++
-                                                    else snackbarHostState.showSnackbar(context.getString(errorResource(result)))
-                                                }
-                                            },
-                                        )
+                                                },
+                                            )
+                                        }
                                     }
                                 }
                                 PremiumTextButton(onClick = { silmeOnayi = true }) {
-                                    Text(stringResource(R.string.question_delete))
+                                    Text(
+                                        text = stringResource(R.string.question_delete),
+                                        color = MaterialTheme.colorScheme.error,
+                                    )
                                 }
                             }
                         }
@@ -666,6 +694,7 @@ private fun gunTarihi(day: Int): String = runCatching {
 @androidx.annotation.StringRes
 private fun statusResource(status: SoruPlanDurumu): Int = when (status) {
     SoruPlanDurumu.AKTIF -> R.string.question_status_active
+    SoruPlanDurumu.OGRETMENE_SORULACAK -> R.string.question_status_ask_teacher
     SoruPlanDurumu.ASKIDA -> R.string.question_status_paused
     SoruPlanDurumu.TAMAMLANDI -> R.string.question_status_done
 }

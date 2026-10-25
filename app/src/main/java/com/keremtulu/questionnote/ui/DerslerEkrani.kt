@@ -6,11 +6,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.itemsIndexed
@@ -37,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.domain.model.Ders
+import com.keremtulu.questionnote.domain.model.dersAnahtari
 import com.keremtulu.questionnote.domain.repository.DersRepository
 import com.keremtulu.questionnote.ui.bilesenler.DersKartVerisi
 import com.keremtulu.questionnote.ui.bilesenler.DersKarti
@@ -46,7 +49,6 @@ import com.keremtulu.questionnote.ui.bilesenler.premium.IskeletKart
 import com.keremtulu.questionnote.ui.bilesenler.premium.PremiumBosDurum
 import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 import com.keremtulu.questionnote.ui.tema.DersRenkleri
-import java.util.Locale
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 
@@ -56,20 +58,40 @@ private sealed interface DersSecimDurumu {
     data object Hata : DersSecimDurumu
 }
 
-private data class DersKartStili(
+internal data class DersKartStili(
     val isaret: Int,
     val acikRenk: androidx.compose.ui.graphics.Color,
     val koyuRenk: androidx.compose.ui.graphics.Color,
-)
+) {
+    fun vurgu(koyuTema: Boolean): androidx.compose.ui.graphics.Color =
+        if (koyuTema) koyuRenk else acikRenk
+}
 
 private val dersKartStilleri = mapOf(
+    "türkçe" to DersKartStili(R.string.symbol_turkce, DersRenkleri.TurkceAcik, DersRenkleri.TurkceKoyu),
     "edebiyat" to DersKartStili(R.string.symbol_edebiyat, DersRenkleri.EdebiyatAcik, DersRenkleri.EdebiyatKoyu),
+    "paragraf" to DersKartStili(R.string.symbol_paragraf, DersRenkleri.ParagrafAcik, DersRenkleri.ParagrafKoyu),
     "matematik" to DersKartStili(R.string.symbol_matematik, DersRenkleri.MatematikAcik, DersRenkleri.MatematikKoyu),
+    "geometri" to DersKartStili(R.string.symbol_geometri, DersRenkleri.GeometriAcik, DersRenkleri.GeometriKoyu),
+    "problemler" to DersKartStili(R.string.symbol_problemler, DersRenkleri.ProblemlerAcik, DersRenkleri.ProblemlerKoyu),
     "biyoloji" to DersKartStili(R.string.symbol_biyoloji, DersRenkleri.BiyolojiAcik, DersRenkleri.BiyolojiKoyu),
     "kimya" to DersKartStili(R.string.symbol_kimya, DersRenkleri.KimyaAcik, DersRenkleri.KimyaKoyu),
     "fizik" to DersKartStili(R.string.symbol_fizik, DersRenkleri.FizikAcik, DersRenkleri.FizikKoyu),
+    "fen bilimleri" to DersKartStili(R.string.symbol_fen, DersRenkleri.FenAcik, DersRenkleri.FenKoyu),
     "coğrafya" to DersKartStili(R.string.symbol_cografya, DersRenkleri.CografyaAcik, DersRenkleri.CografyaKoyu),
     "tarih" to DersKartStili(R.string.symbol_tarih, DersRenkleri.TarihAcik, DersRenkleri.TarihKoyu),
+    "t.c. inkılap tarihi ve atatürkçülük" to DersKartStili(R.string.symbol_inkilap, DersRenkleri.InkilapAcik, DersRenkleri.InkilapKoyu),
+    "felsefe" to DersKartStili(R.string.symbol_felsefe, DersRenkleri.FelsefeAcik, DersRenkleri.FelsefeKoyu),
+    "felsefe grubu" to DersKartStili(R.string.symbol_felsefe_grubu, DersRenkleri.FelsefeAcik, DersRenkleri.FelsefeKoyu),
+    "din kültürü ve ahlak bilgisi" to DersKartStili(R.string.symbol_din, DersRenkleri.DinAcik, DersRenkleri.DinKoyu),
+    "ingilizce" to DersKartStili(R.string.symbol_ingilizce, DersRenkleri.DilAcik, DersRenkleri.DilKoyu),
+    "almanca" to DersKartStili(R.string.symbol_almanca, DersRenkleri.DilAcik, DersRenkleri.DilKoyu),
+    "fransızca" to DersKartStili(R.string.symbol_fransizca, DersRenkleri.DilAcik, DersRenkleri.DilKoyu),
+    "vatandaşlık" to DersKartStili(R.string.symbol_vatandaslik, DersRenkleri.TarihAcik, DersRenkleri.TarihKoyu),
+    "rehberlik" to DersKartStili(R.string.symbol_rehberlik, DersRenkleri.GenelAcik, DersRenkleri.GenelKoyu),
+    "müzik" to DersKartStili(R.string.symbol_muzik, DersRenkleri.SanatSporAcik, DersRenkleri.SanatSporKoyu),
+    "görsel sanatlar" to DersKartStili(R.string.symbol_sanat, DersRenkleri.SanatSporAcik, DersRenkleri.SanatSporKoyu),
+    "beden eğitimi" to DersKartStili(R.string.symbol_spor, DersRenkleri.SanatSporAcik, DersRenkleri.SanatSporKoyu),
 )
 
 private val varsayilanDersKartStili = DersKartStili(
@@ -77,6 +99,9 @@ private val varsayilanDersKartStili = DersKartStili(
     DersRenkleri.GenelAcik,
     DersRenkleri.GenelKoyu,
 )
+
+internal fun dersKartStiliGetir(dersAdi: String): DersKartStili =
+    dersKartStilleri[dersAdi.dersAnahtari()] ?: varsayilanDersKartStili
 
 @Composable
 fun DerslerEkrani(
@@ -101,9 +126,10 @@ fun DerslerEkrani(
         containerColor = colors.background,
         contentWindowInsets = WindowInsets.safeDrawing,
     ) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding)) {
+        @Composable
+        fun DerslerUstBaslik(modifier: Modifier = Modifier) {
             GradyanKart(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 10.dp),
+                modifier = modifier.fillMaxWidth(),
                 borderAnimation = false,
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -155,6 +181,9 @@ fun DerslerEkrani(
                     }
                 }
             }
+        }
+
+        Column(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding)) {
             when (val current = durum) {
                 DersSecimDurumu.Yukleniyor -> LazyVerticalGrid(
                     columns = GridCells.Adaptive(minSize = 156.dp),
@@ -163,23 +192,30 @@ fun DerslerEkrani(
                             contentDescription = loadingLabel
                             liveRegion = LiveRegionMode.Polite
                         },
-                    contentPadding = PaddingValues(start = 18.dp, top = 18.dp, end = 18.dp, bottom = 24.dp),
+                    contentPadding = PaddingValues(start = 18.dp, top = 10.dp, end = 18.dp, bottom = 24.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        DerslerUstBaslik(Modifier.padding(bottom = 4.dp))
+                    }
                     items(6) { IskeletKart(height = 132, showImage = true, showSubtitle = false) }
                 }
-                DersSecimDurumu.Hata -> PremiumBosDurum(
-                    modifier = Modifier.fillMaxWidth().weight(1f).semantics {
-                        liveRegion = LiveRegionMode.Assertive
-                    },
-                    baslik = stringResource(R.string.lessons_error_title),
-                    aciklama = stringResource(R.string.lessons_error_description),
-                    butonMetni = stringResource(R.string.topic_retry),
-                    onButonTikla = { yenileme++ },
-                )
+                DersSecimDurumu.Hata -> {
+                    DerslerUstBaslik(Modifier.padding(horizontal = 20.dp, vertical = 10.dp))
+                    PremiumBosDurum(
+                        modifier = Modifier.fillMaxWidth().weight(1f).semantics {
+                            liveRegion = LiveRegionMode.Assertive
+                        },
+                        baslik = stringResource(R.string.lessons_error_title),
+                        aciklama = stringResource(R.string.lessons_error_description),
+                        butonMetni = stringResource(R.string.topic_retry),
+                        onButonTikla = { yenileme++ },
+                    )
+                }
                 is DersSecimDurumu.Hazir -> {
                     if (current.dersler.isEmpty()) {
+                        DerslerUstBaslik(Modifier.padding(horizontal = 20.dp, vertical = 10.dp))
                         PremiumBosDurum(
                             modifier = Modifier.fillMaxWidth().weight(1f),
                             baslik = stringResource(R.string.lessons_empty_title),
@@ -189,13 +225,15 @@ fun DerslerEkrani(
                         LazyVerticalGrid(
                             columns = GridCells.Adaptive(minSize = 156.dp),
                             modifier = Modifier.fillMaxWidth().weight(1f),
-                            contentPadding = PaddingValues(start = 18.dp, top = 18.dp, end = 18.dp, bottom = 24.dp),
+                            contentPadding = PaddingValues(start = 18.dp, top = 10.dp, end = 18.dp, bottom = 24.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
+                            item(span = { GridItemSpan(maxLineSpan) }, key = "dersler-baslik") {
+                                DerslerUstBaslik(Modifier.padding(bottom = 4.dp))
+                            }
                             itemsIndexed(current.dersler, key = { _, ders -> ders.id }) { index, ders ->
-                                val style = dersKartStilleri[ders.ad.trim().lowercase(Locale.ROOT)]
-                                    ?: varsayilanDersKartStili
+                                val style = dersKartStiliGetir(ders.ad)
                                 val enter = animateItemInsertion(index)
                                 DersKarti(
                                     veri = DersKartVerisi(

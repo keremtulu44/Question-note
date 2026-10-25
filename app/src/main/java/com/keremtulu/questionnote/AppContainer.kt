@@ -27,6 +27,7 @@ class AppContainer(context: Context) {
     val gorselDeposu = LocalSoruGorselDeposu(context)
     val profilDeposu = SinavProfiliDeposu(context)
     val denemeDeposu = com.keremtulu.questionnote.data.prefs.DenemeDeposu(context)
+    val ogretmenDeposu = com.keremtulu.questionnote.data.prefs.OgretmenDeposu(context, gorselDeposu)
     val oturumDeposu = OdakOturumuDeposu(context)
     val tekrarPolitikasi = TekrarPolitikasiDeposu(context)
     val motorTanisi = com.keremtulu.questionnote.data.gelisim.MotorTaniHizmeti(database)
@@ -40,7 +41,13 @@ class AppContainer(context: Context) {
     val gunlukHedefDeposu: GunlukHedefDeposu = TercihGunlukHedefDeposu(context)
     val tercihHedefDeposu = gunlukHedefDeposu as TercihGunlukHedefDeposu
     val rozetHizmeti = RozetHizmeti(database, rozetDeposu, gunlukHedefDeposu, rutbeDeposu = rutbeDeposu)
-    val disaAktarmaHizmeti = YerelYedeklemeHizmeti(context, database, gorselDeposu) {
+    val disaAktarmaHizmeti = YerelYedeklemeHizmeti(
+        context = context,
+        database = database,
+        gorselDeposu = gorselDeposu,
+        denemeDeposu = denemeDeposu,
+        ogretmenDeposu = ogretmenDeposu,
+    ) {
         oturumDeposu.temizle()
         rozetDeposu.geriYuklemeSonrasi()
         rutbeDeposu.geriYuklemeSonrasi()

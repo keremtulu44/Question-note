@@ -1,14 +1,18 @@
 package com.keremtulu.questionnote.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.rememberScrollState
@@ -17,6 +21,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -59,6 +66,7 @@ import com.keremtulu.questionnote.ui.premium.PremiumButton
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import com.keremtulu.questionnote.ui.premium.PremiumCard
 import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
+import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
@@ -115,157 +123,198 @@ fun DersCalismaEkrani(
             .collect { value = SoruListesiDurumu.Hazir(it) }
     }.value
     val colors = MaterialTheme.colorScheme
+    val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
+    val klavyeAcik = WindowInsets.ime.getBottom(androidx.compose.ui.platform.LocalDensity.current) > 0
+    val loadingLabel = stringResource(R.string.question_list_loading_label)
 
     Scaffold(
         containerColor = colors.background,
         contentWindowInsets = WindowInsets.safeDrawing,
     ) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding)) {
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                PremiumTextButton(
-                    onClick = onGeri,
-                    interactionTur = EtkilesimTuru.GERI,
-                ) { Text(stringResource(R.string.topic_back_to_lessons)) }
-                GradyanKart(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(24.dp),
-                    borderAnimation = false,
-                ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text(
-                            text = ders.ad,
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = PremiumMarkaRenkler.Kagit,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Text(
-                            text = if (dersArsivli) stringResource(R.string.lesson_archived_read_only)
-                            else stringResource(R.string.question_screen_subtitle),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.86f),
-                        )
-                    }
-                }
-            }
-
-            if (!dersArsivli) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    PremiumTextButton(
-                        onClick = onKonulariYonet,
-                        modifier = Modifier.weight(1f),
-                        interactionTur = EtkilesimTuru.KART_KAPANIS,
-                    ) { Text(stringResource(R.string.topic_screen_title)) }
-                    PremiumButton(
-                        onClick = onSoruEkle,
-                        modifier = Modifier.weight(1f),
-                    ) { Text(stringResource(R.string.question_add)) }
-                }
-            }
-
-            when (val current = konular) {
-                KonuListesiDurumu.Yukleniyor -> Text(
-                    stringResource(R.string.topic_loading),
-                    modifier = Modifier.padding(horizontal = 22.dp, vertical = 4.dp),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = colors.onSurfaceVariant,
-                )
-                KonuListesiDurumu.Hata -> PremiumBosDurum(
-                    illustration = { VarsayilanIlustrasyon() },
-                    baslik = stringResource(R.string.topic_screen_title),
-                    aciklama = stringResource(R.string.topic_load_error),
-                    butonMetni = stringResource(R.string.topic_retry),
-                    onButonTikla = { yenileme++ },
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp)
-                        .semantics { liveRegion = LiveRegionMode.Assertive },
-                )
-                is KonuListesiDurumu.Hazir -> {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .consumeWindowInsets(padding)
+                .then(
+                    if (sorular is SoruListesiDurumu.Yukleniyor) {
+                        Modifier.semantics {
+                            contentDescription = loadingLabel
+                            liveRegion = LiveRegionMode.Polite
+                        }
+                    } else {
+                        Modifier
+                    },
+                ),
+            contentPadding = PaddingValues(start = 18.dp, top = 8.dp, end = 18.dp, bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Row(
-                        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
-                            .padding(horizontal = 18.dp, vertical = 4.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        FilterChip(
-                            selected = seciliKonuId == null && !konusuzFiltre,
-                            onClick = { seciliKonuId = null; konusuzFiltre = false },
-                            label = { Text(stringResource(R.string.question_filter_all)) },
-                        )
-                        FilterChip(
-                            selected = konusuzFiltre,
-                            onClick = { seciliKonuId = null; konusuzFiltre = true },
-                            label = { Text(stringResource(R.string.question_filter_unassigned)) },
-                        )
-                        current.konular.forEach { konu ->
-                            FilterChip(
-                                selected = seciliKonuId == konu.id,
-                                onClick = { seciliKonuId = konu.id; konusuzFiltre = false },
-                                label = {
-                                    Text(
-                                        if (konu.arsivli) stringResource(R.string.topic_name_archived, konu.ad)
-                                        else konu.ad,
-                                    )
-                                },
+                        PremiumTextButton(
+                            onClick = onGeri,
+                            interactionTur = EtkilesimTuru.GERI,
+                        ) { Text(stringResource(R.string.topic_back_to_lessons)) }
+                        if (klavyeAcik) {
+                            PremiumTextButton(
+                                onClick = { focusManager.clearFocus() },
+                            ) {
+                                Text(
+                                    stringResource(R.string.common_hide_keyboard),
+                                    fontWeight = FontWeight.SemiBold,
+                                )
+                            }
+                        }
+                    }
+                    GradyanKart(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(24.dp),
+                        borderAnimation = false,
+                    ) {
+                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text(
+                                text = ders.ad,
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = PremiumMarkaRenkler.Kagit,
+                                fontWeight = FontWeight.Bold,
+                            )
+                            Text(
+                                text = if (dersArsivli) stringResource(R.string.lesson_archived_read_only)
+                                else stringResource(R.string.question_screen_subtitle),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.86f),
                             )
                         }
                     }
                 }
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
-                    .padding(horizontal = 18.dp, vertical = 2.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                FilterChip(
-                    selected = planDurumuFiltresi == null,
-                    onClick = { planDurumuFiltresi = null },
-                    label = { Text(stringResource(R.string.question_filter_all_statuses)) },
-                )
-                SoruPlanDurumu.entries.forEach { status ->
+            if (!dersArsivli) {
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        PremiumTextButton(
+                            onClick = onKonulariYonet,
+                            modifier = Modifier.weight(1f),
+                            interactionTur = EtkilesimTuru.KART_KAPANIS,
+                        ) { Text(stringResource(R.string.topic_screen_title)) }
+                        PremiumButton(
+                            onClick = onSoruEkle,
+                            modifier = Modifier.weight(1f),
+                        ) { Text(stringResource(R.string.question_add)) }
+                    }
+                }
+            }
+
+            item {
+                when (val current = konular) {
+                    KonuListesiDurumu.Yukleniyor -> Text(
+                        stringResource(R.string.topic_loading),
+                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colors.onSurfaceVariant,
+                    )
+                    KonuListesiDurumu.Hata -> PremiumBosDurum(
+                        illustration = { VarsayilanIlustrasyon() },
+                        baslik = stringResource(R.string.topic_screen_title),
+                        aciklama = stringResource(R.string.topic_load_error),
+                        butonMetni = stringResource(R.string.topic_retry),
+                        onButonTikla = { yenileme++ },
+                        modifier = Modifier.fillMaxWidth()
+                            .semantics { liveRegion = LiveRegionMode.Assertive },
+                    )
+                    is KonuListesiDurumu.Hazir -> {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            FilterChip(
+                                selected = seciliKonuId == null && !konusuzFiltre,
+                                onClick = { seciliKonuId = null; konusuzFiltre = false },
+                                label = { Text(stringResource(R.string.question_filter_all)) },
+                            )
+                            FilterChip(
+                                selected = konusuzFiltre,
+                                onClick = { seciliKonuId = null; konusuzFiltre = true },
+                                label = { Text(stringResource(R.string.question_filter_unassigned)) },
+                            )
+                            current.konular.forEach { konu ->
+                                FilterChip(
+                                    selected = seciliKonuId == konu.id,
+                                    onClick = { seciliKonuId = konu.id; konusuzFiltre = false },
+                                    label = {
+                                        Text(
+                                            if (konu.arsivli) stringResource(R.string.topic_name_archived, konu.ad)
+                                            else konu.ad,
+                                        )
+                                    },
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
                     FilterChip(
-                        selected = planDurumuFiltresi == status,
-                        onClick = { planDurumuFiltresi = status },
-                        label = { Text(stringResource(statusFilterLabel(status))) },
+                        selected = planDurumuFiltresi == null,
+                        onClick = { planDurumuFiltresi = null },
+                        label = { Text(stringResource(R.string.question_filter_all_statuses)) },
+                    )
+                    SoruPlanDurumu.entries.forEach { status ->
+                        FilterChip(
+                            selected = planDurumuFiltresi == status,
+                            onClick = { planDurumuFiltresi = status },
+                            label = { Text(stringResource(statusFilterLabel(status))) },
+                        )
+                    }
+                    FilterChip(
+                        selected = sadeceFavori,
+                        onClick = { sadeceFavori = !sadeceFavori },
+                        label = { Text(stringResource(R.string.question_filter_favorites), maxLines = 1) },
                     )
                 }
-                FilterChip(
-                    selected = sadeceFavori,
-                    onClick = { sadeceFavori = !sadeceFavori },
-                    label = { Text(stringResource(R.string.question_filter_favorites), maxLines = 1) },
+            }
+
+            item {
+                OutlinedTextField(
+                    value = arama,
+                    onValueChange = { arama = it.take(80) },
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+                    label = { Text(stringResource(R.string.question_search), maxLines = 1) },
+                    singleLine = true,
+                    shape = RoundedCornerShape(16.dp),
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = androidx.compose.ui.text.input.ImeAction.Search,
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onSearch = { focusManager.clearFocus() },
+                    ),
                 )
             }
-            OutlinedTextField(
-                value = arama,
-                onValueChange = { arama = it.take(80) },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 4.dp).heightIn(min = 56.dp),
-                label = { Text(stringResource(R.string.question_search), maxLines = 1) },
-                singleLine = true,
-            )
 
             when (val current = sorular) {
                 SoruListesiDurumu.Yukleniyor -> {
-                    val loadingLabel = stringResource(R.string.question_list_loading_label)
-                    LazyColumn(
-                        modifier = Modifier.fillMaxWidth().weight(1f).semantics {
-                            contentDescription = loadingLabel
-                            liveRegion = LiveRegionMode.Polite
-                        },
-                        contentPadding = PaddingValues(start = 18.dp, top = 8.dp, end = 18.dp, bottom = 24.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
-                    ) {
-                        items(4) { IskeletKart(height = 96, showImage = true) }
-                    }
+                    items(4) { IskeletKart(height = 96, showImage = true) }
                 }
-                SoruListesiDurumu.Hata -> DurumKarti(
-                    stringResource(R.string.question_list_error),
-                    modifier = Modifier.weight(1f),
-                    onRetry = { yenileme++ },
-                )
+                SoruListesiDurumu.Hata -> item {
+                    DurumKarti(
+                        stringResource(R.string.question_list_error),
+                        modifier = Modifier.fillMaxWidth(),
+                        onRetry = { yenileme++ },
+                    )
+                }
                 is SoruListesiDurumu.Hazir -> {
                     val query = arama.trim()
                     val visibleQuestions = current.sorular.filter { question ->
@@ -284,28 +333,24 @@ fun DersCalismaEkrani(
                             dersArsivli -> R.string.question_empty_archived_lesson
                             else -> R.string.question_empty
                         }
-                        DurumKarti(
-                            stringResource(emptyMessage),
-                            modifier = Modifier.weight(1f),
-                        )
+                        item {
+                            DurumKarti(
+                                stringResource(emptyMessage),
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
                     } else {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxWidth().weight(1f),
-                            contentPadding = PaddingValues(start = 18.dp, top = 8.dp, end = 18.dp, bottom = 24.dp),
-                            verticalArrangement = Arrangement.spacedBy(10.dp),
-                        ) {
-                            itemsIndexed(visibleQuestions, key = { _, question -> question.id }) { index, soru ->
-                                val enter = animateItemInsertion(index)
-                                SoruListeKarti(
-                                    soru = soru,
-                                    denemeler = denemeler,
-                                    onClick = { onSoruAc(soru.id) },
-                                    modifier = Modifier.graphicsLayer {
-                                        alpha = enter.value
-                                        translationY = (1f - enter.value) * 12.dp.toPx()
-                                    },
-                                )
-                            }
+                        itemsIndexed(visibleQuestions, key = { _, question -> question.id }) { index, soru ->
+                            val enter = animateItemInsertion(index)
+                            SoruListeKarti(
+                                soru = soru,
+                                denemeler = denemeler,
+                                onClick = { onSoruAc(soru.id) },
+                                modifier = Modifier.graphicsLayer {
+                                    alpha = enter.value
+                                    translationY = (1f - enter.value) * 12.dp.toPx()
+                                },
+                            )
                         }
                     }
                 }
@@ -317,6 +362,7 @@ fun DersCalismaEkrani(
 @androidx.annotation.StringRes
 private fun statusFilterLabel(status: SoruPlanDurumu): Int = when (status) {
     SoruPlanDurumu.AKTIF -> R.string.question_status_active
+    SoruPlanDurumu.OGRETMENE_SORULACAK -> R.string.question_status_ask_teacher
     SoruPlanDurumu.ASKIDA -> R.string.question_status_paused
     SoruPlanDurumu.TAMAMLANDI -> R.string.question_status_done
 }
@@ -328,10 +374,13 @@ private fun SoruListeKarti(
     modifier: Modifier = Modifier,
     denemeler: List<com.keremtulu.questionnote.domain.model.DenemeKaydi> = emptyList(),
 ) {
+    val bakirVurgu = if (isSystemInDarkTheme()) PremiumMarkaRenkler.BakirIsik else PremiumMarkaRenkler.Bakir
     PremiumCard(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f)),
         interactionTur = EtkilesimTuru.KART_ACILIS,
     ) {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -352,7 +401,12 @@ private fun SoruListeKarti(
                     overflow = TextOverflow.Ellipsis,
                 )
                 if (soru.favori) {
-                    Text("★", color = PremiumMarkaRenkler.Bakir, style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        text = "★",
+                        color = bakirVurgu,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontFamily = PremiumSembolAilesi,
+                    )
                 }
             }
             val deneme = denemeler.kaynakla(soru.kaynak)
@@ -381,6 +435,7 @@ private fun SoruListeKarti(
                         text = stringResource(
                             when (soru.planDurumu) {
                                 SoruPlanDurumu.AKTIF -> R.string.question_status_active
+                                SoruPlanDurumu.OGRETMENE_SORULACAK -> R.string.question_status_ask_teacher
                                 SoruPlanDurumu.ASKIDA -> R.string.question_status_paused
                                 SoruPlanDurumu.TAMAMLANDI -> R.string.question_status_done
                             },

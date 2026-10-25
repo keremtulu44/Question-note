@@ -2,6 +2,39 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.5.108] — 2026-10-25
+
+- **Tam ekran görsel görüntüleyicisi ve yakınlaştırma düzeltmeleri:** `SoruGorselTamEkran` içinde `matchParentSize()` + yüksekliksiz `fillMaxWidth()` bileşimi nedeniyle soru ve çözüm fotoğraflarının tam ekranda `0px` yüksekliğe çökerek siyah ekran göstermesine yol açan kritik hata giderildi. Tüm tam ekran görüntüleyicilere (`SoruGorselTamEkran`, `SorulacakTamEkranSunumDialog`, `OgretmenTamEkranSoruDialog`) `safeDrawing` pencere boşluğu, yakınlaştırma taşmasını önleyen `.clipToBounds()`, çift dokunuşla `2.4x` yakınlaştırma, **`1x Sıfırla`** aksiyonu ve devre dışı sayfa/sıralama düğmeleri için doğru soluklaştırma eklendi.
+- **Liste kapsayıcılarında (`LazyItemScope`) üst üste binen öğelerin düzeltilmesi:** `OdakOturumuEkrani` (“Çözümü göster” + “çözüm kaydı yok” / “sona bırak” açıklamaları), `GorselBakimEkrani` (yetim dosya başlığı + uyarı metni) ve `DenemeDetayEkrani` içinde aynı `item {}` bloğunda dikey kapsayıcı olmadan `(0, 0)` koordinatına üst üste çizilen bileşenler düzeltildi.
+- **Tipografi ve sembol glif bütünlüğü (`Manrope` + `PremiumSembolAilesi`):** Manrope yazı tipinde bulunmayan tüm sembollerin (`◎` Coğrafya, `◈` Deneme damgası, `★` favori yıldızı, `✓` onay işareti, `▾` → `↓` açılır menü oku) bozuk kutu (`.notdef`) üretmemesi için uygulama genelinde `PremiumSembolAilesi` ailesi bağlandı.
+- **Deneme soru konumu, motor seçimi ve ekran yerleşimi iyileştirmeleri:** Deneme içinden yanlış soru eklerken `SoruFormuEkrani` üzerinde kaynak rozetiyle birlikte **Sayfa / Test / Soru no** (`kaynakKonumu`) alanı görünür bırakıldı; `MotorAyarlariKarti` üzerinde seçili tekrar motoru görsel olarak belirginleştirildi; `DerslerEkrani` ve `KatalogYonetimiEkrani` üst kartları kaydırılabilir listeye dahil edildi; `DersKarti` 2 satırlı uzun ders adları ve büyük yazı ölçeğiyle uyumlu hale getirildi; `AyarlarEkrani` ders profili çipleri akışkan `FlowRow` düzenine geçirildi.
+- **Öğretmen modu bildirim ve yedek önizleme uyumu:** Öğretmen modunda yedek alma/geri yükleme `Snackbar` bildirimleri görünür kılındı; yedek geri yükleme onay penceresine öğretmen grup ve soru sayıları eklendi.
+- Sürüm: `versionCode 38` / `versionName 1.5.108`.
+
+## [1.5.107] — 2026-10-25
+
+- **Deneme klavye ve panel çakışması düzeltmesi:** `MainActivity` üzerinde `adjustResize` pencere modu etkinleştirildi; `DenemeDetayEkrani` içinde klavye yüksekliğinin (`WindowInsets.safeDrawing` + ek `.imePadding()`) iki kez düşülerek form listesinin kapanıp alanların panel altında kalmasına yol açan hata giderildi. Klavye açıkken üst çubuğa tek dokunuşla **“Klavyeyi kapat”** aksiyonu ve ad/doğru/yanlış/soru kutuları arasında klavyeden `İleri / Tamam` geçişi eklendi.
+- **Uygulama geneli klavye, alt panel ve arama iyileştirmeleri:** Öğrenci ve Öğretmen modlarında klavye açıldığında alt sekme çubukları (`AltMenu`, `OgretmenAltMenu`) ve sabit alt kaydet panelleri (`SoruFormuEkrani`, `OgretmenSoruFormuEkrani`) otomatik gizlenerek metin kutularını kapatması önlendi; `DersCalismaEkrani` ve `KonuMerkeziEkrani` arama ekranlarında üst başlıklar kaydırılabilir listeye dahil edilerek klavye açıkken arama sonuçlarının görünür kalması sağlandı; tüm iç ekranlara `consumeWindowInsets` ve tüm form pencerelerine (`CozdurdumDialog`, `GrupFormDialog`, `BaskaGrubaEkleDialog`) klavye-güvenli `Dialog` + `LazyColumn` yapısı uygulandı.
+- **Rol Seçimi ve Öğretmen Modu (`Öğretmenim`) tam Premium yükseltmesi:** Rol seçim ekranına özel çizim vektör amblemler ve yetenek rozetleri eklendi. Öğretmen moduna özel çizim vektör ikonlu ve kaydırma destekli Premium alt menü, canlı istatistik ve ilerleme çubuklu `GradyanKart` özet paneli, renk kodlu ve monogramlı grup kartları, grup ve soru içi anlık arama, `6A–12A / TYT / Özel Ders` hazır grup önerileri, çift dokunuşla yakınlaştırma (`2.4x`) ve **`1x Sıfırla`** destekli tam ekran sunum görünümü ile renkli zorluk seçicili soru formu getirildi.
+- Sürüm: `versionCode 37` / `versionName 1.5.107`.
+
+## [1.5.106] — 2026-10-25
+
+- **Görsel kırpma çökme düzeltmesi ve merkezi erişim:** Kırpma uygulandığında veya küçük önizleme güncellendiğinde `RenderThread` üzerinde geri dönüştürülmüş `Bitmap` (`Canvas: trying to use a recycled bitmap`) ve büyük fotoğraflarda bellek taşması kaynaklı çökmeler giderildi; `✂ Görseli kırp` butonu her görsel kartının altına ortalanmış ve belirgin şekilde taşındı.
+- **Öğrenci tarafı — Öğretmene Sorulacaklar:** Soru eklerken veya detay ekranında sorular `Öğretmene sorulacak` olarak işaretlenebilir; bu sorular aktif günlük tekrar planına girmeden ders ders ayrı listelenir. `Bugün` ekranında bekleyen sorular için **“Bu soruları hocana çözdürdün mü?”** hatırlatıcısı görünür; tam ekran yakınlaştırılabilir sunum ve **“Çözdürdüm”** akışıyla (isteğe bağlı çözüm fotoğrafı ekleyerek ya da fotoğrafsız) soru ertesi gün aktif tekrar planına alınır.
+- **Rol seçimi ve Öğretmen Modu (`Öğretmenim`):** İlk açılışta **Öğrenciyim / Öğretmenim** rol seçimi ve `Ayarlar` ekranından çift yönlü rol geçişi eklendi. Öğretmen modunda XP/rütbe/seri olmadan sınıf ve özel ders grupları (`6B`, `7C`, `Özel Ders` vb.), yalnızca fotoğraf zorunlu hızlı soru kaydı (isteğe bağlı zorluk, cevap ve başlık), **Çözmediklerim / Çözdüklerim** ayrımı, tam ekran yakınlaştırmalı görüntüleyicide varsayılan gizli cevap (**“Cevabı göster”**) ve grup bazında bağımsız çözüldü durumuyla **Başka Gruba Ekle** kopyalama akışı sunuldu.
+- **Yedekleme ve geri yükleme uyumu:** Öğretmen çalışma alanı (`teacher_workspace`) ve kalıcı öğretmen görselleri (`ogretmen-img/` ↔ ZIP `images/`) atomik ZIP yedekleme ve kurtarma günlüğü (`geri-yukleme.json`) kapsamına alındı.
+- Sürüm: `versionCode 36` / `versionName 1.5.106`.
+
+## [1.5.105] — 2026-10-25
+
+- **Deneme ekranları (Premium tasarım):** Deneme listesi, net gidişatı çizgisi ve ders karşılaştırma çubukları cam/gradyan kartlara yükseltildi; negatif net desteği, kural filtresi, ders renk/sembol rozetleri, yüklenecek soru durumu ve doğrudan “Bu denemeyi çalış” kısayolu eklendi.
+- **Deneme detay ve doğruluk düzeltmeleri:** Tarih seçici (`DatePickerDialog`), silme onay penceresi, anlık net özeti, gizli/arşivli ders satırlarının düzenlemede korunması ve ekran döndürmede form durumunun saklanması sağlandı.
+- **Veri ve yedekleme bütünlüğü:** Deneme adı oluşturulduğunda veya değiştirildiğinde kaynak kataloğu ve bağlı sorular otomatik senkronize edilir; en eski denemede ileri tarihli denemeyle yanlış kıyaslama hatası giderildi; deneme kayıtları ZIP yedekleme/geri yükleme (`mock_exams`) akışına dahil edildi.
+- **İlk kurulum ve özel ders seçimi:** 24 derslik katalog 5 ders grubuna ayrılmış renkli/sembollü Premium kartlara dönüştürüldü; yedek geri yükleme sonrasında özel ders seçiminin (`SinavProfili.OZEL`) farklı ders kimliklerinde boş ekran bırakmaması sağlandı.
+- **Metin ve odak görünümü:** Deneme ve kurulum ekranlarındaki sert/iğneleyici metinler sakin ve destekleyici Türkçe çalışma tonuna çekildi; Odak ekranında deneme damgası varken soru konumunun (`kaynakKonumu`) gizlenmesi düzeltildi.
+- Sürüm: `versionCode 35` / `versionName 1.5.105`.
+
 ## [1.5.104] — 2026-10-25
 
 - Yeni deneme kaydından sonra fotoğraf ekleyip dönünce formun sıfırlanması düzeltildi; kaynak her zaman deneme adı.

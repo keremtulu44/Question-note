@@ -54,9 +54,19 @@ data class SinavSecimi(
     val profil: SinavProfili,
     val dersIdleri: Set<String> = emptySet(),
     val herDersiGoster: Boolean = false,
+    val ozelDersAdlari: Set<String> = emptySet(),
 ) {
-    fun gorunur(ders: Ders): Boolean =
-        herDersiGoster || ders.id in dersIdleri || profil.dersAdiEslesir(ders.ad)
+    fun gorunur(ders: Ders): Boolean {
+        if (herDersiGoster || ders.id in dersIdleri) return true
+        if (profil == SinavProfili.OZEL) {
+            if (ozelDersAdlari.isNotEmpty()) {
+                val anahtar = ders.ad.dersAnahtari()
+                return ozelDersAdlari.any { it.dersAnahtari() == anahtar }
+            }
+            return dersIdleri.isEmpty()
+        }
+        return profil.dersAdiEslesir(ders.ad)
+    }
 
     companion object {
         val Tumu = SinavSecimi(SinavProfili.YKS, herDersiGoster = true)

@@ -70,4 +70,34 @@ class SinavProfiliRepositoryTest {
         repo.dersYenidenAdlandir(english.id, "Yabancı dil")
         assertTrue(repo.aktifDersleriIzle().first().any { it.id == english.id })
     }
+
+    @Test fun customOnboardingSelectionSurvivesRestoreWithDifferentLessonIdsAndNeverBlanksOut() = runBlocking {
+        val katalog = repo.kataloguHazirla()
+        val secilenAdlar = setOf("Türkçe", "Matematik", "Geometri")
+        val secilenIdler = katalog.filter { it.ad in secilenAdlar }.map { it.id }.toSet()
+        repo.dersSeciminiKaydet(secilenIdler)
+        assertEquals(secilenAdlar, repo.aktifDersleriIzle().first().map { it.ad }.toSet())
+
+        // Farklı bir cihazdan alınan yedeğin ders tablosunu yeni UUID'lerle değiştirmesini simüle et.
+        db.dersDao().tumunuSil()
+        db.dersDao().ekle(
+            listOf(
+                com.keremtulu.questionnote.data.local.entity.DersEntity("yeni-tr", "Türkçe", 0, false, 1, 1),
+                com.keremtulu.questionnote.data.local.entity.DersEntity("yeni-mat", "Matematik", 1, false, 1, 1),
+                com.keremtulu.questionnote.data.local.entity.DersEntity("yeni-fiz", "Fizik", 2, false, 1, 1),
+            ),
+        )
+        repo.sinavProfiliniUygula(SinavProfili.OZEL)
+        assertEquals(setOf("Türkçe", "Matematik"), repo.aktifDersleriIzle().first().map { it.ad }.toSet())
+
+        // Hiçbir dersin eşleşmediği tamamen özel bir yedek yüklense bile görünür ders listesi sıfırlanmaz.
+        db.dersDao().tumunuSil()
+        db.dersDao().ekle(
+            listOf(
+                com.keremtulu.questionnote.data.local.entity.DersEntity("ozel-1", "Astronomi", 0, false, 1, 1),
+            ),
+        )
+        repo.sinavProfiliniUygula(SinavProfili.OZEL)
+        assertEquals(setOf("Astronomi"), repo.aktifDersleriIzle().first().map { it.ad }.toSet())
+    }
 }

@@ -13,11 +13,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -58,6 +60,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -309,13 +312,13 @@ fun SoruFormuEkrani(
                 val updated = images.toMutableList().apply { this[index] = cropped.copy(sira = index) }
                 if (target.tur == GorselTuru.SORU) soruGorselleri = updated else cozumGorselleri = updated
                 replaced = true
+                kirpmaHedefi = null
                 if (target.gecici && cropped.id != target.id) {
                     runCatching { gorselDeposu.geciciDosyayiSil(target.dosyaAdi) }
                 }
-                kirpmaHedefi = null
             } catch (cancel: CancellationException) {
                 throw cancel
-            } catch (_: Exception) {
+            } catch (_: Throwable) {
                 snackbarHostState.showSnackbar(context.getString(R.string.question_form_crop_error))
             } finally {
                 if (!replaced) {
@@ -388,6 +391,9 @@ fun SoruFormuEkrani(
         formHatasi = null
         scope.launch {
             val result = try {
+                gizliKaynak?.takeIf { it.isNotBlank() }?.let { kaynakAdi ->
+                    soruRepository.kaynakAdiDegistir(null, kaynakAdi)
+                }
                 soruRepository.soruKaydet(
                     SoruKaydetmeIstegi(
                         id = soruId,
@@ -420,13 +426,16 @@ fun SoruFormuEkrani(
         }
     }
 
+    val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
+    val klavyeAcik = WindowInsets.ime.getBottom(androidx.compose.ui.platform.LocalDensity.current) > 0
+
     BackHandler(enabled = true, onBack = ::cancelAndReturn)
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        contentWindowInsets = androidx.compose.foundation.layout.WindowInsets.safeDrawing,
+        contentWindowInsets = WindowInsets.safeDrawing,
         bottomBar = {
-            if (!yukleniyor && !bulunamadi && !yuklemeBasarisiz) {
+            if (!yukleniyor && !bulunamadi && !yuklemeBasarisiz && !klavyeAcik) {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     color = MaterialTheme.colorScheme.surface,
@@ -436,7 +445,6 @@ fun SoruFormuEkrani(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .imePadding()
                             .navigationBarsPadding()
                             .padding(horizontal = 20.dp, vertical = 12.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -503,23 +511,44 @@ fun SoruFormuEkrani(
                 PremiumTextButton(onClick = onGeri) { Text(stringResource(R.string.question_back)) }
             }
             else -> LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(padding),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .consumeWindowInsets(padding)
+                    .testTag("soru_formu_liste"),
                 contentPadding = PaddingValues(start = 18.dp, top = 8.dp, end = 18.dp, bottom = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        PremiumTextButton(
-                            onClick = ::cancelAndReturn,
-                            enabled = !kaydediliyor,
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                verticalAlignment = Alignment.CenterVertically,
+                            PremiumTextButton(
+                                onClick = ::cancelAndReturn,
+                                enabled = !kaydediliyor,
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
                             ) {
-                                Text("←", style = MaterialTheme.typography.titleMedium)
-                                Text(stringResource(R.string.question_form_cancel))
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Text("←", style = MaterialTheme.typography.titleMedium)
+                                    Text(stringResource(R.string.question_form_cancel))
+                                }
+                            }
+                            if (klavyeAcik) {
+                                PremiumTextButton(
+                                    onClick = { focusManager.clearFocus() },
+                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                                ) {
+                                    Text(
+                                        stringResource(R.string.common_hide_keyboard),
+                                        fontWeight = FontWeight.SemiBold,
+                                    )
+                                }
                             }
                         }
                         Surface(
@@ -590,6 +619,82 @@ fun SoruFormuEkrani(
                     }
                 }
                 item {
+                    val sorulacakSecili = planDurumu == SoruPlanDurumu.OGRETMENE_SORULACAK
+                    PremiumCard(
+                        onClick = {
+                            if (!kaydediliyor) {
+                                planDurumu = if (sorulacakSecili) {
+                                    SoruPlanDurumu.AKTIF
+                                } else {
+                                    SoruPlanDurumu.OGRETMENE_SORULACAK
+                                }
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth().testTag("form_ogretmene_sorulacak_karti"),
+                        shape = RoundedCornerShape(22.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (sorulacakSecili) {
+                                MaterialTheme.colorScheme.secondaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.surface
+                            },
+                        ),
+                        border = BorderStroke(
+                            width = if (sorulacakSecili) 1.5.dp else 1.dp,
+                            color = if (sorulacakSecili) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.65f)
+                            },
+                        ),
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Surface(
+                                shape = CircleShape,
+                                color = if (sorulacakSecili) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.primaryContainer
+                                },
+                            ) {
+                                Box(Modifier.width(38.dp).height(38.dp), contentAlignment = Alignment.Center) {
+                                    Text(
+                                        text = if (sorulacakSecili) "✓" else "?",
+                                        color = if (sorulacakSecili) {
+                                            MaterialTheme.colorScheme.onPrimary
+                                        } else {
+                                            MaterialTheme.colorScheme.onPrimaryContainer
+                                        },
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        fontFamily = PremiumSembolAilesi,
+                                    )
+                                }
+                            }
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(4.dp),
+                            ) {
+                                Text(
+                                    stringResource(R.string.question_form_ask_teacher_title),
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                )
+                                Text(
+                                    stringResource(R.string.question_form_ask_teacher_subtitle),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                    }
+                }
+                item {
                     SoruFormBolumu(
                         adim = "02",
                         baslik = stringResource(R.string.question_form_section_details),
@@ -636,31 +741,60 @@ fun SoruFormuEkrani(
                                 }
                             }
                             if (gizliKaynak == null) {
-                            SoruSecenegiSecici(
-                                baslik = stringResource(R.string.question_form_source_label),
-                                secimYok = stringResource(R.string.question_form_source_choose),
-                                secimiTemizle = stringResource(R.string.question_form_source_clear),
-                                ekleEtiketi = stringResource(R.string.question_form_add_source),
-                                bosListeMesaji = stringResource(R.string.question_form_catalog_no_options),
-                                secenekler = catalog?.kaynaklar.orEmpty(),
-                                secilenAd = kaynak,
-                                etkin = !kaydediliyor,
-                                onSec = {
-                                    kaynak = it
-                                    if (it.isBlank()) kaynakKonumu = ""
-                                },
-                                onEkle = { addCatalogOption(SoruSecenekTuru.KAYNAK) },
-                            )
+                                SoruSecenegiSecici(
+                                    baslik = stringResource(R.string.question_form_source_label),
+                                    secimYok = stringResource(R.string.question_form_source_choose),
+                                    secimiTemizle = stringResource(R.string.question_form_source_clear),
+                                    ekleEtiketi = stringResource(R.string.question_form_add_source),
+                                    bosListeMesaji = stringResource(R.string.question_form_catalog_no_options),
+                                    secenekler = catalog?.kaynaklar.orEmpty(),
+                                    secilenAd = kaynak,
+                                    etkin = !kaydediliyor,
+                                    onSec = {
+                                        kaynak = it
+                                        if (it.isBlank()) kaynakKonumu = ""
+                                    },
+                                    onEkle = { addCatalogOption(SoruSecenekTuru.KAYNAK) },
+                                )
+                            } else {
+                                Surface(
+                                    modifier = Modifier.fillMaxWidth().testTag("soru_formu_deneme_kaynak_rozeti"),
+                                    shape = RoundedCornerShape(14.dp),
+                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.24f)),
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        Text(
+                                            text = "◈",
+                                            color = MaterialTheme.colorScheme.primary,
+                                            style = MaterialTheme.typography.labelLarge,
+                                            fontWeight = FontWeight.Bold,
+                                            fontFamily = PremiumSembolAilesi,
+                                        )
+                                        Text(
+                                            text = stringResource(R.string.question_form_deneme_source_badge, gizliKaynak),
+                                            color = MaterialTheme.colorScheme.primary,
+                                            style = MaterialTheme.typography.labelLarge,
+                                            fontWeight = FontWeight.SemiBold,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                        )
+                                    }
+                                }
+                            }
                             OutlinedTextField(
                                 value = kaynakKonumu,
                                 onValueChange = { kaynakKonumu = it },
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth().testTag("soru_formu_kaynak_konumu"),
                                 enabled = !kaydediliyor,
                                 singleLine = true,
                                 label = { Text(stringResource(R.string.question_form_source_location_label)) },
                                 shape = RoundedCornerShape(16.dp),
                             )
-                            }
                             SoruSecenegiSecici(
                                 baslik = stringResource(R.string.question_form_reason_label),
                                 secimYok = stringResource(R.string.question_form_reason_choose),
@@ -735,6 +869,42 @@ fun SoruFormuEkrani(
                                             enabled = !kaydediliyor,
                                         )
                                     }
+                                }
+                            }
+                        }
+                    }
+                }
+                if (klavyeAcik) {
+                    item {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            formHatasi?.let { errorId ->
+                                Text(
+                                    text = stringResource(errorId),
+                                    modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+                                    color = MaterialTheme.colorScheme.error,
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            }
+                            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                PremiumTextButton(
+                                    onClick = { focusManager.clearFocus() },
+                                    modifier = Modifier.heightIn(min = 48.dp),
+                                ) {
+                                    Text(stringResource(R.string.common_hide_keyboard))
+                                }
+                                PremiumButton(
+                                    onClick = ::saveQuestion,
+                                    modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                                    enabled = !kaydediliyor,
+                                    shape = RoundedCornerShape(16.dp),
+                                ) {
+                                    Text(
+                                        stringResource(
+                                            if (kaydediliyor) R.string.question_form_saving
+                                            else R.string.question_form_save,
+                                        ),
+                                        fontWeight = FontWeight.Bold,
+                                    )
                                 }
                             }
                         }
@@ -1117,164 +1287,17 @@ private fun ImageSection(
     onCrop: (SoruGorselGirdisi) -> Unit,
     onImagesChanged: (List<SoruGorselGirdisi>) -> Unit,
 ) {
-    val scope = rememberCoroutineScope()
-    val cropImageDescription = stringResource(R.string.question_form_crop_image)
-    val removeImageDescription = stringResource(R.string.question_form_remove_image)
-    val moveUpDescription = stringResource(R.string.question_form_image_order_up)
-    val moveDownDescription = stringResource(R.string.question_form_image_order_down)
-
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        title?.let { Text(it, style = MaterialTheme.typography.labelLarge) }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            PremiumButton(
-                onClick = onCamera,
-                enabled = enabled,
-                modifier = Modifier.weight(1f).heightIn(min = 50.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                ),
-                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 10.dp),
-            ) {
-                Text(
-                    stringResource(R.string.question_form_take_photo),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            PremiumOutlinedButton(
-                onClick = onPicker,
-                enabled = enabled,
-                modifier = Modifier.weight(1f).heightIn(min = 50.dp),
-                shape = RoundedCornerShape(16.dp),
-                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 10.dp),
-            ) {
-                Text(
-                    stringResource(R.string.question_form_pick_photos),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-        }
-        if (images.isEmpty()) {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(18.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.48f),
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(14.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Surface(shape = CircleShape, color = MaterialTheme.colorScheme.primaryContainer) {
-                        Box(Modifier.width(42.dp).height(42.dp), contentAlignment = Alignment.Center) {
-                            Text(
-                                "+",
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                style = MaterialTheme.typography.headlineSmall,
-                            )
-                        }
-                    }
-                    Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                        Text(
-                            stringResource(R.string.question_form_no_photos),
-                            style = MaterialTheme.typography.labelLarge,
-                        )
-                        Text(
-                            stringResource(R.string.question_form_photo_empty_hint),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                }
-            }
-        } else {
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                items(images, key = { it.id }) { image ->
-                    val file = imageStore.dosyaGoruntuIcin(image)
-                    PremiumCard(
-                        modifier = Modifier.width(220.dp),
-                        shape = RoundedCornerShape(20.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.65f)),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth().padding(8.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            SoruGorselResmi(
-                                file = file,
-                                contentDescription = stringResource(R.string.question_image_description),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(148.dp)
-                                    .clip(RoundedCornerShape(14.dp)),
-                                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
-                                maxDecodeEdge = 480,
-                            )
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceEvenly,
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                IconButton(
-                                    enabled = enabled,
-                                    onClick = { onCrop(image) },
-                                    modifier = Modifier.semantics { contentDescription = cropImageDescription },
-                                ) {
-                                    Text("✂", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleMedium, fontFamily = PremiumSembolAilesi)
-                                }
-                                IconButton(
-                                    enabled = enabled && image.sira > 0,
-                                    onClick = {
-                                        val index = images.indexOfFirst { it.id == image.id }
-                                        if (index > 0) onImagesChanged(images.swapped(index, index - 1))
-                                    },
-                                    modifier = Modifier.semantics { contentDescription = moveUpDescription },
-                                ) {
-                                    Text("↑", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleMedium)
-                                }
-                                IconButton(
-                                    enabled = enabled && image.sira < images.lastIndex,
-                                    onClick = {
-                                        val index = images.indexOfFirst { it.id == image.id }
-                                        if (index in 0 until images.lastIndex) onImagesChanged(images.swapped(index, index + 1))
-                                    },
-                                    modifier = Modifier.semantics { contentDescription = moveDownDescription },
-                                ) {
-                                    Text("↓", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleMedium)
-                                }
-                                IconButton(
-                                    enabled = enabled,
-                                    onClick = {
-                                        if (image.gecici) scope.launch { imageStore.geciciDosyayiSil(image.dosyaAdi) }
-                                        onImagesChanged(
-                                            images.filterNot { it.id == image.id }
-                                                .mapIndexed { order, item -> item.copy(sira = order) },
-                                        )
-                                    },
-                                    modifier = Modifier.semantics { contentDescription = removeImageDescription },
-                                ) {
-                                    Text("×", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.titleLarge)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+    com.keremtulu.questionnote.ui.bilesenler.GorselSecimBolumu(
+        images = images,
+        imageStore = imageStore,
+        enabled = enabled,
+        onCamera = onCamera,
+        onPicker = onPicker,
+        onCrop = onCrop,
+        onImagesChanged = onImagesChanged,
+        title = title,
+    )
 }
-
-private fun List<SoruGorselGirdisi>.swapped(first: Int, second: Int): List<SoruGorselGirdisi> =
-    toMutableList().also { items ->
-        val current = items[first]
-        items[first] = items[second]
-        items[second] = current
-    }.mapIndexed { index, item -> item.copy(sira = index) }
 
 private fun com.keremtulu.questionnote.domain.model.SoruGorseli.toGirdi() = SoruGorselGirdisi(
     id = id,
@@ -1292,6 +1315,7 @@ private fun com.keremtulu.questionnote.domain.model.SoruGorseli.toGirdi() = Soru
 @androidx.annotation.StringRes
 private fun statusLabel(status: SoruPlanDurumu): Int = when (status) {
     SoruPlanDurumu.AKTIF -> R.string.question_status_active
+    SoruPlanDurumu.OGRETMENE_SORULACAK -> R.string.question_status_ask_teacher
     SoruPlanDurumu.ASKIDA -> R.string.question_status_paused
     SoruPlanDurumu.TAMAMLANDI -> R.string.question_status_done
 }

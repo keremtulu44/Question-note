@@ -554,6 +554,33 @@ class RoomSoruRepositoryTest {
         )
     }
 
+    @Test
+    fun kaynakAdiDegistirDenemeKaynaginiKatalogaEklerVeSorulariSenkronizeEder() = runBlocking<Unit> {
+        repository.kaynakAdiDegistir(null, "Miray TYT 1")
+        assertTrue(
+            repository.secenekleriIzle(SoruSecenekTuru.KAYNAK).first().any { it.ad == "Miray TYT 1" },
+        )
+
+        assertEquals(
+            SoruIslemSonucu.Basarili,
+            repository.soruKaydet(
+                SoruKaydetmeIstegi(
+                    dersId = dersId,
+                    kaynak = "Miray TYT 1",
+                    gorseller = listOf(imageFiles.yeniGorsel(GorselTuru.SORU, 0)),
+                ),
+            ),
+        )
+
+        repository.kaynakAdiDegistir("Miray TYT 1", "Miray TYT Deneme 1")
+
+        val guncelSoru = repository.sorulariIzle(dersId).first().single()
+        assertEquals("Miray TYT Deneme 1", guncelSoru.kaynak)
+        val kaynakAdlari = repository.secenekleriIzle(SoruSecenekTuru.KAYNAK).first().map { it.ad }
+        assertTrue("Miray TYT Deneme 1" in kaynakAdlari)
+        assertTrue("Miray TYT 1" !in kaynakAdlari)
+    }
+
     private class FakeGorselDosyaYonetimi : GorselDosyaYonetimi {
         val staged = mutableMapOf<String, SoruGorselGirdisi>()
         val permanent = mutableMapOf<String, SoruGorselGirdisi>()

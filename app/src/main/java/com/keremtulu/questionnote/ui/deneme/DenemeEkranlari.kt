@@ -1,46 +1,77 @@
 package com.keremtulu.questionnote.ui.deneme
 
+import android.app.DatePickerDialog
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -49,110 +80,730 @@ import com.keremtulu.questionnote.data.prefs.DenemeDeposu
 import com.keremtulu.questionnote.domain.model.DenemeDersSatiri
 import com.keremtulu.questionnote.domain.model.DenemeKaydi
 import com.keremtulu.questionnote.domain.model.Ders
+import com.keremtulu.questionnote.domain.model.DersNetKarsilastirma
 import com.keremtulu.questionnote.domain.model.NetKurali
+import com.keremtulu.questionnote.domain.model.Soru
+import com.keremtulu.questionnote.domain.model.denemeKaynakEslesir
 import com.keremtulu.questionnote.domain.model.dersBarlari
-import com.keremtulu.questionnote.domain.model.enZayif
 import com.keremtulu.questionnote.domain.model.grafikNoktalari
-import com.keremtulu.questionnote.domain.model.karisikKural
 import com.keremtulu.questionnote.domain.model.oncekiAyniKural
 import com.keremtulu.questionnote.domain.model.yerelTarih
 import com.keremtulu.questionnote.domain.repository.DersRepository
 import com.keremtulu.questionnote.domain.repository.SoruRepository
+import com.keremtulu.questionnote.ui.animasyon.SureToken
+import com.keremtulu.questionnote.ui.animasyon.animateFloatPremium
+import com.keremtulu.questionnote.ui.animasyon.animateItemInsertion
+import com.keremtulu.questionnote.ui.animasyon.tweenPremium
+import com.keremtulu.questionnote.ui.bilesenler.hatirlaYerelGun
+import com.keremtulu.questionnote.ui.bilesenler.premium.CamKarti
+import com.keremtulu.questionnote.ui.bilesenler.premium.CamYukseklik
 import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
+import com.keremtulu.questionnote.ui.bilesenler.premium.PremiumBosDurum
+import com.keremtulu.questionnote.ui.dersKartStiliGetir
+import com.keremtulu.questionnote.ui.premium.EtkilesimTuru
 import com.keremtulu.questionnote.ui.premium.PremiumButton
-import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
+import com.keremtulu.questionnote.ui.premium.PremiumCard
+import com.keremtulu.questionnote.ui.premium.PremiumExtendedFloatingActionButton
+import com.keremtulu.questionnote.ui.premium.PremiumGradyanButon
 import com.keremtulu.questionnote.ui.premium.PremiumOutlinedButton
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
+import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
+import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.UUID
+import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.roundToInt
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 
+private val DenemeTurkceLocale: Locale = Locale.forLanguageTag("tr-TR")
 private val DenemeTarihBicimi: DateTimeFormatter =
-    DateTimeFormatter.ofPattern("d MMM yyyy", Locale.forLanguageTag("tr-TR"))
+    DateTimeFormatter.ofPattern("d MMM yyyy", DenemeTurkceLocale)
+private val DenemeUzunTarihBicimi: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("d MMMM yyyy, EEEE", DenemeTurkceLocale)
+
+private val MetinHaritasiSaver = listSaver<Map<String, String>, String>(
+    save = { harita -> harita.entries.flatMap { listOf(it.key, it.value) } },
+    restore = { liste ->
+        liste.chunked(2).filter { it.size == 2 }.associate { it[0] to it[1] }
+    },
+)
 
 fun denemeTarihYazi(gun: Int): String = gun.yerelTarih().format(DenemeTarihBicimi)
 
+fun denemeUzunTarihYazi(gun: Int): String =
+    gun.yerelTarih().format(DenemeUzunTarihBicimi)
+        .replaceFirstChar { it.titlecase(DenemeTurkceLocale) }
+
+fun netYazi(deger: Double): String {
+    val temiz = if (abs(deger) < 0.005) 0.0 else deger
+    return if (abs(temiz - temiz.roundToInt()) < 0.005) {
+        temiz.roundToInt().toString()
+    } else {
+        String.format(DenemeTurkceLocale, "%.2f", temiz)
+            .trimEnd('0')
+            .trimEnd(',')
+            .trimEnd('.')
+    }
+}
+
+@Composable
+private fun netKuraliEtiketi(kural: NetKurali): String = when (kural) {
+    NetKurali.DORTTE_BIR -> stringResource(R.string.deneme_rule_4)
+    NetKurali.UCTE_BIR -> stringResource(R.string.deneme_rule_3)
+    NetKurali.YOK -> stringResource(R.string.deneme_rule_none)
+}
+
+@Composable
+private fun tumSorulariIzle(
+    dersler: List<Ders>,
+    soruRepository: SoruRepository?,
+): List<Soru> {
+    val akis = remember(dersler, soruRepository) {
+        if (soruRepository == null || dersler.isEmpty()) {
+            flowOf(emptyList())
+        } else {
+            combine(dersler.map { ders -> soruRepository.sorulariIzle(ders.id) }) { gruplar ->
+                gruplar.flatMap { it }
+            }.catch { emit(emptyList()) }
+        }
+    }
+    val sonuc by produceState(emptyList<Soru>(), akis) {
+        akis.collect { value = it }
+    }
+    return sonuc
+}
+
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DenemeListesiEkrani(
     denemeDeposu: DenemeDeposu,
     dersRepository: DersRepository,
+    soruRepository: SoruRepository? = null,
     onGeri: () -> Unit,
     onYeni: () -> Unit,
     onAc: (String) -> Unit,
 ) {
-    val liste by denemeDeposu.kayitlariIzle.collectAsState()
-    val dersler by produceState(emptyList<Ders>()) {
-        dersRepository.aktifDersleriIzle().collect { value = it }
+    val kayitlar by denemeDeposu.kayitlariIzle.collectAsState()
+    val tumDersler by remember(dersRepository) {
+        combine(
+            dersRepository.dersleriIzle(false),
+            dersRepository.dersleriIzle(true),
+        ) { acik, arsiv -> acik + arsiv }
+    }.collectAsState(initial = emptyList())
+    val dersAdlari = remember(tumDersler) { tumDersler.associate { it.id to it.ad } }
+    val tumSorular = tumSorulariIzle(tumDersler, soruRepository)
+
+    val mevcutKurallar = remember(kayitlar) { kayitlar.map { it.kural }.distinct() }
+    var seciliKuralAdi by rememberSaveable { mutableStateOf<String?>(null) }
+    val seciliKural = remember(seciliKuralAdi, mevcutKurallar) {
+        seciliKuralAdi?.let { ad -> NetKurali.entries.firstOrNull { it.name == ad } }
+            ?.takeIf { it in mevcutKurallar }
     }
-    val dersAd = remember(dersler) { dersler.associate { it.id to it.ad } }
-    Scaffold { insets ->
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(insets),
-            contentPadding = PaddingValues(20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+    val grafikKayitlari = remember(kayitlar, seciliKural) {
+        val filtreli = if (seciliKural == null) kayitlar else kayitlar.filter { it.kural == seciliKural }
+        filtreli.grafikNoktalari()
+    }
+    val sonDeneme = grafikKayitlari.lastOrNull() ?: kayitlar.firstOrNull()
+
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets.safeDrawing,
+        floatingActionButton = {
+            if (kayitlar.isNotEmpty()) {
+                PremiumExtendedFloatingActionButton(
+                    onClick = onYeni,
+                    modifier = Modifier.testTag("deneme-fab-new"),
+                    shape = RoundedCornerShape(20.dp),
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                ) {
+                    Text("+", style = MaterialTheme.typography.titleLarge)
+                    Text(
+                        text = stringResource(R.string.deneme_new),
+                        modifier = Modifier.padding(start = 8.dp),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
+            }
+        },
+    ) { insets ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(insets)
+                .consumeWindowInsets(insets),
         ) {
-            item {
-                GradyanKart(modifier = Modifier.fillMaxWidth(), borderAnimation = false) {
-                    Column {
-                        PremiumTextButton(onClick = onGeri) { Text(stringResource(R.string.common_back)) }
-                        Text(
-                            stringResource(R.string.deneme_kicker),
-                            color = PremiumMarkaRenkler.BakirIsik,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Text(
-                            stringResource(R.string.deneme_title),
-                            color = PremiumMarkaRenkler.Kagit,
-                            style = MaterialTheme.typography.headlineSmall,
-                        )
-                        Text(
-                            stringResource(R.string.deneme_list_subtitle),
-                            modifier = Modifier.padding(top = 4.dp),
-                            color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.82f),
-                            style = MaterialTheme.typography.bodyMedium,
+            DenemeUstCubuk(
+                baslik = stringResource(R.string.deneme_title),
+                onGeri = onGeri,
+            )
+
+            if (kayitlar.isEmpty()) {
+                PremiumBosDurum(
+                    illustration = { DenemeBosIlustrasyon() },
+                    baslik = stringResource(R.string.deneme_empty_title),
+                    aciklama = stringResource(R.string.deneme_empty),
+                    butonMetni = stringResource(R.string.deneme_new),
+                    onButonTikla = onYeni,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .testTag("deneme-empty-state"),
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .testTag("deneme-list"),
+                    contentPadding = PaddingValues(start = 20.dp, top = 6.dp, end = 20.dp, bottom = 104.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp),
+                ) {
+                    item {
+                        GradyanKart(modifier = Modifier.fillMaxWidth(), borderAnimation = false) {
+                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text(
+                                    text = stringResource(R.string.deneme_kicker),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = PremiumMarkaRenkler.BakirIsik,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                                Text(
+                                    text = stringResource(R.string.deneme_title),
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    color = PremiumMarkaRenkler.Kagit,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                                Text(
+                                    text = stringResource(R.string.deneme_list_subtitle),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.78f),
+                                )
+                            }
+                        }
+                    }
+
+                    item {
+                        CamKarti(elevation = CamYukseklik.DUSUK) {
+                            Column(
+                                modifier = Modifier.padding(18.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Column(Modifier.weight(1f)) {
+                                        Text(
+                                            text = stringResource(R.string.deneme_chart_net),
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
+                                        )
+                                        if (grafikKayitlari.size >= 2) {
+                                            val enDusuk = grafikKayitlari.minOf { it.toplamNet() }
+                                            val enYuksek = grafikKayitlari.maxOf { it.toplamNet() }
+                                            Text(
+                                                text = stringResource(
+                                                    R.string.deneme_chart_range,
+                                                    netYazi(enDusuk),
+                                                    netYazi(enYuksek),
+                                                ),
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            )
+                                        }
+                                    }
+                                    grafikKayitlari.lastOrNull()?.let { enSon ->
+                                        val onceki = kayitlar.oncekiAyniKural(enSon)
+                                        NetOzetRozeti(
+                                            net = enSon.toplamNet(),
+                                            fark = onceki?.let { enSon.toplamNet() - it.toplamNet() },
+                                        )
+                                    }
+                                }
+
+                                if (mevcutKurallar.size > 1) {
+                                    FlowRow(
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                                    ) {
+                                        FilterChip(
+                                            selected = seciliKural == null,
+                                            onClick = { seciliKuralAdi = null },
+                                            label = { Text(stringResource(R.string.deneme_chart_all_rules)) },
+                                        )
+                                        mevcutKurallar.forEach { kural ->
+                                            FilterChip(
+                                                selected = seciliKural == kural,
+                                                onClick = { seciliKuralAdi = kural.name },
+                                                label = { Text(netKuraliEtiketi(kural)) },
+                                            )
+                                        }
+                                    }
+                                    if (seciliKural == null) {
+                                        Text(
+                                            text = stringResource(R.string.deneme_chart_mixed),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
+                                }
+
+                                NetCizgisi(grafikKayitlari)
+
+                                if (grafikKayitlari.size < 2) {
+                                    Text(
+                                        text = stringResource(R.string.deneme_chart_need_more),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    if (sonDeneme != null && sonDeneme.satirlar.isNotEmpty()) {
+                        item {
+                            CamKarti(elevation = CamYukseklik.DUSUK) {
+                                Column(
+                                    modifier = Modifier.padding(18.dp),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.deneme_chart_lessons, sonDeneme.ad),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.deneme_chart_legend),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                    DersNetBarlari(
+                                        barlar = kayitlar.dersBarlari(sonDeneme),
+                                        dersAdlari = dersAdlari,
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    itemsIndexed(kayitlar, key = { _, deneme -> deneme.id }) { index, deneme ->
+                        val giris by animateItemInsertion(index)
+                        val onceki = remember(kayitlar, deneme.id) { kayitlar.oncekiAyniKural(deneme) }
+                        val yuklenen = remember(tumSorular, deneme.ad) {
+                            tumSorular.count { denemeKaynakEslesir(it.kaynak, deneme.ad) }
+                        }
+                        DenemeListeKarti(
+                            deneme = deneme,
+                            fark = onceki?.let { deneme.toplamNet() - it.toplamNet() },
+                            yuklenenSoruSayisi = if (soruRepository != null) yuklenen else null,
+                            onClick = { onAc(deneme.id) },
+                            modifier = Modifier.graphicsLayer {
+                                alpha = giris
+                                translationY = (1f - giris) * 18f
+                            },
                         )
                     }
-                }
-            }
-            item {
-                PremiumButton(onClick = onYeni, modifier = Modifier.fillMaxWidth()) {
-                    Text(stringResource(R.string.deneme_new))
-                }
-            }
-            if (liste.isEmpty()) {
-                item {
-                    Text(stringResource(R.string.deneme_empty), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            } else {
-                item { NetCizgisi(liste) }
-                liste.maxWithOrNull(compareBy<DenemeKaydi> { it.gun }.thenBy { it.olusturma })?.let { son ->
-                    item { DersNetBarlari(liste, son, dersAd) }
-                }
-            }
-            items(liste, key = { it.id }) { deneme ->
-                Column(
-                    Modifier
-                        .fillMaxWidth()
-                        .clickable { onAc(deneme.id) }
-                        .padding(vertical = 8.dp),
-                ) {
-                    Text(deneme.ad, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                    Text(
-                        denemeTarihYazi(deneme.gun) + " · " +
-                            stringResource(R.string.deneme_net_line, "%.2f".format(deneme.toplamNet())),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
                 }
             }
         }
     }
 }
 
+@Composable
+private fun DenemeListeKarti(
+    deneme: DenemeKaydi,
+    fark: Double?,
+    yuklenenSoruSayisi: Int?,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = MaterialTheme.colorScheme
+    val dogruToplam = deneme.satirlar.sumOf { it.dogru }
+    val yanlisToplam = deneme.satirlar.sumOf { it.yanlis }
+    val bosToplam = deneme.satirlar.sumOf { it.bos }
+    val hedefYukleme = deneme.toplamYuklenecek
+
+    PremiumCard(
+        onClick = onClick,
+        modifier = modifier
+            .fillMaxWidth()
+            .testTag("deneme-card-${deneme.id}"),
+        colors = CardDefaults.cardColors(containerColor = colors.surface),
+        border = BorderStroke(1.dp, colors.outlineVariant.copy(alpha = 0.55f)),
+        interactionTur = EtkilesimTuru.KART_ACILIS,
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top,
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f).padding(end = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(3.dp),
+                ) {
+                    Text(
+                        text = deneme.ad,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(
+                        text = "${denemeTarihYazi(deneme.gun)} · ${netKuraliEtiketi(deneme.kural)}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colors.onSurfaceVariant,
+                    )
+                }
+                NetOzetRozeti(net = deneme.toplamNet(), fark = fark)
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(R.string.deneme_card_counts, dogruToplam, yanlisToplam, bosToplam),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = colors.onSurfaceVariant,
+                )
+                if (yuklenenSoruSayisi != null) {
+                    val (etiket, arkaPlan, metinRengi) = when {
+                        hedefYukleme == 0 -> Triple(
+                            stringResource(R.string.deneme_upload_clean),
+                            colors.secondaryContainer.copy(alpha = 0.6f),
+                            colors.onSecondaryContainer,
+                        )
+                        yuklenenSoruSayisi >= hedefYukleme -> Triple(
+                            stringResource(R.string.deneme_upload_complete, yuklenenSoruSayisi),
+                            PremiumMarkaRenkler.Yesil.copy(alpha = 0.16f),
+                            if (isSystemInDarkTheme()) PremiumMarkaRenkler.YesilAcik else PremiumMarkaRenkler.Yesil,
+                        )
+                        else -> Triple(
+                            stringResource(R.string.deneme_upload_progress, yuklenenSoruSayisi, hedefYukleme),
+                            colors.primaryContainer.copy(alpha = 0.7f),
+                            colors.onPrimaryContainer,
+                        )
+                    }
+                    Surface(
+                        shape = RoundedCornerShape(999.dp),
+                        color = arkaPlan,
+                    ) {
+                        Text(
+                            text = etiket,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = metinRengi,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun NetOzetRozeti(
+    net: Double,
+    fark: Double?,
+) {
+    val colors = MaterialTheme.colorScheme
+    val koyu = isSystemInDarkTheme()
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        if (fark != null && abs(fark) >= 0.05) {
+            val artis = fark > 0
+            val vurgu = if (artis) {
+                if (koyu) PremiumMarkaRenkler.YesilAcik else PremiumMarkaRenkler.Yesil
+            } else {
+                if (koyu) PremiumMarkaRenkler.BakirIsik else PremiumMarkaRenkler.Bakir
+            }
+            Surface(
+                shape = RoundedCornerShape(999.dp),
+                color = vurgu.copy(alpha = 0.15f),
+            ) {
+                Text(
+                    text = if (artis) {
+                        stringResource(R.string.deneme_delta_positive, netYazi(fark))
+                    } else {
+                        netYazi(fark)
+                    },
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = vurgu,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+        }
+        Surface(
+            shape = RoundedCornerShape(12.dp),
+            color = colors.primary.copy(alpha = 0.12f),
+            border = BorderStroke(1.dp, colors.primary.copy(alpha = 0.25f)),
+        ) {
+            Text(
+                text = stringResource(R.string.deneme_net_badge, netYazi(net)),
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                style = MaterialTheme.typography.titleSmall,
+                color = colors.primary,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+    }
+}
+
+@Composable
+private fun NetCizgisi(noktalar: List<DenemeKaydi>) {
+    if (noktalar.isEmpty()) return
+    val cizgiRengi = MaterialTheme.colorScheme.primary
+    val izRengi = MaterialTheme.colorScheme.outlineVariant
+    val yuzeyRengi = MaterialTheme.colorScheme.surface
+    val ilerleme by animateFloatPremium(
+        target = 1f,
+        animationSpec = tweenPremium(SureToken.SLOW),
+        label = "deneme-line-progress",
+    )
+
+    Canvas(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(148.dp)
+            .testTag("deneme-net-chart"),
+    ) {
+        val yatayIcBosluk = 14.dp.toPx()
+        val dikeyIcBosluk = 14.dp.toPx()
+        val icGenislik = (size.width - yatayIcBosluk * 2f).coerceAtLeast(1f)
+        val icYukseklik = (size.height - dikeyIcBosluk * 2f).coerceAtLeast(1f)
+
+        val degerler = noktalar.map { it.toplamNet().toFloat() }
+        val altSinir = min(0f, degerler.minOrNull() ?: 0f)
+        val hamUst = degerler.maxOrNull() ?: 1f
+        val ustSinir = max(altSinir + 4f, hamUst * 1.08f)
+        val aralik = (ustSinir - altSinir).coerceAtLeast(1f)
+
+        fun yKonumu(deger: Float): Float =
+            dikeyIcBosluk + icYukseklik * (1f - ((deger - altSinir) / aralik).coerceIn(0f, 1f))
+
+        listOf(0f, 0.5f, 1f).forEach { oran ->
+            val y = dikeyIcBosluk + icYukseklik * oran
+            drawLine(
+                color = izRengi.copy(alpha = 0.45f),
+                start = Offset(yatayIcBosluk, y),
+                end = Offset(size.width - yatayIcBosluk, y),
+                strokeWidth = 1.dp.toPx(),
+                pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 6f)),
+            )
+        }
+
+        if (altSinir < 0f) {
+            val sifirY = yKonumu(0f)
+            drawLine(
+                color = izRengi.copy(alpha = 0.85f),
+                start = Offset(yatayIcBosluk, sifirY),
+                end = Offset(size.width - yatayIcBosluk, sifirY),
+                strokeWidth = 1.2.dp.toPx(),
+            )
+        }
+
+        val konumlar = degerler.mapIndexed { indeks, deger ->
+            val x = if (degerler.size == 1) {
+                size.width / 2f
+            } else {
+                yatayIcBosluk + icGenislik * indeks / (degerler.lastIndex.toFloat())
+            }
+            Offset(x, yKonumu(deger * ilerleme.coerceIn(0f, 1f)))
+        }
+
+        if (konumlar.size >= 2) {
+            val tabanY = dikeyIcBosluk + icYukseklik
+            val alanYolu = Path().apply {
+                moveTo(konumlar.first().x, tabanY)
+                konumlar.forEach { nokta -> lineTo(nokta.x, nokta.y) }
+                lineTo(konumlar.last().x, tabanY)
+                close()
+            }
+            drawPath(
+                path = alanYolu,
+                brush = Brush.verticalGradient(
+                    colors = listOf(cizgiRengi.copy(alpha = 0.24f), Color.Transparent),
+                    startY = dikeyIcBosluk,
+                    endY = tabanY,
+                ),
+            )
+
+            val cizgiYolu = Path().apply {
+                konumlar.forEachIndexed { indeks, nokta ->
+                    if (indeks == 0) moveTo(nokta.x, nokta.y) else lineTo(nokta.x, nokta.y)
+                }
+            }
+            drawPath(
+                path = cizgiYolu,
+                color = cizgiRengi,
+                style = Stroke(
+                    width = 2.8.dp.toPx(),
+                    cap = StrokeCap.Round,
+                    join = StrokeJoin.Round,
+                ),
+            )
+        }
+
+        konumlar.forEachIndexed { indeks, nokta ->
+            val sonMu = indeks == konumlar.lastIndex
+            val disCap = if (sonMu) 6.dp.toPx() else 4.5.dp.toPx()
+            if (sonMu) {
+                drawCircle(
+                    color = cizgiRengi.copy(alpha = 0.20f),
+                    radius = 10.dp.toPx(),
+                    center = nokta,
+                )
+            }
+            drawCircle(color = cizgiRengi, radius = disCap, center = nokta)
+            drawCircle(color = yuzeyRengi, radius = (disCap - 2.dp.toPx()).coerceAtLeast(1.5f), center = nokta)
+        }
+    }
+}
+
+@Composable
+private fun DersNetBarlari(
+    barlar: List<DersNetKarsilastirma>,
+    dersAdlari: Map<String, String>,
+) {
+    if (barlar.isEmpty()) return
+    val koyu = isSystemInDarkTheme()
+    val colors = MaterialTheme.colorScheme
+    val tumDegerler = barlar.flatMap { listOfNotNull(it.sonNet, it.oncekiOrtalama) }
+    val enKucuk = min(0.0, tumDegerler.minOrNull() ?: 0.0)
+    val enBuyuk = max(1.0, tumDegerler.maxOrNull() ?: 1.0)
+    val toplamAralik = (enBuyuk - enKucuk).coerceAtLeast(1.0)
+
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        barlar.forEach { bar ->
+            val ad = dersAdlari[bar.dersId] ?: bar.dersAdi ?: "—"
+            val stil = dersKartStiliGetir(ad)
+            val vurgu = if (koyu) stil.koyuRenk else stil.acikRenk
+            val sembol = stringResource(stil.isaret)
+            val fark = bar.oncekiOrtalama?.let { bar.sonNet - it }
+
+            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Row(
+                        modifier = Modifier.weight(1f).padding(end = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(vurgu.copy(alpha = 0.16f)),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                text = sembol,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = vurgu,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = PremiumSembolAilesi,
+                            )
+                        }
+                        Text(
+                            text = ad,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        if (fark != null && abs(fark) >= 0.05) {
+                            Text(
+                                text = if (fark > 0) "+${netYazi(fark)}" else netYazi(fark),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = colors.onSurfaceVariant,
+                            )
+                        }
+                        Text(
+                            text = netYazi(bar.sonNet),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = vurgu,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                }
+
+                Canvas(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(14.dp),
+                ) {
+                    val sifirX = ((-enKucuk / toplamAralik).toFloat() * size.width).coerceIn(0f, size.width)
+                    val kose = CornerRadius(6.dp.toPx(), 6.dp.toPx())
+                    drawRoundRect(
+                        color = colors.surfaceVariant.copy(alpha = 0.65f),
+                        size = size,
+                        cornerRadius = kose,
+                    )
+
+                    fun cubukCiz(deger: Double, renk: Color, ustBosluk: Float, yukseklik: Float) {
+                        val hedefX = (((deger - enKucuk) / toplamAralik).toFloat() * size.width)
+                            .coerceIn(0f, size.width)
+                        val sol = min(sifirX, hedefX)
+                        val genislik = abs(hedefX - sifirX).coerceAtLeast(2.dp.toPx())
+                        drawRoundRect(
+                            color = renk,
+                            topLeft = Offset(sol, ustBosluk),
+                            size = Size(genislik.coerceAtMost(size.width - sol), yukseklik),
+                            cornerRadius = CornerRadius(yukseklik / 2f, yukseklik / 2f),
+                        )
+                    }
+
+                    bar.oncekiOrtalama?.let { ort ->
+                        cubukCiz(ort, vurgu.copy(alpha = 0.30f), 0f, size.height)
+                    }
+                    cubukCiz(bar.sonNet, vurgu, 2.dp.toPx(), (size.height - 4.dp.toPx()).coerceAtLeast(4f))
+
+                    if (enKucuk < 0.0) {
+                        drawLine(
+                            color = colors.outline.copy(alpha = 0.65f),
+                            start = Offset(sifirX, 0f),
+                            end = Offset(sifirX, size.height),
+                            strokeWidth = 1.dp.toPx(),
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+private data class DenemeFormDersi(
+    val ders: Ders,
+    val gizli: Boolean,
+)
+
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DenemeDetayEkrani(
     denemeId: String?,
@@ -160,267 +811,719 @@ fun DenemeDetayEkrani(
     dersRepository: DersRepository,
     soruRepository: SoruRepository,
     onGeri: () -> Unit,
+    onKaydedildi: (String) -> Unit,
     onSoruEkle: (Ders, String, String) -> Unit,
-    onKaydedildi: (String) -> Unit = {},
+    onDenemeyiCalis: ((String) -> Unit)? = null,
 ) {
-    val dersler by produceState(emptyList<Ders>()) {
-        dersRepository.aktifDersleriIzle().collect { value = it }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val snackbar = remember { SnackbarHostState() }
+    val bugunTarih = hatirlaYerelGun()
+
+    val kayitlar by denemeDeposu.kayitlariIzle.collectAsState()
+    val mevcut = remember(kayitlar, denemeId) {
+        denemeId?.let { id -> kayitlar.firstOrNull { it.id == id } ?: denemeDeposu.getir(id) }
     }
-    val mevcut = denemeId?.let { denemeDeposu.getir(it) }
-    var ad by remember(denemeId) { mutableStateOf(mevcut?.ad.orEmpty()) }
-    var kural by remember(denemeId) { mutableStateOf(mevcut?.kural ?: NetKurali.DORTTE_BIR) }
-    var gun by remember(denemeId) { mutableIntStateOf(mevcut?.gun ?: LocalDate.now().toEpochDay().toInt()) }
-    val dogru = remember(denemeId) { mutableStateMapOf<String, String>() }
-    val yanlis = remember(denemeId) { mutableStateMapOf<String, String>() }
-    val soruSayisi = remember(denemeId) { mutableStateMapOf<String, String>() }
-    var kayitId by remember(denemeId) { mutableStateOf(mevcut?.id) }
-    var hata by remember { mutableStateOf<Int?>(null) }
-    var ozet by remember { mutableStateOf<String?>(null) }
-    if (mevcut != null && dogru.isEmpty()) {
-        mevcut.satirlar.forEach { satir ->
-            dogru[satir.dersId] = satir.dogru.toString()
-            yanlis[satir.dersId] = satir.yanlis.toString()
-            soruSayisi[satir.dersId] = satir.soruSayisi.toString()
+
+    val aktifDersler by remember(dersRepository) {
+        dersRepository.aktifDersleriIzle()
+    }.collectAsState(initial = emptyList())
+    val tumDersler by remember(dersRepository) {
+        combine(
+            dersRepository.dersleriIzle(false),
+            dersRepository.dersleriIzle(true),
+        ) { acik, arsiv -> acik + arsiv }
+    }.collectAsState(initial = emptyList())
+    val tumSorular = tumSorulariIzle(tumDersler, soruRepository)
+
+    val formDersleri = remember(aktifDersler, tumDersler, mevcut) {
+        val aktifIdler = aktifDersler.map { it.id }.toSet()
+        val tamHarita = tumDersler.associateBy { it.id }
+        val ekKayitliDersler = mevcut?.satirlar.orEmpty()
+            .filter { it.dersId !in aktifIdler }
+            .map { satir ->
+                val gercekDers = tamHarita[satir.dersId] ?: Ders(
+                    id = satir.dersId,
+                    ad = satir.dersAdi ?: "Ders",
+                    sira = Int.MAX_VALUE,
+                    soruSayisi = 0,
+                    arsivli = true,
+                )
+                DenemeFormDersi(ders = gercekDers, gizli = true)
+            }
+        aktifDersler.map { DenemeFormDersi(ders = it, gizli = false) } + ekKayitliDersler
+    }
+
+    val kayitAnahtari = mevcut?.id ?: "yeni"
+    var ad by rememberSaveable(kayitAnahtari) { mutableStateOf(mevcut?.ad.orEmpty()) }
+    var kuralAdi by rememberSaveable(kayitAnahtari) {
+        mutableStateOf((mevcut?.kural ?: NetKurali.DORTTE_BIR).name)
+    }
+    var seciliGun by rememberSaveable(kayitAnahtari) {
+        mutableIntStateOf(mevcut?.gun ?: bugunTarih.toEpochDay().toInt())
+    }
+    var soruMetinleri by rememberSaveable(kayitAnahtari, stateSaver = MetinHaritasiSaver) {
+        mutableStateOf(
+            mevcut?.satirlar?.associate { it.dersId to it.soruSayisi.toString() }.orEmpty(),
+        )
+    }
+    var dogruMetinleri by rememberSaveable(kayitAnahtari, stateSaver = MetinHaritasiSaver) {
+        mutableStateOf(
+            mevcut?.satirlar?.associate { it.dersId to it.dogru.toString() }.orEmpty(),
+        )
+    }
+    var yanlisMetinleri by rememberSaveable(kayitAnahtari, stateSaver = MetinHaritasiSaver) {
+        mutableStateOf(
+            mevcut?.satirlar?.associate { it.dersId to it.yanlis.toString() }.orEmpty(),
+        )
+    }
+    var silmeOnayiAcik by rememberSaveable { mutableStateOf(false) }
+    var islemde by remember { mutableStateOf(false) }
+
+    val kural = remember(kuralAdi) {
+        NetKurali.entries.firstOrNull { it.name == kuralAdi } ?: NetKurali.DORTTE_BIR
+    }
+
+    val yuklenenSayilar = remember(tumSorular, mevcut?.ad, ad) {
+        val hedefKaynak = mevcut?.ad ?: ad
+        if (hedefKaynak.isBlank()) {
+            emptyMap()
+        } else {
+            tumSorular
+                .filter { denemeKaynakEslesir(it.kaynak, hedefKaynak) }
+                .groupingBy { it.dersId }
+                .eachCount()
         }
     }
-    val kayitli = kayitId?.let { denemeDeposu.getir(it) }
-    val liste by denemeDeposu.kayitlariIzle.collectAsState()
-    val yuklenen = produceState(emptyMap<String, Int>(), kayitli?.ad, dersler) {
-        val adKaynak = kayitli?.ad ?: return@produceState
-        if (dersler.isEmpty()) return@produceState
-        combine(dersler.map { ders ->
-            soruRepository.sorulariIzle(ders.id).map { sorular ->
-                ders.id to sorular.count { it.kaynak == adKaynak }
-            }
-        }) { pairs -> pairs.toMap() }.collect { value = it }
-    }.value
-    Scaffold { insets ->
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(insets),
-            contentPadding = PaddingValues(20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            item {
-                GradyanKart(modifier = Modifier.fillMaxWidth(), borderAnimation = false) {
-                    Column {
-                        PremiumTextButton(onClick = onGeri) { Text(stringResource(R.string.common_back)) }
-                        Text(
-                            stringResource(R.string.deneme_form_title),
-                            color = PremiumMarkaRenkler.Kagit,
-                            style = MaterialTheme.typography.headlineSmall,
-                        )
-                    }
-                }
-            }
-            item {
-                OutlinedTextField(
-                    value = ad,
-                    onValueChange = { ad = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    label = { Text(stringResource(R.string.deneme_name)) },
-                    shape = RoundedCornerShape(16.dp),
+
+    val anlikSatirlar = remember(formDersleri, soruMetinleri, dogruMetinleri, yanlisMetinleri) {
+        formDersleri.mapNotNull { oge ->
+            val id = oge.ders.id
+            val soru = soruMetinleri[id]?.toIntOrNull() ?: 0
+            val dogru = dogruMetinleri[id]?.toIntOrNull() ?: 0
+            val yanlis = yanlisMetinleri[id]?.toIntOrNull() ?: 0
+            if (soru == 0 && dogru == 0 && yanlis == 0) {
+                null
+            } else {
+                DenemeDersSatiri(
+                    dersId = id,
+                    soruSayisi = soru,
+                    dogru = dogru,
+                    yanlis = yanlis,
+                    dersAdi = oge.ders.ad,
                 )
             }
-            item {
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                    PremiumTextButton(onClick = { gun -= 1 }) { Text("‹") }
-                    Text(denemeTarihYazi(gun), fontWeight = FontWeight.SemiBold)
-                    PremiumTextButton(onClick = { gun += 1 }) { Text("›") }
-                }
-                if (gun != LocalDate.now().toEpochDay().toInt()) {
-                    PremiumTextButton(onClick = { gun = LocalDate.now().toEpochDay().toInt() }) {
-                        Text(stringResource(R.string.deneme_today))
-                    }
-                }
-            }
-            item {
-                Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FilterChip(selected = kural == NetKurali.DORTTE_BIR, onClick = { kural = NetKurali.DORTTE_BIR }, label = { Text(stringResource(R.string.deneme_rule_4)) })
-                    FilterChip(selected = kural == NetKurali.UCTE_BIR, onClick = { kural = NetKurali.UCTE_BIR }, label = { Text(stringResource(R.string.deneme_rule_3)) })
-                    FilterChip(selected = kural == NetKurali.YOK, onClick = { kural = NetKurali.YOK }, label = { Text(stringResource(R.string.deneme_rule_none)) })
-                }
-            }
-            items(dersler, key = { it.id }) { ders ->
-                val s = soruSayisi[ders.id].orEmpty()
-                val d = dogru[ders.id].orEmpty()
-                val y = yanlis[ders.id].orEmpty()
-                val sInt = s.toIntOrNull() ?: 0
-                val dInt = d.toIntOrNull() ?: 0
-                val yInt = y.toIntOrNull() ?: 0
-                val bos = (sInt - dInt - yInt).coerceAtLeast(0)
-                val net = kural.net(dInt, yInt)
-                val kalan = ((yInt + bos) - (yuklenen[ders.id] ?: 0)).coerceAtLeast(0)
-                Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(ders.ad, fontWeight = FontWeight.SemiBold)
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        SayiAlani(stringResource(R.string.deneme_total), s, Modifier.weight(1f)) { soruSayisi[ders.id] = it }
-                        SayiAlani(stringResource(R.string.deneme_correct), d, Modifier.weight(1f)) { dogru[ders.id] = it }
-                        SayiAlani(stringResource(R.string.deneme_wrong), y, Modifier.weight(1f)) { yanlis[ders.id] = it }
-                    }
-                    Text(
-                        stringResource(R.string.deneme_blank_net, bos, "%.2f".format(net)),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    if (kayitli != null && kalan > 0) {
-                        PremiumOutlinedButton(
-                            onClick = { onSoruEkle(ders, kayitli.ad, kayitli.id) },
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            Text(stringResource(R.string.deneme_add_photo, kalan))
-                        }
-                    }
-                }
-            }
-            hata?.let { item { Text(stringResource(it), color = MaterialTheme.colorScheme.error) } }
-            ozet?.let { item { Text(it, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium) } }
-            item {
+        }
+    }
+    val gecerliSatirlar = remember(anlikSatirlar) { anlikSatirlar.filter { it.gecerli() && it.soruSayisi > 0 } }
+    val anlikToplamNet = remember(gecerliSatirlar, kural) {
+        gecerliSatirlar.sumOf { kural.net(it.dogru, it.yanlis) }
+    }
+    val anlikDogru = remember(gecerliSatirlar) { gecerliSatirlar.sumOf { it.dogru } }
+    val anlikYanlis = remember(gecerliSatirlar) { gecerliSatirlar.sumOf { it.yanlis } }
+    val anlikBos = remember(gecerliSatirlar) { gecerliSatirlar.sumOf { it.bos } }
+    val toplamYuklenen = remember(yuklenenSayilar) { yuklenenSayilar.values.sum() }
+
+    suspend fun dogrulaVeKaydet(): DenemeKaydi? {
+        val temizAd = ad.trim()
+        if (temizAd.isEmpty()) {
+            snackbar.showSnackbar(context.getString(R.string.deneme_error_name))
+            return null
+        }
+        val hataliVar = anlikSatirlar.any { !it.gecerli() || it.soruSayisi <= 0 }
+        if (hataliVar || gecerliSatirlar.isEmpty()) {
+            snackbar.showSnackbar(context.getString(R.string.deneme_error_scores))
+            return null
+        }
+        val simdi = System.currentTimeMillis()
+        val kaydedilecek = DenemeKaydi(
+            id = mevcut?.id ?: UUID.randomUUID().toString(),
+            ad = temizAd,
+            kural = kural,
+            olusturma = mevcut?.olusturma ?: simdi,
+            gun = seciliGun,
+            satirlar = gecerliSatirlar,
+        )
+        soruRepository.kaynakAdiDegistir(mevcut?.ad, temizAd)
+        denemeDeposu.kaydet(kaydedilecek)
+        return kaydedilecek
+    }
+
+    if (silmeOnayiAcik && mevcut != null) {
+        AlertDialog(
+            onDismissRequest = { silmeOnayiAcik = false },
+            title = { Text(stringResource(R.string.deneme_delete_confirm_title)) },
+            text = { Text(stringResource(R.string.deneme_delete_confirm_body, mevcut.ad)) },
+            confirmButton = {
                 PremiumButton(
                     onClick = {
-                        val temizAd = ad.trim()
-                        if (temizAd.isEmpty()) {
-                            hata = R.string.deneme_error_name
-                            return@PremiumButton
-                        }
-                        val satirlar = dersler.map { ders ->
-                            DenemeDersSatiri(
-                                dersId = ders.id,
-                                soruSayisi = soruSayisi[ders.id].orEmpty().toIntOrNull() ?: 0,
-                                dogru = dogru[ders.id].orEmpty().toIntOrNull() ?: 0,
-                                yanlis = yanlis[ders.id].orEmpty().toIntOrNull() ?: 0,
-                            )
-                        }.filter { it.soruSayisi > 0 || it.dogru > 0 || it.yanlis > 0 }
-                        if (satirlar.isEmpty() || satirlar.any { !it.gecerli() }) {
-                            hata = R.string.deneme_error_scores
-                            return@PremiumButton
-                        }
-                        hata = null
-                        val id = kayitId ?: UUID.randomUUID().toString()
-                        val kayit = DenemeKaydi(
-                            id = id,
-                            ad = temizAd,
-                            kural = kural,
-                            olusturma = kayitli?.olusturma ?: System.currentTimeMillis(),
-                            gun = gun,
-                            satirlar = satirlar,
-                        )
-                        denemeDeposu.kaydet(kayit)
-                        kayitId = id
-                        onKaydedildi(id)
-                        val zayif = kayit.enZayif()
-                        val zayifAd = dersler.firstOrNull { it.id == zayif?.dersId }?.ad
-                        val onceki = liste.oncekiAyniKural(kayit)
-                        val delta = onceki?.let { kayit.toplamNet() - it.toplamNet() }
-                        ozet = buildString {
-                            append("%.2f".format(kayit.toplamNet()))
-                            append(" net.")
-                            if (zayifAd != null) append(" En zayıf: ").append(zayifAd).append(".")
-                            if (delta != null) {
-                                append(" Önceki denemeye göre ")
-                                append(if (delta >= 0) "+" else "")
-                                append("%.2f".format(delta))
-                                append(".")
-                            }
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                ) { Text(stringResource(R.string.deneme_save)) }
-            }
-            if (kayitId != null) {
-                item {
-                    PremiumTextButton(onClick = {
-                        kayitId?.let { denemeDeposu.sil(it) }
+                        silmeOnayiAcik = false
+                        denemeDeposu.sil(mevcut.id)
                         onGeri()
-                    }) { Text(stringResource(R.string.deneme_delete)) }
+                    },
+                ) {
+                    Text(stringResource(R.string.deneme_delete_confirm_action))
                 }
-            }
-        }
+            },
+            dismissButton = {
+                PremiumTextButton(onClick = { silmeOnayiAcik = false }) {
+                    Text(stringResource(R.string.topic_cancel))
+                }
+            },
+        )
     }
-}
 
-@Composable
-private fun NetCizgisi(liste: List<DenemeKaydi>) {
-    val noktalar = liste.grafikNoktalari()
-    val cizgi = MaterialTheme.colorScheme.primary
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text(stringResource(R.string.deneme_chart_net), fontWeight = FontWeight.SemiBold)
-        if (liste.karisikKural()) {
-            Text(stringResource(R.string.deneme_chart_mixed), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        if (noktalar.size < 2) {
-            Text(stringResource(R.string.deneme_chart_need_more), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        } else {
-            Canvas(Modifier.fillMaxWidth().height(120.dp)) {
-                val nets = noktalar.map { it.toplamNet().toFloat() }
-                val min = minOf(0f, nets.min())
-                val max = maxOf(nets.max(), min + 1f)
-                val dx = if (nets.size == 1) 0f else size.width / (nets.size - 1)
-                fun y(v: Float) = size.height - ((v - min) / (max - min)) * size.height
-                val path = Path()
-                nets.forEachIndexed { i, v ->
-                    val x = i * dx
-                    if (i == 0) path.moveTo(x, y(v)) else path.lineTo(x, y(v))
-                }
-                drawPath(path, cizgi, style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round))
-                nets.forEachIndexed { i, v ->
-                    drawCircle(cizgi, 5.dp.toPx(), Offset(i * dx, y(v)))
-                }
-            }
-        }
-    }
-}
+    val focusManager = LocalFocusManager.current
+    val klavyeAcik = WindowInsets.ime.getBottom(LocalDensity.current) > 0
 
-@Composable
-private fun DersNetBarlari(liste: List<DenemeKaydi>, son: DenemeKaydi, dersAd: Map<String, String>) {
-    val barlar = liste.dersBarlari(son)
-    if (barlar.isEmpty()) return
-    val tavan = (barlar.flatMap { listOfNotNull(it.sonNet, it.oncekiOrtalama) }.maxOrNull() ?: 1.0).coerceAtLeast(1.0)
-    val sonRenk = MaterialTheme.colorScheme.primary
-    val onceRenk = MaterialTheme.colorScheme.outline
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(stringResource(R.string.deneme_chart_lessons), fontWeight = FontWeight.SemiBold)
-        Row(Modifier.fillMaxWidth().height(110.dp).horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            barlar.forEach { bar ->
-                Column(Modifier.width(56.dp).fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.BottomCenter) {
-                        Row(Modifier.fillMaxHeight(), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.Bottom) {
-                            Box(
-                                Modifier.width(14.dp).fillMaxHeight((bar.sonNet / tavan).toFloat().coerceIn(0.04f, 1f)),
-                            ) {
-                                Canvas(Modifier.fillMaxSize()) { drawRect(sonRenk) }
-                            }
-                            bar.oncekiOrtalama?.let { once ->
-                                Box(
-                                    Modifier.width(14.dp).fillMaxHeight((once / tavan).toFloat().coerceIn(0.04f, 1f)),
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets.safeDrawing,
+        snackbarHost = { SnackbarHost(snackbar) },
+    ) { insets ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(insets)
+                .consumeWindowInsets(insets),
+        ) {
+            DenemeUstCubuk(
+                baslik = stringResource(
+                    if (mevcut == null) R.string.deneme_form_new_title else R.string.deneme_form_title,
+                ),
+                onGeri = onGeri,
+                sagAksiyon = if (klavyeAcik || mevcut != null) {
+                    {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            if (klavyeAcik) {
+                                PremiumTextButton(
+                                    onClick = { focusManager.clearFocus() },
+                                    modifier = Modifier.testTag("deneme-hide-keyboard-button"),
                                 ) {
-                                    Canvas(Modifier.fillMaxSize()) { drawRect(onceRenk) }
+                                    Text(
+                                        text = stringResource(R.string.common_hide_keyboard),
+                                        fontWeight = FontWeight.SemiBold,
+                                    )
+                                }
+                            }
+                            if (mevcut != null) {
+                                PremiumTextButton(
+                                    onClick = { silmeOnayiAcik = true },
+                                    modifier = Modifier.testTag("deneme-delete-button"),
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.deneme_delete),
+                                        color = MaterialTheme.colorScheme.error,
+                                    )
                                 }
                             }
                         }
                     }
+                } else {
+                    null
+                },
+            )
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .testTag("deneme-detail-list"),
+                contentPadding = PaddingValues(start = 20.dp, top = 6.dp, end = 20.dp, bottom = 36.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
+            ) {
+                item {
+                    GradyanKart(modifier = Modifier.fillMaxWidth(), borderAnimation = false) {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(
+                                text = stringResource(R.string.deneme_live_kicker),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = PremiumMarkaRenkler.BakirIsik,
+                                fontWeight = FontWeight.Bold,
+                            )
+                            Text(
+                                text = stringResource(R.string.deneme_net_line, netYazi(anlikToplamNet)),
+                                style = MaterialTheme.typography.displaySmall,
+                                color = PremiumMarkaRenkler.Kagit,
+                                fontWeight = FontWeight.Bold,
+                            )
+                            Text(
+                                text = stringResource(
+                                    R.string.deneme_live_counts,
+                                    anlikDogru,
+                                    anlikYanlis,
+                                    anlikBos,
+                                ),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.80f),
+                            )
+                            if (mevcut != null && toplamYuklenen > 0 && onDenemeyiCalis != null) {
+                                Spacer(Modifier.height(2.dp))
+                                PremiumButton(
+                                    onClick = { onDenemeyiCalis(mevcut.ad) },
+                                    modifier = Modifier.testTag("deneme-study-button"),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = PremiumMarkaRenkler.Kagit.copy(alpha = 0.16f),
+                                        contentColor = PremiumMarkaRenkler.Kagit,
+                                    ),
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.deneme_study_action, toplamYuklenen),
+                                        fontWeight = FontWeight.SemiBold,
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                item {
+                    CamKarti(elevation = CamYukseklik.DUSUK) {
+                        Column(
+                            modifier = Modifier.padding(18.dp),
+                            verticalArrangement = Arrangement.spacedBy(14.dp),
+                        ) {
+                            OutlinedTextField(
+                                value = ad,
+                                onValueChange = { ad = it },
+                                label = { Text(stringResource(R.string.deneme_name)) },
+                                placeholder = { Text(stringResource(R.string.deneme_name_placeholder)) },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                                keyboardActions = KeyboardActions(
+                                    onNext = {
+                                        if (!focusManager.moveFocus(FocusDirection.Next)) {
+                                            focusManager.clearFocus()
+                                        }
+                                    },
+                                ),
+                                shape = RoundedCornerShape(16.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("deneme-name-input"),
+                            )
+
+                            Surface(
+                                shape = RoundedCornerShape(16.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+                                border = BorderStroke(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                                ),
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 14.dp, vertical = 10.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Column(Modifier.weight(1f)) {
+                                        Text(
+                                            text = stringResource(R.string.deneme_date_label),
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                        Text(
+                                            text = denemeUzunTarihYazi(seciliGun),
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            fontWeight = FontWeight.SemiBold,
+                                        )
+                                    }
+                                    PremiumTextButton(
+                                        onClick = {
+                                            val mevcutTarih = LocalDate.ofEpochDay(seciliGun.toLong())
+                                            DatePickerDialog(
+                                                context,
+                                                { _, yil, ay, gunAyin ->
+                                                    seciliGun = LocalDate.of(yil, ay + 1, gunAyin)
+                                                        .toEpochDay()
+                                                        .toInt()
+                                                },
+                                                mevcutTarih.year,
+                                                mevcutTarih.monthValue - 1,
+                                                mevcutTarih.dayOfMonth,
+                                            ).show()
+                                        },
+                                        modifier = Modifier.testTag("deneme-date-button"),
+                                    ) {
+                                        Text(stringResource(R.string.deneme_date_change))
+                                    }
+                                }
+                            }
+
+                            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                Text(
+                                    text = stringResource(R.string.deneme_rule_label),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                                FlowRow(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                                ) {
+                                    NetKurali.entries.forEach { secenek ->
+                                        FilterChip(
+                                            selected = kural == secenek,
+                                            onClick = { kuralAdi = secenek.name },
+                                            label = { Text(netKuraliEtiketi(secenek)) },
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                item {
                     Text(
-                        dersAd[bar.dersId] ?: "—",
-                        style = MaterialTheme.typography.labelSmall,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                        text = stringResource(R.string.deneme_lessons_section),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(top = 4.dp),
                     )
+                }
+
+                itemsIndexed(formDersleri, key = { _, oge -> oge.ders.id }) { siraIndex, oge ->
+                    val ders = oge.ders
+                    val soruAdet = soruMetinleri[ders.id]?.toIntOrNull() ?: 0
+                    val dogruAdet = dogruMetinleri[ders.id]?.toIntOrNull() ?: 0
+                    val yanlisAdet = yanlisMetinleri[ders.id]?.toIntOrNull() ?: 0
+                    val satir = DenemeDersSatiri(
+                        dersId = ders.id,
+                        soruSayisi = soruAdet,
+                        dogru = dogruAdet,
+                        yanlis = yanlisAdet,
+                        dersAdi = ders.ad,
+                    )
+                    val yuklenen = yuklenenSayilar[ders.id] ?: 0
+                    DenemeDersSkorKarti(
+                        ders = ders,
+                        gizli = oge.gizli,
+                        sonDersMi = siraIndex == formDersleri.lastIndex,
+                        soruMetni = soruMetinleri[ders.id].orEmpty(),
+                        dogruMetni = dogruMetinleri[ders.id].orEmpty(),
+                        yanlisMetni = yanlisMetinleri[ders.id].orEmpty(),
+                        satir = satir,
+                        kural = kural,
+                        yuklenen = yuklenen,
+                        fotografAktif = !oge.gizli && !islemde && satir.gecerli() && satir.soruSayisi > 0 && satir.yuklenecek > 0 && ad.isNotBlank(),
+                        onSoruDegisti = { deger -> soruMetinleri = soruMetinleri + (ders.id to deger) },
+                        onDogruDegisti = { deger -> dogruMetinleri = dogruMetinleri + (ders.id to deger) },
+                        onYanlisDegisti = { deger -> yanlisMetinleri = yanlisMetinleri + (ders.id to deger) },
+                        onFotografYukle = {
+                            if (!islemde) {
+                                scope.launch {
+                                    islemde = true
+                                    try {
+                                        val kaydedilen = dogrulaVeKaydet()
+                                        if (kaydedilen != null) {
+                                            onKaydedildi(kaydedilen.id)
+                                            onSoruEkle(ders, kaydedilen.ad, kaydedilen.id)
+                                        }
+                                    } finally {
+                                        islemde = false
+                                    }
+                                }
+                            }
+                        },
+                    )
+                }
+
+                item {
+                    PremiumGradyanButon(
+                        enabled = !islemde,
+                        onClick = {
+                            scope.launch {
+                                islemde = true
+                                try {
+                                    val kaydedilen = dogrulaVeKaydet()
+                                    if (kaydedilen != null) {
+                                        onKaydedildi(kaydedilen.id)
+                                        onGeri()
+                                    }
+                                } finally {
+                                    islemde = false
+                                }
+                            }
+                        },
+                        modifier = Modifier
+                            .padding(top = 4.dp)
+                            .testTag("deneme-save-button"),
+                    ) {
+                        Text(
+                            text = stringResource(R.string.deneme_save),
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
                 }
             }
         }
-        Text(stringResource(R.string.deneme_chart_legend), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
 @Composable
-private fun SayiAlani(etiket: String, deger: String, modifier: Modifier = Modifier, onDegis: (String) -> Unit) {
+private fun DenemeDersSkorKarti(
+    ders: Ders,
+    gizli: Boolean,
+    sonDersMi: Boolean,
+    soruMetni: String,
+    dogruMetni: String,
+    yanlisMetni: String,
+    satir: DenemeDersSatiri,
+    kural: NetKurali,
+    yuklenen: Int,
+    fotografAktif: Boolean,
+    onSoruDegisti: (String) -> Unit,
+    onDogruDegisti: (String) -> Unit,
+    onYanlisDegisti: (String) -> Unit,
+    onFotografYukle: () -> Unit,
+) {
+    val koyu = isSystemInDarkTheme()
+    val colors = MaterialTheme.colorScheme
+    val stil = dersKartStiliGetir(ders.ad)
+    val vurgu = if (koyu) stil.koyuRenk else stil.acikRenk
+    val sembol = stringResource(stil.isaret)
+    val doluMu = soruMetni.isNotBlank() || dogruMetni.isNotBlank() || yanlisMetni.isNotBlank()
+    val gecersiz = doluMu && (!satir.gecerli() || (satir.soruSayisi == 0 && (satir.dogru > 0 || satir.yanlis > 0)))
+
+    PremiumCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("deneme-lesson-${ders.id}"),
+        colors = CardDefaults.cardColors(containerColor = colors.surface),
+        border = BorderStroke(
+            width = 1.dp,
+            color = if (gecersiz) {
+                colors.error.copy(alpha = 0.7f)
+            } else if (doluMu) {
+                vurgu.copy(alpha = 0.38f)
+            } else {
+                colors.outlineVariant.copy(alpha = 0.50f)
+            },
+        ),
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Row(
+                    modifier = Modifier.weight(1f).padding(end = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(vurgu.copy(alpha = 0.16f)),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = sembol,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = vurgu,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = PremiumSembolAilesi,
+                        )
+                    }
+                    Column {
+                        Text(
+                            text = ders.ad,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        if (gizli) {
+                            Text(
+                                text = stringResource(R.string.deneme_hidden_lesson),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = colors.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
+
+                if (satir.soruSayisi > 0 && satir.gecerli()) {
+                    Surface(
+                        shape = RoundedCornerShape(999.dp),
+                        color = vurgu.copy(alpha = 0.14f),
+                    ) {
+                        Text(
+                            text = stringResource(
+                                R.string.deneme_blank_net,
+                                satir.bos,
+                                netYazi(kural.net(satir.dogru, satir.yanlis)),
+                            ),
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = vurgu,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
+                }
+            }
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                SayiAlani(
+                    etiket = stringResource(R.string.deneme_total),
+                    deger = soruMetni,
+                    hatali = gecersiz,
+                    imeAction = ImeAction.Next,
+                    modifier = Modifier.weight(1f).testTag("deneme-total-${ders.id}"),
+                    onDegisti = onSoruDegisti,
+                )
+                SayiAlani(
+                    etiket = stringResource(R.string.deneme_correct),
+                    deger = dogruMetni,
+                    hatali = gecersiz,
+                    imeAction = ImeAction.Next,
+                    modifier = Modifier.weight(1f).testTag("deneme-correct-${ders.id}"),
+                    onDegisti = onDogruDegisti,
+                )
+                SayiAlani(
+                    etiket = stringResource(R.string.deneme_wrong),
+                    deger = yanlisMetni,
+                    hatali = gecersiz,
+                    imeAction = if (sonDersMi) ImeAction.Done else ImeAction.Next,
+                    modifier = Modifier.weight(1f).testTag("deneme-wrong-${ders.id}"),
+                    onDegisti = onYanlisDegisti,
+                )
+            }
+
+            if (gecersiz) {
+                Text(
+                    text = stringResource(R.string.deneme_row_invalid),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.error,
+                )
+            } else if (!gizli && satir.soruSayisi > 0 && satir.yuklenecek > 0) {
+                val kalan = (satir.yuklenecek - yuklenen).coerceAtLeast(0)
+                PremiumOutlinedButton(
+                    enabled = fotografAktif,
+                    onClick = onFotografYukle,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("deneme-photo-${ders.id}"),
+                ) {
+                    Text(
+                        text = if (kalan > 0) {
+                            stringResource(R.string.deneme_add_photo, kalan)
+                        } else {
+                            stringResource(R.string.deneme_add_more_photo, yuklenen)
+                        },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SayiAlani(
+    etiket: String,
+    deger: String,
+    hatali: Boolean,
+    imeAction: ImeAction = ImeAction.Next,
+    modifier: Modifier = Modifier,
+    onDegisti: (String) -> Unit,
+) {
+    val focusManager = LocalFocusManager.current
     OutlinedTextField(
         value = deger,
-        onValueChange = { if (it.all { c -> c.isDigit() } && it.length <= 3) onDegis(it) },
-        modifier = modifier,
+        onValueChange = { girdi -> onDegisti(girdi.filter(Char::isDigit).take(3)) },
+        label = { Text(etiket, maxLines = 1, overflow = TextOverflow.Ellipsis) },
         singleLine = true,
-        label = { Text(etiket) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-        shape = RoundedCornerShape(12.dp),
+        isError = hatali,
+        shape = RoundedCornerShape(14.dp),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Number,
+            imeAction = imeAction,
+        ),
+        keyboardActions = KeyboardActions(
+            onNext = {
+                if (!focusManager.moveFocus(FocusDirection.Next)) {
+                    focusManager.clearFocus()
+                }
+            },
+            onDone = { focusManager.clearFocus() },
+        ),
+        modifier = modifier,
     )
+}
+
+@Composable
+private fun DenemeUstCubuk(
+    baslik: String,
+    onGeri: () -> Unit,
+    sagAksiyon: (@Composable () -> Unit)? = null,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Row(
+            modifier = Modifier.weight(1f),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            PremiumTextButton(
+                onClick = onGeri,
+                interactionTur = EtkilesimTuru.GERI,
+                modifier = Modifier.testTag("deneme-back-button"),
+            ) {
+                Text("← ${stringResource(R.string.common_back)}")
+            }
+            Spacer(Modifier.width(4.dp))
+            Text(
+                text = baslik,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        sagAksiyon?.invoke()
+    }
+}
+
+@Composable
+private fun DenemeBosIlustrasyon() {
+    val birincil = MaterialTheme.colorScheme.primary
+    val vurgu = PremiumMarkaRenkler.Bakir
+    Canvas(Modifier.size(72.dp)) {
+        val sol = size.width * 0.16f
+        val sag = size.width * 0.84f
+        val alt = size.height * 0.78f
+        val ust = size.height * 0.24f
+        drawLine(
+            color = birincil.copy(alpha = 0.30f),
+            start = Offset(sol, alt),
+            end = Offset(sag, alt),
+            strokeWidth = 2.dp.toPx(),
+            cap = StrokeCap.Round,
+        )
+        val iz = Path().apply {
+            moveTo(sol, alt - 8.dp.toPx())
+            lineTo(size.width * 0.38f, size.height * 0.56f)
+            lineTo(size.width * 0.60f, size.height * 0.62f)
+            lineTo(sag, ust)
+        }
+        drawPath(
+            path = iz,
+            color = birincil,
+            style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round),
+        )
+        drawCircle(color = vurgu, radius = 5.dp.toPx(), center = Offset(sag, ust))
+    }
 }

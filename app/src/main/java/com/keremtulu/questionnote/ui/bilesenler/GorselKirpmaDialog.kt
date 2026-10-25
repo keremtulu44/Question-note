@@ -160,8 +160,10 @@ fun GorselKirpmaDialog(
                             }
                         }
                         else -> {
+                            val safeMaxWidth = if (maxWidth.value.isFinite()) maxWidth else 360.dp
+                            val safeMaxHeight = if (maxHeight.value.isFinite()) maxHeight else 480.dp
                             if (image.isRecycled || image.width <= 0 || image.height <= 0 ||
-                                maxWidth <= 0.dp || maxHeight <= 0.dp
+                                safeMaxWidth <= 0.dp || safeMaxHeight <= 0.dp
                             ) {
                                 Text(
                                     stringResource(R.string.question_form_crop_error),
@@ -169,9 +171,10 @@ fun GorselKirpmaDialog(
                                 )
                                 return@BoxWithConstraints
                             }
-                            val availableHeight = minOf(maxHeight, 420.dp).coerceAtLeast(1.dp)
-                            val ratio = image.width.toFloat() / image.height.coerceAtLeast(1)
-                            val previewWidth = minOf(maxWidth, availableHeight * ratio).coerceAtLeast(1.dp)
+                            val availableHeight = minOf(safeMaxHeight, 520.dp).coerceAtLeast(1.dp)
+                            val ratio = (image.width.toFloat() / image.height.coerceAtLeast(1))
+                                .takeIf { it.isFinite() && it > 0f } ?: 1f
+                            val previewWidth = minOf(safeMaxWidth, availableHeight * ratio).coerceAtLeast(1.dp)
                             val previewHeight = (previewWidth / ratio).coerceAtMost(availableHeight).coerceAtLeast(1.dp)
                             val selectionText = stringResource(R.string.question_form_crop_canvas_description)
                             CropSelectionCanvas(
@@ -249,6 +252,13 @@ private fun CropSelectionCanvas(
 ) {
     val latestSelection = rememberUpdatedState(selection)
     val latestOnSelectionChange = rememberUpdatedState(onSelectionChange)
+    val imageBitmap = remember(bitmap) {
+        if (!bitmap.isRecycled && bitmap.width > 0 && bitmap.height > 0) {
+            runCatching { bitmap.asImageBitmap() }.getOrNull()
+        } else {
+            null
+        }
+    }
 
     Canvas(
         modifier = modifier.pointerInput(bitmap.width, bitmap.height) {
@@ -257,13 +267,32 @@ private fun CropSelectionCanvas(
             var currentSelection = latestSelection.value
             detectDragGestures(
                 onDragStart = { start ->
-                    selectionBeforeDrag = latestSelection.value
-                    dragStart = Offset(
-                        (start.x / size.width.coerceAtLeast(1)).coerceIn(0f, 1f),
-                        (start.y / size.height.coerceAtLeast(1)).coerceIn(0f, 1f),
+                    val w = size.width.coerceAtLeast(1).toFloat()
+                    val h = size.height.coerceAtLeast(1).toFloat()
+                    val existing = latestSelection.value
+                    selectionBeforeDrag = existing
+                    val normStart = Offset(
+                        (start.x / w).coerceIn(0f, 1f),
+                        (start.y / h).coerceIn(0f, 1f),
                     )
-                    val point = requireNotNull(dragStart)
-                    currentSelection = GorselKirpmaAlani(point.x, point.y, point.x, point.y)
+                    val cornerRadiusPx = 28.dp.toPx()
+                    val corners = listOf(
+                        Offset(existing.sol * w, existing.ust * h) to Offset(existing.sag, existing.alt),
+                        Offset(existing.sag * w, existing.ust * h) to Offset(existing.sol, existing.alt),
+                        Offset(existing.sol * w, existing.alt * h) to Offset(existing.sag, existing.ust),
+                        Offset(existing.sag * w, existing.alt * h) to Offset(existing.sol, existing.ust),
+                    )
+                    val grabbedAnchor = corners
+                        .minByOrNull { (cornerPx, _) -> (cornerPx - start).getDistance() }
+                        ?.takeIf { (cornerPx, _) -> (cornerPx - start).getDistance() <= cornerRadiusPx }
+                        ?.second
+                    if (grabbedAnchor != null) {
+                        dragStart = grabbedAnchor
+                        currentSelection = selectionFrom(grabbedAnchor, normStart)
+                    } else {
+                        dragStart = normStart
+                        currentSelection = GorselKirpmaAlani(normStart.x, normStart.y, normStart.x, normStart.y)
+                    }
                     latestOnSelectionChange.value(currentSelection)
                 },
                 onDrag = { change, _ ->
@@ -289,9 +318,13 @@ private fun CropSelectionCanvas(
             )
         },
     ) {
-        if (bitmap.isRecycled || bitmap.width <= 0 || bitmap.height <= 0) return@Canvas
+        val targetBitmap = imageBitmap
+        if (targetBitmap == null || bitmap.isRecycled ||
+            !size.width.isFinite() || !size.height.isFinite() ||
+            size.width <= 0f || size.height <= 0f
+        ) return@Canvas
         drawImage(
-            image = bitmap.asImageBitmap(),
+            image = targetBitmap,
             dstOffset = IntOffset.Zero,
             dstSize = IntSize(size.width.roundToInt().coerceAtLeast(1), size.height.roundToInt().coerceAtLeast(1)),
         )
@@ -320,31 +353,54 @@ private fun CropSelectionCanvas(
                 style = Stroke(width = 2.dp.toPx()),
             )
             listOf(Offset(left, top), Offset(right, top), Offset(left, bottom), Offset(right, bottom)).forEach { corner ->
-                drawCircle(Color.White, radius = 5.dp.toPx(), center = corner)
-                drawCircle(Color(0xFF173A49), radius = 3.dp.toPx(), center = corner)
+                drawCircle(Color.White, radius = 6.dp.toPx(), center = corner)
+                drawCircle(Color(0xFF173A49), radius = 3.5.dp.toPx(), center = corner)
             }
         }
     }
 }
 
 private fun selectionFrom(start: Offset, end: Offset) = GorselKirpmaAlani(
-    sol = min(start.x, end.x),
-    ust = min(start.y, end.y),
-    sag = maxOf(start.x, end.x),
-    alt = maxOf(start.y, end.y),
+    sol = min(start.x, end.x).coerceIn(0f, 1f),
+    ust = min(start.y, end.y).coerceIn(0f, 1f),
+    sag = maxOf(start.x, end.x).coerceIn(0f, 1f),
+    alt = maxOf(start.y, end.y).coerceIn(0f, 1f),
 )
 
 private fun decodePreview(file: File): Bitmap? {
     if (!file.isFile) return null
     val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-    BitmapFactory.decodeFile(file.absolutePath, bounds)
+    try {
+        BitmapFactory.decodeFile(file.absolutePath, bounds)
+    } catch (_: Throwable) {
+        return null
+    }
     if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
     var sample = 1
     while (maxOf(bounds.outWidth, bounds.outHeight) / sample > MAX_PREVIEW_EDGE) sample *= 2
-    return BitmapFactory.decodeFile(
-        file.absolutePath,
-        BitmapFactory.Options().apply { inSampleSize = sample; inPreferredConfig = Bitmap.Config.ARGB_8888 },
-    )
+    return try {
+        BitmapFactory.decodeFile(
+            file.absolutePath,
+            BitmapFactory.Options().apply {
+                inSampleSize = sample
+                inPreferredConfig = Bitmap.Config.ARGB_8888
+            },
+        )
+    } catch (_: OutOfMemoryError) {
+        try {
+            BitmapFactory.decodeFile(
+                file.absolutePath,
+                BitmapFactory.Options().apply {
+                    inSampleSize = (sample * 2).coerceAtLeast(2)
+                    inPreferredConfig = Bitmap.Config.RGB_565
+                },
+            )
+        } catch (_: Throwable) {
+            null
+        }
+    } catch (_: Throwable) {
+        null
+    }
 }
 
 private const val MIN_CROP_EDGE = 32

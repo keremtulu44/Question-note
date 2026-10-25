@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -75,7 +76,7 @@ fun GorselBakimEkrani(
         contentWindowInsets = androidx.compose.foundation.layout.WindowInsets.safeDrawing,
     ) { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding),
+            modifier = Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding),
         ) {
             Column(Modifier.fillMaxWidth().padding(start = 20.dp, top = 8.dp, end = 20.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 PremiumTextButton(onClick = onGeri) { Text(stringResource(R.string.common_back)) }
@@ -141,8 +142,10 @@ fun GorselBakimEkrani(
                         }
                         if (current.onayBekleyenYetimler.isNotEmpty()) {
                             item {
-                                Text(stringResource(R.string.image_orphan_files), style = MaterialTheme.typography.titleSmall)
-                                Text(stringResource(R.string.image_orphan_warning), style = MaterialTheme.typography.bodySmall)
+                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    Text(stringResource(R.string.image_orphan_files), style = MaterialTheme.typography.titleSmall)
+                                    Text(stringResource(R.string.image_orphan_warning), style = MaterialTheme.typography.bodySmall)
+                                }
                             }
                             items(current.onayBekleyenYetimler, key = { it.dosyaAdi }) { file ->
                                 Text(

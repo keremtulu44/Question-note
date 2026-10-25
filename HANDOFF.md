@@ -1,9 +1,40 @@
 # HANDOFF — Yanlış Defteri
 
-**Son güncelleme: 2026-10-18.** Önce bu belge, `docs/DERLEME_RAPORU.md` ve
-[P4–P6 sözleşme/kanıt kaydı](docs/P4_P5_P6_UYGULAMA.md) okunur.
+**Son güncelleme: 2026-10-25.** Önce bu belge, `docs/DERLEME_RAPORU.md`,
+`docs/PREMIUM_GORSEL_GELISTIRME.md` ve [P4–P6 sözleşme/kanıt kaydı](docs/P4_P5_P6_UYGULAMA.md) okunur.
 
-## Güncel doğrulanmış teslim: 1.5.1 sade İlerleme
+## Güncel doğrulanmış teslim: 1.5.108 Uygulama Geneli Görsel, Geometrik & Tipografik Bütünlük Denetimi
+
+- **Sürüm:** `versionName = "1.5.108"` (`versionCode = 38`), çalışma dalı `arena/9d4e7eac-question-note`.
+- **Tam ekran görüntüleyici ve yakınlaştırma sınırları:** `SoruGorselBileseni` içinde `SoruGorselTamEkran` tam ekran görüntüleyicisinin `0px` yüksekliğe çökmesine neden olan `matchParentSize` / `fillMaxWidth` hatası düzeltildi; `SoruGorselTamEkran`, `SorulacakTamEkranSunumDialog` ve `OgretmenTamEkranSoruDialog` bileşenlerine `.clipToBounds()`, çift dokunuşla `2.4x` yakınlaştırma, `1x Sıfırla`, koyu stüdyo kenarlık kontrastı ve devre dışı buton soluklaştırması eklendi.
+- **`LazyItemScope` çakışma ve yerleşim düzeltmeleri:** `OdakOturumuEkrani`, `GorselBakimEkrani` ve `DenemeEkranlari` içindeki çoklu kardeş öğeli `item {}` bloklarının `(0, 0)` noktasında üst üste binmesi giderildi; `DerslerEkrani` ve `KatalogYonetimiEkrani` üst kartları kaydırılabilir yapıya alındı; `DersKarti` esnek yükseklik (`min = 144.dp`) ve 2 satır başlıkla güncellendi; `KonuYonetimiEkrani` ve `SoruDetayEkrani` eylem satırları dar ekranlar için `FlowRow` yapısına geçirildi; tüm kalan ekranlara (`Bugun`, `OdakOturumu`, `SoruDetay`, `KonuYonetimi`, `Ayarlar`, `Karne`, `KatalogYonetimi`, `GorselBakim`, `Seviye`) tutarlı `safeDrawing` + `consumeWindowInsets` uygulandı.
+- **Manrope glif güvenliği, Deneme soru konumu ve Öğretmen yedek önizlemesi:** Binary TTF `cmap` denetimiyle Manrope içinde yer almayan tüm sembollere (`◎`, `◈`, `★`, `✓`) `PremiumSembolAilesi` tanımlandı (`▾` → `↓`). Deneme kaynağından soru eklerken `SoruFormuEkrani` içinde `kaynakKonumu` alanı açık tutuldu; `MotorAyarlariKarti` radyo seçeneklerine görsel seçim halkası ve vurgu eklendi; `OgretmenAnaEkrani` paylaşılan `SnackbarHostState` ve `GeriYuklemeOnizlemesi` öğretmen grup/soru sayılarıyla bağlandı.
+- **Geometrik & görsel regresyon testleri:** `GorselButunlukVeYerlesimArayuzTest` ile `PremiumYanlisDefteriTema` (Açık/Koyu) altında `SoruGorselTamEkran` sıfır olmayan piksel boyutları, `OdakOturumuEkrani` ve `GorselBakimEkrani` dikey çakışmasızlık (`boundsInRoot`), Deneme `gizliKaynak` konum alanı, Öğretmen `Snackbar` + ZIP4 önizleme sayıları, `1.6x` yazı ölçeği ve Manrope TTF `cmap` tablosu doğrulandı.
+
+## Önceki doğrulanmış teslim: 1.5.107 Klavye/IME Düzeltmeleri & Öğretmen Modu Premium Yükseltmesi
+
+- **Sürüm:** `versionName = "1.5.107"` (`versionCode = 37`), çalışma dalı `arena/9d4e7eac-question-note`.
+- **Klavye, `WindowInsets` ve sabit panel düzeltmeleri:** `AndroidManifest.xml` içinde `.MainActivity` ve `.ui.premium.PremiumDemoActivity` için `android:windowSoftInputMode="adjustResize"` tanımlandı. `DenemeDetayEkrani` üzerinde `Scaffold(contentWindowInsets = WindowInsets.safeDrawing)` ile birlikte kullanılan mükerrer `.imePadding()` kaldırılarak klavye açıldığında listenin çökmesi ve alanların üst panelin arkasında kalması giderildi; tüm ekran kapsayıcılarına (`YanlisDefteriUygulamasi`, `OgretmenAnaEkrani`, `DenemeEkranlari`, `SoruFormuEkrani`, `DersCalismaEkrani`, `FiltreliCalismaEkrani`, `KonuMerkeziEkrani`, `SorulacaklarEkrani`) tutarlı `.consumeWindowInsets(...)` eklendi. Klavye açıkken `AltMenu`, `OgretmenAltMenu` ve soru formu sabit alt çubukları otomatik gizlenir; `DersCalismaEkrani` arama alanı ve üst kart kaydırılabilir `LazyColumn` içine taşındı.
+- **Rol Seçimi & Öğretmen Modu Premium yükseltmesi (`RolSecimEkrani`, `OgretmenAnaEkrani`):** Manrope glif düşüşü yaratabilecek ham semboller kaldırılarak özel `Canvas` vektör ikonlu `OgretmenAltMenu` ve rol amblemleri eklendi; `HareketPolitikasi` uyumlu ekran geçişleri, canlı tablo rakamlı (`tnum`) `GradyanKart` özet paneli, renk/monogram kodlu grup kartları, grup ve soru içi arama, `Dialog` + `LazyColumn` tabanlı klavye-güvenli grup/kopyalama pencereleri, çift dokunuşla yakınlaştırma + `1x Sıfırla` destekli ve varsayılan gizli cevaplı tam ekran sunum görünümü sunuldu.
+
+## Önceki doğrulanmış teslim: 1.5.106 Görsel Kırpma, Öğretmene Sorulacaklar & Öğretmen Modu
+
+- **Sürüm:** `versionName = "1.5.106"` (`versionCode = 36`), çalışma dalı `arena/9d4e7eac-question-note`.
+- **Görsel kırpma kararlılığı ve UX:** `SoruGorselBileseni` ve `GorselKirpmaDialog` içinde `asImageBitmap()` ile sarılan `Bitmap` örneklerinde erken `recycle()` kaldırılarak `RenderThread` çökmesi giderildi; `LocalSoruGorselDeposu.kirp` bellek-güvenli alt-örneklemeli çözme ve OOM korumasıyla güçlendirildi; `GorselSecimBolumu` bileşeninde `✂ Görseli kırp` düğmesi her görsel kartının altına ortalanmış birincil konumda sunuldu.
+- **Öğrenci — Öğretmene Sorulacaklar (`SoruPlanDurumu.OGRETMENE_SORULACAK`):** Bu durumdaki sorular `sonrakiTekrarGun = null` ile günlük tekrardan ayrı tutulur, `SorulacaklarEkrani` içinde ders ders gruplanır, `Bugün` ekranında hatırlatıcı kartla gösterilir, tam ekran yakınlaştırılabilir sunumla açılır ve `SoruRepository.ogretmeneCozduruldu` ile (çözüm fotoğrafıyla veya fotoğrafsız) ertesi gün (`bugün + 1`) aktif tekrar planına geçirilir.
+- **Rol Seçimi & Öğretmen Çalışma Alanı (`KullaniciRolu`, `OgretmenDeposu`):** İlk kurulumda `RolSecimEkrani` (`Öğrenciyim` / `Öğretmenim`) gösterilir; mevcut kurulumlu kullanıcılar geriye dönük uyumlu biçimde `OGRENCI` olarak devam eder ve `Ayarlar` ekranından modlar arasında geçiş yapabilir. Öğretmen modu (`OgretmenAnaEkrani`) XP/rütbe/tekrar motorundan bağımsızdır; grup bazlı `Çözmediklerim` / `Çözdüklerim`, zorluk filtresi, tam ekran yakınlaştırmada `Cevabı göster` gizliliği ve bağımsız çözüldü durumuyla `Başka Gruba Ekle` kopyalamasını destekler.
+- **Korunan şema ve yedekleme sözleşmeleri:** Room şeması `4` ve ZIP yedek formatı `4` (`REQUIRED_CSV_FILES` değişmedi). Kalıcı öğretmen görselleri `filesDir/ogretmen-img/<uuid>.jpg` altında referans sayımlı tutulur (öğrenci yetim görsel taramasından izoledir) ve ZIP yedeklerde `data.json -> teacher_workspace` + `manifest.json -> counts.teacher_images` + kurtarma günlüğü (`geri-yukleme.json`) ile tam atomik yedeklenir/geri yüklenir.
+
+## Önceki doğrulanmış teslim: 1.5.105 Deneme & İlk Kurulum Premium Yükseltmesi
+
+- **Sürüm:** `versionName = "1.5.105"` (`versionCode = 35`), çalışma dalı `arena/9d4e7eac-question-note`.
+- **Doğrulanan test kapsamı:** Debug `332/0/0/0`, Release ortak `269/0/0/0`; `assembleRelease`, `apksigner` doğrulaması ve beklenen sertifika parmak izi eşleşmesi başarılı.
+- **Korunan şema sözleşmeleri:** Room şeması `4` ve ZIP yedek formatı `4` (`REQUIRED_CSV_FILES` değişmedi). `data.json` ve kurtarma günlüğü (`geri-yukleme.json`) içinde isteğe bağlı `"mock_exams"` alanı geriye dönük uyumlu biçimde desteklenir; geri yüklemede deneme ders kimlikleri ders adına göre uzlaştırılır.
+- **Özel ders görünürlüğü (`SinavProfili.OZEL`):** `SinavProfiliDeposu` hem `dersler` kimlik kümesini hem `ozel_ders_adlari` ad kümesini saklar; farklı cihazdan yedek geri yüklendiğinde seçili dersler ad üzerinden yeniden eşleştirilir ve ders ekranı asla tamamen boş kalmaz.
+- **Deneme–Kaynak senkronizasyonu:** Deneme oluşturma/yeniden adlandırma `SoruRepository.kaynakAdiDegistir` ile kaynak kataloğunu ve mevcut deneme sorularının `kaynak` alanını atomik günceller; `RoomSoruRepository.soruKaydet` genel katalog sayısını bozmaz.
+- **Premium arayüz ve ton:** 24 derslik katalog için tam açık/koyu renk ve tipografik sembol eşlemesi (`dersKartStiliGetir`), cam/gradyan kartlı `DenemeListesiEkrani` ve `DenemeDetayEkrani`, negatif net destekli grafikler, gruplanmış `DersKurulumEkrani`, Bugün ekranında sakin Deneme özet kartı ve destekleyici Türkçe metin dili uygulandı.
+
+## Önceki temel: 1.5.1 sade İlerleme
 
 **v1.5.1 / code19 yayımlandı.** [Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.5.1) · [APK](https://github.com/keremtulu44/Question-note/releases/download/v1.5.1/yanlis-defteri-1.5.1.apk) · [CI `39158221022`](https://github.com/keremtulu44/Question-note/actions/runs/39158221022)
 **Debug312/0/0/0 · Release258/0/0/0**; APK/imza/sertifika başarılı. Ortak testler iki varyantta tekrar eder, sayılar toplanmaz.

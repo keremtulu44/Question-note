@@ -12,8 +12,8 @@ android {
         applicationId = "com.keremtulu.questionnote"
         minSdk = 26
         targetSdk = 37
-        versionCode = 34
-        versionName = "1.5.104"
+        versionCode = 38
+        versionName = "1.5.108"
     }
 
     buildFeatures {
@@ -23,6 +23,9 @@ android {
 
     testOptions {
         unitTests.isIncludeAndroidResources = true
+        unitTests.all {
+            it.maxHeapSize = "2g"
+        }
     }
 
     compileOptions {

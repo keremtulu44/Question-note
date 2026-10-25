@@ -5,9 +5,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -75,14 +78,21 @@ fun KatalogYonetimiEkrani(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets.safeDrawing,
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { insets ->
-        Column(Modifier.fillMaxSize().padding(insets)) {
-            Column(Modifier.fillMaxWidth().padding(start = 20.dp, top = 8.dp, end = 20.dp, bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets)) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(start = 12.dp, top = 4.dp, end = 20.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 PremiumTextButton(onClick = onGeri) {
                     Text(stringResource(R.string.common_back))
                 }
-                GradyanKart(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), borderAnimation = false) {
+            }
+            @Composable
+            fun KatalogUstKart(modifier: Modifier = Modifier) {
+                GradyanKart(modifier = modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), borderAnimation = false) {
                     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text(
                             stringResource(R.string.catalog_manage_title),
@@ -99,24 +109,33 @@ fun KatalogYonetimiEkrani(
                 }
             }
             when (val current = durum) {
-                KatalogDurumu.Yukleniyor -> Box(
-                    Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) { CircularProgressIndicator() }
-                KatalogDurumu.Hata -> Box(
-                    Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        stringResource(R.string.filtered_practice_options_error),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                KatalogDurumu.Yukleniyor -> {
+                    KatalogUstKart(Modifier.padding(horizontal = 20.dp, vertical = 6.dp))
+                    Box(
+                        Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center,
+                    ) { CircularProgressIndicator() }
+                }
+                KatalogDurumu.Hata -> {
+                    KatalogUstKart(Modifier.padding(horizontal = 20.dp, vertical = 6.dp))
+                    Box(
+                        Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            stringResource(R.string.filtered_practice_options_error),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
                 is KatalogDurumu.Hazir -> LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(start = 20.dp, top = 6.dp, end = 20.dp, bottom = 28.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
+                    item(key = "katalog-hero") {
+                        KatalogUstKart(Modifier.padding(bottom = 4.dp))
+                    }
                     item { Baslik(stringResource(R.string.catalog_source_heading)) }
                     if (current.kaynaklar.isEmpty()) {
                         item { BosMesaj() }

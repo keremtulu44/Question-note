@@ -753,6 +753,48 @@ class YerelYedeklemeHizmetiTest {
         File(directory, "geri-yukleme.json").writeText(json.toString())
     }
 
+    @Test
+    fun mockExamsRoundTripThroughZipBackupAndReconcileLessonIdsOnRestore() = runBlocking<Unit> {
+        val context = RuntimeEnvironment.getApplication()
+        context.getSharedPreferences("denemeler", android.content.Context.MODE_PRIVATE).edit().clear().commit()
+        val denemeDeposu = com.keremtulu.questionnote.data.prefs.DenemeDeposu(context)
+        val yedekHizmeti = YerelYedeklemeHizmeti(context, database, store, denemeDeposu)
+
+        val matematik = database.dersDao().tumunuGetir().first { it.ad == "Matematik" }
+        denemeDeposu.kaydet(
+            com.keremtulu.questionnote.domain.model.DenemeKaydi(
+                id = "deneme-1",
+                ad = "3D Türkiye Geneli 1",
+                kural = com.keremtulu.questionnote.domain.model.NetKurali.DORTTE_BIR,
+                olusturma = 1_760_000_000_000L,
+                gun = 20_380,
+                satirlar = listOf(
+                    com.keremtulu.questionnote.domain.model.DenemeDersSatiri(
+                        dersId = "farkli-cihaz-matematik-id",
+                        soruSayisi = 40,
+                        dogru = 33,
+                        yanlis = 4,
+                        dersAdi = "Matematik",
+                    ),
+                ),
+            ),
+        )
+
+        val archive = yedekHizmeti.zipOlustur().also(temporaryFiles::add)
+        denemeDeposu.sil("deneme-1")
+        assertTrue(denemeDeposu.kayitlariIzle.value.isEmpty())
+
+        val onizleme = yedekHizmeti.dosyadanOnizle(archive)
+        yedekHizmeti.geriYukle(onizleme)
+
+        val geriYuklenen = denemeDeposu.kayitlariIzle.value.single()
+        assertEquals("deneme-1", geriYuklenen.id)
+        assertEquals("3D Türkiye Geneli 1", geriYuklenen.ad)
+        assertEquals(matematik.id, geriYuklenen.satirlar.single().dersId)
+        assertEquals("Matematik", geriYuklenen.satirlar.single().dersAdi)
+        context.getSharedPreferences("denemeler", android.content.Context.MODE_PRIVATE).edit().clear().commit()
+    }
+
     private fun SoruGorselGirdisi.toEntity(questionId: String) = GorselEntity(
         id = id,
         soruId = questionId,

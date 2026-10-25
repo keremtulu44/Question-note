@@ -4,11 +4,16 @@ import android.text.format.Formatter
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
@@ -73,6 +79,7 @@ fun AyarlarEkrani(
     onKatalog: () -> Unit,
     onKonular: () -> Unit,
     onPremiumDemo: () -> Unit = {},
+    onOgretmenModunaGec: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -96,14 +103,17 @@ fun AyarlarEkrani(
         )
     } ?: stringResource(R.string.backup_last_none)
 
-    Scaffold(containerColor = MaterialTheme.colorScheme.background) { insets ->
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets.safeDrawing,
+    ) { insets ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets),
             contentPadding = PaddingValues(
                 start = 20.dp,
-                top = insets.calculateTopPadding() + 12.dp,
+                top = 12.dp,
                 end = 20.dp,
-                bottom = insets.calculateBottomPadding() + 24.dp,
+                bottom = 24.dp,
             ),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
@@ -135,6 +145,31 @@ fun AyarlarEkrani(
                     }
                 }
             }
+            item {
+                Bolum(stringResource(R.string.settings_role_section_title)) {
+                    Text(
+                        stringResource(R.string.settings_role_current_student),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Text(
+                        stringResource(R.string.settings_role_switch_note),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    PremiumOutlinedButton(
+                        onClick = onOgretmenModunaGec,
+                        enabled = !yedeklemeIslemde,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 6.dp)
+                            .testTag("ogretmen_moduna_gec_buton"),
+                    ) {
+                        Text(stringResource(R.string.settings_switch_to_teacher))
+                    }
+                }
+            }
             item { MotorAyarlariKarti(tekrarPolitikasi, motorTanisi) }
             item {
                 val tumDersler by produceState(emptyList<Ders>()) {
@@ -143,32 +178,38 @@ fun AyarlarEkrani(
                 Bolum(stringResource(R.string.settings_profile_title)) {
                     Text(stringResource(R.string.settings_profile_note), style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    tumDersler.forEach { ders ->
-                        val acik = secim.dersIdleri.isEmpty() || ders.id in secim.dersIdleri || secim.herDersiGoster
-                        FilterChip(
-                            selected = acik && (secim.dersIdleri.isEmpty() || ders.id in secim.dersIdleri),
-                            onClick = {
-                                if (profilKaydediliyor || yedeklemeIslemde) return@FilterChip
-                                profilKaydediliyor = true
-                                profilHatasi = false
-                                val simdiki = if (secim.dersIdleri.isEmpty()) tumDersler.map { it.id }.toSet() else secim.dersIdleri
-                                val yeni = if (ders.id in simdiki) simdiki - ders.id else simdiki + ders.id
-                                scope.launch {
-                                    try {
-                                        if (yeni.isNotEmpty()) dersRepository.dersSeciminiKaydet(yeni)
-                                    } catch (iptal: CancellationException) {
-                                        throw iptal
-                                    } catch (_: Exception) {
-                                        profilHatasi = true
-                                    } finally {
-                                        profilKaydediliyor = false
+                    @OptIn(ExperimentalLayoutApi::class)
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        tumDersler.forEach { ders ->
+                            val acik = secim.gorunur(ders)
+                            FilterChip(
+                                selected = acik,
+                                onClick = {
+                                    if (profilKaydediliyor || yedeklemeIslemde) return@FilterChip
+                                    profilKaydediliyor = true
+                                    profilHatasi = false
+                                    val simdiki = tumDersler.filter(secim::gorunur).map { it.id }.toSet()
+                                    val yeni = if (ders.id in simdiki) simdiki - ders.id else simdiki + ders.id
+                                    scope.launch {
+                                        try {
+                                            if (yeni.isNotEmpty()) dersRepository.dersSeciminiKaydet(yeni)
+                                        } catch (iptal: CancellationException) {
+                                            throw iptal
+                                        } catch (_: Exception) {
+                                            profilHatasi = true
+                                        } finally {
+                                            profilKaydediliyor = false
+                                        }
                                     }
-                                }
-                            },
-                            enabled = !profilKaydediliyor && !yedeklemeIslemde,
-                            label = { Text(ders.ad) },
-                            modifier = Modifier.fillMaxWidth(),
-                        )
+                                },
+                                enabled = !profilKaydediliyor && !yedeklemeIslemde,
+                                label = { Text(ders.ad) },
+                            )
+                        }
                     }
                     if (profilKaydediliyor) {
                         Text(
