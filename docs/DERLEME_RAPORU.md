@@ -2,8 +2,8 @@
 
 > Bu dosya Android CI tarafından otomatik üretilir. Keystore veya parola değerleri yazılmaz.
 
-- Zaman (UTC): 2026-10-25T15:42:07Z
-- Workflow commit'i: 17e15048047603ca7f106e4c4d08273513eea300
+- Zaman (UTC): 2026-10-25T15:49:20Z
+- Workflow commit'i: 0cd0e42807dc045d8c83cd84ed7b9192ad8cb4b2
 - Dal: arena/9d4e7eac-question-note
 - Uygulama sürümü: 1.5.106 (versionCode 36)
 - Android SDK: compileSdk/targetSdk 37, minSdk 26; build-tools 37.0.0
@@ -69,21 +69,21 @@ Daemon will be stopped at the end of the build
 > Task :app:processDebugNavigationResources
 > Task :app:parseDebugLocalResources
 > Task :app:javaPreCompileDebug
-> Task :app:checkDebugAarMetadata
 > Task :app:generateDebugRFile
+> Task :app:checkDebugAarMetadata
 > Task :app:mapDebugSourceSetPaths
 > Task :app:compileDebugNavigationResources
 > Task :app:createDebugCompatibleScreenManifests
 > Task :app:extractDeepLinksDebug
 > Task :app:processDebugMainManifest
+> Task :app:mergeDebugResources
 > Task :app:processDebugManifest
 > Task :app:preDebugUnitTestBuild UP-TO-DATE
-> Task :app:processDebugManifestForPackage
-> Task :app:javaPreCompileDebugUnitTest
 > Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest
 > Task :app:mergeDebugAssets
-> Task :app:mergeDebugResources
 > Task :app:processDebugUnitTestManifest
+> Task :app:processDebugManifestForPackage
 > Task :app:processDebugResources
 > Task :app:packageDebugUnitTestForUnitTest
 > Task :app:generateDebugUnitTestConfig
@@ -121,9 +121,9 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/premium/PremiumEntegrasyon.kt:290:81 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
 
 > Task :app:compileDebugJavaWithJavac
-> Task :app:bundleDebugClassesToCompileJar
-> Task :app:processDebugJavaRes
 > Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:processDebugJavaRes
+> Task :app:bundleDebugClassesToCompileJar
 > Task :app:kspDebugUnitTestKotlin
 
 > Task :app:compileDebugUnitTestKotlin
@@ -149,7 +149,7 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/c
 > Task :app:testDebugUnitTest
 
 KirpmaSorulacakVeOgretmenArayuzTest > bugunSorulacaklarHatirlatmasiVeDersDersCozdurdumAkisiCalisir FAILED
-    androidx.test.espresso.AppNotIdleException at KirpmaSorulacakVeOgretmenArayuzTest.kt:226
+    androidx.test.espresso.AppNotIdleException at KirpmaSorulacakVeOgretmenArayuzTest.kt:230
 
 338 tests completed, 1 failed
 
@@ -239,7 +239,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD FAILED in 4m 42s
+BUILD FAILED in 4m 4s
 32 actionable tasks: 32 executed
 ```
 
@@ -264,14 +264,14 @@ Daemon will be stopped at the end of the build
 > Task :app:createReleaseCompatibleScreenManifests
 > Task :app:extractDeepLinksRelease FROM-CACHE
 > Task :app:processReleaseMainManifest
-> Task :app:mergeReleaseResources
 > Task :app:processReleaseManifest
 > Task :app:preReleaseUnitTestBuild UP-TO-DATE
 > Task :app:javaPreCompileReleaseUnitTest FROM-CACHE
 > Task :app:generateReleaseAssets UP-TO-DATE
-> Task :app:processReleaseManifestForPackage
 > Task :app:mergeReleaseAssets
 > Task :app:processReleaseUnitTestManifest
+> Task :app:processReleaseManifestForPackage
+> Task :app:mergeReleaseResources
 > Task :app:processReleaseResources
 > Task :app:packageReleaseUnitTestForUnitTest
 > Task :app:generateReleaseUnitTestConfig
@@ -309,9 +309,9 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/premium/PremiumEntegrasyon.kt:290:81 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
 
 > Task :app:compileReleaseJavaWithJavac
+> Task :app:bundleReleaseClassesToCompileJar
 > Task :app:processReleaseJavaRes
 > Task :app:bundleReleaseClassesToRuntimeJar
-> Task :app:bundleReleaseClassesToCompileJar
 > Task :app:kspReleaseUnitTestKotlin
 
 > Task :app:compileReleaseUnitTestKotlin
@@ -332,7 +332,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 2m 4s
+BUILD SUCCESSFUL in 1m 40s
 32 actionable tasks: 24 executed, 8 from cache
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 -- Hata satırları ve son bölüm --
@@ -353,14 +353,14 @@ Daemon will be stopped at the end of the build
 > Task :app:createReleaseCompatibleScreenManifests
 > Task :app:extractDeepLinksRelease FROM-CACHE
 > Task :app:processReleaseMainManifest
-> Task :app:mergeReleaseResources
 > Task :app:processReleaseManifest
 > Task :app:preReleaseUnitTestBuild UP-TO-DATE
 > Task :app:javaPreCompileReleaseUnitTest FROM-CACHE
 > Task :app:generateReleaseAssets UP-TO-DATE
-> Task :app:processReleaseManifestForPackage
 > Task :app:mergeReleaseAssets
 > Task :app:processReleaseUnitTestManifest
+> Task :app:processReleaseManifestForPackage
+> Task :app:mergeReleaseResources
 > Task :app:processReleaseResources
 > Task :app:packageReleaseUnitTestForUnitTest
 > Task :app:generateReleaseUnitTestConfig
@@ -398,9 +398,9 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/premium/PremiumEntegrasyon.kt:290:81 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
 
 > Task :app:compileReleaseJavaWithJavac
+> Task :app:bundleReleaseClassesToCompileJar
 > Task :app:processReleaseJavaRes
 > Task :app:bundleReleaseClassesToRuntimeJar
-> Task :app:bundleReleaseClassesToCompileJar
 > Task :app:kspReleaseUnitTestKotlin
 
 > Task :app:compileReleaseUnitTestKotlin
@@ -421,7 +421,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 2m 4s
+BUILD SUCCESSFUL in 1m 40s
 32 actionable tasks: 24 executed, 8 from cache
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 ```
@@ -429,8 +429,8 @@ Consider enabling configuration cache to speed up this build: https://docs.gradl
 ## JUnit başarısızlık ayrıntıları
 
 ```text
-testDebugUnitTest: com.keremtulu.questionnote.ui.KirpmaSorulacakVeOgretmenArayuzTest > bugunSorulacaklarHatirlatmasiVeDersDersCozdurdumAkisiCalisir: androidx.test.espresso.AppNotIdleException: androidx.test.espresso.AppNotIdleException: Compose did not get idle after 170329 attempts in 60 SECONDS.  1. Check your measure/layout lambdas for infinite composition loops. 2. Verify that the 'busy' resources listed above are not deadlocked. 3. Increase Espresso's master idling policy if a longer timeout is required.  The following Idle Conditions failed .
-androidx.test.espresso.AppNotIdleException: Compose did not get idle after 170329 attempts in 60 SECONDS.
+testDebugUnitTest: com.keremtulu.questionnote.ui.KirpmaSorulacakVeOgretmenArayuzTest > bugunSorulacaklarHatirlatmasiVeDersDersCozdurdumAkisiCalisir: androidx.test.espresso.AppNotIdleException: androidx.test.espresso.AppNotIdleException: Compose did not get idle after 271167 attempts in 60 SECONDS.  1. Check your measure/layout lambdas for infinite composition loops. 2. Verify that the 'busy' resources listed above are not deadlocked. 3. Increase Espresso's master idling policy if a longer timeout is required.  The following Idle Conditions failed .
+androidx.test.espresso.AppNotIdleException: Compose did not get idle after 271167 attempts in 60 SECONDS.
 
 1. Check your measure/layout lambdas for infinite composition loops.
 2. Verify that the 'busy' resources listed above are not deadlocked.
@@ -447,10 +447,10 @@ androidx.test.espresso.AppNotIdleException: Compose did not get idle after 17032
 	at androidx.compose.ui.test.TestOwnerKt.getAllSemanticsNodes$default(TestOwner.kt:109)
 	at androidx.compose.ui.test.SemanticsNodeInteractionCollection.fetchSemanticsNodes(SemanticsNodeInteraction.kt:249)
 	at androidx.compose.ui.test.SemanticsNodeInteractionCollection.fetchSemanticsNodes$default(SemanticsNodeInteraction.kt:245)
-	at com.keremtulu.questionnote.ui.KirpmaSorulacakVeOgretmenArayuzTest.bugunSorulacaklarHatirlatmasiVeDersDersCozdurdumAkisiCalisir$lambda$5(KirpmaSorulacakVeOgretmenArayuzTest.kt:226)
+	at com.keremtulu.questionnote.ui.KirpmaSorulacakVeOgretmenArayuzTest.bugunSorulacaklarHatirlatmasiVeDersDersCozdurdumAkisiCalisir$lambda$5(KirpmaSorulacakVeOgretmenArayuzTest.kt:230)
 	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:893)
 	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:500)
-	at com.keremtulu.questionnote.ui.KirpmaSorulacakVeOgretmenArayuzTest.bugunSorulacaklarHatirlatmasiVeDersDersCozdurdumAkisiCalisir(KirpmaSorulacakVeOgretmenArayuzTest.kt:225)
+	at com.keremtulu.questionnote.ui.KirpmaSorulacakVeOgretmenArayuzTest.bugunSorulacaklarHatirlatmasiVeDersDersCozdurdumAkisiCalisir(KirpmaSorulacakVeOgretmenArayuzTest.kt:229)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
