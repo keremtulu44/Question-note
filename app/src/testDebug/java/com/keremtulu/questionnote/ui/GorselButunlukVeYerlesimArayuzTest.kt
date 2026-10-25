@@ -45,8 +45,8 @@ import com.keremtulu.questionnote.domain.model.SinavProfili
 import com.keremtulu.questionnote.ui.bilesenler.SoruGorselTamEkran
 import com.keremtulu.questionnote.ui.calisma.OdakOturumuEkrani
 import com.keremtulu.questionnote.ui.ogretmen.OgretmenAnaEkrani
-import com.keremtulu.questionnote.ui.premium.PremiumYanlisDefteriTema
 import com.keremtulu.questionnote.ui.tema.HareketPolitikasi
+import com.keremtulu.questionnote.ui.tema.PremiumYanlisDefteriTema
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
