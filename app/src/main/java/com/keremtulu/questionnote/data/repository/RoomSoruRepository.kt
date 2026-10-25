@@ -168,6 +168,45 @@ class RoomSoruRepository(
             }
         }
 
+    override suspend fun kaynakAdiDegistir(eskiAd: String?, yeniAd: String) {
+        val temizYeni = canonicalSoruSecenegiAdi(yeniAd)
+        if (temizYeni.isBlank() || temizYeni.length > SORU_SECENEGI_ADI_UST_SINIR) return
+        val yeniNormalize = normalizeSoruSecenegiAdi(temizYeni)
+        if (yeniNormalize.isBlank()) return
+        val eskiNormalize = eskiAd?.let(::normalizeSoruSecenegiAdi)?.takeIf { it.isNotBlank() }
+        val now = saat.millis()
+        database.withTransaction {
+            val mevcutYeni = soruSecenegiDao.adaGoreGetir(SoruSecenekTuru.KAYNAK.name, yeniNormalize)
+            val hedefAd = mevcutYeni?.ad ?: temizYeni
+            if (mevcutYeni == null) {
+                soruSecenegiDao.ekle(
+                    SoruSecenegiEntity(
+                        id = UUID.randomUUID().toString(),
+                        tur = SoruSecenekTuru.KAYNAK.name,
+                        ad = temizYeni,
+                        normalizeAd = yeniNormalize,
+                        varsayilan = false,
+                        sira = 0,
+                        olusturma = now,
+                    ),
+                )
+            }
+            if (eskiNormalize != null) {
+                soruDao.tumunuGetir()
+                    .filter { !it.kaynak.isNullOrBlank() && normalizeSoruSecenegiAdi(it.kaynak) == eskiNormalize && it.kaynak != hedefAd }
+                    .forEach { soru ->
+                        soruDao.guncelle(soru.copy(kaynak = hedefAd, guncelleme = now))
+                    }
+                if (eskiNormalize != yeniNormalize) {
+                    val eskiSecenek = soruSecenegiDao.adaGoreGetir(SoruSecenekTuru.KAYNAK.name, eskiNormalize)
+                    if (eskiSecenek != null && !eskiSecenek.varsayilan && soruDao.kaynakKullanimSayisi(eskiSecenek.ad) == 0) {
+                        soruSecenegiDao.sil(eskiSecenek.id)
+                    }
+                }
+            }
+        }
+    }
+
     override suspend fun soruKaydet(istek: SoruKaydetmeIstegi): SoruIslemSonucu {
         if (!istek.gorseller.siraliVeGecerli()) return SoruIslemSonucu.GorselGecersiz
         if (istek.gorseller.none { it.tur == GorselTuru.SORU }) return SoruIslemSonucu.SoruGorseliGerekli

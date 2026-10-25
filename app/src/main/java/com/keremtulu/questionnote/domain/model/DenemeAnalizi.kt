@@ -22,6 +22,7 @@ data class DersNetKarsilastirma(
     val dersId: String,
     val sonNet: Double,
     val oncekiOrtalama: Double?,
+    val dersAdi: String? = null,
 )
 
 fun List<DenemeKaydi>.dersBarlari(son: DenemeKaydi): List<DersNetKarsilastirma> {
@@ -33,19 +34,25 @@ fun List<DenemeKaydi>.dersBarlari(son: DenemeKaydi): List<DersNetKarsilastirma> 
             dersId = satir.dersId,
             sonNet = son.kural.net(satir.dogru, satir.yanlis),
             oncekiOrtalama = oncekiler.takeIf { it.isNotEmpty() }?.average(),
+            dersAdi = satir.dersAdi,
         )
     }
 }
 
+fun denemeKaynakEslesir(bir: String?, iki: String?): Boolean {
+    if (bir.isNullOrBlank() || iki.isNullOrBlank()) return false
+    return normalizeSoruSecenegiAdi(bir) == normalizeSoruSecenegiAdi(iki)
+}
+
 fun List<DenemeKaydi>.kaynakla(ad: String?): DenemeKaydi? {
-    val temiz = ad?.trim().orEmpty()
-    if (temiz.isEmpty()) return null
-    return firstOrNull { it.ad == temiz }
+    if (ad.isNullOrBlank()) return null
+    return firstOrNull { denemeKaynakEslesir(it.ad, ad) }
 }
 
 fun List<DenemeKaydi>.oncekiAyniKural(son: DenemeKaydi): DenemeKaydi? =
-    kronolojik().filter { it.kural == son.kural && it.id != son.id }.lastOrNull { it.gun < son.gun || (it.gun == son.gun && it.olusturma < son.olusturma) }
-        ?: kronolojik().filter { it.kural == son.kural && it.id != son.id }.lastOrNull()
+    kronolojik()
+        .filter { it.kural == son.kural && it.id != son.id }
+        .lastOrNull { it.gun < son.gun || (it.gun == son.gun && it.olusturma < son.olusturma) }
 
 fun DenemeKaydi.enZayif(): DenemeDersSatiri? =
     satirlar.minByOrNull { kural.net(it.dogru, it.yanlis) }

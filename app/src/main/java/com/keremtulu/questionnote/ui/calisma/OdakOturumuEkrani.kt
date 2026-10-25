@@ -367,9 +367,12 @@ fun OdakOturumuEkrani(
             val denemeKaydi = denemeler.kaynakla(soru.kaynak)
             if (denemeKaydi != null) {
                 item { com.keremtulu.questionnote.ui.deneme.DenemeHatirlatmaYazi(soru.id, denemeKaydi) }
+                soru.kaynakKonumu?.takeIf { it.isNotBlank() }?.let { konum ->
+                    item { Text(konum, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant) }
+                }
             } else {
-            val kaynak = listOfNotNull(soru.kaynak, soru.kaynakKonumu).filter { it.isNotBlank() }.joinToString(" · ")
-            if (kaynak.isNotBlank()) item { Text(kaynak, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant) }
+                val kaynak = listOfNotNull(soru.kaynak, soru.kaynakKonumu).filter { it.isNotBlank() }.joinToString(" · ")
+                if (kaynak.isNotBlank()) item { Text(kaynak, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant) }
             }
             items(soru.gorseller.filter { it.tur == GorselTuru.SORU }, key = { it.id }) { image ->
                 OdakGorseli(image, gorselDeposu, stringResource(R.string.question_image_description),

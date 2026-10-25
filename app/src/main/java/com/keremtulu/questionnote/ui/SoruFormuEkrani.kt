@@ -388,6 +388,9 @@ fun SoruFormuEkrani(
         formHatasi = null
         scope.launch {
             val result = try {
+                gizliKaynak?.takeIf { it.isNotBlank() }?.let { kaynakAdi ->
+                    soruRepository.kaynakAdiDegistir(null, kaynakAdi)
+                }
                 soruRepository.soruKaydet(
                     SoruKaydetmeIstegi(
                         id = soruId,

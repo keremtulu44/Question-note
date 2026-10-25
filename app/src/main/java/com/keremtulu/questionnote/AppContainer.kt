@@ -40,7 +40,7 @@ class AppContainer(context: Context) {
     val gunlukHedefDeposu: GunlukHedefDeposu = TercihGunlukHedefDeposu(context)
     val tercihHedefDeposu = gunlukHedefDeposu as TercihGunlukHedefDeposu
     val rozetHizmeti = RozetHizmeti(database, rozetDeposu, gunlukHedefDeposu, rutbeDeposu = rutbeDeposu)
-    val disaAktarmaHizmeti = YerelYedeklemeHizmeti(context, database, gorselDeposu) {
+    val disaAktarmaHizmeti = YerelYedeklemeHizmeti(context, database, gorselDeposu, denemeDeposu) {
         oturumDeposu.temizle()
         rozetDeposu.geriYuklemeSonrasi()
         rutbeDeposu.geriYuklemeSonrasi()

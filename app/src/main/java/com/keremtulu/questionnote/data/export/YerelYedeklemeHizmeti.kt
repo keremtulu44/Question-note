@@ -90,6 +90,7 @@ class YerelYedeklemeHizmeti(
     context: Context,
     private val database: YanlisDefteriDatabase,
     private val gorselDeposu: LocalSoruGorselDeposu,
+    private val denemeDeposu: com.keremtulu.questionnote.data.prefs.DenemeDeposu? = null,
     // Clear ONLY a committed restore, before removing its recovery markers. Also used on startup.
     private val oturumTemizle: () -> Unit = {
         com.keremtulu.questionnote.data.prefs.OdakOturumuDeposu(context.applicationContext).temizle()
@@ -278,6 +279,7 @@ class YerelYedeklemeHizmeti(
             preparedId = preview.id,
             oldFileNames = current.gorseller.map { it.dosyaAdi }.distinct(),
             newFileNames = newFileNames,
+            mockExams = verified.data.denemeler,
         )
         writeJournal(journal)
 
@@ -391,6 +393,7 @@ class YerelYedeklemeHizmeti(
         // A failed pre-commit restore preserves the old session. A committed replacement must
         // never resume an old question ID, even when the imported backup reuses that ID.
         // If preference persistence fails, retain journal/DB marker and block recovery safely.
+        denemeDeposu?.geriYukleVeUzlastir(journal.mockExams, database.dersDao().tumunuGetir())
         oturumTemizle()
         journal.oldFileNames.filterNot { it in journal.newFileNames }
             .forEach { gorselDeposu.kaliciDosyayiSil(it) }
@@ -414,14 +417,23 @@ class YerelYedeklemeHizmeti(
     }
 
     private suspend fun currentSnapshot(): ExportSnapshot = database.withTransaction {
+        val dersler = database.dersDao().tumunuGetir()
+        val dersHaritasi = dersler.associateBy { it.id }
+        val denemeler = denemeDeposu?.kayitlariIzle?.value.orEmpty().mapNotNull { deneme ->
+            val satirlar = deneme.satirlar.map { satir ->
+                satir.copy(dersAdi = satir.dersAdi ?: dersHaritasi[satir.dersId]?.ad)
+            }.filter { it.gecerli() }.distinctBy { it.dersId }
+            if (deneme.ad.isBlank() || satirlar.isEmpty()) null else deneme.copy(satirlar = satirlar)
+        }
         ExportSnapshot(
-            dersler = database.dersDao().tumunuGetir(),
+            dersler = dersler,
             konular = database.konuDao().tumunuGetir(),
             sorular = database.soruDao().tumunuGetir(),
             secenekler = database.soruSecenegiDao().tumunuGetir(),
             gorseller = database.gorselDao().tumunuGetir(),
             tekrarlar = database.tekrarDao().tumunuGetir(),
             olcumler = database.tekrarOlcumDao().tumunuGetir(),
+            denemeler = denemeler,
         )
     }
 
@@ -554,6 +566,18 @@ class YerelYedeklemeHizmeti(
         .put("images", JSONArray().apply { data.images.forEach { put(it.toJson()) } })
         .put("reviews", JSONArray().apply { data.tekrarlar.forEach { put(it.toJson()) } })
         .put("measurements", JSONArray().apply { data.olcumler.forEach { put(OlcumSerilestirme.yaz(it)) } })
+        .apply {
+            if (data.denemeler.isNotEmpty()) {
+                put(
+                    "mock_exams",
+                    JSONArray().apply {
+                        data.denemeler.forEach {
+                            put(com.keremtulu.questionnote.data.prefs.DenemeDeposu.jsonYaz(it))
+                        }
+                    },
+                )
+            }
+        }
 
     private fun csvFiles(data: BackupData): Map<String, ByteArray> = linkedMapOf(
         "csv/lessons.csv" to csv(
@@ -709,6 +733,7 @@ class YerelYedeklemeHizmeti(
             images = imageData,
             tekrarlar = tekrarlar,
             olcumler = olcumler,
+            denemeler = denemeler,
         )
     }
 
@@ -953,6 +978,13 @@ class YerelYedeklemeHizmeti(
             4 -> json.getJSONArray("measurements").toTypedList(MAX_ROWS_PER_TABLE, OlcumSerilestirme::oku)
             else -> throw IOException("Desteklenmeyen ölçüm tablosu sürümü.")
         }
+        val mockExams = if (json.has("mock_exams") && !json.isNull("mock_exams")) {
+            json.getJSONArray("mock_exams").toTypedList(MAX_ROWS_PER_TABLE) { item ->
+                com.keremtulu.questionnote.data.prefs.DenemeDeposu.jsonOku(item, strict = true)
+            }
+        } else {
+            emptyList()
+        }
         BackupData(
             dersler = lessons,
             konular = topics,
@@ -961,6 +993,7 @@ class YerelYedeklemeHizmeti(
             images = images,
             tekrarlar = reviews,
             olcumler = measurements,
+            denemeler = mockExams,
         )
     } catch (error: IOException) {
         throw error
@@ -1086,6 +1119,19 @@ class YerelYedeklemeHizmeti(
         if (data.olcumler.size > MAX_ROWS_PER_TABLE) throw IOException("Ölçüm tablosu sınırı aşıldı.")
         uniqueIds(data.olcumler.map { it.tekrarId }, "ölçüm")
         uniqueIds(data.olcumler.map { it.denemeId }, "deneme")
+        if (data.denemeler.size > MAX_ROWS_PER_TABLE) throw IOException("Deneme kaydı sınırı aşıldı.")
+        uniqueIds(data.denemeler.map { it.id }, "deneme kaydı")
+        data.denemeler.forEach { sinav ->
+            if (sinav.ad.isBlank() || sinav.ad.length > MAX_TEXT_FIELD ||
+                sinav.olusturma < 0L || sinav.gun < 0 || sinav.satirlar.isEmpty()
+            ) {
+                throw IOException("Yedekte geçersiz deneme kaydı var.")
+            }
+            uniqueIds(sinav.satirlar.map { it.dersId }, "deneme ders satırı")
+            if (sinav.satirlar.any { !it.gecerli() || (it.dersAdi != null && it.dersAdi.length > MAX_TEXT_FIELD) }) {
+                throw IOException("Yedekte geçersiz deneme ders skoru var.")
+            }
+        }
         val reviewsById = data.tekrarlar.associateBy { it.id }
         data.olcumler.forEach { olcum ->
             val tekrar = reviewsById[olcum.tekrarId] ?: throw IOException("Yetim ölçüm kaydı.")
@@ -1248,6 +1294,14 @@ class YerelYedeklemeHizmeti(
             .put("prepared_id", journal.preparedId)
             .put("old_files", JSONArray(journal.oldFileNames))
             .put("new_files", JSONArray(journal.newFileNames))
+            .put(
+                "mock_exams",
+                JSONArray().apply {
+                    journal.mockExams.forEach {
+                        put(com.keremtulu.questionnote.data.prefs.DenemeDeposu.jsonYaz(it))
+                    }
+                },
+            )
         writeAtomic(journalFile, json.toString().toByteArray(Charsets.UTF_8))
     }
 
@@ -1265,7 +1319,14 @@ class YerelYedeklemeHizmeti(
         if (oldFiles.any { !PERMANENT_IMAGE_PATH.matches(it) } || newFiles.any { !PERMANENT_IMAGE_PATH.matches(it) }) {
             throw IOException("Geri yükleme günlüğü görsel yolları geçersiz.")
         }
-        RestoreJournal(id, state, safety, preparedId, oldFiles, newFiles)
+        val mockExams = if (json.has("mock_exams") && !json.isNull("mock_exams")) {
+            json.getJSONArray("mock_exams").toTypedList(MAX_ROWS_PER_TABLE) { item ->
+                com.keremtulu.questionnote.data.prefs.DenemeDeposu.jsonOku(item, strict = true)
+            }
+        } else {
+            emptyList()
+        }
+        RestoreJournal(id, state, safety, preparedId, oldFiles, newFiles, mockExams)
     } catch (error: IOException) {
         throw error
     } catch (error: Exception) {
@@ -1387,6 +1448,7 @@ class YerelYedeklemeHizmeti(
         val gorseller: List<GorselEntity>,
         val tekrarlar: List<TekrarEntity>,
         val olcumler: List<TekrarOlcumEntity>,
+        val denemeler: List<com.keremtulu.questionnote.domain.model.DenemeKaydi> = emptyList(),
     )
 
     private data class BackupData(
@@ -1397,6 +1459,7 @@ class YerelYedeklemeHizmeti(
         val images: List<BackupImage>,
         val tekrarlar: List<TekrarEntity>,
         val olcumler: List<TekrarOlcumEntity>,
+        val denemeler: List<com.keremtulu.questionnote.domain.model.DenemeKaydi> = emptyList(),
     )
 
     private data class BackupImage(
@@ -1430,6 +1493,7 @@ class YerelYedeklemeHizmeti(
         val preparedId: String,
         val oldFileNames: List<String>,
         val newFileNames: List<String>,
+        val mockExams: List<com.keremtulu.questionnote.domain.model.DenemeKaydi> = emptyList(),
     )
 
     private companion object {

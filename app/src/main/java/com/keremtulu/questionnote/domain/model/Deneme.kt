@@ -18,6 +18,7 @@ data class DenemeDersSatiri(
     val soruSayisi: Int,
     val dogru: Int,
     val yanlis: Int,
+    val dersAdi: String? = null,
 ) {
     val bos: Int get() = (soruSayisi - dogru - yanlis).coerceAtLeast(0)
     val yuklenecek: Int get() = yanlis + bos

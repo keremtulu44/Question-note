@@ -32,6 +32,12 @@ interface SoruRepository {
 
     suspend fun secenekSil(secenekId: String): SoruSecenegiSilmeSonucu
 
+    /**
+     * Deneme kaydı oluşturulduğunda veya yeniden adlandırıldığında kaynak kataloğunu ve
+     * eski deneme adını taşıyan soruların kaynak metnini birlikte günceller.
+     */
+    suspend fun kaynakAdiDegistir(eskiAd: String?, yeniAd: String) {}
+
     suspend fun soruKaydet(istek: SoruKaydetmeIstegi): SoruIslemSonucu
 
     suspend fun soruSil(soruId: String): SoruIslemSonucu
