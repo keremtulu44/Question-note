@@ -2,9 +2,9 @@
 
 > Bu dosya Android CI tarafından otomatik üretilir. Keystore veya parola değerleri yazılmaz.
 
-- Zaman (UTC): 2026-10-25T12:59:56Z
-- Workflow commit'i: b635fbbfa66c5db9aa986e0f539046624cbb96ff
-- Dal: arena/ade0c6b2-question-note
+- Zaman (UTC): 2026-10-25T13:14:20Z
+- Workflow commit'i: 5b99b45364fa6e9f7146227527919483badbd44c
+- Dal: main
 - Uygulama sürümü: 1.5.104 (versionCode 34)
 - Android SDK: compileSdk/targetSdk 37, minSdk 26; build-tools 37.0.0
 - Genel sonuç: **BAŞARILI**
@@ -18,9 +18,9 @@
 - İmzalama secret durumu: İki gerekli secret dolu (değerler gösterilmez)
 - İmzalama/verify durumu: İmzalandı; apksigner doğruladı ve beklenen sertifika eşleşti (kod: 0; apksigner verify: 0)
 - Sertifika parmak izi: FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54 (beklenen: FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54; durum: eşleşti)
-- Release: Release oluşturuldu (kod: 0)
+- Release: Bu sürüm etiketi için Release zaten mevcut; yeniden oluşturulmadı (kod: 0)
 - Release URL: https://github.com/keremtulu44/Question-note/releases/tag/v1.5.104
-- İmzalı APK SHA-256: d4e73d21f661fa3266096b73dd6331f62ad8cefc334b7efe2e934a4b35210d74
+- İmzalı APK SHA-256: 7d460d652179dc352ea7c49708c5dec8235f472a39b9aa6d69b0f9f6bbbe1929
 
 ## Gradle sürümü
 
@@ -69,20 +69,20 @@ Daemon will be stopped at the end of the build
 > Task :app:parseDebugLocalResources
 > Task :app:javaPreCompileDebug
 > Task :app:generateDebugRFile
-> Task :app:mapDebugSourceSetPaths
 > Task :app:checkDebugAarMetadata
+> Task :app:mapDebugSourceSetPaths
 > Task :app:compileDebugNavigationResources
 > Task :app:createDebugCompatibleScreenManifests
 > Task :app:extractDeepLinksDebug
 > Task :app:processDebugMainManifest
 > Task :app:processDebugManifest
+> Task :app:processDebugManifestForPackage
 > Task :app:preDebugUnitTestBuild UP-TO-DATE
-> Task :app:javaPreCompileDebugUnitTest
 > Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest
 > Task :app:mergeDebugAssets
 > Task :app:mergeDebugResources
 > Task :app:processDebugUnitTestManifest
-> Task :app:processDebugManifestForPackage
 > Task :app:processDebugResources
 > Task :app:packageDebugUnitTestForUnitTest
 > Task :app:generateDebugUnitTestConfig
@@ -118,8 +118,8 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/premium/PremiumEntegrasyon.kt:290:81 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
 
 > Task :app:compileDebugJavaWithJavac
-> Task :app:bundleDebugClassesToRuntimeJar
 > Task :app:processDebugJavaRes
+> Task :app:bundleDebugClassesToRuntimeJar
 > Task :app:bundleDebugClassesToCompileJar
 > Task :app:kspDebugUnitTestKotlin
 
@@ -151,20 +151,20 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 3m 24s
+BUILD SUCCESSFUL in 3m 14s
 32 actionable tasks: 32 executed
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 
 -- Son 80 satır --
 > Task :app:processDebugMainManifest
 > Task :app:processDebugManifest
+> Task :app:processDebugManifestForPackage
 > Task :app:preDebugUnitTestBuild UP-TO-DATE
-> Task :app:javaPreCompileDebugUnitTest
 > Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest
 > Task :app:mergeDebugAssets
 > Task :app:mergeDebugResources
 > Task :app:processDebugUnitTestManifest
-> Task :app:processDebugManifestForPackage
 > Task :app:processDebugResources
 > Task :app:packageDebugUnitTestForUnitTest
 > Task :app:generateDebugUnitTestConfig
@@ -200,8 +200,8 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/premium/PremiumEntegrasyon.kt:290:81 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
 
 > Task :app:compileDebugJavaWithJavac
-> Task :app:bundleDebugClassesToRuntimeJar
 > Task :app:processDebugJavaRes
+> Task :app:bundleDebugClassesToRuntimeJar
 > Task :app:bundleDebugClassesToCompileJar
 > Task :app:kspDebugUnitTestKotlin
 
@@ -233,7 +233,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 3m 24s
+BUILD SUCCESSFUL in 3m 14s
 32 actionable tasks: 32 executed
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 ```
@@ -254,15 +254,15 @@ Daemon will be stopped at the end of the build
 > Task :app:generateReleaseRFile FROM-CACHE
 > Task :app:javaPreCompileRelease FROM-CACHE
 > Task :app:mapReleaseSourceSetPaths
-> Task :app:checkReleaseAarMetadata
 > Task :app:compileReleaseNavigationResources FROM-CACHE
+> Task :app:checkReleaseAarMetadata
 > Task :app:createReleaseCompatibleScreenManifests
 > Task :app:extractDeepLinksRelease FROM-CACHE
 > Task :app:processReleaseMainManifest
+> Task :app:mergeReleaseResources
 > Task :app:processReleaseManifest
 > Task :app:preReleaseUnitTestBuild UP-TO-DATE
 > Task :app:javaPreCompileReleaseUnitTest FROM-CACHE
-> Task :app:mergeReleaseResources
 > Task :app:generateReleaseAssets UP-TO-DATE
 > Task :app:mergeReleaseAssets
 > Task :app:processReleaseUnitTestManifest
@@ -325,7 +325,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 1m 52s
+BUILD SUCCESSFUL in 1m 46s
 32 actionable tasks: 24 executed, 8 from cache
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 -- Hata satırları ve son bölüm --
@@ -341,15 +341,15 @@ Daemon will be stopped at the end of the build
 > Task :app:generateReleaseRFile FROM-CACHE
 > Task :app:javaPreCompileRelease FROM-CACHE
 > Task :app:mapReleaseSourceSetPaths
-> Task :app:checkReleaseAarMetadata
 > Task :app:compileReleaseNavigationResources FROM-CACHE
+> Task :app:checkReleaseAarMetadata
 > Task :app:createReleaseCompatibleScreenManifests
 > Task :app:extractDeepLinksRelease FROM-CACHE
 > Task :app:processReleaseMainManifest
+> Task :app:mergeReleaseResources
 > Task :app:processReleaseManifest
 > Task :app:preReleaseUnitTestBuild UP-TO-DATE
 > Task :app:javaPreCompileReleaseUnitTest FROM-CACHE
-> Task :app:mergeReleaseResources
 > Task :app:generateReleaseAssets UP-TO-DATE
 > Task :app:mergeReleaseAssets
 > Task :app:processReleaseUnitTestManifest
@@ -412,7 +412,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 1m 52s
+BUILD SUCCESSFUL in 1m 46s
 32 actionable tasks: 24 executed, 8 from cache
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 ```
@@ -495,7 +495,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 1m 52s
+BUILD SUCCESSFUL in 1m 49s
 50 actionable tasks: 28 executed, 22 up-to-date
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 ```
@@ -531,12 +531,12 @@ V3.0 Signer: public key MD5 digest: efca2e07ac5a04473681ddaf5ff0157e
 ## Release çıktısı
 
 ```text
-https://github.com/keremtulu44/Question-note/releases/tag/v1.5.104
+Bu sürüm etiketi için Release zaten mevcut; yeniden oluşturulmadı
 ```
 
 ## APK özeti
 
 ```text
 APK: app/build/outputs/apk/release/yanlis-defteri-1.5.104.apk
-SHA-256: d4e73d21f661fa3266096b73dd6331f62ad8cefc334b7efe2e934a4b35210d74
+SHA-256: 7d460d652179dc352ea7c49708c5dec8235f472a39b9aa6d69b0f9f6bbbe1929
 ```
