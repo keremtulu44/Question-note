@@ -13,11 +13,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -424,13 +426,16 @@ fun SoruFormuEkrani(
         }
     }
 
+    val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
+    val klavyeAcik = WindowInsets.ime.getBottom(androidx.compose.ui.platform.LocalDensity.current) > 0
+
     BackHandler(enabled = true, onBack = ::cancelAndReturn)
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        contentWindowInsets = androidx.compose.foundation.layout.WindowInsets.safeDrawing,
+        contentWindowInsets = WindowInsets.safeDrawing,
         bottomBar = {
-            if (!yukleniyor && !bulunamadi && !yuklemeBasarisiz) {
+            if (!yukleniyor && !bulunamadi && !yuklemeBasarisiz && !klavyeAcik) {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     color = MaterialTheme.colorScheme.surface,
@@ -440,7 +445,6 @@ fun SoruFormuEkrani(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .imePadding()
                             .navigationBarsPadding()
                             .padding(horizontal = 20.dp, vertical = 12.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -507,23 +511,40 @@ fun SoruFormuEkrani(
                 PremiumTextButton(onClick = onGeri) { Text(stringResource(R.string.question_back)) }
             }
             else -> LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(padding),
+                modifier = Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding),
                 contentPadding = PaddingValues(start = 18.dp, top = 8.dp, end = 18.dp, bottom = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        PremiumTextButton(
-                            onClick = ::cancelAndReturn,
-                            enabled = !kaydediliyor,
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                verticalAlignment = Alignment.CenterVertically,
+                            PremiumTextButton(
+                                onClick = ::cancelAndReturn,
+                                enabled = !kaydediliyor,
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
                             ) {
-                                Text("←", style = MaterialTheme.typography.titleMedium)
-                                Text(stringResource(R.string.question_form_cancel))
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Text("←", style = MaterialTheme.typography.titleMedium)
+                                    Text(stringResource(R.string.question_form_cancel))
+                                }
+                            }
+                            if (klavyeAcik) {
+                                PremiumTextButton(
+                                    onClick = { focusManager.clearFocus() },
+                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                                ) {
+                                    Text(
+                                        stringResource(R.string.common_hide_keyboard),
+                                        fontWeight = FontWeight.SemiBold,
+                                    )
+                                }
                             }
                         }
                         Surface(
@@ -814,6 +835,42 @@ fun SoruFormuEkrani(
                                             enabled = !kaydediliyor,
                                         )
                                     }
+                                }
+                            }
+                        }
+                    }
+                }
+                if (klavyeAcik) {
+                    item {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            formHatasi?.let { errorId ->
+                                Text(
+                                    text = stringResource(errorId),
+                                    modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+                                    color = MaterialTheme.colorScheme.error,
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            }
+                            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                PremiumTextButton(
+                                    onClick = { focusManager.clearFocus() },
+                                    modifier = Modifier.heightIn(min = 48.dp),
+                                ) {
+                                    Text(stringResource(R.string.common_hide_keyboard))
+                                }
+                                PremiumButton(
+                                    onClick = ::saveQuestion,
+                                    modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                                    enabled = !kaydediliyor,
+                                    shape = RoundedCornerShape(16.dp),
+                                ) {
+                                    Text(
+                                        stringResource(
+                                            if (kaydediliyor) R.string.question_form_saving
+                                            else R.string.question_form_save,
+                                        ),
+                                        fontWeight = FontWeight.Bold,
+                                    )
                                 }
                             }
                         }

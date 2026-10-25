@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -467,6 +468,7 @@ fun YanlisDefteriUygulamasi(
         }
     } else {
     val altMenuGorunur = ekran.altMenuGorunur()
+    val klavyeAcik = WindowInsets.ime.getBottom(androidx.compose.ui.platform.LocalDensity.current) > 0
     val hareketPolitikasi = LocalHareketPolitikasi.current
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -506,7 +508,7 @@ fun YanlisDefteriUygulamasi(
         },
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
-            if (altMenuGorunur) {
+            if (altMenuGorunur && !klavyeAcik) {
                 AltMenu(secili = ekran.aktifSekme(), onSec = ::sekmeSec)
             }
         },

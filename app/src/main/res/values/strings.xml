@@ -1036,4 +1036,26 @@
     <string name="teacher_answer_prefix">Cevap: %1$s</string>
     <string name="teacher_delete_question_title">Soruyu bu gruptan sil?</string>
     <string name="teacher_delete_question_message">Bu soru yalnızca bu gruptan kaldırılır; eklediğin diğer gruplardaki kopyalar etkilenmez.</string>
+    <string name="common_hide_keyboard">Klavyeyi kapat</string>
+    <string name="role_switch_anytime_hint">İstediğin zaman Ayarlar ekranından Öğrenci ve Öğretmen modları arasında geçiş yapabilirsin; kayıtların silinmez.</string>
+    <string name="role_student_pill_1">Akıllı tekrar</string>
+    <string name="role_student_pill_2">Deneme analizi</string>
+    <string name="role_student_pill_3">Öğretmene sorulacaklar</string>
+    <string name="role_teacher_pill_1">Sınıf &amp; özel ders grupları</string>
+    <string name="role_teacher_pill_2">Gizli cevaplı sunum</string>
+    <string name="role_teacher_pill_3">Gruplar arası kopyalama</string>
+    <string name="teacher_stat_groups">Grup</string>
+    <string name="teacher_stat_unsolved">Çözülecek</string>
+    <string name="teacher_stat_solved">Çözülen</string>
+    <string name="teacher_group_search_placeholder">Grup veya öğrenci ara…</string>
+    <string name="teacher_question_search_placeholder">Başlık veya cevap içinde ara…</string>
+    <string name="teacher_search_empty_title">Eşleşen kayıt bulunamadı</string>
+    <string name="teacher_search_empty_subtitle">Arama terimini veya seçili filtreyi temizleyip tekrar deneyebilirsin.</string>
+    <string name="teacher_group_pending_badge">%1$d bekliyor</string>
+    <string name="teacher_group_solved_badge">%1$d çözüldü</string>
+    <string name="teacher_group_empty_badge">Henüz soru yok</string>
+    <string name="teacher_photo_count_badge">%1$d görsel</string>
+    <string name="teacher_zoom_reset">1x Sıfırla</string>
+    <string name="teacher_zoom_hint">Çift dokun veya iki parmakla yakınlaştır</string>
+    <string name="teacher_settings_workspace_summary">Çalışma alanında %1$d grup ve %2$d soru kayıtlı. Tüm veriler ve fotoğraflar ZIP yedeğine dahildir.</string>
 </resources>

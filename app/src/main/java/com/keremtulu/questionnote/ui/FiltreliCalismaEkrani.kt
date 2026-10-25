@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -261,7 +262,11 @@ fun FiltreliCalismaEkrani(
         contentWindowInsets = WindowInsets.safeDrawing,
     ) { insets ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(insets).testTag("practice-filter-list"),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(insets)
+                .consumeWindowInsets(insets)
+                .testTag("practice-filter-list"),
             contentPadding = PaddingValues(start = 20.dp, top = 10.dp, end = 20.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {

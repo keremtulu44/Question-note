@@ -14,10 +14,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
@@ -25,6 +26,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
@@ -62,10 +64,14 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -230,7 +236,8 @@ fun DenemeListesiEkrani(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(insets),
+                .padding(insets)
+                .consumeWindowInsets(insets),
         ) {
             DenemeUstCubuk(
                 baslik = stringResource(R.string.deneme_title),
@@ -964,6 +971,9 @@ fun DenemeDetayEkrani(
         )
     }
 
+    val focusManager = LocalFocusManager.current
+    val klavyeAcik = WindowInsets.ime.getBottom(LocalDensity.current) > 0
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets.safeDrawing,
@@ -973,23 +983,41 @@ fun DenemeDetayEkrani(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(insets)
-                .imePadding(),
+                .consumeWindowInsets(insets),
         ) {
             DenemeUstCubuk(
                 baslik = stringResource(
                     if (mevcut == null) R.string.deneme_form_new_title else R.string.deneme_form_title,
                 ),
                 onGeri = onGeri,
-                sagAksiyon = if (mevcut != null) {
+                sagAksiyon = if (klavyeAcik || mevcut != null) {
                     {
-                        PremiumTextButton(
-                            onClick = { silmeOnayiAcik = true },
-                            modifier = Modifier.testTag("deneme-delete-button"),
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
-                            Text(
-                                text = stringResource(R.string.deneme_delete),
-                                color = MaterialTheme.colorScheme.error,
-                            )
+                            if (klavyeAcik) {
+                                PremiumTextButton(
+                                    onClick = { focusManager.clearFocus() },
+                                    modifier = Modifier.testTag("deneme-hide-keyboard-button"),
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.common_hide_keyboard),
+                                        fontWeight = FontWeight.SemiBold,
+                                    )
+                                }
+                            }
+                            if (mevcut != null) {
+                                PremiumTextButton(
+                                    onClick = { silmeOnayiAcik = true },
+                                    modifier = Modifier.testTag("deneme-delete-button"),
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.deneme_delete),
+                                        color = MaterialTheme.colorScheme.error,
+                                    )
+                                }
+                            }
                         }
                     }
                 } else {
@@ -1061,6 +1089,14 @@ fun DenemeDetayEkrani(
                                 label = { Text(stringResource(R.string.deneme_name)) },
                                 placeholder = { Text(stringResource(R.string.deneme_name_placeholder)) },
                                 singleLine = true,
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                                keyboardActions = KeyboardActions(
+                                    onNext = {
+                                        if (!focusManager.moveFocus(FocusDirection.Next)) {
+                                            focusManager.clearFocus()
+                                        }
+                                    },
+                                ),
                                 shape = RoundedCornerShape(16.dp),
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -1148,7 +1184,7 @@ fun DenemeDetayEkrani(
                     )
                 }
 
-                itemsIndexed(formDersleri, key = { _, oge -> oge.ders.id }) { _, oge ->
+                itemsIndexed(formDersleri, key = { _, oge -> oge.ders.id }) { siraIndex, oge ->
                     val ders = oge.ders
                     val soruAdet = soruMetinleri[ders.id]?.toIntOrNull() ?: 0
                     val dogruAdet = dogruMetinleri[ders.id]?.toIntOrNull() ?: 0
@@ -1164,6 +1200,7 @@ fun DenemeDetayEkrani(
                     DenemeDersSkorKarti(
                         ders = ders,
                         gizli = oge.gizli,
+                        sonDersMi = siraIndex == formDersleri.lastIndex,
                         soruMetni = soruMetinleri[ders.id].orEmpty(),
                         dogruMetni = dogruMetinleri[ders.id].orEmpty(),
                         yanlisMetni = yanlisMetinleri[ders.id].orEmpty(),
@@ -1228,6 +1265,7 @@ fun DenemeDetayEkrani(
 private fun DenemeDersSkorKarti(
     ders: Ders,
     gizli: Boolean,
+    sonDersMi: Boolean,
     soruMetni: String,
     dogruMetni: String,
     yanlisMetni: String,
@@ -1335,6 +1373,7 @@ private fun DenemeDersSkorKarti(
                     etiket = stringResource(R.string.deneme_total),
                     deger = soruMetni,
                     hatali = gecersiz,
+                    imeAction = ImeAction.Next,
                     modifier = Modifier.weight(1f).testTag("deneme-total-${ders.id}"),
                     onDegisti = onSoruDegisti,
                 )
@@ -1342,6 +1381,7 @@ private fun DenemeDersSkorKarti(
                     etiket = stringResource(R.string.deneme_correct),
                     deger = dogruMetni,
                     hatali = gecersiz,
+                    imeAction = ImeAction.Next,
                     modifier = Modifier.weight(1f).testTag("deneme-correct-${ders.id}"),
                     onDegisti = onDogruDegisti,
                 )
@@ -1349,6 +1389,7 @@ private fun DenemeDersSkorKarti(
                     etiket = stringResource(R.string.deneme_wrong),
                     deger = yanlisMetni,
                     hatali = gecersiz,
+                    imeAction = if (sonDersMi) ImeAction.Done else ImeAction.Next,
                     modifier = Modifier.weight(1f).testTag("deneme-wrong-${ders.id}"),
                     onDegisti = onYanlisDegisti,
                 )
@@ -1387,9 +1428,11 @@ private fun SayiAlani(
     etiket: String,
     deger: String,
     hatali: Boolean,
+    imeAction: ImeAction = ImeAction.Next,
     modifier: Modifier = Modifier,
     onDegisti: (String) -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
     OutlinedTextField(
         value = deger,
         onValueChange = { girdi -> onDegisti(girdi.filter(Char::isDigit).take(3)) },
@@ -1397,7 +1440,18 @@ private fun SayiAlani(
         singleLine = true,
         isError = hatali,
         shape = RoundedCornerShape(14.dp),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Number,
+            imeAction = imeAction,
+        ),
+        keyboardActions = KeyboardActions(
+            onNext = {
+                if (!focusManager.moveFocus(FocusDirection.Next)) {
+                    focusManager.clearFocus()
+                }
+            },
+            onDone = { focusManager.clearFocus() },
+        ),
         modifier = modifier,
     )
 }

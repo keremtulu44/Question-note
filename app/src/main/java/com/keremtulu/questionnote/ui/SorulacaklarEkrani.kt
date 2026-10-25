@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -145,7 +146,11 @@ fun SorulacaklarEkrani(
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { insets ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(insets).testTag("sorulacaklar_liste"),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(insets)
+                .consumeWindowInsets(insets)
+                .testTag("sorulacaklar_liste"),
             contentPadding = PaddingValues(start = 18.dp, top = 8.dp, end = 18.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
@@ -708,7 +713,8 @@ internal fun CozdurdumDialog(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 24.dp),
+                .windowInsetsPadding(WindowInsets.safeDrawing)
+                .padding(horizontal = 20.dp, vertical = 16.dp),
             shape = RoundedCornerShape(24.dp),
             color = MaterialTheme.colorScheme.surface,
             tonalElevation = 6.dp,

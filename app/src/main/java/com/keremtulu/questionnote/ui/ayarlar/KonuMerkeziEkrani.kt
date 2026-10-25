@@ -3,12 +3,17 @@ package com.keremtulu.questionnote.ui.ayarlar
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -61,9 +66,13 @@ fun KonuMerkeziEkrani(
         hata = false
         akis.catch { hata = true }.collect { value = it }
     }
-    Scaffold { insets ->
+    val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets.safeDrawing,
+    ) { insets ->
         LazyColumn(
-            Modifier.fillMaxSize().padding(insets),
+            Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets),
             contentPadding = PaddingValues(20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -88,8 +97,18 @@ fun KonuMerkeziEkrani(
                 }
             }
             item {
-                OutlinedTextField(arama, { arama = it }, Modifier.fillMaxWidth(),
-                    label = { Text(stringResource(R.string.topics_search)) }, singleLine = true)
+                OutlinedTextField(
+                    value = arama,
+                    onValueChange = { arama = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(stringResource(R.string.topics_search)) },
+                    singleLine = true,
+                    shape = RoundedCornerShape(16.dp),
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = androidx.compose.ui.text.input.ImeAction.Search,
+                    ),
+                    keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
+                )
             }
             if (hata) {
                 item { PremiumTextButton(onClick = { yenile++ }) { Text(stringResource(R.string.topic_retry)) } }
