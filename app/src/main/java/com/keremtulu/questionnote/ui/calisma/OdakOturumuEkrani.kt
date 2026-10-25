@@ -125,6 +125,7 @@ fun OdakOturumuEkrani(
     onAtla: () -> Unit,
     oturumCizimBellegi: TahtaOturumCizimBellegi? = null,
     monotonikSaat: MonotonikSaat = MonotonikSaat { SystemClock.elapsedRealtime() },
+    denemeler: List<com.keremtulu.questionnote.domain.model.DenemeKaydi> = emptyList(),
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -362,8 +363,13 @@ fun OdakOturumuEkrani(
             if (!soru.soruNotu.isNullOrBlank()) item {
                 Text(soru.soruNotu.orEmpty(), style = MaterialTheme.typography.bodyLarge, color = colors.onSurface)
             }
+            val denemeKaydi = com.keremtulu.questionnote.ui.deneme.run { soru.denemeKaydi(denemeler) }
+            if (denemeKaydi != null) {
+                item { com.keremtulu.questionnote.ui.deneme.DenemeHatirlatmaYazi(soru.id, denemeKaydi) }
+            } else {
             val kaynak = listOfNotNull(soru.kaynak, soru.kaynakKonumu).filter { it.isNotBlank() }.joinToString(" · ")
             if (kaynak.isNotBlank()) item { Text(kaynak, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant) }
+            }
             items(soru.gorseller.filter { it.tur == GorselTuru.SORU }, key = { it.id }) { image ->
                 OdakGorseli(image, gorselDeposu, stringResource(R.string.question_image_description),
                     onDurum = { durum ->

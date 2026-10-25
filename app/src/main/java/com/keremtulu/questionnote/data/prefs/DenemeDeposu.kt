@@ -4,6 +4,7 @@ import android.content.Context
 import com.keremtulu.questionnote.domain.model.DenemeDersSatiri
 import com.keremtulu.questionnote.domain.model.DenemeKaydi
 import com.keremtulu.questionnote.domain.model.NetKurali
+import com.keremtulu.questionnote.domain.model.yerelEpochGun
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,7 +20,7 @@ class DenemeDeposu(context: Context) {
 
     fun kaydet(deneme: DenemeKaydi) {
         val guncel = kayitlar.value.filter { it.id != deneme.id } + deneme
-        yaz(guncel.sortedByDescending { it.olusturma })
+        yaz(guncel.sortedWith(compareByDescending<DenemeKaydi> { it.gun }.thenByDescending { it.olusturma }))
     }
 
     fun sil(id: String) {
@@ -47,12 +48,14 @@ class DenemeDeposu(context: Context) {
                             )
                         }
                     }
+                    val olusturma = o.getLong("olusturma")
                     add(
                         DenemeKaydi(
                             id = o.getString("id"),
                             ad = o.getString("ad"),
                             kural = runCatching { NetKurali.valueOf(o.getString("kural")) }.getOrDefault(NetKurali.DORTTE_BIR),
-                            olusturma = o.getLong("olusturma"),
+                            olusturma = olusturma,
+                            gun = if (o.has("gun")) o.getInt("gun") else olusturma.yerelEpochGun(),
                             satirlar = satirlar,
                         ),
                     )
@@ -70,6 +73,7 @@ class DenemeDeposu(context: Context) {
                     .put("ad", deneme.ad)
                     .put("kural", deneme.kural.name)
                     .put("olusturma", deneme.olusturma)
+                    .put("gun", deneme.gun)
                     .put(
                         "satirlar",
                         JSONArray().apply {

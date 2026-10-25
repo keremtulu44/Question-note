@@ -2,6 +2,12 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.5.103] — 2026-10-25
+
+- Deneme günü otomatik; listede tarih. Toplam net çizgisi ve ders neti çubukları (önceki ortalama).
+- Soru kartı / odak: denemede kaçırılan damga ve kısa hatırlatma. Boş ekranlar biraz daha iğneli.
+- Sürüm: `versionCode 33` / `versionName 1.5.103`.
+
 ## [1.5.102] — 2026-10-25
 
 - İlk açılışta ~24 derslik katalogdan çoklu seçim; sınıf/sınav profili zorunlu değil.

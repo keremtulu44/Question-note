@@ -30,6 +30,7 @@ data class DenemeKaydi(
     val ad: String,
     val kural: NetKurali,
     val olusturma: Long,
+    val gun: Int,
     val satirlar: List<DenemeDersSatiri>,
 ) {
     fun toplamNet(): Double = satirlar.sumOf { kural.net(it.dogru, it.yanlis) }

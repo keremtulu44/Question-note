@@ -105,6 +105,7 @@ fun SoruDetayEkrani(
     tekrarOturumunda: Boolean = false,
     oturumSira: Int? = null,
     oturumToplam: Int? = null,
+    denemeler: List<com.keremtulu.questionnote.domain.model.DenemeKaydi> = emptyList(),
 ) {
     val denemeId = remember(soruId) { UUID.randomUUID().toString() }
     var yenileme by remember(soruId) { mutableIntStateOf(0) }
@@ -274,8 +275,13 @@ fun SoruDetayEkrani(
                             }
                         }
                     }
+                    val denemeKaydi = com.keremtulu.questionnote.ui.deneme.run { soru.denemeKaydi(denemeler) }
+                    if (denemeKaydi != null) {
+                        item { com.keremtulu.questionnote.ui.deneme.DenemeDamgaYazi(denemeKaydi) }
+                    } else {
                     soru.kaynak?.takeIf { it.isNotBlank() }?.let { source ->
                         item { BilgiAlani(R.string.question_source, source) }
+                    }
                     }
                     soru.kaynakKonumu?.takeIf { it.isNotBlank() }?.let { location ->
                         item { BilgiAlani(R.string.question_source_location, location) }

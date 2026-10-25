@@ -84,6 +84,7 @@ fun DersCalismaEkrani(
     onKonulariYonet: () -> Unit,
     onSoruEkle: () -> Unit,
     onSoruAc: (String) -> Unit,
+    denemeler: List<com.keremtulu.questionnote.domain.model.DenemeKaydi> = emptyList(),
 ) {
     var seciliKonuId by remember(ders.id) { mutableStateOf<String?>(null) }
     var konusuzFiltre by remember(ders.id) { mutableStateOf(false) }
@@ -296,6 +297,7 @@ fun DersCalismaEkrani(
                                 val enter = animateItemInsertion(index)
                                 SoruListeKarti(
                                     soru = soru,
+                                    denemeler = denemeler,
                                     onClick = { onSoruAc(soru.id) },
                                     modifier = Modifier.graphicsLayer {
                                         alpha = enter.value
@@ -323,6 +325,7 @@ private fun SoruListeKarti(
     soru: Soru,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    denemeler: List<com.keremtulu.questionnote.domain.model.DenemeKaydi> = emptyList(),
 ) {
     PremiumCard(
         onClick = onClick,
@@ -351,8 +354,13 @@ private fun SoruListeKarti(
                     Text("★", color = PremiumMarkaRenkler.Bakir, style = MaterialTheme.typography.titleMedium)
                 }
             }
+            val deneme = com.keremtulu.questionnote.ui.deneme.run { soru.denemeKaydi(denemeler) }
+            if (deneme != null) {
+                com.keremtulu.questionnote.ui.deneme.DenemeDamgaYazi(deneme)
+            } else {
             soru.kaynak?.takeIf { it.isNotBlank() && it != soru.soruNotu }?.let {
                 Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
             }
             soru.kaynakKonumu?.takeIf { it.isNotBlank() }?.let {
                 Text(

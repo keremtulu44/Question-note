@@ -169,6 +169,7 @@ fun YanlisDefteriUygulamasi(
     val tahtaOturumId = (ekran as? UygulamaEkrani.FiltreliOturum)?.oturum?.id
     val tahtaOturumCizimBellegi = remember(tahtaOturumId) { TahtaOturumCizimBellegi() }
     val profilSecimi by profilDeposu.secimIzle.collectAsState()
+    val denemeler by denemeDeposu.kayitlariIzle.collectAsState()
     var bekleyenOturum by remember { mutableStateOf<UygulamaEkrani.FiltreliOturum?>(null) }
     var filtreliCalismaAyar by remember { mutableStateOf(FiltreliCalismaEkraniAyar()) }
     // Filtreli oturum sürerken başka bir ekrana geçilirse önce onay istenir.
@@ -514,6 +515,7 @@ fun YanlisDefteriUygulamasi(
                         dersArsivli = false,
                         konuRepository = konuRepository,
                         soruRepository = soruRepository,
+                        denemeler = denemeler,
                         onGeri = { ekran = current.geri },
                         onKonulariYonet = { ekran = UygulamaEkrani.Konular(current.ders, current) },
                         onSoruEkle = {
@@ -540,6 +542,7 @@ fun YanlisDefteriUygulamasi(
                         onTekrarTamamlandi = { _, _ -> ekran = current.geri },
                         onKaydedildi = ::geriAlKutucuguGoster,
                         tekrarOturumunda = current.tekrarOturumunda,
+                        denemeler = denemeler,
                     )
                     UygulamaEkrani.FiltreliCalisma -> FiltreliCalismaEkrani(
                         dersRepository = dersRepository,
@@ -566,6 +569,7 @@ fun YanlisDefteriUygulamasi(
                                 oturumId = current.oturum.id,
                                 oturumDeposu = oturumDeposu,
                                 oturumCizimBellegi = tahtaOturumCizimBellegi,
+                                denemeler = denemeler,
                                 disDuraklatildi = oturumCikisHedefi != null,
                                 cozumOnceAcildi = question.id in current.oturum.cozumAcilanlar,
                                 onCozumAcildi = { oturumGoster(current.sorular, current.dersler, current.oturum.cozumuAc()) },
@@ -609,6 +613,7 @@ fun YanlisDefteriUygulamasi(
                     )
                     UygulamaEkrani.Denemeler -> com.keremtulu.questionnote.ui.deneme.DenemeListesiEkrani(
                         denemeDeposu = denemeDeposu,
+                        dersRepository = dersRepository,
                         onGeri = { ekran = UygulamaEkrani.Bugun },
                         onYeni = { ekran = UygulamaEkrani.DenemeDetay(null) },
                         onAc = { ekran = UygulamaEkrani.DenemeDetay(it) },
