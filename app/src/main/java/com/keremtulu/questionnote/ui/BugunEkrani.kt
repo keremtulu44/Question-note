@@ -516,7 +516,7 @@ private fun BugunDenemeKarti(
             R.string.today_deneme_subtitle_summary,
             denemeler.size,
             sonDeneme.ad,
-            com.keremtulu.questionnote.ui.deneme.netYazi(sonDeneme.toplamNet),
+            com.keremtulu.questionnote.ui.deneme.netYazi(sonDeneme.toplamNet()),
         )
     }
 

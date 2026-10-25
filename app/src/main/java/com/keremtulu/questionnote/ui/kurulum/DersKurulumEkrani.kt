@@ -57,14 +57,14 @@ import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import kotlinx.coroutines.launch
 
 private val VarsayilanBaslangicAnahtarlari = setOf(
-    "turkce",
+    "türkçe",
     "matematik",
     "geometri",
     "fizik",
     "kimya",
     "biyoloji",
     "tarih",
-    "cografya",
+    "coğrafya",
 )
 
 private data class DersGrubu(
@@ -73,19 +73,16 @@ private data class DersGrubu(
 )
 
 private fun dersGrubuAnahtari(ad: String): Int = when (ad.dersAnahtari()) {
-    "turkce", "turk dili ve edebiyati", "paragraf" -> R.string.onboarding_group_language
-    "matematik", "geometri", "sayisal mantik" -> R.string.onboarding_group_math
+    "türkçe", "edebiyat", "paragraf" -> R.string.onboarding_group_language
+    "matematik", "geometri", "problemler" -> R.string.onboarding_group_math
     "fen bilimleri", "fizik", "kimya", "biyoloji" -> R.string.onboarding_group_science
-    "sosyal bilgiler",
     "tarih",
-    "cografya",
-    "t.c. inkilap tarihi",
+    "coğrafya",
+    "t.c. inkılap tarihi ve atatürkçülük",
     "felsefe",
-    "psikoloji",
-    "sosyoloji",
-    "mantik",
-    "din kulturu",
-    "vatandaslik",
+    "felsefe grubu",
+    "din kültürü ve ahlak bilgisi",
+    "vatandaşlık",
     -> R.string.onboarding_group_social
     else -> R.string.onboarding_group_foreign
 }
@@ -316,7 +313,7 @@ private fun KurulumDersKarti(
     val colors = MaterialTheme.colorScheme
     val stil = dersKartStiliGetir(ders.ad)
     val vurgu = if (koyu) stil.koyuRenk else stil.acikRenk
-    val sembol = stringResource(stil.sembolRes)
+    val sembol = stringResource(stil.isaret)
 
     PremiumCard(
         onClick = onTikla,

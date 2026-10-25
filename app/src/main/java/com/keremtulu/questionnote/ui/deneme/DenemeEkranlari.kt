@@ -185,7 +185,10 @@ fun DenemeListesiEkrani(
 ) {
     val kayitlar by denemeDeposu.kayitlariIzle.collectAsState()
     val tumDersler by remember(dersRepository) {
-        dersRepository.dersleriIzle(arsivliDahil = true)
+        combine(
+            dersRepository.dersleriIzle(false),
+            dersRepository.dersleriIzle(true),
+        ) { acik, arsiv -> acik + arsiv }
     }.collectAsState(initial = emptyList())
     val dersAdlari = remember(tumDersler) { tumDersler.associate { it.id to it.ad } }
     val tumSorular = tumSorulariIzle(tumDersler, soruRepository)
@@ -295,8 +298,8 @@ fun DenemeListesiEkrani(
                                             fontWeight = FontWeight.Bold,
                                         )
                                         if (grafikKayitlari.size >= 2) {
-                                            val enDusuk = grafikKayitlari.minOf { it.toplamNet }
-                                            val enYuksek = grafikKayitlari.maxOf { it.toplamNet }
+                                            val enDusuk = grafikKayitlari.minOf { it.toplamNet() }
+                                            val enYuksek = grafikKayitlari.maxOf { it.toplamNet() }
                                             Text(
                                                 text = stringResource(
                                                     R.string.deneme_chart_range,
@@ -311,8 +314,8 @@ fun DenemeListesiEkrani(
                                     grafikKayitlari.lastOrNull()?.let { enSon ->
                                         val onceki = kayitlar.oncekiAyniKural(enSon)
                                         NetOzetRozeti(
-                                            net = enSon.toplamNet,
-                                            fark = onceki?.let { enSon.toplamNet - it.toplamNet },
+                                            net = enSon.toplamNet(),
+                                            fark = onceki?.let { enSon.toplamNet() - it.toplamNet() },
                                         )
                                     }
                                 }
@@ -391,7 +394,7 @@ fun DenemeListesiEkrani(
                         }
                         DenemeListeKarti(
                             deneme = deneme,
-                            fark = onceki?.let { deneme.toplamNet - it.toplamNet },
+                            fark = onceki?.let { deneme.toplamNet() - it.toplamNet() },
                             yuklenenSoruSayisi = if (soruRepository != null) yuklenen else null,
                             onClick = { onAc(deneme.id) },
                             modifier = Modifier.graphicsLayer {
@@ -455,7 +458,7 @@ private fun DenemeListeKarti(
                         color = colors.onSurfaceVariant,
                     )
                 }
-                NetOzetRozeti(net = deneme.toplamNet, fark = fark)
+                NetOzetRozeti(net = deneme.toplamNet(), fark = fark)
             }
 
             Row(
@@ -578,7 +581,7 @@ private fun NetCizgisi(noktalar: List<DenemeKaydi>) {
         val icGenislik = (size.width - yatayIcBosluk * 2f).coerceAtLeast(1f)
         val icYukseklik = (size.height - dikeyIcBosluk * 2f).coerceAtLeast(1f)
 
-        val degerler = noktalar.map { it.toplamNet.toFloat() }
+        val degerler = noktalar.map { it.toplamNet().toFloat() }
         val altSinir = min(0f, degerler.minOrNull() ?: 0f)
         val hamUst = degerler.maxOrNull() ?: 1f
         val ustSinir = max(altSinir + 4f, hamUst * 1.08f)
@@ -684,7 +687,7 @@ private fun DersNetBarlari(
             val ad = dersAdlari[bar.dersId] ?: bar.dersAdi ?: "—"
             val stil = dersKartStiliGetir(ad)
             val vurgu = if (koyu) stil.koyuRenk else stil.acikRenk
-            val sembol = stringResource(stil.sembolRes)
+            val sembol = stringResource(stil.isaret)
             val fark = bar.oncekiOrtalama?.let { bar.sonNet - it }
 
             Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
@@ -817,7 +820,10 @@ fun DenemeDetayEkrani(
         dersRepository.aktifDersleriIzle()
     }.collectAsState(initial = emptyList())
     val tumDersler by remember(dersRepository) {
-        dersRepository.dersleriIzle(arsivliDahil = true)
+        combine(
+            dersRepository.dersleriIzle(false),
+            dersRepository.dersleriIzle(true),
+        ) { acik, arsiv -> acik + arsiv }
     }.collectAsState(initial = emptyList())
     val tumSorular = tumSorulariIzle(tumDersler, soruRepository)
 
@@ -831,9 +837,8 @@ fun DenemeDetayEkrani(
                     id = satir.dersId,
                     ad = satir.dersAdi ?: "Ders",
                     sira = Int.MAX_VALUE,
+                    soruSayisi = 0,
                     arsivli = true,
-                    olusturma = 0L,
-                    guncelleme = 0L,
                 )
                 DenemeFormDersi(ders = gercekDers, gizli = true)
             }
@@ -1239,7 +1244,7 @@ private fun DenemeDersSkorKarti(
     val colors = MaterialTheme.colorScheme
     val stil = dersKartStiliGetir(ders.ad)
     val vurgu = if (koyu) stil.koyuRenk else stil.acikRenk
-    val sembol = stringResource(stil.sembolRes)
+    val sembol = stringResource(stil.isaret)
     val doluMu = soruMetni.isNotBlank() || dogruMetni.isNotBlank() || yanlisMetni.isNotBlank()
     val gecersiz = doluMu && (!satir.gecerli() || (satir.soruSayisi == 0 && (satir.dogru > 0 || satir.yanlis > 0)))
 
