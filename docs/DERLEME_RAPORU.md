@@ -2,9 +2,9 @@
 
 > Bu dosya Android CI tarafından otomatik üretilir. Keystore veya parola değerleri yazılmaz.
 
-- Zaman (UTC): 2026-10-25T18:58:56Z
-- Workflow commit'i: 36bd9a21d6305a9d54a98cda412969cb2b2d1722
-- Dal: arena/9d4e7eac-question-note
+- Zaman (UTC): 2026-10-25T19:07:42Z
+- Workflow commit'i: b48a2aff5fefde1f6092d8f4dc5446286a1b70f8
+- Dal: main
 - Uygulama sürümü: 1.5.108 (versionCode 38)
 - Android SDK: compileSdk/targetSdk 37, minSdk 26; build-tools 37.0.0
 - Genel sonuç: **BAŞARILI**
@@ -18,9 +18,9 @@
 - İmzalama secret durumu: İki gerekli secret dolu (değerler gösterilmez)
 - İmzalama/verify durumu: İmzalandı; apksigner doğruladı ve beklenen sertifika eşleşti (kod: 0; apksigner verify: 0)
 - Sertifika parmak izi: FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54 (beklenen: FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54; durum: eşleşti)
-- Release: Release oluşturuldu (kod: 0)
+- Release: Bu sürüm etiketi için Release zaten mevcut; yeniden oluşturulmadı (kod: 0)
 - Release URL: https://github.com/keremtulu44/Question-note/releases/tag/v1.5.108
-- İmzalı APK SHA-256: ea121be66a138f32d1134112058f39f04711bdaea3a13479499637f089171c07
+- İmzalı APK SHA-256: 573ece1490031aa56295f66edfd3ec83c2de46923d15ca7aeef75755d58b0209
 
 ## Gradle sürümü
 
@@ -76,14 +76,14 @@ Daemon will be stopped at the end of the build
 > Task :app:extractDeepLinksDebug
 > Task :app:processDebugMainManifest
 > Task :app:processDebugManifest
-> Task :app:processDebugManifestForPackage
 > Task :app:preDebugUnitTestBuild UP-TO-DATE
-> Task :app:generateDebugAssets UP-TO-DATE
-> Task :app:javaPreCompileDebugUnitTest
-> Task :app:mergeDebugAssets
 > Task :app:mergeDebugResources
-> Task :app:processDebugUnitTestManifest
+> Task :app:processDebugManifestForPackage
+> Task :app:javaPreCompileDebugUnitTest
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets
 > Task :app:processDebugResources
+> Task :app:processDebugUnitTestManifest
 > Task :app:packageDebugUnitTestForUnitTest
 > Task :app:generateDebugUnitTestConfig
 > Task :app:kspDebugKotlin
@@ -121,7 +121,6 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 
 > Task :app:compileDebugJavaWithJavac
 > Task :app:processDebugJavaRes
-> Task :app:bundleDebugClassesToRuntimeJar
 > Task :app:bundleDebugClassesToCompileJar
 > Task :app:bundleDebugClassesToRuntimeJar
 > Task :app:kspDebugUnitTestKotlin
@@ -158,12 +157,13 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 3m 8s
+BUILD SUCCESSFUL in 2m 33s
 
 -- Son 80 satır --
-> Task :app:mergeDebugResources
-> Task :app:processDebugUnitTestManifest
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets
 > Task :app:processDebugResources
+> Task :app:processDebugUnitTestManifest
 > Task :app:packageDebugUnitTestForUnitTest
 > Task :app:generateDebugUnitTestConfig
 > Task :app:kspDebugKotlin
@@ -201,7 +201,6 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 
 > Task :app:compileDebugJavaWithJavac
 > Task :app:processDebugJavaRes
-> Task :app:bundleDebugClassesToRuntimeJar
 > Task :app:bundleDebugClassesToCompileJar
 > Task :app:bundleDebugClassesToRuntimeJar
 > Task :app:kspDebugUnitTestKotlin
@@ -238,7 +237,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 3m 8s
+BUILD SUCCESSFUL in 2m 33s
 32 actionable tasks: 32 executed
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 ```
@@ -258,9 +257,9 @@ Daemon will be stopped at the end of the build
 > Task :app:parseReleaseLocalResources FROM-CACHE
 > Task :app:generateReleaseRFile FROM-CACHE
 > Task :app:javaPreCompileRelease FROM-CACHE
+> Task :app:checkReleaseAarMetadata
 > Task :app:mapReleaseSourceSetPaths
 > Task :app:compileReleaseNavigationResources FROM-CACHE
-> Task :app:checkReleaseAarMetadata
 > Task :app:createReleaseCompatibleScreenManifests
 > Task :app:extractDeepLinksRelease FROM-CACHE
 > Task :app:processReleaseMainManifest
@@ -268,10 +267,9 @@ Daemon will be stopped at the end of the build
 > Task :app:processReleaseManifest
 > Task :app:preReleaseUnitTestBuild UP-TO-DATE
 > Task :app:javaPreCompileReleaseUnitTest FROM-CACHE
-> Task :app:processReleaseManifestForPackage
 > Task :app:generateReleaseAssets UP-TO-DATE
+> Task :app:processReleaseManifestForPackage
 > Task :app:mergeReleaseAssets
-> Task :app:mergeReleaseResources
 > Task :app:processReleaseUnitTestManifest
 > Task :app:processReleaseResources
 > Task :app:packageReleaseUnitTestForUnitTest
@@ -310,8 +308,8 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/premium/PremiumEntegrasyon.kt:316:81 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
 
 > Task :app:compileReleaseJavaWithJavac
-> Task :app:processReleaseJavaRes
 > Task :app:bundleReleaseClassesToCompileJar
+> Task :app:processReleaseJavaRes
 > Task :app:bundleReleaseClassesToRuntimeJar
 > Task :app:kspReleaseUnitTestKotlin
 
@@ -333,7 +331,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 1m 35s
+BUILD SUCCESSFUL in 1m 10s
 32 actionable tasks: 24 executed, 8 from cache
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 -- Hata satırları ve son bölüm --
@@ -348,9 +346,9 @@ Daemon will be stopped at the end of the build
 > Task :app:parseReleaseLocalResources FROM-CACHE
 > Task :app:generateReleaseRFile FROM-CACHE
 > Task :app:javaPreCompileRelease FROM-CACHE
+> Task :app:checkReleaseAarMetadata
 > Task :app:mapReleaseSourceSetPaths
 > Task :app:compileReleaseNavigationResources FROM-CACHE
-> Task :app:checkReleaseAarMetadata
 > Task :app:createReleaseCompatibleScreenManifests
 > Task :app:extractDeepLinksRelease FROM-CACHE
 > Task :app:processReleaseMainManifest
@@ -358,10 +356,9 @@ Daemon will be stopped at the end of the build
 > Task :app:processReleaseManifest
 > Task :app:preReleaseUnitTestBuild UP-TO-DATE
 > Task :app:javaPreCompileReleaseUnitTest FROM-CACHE
-> Task :app:processReleaseManifestForPackage
 > Task :app:generateReleaseAssets UP-TO-DATE
+> Task :app:processReleaseManifestForPackage
 > Task :app:mergeReleaseAssets
-> Task :app:mergeReleaseResources
 > Task :app:processReleaseUnitTestManifest
 > Task :app:processReleaseResources
 > Task :app:packageReleaseUnitTestForUnitTest
@@ -400,8 +397,8 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/premium/PremiumEntegrasyon.kt:316:81 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
 
 > Task :app:compileReleaseJavaWithJavac
-> Task :app:processReleaseJavaRes
 > Task :app:bundleReleaseClassesToCompileJar
+> Task :app:processReleaseJavaRes
 > Task :app:bundleReleaseClassesToRuntimeJar
 > Task :app:kspReleaseUnitTestKotlin
 
@@ -423,7 +420,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 1m 35s
+BUILD SUCCESSFUL in 1m 10s
 32 actionable tasks: 24 executed, 8 from cache
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 ```
@@ -445,15 +442,15 @@ Daemon will be stopped at the end of the build
 > Task :app:mergeReleaseNativeLibs
 > Task :app:checkReleaseDuplicateClasses
 > Task :app:generateReleaseBuildConfig UP-TO-DATE
+> Task :app:generateReleaseResources UP-TO-DATE
 
 > Task :app:stripReleaseDebugSymbols
 Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so. Run with --info option to learn more.
 
-> Task :app:generateReleaseResources UP-TO-DATE
-> Task :app:extractReleaseNativeSymbolTables
 > Task :app:packageReleaseResources UP-TO-DATE
-> Task :app:mergeReleaseNativeDebugMetadata NO-SOURCE
+> Task :app:extractReleaseNativeSymbolTables
 > Task :app:processReleaseNavigationResources UP-TO-DATE
+> Task :app:mergeReleaseNativeDebugMetadata NO-SOURCE
 > Task :app:parseReleaseLocalResources UP-TO-DATE
 > Task :app:generateReleaseRFile UP-TO-DATE
 > Task :app:kspReleaseKotlin UP-TO-DATE
@@ -506,7 +503,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 1m 32s
+BUILD SUCCESSFUL in 1m 11s
 50 actionable tasks: 28 executed, 22 up-to-date
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 ```
@@ -542,12 +539,12 @@ V3.0 Signer: public key MD5 digest: efca2e07ac5a04473681ddaf5ff0157e
 ## Release çıktısı
 
 ```text
-https://github.com/keremtulu44/Question-note/releases/tag/v1.5.108
+Bu sürüm etiketi için Release zaten mevcut; yeniden oluşturulmadı
 ```
 
 ## APK özeti
 
 ```text
 APK: app/build/outputs/apk/release/yanlis-defteri-1.5.108.apk
-SHA-256: ea121be66a138f32d1134112058f39f04711bdaea3a13479499637f089171c07
+SHA-256: 573ece1490031aa56295f66edfd3ec83c2de46923d15ca7aeef75755d58b0209
 ```
