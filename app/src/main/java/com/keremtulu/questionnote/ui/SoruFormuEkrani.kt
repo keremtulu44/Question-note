@@ -116,6 +116,7 @@ fun SoruFormuEkrani(
     konuRepository: KonuRepository,
     gorselDeposu: LocalSoruGorselDeposu,
     onGeri: () -> Unit,
+    gizliKaynak: String? = null,
 ) {
     var yukleniyor by remember(soruId) { mutableStateOf(soruId != null) }
     var bulunamadi by remember(soruId) { mutableStateOf(false) }
