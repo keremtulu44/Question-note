@@ -31,8 +31,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -698,78 +696,108 @@ internal fun CozdurdumDialog(
         }
     }
 
-    AlertDialog(
+    Dialog(
         onDismissRequest = {
             if (!kaydediliyor && !kirpmaIsleniyor) {
                 gecicileriTemizle()
                 onDismiss()
             }
         },
-        title = { Text(stringResource(R.string.ask_teacher_dialog_title), fontWeight = FontWeight.Bold) },
-        text = {
-            Column(
-                modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 24.dp),
+            shape = RoundedCornerShape(24.dp),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 6.dp,
+        ) {
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(20.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Text(
-                    stringResource(R.string.ask_teacher_dialog_subtitle),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                GorselSecimBolumu(
-                    title = stringResource(R.string.question_form_solution_images),
-                    images = cozumGorselleri,
-                    imageStore = gorselDeposu,
-                    enabled = !kaydediliyor && !kirpmaIsleniyor,
-                    onCamera = ::kamerayiAc,
-                    onPicker = {
-                        galeriSecici.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                    },
-                    onCrop = { kirpmaHedefi = it },
-                    onImagesChanged = { cozumGorselleri = it },
-                )
-                OutlinedTextField(
-                    value = cozumNotu,
-                    onValueChange = { cozumNotu = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = !kaydediliyor,
-                    minLines = 2,
-                    label = { Text(stringResource(R.string.ask_teacher_solution_note_label)) },
-                    shape = RoundedCornerShape(14.dp),
-                )
-                if (cozumGorselleri.isNotEmpty()) {
-                    PremiumButton(
-                        onClick = { tekraraAl(gorsellerle = true) },
+                item {
+                    Text(
+                        text = stringResource(R.string.ask_teacher_dialog_title),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+                item {
+                    Text(
+                        text = stringResource(R.string.ask_teacher_dialog_subtitle),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                item {
+                    GorselSecimBolumu(
+                        title = stringResource(R.string.question_form_solution_images),
+                        images = cozumGorselleri,
+                        imageStore = gorselDeposu,
+                        enabled = !kaydediliyor && !kirpmaIsleniyor,
+                        onCamera = ::kamerayiAc,
+                        onPicker = {
+                            galeriSecici.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                        },
+                        onCrop = { kirpmaHedefi = it },
+                        onImagesChanged = { cozumGorselleri = it },
+                    )
+                }
+                item {
+                    OutlinedTextField(
+                        value = cozumNotu,
+                        onValueChange = { cozumNotu = it },
+                        modifier = Modifier.fillMaxWidth(),
                         enabled = !kaydediliyor,
-                        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("cozdurdum_fotografli_onay"),
+                        minLines = 2,
+                        label = { Text(stringResource(R.string.ask_teacher_solution_note_label)) },
                         shape = RoundedCornerShape(14.dp),
-                    ) {
-                        Text(stringResource(R.string.ask_teacher_save_with_photo), fontWeight = FontWeight.Bold)
+                    )
+                }
+                if (cozumGorselleri.isNotEmpty()) {
+                    item {
+                        PremiumButton(
+                            onClick = { tekraraAl(gorsellerle = true) },
+                            enabled = !kaydediliyor,
+                            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("cozdurdum_fotografli_onay"),
+                            shape = RoundedCornerShape(14.dp),
+                        ) {
+                            Text(stringResource(R.string.ask_teacher_save_with_photo), fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
-                PremiumOutlinedButton(
-                    onClick = { tekraraAl(gorsellerle = false) },
-                    enabled = !kaydediliyor,
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("cozdurdum_fotografsiz_onay"),
-                    shape = RoundedCornerShape(14.dp),
-                ) {
-                    Text(stringResource(R.string.ask_teacher_save_without_photo), fontWeight = FontWeight.SemiBold)
+                item {
+                    PremiumOutlinedButton(
+                        onClick = { tekraraAl(gorsellerle = false) },
+                        enabled = !kaydediliyor,
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("cozdurdum_fotografsiz_onay"),
+                        shape = RoundedCornerShape(14.dp),
+                    ) {
+                        Text(stringResource(R.string.ask_teacher_save_without_photo), fontWeight = FontWeight.SemiBold)
+                    }
+                }
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                    ) {
+                        PremiumTextButton(
+                            enabled = !kaydediliyor,
+                            onClick = {
+                                gecicileriTemizle()
+                                onDismiss()
+                            },
+                        ) {
+                            Text(stringResource(R.string.question_form_cancel))
+                        }
+                    }
                 }
             }
-        },
-        confirmButton = {},
-        dismissButton = {
-            PremiumTextButton(
-                enabled = !kaydediliyor,
-                onClick = {
-                    gecicileriTemizle()
-                    onDismiss()
-                },
-            ) {
-                Text(stringResource(R.string.question_form_cancel))
-            }
-        },
-    )
+        }
+    }
 
     kirpmaHedefi?.let { target ->
         val file = gorselDeposu.dosyaGoruntuIcin(target)
