@@ -2,6 +2,15 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.5.108] — 2026-10-25
+
+- **Tam ekran görsel görüntüleyicisi ve yakınlaştırma düzeltmeleri:** `SoruGorselTamEkran` içinde `matchParentSize()` + yüksekliksiz `fillMaxWidth()` bileşimi nedeniyle soru ve çözüm fotoğraflarının tam ekranda `0px` yüksekliğe çökerek siyah ekran göstermesine yol açan kritik hata giderildi. Tüm tam ekran görüntüleyicilere (`SoruGorselTamEkran`, `SorulacakTamEkranSunumDialog`, `OgretmenTamEkranSoruDialog`) `safeDrawing` pencere boşluğu, yakınlaştırma taşmasını önleyen `.clipToBounds()`, çift dokunuşla `2.4x` yakınlaştırma, **`1x Sıfırla`** aksiyonu ve devre dışı sayfa/sıralama düğmeleri için doğru soluklaştırma eklendi.
+- **Liste kapsayıcılarında (`LazyItemScope`) üst üste binen öğelerin düzeltilmesi:** `OdakOturumuEkrani` (“Çözümü göster” + “çözüm kaydı yok” / “sona bırak” açıklamaları), `GorselBakimEkrani` (yetim dosya başlığı + uyarı metni) ve `DenemeDetayEkrani` içinde aynı `item {}` bloğunda dikey kapsayıcı olmadan `(0, 0)` koordinatına üst üste çizilen bileşenler düzeltildi.
+- **Tipografi ve sembol glif bütünlüğü (`Manrope` + `PremiumSembolAilesi`):** Manrope yazı tipinde bulunmayan tüm sembollerin (`◎` Coğrafya, `◈` Deneme damgası, `★` favori yıldızı, `✓` onay işareti, `▾` → `↓` açılır menü oku) bozuk kutu (`.notdef`) üretmemesi için uygulama genelinde `PremiumSembolAilesi` ailesi bağlandı.
+- **Deneme soru konumu, motor seçimi ve ekran yerleşimi iyileştirmeleri:** Deneme içinden yanlış soru eklerken `SoruFormuEkrani` üzerinde kaynak rozetiyle birlikte **Sayfa / Test / Soru no** (`kaynakKonumu`) alanı görünür bırakıldı; `MotorAyarlariKarti` üzerinde seçili tekrar motoru görsel olarak belirginleştirildi; `DerslerEkrani` ve `KatalogYonetimiEkrani` üst kartları kaydırılabilir listeye dahil edildi; `DersKarti` 2 satırlı uzun ders adları ve büyük yazı ölçeğiyle uyumlu hale getirildi; `AyarlarEkrani` ders profili çipleri akışkan `FlowRow` düzenine geçirildi.
+- **Öğretmen modu bildirim ve yedek önizleme uyumu:** Öğretmen modunda yedek alma/geri yükleme `Snackbar` bildirimleri görünür kılındı; yedek geri yükleme onay penceresine öğretmen grup ve soru sayıları eklendi.
+- Sürüm: `versionCode 38` / `versionName 1.5.108`.
+
 ## [1.5.107] — 2026-10-25
 
 - **Deneme klavye ve panel çakışması düzeltmesi:** `MainActivity` üzerinde `adjustResize` pencere modu etkinleştirildi; `DenemeDetayEkrani` içinde klavye yüksekliğinin (`WindowInsets.safeDrawing` + ek `.imePadding()`) iki kez düşülerek form listesinin kapanıp alanların panel altında kalmasına yol açan hata giderildi. Klavye açıkken üst çubuğa tek dokunuşla **“Klavyeyi kapat”** aksiyonu ve ad/doğru/yanlış/soru kutuları arasında klavyeden `İleri / Tamam` geçişi eklendi.

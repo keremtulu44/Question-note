@@ -511,7 +511,11 @@ fun SoruFormuEkrani(
                 PremiumTextButton(onClick = onGeri) { Text(stringResource(R.string.question_back)) }
             }
             else -> LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .consumeWindowInsets(padding)
+                    .testTag("soru_formu_liste"),
                 contentPadding = PaddingValues(start = 18.dp, top = 8.dp, end = 18.dp, bottom = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
