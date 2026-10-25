@@ -1,8 +1,15 @@
 package com.keremtulu.questionnote.ui
 
+import android.content.ComponentName
 import android.content.Context
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -11,7 +18,10 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.height
 import androidx.room.Room
+import com.keremtulu.questionnote.MainActivity
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
 import com.keremtulu.questionnote.data.local.VarsayilanDersleriEkle
@@ -206,5 +216,49 @@ class DenemeVeKurulumArayuzTest {
         compose.onNodeWithText(compose.activity.getString(R.string.deneme_delete_confirm_action)).performClick()
         compose.waitForIdle()
         assertNull(denemeDeposu.getir("d-1"))
+    }
+
+    @Test
+    fun klavyeAcikDarAlandaDenemeFormAlanlariPanelAltindaKaybolmazVeManifestAdjustResizeKullanir() {
+        val context = RuntimeEnvironment.getApplication()
+        val activityInfo = context.packageManager.getActivityInfo(
+            ComponentName(context, MainActivity::class.java),
+            0,
+        )
+        assertEquals(
+            WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE,
+            activityInfo.softInputMode and WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST,
+        )
+
+        val tumDersler = runBlocking { dersRepository.kataloguHazirla() }
+        val mat = tumDersler.first { it.ad == "Matematik" }
+        runBlocking { dersRepository.dersSeciminiKaydet(setOf(mat.id)) }
+
+        compose.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                // Klavye ~360dp açıldığında kalan görünür pencere yüksekliğini simüle eder.
+                Box(modifier = Modifier.fillMaxWidth().height(340.dp)) {
+                    DenemeDetayEkrani(
+                        denemeId = null,
+                        denemeDeposu = denemeDeposu,
+                        dersRepository = dersRepository,
+                        soruRepository = soruRepository,
+                        onGeri = {},
+                        onKaydedildi = {},
+                        onSoruEkle = { _, _, _ -> },
+                    )
+                }
+            }
+        }
+        compose.waitForIdle()
+
+        val listeYuksekligi = compose.onNodeWithTag("deneme-detail-list")
+            .getUnclippedBoundsInRoot().height
+        assertTrue("Liste yüksekliği klavye açıkken 0'a çökmemeli: $listeYuksekligi", listeYuksekligi >= 220.dp)
+
+        compose.onNodeWithTag("deneme-name-input").assertIsDisplayed().performTextReplacement("Özdebir TG 4")
+        compose.onNodeWithTag("deneme-detail-list")
+            .performScrollToNode(hasTestTag("deneme-correct-${mat.id}"))
+        compose.onNodeWithTag("deneme-correct-${mat.id}").assertIsDisplayed().performTextReplacement("32")
     }
 }

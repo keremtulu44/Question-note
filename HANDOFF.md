@@ -3,7 +3,13 @@
 **Son güncelleme: 2026-10-25.** Önce bu belge, `docs/DERLEME_RAPORU.md`,
 `docs/PREMIUM_GORSEL_GELISTIRME.md` ve [P4–P6 sözleşme/kanıt kaydı](docs/P4_P5_P6_UYGULAMA.md) okunur.
 
-## Güncel doğrulanmış teslim: 1.5.106 Görsel Kırpma, Öğretmene Sorulacaklar & Öğretmen Modu
+## Güncel doğrulanmış teslim: 1.5.107 Klavye/IME Düzeltmeleri & Öğretmen Modu Premium Yükseltmesi
+
+- **Sürüm:** `versionName = "1.5.107"` (`versionCode = 37`), çalışma dalı `arena/9d4e7eac-question-note`.
+- **Klavye, `WindowInsets` ve sabit panel düzeltmeleri:** `AndroidManifest.xml` içinde `.MainActivity` ve `.ui.premium.PremiumDemoActivity` için `android:windowSoftInputMode="adjustResize"` tanımlandı. `DenemeDetayEkrani` üzerinde `Scaffold(contentWindowInsets = WindowInsets.safeDrawing)` ile birlikte kullanılan mükerrer `.imePadding()` kaldırılarak klavye açıldığında listenin çökmesi ve alanların üst panelin arkasında kalması giderildi; tüm ekran kapsayıcılarına (`YanlisDefteriUygulamasi`, `OgretmenAnaEkrani`, `DenemeEkranlari`, `SoruFormuEkrani`, `DersCalismaEkrani`, `FiltreliCalismaEkrani`, `KonuMerkeziEkrani`, `SorulacaklarEkrani`) tutarlı `.consumeWindowInsets(...)` eklendi. Klavye açıkken `AltMenu`, `OgretmenAltMenu` ve soru formu sabit alt çubukları otomatik gizlenir; `DersCalismaEkrani` arama alanı ve üst kart kaydırılabilir `LazyColumn` içine taşındı.
+- **Rol Seçimi & Öğretmen Modu Premium yükseltmesi (`RolSecimEkrani`, `OgretmenAnaEkrani`):** Manrope glif düşüşü yaratabilecek ham semboller kaldırılarak özel `Canvas` vektör ikonlu `OgretmenAltMenu` ve rol amblemleri eklendi; `HareketPolitikasi` uyumlu ekran geçişleri, canlı tablo rakamlı (`tnum`) `GradyanKart` özet paneli, renk/monogram kodlu grup kartları, grup ve soru içi arama, `Dialog` + `LazyColumn` tabanlı klavye-güvenli grup/kopyalama pencereleri, çift dokunuşla yakınlaştırma + `1x Sıfırla` destekli ve varsayılan gizli cevaplı tam ekran sunum görünümü sunuldu.
+
+## Önceki doğrulanmış teslim: 1.5.106 Görsel Kırpma, Öğretmene Sorulacaklar & Öğretmen Modu
 
 - **Sürüm:** `versionName = "1.5.106"` (`versionCode = 36`), çalışma dalı `arena/9d4e7eac-question-note`.
 - **Görsel kırpma kararlılığı ve UX:** `SoruGorselBileseni` ve `GorselKirpmaDialog` içinde `asImageBitmap()` ile sarılan `Bitmap` örneklerinde erken `recycle()` kaldırılarak `RenderThread` çökmesi giderildi; `LocalSoruGorselDeposu.kirp` bellek-güvenli alt-örneklemeli çözme ve OOM korumasıyla güçlendirildi; `GorselSecimBolumu` bileşeninde `✂ Görseli kırp` düğmesi her görsel kartının altına ortalanmış birincil konumda sunuldu.

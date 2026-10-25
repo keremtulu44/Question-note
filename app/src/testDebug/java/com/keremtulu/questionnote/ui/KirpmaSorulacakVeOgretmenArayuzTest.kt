@@ -318,4 +318,44 @@ class KirpmaSorulacakVeOgretmenArayuzTest {
             kaynak.delete()
         }
     }
+
+    @Test
+    fun ogretmenPremiumAnaEkranHazirGrupOnerisiVeAltMenuSekmeGecisiCalisir() {
+        val context = RuntimeEnvironment.getApplication()
+        runBlocking {
+            ogretmenDeposu.grupEkle("6B", "Salı 15:00")
+            ogretmenDeposu.grupEkle("7C", "Çarşamba 16:00")
+            ogretmenDeposu.grupEkle("Özel Ders (Ahmet)", "Cumartesi")
+        }
+
+        compose.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                OgretmenAnaEkrani(
+                    ogretmenDeposu = ogretmenDeposu,
+                    gorselDeposu = gorselDeposu,
+                    sonYedek = null,
+                    yedeklemeIslemde = false,
+                    onOgrenciModunaGec = {},
+                    onYedekOlustur = {},
+                    onYedekGeriYukle = {},
+                )
+            }
+        }
+        compose.waitForIdle()
+
+        compose.onNodeWithText(context.getString(R.string.teacher_stat_groups)).assertIsDisplayed()
+        compose.onNodeWithTag("ogretmen_grup_ekle_fab").performClick()
+        compose.onNodeWithText("8A").performClick()
+        compose.onNodeWithTag("ogretmen_grup_kaydet_buton").performClick()
+        compose.waitUntil(5_000) { ogretmenDeposu.anlikVeri().gruplar.any { it.ad == "8A" } }
+
+        // Özel alt menü üzerinden Ayarlar sekmesine ve tekrar Gruplarım sekmesine geçiş
+        compose.onNodeWithText(context.getString(R.string.teacher_nav_settings)).performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("ogrenci_moduna_gec_buton").assertIsDisplayed()
+
+        compose.onNodeWithText(context.getString(R.string.teacher_nav_groups)).performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("ogretmen_grup_ekle_fab").assertIsDisplayed()
+    }
 }

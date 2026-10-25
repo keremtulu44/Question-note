@@ -2,6 +2,13 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.5.107] — 2026-10-25
+
+- **Deneme klavye ve panel çakışması düzeltmesi:** `MainActivity` üzerinde `adjustResize` pencere modu etkinleştirildi; `DenemeDetayEkrani` içinde klavye yüksekliğinin (`WindowInsets.safeDrawing` + ek `.imePadding()`) iki kez düşülerek form listesinin kapanıp alanların panel altında kalmasına yol açan hata giderildi. Klavye açıkken üst çubuğa tek dokunuşla **“Klavyeyi kapat”** aksiyonu ve ad/doğru/yanlış/soru kutuları arasında klavyeden `İleri / Tamam` geçişi eklendi.
+- **Uygulama geneli klavye, alt panel ve arama iyileştirmeleri:** Öğrenci ve Öğretmen modlarında klavye açıldığında alt sekme çubukları (`AltMenu`, `OgretmenAltMenu`) ve sabit alt kaydet panelleri (`SoruFormuEkrani`, `OgretmenSoruFormuEkrani`) otomatik gizlenerek metin kutularını kapatması önlendi; `DersCalismaEkrani` ve `KonuMerkeziEkrani` arama ekranlarında üst başlıklar kaydırılabilir listeye dahil edilerek klavye açıkken arama sonuçlarının görünür kalması sağlandı; tüm iç ekranlara `consumeWindowInsets` ve tüm form pencerelerine (`CozdurdumDialog`, `GrupFormDialog`, `BaskaGrubaEkleDialog`) klavye-güvenli `Dialog` + `LazyColumn` yapısı uygulandı.
+- **Rol Seçimi ve Öğretmen Modu (`Öğretmenim`) tam Premium yükseltmesi:** Rol seçim ekranına özel çizim vektör amblemler ve yetenek rozetleri eklendi. Öğretmen moduna özel çizim vektör ikonlu ve kaydırma destekli Premium alt menü, canlı istatistik ve ilerleme çubuklu `GradyanKart` özet paneli, renk kodlu ve monogramlı grup kartları, grup ve soru içi anlık arama, `6A–12A / TYT / Özel Ders` hazır grup önerileri, çift dokunuşla yakınlaştırma (`2.4x`) ve **`1x Sıfırla`** destekli tam ekran sunum görünümü ile renkli zorluk seçicili soru formu getirildi.
+- Sürüm: `versionCode 37` / `versionName 1.5.107`.
+
 ## [1.5.106] — 2026-10-25
 
 - **Görsel kırpma çökme düzeltmesi ve merkezi erişim:** Kırpma uygulandığında veya küçük önizleme güncellendiğinde `RenderThread` üzerinde geri dönüştürülmüş `Bitmap` (`Canvas: trying to use a recycled bitmap`) ve büyük fotoğraflarda bellek taşması kaynaklı çökmeler giderildi; `✂ Görseli kırp` butonu her görsel kartının altına ortalanmış ve belirgin şekilde taşındı.
