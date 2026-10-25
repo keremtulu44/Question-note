@@ -2,15 +2,15 @@
 
 > Bu dosya Android CI tarafından otomatik üretilir. Keystore veya parola değerleri yazılmaz.
 
-- Zaman (UTC): 2026-10-25T15:34:03Z
-- Workflow commit'i: 40875de62b16c6ae85c659dbc6cf8ac97afa37ae
+- Zaman (UTC): 2026-10-25T15:42:07Z
+- Workflow commit'i: 17e15048047603ca7f106e4c4d08273513eea300
 - Dal: arena/9d4e7eac-question-note
 - Uygulama sürümü: 1.5.106 (versionCode 36)
 - Android SDK: compileSdk/targetSdk 37, minSdk 26; build-tools 37.0.0
 - Genel sonuç: **BAŞARISIZ**
 - Wrapper çıkış kodu: 0
 - testDebugUnitTest çıkış kodu: 1
-- Birim test özeti (Debug): 338 test; 32 başarısız; 0 hata; 0 atlandı
+- Birim test özeti (Debug): 338 test; 1 başarısız; 0 hata; 0 atlandı
 - testReleaseUnitTest çıkış kodu: 0
 - Birim test özeti (Release ortak testler): 272 test; 0 başarısız; 0 hata; 0 atlandı
 - UI/Preview regresyonları yalnız testDebug; ortak testler iki varyantta çalışır, sayılar toplanmaz.
@@ -56,7 +56,7 @@ OS:            Linux 6.17.0-1022-azure amd64
 
 ```text
 -- Derleyici/Gradle hata satırları --
-194:* What went wrong:
+101:* What went wrong:
 
 -- İlk 100 satır --
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
@@ -69,8 +69,8 @@ Daemon will be stopped at the end of the build
 > Task :app:processDebugNavigationResources
 > Task :app:parseDebugLocalResources
 > Task :app:javaPreCompileDebug
-> Task :app:generateDebugRFile
 > Task :app:checkDebugAarMetadata
+> Task :app:generateDebugRFile
 > Task :app:mapDebugSourceSetPaths
 > Task :app:compileDebugNavigationResources
 > Task :app:createDebugCompatibleScreenManifests
@@ -79,8 +79,8 @@ Daemon will be stopped at the end of the build
 > Task :app:processDebugManifest
 > Task :app:preDebugUnitTestBuild UP-TO-DATE
 > Task :app:processDebugManifestForPackage
-> Task :app:generateDebugAssets UP-TO-DATE
 > Task :app:javaPreCompileDebugUnitTest
+> Task :app:generateDebugAssets UP-TO-DATE
 > Task :app:mergeDebugAssets
 > Task :app:mergeDebugResources
 > Task :app:processDebugUnitTestManifest
@@ -121,8 +121,8 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/premium/PremiumEntegrasyon.kt:290:81 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
 
 > Task :app:compileDebugJavaWithJavac
-> Task :app:processDebugJavaRes
 > Task :app:bundleDebugClassesToCompileJar
+> Task :app:processDebugJavaRes
 > Task :app:bundleDebugClassesToRuntimeJar
 > Task :app:kspDebugUnitTestKotlin
 
@@ -149,16 +149,16 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/c
 > Task :app:testDebugUnitTest
 
 KirpmaSorulacakVeOgretmenArayuzTest > bugunSorulacaklarHatirlatmasiVeDersDersCozdurdumAkisiCalisir FAILED
-    java.lang.OutOfMemoryError at Arrays.java:3481
+    androidx.test.espresso.AppNotIdleException at KirpmaSorulacakVeOgretmenArayuzTest.kt:226
 
-KirpmaSorulacakVeOgretmenArayuzTest > merkezdekiKirpButonuAcilirVeGorselDegistigindeCokmeOlmaz FAILED
-    java.lang.OutOfMemoryError
+338 tests completed, 1 failed
 
-OlcumVeProfilArayuzTest > sparseProfileStatesTheMissingSamplesInsteadOfASpeedLabel FAILED
-    java.lang.OutOfMemoryError
+> Task :app:testDebugUnitTest FAILED
 
-OlcumVeProfilArayuzTest > oldUnmeasuredHistoryShowsNoInventedMedian FAILED
-    java.lang.OutOfMemoryError
+[Incubating] Problems report is available at: file:///home/runner/work/Question-note/Question-note/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
 
 -- Son 80 satır --
 	at org.gradle.internal.execution.steps.TimeoutStep.execute(TimeoutStep.java:55)
@@ -230,7 +230,7 @@ OlcumVeProfilArayuzTest > oldUnmeasuredHistoryShowsNoInventedMedian FAILED
 	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:38)
 	at org.gradle.internal.execution.impl.DefaultExecutionEngine$1.execute(DefaultExecutionEngine.java:68)
 	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.doExecute(DefaultTaskNodeExecutor.java:364)
-	... 25 more
+	... 55 more
 
 
 Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
@@ -239,7 +239,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD FAILED in 3m 32s
+BUILD FAILED in 4m 42s
 32 actionable tasks: 32 executed
 ```
 
@@ -258,20 +258,20 @@ Daemon will be stopped at the end of the build
 > Task :app:parseReleaseLocalResources FROM-CACHE
 > Task :app:generateReleaseRFile FROM-CACHE
 > Task :app:javaPreCompileRelease FROM-CACHE
-> Task :app:checkReleaseAarMetadata
 > Task :app:mapReleaseSourceSetPaths
+> Task :app:checkReleaseAarMetadata
 > Task :app:compileReleaseNavigationResources FROM-CACHE
 > Task :app:createReleaseCompatibleScreenManifests
 > Task :app:extractDeepLinksRelease FROM-CACHE
 > Task :app:processReleaseMainManifest
+> Task :app:mergeReleaseResources
 > Task :app:processReleaseManifest
 > Task :app:preReleaseUnitTestBuild UP-TO-DATE
 > Task :app:javaPreCompileReleaseUnitTest FROM-CACHE
 > Task :app:generateReleaseAssets UP-TO-DATE
-> Task :app:mergeReleaseAssets
 > Task :app:processReleaseManifestForPackage
+> Task :app:mergeReleaseAssets
 > Task :app:processReleaseUnitTestManifest
-> Task :app:mergeReleaseResources
 > Task :app:processReleaseResources
 > Task :app:packageReleaseUnitTestForUnitTest
 > Task :app:generateReleaseUnitTestConfig
@@ -332,7 +332,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 1m 9s
+BUILD SUCCESSFUL in 2m 4s
 32 actionable tasks: 24 executed, 8 from cache
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 -- Hata satırları ve son bölüm --
@@ -347,20 +347,20 @@ Daemon will be stopped at the end of the build
 > Task :app:parseReleaseLocalResources FROM-CACHE
 > Task :app:generateReleaseRFile FROM-CACHE
 > Task :app:javaPreCompileRelease FROM-CACHE
-> Task :app:checkReleaseAarMetadata
 > Task :app:mapReleaseSourceSetPaths
+> Task :app:checkReleaseAarMetadata
 > Task :app:compileReleaseNavigationResources FROM-CACHE
 > Task :app:createReleaseCompatibleScreenManifests
 > Task :app:extractDeepLinksRelease FROM-CACHE
 > Task :app:processReleaseMainManifest
+> Task :app:mergeReleaseResources
 > Task :app:processReleaseManifest
 > Task :app:preReleaseUnitTestBuild UP-TO-DATE
 > Task :app:javaPreCompileReleaseUnitTest FROM-CACHE
 > Task :app:generateReleaseAssets UP-TO-DATE
-> Task :app:mergeReleaseAssets
 > Task :app:processReleaseManifestForPackage
+> Task :app:mergeReleaseAssets
 > Task :app:processReleaseUnitTestManifest
-> Task :app:mergeReleaseResources
 > Task :app:processReleaseResources
 > Task :app:packageReleaseUnitTestForUnitTest
 > Task :app:generateReleaseUnitTestConfig
@@ -421,7 +421,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 1m 9s
+BUILD SUCCESSFUL in 2m 4s
 32 actionable tasks: 24 executed, 8 from cache
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 ```
@@ -429,133 +429,43 @@ Consider enabling configuration cache to speed up this build: https://docs.gradl
 ## JUnit başarısızlık ayrıntıları
 
 ```text
-testDebugUnitTest: com.keremtulu.questionnote.ui.KirpmaSorulacakVeOgretmenArayuzTest > bugunSorulacaklarHatirlatmasiVeDersDersCozdurdumAkisiCalisir: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-	at java.base/java.util.Arrays.copyOf(Arrays.java:3481)
-	at com.google.common.collect.HashBiMap.ensureCapacity(HashBiMap.java:176)
-	at com.google.common.collect.HashBiMap.put(HashBiMap.java:309)
-	at com.google.common.collect.HashBiMap.put(HashBiMap.java:283)
-	at org.robolectric.res.android.NativeObjRegistry.register(NativeObjRegistry.java:91)
-	at org.robolectric.shadows.ShadowLineBreaker.nComputeLineBreaks(ShadowLineBreaker.java:35)
-	at java.base/java.lang.invoke.LambdaForm$DMH/0x00007fb360e71400.invokeStatic(LambdaForm$DMH)
-	at java.base/java.lang.invoke.LambdaForm$MH/0x00007fb360e74400.guardWithCatch(LambdaForm$MH)
-	at java.base/java.lang.invoke.LambdaForm$MH/0x00007fb360f2ac00.delegate(LambdaForm$MH)
-	at java.base/java.lang.invoke.LambdaForm$MH/0x00007fb360e76800.guard(LambdaForm$MH)
-	at java.base/java.lang.invoke.LambdaForm$MH/0x00007fb360e76c00.linkToCallSite(LambdaForm$MH)
-	at android.graphics.text.LineBreaker.nComputeLineBreaks(LineBreaker.java)
-	at android.graphics.text.LineBreaker.computeLineBreaks(LineBreaker.java:584)
-	at java.base/java.lang.invoke.LambdaForm$DMH/0x00007fb360269000.invokeSpecial(LambdaForm$DMH)
-	at java.base/java.lang.invoke.LambdaForm$MH/0x00007fb36038e400.guardWithCatch(LambdaForm$MH)
-	at java.base/java.lang.invoke.LambdaForm$MH/0x00007fb360269800.delegate(LambdaForm$MH)
-	at java.base/java.lang.invoke.LambdaForm$MH/0x00007fb36038f400.guard(LambdaForm$MH)
-	at java.base/java.lang.invoke.LambdaForm$MH/0x00007fb36038f800.linkToCallSite(LambdaForm$MH)
-	at android.graphics.text.LineBreaker.computeLineBreaks(LineBreaker.java)
-	at android.text.StaticLayout.generate(StaticLayout.java:946)
-	at java.base/java.lang.invoke.LambdaForm$DMH/0x00007fb36026f800.invokeSpecial(LambdaForm$DMH)
-	at java.base/java.lang.invoke.LambdaForm$MH/0x00007fb3602be000.guardWithCatch(LambdaForm$MH)
-	at java.base/java.lang.invoke.LambdaForm$MH/0x00007fb360270400.delegate(LambdaForm$MH)
-	at java.base/java.lang.invoke.LambdaForm$MH/0x00007fb3602c0000.guard(LambdaForm$MH)
-	at java.base/java.lang.invoke.LambdaForm$MH/0x00007fb3602c0400.linkToCallSite(LambdaForm$MH)
-	at android.text.StaticLayout.generate(StaticLayout.java)
-	at android.text.StaticLayout.__constructor__(StaticLayout.java:733)
-	at java.base/java.lang.invoke.LambdaForm$DMH/0x00007fb36026f800.invokeSpecial(LambdaForm$DMH)
-	at java.base/java.lang.invoke.LambdaForm$MH/0x00007fb3602be000.guardWithCatch(LambdaForm$MH)
-	at java.base/java.lang.invoke.LambdaForm$MH/0x00007fb360270400.delegate(LambdaForm$MH)
-	at java.base/java.lang.invoke.LambdaForm$MH/0x00007fb3602c0000.guard(LambdaForm$MH)
-	at java.base/java.lang.invoke.LambdaForm$MH/0x00007fb3602c0400.linkToCallSite(LambdaForm$MH)
+testDebugUnitTest: com.keremtulu.questionnote.ui.KirpmaSorulacakVeOgretmenArayuzTest > bugunSorulacaklarHatirlatmasiVeDersDersCozdurdumAkisiCalisir: androidx.test.espresso.AppNotIdleException: androidx.test.espresso.AppNotIdleException: Compose did not get idle after 170329 attempts in 60 SECONDS.  1. Check your measure/layout lambdas for infinite composition loops. 2. Verify that the 'busy' resources listed above are not deadlocked. 3. Increase Espresso's master idling policy if a longer timeout is required.  The following Idle Conditions failed .
+androidx.test.espresso.AppNotIdleException: Compose did not get idle after 170329 attempts in 60 SECONDS.
 
-testDebugUnitTest: com.keremtulu.questionnote.ui.KirpmaSorulacakVeOgretmenArayuzTest > merkezdekiKirpButonuAcilirVeGorselDegistigindeCokmeOlmaz: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.OlcumVeProfilArayuzTest > sparseProfileStatesTheMissingSamplesInsteadOfASpeedLabel: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.OlcumVeProfilArayuzTest > oldUnmeasuredHistoryShowsNoInventedMedian: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.OlcumVeProfilArayuzTest > focusFreezesAtAssessmentAndSavesThatMeasurementWithTheSelectedResult: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.OlcumVeProfilArayuzTest > focusDoesNotExposeTheSolutionBeforeItsCheckpointMarkerIsSaved: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.OlcumVeProfilArayuzTest > twoHundredPercentDarkProfileKeepsScopeAndSampleCountsReadable: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.OneridenOdagaAkisTest > recommendationFilterFocusReportAndProgressKeepEligibilityAndShadowDateContract: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.P5P6ArayuzTest > recommendationPreservesDueScopeAndSmallRoundAtTwoHundredPercent: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.P5P6ArayuzTest > badgeAndRankNeverOverlapAndAcknowledgementIsDurable: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.P5P6ArayuzTest > activeModeIsDisabledAndOffChoiceIsPersistedWithoutAnActivationBypass: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.P5P6ArayuzTest > progressiveTopicDetailsUseCapturedNameAndCurrentScopedFilter: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.P5P6ArayuzTest > zeroCoveredQuestionsNeverRenderZeroMinutesAsAnEstimate: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.P5P6ArayuzTest > fullyCoveredDayDoesNotRepeatTheSameEstimateAsASubtotal: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.P5P6ArayuzTest > insufficientComparisonShowsActualDaysRatherThanJustTheMinimumThreshold: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.P5P6ArayuzTest > noEligibleDataShowsNoInventedAction: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.PremiumIlerlemeTest > errorStateOffersRetryInDarkTheme: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.PremiumIlerlemeTest > loadingStateDoesNotPresentZeroAsAnActualMeasurement: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.PremiumIlerlemeTest > systemMotionSettingIsObservedWhileTheScreenIsOpen: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.PremiumIlerlemeTest > emptyStateHasAnActualActionAndNoMadeUpMeasurements: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.PremiumIlerlemeTest > initialXpIsRealAndReducedMotionAppliesUpdatesWithoutCountingFromZero: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.PremiumIlerlemeTest > openingWithMotionEnabledDoesNotPretendTheExistingXpWasJustEarned: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.PremiumIlerlemeTest > twoHundredPercentTextKeepsTheActionUsableAndExplainsXpOnlyInDetails: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.PremiumIlerlemeTest > reportOwnershipCountTracksAConcurrentLifetimeAward: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.PremiumIlerlemeTest > collapsedCollectionDoesNotExposeHiddenNamesAndBadgeDenominatorIsThirty: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.PremiumIlerlemeTest > aRealXpChangeUsesOneShortFiniteAnimationWhenMotionIsEnabled: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.calisma.CozumTahtasiKullanimTest > choosingAQuestionPageStartsOverlayDrawingAndKeepsEachSurfaceUndoHistorySeparate: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.calisma.CozumTahtasiKullanimTest > questionSurfaceCanZoomAndShowsTheFiveQuestionSessionPosition: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.calisma.CozumTahtasiKullanimTest > landscapeShowsTheQuestionBesideTheWorkingBoard: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.calisma.CozumTahtasiKullanimTest > topQuestionIconOpensScrollableQuestionPanelAndReturnsToBoard: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.calisma.CozumTahtasiKullanimTest > drawingDockHasClearToolSelectionAndGroupedStyleControls: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.calisma.CozumTahtasiKullanimTest > sessionWhiteboardKeepsSeparateDrawingsForEachQuestion: java.lang.OutOfMemoryError: java.lang.OutOfMemoryError: Java heap space
-java.lang.OutOfMemoryError: Java heap space
+1. Check your measure/layout lambdas for infinite composition loops.
+2. Verify that the 'busy' resources listed above are not deadlocked.
+3. Increase Espresso's master idling policy if a longer timeout is required.
+ The following Idle Conditions failed .
+	at androidx.test.espresso.AppNotIdleException.create(AppNotIdleException.java:11)
+	at androidx.compose.ui.test.RobolectricIdlingStrategy.runUntilIdle$lambda$0(RobolectricIdlingStrategy.android.kt:101)
+	at androidx.compose.ui.test.AndroidSynchronization_androidKt.runOnUiThread(AndroidSynchronization.android.kt:35)
+	at androidx.compose.ui.test.RobolectricIdlingStrategy.runUntilIdle(RobolectricIdlingStrategy.android.kt:66)
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment.waitForIdle(ComposeUiTest.android.kt:716)
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment.access$waitForIdle(ComposeUiTest.android.kt:481)
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidTestOwner.getRoots(ComposeUiTest.android.kt:988)
+	at androidx.compose.ui.test.TestOwnerKt.getAllSemanticsNodes(TestOwner.kt:116)
+	at androidx.compose.ui.test.TestOwnerKt.getAllSemanticsNodes$default(TestOwner.kt:109)
+	at androidx.compose.ui.test.SemanticsNodeInteractionCollection.fetchSemanticsNodes(SemanticsNodeInteraction.kt:249)
+	at androidx.compose.ui.test.SemanticsNodeInteractionCollection.fetchSemanticsNodes$default(SemanticsNodeInteraction.kt:245)
+	at com.keremtulu.questionnote.ui.KirpmaSorulacakVeOgretmenArayuzTest.bugunSorulacaklarHatirlatmasiVeDersDersCozdurdumAkisiCalisir$lambda$5(KirpmaSorulacakVeOgretmenArayuzTest.kt:226)
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:893)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:500)
+	at com.keremtulu.questionnote.ui.KirpmaSorulacakVeOgretmenArayuzTest.bugunSorulacaklarHatirlatmasiVeDersDersCozdurdumAkisiCalisir(KirpmaSorulacakVeOgretmenArayuzTest.kt:225)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:26)
+	at org.junit.internal.runners.statements.RunAfters.evaluate(RunAfters.java:27)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule$apply$testWithDisposal$1.evaluate(AndroidComposeTestRule.android.kt:426)
+	at org.junit.rules.ExternalResource$1.evaluate(ExternalResource.java:54)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule$apply$1$evaluate$1.invokeSuspend(AndroidComposeTestRule.android.kt:448)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule$apply$1$evaluate$1.invoke(AndroidComposeTestRule.android.kt)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestR
 ```
 
 ## Derleme çıktısı (son 120 satır)
