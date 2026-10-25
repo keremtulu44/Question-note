@@ -107,8 +107,8 @@ class DenemeVeKurulumArayuzTest {
 
         compose.onNodeWithText(compose.activity.getString(R.string.onboarding_selected_count, 24))
             .assertIsDisplayed()
-        compose.onNodeWithTag("onboarding-continue-button").performClick()
-        compose.waitForIdle()
+        compose.onNodeWithText(compose.activity.getString(R.string.onboarding_continue)).performClick()
+        compose.waitUntil(5_000) { tamamlandi }
 
         assertTrue(tamamlandi)
         assertTrue(!profilDeposu.kurulumGerekli())
