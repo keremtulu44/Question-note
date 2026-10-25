@@ -2,25 +2,25 @@
 
 > Bu dosya Android CI tarafından otomatik üretilir. Keystore veya parola değerleri yazılmaz.
 
-- Zaman (UTC): 2026-10-25T15:49:20Z
-- Workflow commit'i: 0cd0e42807dc045d8c83cd84ed7b9192ad8cb4b2
+- Zaman (UTC): 2026-10-25T15:59:34Z
+- Workflow commit'i: 6d624d276bee567bee1292b7e63aa1de9b420735
 - Dal: arena/9d4e7eac-question-note
 - Uygulama sürümü: 1.5.106 (versionCode 36)
 - Android SDK: compileSdk/targetSdk 37, minSdk 26; build-tools 37.0.0
-- Genel sonuç: **BAŞARISIZ**
+- Genel sonuç: **BAŞARILI**
 - Wrapper çıkış kodu: 0
-- testDebugUnitTest çıkış kodu: 1
-- Birim test özeti (Debug): 338 test; 1 başarısız; 0 hata; 0 atlandı
+- testDebugUnitTest çıkış kodu: 0
+- Birim test özeti (Debug): 338 test; 0 başarısız; 0 hata; 0 atlandı
 - testReleaseUnitTest çıkış kodu: 0
 - Birim test özeti (Release ortak testler): 272 test; 0 başarısız; 0 hata; 0 atlandı
 - UI/Preview regresyonları yalnız testDebug; ortak testler iki varyantta çalışır, sayılar toplanmaz.
-- assembleRelease çıkış kodu: 125
+- assembleRelease çıkış kodu: 0
 - İmzalama secret durumu: İki gerekli secret dolu (değerler gösterilmez)
-- İmzalama/verify durumu: İmzalama henüz çalıştırılmadı (kod: 125; apksigner verify: 125)
-- Sertifika parmak izi: bulunamadı (beklenen: FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54; durum: doğrulanmadı)
-- Release: Yayımlanmadı (kod: 125)
-- Release URL: yok
-- İmzalı APK SHA-256: bulunamadı
+- İmzalama/verify durumu: İmzalandı; apksigner doğruladı ve beklenen sertifika eşleşti (kod: 0; apksigner verify: 0)
+- Sertifika parmak izi: FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54 (beklenen: FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54; durum: eşleşti)
+- Release: Release oluşturuldu (kod: 0)
+- Release URL: https://github.com/keremtulu44/Question-note/releases/tag/v1.5.106
+- İmzalı APK SHA-256: 5bfa2ecd20b3c19eee7cecb1bd749e2db8215a2ed7e4a30cc0d6748860088f69
 
 ## Gradle sürümü
 
@@ -56,7 +56,6 @@ OS:            Linux 6.17.0-1022-azure amd64
 
 ```text
 -- Derleyici/Gradle hata satırları --
-101:* What went wrong:
 
 -- İlk 100 satır --
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
@@ -76,14 +75,14 @@ Daemon will be stopped at the end of the build
 > Task :app:createDebugCompatibleScreenManifests
 > Task :app:extractDeepLinksDebug
 > Task :app:processDebugMainManifest
-> Task :app:mergeDebugResources
 > Task :app:processDebugManifest
 > Task :app:preDebugUnitTestBuild UP-TO-DATE
-> Task :app:generateDebugAssets UP-TO-DATE
 > Task :app:javaPreCompileDebugUnitTest
-> Task :app:mergeDebugAssets
-> Task :app:processDebugUnitTestManifest
 > Task :app:processDebugManifestForPackage
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets
+> Task :app:mergeDebugResources
+> Task :app:processDebugUnitTestManifest
 > Task :app:processDebugResources
 > Task :app:packageDebugUnitTestForUnitTest
 > Task :app:generateDebugUnitTestConfig
@@ -111,7 +110,7 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/ses/SesYoneticisi.kt:252:64 'static field VIBRATOR_SERVICE: String' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/ses/SesYoneticisi.kt:260:33 'static field HAPTIC_FEEDBACK_ENABLED: String' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/SoruDetayEkrani.kt:664:89 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/SorulacaklarEkrani.kt:473:26 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/SorulacaklarEkrani.kt:471:26 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/YanlisDefteriUygulamasi.kt:200:71 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/bilesenler/SoruGorselBileseni.kt:151:26 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/bilesenler/premium/PremiumBilesenler.kt:106:28 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
@@ -121,8 +120,8 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/premium/PremiumEntegrasyon.kt:290:81 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
 
 > Task :app:compileDebugJavaWithJavac
-> Task :app:bundleDebugClassesToRuntimeJar
 > Task :app:processDebugJavaRes
+> Task :app:bundleDebugClassesToRuntimeJar
 > Task :app:bundleDebugClassesToCompileJar
 > Task :app:kspDebugUnitTestKotlin
 
@@ -148,90 +147,7 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/c
 > Task :app:processDebugUnitTestJavaRes
 > Task :app:testDebugUnitTest
 
-KirpmaSorulacakVeOgretmenArayuzTest > bugunSorulacaklarHatirlatmasiVeDersDersCozdurdumAkisiCalisir FAILED
-    androidx.test.espresso.AppNotIdleException at KirpmaSorulacakVeOgretmenArayuzTest.kt:230
-
-338 tests completed, 1 failed
-
-> Task :app:testDebugUnitTest FAILED
-
 [Incubating] Problems report is available at: file:///home/runner/work/Question-note/Question-note/build/reports/problems/problems-report.html
-
-FAILURE: Build failed with an exception.
-
-
--- Son 80 satır --
-	at org.gradle.internal.execution.steps.TimeoutStep.execute(TimeoutStep.java:55)
-	at org.gradle.internal.execution.steps.PreCreateOutputParentsStep.execute(PreCreateOutputParentsStep.java:51)
-	at org.gradle.internal.execution.steps.PreCreateOutputParentsStep.execute(PreCreateOutputParentsStep.java:29)
-	at org.gradle.internal.execution.steps.RemovePreviousOutputsStep.executeMutable(RemovePreviousOutputsStep.java:67)
-	at org.gradle.internal.execution.steps.RemovePreviousOutputsStep.executeMutable(RemovePreviousOutputsStep.java:39)
-	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
-	at org.gradle.internal.execution.steps.BroadcastChangingOutputsStep.execute(BroadcastChangingOutputsStep.java:42)
-	at org.gradle.internal.execution.steps.BroadcastChangingOutputsStep.execute(BroadcastChangingOutputsStep.java:24)
-	at org.gradle.internal.execution.steps.CaptureOutputsAfterExecutionStep.execute(CaptureOutputsAfterExecutionStep.java:69)
-	at org.gradle.internal.execution.steps.CaptureOutputsAfterExecutionStep.execute(CaptureOutputsAfterExecutionStep.java:46)
-	at org.gradle.internal.execution.steps.ResolveInputChangesStep.executeMutable(ResolveInputChangesStep.java:39)
-	at org.gradle.internal.execution.steps.ResolveInputChangesStep.executeMutable(ResolveInputChangesStep.java:28)
-	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
-	at org.gradle.internal.execution.steps.BuildCacheStep.executeWithoutCache(BuildCacheStep.java:189)
-	at org.gradle.internal.execution.steps.BuildCacheStep.lambda$execute$1(BuildCacheStep.java:76)
-	at org.gradle.internal.Either$Right.fold(Either.java:176)
-	at org.gradle.internal.execution.caching.CachingState.fold(CachingState.java:62)
-	at org.gradle.internal.execution.steps.BuildCacheStep.execute(BuildCacheStep.java:74)
-	at org.gradle.internal.execution.steps.BuildCacheStep.execute(BuildCacheStep.java:49)
-	at org.gradle.internal.execution.steps.StoreExecutionStateStep.executeMutable(StoreExecutionStateStep.java:46)
-	at org.gradle.internal.execution.steps.StoreExecutionStateStep.executeMutable(StoreExecutionStateStep.java:35)
-	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
-	at org.gradle.internal.execution.steps.SkipUpToDateStep.executeBecause(SkipUpToDateStep.java:75)
-	at org.gradle.internal.execution.steps.SkipUpToDateStep.lambda$execute$2(SkipUpToDateStep.java:53)
-	at org.gradle.internal.execution.steps.SkipUpToDateStep.execute(SkipUpToDateStep.java:53)
-	at org.gradle.internal.execution.steps.SkipUpToDateStep.execute(SkipUpToDateStep.java:35)
-	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsFinishedStep.execute(MarkSnapshottingInputsFinishedStep.java:37)
-	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsFinishedStep.execute(MarkSnapshottingInputsFinishedStep.java:27)
-	at org.gradle.internal.execution.steps.ResolveMutableCachingStateStep.executeDelegate(ResolveMutableCachingStateStep.java:70)
-	at org.gradle.internal.execution.steps.ResolveMutableCachingStateStep.executeDelegate(ResolveMutableCachingStateStep.java:32)
-	at org.gradle.internal.execution.steps.AbstractResolveCachingStateStep.execute(AbstractResolveCachingStateStep.java:69)
-	at org.gradle.internal.execution.steps.AbstractResolveCachingStateStep.execute(AbstractResolveCachingStateStep.java:37)
-	at org.gradle.internal.execution.steps.ResolveChangesStep.executeMutable(ResolveChangesStep.java:63)
-	at org.gradle.internal.execution.steps.ResolveChangesStep.executeMutable(ResolveChangesStep.java:34)
-	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
-	at org.gradle.internal.execution.steps.ValidateStep$Mutable.executeDelegate(ValidateStep.java:79)
-	at org.gradle.internal.execution.steps.ValidateStep$Mutable.executeDelegate(ValidateStep.java:65)
-	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:105)
-	at org.gradle.internal.execution.steps.ValidateStep$Mutable.execute(ValidateStep.java:65)
-	at org.gradle.internal.execution.steps.CaptureMutableStateBeforeExecutionStep.executeMutable(CaptureMutableStateBeforeExecutionStep.java:86)
-	at org.gradle.internal.execution.steps.CaptureMutableStateBeforeExecutionStep.execute(CaptureMutableStateBeforeExecutionStep.java:65)
-	at org.gradle.internal.execution.steps.CaptureMutableStateBeforeExecutionStep.execute(CaptureMutableStateBeforeExecutionStep.java:45)
-	at org.gradle.internal.execution.steps.SkipEmptyMutableWorkStep.executeWithNonEmptySources(SkipEmptyMutableWorkStep.java:210)
-	at org.gradle.internal.execution.steps.SkipEmptyMutableWorkStep.executeMutable(SkipEmptyMutableWorkStep.java:90)
-	at org.gradle.internal.execution.steps.SkipEmptyMutableWorkStep.executeMutable(SkipEmptyMutableWorkStep.java:53)
-	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
-	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsStartedStep.execute(MarkSnapshottingInputsStartedStep.java:38)
-	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.executeMutable(LoadPreviousExecutionStateStep.java:36)
-	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.executeMutable(LoadPreviousExecutionStateStep.java:23)
-	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
-	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.executeMutable(HandleStaleOutputsStep.java:77)
-	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.executeMutable(HandleStaleOutputsStep.java:43)
-	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
-	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.lambda$executeMutable$0(AssignMutableWorkspaceStep.java:34)
-	at org.gradle.api.internal.tasks.execution.TaskExecution$4.withWorkspace(TaskExecution.java:314)
-	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.executeMutable(AssignMutableWorkspaceStep.java:30)
-	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.executeMutable(AssignMutableWorkspaceStep.java:21)
-	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
-	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:40)
-	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:23)
-	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.lambda$execute$2(ExecuteWorkBuildOperationFiringStep.java:67)
-	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:67)
-	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:39)
-	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:46)
-	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:34)
-	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:56)
-	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:38)
-	at org.gradle.internal.execution.impl.DefaultExecutionEngine$1.execute(DefaultExecutionEngine.java:68)
-	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.doExecute(DefaultTaskNodeExecutor.java:364)
-	... 55 more
-
 
 Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
 
@@ -239,8 +155,91 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD FAILED in 4m 4s
+BUILD SUCCESSFUL in 2m 59s
 32 actionable tasks: 32 executed
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
+
+-- Son 80 satır --
+> Task :app:processDebugManifestForPackage
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets
+> Task :app:mergeDebugResources
+> Task :app:processDebugUnitTestManifest
+> Task :app:processDebugResources
+> Task :app:packageDebugUnitTestForUnitTest
+> Task :app:generateDebugUnitTestConfig
+> Task :app:kspDebugKotlin
+> Task :app:compileDebugKotlin
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/export/YerelYedeklemeHizmeti.kt:67:34 Non-public primary constructor is exposed via the generated 'copy()' method of the 'data' class.
+
+The generated 'copy()' will change its visibility in future releases.
+
+To suppress the warning do one of the following:
+- Annotate the data class with the '@ConsistentCopyVisibility' annotation.
+- Use the '-Xconsistent-data-class-copy-visibility' compiler flag.
+- Annotate the data class with the '@ExposedCopyVisibility' annotation 
+  (Discouraged, but can be used to keep binary compatibility).
+
+To learn more, see the documentation of the '@ConsistentCopyVisibility' and '@ExposedCopyVisibility' annotations.
+
+This will become an error in language version 2.5. See https://youtrack.jetbrains.com/issue/KT-11914.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/images/LocalSoruGorselDeposu.kt:134:57 'static fun newInstance(p0: String, p1: Boolean): BitmapRegionDecoder' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/images/LocalSoruGorselDeposu.kt:135:21 Elvis operator (?:) always returns the left operand of non-nullable type 'BitmapRegionDecoder'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/images/LocalSoruGorselDeposu.kt:462:35 Elvis operator (?:) always returns the left operand of non-nullable type 'Bitmap'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/local/YanlisDefteriMigrations.kt:12:30 The corresponding parameter in the supertype 'Migration' is named 'db'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/local/YanlisDefteriMigrations.kt:25:30 The corresponding parameter in the supertype 'Migration' is named 'db'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/local/YanlisDefteriMigrations.kt:105:30 The corresponding parameter in the supertype 'Migration' is named 'db'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/ses/SesYoneticisi.kt:252:64 'static field VIBRATOR_SERVICE: String' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/ses/SesYoneticisi.kt:260:33 'static field HAPTIC_FEEDBACK_ENABLED: String' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/SoruDetayEkrani.kt:664:89 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/SorulacaklarEkrani.kt:471:26 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/YanlisDefteriUygulamasi.kt:200:71 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/bilesenler/SoruGorselBileseni.kt:151:26 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/bilesenler/premium/PremiumBilesenler.kt:106:28 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/calisma/CozumTahtasiDialog.kt:1558:30 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/karne/KarneEkrani.kt:231:72 Unnecessary safe call on a non-null receiver of type 'KarneVerisi'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/ogretmen/OgretmenAnaEkrani.kt:965:26 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/premium/PremiumEntegrasyon.kt:290:81 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
+
+> Task :app:compileDebugJavaWithJavac
+> Task :app:processDebugJavaRes
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:kspDebugUnitTestKotlin
+
+> Task :app:compileDebugUnitTestKotlin
+w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/export/YerelDisaAktarmaHizmetiTest.kt:150:112 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/export/YerelDisaAktarmaHizmetiTest.kt:151:85 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/images/LocalSoruGorselDeposuTest.kt:46:60 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/images/LocalSoruGorselDeposuTest.kt:47:61 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/com/keremtulu/questionnote/ui/DenemeVeKurulumArayuzTest.kt:51:19 'fun <reified A : ComponentActivity> createAndroidComposeRule(effectContext: CoroutineContext = ...): AndroidComposeTestRule<ActivityScenarioRule<A>, A>' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createAndroidComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/com/keremtulu/questionnote/ui/IlerlemeArayuzTest.kt:54:29 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/com/keremtulu/questionnote/ui/IlerlemeGorselOnizlemeTest.kt:29:29 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/com/keremtulu/questionnote/ui/IlerlemeSadelikTest.kt:30:29 'fun <reified A : ComponentActivity> createAndroidComposeRule(effectContext: CoroutineContext = ...): AndroidComposeTestRule<ActivityScenarioRule<A>, A>' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createAndroidComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/com/keremtulu/questionnote/ui/KirpmaSorulacakVeOgretmenArayuzTest.kt:64:19 'fun <reified A : ComponentActivity> createAndroidComposeRule(effectContext: CoroutineContext = ...): AndroidComposeTestRule<ActivityScenarioRule<A>, A>' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createAndroidComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/com/keremtulu/questionnote/ui/OlcumVeProfilArayuzTest.kt:58:29 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/com/keremtulu/questionnote/ui/OneridenOdagaAkisTest.kt:38:29 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/com/keremtulu/questionnote/ui/P5P6ArayuzTest.kt:44:29 'fun <reified A : ComponentActivity> createAndroidComposeRule(effectContext: CoroutineContext = ...): AndroidComposeTestRule<ActivityScenarioRule<A>, A>' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createAndroidComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/com/keremtulu/questionnote/ui/P5P6ArayuzTest.kt:65:30 Unnecessary safe call on a non-null receiver of type 'Pair<SoruCalismaFiltresi, Int>'.
+w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/com/keremtulu/questionnote/ui/P6GorselOnizlemeTest.kt:27:29 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/com/keremtulu/questionnote/ui/PremiumIlerlemeTest.kt:52:29 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/com/keremtulu/questionnote/ui/calisma/CozumTahtasiKullanimTest.kt:34:29 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes
+> Task :app:testDebugUnitTest
+
+[Incubating] Problems report is available at: file:///home/runner/work/Question-note/Question-note/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 2m 59s
+32 actionable tasks: 32 executed
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 ```
 
 ## Release birim test çıktısı
@@ -269,9 +268,9 @@ Daemon will be stopped at the end of the build
 > Task :app:javaPreCompileReleaseUnitTest FROM-CACHE
 > Task :app:generateReleaseAssets UP-TO-DATE
 > Task :app:mergeReleaseAssets
+> Task :app:mergeReleaseResources
 > Task :app:processReleaseUnitTestManifest
 > Task :app:processReleaseManifestForPackage
-> Task :app:mergeReleaseResources
 > Task :app:processReleaseResources
 > Task :app:packageReleaseUnitTestForUnitTest
 > Task :app:generateReleaseUnitTestConfig
@@ -299,7 +298,7 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/ses/SesYoneticisi.kt:252:64 'static field VIBRATOR_SERVICE: String' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/ses/SesYoneticisi.kt:260:33 'static field HAPTIC_FEEDBACK_ENABLED: String' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/SoruDetayEkrani.kt:664:89 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/SorulacaklarEkrani.kt:473:26 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/SorulacaklarEkrani.kt:471:26 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/YanlisDefteriUygulamasi.kt:200:71 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/bilesenler/SoruGorselBileseni.kt:151:26 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/bilesenler/premium/PremiumBilesenler.kt:106:28 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
@@ -309,8 +308,8 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/premium/PremiumEntegrasyon.kt:290:81 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
 
 > Task :app:compileReleaseJavaWithJavac
-> Task :app:bundleReleaseClassesToCompileJar
 > Task :app:processReleaseJavaRes
+> Task :app:bundleReleaseClassesToCompileJar
 > Task :app:bundleReleaseClassesToRuntimeJar
 > Task :app:kspReleaseUnitTestKotlin
 
@@ -332,7 +331,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 1m 40s
+BUILD SUCCESSFUL in 1m 29s
 32 actionable tasks: 24 executed, 8 from cache
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 -- Hata satırları ve son bölüm --
@@ -358,9 +357,9 @@ Daemon will be stopped at the end of the build
 > Task :app:javaPreCompileReleaseUnitTest FROM-CACHE
 > Task :app:generateReleaseAssets UP-TO-DATE
 > Task :app:mergeReleaseAssets
+> Task :app:mergeReleaseResources
 > Task :app:processReleaseUnitTestManifest
 > Task :app:processReleaseManifestForPackage
-> Task :app:mergeReleaseResources
 > Task :app:processReleaseResources
 > Task :app:packageReleaseUnitTestForUnitTest
 > Task :app:generateReleaseUnitTestConfig
@@ -388,7 +387,7 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/ses/SesYoneticisi.kt:252:64 'static field VIBRATOR_SERVICE: String' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/data/ses/SesYoneticisi.kt:260:33 'static field HAPTIC_FEEDBACK_ENABLED: String' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/SoruDetayEkrani.kt:664:89 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/SorulacaklarEkrani.kt:473:26 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
+w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/SorulacaklarEkrani.kt:471:26 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/YanlisDefteriUygulamasi.kt:200:71 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/bilesenler/SoruGorselBileseni.kt:151:26 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/bilesenler/premium/PremiumBilesenler.kt:106:28 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
@@ -398,8 +397,8 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/keremtulu/questionnote/ui/premium/PremiumEntegrasyon.kt:290:81 Unnecessary safe call on a non-null receiver of type '() -> Unit'.
 
 > Task :app:compileReleaseJavaWithJavac
-> Task :app:bundleReleaseClassesToCompileJar
 > Task :app:processReleaseJavaRes
+> Task :app:bundleReleaseClassesToCompileJar
 > Task :app:bundleReleaseClassesToRuntimeJar
 > Task :app:kspReleaseUnitTestKotlin
 
@@ -421,7 +420,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 1m 40s
+BUILD SUCCESSFUL in 1m 29s
 32 actionable tasks: 24 executed, 8 from cache
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 ```
@@ -429,71 +428,123 @@ Consider enabling configuration cache to speed up this build: https://docs.gradl
 ## JUnit başarısızlık ayrıntıları
 
 ```text
-testDebugUnitTest: com.keremtulu.questionnote.ui.KirpmaSorulacakVeOgretmenArayuzTest > bugunSorulacaklarHatirlatmasiVeDersDersCozdurdumAkisiCalisir: androidx.test.espresso.AppNotIdleException: androidx.test.espresso.AppNotIdleException: Compose did not get idle after 271167 attempts in 60 SECONDS.  1. Check your measure/layout lambdas for infinite composition loops. 2. Verify that the 'busy' resources listed above are not deadlocked. 3. Increase Espresso's master idling policy if a longer timeout is required.  The following Idle Conditions failed .
-androidx.test.espresso.AppNotIdleException: Compose did not get idle after 271167 attempts in 60 SECONDS.
-
-1. Check your measure/layout lambdas for infinite composition loops.
-2. Verify that the 'busy' resources listed above are not deadlocked.
-3. Increase Espresso's master idling policy if a longer timeout is required.
- The following Idle Conditions failed .
-	at androidx.test.espresso.AppNotIdleException.create(AppNotIdleException.java:11)
-	at androidx.compose.ui.test.RobolectricIdlingStrategy.runUntilIdle$lambda$0(RobolectricIdlingStrategy.android.kt:101)
-	at androidx.compose.ui.test.AndroidSynchronization_androidKt.runOnUiThread(AndroidSynchronization.android.kt:35)
-	at androidx.compose.ui.test.RobolectricIdlingStrategy.runUntilIdle(RobolectricIdlingStrategy.android.kt:66)
-	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment.waitForIdle(ComposeUiTest.android.kt:716)
-	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment.access$waitForIdle(ComposeUiTest.android.kt:481)
-	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidTestOwner.getRoots(ComposeUiTest.android.kt:988)
-	at androidx.compose.ui.test.TestOwnerKt.getAllSemanticsNodes(TestOwner.kt:116)
-	at androidx.compose.ui.test.TestOwnerKt.getAllSemanticsNodes$default(TestOwner.kt:109)
-	at androidx.compose.ui.test.SemanticsNodeInteractionCollection.fetchSemanticsNodes(SemanticsNodeInteraction.kt:249)
-	at androidx.compose.ui.test.SemanticsNodeInteractionCollection.fetchSemanticsNodes$default(SemanticsNodeInteraction.kt:245)
-	at com.keremtulu.questionnote.ui.KirpmaSorulacakVeOgretmenArayuzTest.bugunSorulacaklarHatirlatmasiVeDersDersCozdurdumAkisiCalisir$lambda$5(KirpmaSorulacakVeOgretmenArayuzTest.kt:230)
-	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:893)
-	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:500)
-	at com.keremtulu.questionnote.ui.KirpmaSorulacakVeOgretmenArayuzTest.bugunSorulacaklarHatirlatmasiVeDersDersCozdurdumAkisiCalisir(KirpmaSorulacakVeOgretmenArayuzTest.kt:229)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:26)
-	at org.junit.internal.runners.statements.RunAfters.evaluate(RunAfters.java:27)
-	at androidx.compose.ui.test.junit4.AndroidComposeTestRule$apply$testWithDisposal$1.evaluate(AndroidComposeTestRule.android.kt:426)
-	at org.junit.rules.ExternalResource$1.evaluate(ExternalResource.java:54)
-	at androidx.compose.ui.test.junit4.AndroidComposeTestRule$apply$1$evaluate$1.invokeSuspend(AndroidComposeTestRule.android.kt:448)
-	at androidx.compose.ui.test.junit4.AndroidComposeTestRule$apply$1$evaluate$1.invoke(AndroidComposeTestRule.android.kt)
-	at androidx.compose.ui.test.junit4.AndroidComposeTestR
+Başarısız JUnit testi yok.
 ```
 
 ## Derleme çıktısı (son 120 satır)
 
 ```text
-assembleRelease, Debug/Release birim test kapılarından biri geçmediği için çalıştırılmadı.
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preReleaseBuild UP-TO-DATE
+> Task :app:mergeReleaseJniLibFolders
+> Task :app:mergeReleaseNativeLibs
+> Task :app:checkReleaseDuplicateClasses
+> Task :app:generateReleaseBuildConfig UP-TO-DATE
+
+> Task :app:stripReleaseDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so. Run with --info option to learn more.
+
+> Task :app:generateReleaseResources UP-TO-DATE
+> Task :app:extractReleaseNativeSymbolTables
+> Task :app:packageReleaseResources UP-TO-DATE
+> Task :app:mergeReleaseNativeDebugMetadata NO-SOURCE
+> Task :app:processReleaseNavigationResources UP-TO-DATE
+> Task :app:parseReleaseLocalResources UP-TO-DATE
+> Task :app:generateReleaseRFile UP-TO-DATE
+> Task :app:kspReleaseKotlin UP-TO-DATE
+> Task :app:compileReleaseKotlin UP-TO-DATE
+> Task :app:javaPreCompileRelease UP-TO-DATE
+> Task :app:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :app:checkReleaseAarMetadata UP-TO-DATE
+> Task :app:mapReleaseSourceSetPaths UP-TO-DATE
+> Task :app:compileReleaseNavigationResources UP-TO-DATE
+> Task :app:mergeReleaseResources UP-TO-DATE
+> Task :app:createReleaseCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksRelease UP-TO-DATE
+> Task :app:processReleaseMainManifest UP-TO-DATE
+> Task :app:processReleaseManifest UP-TO-DATE
+> Task :app:processReleaseManifestForPackage UP-TO-DATE
+> Task :app:processReleaseResources UP-TO-DATE
+> Task :app:dexBuilderRelease
+> Task :app:desugarReleaseFileDependencies
+> Task :app:mergeReleaseStartupProfile
+> Task :app:mergeReleaseArtProfile
+> Task :app:generateReleaseAssets UP-TO-DATE
+> Task :app:mergeReleaseGlobalSynthetics
+> Task :app:mergeReleaseAssets UP-TO-DATE
+> Task :app:compressReleaseAssets
+> Task :app:extractReleaseVersionControlInfo
+> Task :app:extractProguardFiles
+> Task :app:generateReleaseLintVitalReportModel
+> Task :app:mergeExtDexRelease
+> Task :app:processReleaseJavaRes UP-TO-DATE
+> Task :app:optimizeReleaseResources
+> Task :app:collectReleaseDependencies
+> Task :app:sdkReleaseDependencyData
+> Task :app:writeReleaseAppMetadata
+> Task :app:writeReleaseSigningConfigVersions
+> Task :app:mergeReleaseJavaResource
+> Task :app:mergeDexRelease
+> Task :app:compileReleaseArtProfile
+> Task :app:lintVitalAnalyzeRelease
+> Task :app:lintVitalReportRelease
+> Task :app:lintVitalRelease
+> Task :app:packageRelease
+> Task :app:createReleaseApkListingFileRedirect
+> Task :app:assembleRelease
+
+[Incubating] Problems report is available at: file:///home/runner/work/Question-note/Question-note/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m 29s
+50 actionable tasks: 28 executed, 22 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 ```
 
 ## İmzalama çıktısı
 
 ```text
-İmzalama başlatılmadı.
 ```
 
 ## Sertifika doğrulama çıktısı
 
 ```text
-apksigner verify çalıştırılmadı.
+Verifies
+Verified using v1 scheme (JAR signing): false
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): true
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v3.2 scheme (APK Signature Scheme v3.2): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1
+V3.0 Signer: certificate DN: C=TR, O=keremtulu44, CN=Yanlis Defteri
+V3.0 Signer: certificate SHA-256 digest: fa13ded73cb46ede9e363747ee3895f2b637149c165790a2e46778f13089de54
+V3.0 Signer: certificate SHA-1 digest: e91037b0ae3d996547d94f67150f615b8d39562e
+V3.0 Signer: certificate MD5 digest: ae05416ccef3056264f2b194d11895f4
+V3.0 Signer: key algorithm: RSA
+V3.0 Signer: key size (bits): 2048
+V3.0 Signer: public key SHA-256 digest: f4e20e6ced2eb9a1b0f2babc335d30ab4447486a9c45a4815caea25907b6fc38
+V3.0 Signer: public key SHA-1 digest: 28cb01aac44f1a61a3cc1410b5e5d96b7c4d5253
+V3.0 Signer: public key MD5 digest: efca2e07ac5a04473681ddaf5ff0157e
 ```
 
 ## Release çıktısı
 
 ```text
-Release oluşturulmadı.
+https://github.com/keremtulu44/Question-note/releases/tag/v1.5.106
 ```
 
 ## APK özeti
 
 ```text
-İmzalı APK yok.
+APK: app/build/outputs/apk/release/yanlis-defteri-1.5.106.apk
+SHA-256: 5bfa2ecd20b3c19eee7cecb1bd749e2db8215a2ed7e4a30cc0d6748860088f69
 ```
