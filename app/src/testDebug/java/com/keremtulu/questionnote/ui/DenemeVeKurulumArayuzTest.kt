@@ -111,7 +111,7 @@ class DenemeVeKurulumArayuzTest {
         compose.waitForIdle()
 
         assertTrue(tamamlandi)
-        assertTrue(profilDeposu.kurulumTamam())
+        assertTrue(!profilDeposu.kurulumGerekli())
     }
 
     @Test

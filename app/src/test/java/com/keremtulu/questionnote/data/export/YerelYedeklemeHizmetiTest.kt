@@ -754,7 +754,7 @@ class YerelYedeklemeHizmetiTest {
     }
 
     @Test
-    fun mockExamsRoundTripThroughZipBackupAndReconcileLessonIdsOnRestore() = runBlocking {
+    fun mockExamsRoundTripThroughZipBackupAndReconcileLessonIdsOnRestore() = runBlocking<Unit> {
         val context = RuntimeEnvironment.getApplication()
         context.getSharedPreferences("denemeler", android.content.Context.MODE_PRIVATE).edit().clear().commit()
         val denemeDeposu = com.keremtulu.questionnote.data.prefs.DenemeDeposu(context)
@@ -780,7 +780,7 @@ class YerelYedeklemeHizmetiTest {
             ),
         )
 
-        val archive = yedekHizmeti.yedekOlustur().also(temporaryFiles::add)
+        val archive = yedekHizmeti.zipOlustur().also(temporaryFiles::add)
         denemeDeposu.sil("deneme-1")
         assertTrue(denemeDeposu.kayitlariIzle.value.isEmpty())
 

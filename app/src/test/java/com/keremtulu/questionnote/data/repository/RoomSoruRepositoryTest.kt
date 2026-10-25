@@ -555,7 +555,7 @@ class RoomSoruRepositoryTest {
     }
 
     @Test
-    fun kaynakAdiDegistirDenemeKaynaginiKatalogaEklerVeSorulariSenkronizeEder() = runBlocking {
+    fun kaynakAdiDegistirDenemeKaynaginiKatalogaEklerVeSorulariSenkronizeEder() = runBlocking<Unit> {
         repository.kaynakAdiDegistir(null, "Miray TYT 1")
         assertTrue(
             repository.secenekleriIzle(SoruSecenekTuru.KAYNAK).first().any { it.ad == "Miray TYT 1" },
@@ -578,7 +578,7 @@ class RoomSoruRepositoryTest {
         assertEquals("Miray TYT Deneme 1", guncelSoru.kaynak)
         val kaynakAdlari = repository.secenekleriIzle(SoruSecenekTuru.KAYNAK).first().map { it.ad }
         assertTrue("Miray TYT Deneme 1" in kaynakAdlari)
-        assertFalse("Miray TYT 1" in kaynakAdlari)
+        assertTrue("Miray TYT 1" !in kaynakAdlari)
     }
 
     private class FakeGorselDosyaYonetimi : GorselDosyaYonetimi {
