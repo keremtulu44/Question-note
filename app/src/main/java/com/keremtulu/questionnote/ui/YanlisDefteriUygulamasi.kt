@@ -164,9 +164,16 @@ fun YanlisDefteriUygulamasi(
     gunlukHedefDeposu: GunlukHedefDeposu,
     tercihHedefDeposu: TercihGunlukHedefDeposu,
     denemeDeposu: com.keremtulu.questionnote.data.prefs.DenemeDeposu,
+    ogretmenDeposu: com.keremtulu.questionnote.data.prefs.OgretmenDeposu? = null,
 ) {
+    val context = LocalContext.current
+    val etkinOgretmenDeposu = remember(ogretmenDeposu, context, gorselDeposu) {
+        ogretmenDeposu ?: com.keremtulu.questionnote.data.prefs.OgretmenDeposu(context, gorselDeposu)
+    }
     var ekran by remember { mutableStateOf<UygulamaEkrani>(UygulamaEkrani.Bugun) }
     var kurulumGerekli by remember { mutableStateOf(profilDeposu.kurulumGerekli()) }
+    val aktifRol by profilDeposu.rolIzle.collectAsState()
+    val rolSecildi by profilDeposu.rolSecildiIzle.collectAsState()
     val tahtaOturumId = (ekran as? UygulamaEkrani.FiltreliOturum)?.oturum?.id
     val tahtaOturumCizimBellegi = remember(tahtaOturumId) { TahtaOturumCizimBellegi() }
     val profilSecimi by profilDeposu.secimIzle.collectAsState()
@@ -180,7 +187,6 @@ fun YanlisDefteriUygulamasi(
     var oturumBaslatiliyor by remember { mutableStateOf(false) }
     var geriYuklemeOnizlemesi by remember { mutableStateOf<GeriYuklemeOnizlemesi?>(null) }
     var sonYedek by remember { mutableStateOf<SonYedekBilgisi?>(null) }
-    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     var rozetGozlemYenileme by remember { mutableIntStateOf(0) }
@@ -282,6 +288,7 @@ fun YanlisDefteriUygulamasi(
         kurtarma = KurtarmaDurumu.YUKLENIYOR
         try {
             disaAktarmaHizmeti.kesintiliGeriYuklemeyiTamamla()
+            runCatching { dersRepository.kataloguHazirla() }
             runCatching { gorselDeposu.eskiGecicileriTemizle() }
             sonYedek = disaAktarmaHizmeti.sonYedekBilgisiGetir()
             val kayit = withContext(Dispatchers.IO) { oturumDeposu.oku() }
@@ -307,8 +314,9 @@ fun YanlisDefteriUygulamasi(
 
     LaunchedEffect(disaAktarmaHizmeti) { kurtarmayiCalistir() }
     LaunchedEffect(profilSecimi.profil) { filtreliCalismaAyar = FiltreliCalismaEkraniAyar() }
-    LaunchedEffect(ekran, kurtarma, yedeklemeIslemde) {
-        if (kurtarma == KurtarmaDurumu.HAZIR && !yedeklemeIslemde &&
+    LaunchedEffect(ekran, kurtarma, yedeklemeIslemde, aktifRol) {
+        if (aktifRol == com.keremtulu.questionnote.domain.model.KullaniciRolu.OGRENCI &&
+            kurtarma == KurtarmaDurumu.HAZIR && !yedeklemeIslemde &&
             (ekran == UygulamaEkrani.Seviye || ekran == UygulamaEkrani.Bugun)) {
             if (rozetGozlemDurdu) rozetGozlemYenileme++
             try {
@@ -320,8 +328,9 @@ fun YanlisDefteriUygulamasi(
             }
         }
     }
-    LaunchedEffect(kurtarma, yedeklemeIslemde, rozetHizmeti, rozetGozlemYenileme) {
-        if (kurtarma == KurtarmaDurumu.HAZIR && !yedeklemeIslemde) {
+    LaunchedEffect(kurtarma, yedeklemeIslemde, rozetHizmeti, rozetGozlemYenileme, aktifRol) {
+        if (aktifRol == com.keremtulu.questionnote.domain.model.KullaniciRolu.OGRENCI &&
+            kurtarma == KurtarmaDurumu.HAZIR && !yedeklemeIslemde) {
             rozetGozlemDurdu = false
             dayanikliIzle { rozetHizmeti.degisiklikleriIzle() }.collect { durum ->
                 when (durum) {
@@ -402,18 +411,61 @@ fun YanlisDefteriUygulamasi(
     }
 
     BackHandler(
-        enabled = kurtarma == KurtarmaDurumu.HAZIR && ekran != UygulamaEkrani.Bugun,
+        enabled = aktifRol == com.keremtulu.questionnote.domain.model.KullaniciRolu.OGRENCI &&
+            kurtarma == KurtarmaDurumu.HAZIR && ekran != UygulamaEkrani.Bugun,
     ) {
         ekranSec(ekran.geriHedefi())
     }
 
-    if (kurulumGerekli) {
+    if (!rolSecildi && kurulumGerekli) {
+        com.keremtulu.questionnote.ui.kurulum.RolSecimEkrani(
+            onRolSecildi = { secilenRol ->
+                profilDeposu.rolKaydet(secilenRol)
+                kurulumGerekli = profilDeposu.kurulumGerekli()
+            },
+        )
+        return
+    }
+
+    if (aktifRol == com.keremtulu.questionnote.domain.model.KullaniciRolu.OGRENCI && kurulumGerekli) {
         com.keremtulu.questionnote.ui.kurulum.DersKurulumEkrani(
             dersRepository = dersRepository,
             onTamam = { kurulumGerekli = false },
         )
         return
     }
+
+    if (aktifRol == com.keremtulu.questionnote.domain.model.KullaniciRolu.OGRETMEN) {
+        when (kurtarma) {
+            KurtarmaDurumu.YUKLENIYOR -> UygulamaDurumEkrani(
+                metin = stringResource(R.string.backup_restore_working),
+                yukleniyor = true,
+            )
+            KurtarmaDurumu.HATA -> UygulamaDurumEkrani(
+                metin = stringResource(R.string.backup_restore_recovery_error),
+                yukleniyor = false,
+                tekrarDene = { scope.launch { kurtarmayiCalistir() } },
+            )
+            KurtarmaDurumu.HAZIR -> com.keremtulu.questionnote.ui.ogretmen.OgretmenAnaEkrani(
+                ogretmenDeposu = etkinOgretmenDeposu,
+                gorselDeposu = gorselDeposu,
+                sonYedek = sonYedek,
+                yedeklemeIslemde = yedeklemeIslemde,
+                onOgrenciModunaGec = {
+                    kurulumGerekli = profilDeposu.kurulumGerekli()
+                    profilDeposu.rolKaydet(com.keremtulu.questionnote.domain.model.KullaniciRolu.OGRENCI)
+                },
+                onYedekOlustur = {
+                    if (!yedeklemeIslemde) exportLauncher.launch("yanlis-defteri-yedek.zip")
+                },
+                onYedekGeriYukle = {
+                    if (!yedeklemeIslemde) {
+                        restoreLauncher.launch(arrayOf("application/zip", "application/octet-stream"))
+                    }
+                },
+            )
+        }
+    } else {
     val altMenuGorunur = ekran.altMenuGorunur()
     val hareketPolitikasi = LocalHareketPolitikasi.current
     Scaffold(
@@ -699,15 +751,20 @@ fun YanlisDefteriUygulamasi(
                                 ),
                             )
                         },
+                        onOgretmenModunaGec = {
+                            profilDeposu.rolKaydet(com.keremtulu.questionnote.domain.model.KullaniciRolu.OGRETMEN)
+                        },
                     )
                 }
             }
             }
         }
     }
+    }
 
     com.keremtulu.questionnote.ui.karne.KutlamaHost(rozetDeposu, rutbeDeposu,
-        goster = kurtarma == KurtarmaDurumu.HAZIR && !yedeklemeIslemde &&
+        goster = aktifRol == com.keremtulu.questionnote.domain.model.KullaniciRolu.OGRENCI &&
+            kurtarma == KurtarmaDurumu.HAZIR && !yedeklemeIslemde &&
             ekran !is UygulamaEkrani.FiltreliOturum && ekran !is UygulamaEkrani.SoruFormu &&
             ekran !is UygulamaEkrani.SoruAyrintisi && oturumCikisHedefi == null && geriYuklemeOnizlemesi == null,
     )

@@ -29,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
@@ -73,6 +74,7 @@ fun AyarlarEkrani(
     onKatalog: () -> Unit,
     onKonular: () -> Unit,
     onPremiumDemo: () -> Unit = {},
+    onOgretmenModunaGec: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -132,6 +134,31 @@ fun AyarlarEkrani(
                             color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.86f),
                             style = MaterialTheme.typography.bodyMedium,
                         )
+                    }
+                }
+            }
+            item {
+                Bolum(stringResource(R.string.settings_role_section_title)) {
+                    Text(
+                        stringResource(R.string.settings_role_current_student),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Text(
+                        stringResource(R.string.settings_role_switch_note),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    PremiumOutlinedButton(
+                        onClick = onOgretmenModunaGec,
+                        enabled = !yedeklemeIslemde,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 6.dp)
+                            .testTag("ogretmen_moduna_gec_buton"),
+                    ) {
+                        Text(stringResource(R.string.settings_switch_to_teacher))
                     }
                 }
             }

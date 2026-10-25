@@ -91,6 +91,7 @@ class YerelYedeklemeHizmeti(
     private val database: YanlisDefteriDatabase,
     private val gorselDeposu: LocalSoruGorselDeposu,
     private val denemeDeposu: com.keremtulu.questionnote.data.prefs.DenemeDeposu? = null,
+    private val ogretmenDeposu: com.keremtulu.questionnote.data.prefs.OgretmenDeposu? = null,
     // Clear ONLY a committed restore, before removing its recovery markers. Also used on startup.
     private val oturumTemizle: () -> Unit = {
         com.keremtulu.questionnote.data.prefs.OdakOturumuDeposu(context.applicationContext).temizle()
@@ -266,12 +267,28 @@ class YerelYedeklemeHizmeti(
                 guvenlikKopyasi = true,
             ),
         )
-        val restoreImageBytes = verified.data.images.sumOf { it.sizeBytes }
+        val uniqueTeacherImages = verified.data.ogretmenVerisi.sorular
+            .flatMap { it.gorseller }
+            .distinctBy { it.dosyaAdi }
+        val restoreImageBytes = verified.data.images.sumOf { it.sizeBytes } +
+            uniqueTeacherImages.sumOf { it.boyut }
         ensureFreeSpace(root, restoreImageBytes + MIN_FREE_SPACE_RESERVE_BYTES)
 
         val newFileNames = verified.data.images.map { image ->
             image.permanentFileName(preview.id)
         }
+        val remappedTeacherWorkspace = verified.data.ogretmenVerisi.copy(
+            sorular = verified.data.ogretmenVerisi.sorular.map { soru ->
+                soru.copy(
+                    gorseller = soru.gorseller.map { img ->
+                        img.copy(dosyaAdi = teacherPermanentFileName(preview.id, img.dosyaAdi))
+                    },
+                )
+            },
+        )
+        val newTeacherFileNames = uniqueTeacherImages.map { img ->
+            teacherPermanentFileName(preview.id, img.dosyaAdi)
+        }.distinct()
         val journal = RestoreJournal(
             id = preview.id,
             state = STATE_PREPARED,
@@ -280,6 +297,9 @@ class YerelYedeklemeHizmeti(
             oldFileNames = current.gorseller.map { it.dosyaAdi }.distinct(),
             newFileNames = newFileNames,
             mockExams = verified.data.denemeler,
+            oldTeacherFileNames = current.ogretmenVerisi.kaliciDosyaAdlari().toList(),
+            newTeacherFileNames = newTeacherFileNames,
+            teacherWorkspace = remappedTeacherWorkspace,
         )
         writeJournal(journal)
 
@@ -301,6 +321,28 @@ class YerelYedeklemeHizmeti(
                 if (copied != destinationName) throw IOException("Yedek görseli kalıcı alana alınamadı: ${image.id}")
                 if (!gorselDeposu.kaliciDosyayiDogrula(expected)) {
                     throw IOException("Kalıcılaştırılan yedek görseli doğrulanamadı: ${image.id}")
+                }
+            }
+            uniqueTeacherImages.forEach { img ->
+                val zipName = com.keremtulu.questionnote.data.prefs.OgretmenDeposu.zipAdi(img.dosyaAdi)
+                val source = File(payloadDirectory, zipName)
+                val destinationName = teacherPermanentFileName(preview.id, img.dosyaAdi)
+                val expected = img.copy(dosyaAdi = destinationName).toGirdi()
+                val existing = gorselDeposu.dosyaGoruntuIcin(destinationName)
+                if (existing?.exists() == true) {
+                    if (gorselDeposu.ogretmenKaliciDosyayiDogrula(expected)) return@forEach
+                    gorselDeposu.ogretmenKaliciDosyayiSil(destinationName)
+                }
+                val copied = gorselDeposu.ogretmenYedektenKaliciyaKopyala(
+                    source = source,
+                    beklenen = img.toGirdi(),
+                    hedefDosyaAdi = destinationName,
+                )
+                if (copied != destinationName) {
+                    throw IOException("Öğretmen görseli kalıcı alana alınamadı: ${img.id}")
+                }
+                if (!gorselDeposu.ogretmenKaliciDosyayiDogrula(expected)) {
+                    throw IOException("Kalıcılaştırılan öğretmen görseli doğrulanamadı: ${img.id}")
                 }
             }
 
@@ -372,6 +414,7 @@ class YerelYedeklemeHizmeti(
         } else {
             // No marker means the all-or-nothing Room transaction did not commit; retain old rows/files.
             journal.newFileNames.forEach { gorselDeposu.kaliciDosyayiSil(it) }
+            journal.newTeacherFileNames.forEach { gorselDeposu.ogretmenKaliciDosyayiSil(it) }
             preparedDirectory(journal.preparedId).deleteRecursively()
             journalFile.delete()
         }
@@ -390,13 +433,21 @@ class YerelYedeklemeHizmeti(
                 throw IOException("Geri yükleme sonrası görsel doğrulaması başarısız: ${row.dosyaAdi}")
             }
         }
+        for (img in journal.teacherWorkspace.sorular.flatMap { it.gorseller }.distinctBy { it.dosyaAdi }) {
+            if (!gorselDeposu.ogretmenKaliciDosyayiDogrula(img.toGirdi())) {
+                throw IOException("Geri yükleme sonrası öğretmen görsel doğrulaması başarısız: ${img.dosyaAdi}")
+            }
+        }
         // A failed pre-commit restore preserves the old session. A committed replacement must
         // never resume an old question ID, even when the imported backup reuses that ID.
         // If preference persistence fails, retain journal/DB marker and block recovery safely.
         denemeDeposu?.geriYukleVeUzlastir(journal.mockExams, database.dersDao().tumunuGetir())
+        ogretmenDeposu?.geriYukle(journal.teacherWorkspace)
         oturumTemizle()
         journal.oldFileNames.filterNot { it in journal.newFileNames }
             .forEach { gorselDeposu.kaliciDosyayiSil(it) }
+        journal.oldTeacherFileNames.filterNot { it in journal.newTeacherFileNames }
+            .forEach { gorselDeposu.ogretmenKaliciDosyayiSil(it) }
         database.withTransaction {
             val marker = database.geriYuklemeIsaretiDao().idGetir()
             if (marker == journal.id) database.geriYuklemeIsaretiDao().tumunuSil()
@@ -434,6 +485,7 @@ class YerelYedeklemeHizmeti(
             tekrarlar = database.tekrarDao().tumunuGetir(),
             olcumler = database.tekrarOlcumDao().tumunuGetir(),
             denemeler = denemeler,
+            ogretmenVerisi = ogretmenDeposu?.anlikVeri() ?: com.keremtulu.questionnote.domain.model.OgretmenVerisi(),
         )
     }
 
@@ -462,14 +514,33 @@ class YerelYedeklemeHizmeti(
                 if (file.length() != image.sizeBytes) throw IOException("Görsel boyutu değişti: ${image.id}")
                 payloads += payloadFromFile(image.zipFileName, file, image.sizeBytes, image.sha256)
             }
+            val uniqueTeacherImages = backupData.ogretmenVerisi.sorular
+                .flatMap { it.gorseller }
+                .distinctBy { it.dosyaAdi }
+            uniqueTeacherImages.forEach { img ->
+                val input = img.toGirdi()
+                if (!gorselDeposu.ogretmenKaliciDosyayiDogrula(input)) {
+                    throw IOException("Eksik veya bozuk öğretmen görseli bulundu: ${img.id}")
+                }
+                val file = gorselDeposu.dosyaGoruntuIcin(img.dosyaAdi)
+                    ?: throw IOException("Öğretmen görseli bulunamadı: ${img.id}")
+                if (file.length() != img.boyut) throw IOException("Öğretmen görsel boyutu değişti: ${img.id}")
+                val zipPath = com.keremtulu.questionnote.data.prefs.OgretmenDeposu.zipAdi(img.dosyaAdi)
+                payloads += payloadFromFile(zipPath, file, img.boyut, img.sha256)
+            }
             val payloadSize = payloads.sumOf { it.sizeBytes }
             if (payloads.size + 1 > MAX_ARCHIVE_ENTRIES || payloadSize > MAX_TOTAL_UNCOMPRESSED_BYTES) {
                 throw IOException("Yedek, dosya sayısı veya açılmış toplam boyut sınırını aşıyor.")
             }
             ensureFreeSpace(temp.parentFile ?: appContext.cacheDir, estimatedArchiveBytes(payloadSize))
             val createdAt = System.currentTimeMillis()
-            val manifestBytes = manifestJson(backupData.counts(), backupData.secenekler.size, createdAt, payloads).toString(2)
-                .toByteArray(Charsets.UTF_8)
+            val manifestBytes = manifestJson(
+                counts = backupData.counts(),
+                catalogOptionCount = backupData.secenekler.size,
+                teacherImageCount = uniqueTeacherImages.size,
+                createdAt = createdAt,
+                payloads = payloads,
+            ).toString(2).toByteArray(Charsets.UTF_8)
             if (manifestBytes.size > MAX_MANIFEST_BYTES) throw IOException("Yedek manifesti beklenenden büyük.")
 
             val fileOutput = FileOutputStream(temp)
@@ -531,6 +602,7 @@ class YerelYedeklemeHizmeti(
     private fun manifestJson(
         counts: YedekSayilari,
         catalogOptionCount: Int,
+        teacherImageCount: Int,
         createdAt: Long,
         payloads: List<ArchivePayload>,
     ) = JSONObject()
@@ -548,7 +620,10 @@ class YerelYedeklemeHizmeti(
             .put("images", counts.gorselSayisi)
             .put("reviews", counts.tekrarSayisi)
             .put("measurements", counts.olcumSayisi)
-            .put("catalog_options", catalogOptionCount))
+            .put("catalog_options", catalogOptionCount)
+            .apply {
+                if (teacherImageCount > 0) put("teacher_images", teacherImageCount)
+            })
         .put("files", JSONArray().apply {
             payloads.sortedBy { it.name }.forEach { item ->
                 put(JSONObject()
@@ -575,6 +650,12 @@ class YerelYedeklemeHizmeti(
                             put(com.keremtulu.questionnote.data.prefs.DenemeDeposu.jsonYaz(it))
                         }
                     },
+                )
+            }
+            if (data.ogretmenVerisi.bosDegil()) {
+                put(
+                    "teacher_workspace",
+                    com.keremtulu.questionnote.data.prefs.OgretmenDeposu.jsonYaz(data.ogretmenVerisi),
                 )
             }
         }
@@ -734,6 +815,7 @@ class YerelYedeklemeHizmeti(
             tekrarlar = tekrarlar,
             olcumler = olcumler,
             denemeler = denemeler,
+            ogretmenVerisi = ogretmenVerisi,
         )
     }
 
@@ -786,6 +868,9 @@ class YerelYedeklemeHizmeti(
             } else {
                 null
             }
+            val teacherImageCount = manifestCounts.optInt("teacher_images", 0).also {
+                if (it < 0) throw IOException("Manifest içindeki öğretmen görsel sayısı negatif.")
+            }
             val inventory = parseInventory(manifest.getJSONArray("files"))
             val inventoryPaths = inventory.map { it.path }.toSet()
             if (inventory.size + 1 != entries.size || inventoryPaths + MANIFEST_FILE != entryNames.toSet()) {
@@ -805,7 +890,9 @@ class YerelYedeklemeHizmeti(
             if (inventoryPaths != expectedCsvFiles + DATA_FILE + imageEntries) {
                 throw IOException("ZIP envanteri biçim sürümünün tablolarıyla eşleşmiyor.")
             }
-            if (imageEntries.size != counts.gorselSayisi || imageEntries.any { !IMAGE_PATH.matches(it) }) {
+            if (imageEntries.size != counts.gorselSayisi + teacherImageCount ||
+                imageEntries.any { !IMAGE_PATH.matches(it) }
+            ) {
                 throw IOException("Yedek görsel envanteri geçersiz.")
             }
             if (!inventoryPaths.contains(DATA_FILE)) throw IOException("data.json yedekte eksik.")
@@ -838,8 +925,15 @@ class YerelYedeklemeHizmeti(
             if (data.counts() != counts || catalogOptionCount?.let { it != data.secenekler.size } == true) {
                 throw IOException("Manifest sayıları içerikle uyuşmuyor.")
             }
-            val dataImagePaths = data.images.map { it.zipFileName }.toSet()
-            if (dataImagePaths.size != data.images.size || dataImagePaths != imageEntries.toSet()) {
+            val teacherZipPaths = data.ogretmenVerisi.sorular
+                .flatMap { it.gorseller }
+                .distinctBy { it.dosyaAdi }
+                .map { com.keremtulu.questionnote.data.prefs.OgretmenDeposu.zipAdi(it.dosyaAdi) }
+            if (teacherZipPaths.size != teacherImageCount) {
+                throw IOException("Öğretmen görsel sayısı manifest ile uyuşmuyor.")
+            }
+            val dataImagePaths = (data.images.map { it.zipFileName } + teacherZipPaths).toSet()
+            if (dataImagePaths.size != data.images.size + teacherZipPaths.size || dataImagePaths != imageEntries.toSet()) {
                 throw IOException("JSON görsel ilişkileri ZIP girdileriyle uyuşmuyor.")
             }
             return VerifiedArchive(
@@ -985,6 +1079,11 @@ class YerelYedeklemeHizmeti(
         } else {
             emptyList()
         }
+        val teacherWorkspace = if (json.has("teacher_workspace") && !json.isNull("teacher_workspace")) {
+            com.keremtulu.questionnote.data.prefs.OgretmenDeposu.jsonOku(json.getJSONObject("teacher_workspace"))
+        } else {
+            com.keremtulu.questionnote.domain.model.OgretmenVerisi()
+        }
         BackupData(
             dersler = lessons,
             konular = topics,
@@ -994,6 +1093,7 @@ class YerelYedeklemeHizmeti(
             tekrarlar = reviews,
             olcumler = measurements,
             denemeler = mockExams,
+            ogretmenVerisi = teacherWorkspace,
         )
     } catch (error: IOException) {
         throw error
@@ -1130,6 +1230,44 @@ class YerelYedeklemeHizmeti(
             uniqueIds(sinav.satirlar.map { it.dersId }, "deneme ders satırı")
             if (sinav.satirlar.any { !it.gecerli() || (it.dersAdi != null && it.dersAdi.length > MAX_TEXT_FIELD) }) {
                 throw IOException("Yedekte geçersiz deneme ders skoru var.")
+            }
+        }
+        if (data.ogretmenVerisi.gruplar.size > MAX_ROWS_PER_TABLE ||
+            data.ogretmenVerisi.sorular.size > MAX_ROWS_PER_TABLE
+        ) {
+            throw IOException("Yedekte öğretmen kaydı sınırı aşıldı.")
+        }
+        val teacherGroupIds = uniqueIds(data.ogretmenVerisi.gruplar.map { it.id }, "öğretmen grubu")
+        data.ogretmenVerisi.gruplar.forEach { g ->
+            if (g.ad.isBlank() || g.ad.length > MAX_TEXT_FIELD) {
+                throw IOException("Yedekte geçersiz öğretmen grubu var.")
+            }
+        }
+        uniqueIds(data.ogretmenVerisi.sorular.map { it.id }, "öğretmen sorusu")
+        data.ogretmenVerisi.sorular.forEach { s ->
+            if (s.grupId !in teacherGroupIds || s.gorseller.isEmpty() || s.gorseller.size > 20) {
+                throw IOException("Yedekte geçersiz öğretmen sorusu var: ${s.id}")
+            }
+            s.gorseller.forEach { img ->
+                if (!TEACHER_PERMANENT_IMAGE_PATH.matches(img.dosyaAdi) ||
+                    img.mimeType != JPEG_MIME || img.genislik !in 1..MAX_IMAGE_EDGE ||
+                    img.yukseklik !in 1..MAX_IMAGE_EDGE || img.boyut !in 1L..MAX_ENTRY_BYTES ||
+                    !SHA256.matches(img.sha256)
+                ) {
+                    throw IOException("Yedekte öğretmen görsel kaydı geçersiz: ${img.id}")
+                }
+                if (extractedPayload != null) {
+                    val zipPath = com.keremtulu.questionnote.data.prefs.OgretmenDeposu.zipAdi(img.dosyaAdi)
+                    val file = File(extractedPayload, zipPath)
+                    if (!file.isFile || file.length() != img.boyut || sha256(file) != img.sha256) {
+                        throw IOException("Öğretmen görsel içeriği JSON metadata ile uyuşmuyor: ${img.id}")
+                    }
+                    val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                    BitmapFactory.decodeFile(file.absolutePath, bounds)
+                    if (bounds.outWidth != img.genislik || bounds.outHeight != img.yukseklik) {
+                        throw IOException("Öğretmen görsel çözünürlüğü uyuşmuyor: ${img.id}")
+                    }
+                }
             }
         }
         val reviewsById = data.tekrarlar.associateBy { it.id }
@@ -1294,6 +1432,9 @@ class YerelYedeklemeHizmeti(
             .put("prepared_id", journal.preparedId)
             .put("old_files", JSONArray(journal.oldFileNames))
             .put("new_files", JSONArray(journal.newFileNames))
+            .put("old_teacher_files", JSONArray(journal.oldTeacherFileNames))
+            .put("new_teacher_files", JSONArray(journal.newTeacherFileNames))
+            .put("teacher_workspace", com.keremtulu.questionnote.data.prefs.OgretmenDeposu.jsonYaz(journal.teacherWorkspace))
             .put(
                 "mock_exams",
                 JSONArray().apply {
@@ -1319,6 +1460,18 @@ class YerelYedeklemeHizmeti(
         if (oldFiles.any { !PERMANENT_IMAGE_PATH.matches(it) } || newFiles.any { !PERMANENT_IMAGE_PATH.matches(it) }) {
             throw IOException("Geri yükleme günlüğü görsel yolları geçersiz.")
         }
+        val oldTeacherFiles = json.optJSONArray("old_teacher_files")?.toStringList().orEmpty()
+        val newTeacherFiles = json.optJSONArray("new_teacher_files")?.toStringList().orEmpty()
+        if (oldTeacherFiles.any { !TEACHER_PERMANENT_IMAGE_PATH.matches(it) } ||
+            newTeacherFiles.any { !TEACHER_PERMANENT_IMAGE_PATH.matches(it) }
+        ) {
+            throw IOException("Geri yükleme günlüğü öğretmen görsel yolları geçersiz.")
+        }
+        val teacherWorkspace = if (json.has("teacher_workspace") && !json.isNull("teacher_workspace")) {
+            com.keremtulu.questionnote.data.prefs.OgretmenDeposu.jsonOku(json.getJSONObject("teacher_workspace"))
+        } else {
+            com.keremtulu.questionnote.domain.model.OgretmenVerisi()
+        }
         val mockExams = if (json.has("mock_exams") && !json.isNull("mock_exams")) {
             json.getJSONArray("mock_exams").toTypedList(MAX_ROWS_PER_TABLE) { item ->
                 com.keremtulu.questionnote.data.prefs.DenemeDeposu.jsonOku(item, strict = true)
@@ -1326,7 +1479,18 @@ class YerelYedeklemeHizmeti(
         } else {
             emptyList()
         }
-        RestoreJournal(id, state, safety, preparedId, oldFiles, newFiles, mockExams)
+        RestoreJournal(
+            id = id,
+            state = state,
+            safetyBackupName = safety,
+            preparedId = preparedId,
+            oldFileNames = oldFiles,
+            newFileNames = newFiles,
+            mockExams = mockExams,
+            oldTeacherFileNames = oldTeacherFiles,
+            newTeacherFileNames = newTeacherFiles,
+            teacherWorkspace = teacherWorkspace,
+        )
     } catch (error: IOException) {
         throw error
     } catch (error: Exception) {
@@ -1420,6 +1584,11 @@ class YerelYedeklemeHizmeti(
         return "img/$stableId.jpg"
     }
 
+    private fun teacherPermanentFileName(restoreId: String, sourceDosyaAdi: String): String {
+        val stableId = UUID.nameUUIDFromBytes("$restoreId:teacher:$sourceDosyaAdi".toByteArray(Charsets.UTF_8))
+        return "ogretmen-img/$stableId.jpg"
+    }
+
     private fun sha256(bytes: ByteArray): String = MessageDigest.getInstance("SHA-256").digest(bytes).toHex()
 
     private fun sha256(file: File): String {
@@ -1449,6 +1618,8 @@ class YerelYedeklemeHizmeti(
         val tekrarlar: List<TekrarEntity>,
         val olcumler: List<TekrarOlcumEntity>,
         val denemeler: List<com.keremtulu.questionnote.domain.model.DenemeKaydi> = emptyList(),
+        val ogretmenVerisi: com.keremtulu.questionnote.domain.model.OgretmenVerisi =
+            com.keremtulu.questionnote.domain.model.OgretmenVerisi(),
     )
 
     private data class BackupData(
@@ -1460,6 +1631,8 @@ class YerelYedeklemeHizmeti(
         val tekrarlar: List<TekrarEntity>,
         val olcumler: List<TekrarOlcumEntity>,
         val denemeler: List<com.keremtulu.questionnote.domain.model.DenemeKaydi> = emptyList(),
+        val ogretmenVerisi: com.keremtulu.questionnote.domain.model.OgretmenVerisi =
+            com.keremtulu.questionnote.domain.model.OgretmenVerisi(),
     )
 
     private data class BackupImage(
@@ -1494,6 +1667,10 @@ class YerelYedeklemeHizmeti(
         val oldFileNames: List<String>,
         val newFileNames: List<String>,
         val mockExams: List<com.keremtulu.questionnote.domain.model.DenemeKaydi> = emptyList(),
+        val oldTeacherFileNames: List<String> = emptyList(),
+        val newTeacherFileNames: List<String> = emptyList(),
+        val teacherWorkspace: com.keremtulu.questionnote.domain.model.OgretmenVerisi =
+            com.keremtulu.questionnote.domain.model.OgretmenVerisi(),
     )
 
     private companion object {
@@ -1534,6 +1711,7 @@ class YerelYedeklemeHizmeti(
         val IMAGE_ID = UUID_PATTERN
         val IMAGE_PATH = Regex("images/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\.jpg")
         val PERMANENT_IMAGE_PATH = Regex("img/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\.jpg")
+        val TEACHER_PERMANENT_IMAGE_PATH = Regex("ogretmen-img/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\.jpg")
         val SAFETY_NAME = Regex("safety-[0-9a-fA-F-]{36}\\.zip")
         val SHA256 = Regex("[0-9a-f]{64}")
         val LEGACY_REQUIRED_CSV_FILES = setOf(
