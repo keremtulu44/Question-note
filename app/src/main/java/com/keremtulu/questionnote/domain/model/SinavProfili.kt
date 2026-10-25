@@ -5,36 +5,60 @@ import java.util.Locale
 
 /** Profiles are a view of the lesson catalogue, never an instruction to delete/archive data. */
 enum class SinavProfili(val ad: String, val aciklama: String, val dersAdlari: List<String>) {
-    SERBEST("Tümü / özel", "Kendi programın. Mevcut bütün aktif dersler görünür.", emptyList()),
+    OZEL(
+        "Derslerim",
+        "Kurulumda seçtiğin dersler",
+        emptyList(),
+    ),
     LGS(
         "LGS", "Ortaokul · liseye hazırlık",
         listOf("Türkçe", "Matematik", "Fen Bilimleri", "T.C. İnkılap Tarihi ve Atatürkçülük", "Din Kültürü ve Ahlak Bilgisi", "İngilizce"),
     ),
-    TYT(
-        "TYT", "YKS · temel yeterlilik",
-        listOf("Türkçe", "Matematik", "Geometri", "Fizik", "Kimya", "Biyoloji", "Tarih", "Coğrafya", "Felsefe", "Din Kültürü ve Ahlak Bilgisi"),
+    YKS(
+        "AYT / TYT", "YKS · temel ve alan yeterlilik",
+        listOf(
+            "Türkçe", "Edebiyat", "Matematik", "Geometri",
+            "Fizik", "Kimya", "Biyoloji",
+            "Tarih", "Coğrafya", "Felsefe", "Felsefe Grubu",
+            "Din Kültürü ve Ahlak Bilgisi",
+        ),
     ),
-    AYT(
-        "AYT", "YKS · alan yeterlilik",
-        listOf("Edebiyat", "Matematik", "Geometri", "Fizik", "Kimya", "Biyoloji", "Tarih", "Coğrafya", "Felsefe Grubu", "Din Kültürü ve Ahlak Bilgisi"),
-    ),
-    KPSS(
-        "KPSS", "Genel Yetenek · Genel Kültür",
-        listOf("Türkçe", "Matematik", "Geometri", "Tarih", "Coğrafya", "Vatandaşlık", "Güncel Bilgiler"),
+    SINIF_9_10(
+        "9. / 10. sınıf", "Lise 9. ve 10. sınıf dersleri",
+        listOf(
+            "Türkçe", "Matematik", "Geometri",
+            "Fizik", "Kimya", "Biyoloji",
+            "Tarih", "Coğrafya", "İngilizce",
+            "Din Kültürü ve Ahlak Bilgisi",
+        ),
     ),
     ;
 
     fun dersAdiEslesir(ad: String): Boolean = dersAdlari.any { it.dersAnahtari() == ad.dersAnahtari() }
 
     companion object {
-        fun anahtarla(anahtar: String?): SinavProfili = entries.firstOrNull { it.name == anahtar } ?: SERBEST
+        fun anahtarla(anahtar: String?): SinavProfili = when (anahtar) {
+            OZEL.name -> OZEL
+            LGS.name -> LGS
+            SINIF_9_10.name -> SINIF_9_10
+            YKS.name, "TYT", "AYT", "SERBEST", "KPSS" -> YKS
+            else -> YKS
+        }
     }
 }
 
 internal fun String.dersAnahtari(): String =
     Normalizer.normalize(trim(), Normalizer.Form.NFC).lowercase(Locale.forLanguageTag("tr-TR"))
 
-data class SinavSecimi(val profil: SinavProfili, val dersIdleri: Set<String> = emptySet()) {
+data class SinavSecimi(
+    val profil: SinavProfili,
+    val dersIdleri: Set<String> = emptySet(),
+    val herDersiGoster: Boolean = false,
+) {
     fun gorunur(ders: Ders): Boolean =
-        profil == SinavProfili.SERBEST || ders.id in dersIdleri || profil.dersAdiEslesir(ders.ad)
+        herDersiGoster || ders.id in dersIdleri || profil.dersAdiEslesir(ders.ad)
+
+    companion object {
+        val Tumu = SinavSecimi(SinavProfili.YKS, herDersiGoster = true)
+    }
 }

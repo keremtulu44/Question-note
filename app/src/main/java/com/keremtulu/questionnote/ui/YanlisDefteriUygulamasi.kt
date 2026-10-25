@@ -112,7 +112,12 @@ private sealed interface UygulamaEkrani {
         val geri: UygulamaEkrani,
         val tekrarOturumunda: Boolean = false,
     ) : UygulamaEkrani
-    data class SoruFormu(val ders: Ders, val soruId: String?, val geri: UygulamaEkrani) : UygulamaEkrani
+    data class SoruFormu(
+        val ders: Ders,
+        val soruId: String?,
+        val geri: UygulamaEkrani,
+        val gizliKaynak: String? = null,
+    ) : UygulamaEkrani
     data object FiltreliCalisma : UygulamaEkrani
     data class FiltreliOturum(
         val sorular: List<Soru>,
@@ -132,6 +137,8 @@ private sealed interface UygulamaEkrani {
     data object KonuMerkezi : UygulamaEkrani
     data object Seviye : UygulamaEkrani
     data object Ayarlar : UygulamaEkrani
+    data object Denemeler : UygulamaEkrani
+    data class DenemeDetay(val denemeId: String?) : UygulamaEkrani
 }
 
 private enum class KurtarmaDurumu { YUKLENIYOR, HAZIR, HATA }
@@ -155,11 +162,14 @@ fun YanlisDefteriUygulamasi(
     oturumDeposu: OdakOturumuDeposu,
     gunlukHedefDeposu: GunlukHedefDeposu,
     tercihHedefDeposu: TercihGunlukHedefDeposu,
+    denemeDeposu: com.keremtulu.questionnote.data.prefs.DenemeDeposu,
 ) {
     var ekran by remember { mutableStateOf<UygulamaEkrani>(UygulamaEkrani.Bugun) }
+    var kurulumGerekli by remember { mutableStateOf(profilDeposu.kurulumGerekli()) }
     val tahtaOturumId = (ekran as? UygulamaEkrani.FiltreliOturum)?.oturum?.id
     val tahtaOturumCizimBellegi = remember(tahtaOturumId) { TahtaOturumCizimBellegi() }
     val profilSecimi by profilDeposu.secimIzle.collectAsState()
+    val denemeler by denemeDeposu.kayitlariIzle.collectAsState()
     var bekleyenOturum by remember { mutableStateOf<UygulamaEkrani.FiltreliOturum?>(null) }
     var filtreliCalismaAyar by remember { mutableStateOf(FiltreliCalismaEkraniAyar()) }
     // Filtreli oturum sürerken başka bir ekrana geçilirse önce onay istenir.
@@ -396,6 +406,13 @@ fun YanlisDefteriUygulamasi(
         ekranSec(ekran.geriHedefi())
     }
 
+    if (kurulumGerekli) {
+        com.keremtulu.questionnote.ui.kurulum.DersKurulumEkrani(
+            dersRepository = dersRepository,
+            onTamam = { kurulumGerekli = false },
+        )
+        return
+    }
     val altMenuGorunur = ekran.altMenuGorunur()
     val hareketPolitikasi = LocalHareketPolitikasi.current
     Scaffold(
@@ -477,6 +494,7 @@ fun YanlisDefteriUygulamasi(
                         ilerlemeHizmeti = ilerlemeHizmeti,
                         gunlukHedefDeposu = gunlukHedefDeposu,
                         onSoruEkle = { ekran = UygulamaEkrani.DersSecimi(soruEkleModu = true) },
+                        onDeneme = { ekran = UygulamaEkrani.Denemeler },
                         onOturumBaslat = { sorular, dersler -> oturumBaslat(sorular, dersler, bugunden = true) },
                         onDevam = bekleyenOturum?.let { onceki -> { ekran = onceki; bekleyenOturum = null } },
                     )
@@ -497,6 +515,7 @@ fun YanlisDefteriUygulamasi(
                         dersArsivli = false,
                         konuRepository = konuRepository,
                         soruRepository = soruRepository,
+                        denemeler = denemeler,
                         onGeri = { ekran = current.geri },
                         onKonulariYonet = { ekran = UygulamaEkrani.Konular(current.ders, current) },
                         onSoruEkle = {
@@ -523,6 +542,7 @@ fun YanlisDefteriUygulamasi(
                         onTekrarTamamlandi = { _, _ -> ekran = current.geri },
                         onKaydedildi = ::geriAlKutucuguGoster,
                         tekrarOturumunda = current.tekrarOturumunda,
+                        denemeler = denemeler,
                     )
                     UygulamaEkrani.FiltreliCalisma -> FiltreliCalismaEkrani(
                         dersRepository = dersRepository,
@@ -549,6 +569,7 @@ fun YanlisDefteriUygulamasi(
                                 oturumId = current.oturum.id,
                                 oturumDeposu = oturumDeposu,
                                 oturumCizimBellegi = tahtaOturumCizimBellegi,
+                                denemeler = denemeler,
                                 disDuraklatildi = oturumCikisHedefi != null,
                                 cozumOnceAcildi = question.id in current.oturum.cozumAcilanlar,
                                 onCozumAcildi = { oturumGoster(current.sorular, current.dersler, current.oturum.cozumuAc()) },
@@ -588,6 +609,27 @@ fun YanlisDefteriUygulamasi(
                         konuRepository = konuRepository,
                         gorselDeposu = gorselDeposu,
                         onGeri = { ekran = current.geri },
+                        gizliKaynak = current.gizliKaynak,
+                    )
+                    UygulamaEkrani.Denemeler -> com.keremtulu.questionnote.ui.deneme.DenemeListesiEkrani(
+                        denemeDeposu = denemeDeposu,
+                        dersRepository = dersRepository,
+                        onGeri = { ekran = UygulamaEkrani.Bugun },
+                        onYeni = { ekran = UygulamaEkrani.DenemeDetay(null) },
+                        onAc = { ekran = UygulamaEkrani.DenemeDetay(it) },
+                    )
+                    is UygulamaEkrani.DenemeDetay -> com.keremtulu.questionnote.ui.deneme.DenemeDetayEkrani(
+                        denemeId = current.denemeId,
+                        denemeDeposu = denemeDeposu,
+                        dersRepository = dersRepository,
+                        soruRepository = soruRepository,
+                        onGeri = { ekran = UygulamaEkrani.Denemeler },
+                        onKaydedildi = { id ->
+                            if (current.denemeId != id) ekran = UygulamaEkrani.DenemeDetay(id)
+                        },
+                        onSoruEkle = { ders, kaynak, id ->
+                            ekran = UygulamaEkrani.SoruFormu(ders, null, UygulamaEkrani.DenemeDetay(id), kaynak)
+                        },
                     )
                     UygulamaEkrani.GorselBakimi -> GorselBakimEkrani(
                         service = gorselTutarliligi,
@@ -774,9 +816,12 @@ private fun UygulamaEkrani.aktifSekme(): AltSekme = when (this) {
     -> AltSekme.FILTRELI
     UygulamaEkrani.Seviye -> AltSekme.SEVIYE
     UygulamaEkrani.Ayarlar, UygulamaEkrani.Katalog, UygulamaEkrani.GorselBakimi, UygulamaEkrani.KonuMerkezi -> AltSekme.AYARLAR
+    UygulamaEkrani.Denemeler, is UygulamaEkrani.DenemeDetay -> AltSekme.BUGUN
     is UygulamaEkrani.SoruAyrintisi -> if (tekrarOturumunda) AltSekme.FILTRELI else AltSekme.DERSLER
     is UygulamaEkrani.SoruFormu -> if (geri is UygulamaEkrani.FiltreliOturum) {
         AltSekme.FILTRELI
+    } else if (geri is UygulamaEkrani.DenemeDetay) {
+        AltSekme.BUGUN
     } else {
         AltSekme.DERSLER
     }
@@ -808,6 +853,8 @@ private fun UygulamaEkrani.geriHedefi(): UygulamaEkrani = when (this) {
     UygulamaEkrani.Katalog -> UygulamaEkrani.Ayarlar
     UygulamaEkrani.Seviye -> UygulamaEkrani.Bugun
     UygulamaEkrani.Ayarlar -> UygulamaEkrani.Bugun
+    UygulamaEkrani.Denemeler -> UygulamaEkrani.Bugun
+    is UygulamaEkrani.DenemeDetay -> UygulamaEkrani.Denemeler
 }
 
 @Composable

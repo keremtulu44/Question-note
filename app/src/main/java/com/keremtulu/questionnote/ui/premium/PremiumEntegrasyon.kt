@@ -202,6 +202,7 @@ fun PremiumGradyanButon(
 ) {
     Box(
         modifier
+            .fillMaxWidth()
             .clip(MaterialTheme.shapes.large)
             .background(gradyan),
     ) {

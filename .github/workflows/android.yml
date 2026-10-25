@@ -9,6 +9,7 @@ on:
       - arena/1c0f41d0-question-note
       - arena/be352b3c-question-note
       - arena/abf7be2d-question-note
+      - arena/ade0c6b2-question-note
     paths:
       - 'app/**'
       - 'tools/junit_ozeti.py'

@@ -98,6 +98,7 @@ fun BugunEkrani(
     onSoruEkle: () -> Unit,
     onOturumBaslat: (List<Soru>, Map<String, Ders>) -> Unit,
     onDevam: (() -> Unit)? = null,
+    onDeneme: () -> Unit = {},
 ) {
     val today = com.keremtulu.questionnote.ui.bilesenler.hatirlaYerelGun()
     val dateText = remember(today) {
@@ -165,8 +166,8 @@ fun BugunEkrani(
                             text = stringResource(R.string.today_kicker),
                             color = PremiumMarkaRenkler.BakirIsik,
                             style = MaterialTheme.typography.labelMedium,
-                            letterSpacing = 1.4.sp,
                             fontWeight = FontWeight.Bold,
+                            maxLines = 1,
                         )
                         Text(
                             text = stringResource(R.string.today_title),
@@ -181,6 +182,11 @@ fun BugunEkrani(
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     }
+                }
+            }
+            item {
+                PremiumOutlinedButton(onClick = onDeneme, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.deneme_open))
                 }
             }
             if (onDevam != null) item {

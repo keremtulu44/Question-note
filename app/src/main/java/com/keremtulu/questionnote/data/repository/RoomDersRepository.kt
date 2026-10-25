@@ -56,6 +56,35 @@ class RoomDersRepository(
         Unit
     }
 
+    override suspend fun kataloguHazirla(adlar: List<String>): List<Ders> = withContext(Dispatchers.IO) {
+        database.withTransaction {
+            val dersler = dersDao.tumunuGetir().toMutableList()
+            adlar.forEach { ad ->
+                val mevcut = dersler.firstOrNull { it.ad.anahtar() == ad.anahtar() }
+                if (mevcut == null) {
+                    val now = System.currentTimeMillis()
+                    val yeni = DersEntity(
+                        id = UUID.randomUUID().toString(),
+                        ad = ad,
+                        sira = (dersler.maxOfOrNull { it.sira } ?: -1) + 1,
+                        arsivli = false,
+                        olusturma = now,
+                        guncelleme = now,
+                    )
+                    dersDao.ekle(yeni)
+                    dersler.add(yeni)
+                }
+            }
+            dersler.filter { !it.arsivli }.sortedBy { it.sira }.map { entity ->
+                Ders(id = entity.id, ad = entity.ad, sira = entity.sira, soruSayisi = 0, arsivli = entity.arsivli)
+            }
+        }
+    }
+
+    override suspend fun dersSeciminiKaydet(dersIdleri: Set<String>) {
+        profilDeposu?.kaydet(SinavProfili.OZEL, dersIdleri)
+    }
+
     override fun dersleriIzle(arsivli: Boolean): Flow<List<Ders>> =
         dersDao.dersleriIzle(arsivli).map { dersler -> dersler.map { it.toDomain() } }
 

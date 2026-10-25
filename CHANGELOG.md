@@ -2,6 +2,42 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.5.104] — 2026-10-25
+
+- Yeni deneme kaydından sonra fotoğraf ekleyip dönünce formun sıfırlanması düzeltildi; kaynak her zaman deneme adı.
+- Sürüm: `versionCode 34` / `versionName 1.5.104`.
+
+## [1.5.103] — 2026-10-25
+
+- Deneme günü otomatik; listede tarih. Toplam net çizgisi ve ders neti çubukları (önceki ortalama).
+- Soru kartı / odak: denemede kaçırılan damga ve kısa hatırlatma. Boş ekranlar biraz daha iğneli.
+- Sürüm: `versionCode 33` / `versionName 1.5.103`.
+
+## [1.5.102] — 2026-10-25
+
+- İlk açılışta ~24 derslik katalogdan çoklu seçim; sınıf/sınav profili zorunlu değil.
+- Deneme kaydı: ad, 4’te 1 / 3’te 1 / netsiz, ders bazında doğru-yanlış-soru (boş hesaplanır). Yanlış ve boşlar için panelden klasik soru ekleme; kaynak otomatik deneme adı.
+- Sürüm: `versionCode 32` / `versionName 1.5.102`.
+
+## [1.5.101] — 2026-10-24
+
+- Ders listesinde sahte “Fotoğraflı soru” başlığı yerine not/kaynak; favori yongası ve not/kaynak araması.
+- Katalog, konu, görsel bakım ve konu merkezi kahraman kartlı; yanlış “derslere dön” etiketleri düzeltildi.
+- Sürüm: `versionCode 31` / `versionName 1.5.101`.
+
+
+## [1.5.100] — 2026-10-24
+
+- **Filtreli çalışma:** “Kaç soru?” alanı, yanındaki tam genişlik Başlat düğmesi tarafından ezilip ekranın ortasında dikey harf harf görünüyordu. Sayı artık 5 / 10 / 20 / Tümü yongaları; Başlat tam genişlikte ayrı satırda.
+- Sürüm: `versionCode 30` / `versionName 1.5.100`.
+
+
+## [1.5.99] — 2026-10-24
+
+- **Görünüm:** Bugün, Dersler, Filtreli, İlerleme, Odak, Ayarlar ve alt menü daha sakin, cam/gradyan kartlı ve tutarlı bir premium düzene çekildi. Ders kartlarında renk şeridi, kahraman kartlarında bakır/deniz parıltısı.
+- **Sınav seçimi:** LGS, AYT/TYT ve 9./10. sınıf. Filtreli çalışma dropdown düzeni ve görsel kırpma çökmesi giderildi.
+- Sürüm: `versionCode 29` / `versionName 1.5.99` — aynı uygulama kimliği ve imzalama anahtarıyla güncelleme.
+
 ## [1.5.96] — 2026-10-23
 
 - **Çözüm Atölyesi:** beyaz tahta ekranı, daha belirgin soru/çizim çalışma alanı ve seçili araç durumu olan bir düzene getirildi. Yatay görünümde araçlar, renk/kalınlık ve geri al/yinele/temizle kontrolleri kompakt bir çalışma çubuğunda birleşir; dikey görünümde açıklamalı kontrol grupları korunur.

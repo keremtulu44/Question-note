@@ -53,17 +53,25 @@ internal fun DersKarti(
 
     PremiumCard(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth().height(132.dp),
-        shape = RoundedCornerShape(22.dp),
+        modifier = modifier.fillMaxWidth().height(140.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = renkler.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp, pressedElevation = 5.dp),
-        border = BorderStroke(1.dp, renkler.outlineVariant.copy(alpha = 0.8f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp, pressedElevation = 7.dp),
+        border = BorderStroke(1.dp, vurguRengi.copy(alpha = 0.28f)),
         interactionTur = EtkilesimTuru.KART_ACILIS,
     ) {
+        Box(Modifier.fillMaxSize()) {
+            Box(
+                Modifier
+                    .align(Alignment.TopStart)
+                    .fillMaxWidth()
+                    .height(4.dp)
+                    .background(vurguRengi.copy(alpha = 0.85f)),
+            )
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(start = 16.dp, top = 18.dp, end = 16.dp, bottom = 16.dp),
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
             Row(
@@ -106,9 +114,11 @@ internal fun DersKarti(
                 text = veri.ad,
                 color = renkler.onSurface,
                 style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+        }
         }
     }
 }

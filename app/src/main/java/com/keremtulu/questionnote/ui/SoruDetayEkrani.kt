@@ -44,6 +44,7 @@ import com.keremtulu.questionnote.domain.calisma.TekrarDenemesi
 import java.util.UUID
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
 import com.keremtulu.questionnote.domain.model.Ders
+import com.keremtulu.questionnote.domain.model.kaynakla
 import com.keremtulu.questionnote.domain.model.Konu
 import com.keremtulu.questionnote.domain.model.Soru
 import com.keremtulu.questionnote.domain.model.SoruGorseli
@@ -105,6 +106,7 @@ fun SoruDetayEkrani(
     tekrarOturumunda: Boolean = false,
     oturumSira: Int? = null,
     oturumToplam: Int? = null,
+    denemeler: List<com.keremtulu.questionnote.domain.model.DenemeKaydi> = emptyList(),
 ) {
     val denemeId = remember(soruId) { UUID.randomUUID().toString() }
     var yenileme by remember(soruId) { mutableIntStateOf(0) }
@@ -246,10 +248,12 @@ fun SoruDetayEkrani(
                             ) {
                                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                     Text(
-                                        text = stringResource(R.string.question_photo_only),
+                                        text = soru.soruNotu?.takeIf { it.isNotBlank() }
+                                            ?: stringResource(R.string.question_untitled),
                                         style = MaterialTheme.typography.headlineSmall,
                                         color = PremiumMarkaRenkler.Kagit,
                                         fontWeight = FontWeight.Bold,
+                                        maxLines = 2,
                                     )
                                     Text(
                                         text = stringResource(R.string.question_lesson_label, ders.ad),
@@ -272,8 +276,13 @@ fun SoruDetayEkrani(
                             }
                         }
                     }
+                    val denemeKaydi = denemeler.kaynakla(soru.kaynak)
+                    if (denemeKaydi != null) {
+                        item { com.keremtulu.questionnote.ui.deneme.DenemeDamgaYazi(denemeKaydi) }
+                    } else {
                     soru.kaynak?.takeIf { it.isNotBlank() }?.let { source ->
                         item { BilgiAlani(R.string.question_source, source) }
+                    }
                     }
                     soru.kaynakKonumu?.takeIf { it.isNotBlank() }?.let { location ->
                         item { BilgiAlani(R.string.question_source_location, location) }

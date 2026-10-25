@@ -73,7 +73,7 @@ class IlerlemeTercihleriTest {
 
     @Test fun profileDefaultsToAllLessonsAndPersistsAnExplicitChoice() {
         val depo = SinavProfiliDeposu(context)
-        assertEquals(SinavProfili.SERBEST, depo.secili())
+        assertEquals(SinavProfili.YKS, depo.secili())
         depo.kaydet(SinavProfili.LGS, setOf("math-id", "science-id"))
         assertEquals(SinavProfili.LGS, SinavProfiliDeposu(context).secili())
         assertEquals(setOf("math-id", "science-id"), SinavProfiliDeposu(context).secimIzle.value.dersIdleri)

@@ -84,6 +84,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import com.keremtulu.questionnote.domain.karne.KarneHesabi
 import com.keremtulu.questionnote.domain.karne.OturumSonucu
 import com.keremtulu.questionnote.domain.model.Ders
+import com.keremtulu.questionnote.domain.model.kaynakla
 import com.keremtulu.questionnote.domain.model.GorselTuru
 import com.keremtulu.questionnote.domain.model.Soru
 import com.keremtulu.questionnote.domain.model.SoruGorseli
@@ -125,6 +126,7 @@ fun OdakOturumuEkrani(
     onAtla: () -> Unit,
     oturumCizimBellegi: TahtaOturumCizimBellegi? = null,
     monotonikSaat: MonotonikSaat = MonotonikSaat { SystemClock.elapsedRealtime() },
+    denemeler: List<com.keremtulu.questionnote.domain.model.DenemeKaydi> = emptyList(),
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -308,8 +310,8 @@ fun OdakOturumuEkrani(
                     Modifier.fillMaxWidth().background(Brush.linearGradient(listOf(Color(0xFF173A49), Color(0xFF2C5D69))), RoundedCornerShape(24.dp)).padding(20.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Text(stringResource(R.string.focus_kicker), color = Color(0xFFEDD09A), letterSpacing = 2.sp,
-                        style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.focus_kicker), color = Color(0xFFEDD09A),
+                        style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, maxLines = 1)
                     Text(ders.ad, color = Color.White, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                     Text(stringResource(R.string.measure_phase_times,
                         sureMetni(olcum.nokta.olcum.denemeAktifMs), sureMetni(olcum.nokta.olcum.incelemeAktifMs)),
@@ -362,8 +364,13 @@ fun OdakOturumuEkrani(
             if (!soru.soruNotu.isNullOrBlank()) item {
                 Text(soru.soruNotu.orEmpty(), style = MaterialTheme.typography.bodyLarge, color = colors.onSurface)
             }
+            val denemeKaydi = denemeler.kaynakla(soru.kaynak)
+            if (denemeKaydi != null) {
+                item { com.keremtulu.questionnote.ui.deneme.DenemeHatirlatmaYazi(soru.id, denemeKaydi) }
+            } else {
             val kaynak = listOfNotNull(soru.kaynak, soru.kaynakKonumu).filter { it.isNotBlank() }.joinToString(" · ")
             if (kaynak.isNotBlank()) item { Text(kaynak, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant) }
+            }
             items(soru.gorseller.filter { it.tur == GorselTuru.SORU }, key = { it.id }) { image ->
                 OdakGorseli(image, gorselDeposu, stringResource(R.string.question_image_description),
                     onDurum = { durum ->

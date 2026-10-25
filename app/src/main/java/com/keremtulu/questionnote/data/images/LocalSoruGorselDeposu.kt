@@ -129,13 +129,23 @@ class LocalSoruGorselDeposu(context: Context) : GorselDosyaYonetimi {
         var decoder: BitmapRegionDecoder? = null
         var cropped: Bitmap? = null
         try {
-            val regionDecoder = BitmapRegionDecoder.newInstance(source.absolutePath, false)
-                ?: throw IOException("Görsel kırpma için açılamadı.")
-            decoder = regionDecoder
-            val cropBitmap = regionDecoder.decodeRegion(
-                Rect(left, top, right, bottom),
-                BitmapFactory.Options().apply { inPreferredConfig = Bitmap.Config.ARGB_8888 },
-            ) ?: throw IOException("Seçilen kırpma alanı okunamadı.")
+            val cropBitmap = try {
+                val regionDecoder = BitmapRegionDecoder.newInstance(source.absolutePath, false)
+                    ?: throw IOException("Görsel kırpma için açılamadı.")
+                decoder = regionDecoder
+                regionDecoder.decodeRegion(
+                    Rect(left, top, right, bottom),
+                    BitmapFactory.Options().apply { inPreferredConfig = Bitmap.Config.ARGB_8888 },
+                ) ?: throw IOException("Seçilen kırpma alanı okunamadı.")
+            } catch (_: Exception) {
+                val full = BitmapFactory.decodeFile(source.absolutePath)
+                    ?: throw IOException("Görsel kırpma için açılamadı.")
+                try {
+                    Bitmap.createBitmap(full, left, top, right - left, bottom - top)
+                } finally {
+                    if (!full.isRecycled) full.recycle()
+                }
+            }
             cropped = cropBitmap
             FileOutputStream(staged).use { output ->
                 BufferedOutputStream(output).use { buffered ->

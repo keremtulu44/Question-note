@@ -19,8 +19,17 @@ class SinavProfiliDeposu(context: Context) {
     val secimIzle: StateFlow<SinavSecimi> = secim.asStateFlow()
     fun secili(): SinavProfili = secim.value.profil
 
+    fun kurulumGerekli(): Boolean =
+        !prefs.getBoolean("kurulum", false) && prefs.getString("secili", null) == null
+
     fun kaydet(profil: SinavProfili, dersIdleri: Set<String>) {
-        check(prefs.edit().putString("secili", profil.name).putStringSet("dersler", dersIdleri).commit())
+        check(
+            prefs.edit()
+                .putString("secili", profil.name)
+                .putStringSet("dersler", dersIdleri)
+                .putBoolean("kurulum", true)
+                .commit(),
+        )
         secim.value = SinavSecimi(profil, dersIdleri.toSet())
     }
 }

@@ -81,13 +81,13 @@ fun AltMenu(
         )
         onSec(hedef)
     }
-    Surface(color = colors.surface, tonalElevation = 2.dp) {
+    Surface(color = colors.surface, tonalElevation = 4.dp, shadowElevation = 10.dp) {
         Column(
             Modifier.windowInsetsPadding(
                 systemInsets.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal),
             ),
         ) {
-            HorizontalDivider(color = colors.outlineVariant.copy(alpha = 0.5f))
+            HorizontalDivider(color = colors.outlineVariant.copy(alpha = 0.35f))
             Row(
                 Modifier.fillMaxWidth()
                     .selectableGroup()
@@ -122,9 +122,9 @@ fun AltMenu(
                         label = "alt-menu-gosterge",
                     )
                     Box(
-                        Modifier.size(52.dp, 30.dp).drawBehind {
+                        Modifier.size(52.dp, 32.dp).drawBehind {
                             drawRoundRect(
-                                color = colors.primaryContainer.copy(alpha = gosterge.value),
+                                color = colors.primary.copy(alpha = 0.16f * gosterge.value),
                                 cornerRadius = CornerRadius(16.dp.toPx()),
                             )
                         },
@@ -136,6 +136,7 @@ fun AltMenu(
                             etiket, fontSize = 11.sp, lineHeight = 14.sp, textAlign = TextAlign.Center,
                             color = if (aktif) colors.primary else colors.onSurfaceVariant,
                             fontWeight = if (aktif) FontWeight.Bold else FontWeight.Medium,
+                            maxLines = 1,
                         )
                     }
                 }

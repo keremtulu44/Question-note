@@ -117,16 +117,16 @@ fun CamKarti(
             .graphicsLayer { scaleX = scale.value; scaleY = scale.value }
             .then(clickModifier),
         shape = shape,
-        color = colors.surface.copy(alpha = 0.94f),
+        color = colors.surface.copy(alpha = 0.96f),
         contentColor = contentColor,
         tonalElevation = 0.dp,
         shadowElevation = shadow,
-        border = BorderStroke(1.dp, colors.outline.copy(alpha = 0.20f)),
+        border = BorderStroke(1.dp, colors.outline.copy(alpha = 0.16f)),
     ) {
         Box(Modifier.drawBehind {
             drawRoundRect(
                 brush = Brush.verticalGradient(
-                    listOf(Color.White.copy(alpha = 0.14f), Color.Transparent, Color.Black.copy(alpha = 0.018f)),
+                    listOf(Color.White.copy(alpha = 0.22f), Color.Transparent, Color.Black.copy(alpha = 0.03f)),
                 ),
             )
         }.padding(1.dp)) {
@@ -191,20 +191,32 @@ fun GradyanKart(
             .fillMaxWidth()
             .clip(shape)
             .background(gradyan)
+            .drawBehind {
+                drawCircle(
+                    color = PremiumMarkaRenkler.BakirIsik.copy(alpha = 0.16f),
+                    radius = size.maxDimension * 0.42f,
+                    center = Offset(size.width * 0.92f, size.height * 0.08f),
+                )
+                drawCircle(
+                    color = PremiumMarkaRenkler.DenizAcik.copy(alpha = 0.10f),
+                    radius = size.maxDimension * 0.34f,
+                    center = Offset(size.width * 0.08f, size.height * 0.95f),
+                )
+            }
             .border(
                 BorderStroke(
                     1.5.dp,
                     Brush.horizontalGradient(
                         listOf(
-                            PremiumMarkaRenkler.BakirIsik.copy(alpha = if (borderAnimation) pulse.value else 0.75f),
-                            Color.White.copy(alpha = 0.30f),
-                            PremiumMarkaRenkler.DenizAcik.copy(alpha = if (borderAnimation) pulse.value else 0.75f),
+                            PremiumMarkaRenkler.BakirIsik.copy(alpha = if (borderAnimation) pulse.value else 0.82f),
+                            Color.White.copy(alpha = 0.38f),
+                            PremiumMarkaRenkler.DenizAcik.copy(alpha = if (borderAnimation) pulse.value else 0.82f),
                         ),
                     ),
                 ),
                 shape,
             )
-            .padding(20.dp),
+            .padding(22.dp),
     ) { content() }
 }
 

@@ -257,7 +257,7 @@ private fun YeniRutbeKarti(ozet: SeviyeOzeti) {
 
 @Composable private fun EmekEtiketi() {
     Text(stringResource(R.string.progress_effort_label), color = BakirIsik,
-        style = MaterialTheme.typography.labelSmall, letterSpacing = 1.5.sp)
+        style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
 }
 @Composable private fun XpMetni(xp: Int) {
     Text(stringResource(R.string.progress_total_xp, sayi(xp)), color = Kagit.copy(alpha = .85f),

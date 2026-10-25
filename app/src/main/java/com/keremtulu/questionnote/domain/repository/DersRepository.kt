@@ -12,6 +12,10 @@ interface DersRepository {
 
     suspend fun sinavProfiliniUygula(profil: SinavProfili)
 
+    suspend fun kataloguHazirla(adlar: List<String> = com.keremtulu.questionnote.domain.model.KatalogDersAdlari): List<Ders>
+
+    suspend fun dersSeciminiKaydet(dersIdleri: Set<String>)
+
     suspend fun dersEkle(ad: String): DersIslemSonucu
 
     suspend fun dersYenidenAdlandir(dersId: String, ad: String): DersIslemSonucu

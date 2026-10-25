@@ -116,6 +116,7 @@ fun SoruFormuEkrani(
     konuRepository: KonuRepository,
     gorselDeposu: LocalSoruGorselDeposu,
     onGeri: () -> Unit,
+    gizliKaynak: String? = null,
 ) {
     var yukleniyor by remember(soruId) { mutableStateOf(soruId != null) }
     var bulunamadi by remember(soruId) { mutableStateOf(false) }
@@ -123,7 +124,7 @@ fun SoruFormuEkrani(
     var formHatasi by remember { mutableStateOf<Int?>(null) }
     var kaydediliyor by remember { mutableStateOf(false) }
     var cozumNotu by remember(soruId) { mutableStateOf("") }
-    var kaynak by remember(soruId) { mutableStateOf("") }
+    var kaynak by remember(soruId) { mutableStateOf(gizliKaynak.orEmpty()) }
     var kaynakKonumu by remember(soruId) { mutableStateOf("") }
     var yanlisNedeni by remember(soruId) { mutableStateOf("") }
     var katalogDialogTuru by remember { mutableStateOf<SoruSecenekTuru?>(null) }
@@ -393,7 +394,7 @@ fun SoruFormuEkrani(
                         dersId = ders.id,
                         konuId = konuId,
                         cozumNotu = cozumNotu,
-                        kaynak = kaynak,
+                        kaynak = gizliKaynak ?: kaynak,
                         kaynakKonumu = kaynakKonumu,
                         yanlisNedeni = yanlisNedeni,
                         planDurumu = planDurumu,
@@ -534,7 +535,6 @@ fun SoruFormuEkrani(
                                     stringResource(R.string.question_form_header_kicker),
                                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                                     style = MaterialTheme.typography.labelMedium,
-                                    letterSpacing = 1.2.sp,
                                 )
                                 Text(
                                     stringResource(
@@ -635,6 +635,7 @@ fun SoruFormuEkrani(
                                     )
                                 }
                             }
+                            if (gizliKaynak == null) {
                             SoruSecenegiSecici(
                                 baslik = stringResource(R.string.question_form_source_label),
                                 secimYok = stringResource(R.string.question_form_source_choose),
@@ -659,6 +660,7 @@ fun SoruFormuEkrani(
                                 label = { Text(stringResource(R.string.question_form_source_location_label)) },
                                 shape = RoundedCornerShape(16.dp),
                             )
+                            }
                             SoruSecenegiSecici(
                                 baslik = stringResource(R.string.question_form_reason_label),
                                 secimYok = stringResource(R.string.question_form_reason_choose),
