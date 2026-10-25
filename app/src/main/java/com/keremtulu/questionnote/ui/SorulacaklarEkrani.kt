@@ -8,6 +8,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.horizontalScroll
@@ -55,8 +56,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -517,15 +520,57 @@ private fun SorulacakTamEkranSunumDialog(
                             color = Color.White.copy(alpha = 0.72f),
                             style = MaterialTheme.typography.bodySmall,
                         )
+                    } else {
+                        Text(
+                            text = stringResource(R.string.teacher_zoom_hint),
+                            color = Color.White.copy(alpha = 0.68f),
+                            style = MaterialTheme.typography.bodySmall,
+                        )
                     }
                 }
-                PremiumTextButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.common_close), color = Color.White)
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (scale > 1.05f) {
+                        PremiumTextButton(
+                            onClick = {
+                                scale = 1f
+                                offsetX = 0f
+                                offsetY = 0f
+                            },
+                        ) {
+                            Text(
+                                text = stringResource(R.string.teacher_zoom_reset),
+                                color = PremiumMarkaRenkler.BakirIsik,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                        }
+                    }
+                    PremiumTextButton(onClick = onDismiss) {
+                        Text(stringResource(R.string.common_close), color = Color.White)
+                    }
                 }
             }
 
             Box(
-                modifier = Modifier.fillMaxWidth().weight(1f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .clipToBounds()
+                    .pointerInput(aktifGorsel?.id) {
+                        detectTapGestures(
+                            onDoubleTap = {
+                                if (scale > 1.05f) {
+                                    scale = 1f
+                                    offsetX = 0f
+                                    offsetY = 0f
+                                } else {
+                                    scale = 2.4f
+                                }
+                            },
+                        )
+                    },
                 contentAlignment = Alignment.Center,
             ) {
                 SoruGorselResmi(
@@ -548,18 +593,30 @@ private fun SorulacakTamEkranSunumDialog(
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (gorseller.size > 1) {
+                    val oncekiAktif = sayfa > 0
+                    val sonrakiAktif = sayfa < gorseller.lastIndex
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         PremiumTextButton(
-                            onClick = { if (sayfa > 0) sayfa-- },
-                            enabled = sayfa > 0,
-                        ) { Text(stringResource(R.string.ask_teacher_prev_page), color = Color.White) }
+                            onClick = { if (oncekiAktif) sayfa-- },
+                            enabled = oncekiAktif,
+                        ) {
+                            Text(
+                                text = stringResource(R.string.ask_teacher_prev_page),
+                                color = if (oncekiAktif) Color.White else Color.White.copy(alpha = 0.36f),
+                            )
+                        }
                         PremiumTextButton(
-                            onClick = { if (sayfa < gorseller.lastIndex) sayfa++ },
-                            enabled = sayfa < gorseller.lastIndex,
-                        ) { Text(stringResource(R.string.ask_teacher_next_page), color = Color.White) }
+                            onClick = { if (sonrakiAktif) sayfa++ },
+                            enabled = sonrakiAktif,
+                        ) {
+                            Text(
+                                text = stringResource(R.string.ask_teacher_next_page),
+                                color = if (sonrakiAktif) Color.White else Color.White.copy(alpha = 0.36f),
+                            )
+                        }
                     }
                 }
                 PremiumButton(

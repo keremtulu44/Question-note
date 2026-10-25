@@ -7,12 +7,19 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,12 +35,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -42,6 +53,7 @@ import com.keremtulu.questionnote.R
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import com.keremtulu.questionnote.ui.animasyon.rememberShimmer
 import kotlin.math.PI
@@ -132,7 +144,7 @@ fun SoruGorselResmi(
             Image(
                 bitmap = imageBitmap,
                 contentDescription = contentDescription,
-                modifier = Modifier.matchParentSize().then(clickModifier),
+                modifier = Modifier.fillMaxSize().then(clickModifier),
                 contentScale = contentScale,
             )
         }
@@ -150,39 +162,102 @@ fun SoruGorselTamEkran(
     var offsetY by remember(file.absolutePath) { mutableFloatStateOf(0f) }
     val transformState = rememberTransformableState { zoom, pan, _ ->
         scale = (scale * zoom).coerceIn(1f, 5f)
-        offsetX += pan.x
-        offsetY += pan.y
+        if (scale <= 1.02f) {
+            offsetX = 0f
+            offsetY = 0f
+        } else {
+            offsetX += pan.x
+            offsetY += pan.y
+        }
     }
     BackHandler(onBack = onDismiss)
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize().background(Color.Black),
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(PremiumMarkaRenkler.MurekkepKoyu)
+                .windowInsetsPadding(WindowInsets.safeDrawing)
+                .padding(14.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
         ) {
-            SoruGorselResmi(
-                file = file,
-                contentDescription = contentDescription,
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(R.string.teacher_zoom_hint),
+                    modifier = Modifier.weight(1f),
+                    color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.72f),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (scale > 1.05f) {
+                        PremiumTextButton(
+                            onClick = {
+                                scale = 1f
+                                offsetX = 0f
+                                offsetY = 0f
+                            },
+                        ) {
+                            Text(
+                                text = stringResource(R.string.teacher_zoom_reset),
+                                color = PremiumMarkaRenkler.BakirIsik,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                        }
+                    }
+                    PremiumTextButton(onClick = onDismiss) {
+                        Text(
+                            text = stringResource(R.string.common_close),
+                            color = PremiumMarkaRenkler.Kagit,
+                        )
+                    }
+                }
+            }
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .align(Alignment.Center)
-                    .graphicsLayer {
-                        scaleX = scale
-                        scaleY = scale
-                        translationX = offsetX
-                        translationY = offsetY
-                    }
-                    .transformable(transformState),
-                contentScale = ContentScale.Fit,
-                maxDecodeEdge = 3_000,
-                cerceve = false,
-            )
-            PremiumTextButton(
-                onClick = onDismiss,
-                modifier = Modifier.align(Alignment.TopEnd).padding(16.dp),
+                    .weight(1f)
+                    .clipToBounds()
+                    .pointerInput(file.absolutePath) {
+                        detectTapGestures(
+                            onDoubleTap = {
+                                if (scale > 1.05f) {
+                                    scale = 1f
+                                    offsetX = 0f
+                                    offsetY = 0f
+                                } else {
+                                    scale = 2.4f
+                                }
+                            },
+                        )
+                    },
+                contentAlignment = Alignment.Center,
             ) {
-                Text(text = stringResource(R.string.common_close), color = Color.White)
+                SoruGorselResmi(
+                    file = file,
+                    contentDescription = contentDescription,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .testTag("tam_ekran_soru_gorseli")
+                        .graphicsLayer {
+                            scaleX = scale
+                            scaleY = scale
+                            translationX = offsetX
+                            translationY = offsetY
+                        }
+                        .transformable(transformState),
+                    contentScale = ContentScale.Fit,
+                    maxDecodeEdge = 3_000,
+                    cerceve = false,
+                )
             }
         }
     }

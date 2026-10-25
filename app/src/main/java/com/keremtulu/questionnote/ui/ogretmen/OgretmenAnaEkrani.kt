@@ -83,6 +83,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.geometry.CornerRadius
@@ -1700,6 +1701,7 @@ private fun OgretmenTamEkranSoruDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
+                    .clipToBounds()
                     .pointerInput(aktifGorsel?.id) {
                         detectTapGestures(
                             onDoubleTap = {
@@ -1744,26 +1746,36 @@ private fun OgretmenTamEkranSoruDialog(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     if (gorseller.size > 1) {
+                        val oncekiAktif = sayfa > 0
+                        val sonrakiAktif = sayfa < gorseller.lastIndex
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                         ) {
                             PremiumTextButton(
-                                onClick = { if (sayfa > 0) sayfa-- },
-                                enabled = sayfa > 0,
+                                onClick = { if (oncekiAktif) sayfa-- },
+                                enabled = oncekiAktif,
                             ) {
                                 Text(
                                     stringResource(R.string.ask_teacher_prev_page),
-                                    color = PremiumMarkaRenkler.Kagit,
+                                    color = if (oncekiAktif) {
+                                        PremiumMarkaRenkler.Kagit
+                                    } else {
+                                        PremiumMarkaRenkler.Kagit.copy(alpha = 0.36f)
+                                    },
                                 )
                             }
                             PremiumTextButton(
-                                onClick = { if (sayfa < gorseller.lastIndex) sayfa++ },
-                                enabled = sayfa < gorseller.lastIndex,
+                                onClick = { if (sonrakiAktif) sayfa++ },
+                                enabled = sonrakiAktif,
                             ) {
                                 Text(
                                     stringResource(R.string.ask_teacher_next_page),
-                                    color = PremiumMarkaRenkler.Kagit,
+                                    color = if (sonrakiAktif) {
+                                        PremiumMarkaRenkler.Kagit
+                                    } else {
+                                        PremiumMarkaRenkler.Kagit.copy(alpha = 0.36f)
+                                    },
                                 )
                             }
                         }
@@ -1789,6 +1801,8 @@ private fun OgretmenTamEkranSoruDialog(
                             onClick = { cevapAcik = !cevapAcik },
                             modifier = Modifier.fillMaxWidth().testTag("ogretmen_cevabi_goster"),
                             shape = RoundedCornerShape(14.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = PremiumMarkaRenkler.Kagit),
+                            border = BorderStroke(1.dp, PremiumMarkaRenkler.Kagit.copy(alpha = 0.32f)),
                         ) {
                             Text(
                                 stringResource(
@@ -1807,6 +1821,8 @@ private fun OgretmenTamEkranSoruDialog(
                             onClick = onBaskaGrubaEkle,
                             modifier = Modifier.weight(1f).heightIn(min = 48.dp),
                             shape = RoundedCornerShape(14.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = PremiumMarkaRenkler.Kagit),
+                            border = BorderStroke(1.dp, PremiumMarkaRenkler.Kagit.copy(alpha = 0.32f)),
                         ) {
                             Text(stringResource(R.string.teacher_copy_to_group), color = PremiumMarkaRenkler.Kagit)
                         }

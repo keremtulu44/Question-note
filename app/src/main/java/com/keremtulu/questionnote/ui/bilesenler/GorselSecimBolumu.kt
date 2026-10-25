@@ -294,25 +294,45 @@ fun GorselSecimBolumu(
                                 horizontalArrangement = Arrangement.SpaceEvenly,
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
+                                val solaAktif = enabled && image.sira > 0
+                                val sagaAktif = enabled && image.sira < images.lastIndex
                                 IconButton(
-                                    enabled = enabled && image.sira > 0,
+                                    enabled = solaAktif,
                                     onClick = {
                                         val index = images.indexOfFirst { it.id == image.id }
                                         if (index > 0) onImagesChanged(images.swapped(index, index - 1))
                                     },
                                     modifier = Modifier.semantics { contentDescription = moveUpDescription },
                                 ) {
-                                    Text("←", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleMedium)
+                                    Text(
+                                        text = "←",
+                                        color = if (solaAktif) {
+                                            MaterialTheme.colorScheme.primary
+                                        } else {
+                                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.34f)
+                                        },
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontFamily = PremiumSembolAilesi,
+                                    )
                                 }
                                 IconButton(
-                                    enabled = enabled && image.sira < images.lastIndex,
+                                    enabled = sagaAktif,
                                     onClick = {
                                         val index = images.indexOfFirst { it.id == image.id }
                                         if (index in 0 until images.lastIndex) onImagesChanged(images.swapped(index, index + 1))
                                     },
                                     modifier = Modifier.semantics { contentDescription = moveDownDescription },
                                 ) {
-                                    Text("→", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleMedium)
+                                    Text(
+                                        text = "→",
+                                        color = if (sagaAktif) {
+                                            MaterialTheme.colorScheme.primary
+                                        } else {
+                                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.34f)
+                                        },
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontFamily = PremiumSembolAilesi,
+                                    )
                                 }
                                 IconButton(
                                     enabled = enabled,
@@ -327,7 +347,15 @@ fun GorselSecimBolumu(
                                     },
                                     modifier = Modifier.semantics { contentDescription = removeImageDescription },
                                 ) {
-                                    Text("×", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.titleLarge)
+                                    Text(
+                                        text = "×",
+                                        color = if (enabled) {
+                                            MaterialTheme.colorScheme.error
+                                        } else {
+                                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.34f)
+                                        },
+                                        style = MaterialTheme.typography.titleLarge,
+                                    )
                                 }
                             }
                         }
