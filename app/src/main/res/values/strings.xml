@@ -1060,4 +1060,5 @@
     <string name="teacher_settings_workspace_summary">Çalışma alanında %1$d grup ve %2$d soru kayıtlı. Tüm veriler ve fotoğraflar ZIP yedeğine dahildir.</string>
     <string name="topic_with_archived_suffix">%1$s (arşivli)</string>
     <string name="question_form_deneme_source_badge">Deneme kaynağı: %1$s</string>
+    <string name="backup_teacher_workspace_counts">Öğretmen çalışma alanı: yedekte %1$d grup / %2$d soru (mevcut: %3$d grup / %4$d soru).</string>
 </resources>

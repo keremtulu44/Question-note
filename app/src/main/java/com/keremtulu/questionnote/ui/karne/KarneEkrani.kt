@@ -14,11 +14,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -170,8 +173,9 @@ fun KarneEkrani(
 
     Scaffold(
         containerColor = colors.background,
+        contentWindowInsets = WindowInsets.safeDrawing,
     ) { insets ->
-        Box(Modifier.fillMaxSize().padding(insets)) {
+        Box(Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets)) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize().testTag("karne-report-list")
                     .semantics { stateDescription = reportState },
@@ -403,17 +407,24 @@ private fun OranHalkasi(sayilar: KarneSayilari, animasyonAcik: Boolean) {
                 style = Stroke(width = kalinlik, cap = StrokeCap.Round),
             )
         }
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            modifier = Modifier.padding(horizontal = 20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
             Text(
                 text = stringResource(R.string.karne_rate, sayilar.oran),
                 color = colors.onBackground,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
             )
             Text(
                 text = stringResource(R.string.karne_rate_caption),
                 color = colors.onSurfaceVariant,
                 style = MaterialTheme.typography.labelMedium,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
             )
         }
     }

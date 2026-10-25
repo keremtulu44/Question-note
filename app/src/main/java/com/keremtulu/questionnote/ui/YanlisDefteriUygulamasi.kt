@@ -452,6 +452,7 @@ fun YanlisDefteriUygulamasi(
                 gorselDeposu = gorselDeposu,
                 sonYedek = sonYedek,
                 yedeklemeIslemde = yedeklemeIslemde,
+                snackbarHostState = snackbarHostState,
                 onOgrenciModunaGec = {
                     kurulumGerekli = profilDeposu.kurulumGerekli()
                     profilDeposu.rolKaydet(com.keremtulu.questionnote.domain.model.KullaniciRolu.OGRENCI)
@@ -814,6 +815,19 @@ fun YanlisDefteriUygulamasi(
                         Text(stringResource(R.string.backup_restore_working))
                     }
                 } else {
+                    val ogretmenSatiri = if (
+                        preview.yedekOgretmenGrupSayisi > 0 || preview.mevcutOgretmenGrupSayisi > 0
+                    ) {
+                        "\n\n" + context.getString(
+                            R.string.backup_teacher_workspace_counts,
+                            preview.yedekOgretmenGrupSayisi,
+                            preview.yedekOgretmenSoruSayisi,
+                            preview.mevcutOgretmenGrupSayisi,
+                            preview.mevcutOgretmenSoruSayisi,
+                        )
+                    } else {
+                        ""
+                    }
                     Text(
                         context.getString(
                             R.string.backup_restore_confirm,
@@ -822,7 +836,8 @@ fun YanlisDefteriUygulamasi(
                             preview.yedek.sayilar.gorselSayisi,
                             preview.mevcut.soruSayisi,
                             preview.mevcut.gorselSayisi,
-                        ) + "\n\n" + context.getString(R.string.backup_measurement_count, preview.yedek.sayilar.olcumSayisi),
+                        ) + "\n\n" + context.getString(R.string.backup_measurement_count, preview.yedek.sayilar.olcumSayisi) +
+                            ogretmenSatiri,
                     )
                 }
             },
@@ -836,6 +851,7 @@ fun YanlisDefteriUygulamasi(
                                 // The service invalidates persisted resume state only after a proven commit.
                                 val result = disaAktarmaHizmeti.geriYukle(preview)
                                 bekleyenOturum = null
+                                kurulumGerekli = profilDeposu.kurulumGerekli()
                                 val profilHazir = try {
                                     dersRepository.sinavProfiliniUygula(profilDeposu.secili())
                                     true

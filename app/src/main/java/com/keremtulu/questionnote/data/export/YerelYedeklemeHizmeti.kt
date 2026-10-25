@@ -68,6 +68,10 @@ data class GeriYuklemeOnizlemesi internal constructor(
     val id: String,
     val yedek: YedekOzet,
     val mevcut: YedekSayilari,
+    val yedekOgretmenGrupSayisi: Int = 0,
+    val yedekOgretmenSoruSayisi: Int = 0,
+    val mevcutOgretmenGrupSayisi: Int = 0,
+    val mevcutOgretmenSoruSayisi: Int = 0,
 )
 
 data class GeriYuklemeSonucu(
@@ -229,10 +233,16 @@ class YerelYedeklemeHizmeti(
         val payloadDirectory = File(directory, PAYLOAD_DIRECTORY)
         val verified = verifyArchive(archive, payloadDirectory)
         val current = currentCounts()
+        val mevcutOgretmen = ogretmenDeposu?.anlikVeri()
+            ?: com.keremtulu.questionnote.domain.model.OgretmenVerisi()
         return GeriYuklemeOnizlemesi(
             id = id,
             yedek = verified.summary.copy(dosyaAdi = displayName.takeIf { it.isNotBlank() } ?: archive.name),
             mevcut = current,
+            yedekOgretmenGrupSayisi = verified.data.ogretmenVerisi.gruplar.size,
+            yedekOgretmenSoruSayisi = verified.data.ogretmenVerisi.gruplar.sumOf { it.sorular.size },
+            mevcutOgretmenGrupSayisi = mevcutOgretmen.gruplar.size,
+            mevcutOgretmenSoruSayisi = mevcutOgretmen.gruplar.sumOf { it.sorular.size },
         )
     }
 

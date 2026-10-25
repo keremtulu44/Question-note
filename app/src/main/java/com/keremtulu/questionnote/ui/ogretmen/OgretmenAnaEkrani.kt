@@ -180,10 +180,10 @@ fun OgretmenAnaEkrani(
     onOgrenciModunaGec: () -> Unit,
     onYedekOlustur: () -> Unit,
     onYedekGeriYukle: () -> Unit,
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
     val veri by ogretmenDeposu.veriIzle.collectAsState()
     var altEkran by remember { mutableStateOf<OgretmenEkranDurumu>(OgretmenEkranDurumu.Gruplar) }
-    val snackbarHostState = remember { SnackbarHostState() }
     val hareketPolitikasi = LocalHareketPolitikasi.current
     val klavyeAcik = WindowInsets.ime.getBottom(LocalDensity.current) > 0
 

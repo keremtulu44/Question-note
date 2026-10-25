@@ -4,11 +4,16 @@ import android.text.format.Formatter
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -98,14 +103,17 @@ fun AyarlarEkrani(
         )
     } ?: stringResource(R.string.backup_last_none)
 
-    Scaffold(containerColor = MaterialTheme.colorScheme.background) { insets ->
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets.safeDrawing,
+    ) { insets ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets),
             contentPadding = PaddingValues(
                 start = 20.dp,
-                top = insets.calculateTopPadding() + 12.dp,
+                top = 12.dp,
                 end = 20.dp,
-                bottom = insets.calculateBottomPadding() + 24.dp,
+                bottom = 24.dp,
             ),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
@@ -170,32 +178,38 @@ fun AyarlarEkrani(
                 Bolum(stringResource(R.string.settings_profile_title)) {
                     Text(stringResource(R.string.settings_profile_note), style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    tumDersler.forEach { ders ->
-                        val acik = secim.gorunur(ders)
-                        FilterChip(
-                            selected = acik,
-                            onClick = {
-                                if (profilKaydediliyor || yedeklemeIslemde) return@FilterChip
-                                profilKaydediliyor = true
-                                profilHatasi = false
-                                val simdiki = tumDersler.filter(secim::gorunur).map { it.id }.toSet()
-                                val yeni = if (ders.id in simdiki) simdiki - ders.id else simdiki + ders.id
-                                scope.launch {
-                                    try {
-                                        if (yeni.isNotEmpty()) dersRepository.dersSeciminiKaydet(yeni)
-                                    } catch (iptal: CancellationException) {
-                                        throw iptal
-                                    } catch (_: Exception) {
-                                        profilHatasi = true
-                                    } finally {
-                                        profilKaydediliyor = false
+                    @OptIn(ExperimentalLayoutApi::class)
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        tumDersler.forEach { ders ->
+                            val acik = secim.gorunur(ders)
+                            FilterChip(
+                                selected = acik,
+                                onClick = {
+                                    if (profilKaydediliyor || yedeklemeIslemde) return@FilterChip
+                                    profilKaydediliyor = true
+                                    profilHatasi = false
+                                    val simdiki = tumDersler.filter(secim::gorunur).map { it.id }.toSet()
+                                    val yeni = if (ders.id in simdiki) simdiki - ders.id else simdiki + ders.id
+                                    scope.launch {
+                                        try {
+                                            if (yeni.isNotEmpty()) dersRepository.dersSeciminiKaydet(yeni)
+                                        } catch (iptal: CancellationException) {
+                                            throw iptal
+                                        } catch (_: Exception) {
+                                            profilHatasi = true
+                                        } finally {
+                                            profilKaydediliyor = false
+                                        }
                                     }
-                                }
-                            },
-                            enabled = !profilKaydediliyor && !yedeklemeIslemde,
-                            label = { Text(ders.ad) },
-                            modifier = Modifier.fillMaxWidth(),
-                        )
+                                },
+                                enabled = !profilKaydediliyor && !yedeklemeIslemde,
+                                label = { Text(ders.ad) },
+                            )
+                        }
                     }
                     if (profilKaydediliyor) {
                         Text(
