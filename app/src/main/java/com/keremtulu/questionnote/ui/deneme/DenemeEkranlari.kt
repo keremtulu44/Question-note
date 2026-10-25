@@ -129,7 +129,7 @@ fun DenemeListesiEkrani(
                 }
             } else {
                 item { NetCizgisi(liste) }
-                liste.maxByOrNull { it.gun to it.olusturma }?.let { son ->
+                liste.maxWithOrNull(compareBy<DenemeKaydi> { it.gun }.thenBy { it.olusturma })?.let { son ->
                     item { DersNetBarlari(liste, son, dersAd) }
                 }
             }

@@ -44,6 +44,7 @@ import com.keremtulu.questionnote.domain.calisma.TekrarDenemesi
 import java.util.UUID
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
 import com.keremtulu.questionnote.domain.model.Ders
+import com.keremtulu.questionnote.domain.model.kaynakla
 import com.keremtulu.questionnote.domain.model.Konu
 import com.keremtulu.questionnote.domain.model.Soru
 import com.keremtulu.questionnote.domain.model.SoruGorseli
@@ -275,7 +276,7 @@ fun SoruDetayEkrani(
                             }
                         }
                     }
-                    val denemeKaydi = com.keremtulu.questionnote.ui.deneme.run { soru.denemeKaydi(denemeler) }
+                    val denemeKaydi = denemeler.kaynakla(soru.kaynak)
                     if (denemeKaydi != null) {
                         item { com.keremtulu.questionnote.ui.deneme.DenemeDamgaYazi(denemeKaydi) }
                     } else {

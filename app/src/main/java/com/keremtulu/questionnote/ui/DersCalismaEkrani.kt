@@ -46,6 +46,7 @@ import com.keremtulu.questionnote.domain.model.Ders
 import com.keremtulu.questionnote.domain.model.Konu
 import com.keremtulu.questionnote.domain.model.Soru
 import com.keremtulu.questionnote.domain.model.SoruPlanDurumu
+import com.keremtulu.questionnote.domain.model.kaynakla
 import com.keremtulu.questionnote.domain.repository.KonuRepository
 import com.keremtulu.questionnote.domain.repository.SoruRepository
 import com.keremtulu.questionnote.ui.animasyon.animateItemInsertion
@@ -354,7 +355,7 @@ private fun SoruListeKarti(
                     Text("★", color = PremiumMarkaRenkler.Bakir, style = MaterialTheme.typography.titleMedium)
                 }
             }
-            val deneme = com.keremtulu.questionnote.ui.deneme.run { soru.denemeKaydi(denemeler) }
+            val deneme = denemeler.kaynakla(soru.kaynak)
             if (deneme != null) {
                 com.keremtulu.questionnote.ui.deneme.DenemeDamgaYazi(deneme)
             } else {

@@ -84,6 +84,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import com.keremtulu.questionnote.domain.karne.KarneHesabi
 import com.keremtulu.questionnote.domain.karne.OturumSonucu
 import com.keremtulu.questionnote.domain.model.Ders
+import com.keremtulu.questionnote.domain.model.kaynakla
 import com.keremtulu.questionnote.domain.model.GorselTuru
 import com.keremtulu.questionnote.domain.model.Soru
 import com.keremtulu.questionnote.domain.model.SoruGorseli
@@ -363,7 +364,7 @@ fun OdakOturumuEkrani(
             if (!soru.soruNotu.isNullOrBlank()) item {
                 Text(soru.soruNotu.orEmpty(), style = MaterialTheme.typography.bodyLarge, color = colors.onSurface)
             }
-            val denemeKaydi = com.keremtulu.questionnote.ui.deneme.run { soru.denemeKaydi(denemeler) }
+            val denemeKaydi = denemeler.kaynakla(soru.kaynak)
             if (denemeKaydi != null) {
                 item { com.keremtulu.questionnote.ui.deneme.DenemeHatirlatmaYazi(soru.id, denemeKaydi) }
             } else {
