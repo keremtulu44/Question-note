@@ -46,6 +46,28 @@ uygulama sözleşmesi: [Öğretmen modu](docs/OGRETMEN_MODU.md).
   (paylaşım sayfası), erişilebilirlik taraması, 2561 satırlık monolitten ayrılmış ekranların
   gerçek cihaz ölçümü.
 
+## Öğretmen ihtiyaç araştırması — T3/T4 adayları (2026-10-26, **uygulanmadı**)
+
+Ayrıntı, kanıt ve gerekçe: [Öğretmen ihtiyaç araştırması](docs/OGRETMEN_IHTIYAC_ARASTIRMASI.md).
+Karar bekleyen sorular: PROJECT_BRIEF §8 (A12–A17).
+
+**T3 — görünürlük ve iletişim (1.6.x, Room/ZIP sürümü artmaz):**
+- [ ] Kuyruk + grup detayında **arama**, ders/konu filtre çipleri (v1.5.107'deki arama bölünmede düştü; `kuyruk(dersId=…)` hazır ama UI kullanmıyor).
+- [ ] **"Kim sordu" yüzeyi:** kart rozeti, filtre, hızlı isim seçimi, normalize gruplama.
+- [ ] **Paylaş** (`ACTION_SEND` + `FileProvider`): tek soru, soru+çözüm, seçili N soru; `kimSordu` varsayılan dışarıda.
+- [ ] Kuyrukta **Bugün / Geciken / Planlanmamış** gruplaması + "bugüne al / yarına at" hızlı aksiyonu.
+- [ ] **Kapatma döngüsü:** tüm gruplarda arşiv filtresi, arşivden çıkarma, grup silmede 10 sn geri alma penceresi.
+- [ ] **Yedek tazeliği** uyarısı (7+ gün) ve **aynı görsel** (sha256) uyarısı.
+- [ ] **Hafif içgörü kartı:** son 30 gün konu dağılımı, ortalama bekleme, haftalık kapanma (oyunlaştırma yok).
+
+**T4 — kayıt yükünü azaltma (1.7.0, Room v6 + ZIP v6; v5 yedekleri okunur):**
+- [ ] **Fotoğrafsız sözlü soru** (`gorsel_bekliyor` + "fotoğraf ekle" rozeti) — karar: A12.
+- [ ] **Hızlı toplama / taslak kutusu:** tek oturumda çok fotoğraf, toplu alan atama, taslak yaşı.
+- [ ] **Bana sorulanlar** şeridi (öğrenci "hocaya sor" işaretleri, aynı cihaz varsayımı) — karar: A16.
+- [ ] **Dönemi kapat** (toplu arşiv + özet) ve paylaşım kullanımı ölçüldükten sonra **PDF çalışma kâğıdı** — karar: A17.
+- [ ] Yatay/tablet iki panel (yalnız cihaz verisi varsa) — karar: A15.
+- [ ] Günlük özet bildirimi (varsayılan kapalı, tek özet) — karar: A14.
+
 ## Son yayımlanan — v1.5.1 / code19
 
 - [x] İlerleme ana görünümü: rütbe, bugünkü hedef ve tek eylem; rapor yığını kaldırıldı.

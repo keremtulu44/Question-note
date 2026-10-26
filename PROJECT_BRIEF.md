@@ -200,6 +200,12 @@ Ayrıca v1'de yok: otomatik yedekleme, Drive API/OAuth bağlantısı, yedek şif
 | ~~A9~~ | ~~Görsel kalite varsayılanı~~ | **Kapandı (2026-10-16): K21 — otomatik optimize** (uzun kenar ~3000 px, JPEG ~%90; ölçüt okunabilirlik) |
 | A10 | Depolama dolduğunda "eski görselleri yeniden sıkıştır" aracı | Aşama 5'te değerlendirilecek |
 | A11 | Önizleme stratejisi (Coil önbelleği yeterli mi) | Aşama 5'te ölçümle karar verilecek |
+| A12 | Öğretmende **fotoğrafsız (sözlü) soru** kaydı | Açık — [ihtiyaç araştırması](docs/OGRETMEN_IHTIYAC_ARASTIRMASI.md) S1; `kimSordu` alanı sözlü soruyu ima ediyor ama form fotoğrafı zorunlu tutuyor. Evet ise Room/ZIP **v6** gerekir |
+| A13 | Paylaşımın kapsamı (`ACTION_SEND`) | Açık — soru, soru+çözüm, seçili N soru; `kimSordu` paylaşımda varsayılan dışarıda. Uygulama hedef kanalı bilmez |
+| A14 | Günlük özet **bildirimi** | Açık — varsayılan kapalı öneriliyor; `POST_NOTIFICATIONS` + WorkManager gerekir, cihazda pil davranışı ölçülmeli |
+| A15 | Tablet/yatay iki panel | Açık — gerçek cihaz kullanımı görülmeden uygulanmamalı |
+| A16 | Öğrenci "hocaya sor" işaretlerinin öğretmen tarafında görünmesi | Açık — yalnız **aynı cihaz** varsayımıyla; çok kullanıcılı yapı izlenimi vermemeli (K38 sınırı) |
+| A17 | PDF çalışma kâğıdı | Açık — önce paylaşım kullanımı ölçülecek |
 
 ---
 

@@ -40,6 +40,10 @@
   rebase ediyor ve rapor özetini log'a basıyor; böylece test sonuçları dalda kaybolmuyor.
 - **Açık kalanlar:** fiziksel cihaz kabulü (kamera izinsiz açılmalı, süreç öldürme, 200+ soru,
   1.6x yazı ölçeğinde sunum/klavye) ve T2 maddeleri (`ROADMAP.md`).
+- **Sıradaki iş önerisi:** [öğretmen ihtiyaç araştırması](docs/OGRETMEN_IHTIYAC_ARASTIRMASI.md)
+  (2026-10-26) — kanıtlı 14 boşluk, 22 fikir ve T3/T4 sıralaması. T3 tamamen mevcut v5 verisiyle
+  yapılabilir (arama, "kim sordu" yüzeyi, paylaşım, plan grupları, arşiv geri alma, yedek tazeliği);
+  T4 (fotoğrafsız sözlü soru, taslak kutusu) **Room/ZIP v6** gerektirir ve A12/A16 kararlarına bağlı.
 
 ## Önceki doğrulanmış teslim: 1.5.108 Uygulama Geneli Görsel, Geometrik & Tipografik Bütünlük Denetimi
 
