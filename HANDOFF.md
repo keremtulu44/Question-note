@@ -3,7 +3,7 @@
 **Son güncelleme: 2026-10-26.** Önce bu belge, `docs/DERLEME_RAPORU.md`,
 `docs/PREMIUM_GORSEL_GELISTIRME.md` ve [P4–P6 sözleşme/kanıt kaydı](docs/P4_P5_P6_UYGULAMA.md) okunur.
 
-## Güncel çalışma: 1.6.0 Öğretmen modu — T0 + T1 + P2 başlangıcı (CI bekliyor)
+## Güncel ve yayımlanmış: 1.6.0 Öğretmen modu — T0 + T1 + P2 başlangıcı
 
 - **Dal:** `arena/5d75ca16-question-note`. **Sürüm:** `versionName = "1.6.0"` (`versionCode = 39`).
 - **Veri katmanı (Room v5):** öğretmen çalışma alanı artık veritabanında:
@@ -27,8 +27,19 @@
 - **Testler:** `OgretmenMigrationTest` (gerçek v4 şemasından 4→5, indeksler, CASCADE/SET NULL),
   `OgretmenDeposuRoomTest` (JSON içe aktarma, toplu durum, taşıma, kopyalama, silme geri alma);
   mevcut üç test dosyası artık `OgretmenDeposu(context, gorselDeposu, database)` ile in-memory DB kullanıyor.
-- **Açık kalanlar:** CI sonucu `docs/DERLEME_RAPORU.md`'ye yazılacak; fiziksel cihaz kabulü
-  (kamera, süreç öldürme, 200+ soru, 1.6x yazı ölçeği) ve T2 maddeleri `ROADMAP.md` içinde.
+- **Doğrulanmış CI:** `40280978018` — **Debug 351/0/0/0 · Release 277/0/0/0**, `assembleRelease`,
+  imza + beklenen sertifika parmak izi eşleşti; Release `v1.6.0` yayımlandı, APK
+  `yanlis-defteri-1.6.0.apk` (13.653.001 bayt, SHA-256
+  `db756b455b2d3942be7f2d009f00062696e100482938206b951c6b161f4c470f`). Sayılar iki varyantta
+  tekrar eder, toplanmaz.
+- **Arayüz kararları (K45/K46):** öğretmen onay/seçim/form pencereleri tek `OgretmenDiyalogu`
+  kabuğunda (düz `Dialog`); Material3 `AlertDialog` Robolectric Compose testlerinde boşta kalmıyordu.
+  Host ekranları animasyonsuz `when` ile çizilir; `AnimatedContent` dialog penceresini her karede
+  yeniden kuruyordu.
+- **CI altyapısı:** rapor adımı önce düz `git push` deniyor, yalnız reddedilirse derinleştirip
+  rebase ediyor ve rapor özetini log'a basıyor; böylece test sonuçları dalda kaybolmuyor.
+- **Açık kalanlar:** fiziksel cihaz kabulü (kamera izinsiz açılmalı, süreç öldürme, 200+ soru,
+  1.6x yazı ölçeğinde sunum/klavye) ve T2 maddeleri (`ROADMAP.md`).
 
 ## Önceki doğrulanmış teslim: 1.5.108 Uygulama Geneli Görsel, Geometrik & Tipografik Bütünlük Denetimi
 

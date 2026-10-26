@@ -116,3 +116,11 @@ kendi UUID'siyle adlandırılır). Okuma v2/v3/v4/v5 yedeklerini destekler. Ayr�
 | `OgretmenVeSorulacaklarVeriTest` | Öğretmen↔öğrenci köprüsü ve ZIP gidiş-dönüşü |
 | `KirpmaSorulacakVeOgretmenArayuzTest` | Kuyruk/grup/sunum etkileşimi, gizli cevap, başka gruba kopyalama |
 | `GorselButunlukVeYerlesimArayuzTest` | Büyük yazı ölçeğinde taşma, paylaşılan snackbar |
+
+**Doğrulanmış paket (CI `40280978018`):** Debug 351/0/0/0 · Release 277/0/0/0; `assembleRelease`,
+imza ve beklenen sertifika parmak izi eşleşti, Release `v1.6.0` yayımlandı. Ortak testler iki
+varyantta tekrar eder; sayılar toplanmaz. Fiziksel cihaz kabulü hâlâ açık (`ROADMAP.md`).
+
+**Test kuralları:** öğretmen pencereleri `OgretmenDiyalogu` ile çizildiği için testler pencere
+kabuğunu (`ogretmen_kopyala_dialog`) bekler; kart içi aksiyonlar dokunma yönlendirmesine bağlı
+kalmadan semantik `OnClick` ile tetiklenir.

@@ -33,9 +33,14 @@ uygulama sözleşmesi: [Öğretmen modu](docs/OGRETMEN_MODU.md).
   başka gruba kopyalama uyarısı, soru taşıma.
 - [~] **P2 başlangıcı:** Room v5 + ZIP `FORMAT_VERSION` 5, `teacher_workspace` ve paylaşılan
   `images/`; v2–v5 okuma.
-- [ ] CI kapısı: bu paket push edildi, sonuç `docs/DERLEME_RAPORU.md` içine yazılacak.
+- [x] **CI kapısı:** `40280978018` — **Debug 351/0/0/0 · Release 277/0/0/0**, `assembleRelease`,
+  imza + beklenen sertifika parmak izi eşleşti ve Release yayımlandı.
+  [v1.6.0 APK](https://github.com/keremtulu44/Question-note/releases/download/v1.6.0/yanlis-defteri-1.6.0.apk)
+  · SHA-256 `db756b455b2d3942be7f2d009f00062696e100482938206b951c6b161f4c470f`
+  · [rapor](docs/DERLEME_RAPORU.md).
 - [ ] Fiziksel cihaz: kamera (izin istemeden açılmalı), süreç öldürme, 200+ soruluk grupta liste
-  performansı, 1.6x yazı ölçeğinde sunum/klavye taşması.
+  performansı, 1.6x yazı ölçeğinde sunum/klavye taşması. Otomatik kapı yeşil olduğu için T0/T1/P2
+  maddeleri `[~]` kalır; cihaz kabulü tamamlanınca `[x]` olur.
 - [ ] **T2 (sıradaki):** öğretmen↔öğrenci kapalı döngü yüzeyi (öğrenci "hocaya sor" durumunun
   öğretmen tarafında görünmesi), tekrar eden soruların otomatik hatırlatılması, dışa aktarma
   (paylaşım sayfası), erişilebilirlik taraması, 2561 satırlık monolitten ayrılmış ekranların

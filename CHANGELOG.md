@@ -2,6 +2,17 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.6.0] — 2026-10-26
+
+- **Öğretmen verisi Room v5:** `ogretmen_gruplari`, `ogretmen_sorulari`, `ogretmen_soru_gorselleri` tabloları (5 indeks, `MIGRATION_4_5`); ders/konu bağları `SET NULL`, soru→grup ve görsel→soru `CASCADE`. Eski tek JSON dosyası ilk açılışta toleranslı içe aktarılır, sonra arşivlenir; okunamazsa karantinaya alınır ve çalışma alanı salt-okunur kalır.
+- **Gerçek öğretmen akışı:** tüm gruplardan "Bugün" kuyruğu (geciken filtresi, grup çipleri, sıralama), ders/konu/kaynak/"kim sordu"/çözüm günü alanları (ortak katalog), başka gruba kopyalama uyarısı, soru taşıma, toplu seçim + onaylı arşivleme, silme ve geri alma, kaydet-ve-yeni.
+- **Sınıf içi sunum:** tam ekran dialog; ekran açık kalır, cevap varsayılan gizli, çözüm ayrı açılır, "Çözdüm, sıradaki" ve sunumdan kopyalama.
+- **Kamera:** gereksiz izin kapısı kaldırıldı; manifestte `CAMERA` izni yok.
+- **Yedek:** ZIP `FORMAT_VERSION` 5, `teacher_workspace` `data.json` içinde, öğretmen görselleri öğrenci `images/` klasöründe; v2–v5 okuma, sıkı doğrulama. Şifreleme yok.
+- **Arayüz kararları:** öğretmen onay/seçim/form pencereleri tek `OgretmenDiyalogu` kabuğunda (Material3 `AlertDialog` testlerde boşta kalmıyordu); host ekranları animasyonsuz geçiş kullanır.
+- CI `40280978018`: **Debug 351/0/0/0 · Release 277/0/0/0**, imza + sertifika doğrulandı; yayımlanan APK SHA-256 `db756b455b2d3942be7f2d009f00062696e100482938206b951c6b161f4c470f`.
+- Sürüm: `versionCode 39` / `versionName 1.6.0`.
+
 ## [1.5.108] — 2026-10-25
 
 - **Tam ekran görsel görüntüleyicisi ve yakınlaştırma düzeltmeleri:** `SoruGorselTamEkran` içinde `matchParentSize()` + yüksekliksiz `fillMaxWidth()` bileşimi nedeniyle soru ve çözüm fotoğraflarının tam ekranda `0px` yüksekliğe çökerek siyah ekran göstermesine yol açan kritik hata giderildi. Tüm tam ekran görüntüleyicilere (`SoruGorselTamEkran`, `SorulacakTamEkranSunumDialog`, `OgretmenTamEkranSoruDialog`) `safeDrawing` pencere boşluğu, yakınlaştırma taşmasını önleyen `.clipToBounds()`, çift dokunuşla `2.4x` yakınlaştırma, **`1x Sıfırla`** aksiyonu ve devre dışı sayfa/sıralama düğmeleri için doğru soluklaştırma eklendi.

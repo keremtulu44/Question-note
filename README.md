@@ -25,17 +25,22 @@ cevaplamak ve çözümü öğrenme sürecinden ayrı saklamaktır.
 
 ## Durum
 
-**v1.6.0 hazırlanıyor — öğretmen modu (T0 + T1 + P2 başlangıcı).** Dal
-`arena/5d75ca16-question-note`; CI sonucu `docs/DERLEME_RAPORU.md` içine yazılır.
+**v1.6.0 yayımlandı** (versionCode 39) — öğretmen modu (T0 + T1 + P2 başlangıcı).
+[İndir](https://github.com/keremtulu44/Question-note/releases/download/v1.6.0/yanlis-defteri-1.6.0.apk) ·
+[CI `40280978018`](https://github.com/keremtulu44/Question-note/actions/runs/40280978018).
+**Debug 351/0/0/0 · Release 277/0/0/0**; APK imza ve sertifika parmak izi doğrulandı
+(`db756b455b2d3942be7f2d009f00062696e100482938206b951c6b161f4c470f`). Ortak testler iki
+varyantta tekrar eder; sayılar toplanmaz.
 
 - **Öğretmen verisi Room v5'te:** gruplar, sorular ve soru/çözüm fotoğrafları üç tabloda; eski
   `ogretmen_calisma_alani.json` bir kez toleranslı içe aktarılır ve arşivlenir. JSON artık yalnız
   yedek/aktarım biçimi. Ayrıntı: [Öğretmen modu](docs/OGRETMEN_MODU.md).
 - **Ortak ders/konu kataloğu:** öğrenci tarafında açılan ders/konu, öğretmen formunda anında seçilir.
-- **Kuyruk ve sunum:** tüm gruplardan "Bugün" listesi, geciken filtresi, toplu işlem, arşiv, silme
-  geri alma; sınıf içi tam ekran sunumda ekran açık kalır, cevap gizlidir, çözüm ayrı açılır.
+- **Kuyruk ve sunum:** tüm gruplardan "Bugün" listesi, geciken filtresi, toplu işlem (onaylı arşiv),
+  silme geri alma; sınıf içi tam ekran sunumda ekran açık kalır, cevap gizlidir, çözüm ayrı açılır.
 - **Kamera düzeltmesi:** gereksiz izin kapısı kaldırıldı; manifestte `CAMERA` izni yok.
 - **Yedek:** ZIP/Room sürümü 5; okuma v2–v5. Şifreleme yok.
+- **Açık kalan:** fiziksel cihaz kabulü (kamera, süreç öldürme, 200+ soruluk grup, 1.6x yazı ölçeği).
 
 ## Önceki yayım — v1.5.1
 
