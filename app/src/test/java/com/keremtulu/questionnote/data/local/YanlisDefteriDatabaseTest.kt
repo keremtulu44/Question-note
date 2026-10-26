@@ -109,14 +109,14 @@ class YanlisDefteriDatabaseTest {
     }
 
     @Test
-    fun schemaCreatesAllPlannedTablesAtVersionFour() = runBlocking {
+    fun schemaCreatesAllPlannedTablesAtCurrentVersion() = runBlocking {
         val sqlite = database.openHelper.readableDatabase
         val cursor = sqlite.query("PRAGMA user_version")
         val version = cursor.use {
             assertTrue(it.moveToFirst())
             it.getInt(0)
         }
-        assertEquals(4, version)
+        assertEquals(5, version)
 
         val namesCursor = sqlite.query("SELECT name FROM sqlite_master WHERE type = 'table'")
         val tableNames = namesCursor.use { rows ->
@@ -125,7 +125,9 @@ class YanlisDefteriDatabaseTest {
             }
         }
         assertTrue(tableNames.containsAll(setOf(
-            "dersler", "konular", "sorular", "gorseller", "tekrarlar", "geri_yukleme_isaretleri", "soru_secenekleri", "tekrar_olcumleri",
+            "dersler", "konular", "sorular", "gorseller", "tekrarlar", "geri_yukleme_isaretleri",
+            "soru_secenekleri", "tekrar_olcumleri", "ogretmen_gruplari", "ogretmen_sorulari",
+            "ogretmen_soru_gorselleri",
         )))
         assertEquals(VarsayilanSoruNedenleri, database.soruSecenegiDao().tumunuGetir()
             .filter { it.varsayilan }
@@ -160,7 +162,12 @@ class YanlisDefteriDatabaseTest {
             YanlisDefteriDatabase::class.java,
             databaseName,
         )
-            .addMigrations(YanlisDefteriMigrations.MIGRATION_1_2, YanlisDefteriMigrations.MIGRATION_2_3, YanlisDefteriMigrations.MIGRATION_3_4)
+            .addMigrations(
+                YanlisDefteriMigrations.MIGRATION_1_2,
+                YanlisDefteriMigrations.MIGRATION_2_3,
+                YanlisDefteriMigrations.MIGRATION_3_4,
+                YanlisDefteriMigrations.MIGRATION_4_5,
+            )
             .allowMainThreadQueries()
             .build()
         try {
@@ -174,7 +181,7 @@ class YanlisDefteriDatabaseTest {
                 it.moveToFirst()
                 it.getInt(0)
             }
-            assertEquals(4, version)
+            assertEquals(5, version)
             assertEquals(VarsayilanSoruNedenleri, migrated.soruSecenegiDao().tumunuGetir()
                 .filter { it.varsayilan }
                 .map { it.ad })
@@ -225,7 +232,12 @@ class YanlisDefteriDatabaseTest {
             YanlisDefteriDatabase::class.java,
             databaseName,
         )
-            .addMigrations(YanlisDefteriMigrations.MIGRATION_1_2, YanlisDefteriMigrations.MIGRATION_2_3, YanlisDefteriMigrations.MIGRATION_3_4)
+            .addMigrations(
+                YanlisDefteriMigrations.MIGRATION_1_2,
+                YanlisDefteriMigrations.MIGRATION_2_3,
+                YanlisDefteriMigrations.MIGRATION_3_4,
+                YanlisDefteriMigrations.MIGRATION_4_5,
+            )
             .allowMainThreadQueries()
             .build()
         try {
@@ -249,7 +261,7 @@ class YanlisDefteriDatabaseTest {
                 it.moveToFirst()
                 it.getInt(0)
             }
-            assertEquals(4, version)
+            assertEquals(5, version)
         } finally {
             migrated.close()
             context.deleteDatabase(databaseName)

@@ -109,10 +109,16 @@ fun OgretmenAnaEkrani(
 ) {
     val veri by ogretmenDeposu.veriIzle.collectAsState()
     val alanDurumu by ogretmenDeposu.durumIzle.collectAsState()
-    val dersler by (dersRepository?.dersleriIzle(arsivli = true)?.collectAsState(initial = emptyList())
-        ?: remember { mutableStateOf(emptyList<Ders>()) })
-    val konular by (konuRepository?.tumunuIzle()?.collectAsState(initial = emptyList())
-        ?: remember { mutableStateOf(emptyList<Konu>()) })
+    // Hoisted: a flow created inside the composition body would restart collection on every
+    // recomposition, which reads as an endless recomposition loop in UI tests.
+    val derslerAkisi = remember(dersRepository) { dersRepository?.dersleriIzle(arsivli = true) }
+    val konularAkisi = remember(konuRepository) { konuRepository?.tumunuIzle() }
+    val derslerDurumu = derslerAkisi?.collectAsState(initial = emptyList<Ders>())
+    val konularDurumu = konularAkisi?.collectAsState(initial = emptyList<Konu>())
+    val bosDersler = remember { mutableStateOf(emptyList<Ders>()) }
+    val bosKonular = remember { mutableStateOf(emptyList<Konu>()) }
+    val dersler by derslerDurumu ?: bosDersler
+    val konular by konularDurumu ?: bosKonular
 
     var altEkran by remember { mutableStateOf<OgretmenEkranDurumu>(OgretmenEkranDurumu.Gruplar) }
     var baslatildi by remember { mutableStateOf(ogretmenDeposu.anlikDurum() != OgretmenAlanDurumu.Yukleniyor) }

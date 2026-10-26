@@ -308,6 +308,10 @@ class KirpmaSorulacakVeOgretmenArayuzTest {
                 compose.onAllNodesWithTag("ogretmen_baska_gruba_ekle_${soru.id}").fetchSemanticsNodes().isNotEmpty()
             }
             compose.onNodeWithTag("ogretmen_baska_gruba_ekle_${soru.id}").performClick()
+            // A dialog opens in its own window; give it a frame before querying its rows.
+            compose.waitUntil(5_000) {
+                compose.onAllNodesWithTag("hedef_grup_${g7C.id}").fetchSemanticsNodes().isNotEmpty()
+            }
             compose.onNodeWithTag("hedef_grup_${g7C.id}").performClick()
             compose.onNodeWithTag("hedef_gruplara_kopyala_onay").performClick()
 
