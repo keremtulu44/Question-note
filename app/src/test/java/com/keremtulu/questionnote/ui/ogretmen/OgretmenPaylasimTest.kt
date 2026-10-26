@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.net.Uri
+import androidx.core.content.FileProvider
 import androidx.room.Room
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
 import com.keremtulu.questionnote.data.local.VarsayilanDersleriEkle
@@ -19,6 +20,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -96,7 +98,18 @@ class OgretmenPaylasimTest {
         val kaynak = testGorseli("paylasim")
         try {
             val grup = runBlocking { requireNotNull(ogretmenDeposu.grupEkle("8A")) }
+            // Var olmayan ders kimliği kaydı düşürmemeli; yalnız o etiket atılır.
             val soru = soru(grup.id, "Oran Orantı", "Elif Y.", kaynak, dersId = "yok")
+            assertNull(soru.dersId)
+
+            val dosya = requireNotNull(gorselDeposu.dosyaGoruntuIcin(soru.gorseller.single().dosyaAdi))
+            assertTrue("Soru fotoğrafı diskte olmalı: ${dosya.absolutePath}", dosya.isFile)
+            assertNull(
+                "FileProvider fotoğrafı paylaşamadı: ${soru.gorseller.single().dosyaAdi}",
+                runCatching {
+                    FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", dosya)
+                }.exceptionOrNull(),
+            )
 
             val uriler = OgretmenPaylasim.gorselUrisi(context, listOf(soru), gorselDeposu)
             assertEquals(1, uriler.size)
@@ -145,8 +158,19 @@ class OgretmenPaylasimTest {
                     dersAdlari = dersAdlari,
                 ),
             )
+            val dosyalar = sorular.flatMap { s ->
+                s.gorseller.map { g -> g.dosyaAdi to gorselDeposu.dosyaGoruntuIcin(g.dosyaAdi) }
+            }
+            assertTrue(
+                "Üç fotoğraf da diskte olmalı: ${dosyalar.map { it.first to (it.second?.isFile == true) }}",
+                dosyalar.size == 3 && dosyalar.all { it.second?.isFile == true },
+            )
+            assertEquals(
+                "Chooser içeriği: ${OgretmenPaylasim.gorselUrisi(context, sorular, gorselDeposu)}",
+                Intent.ACTION_SEND_MULTIPLE,
+                seciciIci(paylasim).action,
+            )
             val gonder = seciciIci(paylasim)
-            assertEquals(Intent.ACTION_SEND_MULTIPLE, gonder.action)
             val uriler = requireNotNull(gonder.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM))
             assertEquals(3, uriler.size)
             val metin = requireNotNull(gonder.getStringExtra(Intent.EXTRA_TEXT))

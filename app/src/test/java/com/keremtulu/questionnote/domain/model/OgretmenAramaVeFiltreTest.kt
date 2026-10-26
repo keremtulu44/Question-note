@@ -161,11 +161,13 @@ class OgretmenAramaVeFiltreTest {
 
     @Test
     fun binSorudaAramaKabulKapisiAltindaKalir() {
+        // Tek kelime sorgusu: her soru ya "oran orantı" ya "üçgenler" içerir, başka hiçbir alan
+        // bu kelimeleri geçmez. Böylece eşleşme kümesi tam olarak bilinir.
         val v = veri(
             (1..1_000).map { i ->
                 soru(
                     id = "s$i",
-                    baslik = "Soru $i oran orantı",
+                    baslik = if (i % 2 == 0) "Oran orantı $i" else "Üçgenler $i",
                     kimSordu = "Öğrenci ${i % 120}",
                     kaynak = "Miray ${i % 40}",
                     dersId = "m",
@@ -174,15 +176,14 @@ class OgretmenAramaVeFiltreTest {
         )
         val dersler = mapOf("m" to "Matematik")
         // Isınma turu: JIT/ilk ayırma maliyeti ölçüme girmesin.
-        v.filtrele(arama = "miray 7", dersAdlari = dersler)
+        v.filtrele(arama = "üçgen", dersAdlari = dersler)
         var enIyi = Long.MAX_VALUE
         repeat(3) {
             val basla = System.nanoTime()
-            val sonuc = v.filtrele(arama = "miray 7", dersAdlari = dersler)
+            val sonuc = v.filtrele(arama = "üçgen", dersAdlari = dersler)
             enIyi = minOf(enIyi, (System.nanoTime() - basla) / 1_000_000)
-            assertTrue(sonuc.isNotEmpty())
-            // İki kelime ayrı ayrı aranır: "miray 17" de eşleşir, bu yüzden kaynak tam eşleşmez.
-            assertTrue(sonuc.all { it.id.removePrefix("s").toInt() % 40 == 7 })
+            val beklenen = (1..1_000).filter { it % 2 == 1 }.mapTo(mutableSetOf()) { "s$it" }
+            assertEquals(beklenen, sonuc.mapTo(mutableSetOf()) { it.id })
         }
         assertTrue("1000 soruda arama ${enIyi}ms sürdü", enIyi < 200)
     }

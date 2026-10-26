@@ -282,6 +282,15 @@ class OgretmenDeposu(
 
             val mevcut = state.value
             if (mevcut.gruplar.none { it.id == grupId }) return@withLock null
+            // `ogretmen_sorulari` has foreign keys to the lesson/topic catalogue. A lesson archived
+            // or deleted while the form was open would make the insert fail and the whole question
+            // (photo included) would be lost, so an unknown id is dropped instead.
+            val gecerliDers = temizDers?.takeIf { aday ->
+                runCatching { db.dersDao().idIleGetir(aday) }.getOrNull() != null
+            }
+            val gecerliKonu = temizKonu?.takeIf { aday ->
+                runCatching { db.konuDao().idIleGetir(aday) }.getOrNull() != null
+            }
             val eskiSoru = id?.let { aranan -> mevcut.sorular.firstOrNull { it.id == aranan } }
             if (id != null && eskiSoru == null) return@withLock null
             val eskiGorselMap = eskiSoru?.gorseller.orEmpty().associateBy { it.id }
@@ -323,8 +332,8 @@ class OgretmenDeposu(
                     id = eskiSoru?.id ?: UUID.randomUUID().toString(),
                     grupId = grupId,
                     baslik = temizBaslik,
-                    dersId = temizDers,
-                    konuId = temizKonu,
+                    dersId = gecerliDers,
+                    konuId = gecerliKonu,
                     kaynak = temizKaynak,
                     kimSordu = temizKimSordu,
                     planGun = planGun,
