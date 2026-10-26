@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -17,6 +18,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextReplacement
 import androidx.room.Room
 import com.keremtulu.questionnote.R
@@ -310,7 +312,10 @@ class KirpmaSorulacakVeOgretmenArayuzTest {
             // Kart aksiyonu listenin altında kalabildiği için önce görünür alana kaydırılır.
             compose.onNodeWithTag("ogretmen_soru_listesi")
                 .performScrollToNode(hasTestTag("ogretmen_baska_gruba_ekle_${soru.id}"))
-            compose.onNodeWithTag("ogretmen_baska_gruba_ekle_${soru.id}").performClick()
+            // Kart tıklaması ile iç içe geçen dokunma alanı testte kaybolabiliyor; düğümün kendi
+            // OnClick semantiği doğrudan çalıştırılır (dokunma yönlendirmesine bağlı kalmadan).
+            compose.onNodeWithTag("ogretmen_baska_gruba_ekle_${soru.id}")
+                .performSemanticsAction(SemanticsActions.OnClick)
             // Dialog kendi penceresinde açılır: önce kabuğun, sonra satırların çizilmesini bekle.
             compose.waitUntil(5_000) {
                 compose.onAllNodesWithTag("ogretmen_kopyala_dialog").fetchSemanticsNodes().isNotEmpty()
