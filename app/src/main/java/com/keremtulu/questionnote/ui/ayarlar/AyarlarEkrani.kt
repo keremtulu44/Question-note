@@ -33,6 +33,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -111,7 +112,7 @@ fun AyarlarEkrani(
             modifier = Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets),
             contentPadding = PaddingValues(
                 start = 20.dp,
-                top = 12.dp,
+                top = 20.dp,
                 end = 20.dp,
                 bottom = 24.dp,
             ),
@@ -170,7 +171,6 @@ fun AyarlarEkrani(
                     }
                 }
             }
-            item { MotorAyarlariKarti(tekrarPolitikasi, motorTanisi) }
             item {
                 val tumDersler by produceState(emptyList<Ders>()) {
                     dersRepository.dersleriIzle(false).collect { value = it }
@@ -321,9 +321,12 @@ fun AyarlarEkrani(
                             fontWeight = FontWeight.SemiBold,
                         )
                     }
-                    Row(
+                    @OptIn(ExperimentalLayoutApi::class)
+                    FlowRow(
                         modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                        maxItemsInEachRow = if (LocalDensity.current.fontScale >= 1.5f) 1 else 2,
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         PremiumOutlinedButton(
                             modifier = Modifier.weight(1f),
@@ -343,26 +346,13 @@ fun AyarlarEkrani(
             item {
                 Bolum(stringResource(R.string.settings_category_other)) {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Column(Modifier.weight(1f).padding(end = 12.dp)) {
-                            Text(stringResource(R.string.settings_premium_title), style = MaterialTheme.typography.bodyMedium)
-                            Text(stringResource(R.string.settings_premium_note), style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                        PremiumOutlinedButton(onClick = onPremiumDemo, enabled = !yedeklemeIslemde) {
-                            Text(stringResource(R.string.settings_premium_open))
-                        }
-                    }
-                    Row(
                         modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         Text(
                             stringResource(R.string.menu_image_maintenance),
+                            modifier = Modifier.weight(1f).padding(end = 12.dp),
                             color = MaterialTheme.colorScheme.onSurface,
                             style = MaterialTheme.typography.bodyMedium,
                         )
@@ -377,6 +367,7 @@ fun AyarlarEkrani(
                     ) {
                         Text(
                             stringResource(R.string.menu_catalog),
+                            modifier = Modifier.weight(1f).padding(end = 12.dp),
                             color = MaterialTheme.colorScheme.onSurface,
                             style = MaterialTheme.typography.bodyMedium,
                         )

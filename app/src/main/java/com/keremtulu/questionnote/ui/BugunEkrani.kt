@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import com.keremtulu.questionnote.domain.repeat.CalismaSorulariniSirala
+import com.keremtulu.questionnote.domain.repeat.GunlukCalismaPlani
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -175,7 +175,7 @@ fun BugunEkrani(
     ) { insets ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets),
-            contentPadding = PaddingValues(start = 20.dp, top = 10.dp, end = 20.dp, bottom = 104.dp),
+            contentPadding = PaddingValues(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 104.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             item {
@@ -405,22 +405,24 @@ private fun BugunGunKarti(
                             style = MaterialTheme.typography.labelLarge,
                         )
                     }
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        ready.sorular.forEach { row ->
-                            GunSoruSatiri(
-                                row = row,
-                                today = today,
-                                onClick = {
-                                    onOturumBaslat(listOf(row.soru), mapOf(row.ders.id to row.ders))
-                                },
-                            )
-                        }
+                    val plan = remember(ready.sorular, today, hedef, yapilan) {
+                        GunlukCalismaPlani.olustur(
+                            ready.sorular.map { it.soru }, today.toEpochDay().toInt(), hedef, yapilan,
+                        )
                     }
                     val dersler = ready.sorular.associate { it.ders.id to it.ders }
-                    val sorular = CalismaSorulariniSirala.akilliOncelik(
-                        ready.sorular.map { it.soru },
-                        today.toEpochDay().toInt(),
-                    ).take((hedef - yapilan).coerceIn(5, 30))
+                    val satirlar = ready.sorular.associateBy { it.soru.id }
+                    val sorular = plan.tur
+                    Text(
+                        stringResource(R.string.today_queue_summary, plan.geciken, count - plan.geciken),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colors.onPrimaryContainer,
+                    )
+                    Text(
+                        stringResource(R.string.today_batch_explanation, sorular.size, plan.kalan),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = colors.onPrimaryContainer,
+                    )
                     PremiumGradyanButon(
                         onClick = { onOturumBaslat(sorular, dersler) },
                         modifier = Modifier.fillMaxWidth(),
@@ -434,6 +436,20 @@ private fun BugunGunKarti(
                             )
                         }
                     }
+                    Text(
+                        stringResource(R.string.today_preview_title),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = colors.onPrimaryContainer,
+                    )
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        plan.onizleme.forEach { soru ->
+                            val row = satirlar.getValue(soru.id)
+                            GunSoruSatiri(row, today) {
+                                onOturumBaslat(listOf(row.soru), mapOf(row.ders.id to row.ders))
+                            }
+                        }
+                    }
+
                 }
             }
             KutlamaParcaciklari(
@@ -498,20 +514,21 @@ private fun GunSoruSatiri(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
+            Surface(
+                shape = CircleShape,
+                color = if (lateDays == 0) colors.secondaryContainer else colors.errorContainer,
+            ) {
+                Text(
+                    text = if (lateDays == 0) stringResource(R.string.today_due_today)
+                    else pluralStringResource(R.plurals.today_overdue_days, lateDays, lateDays),
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                    color = if (lateDays == 0) colors.onSecondaryContainer else colors.onErrorContainer,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
         }
-        Surface(
-            shape = CircleShape,
-            color = if (lateDays == 0) colors.secondaryContainer else colors.errorContainer,
-        ) {
-            Text(
-                text = if (lateDays == 0) stringResource(R.string.today_due_today)
-                else pluralStringResource(R.plurals.today_overdue_days, lateDays, lateDays),
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-                color = if (lateDays == 0) colors.onSecondaryContainer else colors.onErrorContainer,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.SemiBold,
-            )
-        }
+
     }
 }
 

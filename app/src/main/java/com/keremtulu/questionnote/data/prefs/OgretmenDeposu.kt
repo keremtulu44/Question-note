@@ -372,6 +372,22 @@ class OgretmenDeposu(
         }
     }
 
+    /** Targeted update: planning must never overwrite notes, images or a concurrently solved status. */
+    suspend fun planDegistir(soruId: String, gun: Long?): Boolean {
+        baslat()
+        return mutex.withLock {
+            val degisen = try {
+                dao.planGuncelle(soruId, gun, System.currentTimeMillis())
+            } catch (iptal: kotlinx.coroutines.CancellationException) {
+                throw iptal
+            } catch (_: Exception) {
+                return@withLock false
+            }
+            if (degisen > 0) yenile()
+            degisen > 0
+        }
+    }
+
     suspend fun durumDegistir(soruId: String, yeniDurum: OgretmenDurum): Boolean {
         baslat()
         return topluDurumDegistir(setOf(soruId), yeniDurum) > 0

@@ -233,7 +233,7 @@ fun SoruDetayEkrani(
                 val cozumVar = !soru.cozumNotu.isNullOrBlank() || cozumGorselleri.isNotEmpty()
                 LazyColumn(
                     modifier = Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding),
-                    contentPadding = PaddingValues(start = 20.dp, top = 8.dp, end = 20.dp, bottom = 32.dp),
+                    contentPadding = PaddingValues(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 32.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     item {

@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
@@ -517,7 +519,8 @@ fun YanlisDefteriUygulamasi(
             }
         },
     ) { insets ->
-        Box(Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets)) {
+        Box(Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets)
+            .wrapContentWidth(androidx.compose.ui.Alignment.CenterHorizontally).widthIn(max = 840.dp)) {
             AnimatedContent(
                 targetState = ekran,
                 transitionSpec = {

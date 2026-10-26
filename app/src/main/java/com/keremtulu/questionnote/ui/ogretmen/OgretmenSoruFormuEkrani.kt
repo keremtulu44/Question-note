@@ -369,7 +369,7 @@ internal fun OgretmenSoruFormuEkrani(
             .fillMaxSize()
             .padding(insetler)
             .consumeWindowInsets(insetler),
-        contentPadding = PaddingValues(start = 18.dp, top = 8.dp, end = 18.dp, bottom = 24.dp),
+        contentPadding = PaddingValues(start = 18.dp, top = 20.dp, end = 18.dp, bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         item {

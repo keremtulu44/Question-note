@@ -24,6 +24,7 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -126,6 +127,11 @@ internal fun OgretmenGrupDetayEkrani(
             konuAdlari = konuAdlari,
         )
     }
+    // Hidden questions must not remain targets after a search, tab or day-filter change.
+    val gorunurIdler = remember(liste) { liste.mapTo(mutableSetOf()) { it.id } }
+    val etkinSecim = seciliIdler.intersect(gorunurIdler)
+    LaunchedEffect(gorunurIdler) { seciliIdler = seciliIdler.intersect(gorunurIdler) }
+
     val filtreAktif = arama.isNotBlank() || seciliSoran != null
 
     fun secimiTemizle() {
@@ -204,7 +210,7 @@ internal fun OgretmenGrupDetayEkrani(
     Box(Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.fillMaxSize().testTag("ogretmen_soru_listesi"),
-            contentPadding = PaddingValues(start = 18.dp, top = 8.dp, end = 18.dp, bottom = 130.dp),
+            contentPadding = PaddingValues(start = 18.dp, top = 20.dp, end = 18.dp, bottom = 130.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             item {
@@ -347,7 +353,7 @@ internal fun OgretmenGrupDetayEkrani(
                     grupAdi = grup.ad,
                     dersAdi = soru.dersId?.let { dersAdlari[it] },
                     konuAdi = soru.konuId?.let { konuAdlari[it] },
-                    koyuTema = false,
+                    koyuTema = androidx.compose.foundation.isSystemInDarkTheme(),
                     gorselDeposu = gorselDeposu,
                     onTamEkran = { sunumId = soru.id },
                     onCozulduDegistir = { cozuldu ->
@@ -423,14 +429,14 @@ internal fun OgretmenGrupDetayEkrani(
 
         if (secimModu) {
             SecimCubugu(
-                adet = seciliIdler.size,
+                adet = etkinSecim.size,
                 modifier = Modifier.align(Alignment.BottomCenter).padding(horizontal = 14.dp, vertical = 90.dp),
-                onCoz = { durumUygula(seciliIdler, OgretmenDurum.COZULDU) },
-                onCozme = { durumUygula(seciliIdler, OgretmenDurum.BEKLIYOR) },
-                onArsivle = { durumUygula(seciliIdler, OgretmenDurum.ARSIV) },
-                onSil = { silinecekIdler = seciliIdler },
+                onCoz = { durumUygula(etkinSecim, OgretmenDurum.COZULDU) },
+                onCozme = { durumUygula(etkinSecim, OgretmenDurum.BEKLIYOR) },
+                onArsivle = { durumUygula(etkinSecim, OgretmenDurum.ARSIV) },
+                onSil = { silinecekIdler = etkinSecim },
                 onPaylas = {
-                    val hedefler = tumListe.filter { it.id in seciliIdler }
+                    val hedefler = tumListe.filter { it.id in etkinSecim }
                     secimiTemizle()
                     paylas(hedefler)
                 },

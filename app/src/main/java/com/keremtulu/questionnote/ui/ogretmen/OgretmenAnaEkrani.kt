@@ -6,8 +6,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
@@ -122,7 +126,7 @@ fun OgretmenAnaEkrani(
     }
 
     val klavyeAcik = WindowInsets.ime.getBottom(LocalDensity.current) > 0
-    val bugun = remember { bugunEpochGun() }
+    val bugun = com.keremtulu.questionnote.ui.bilesenler.hatirlaYerelGun().toEpochDay()
     val dersAdlari = remember(dersler) { dersler.associate { it.id to it.ad } }
     val konuAdlari = remember(konular) { konular.associate { it.id to it.ad } }
 
@@ -146,7 +150,7 @@ fun OgretmenAnaEkrani(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        contentWindowInsets = WindowInsets.safeDrawing,
         snackbarHost = {
             SnackbarHost(snackbarHostState) { data ->
                 Surface(
@@ -202,7 +206,8 @@ fun OgretmenAnaEkrani(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(insets)
-                .consumeWindowInsets(insets),
+                .consumeWindowInsets(insets)
+                .wrapContentWidth(Alignment.CenterHorizontally).widthIn(max = 840.dp),
         ) {
             if (!baslatildi) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -447,6 +452,7 @@ internal fun OgretmenAltMenu(
 }
 
 /** Shared header used by the queue and class list so both screens state the same numbers. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun OgretmenHeroKarti(
     kicker: String,
@@ -484,9 +490,11 @@ internal fun OgretmenHeroKarti(
                 color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.85f),
                 style = MaterialTheme.typography.bodyMedium,
             )
-            Row(
+            FlowRow(
                 modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                maxItemsInEachRow = if (LocalDensity.current.fontScale >= 1.5f) 1 else 3,
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 HeroSayacKutusu(
                     deger = grupSayisi,
@@ -541,7 +549,7 @@ internal fun HeroSayacKutusu(
                 text = etiket,
                 color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.78f),
                 style = MaterialTheme.typography.labelSmall,
-                maxLines = 1,
+                maxLines = 3,
             )
         }
     }

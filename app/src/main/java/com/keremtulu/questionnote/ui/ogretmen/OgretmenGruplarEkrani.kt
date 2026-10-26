@@ -82,7 +82,7 @@ internal fun OgretmenGruplarEkrani(
     Box(Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 18.dp, top = 10.dp, end = 18.dp, bottom = 110.dp),
+            contentPadding = PaddingValues(start = 18.dp, top = 20.dp, end = 18.dp, bottom = 110.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item {
@@ -153,8 +153,11 @@ internal fun OgretmenGruplarEkrani(
                         grup = grup,
                         cozulmemis = sorulari.count { it.kuyrukta },
                         cozulmus = sorulari.count { it.cozuldu },
-                        koyuTema = false,
+                        koyuTema = androidx.compose.foundation.isSystemInDarkTheme(),
                         onClick = { onGrupAc(grup.id) },
+                        isOzeti = remember(sorulari, bugun) {
+                            com.keremtulu.questionnote.domain.model.OgretmenIsOzeti.hesapla(sorulari, bugun)
+                        },
                     )
                     grup.dersId?.let { dersId ->
                         val ad = dersAdlari[dersId]

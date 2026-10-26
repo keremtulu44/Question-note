@@ -3,6 +3,27 @@
 **Son güncelleme: 2026-10-26.** Önce bu belge, `docs/DERLEME_RAPORU.md`,
 `docs/PREMIUM_GORSEL_GELISTIRME.md` ve [P4–P6 sözleşme/kanıt kaydı](docs/P4_P5_P6_UYGULAMA.md) okunur.
 
+## Kullanım olgunluğu çalışması (2026-10-26, derleme bekliyor)
+
+`arena/263f59f4-question-note` üzerinde öğrenci Bugün kuyruğu en fazla üç önizlemeye
+indirildi; tur/önizleme aynı saf `GunlukCalismaPlani` sırasını kullanır. Öğrenci
+ayarlarında demo/motor kartları ve ilerlemede teknik ayrıntı menüsü kaldırıldı;
+öğretmen moduna geçiş korundu. İlerleme çalışma önerisi, yedi günlük kayıt ve ders
+pekişmesini öne alır. Öğretmen host safeDrawing, geniş ekran içerik sınırı, tema ve
+canlı tarih düzeltmeleri; kuyrukta hedefli Room güncellemesiyle hızlı planlama eklendi.
+
+İkinci geçiş: kart etiket/işlemleri sarılır, büyük yazı düğmeleri alt alta gelir;
+gruba özgü iş özeti, kuyruk silme onayı + geri alma ve görünür listeyle sınırlı
+toplu seçim eklendi. Yeni 320 dp / yüzde 200 yazı testleri ve kuyruk silme testi
+kaynak olarak hazır; çalıştırılmadı. 30 değişen/yeni Kotlin dosyasında ayrıştırıcı
+sözdizimi hatası yok (derleme kanıtı değildir).
+
+Ayrıntılar, ihtiyaç temelli öneriler ve cihaz kabul listesi:
+[`docs/OLGUNLASMA_INCELEMESI.md`](docs/OLGUNLASMA_INCELEMESI.md).
+Statik kaynak kontrolü ve diff kontrolü geçti. **Java/SDK olmadığı için yeni Kotlin,
+JUnit, APK ve görsel doğrulama yapılmadı.** Aşağıdaki eski CI sonuçları bu değişikliklerin
+kanıtı değildir. Sürüm, Room şeması, yedek biçimi artırılmadı.
+
 ## T3 uygulandı ve CI'dan geçti (2026-10-26)
 
 Kullanıcı kararı: **yalnız T3** ve **tamamı çevrimdışı** (bulut/hesap/bildirim yok, Play'e yüklenebilir

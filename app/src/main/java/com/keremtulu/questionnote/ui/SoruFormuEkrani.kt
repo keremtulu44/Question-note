@@ -516,7 +516,7 @@ fun SoruFormuEkrani(
                     .padding(padding)
                     .consumeWindowInsets(padding)
                     .testTag("soru_formu_liste"),
-                contentPadding = PaddingValues(start = 18.dp, top = 8.dp, end = 18.dp, bottom = 24.dp),
+                contentPadding = PaddingValues(start = 18.dp, top = 20.dp, end = 18.dp, bottom = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
                 item {

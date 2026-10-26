@@ -12,6 +12,8 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -201,6 +203,38 @@ class OgretmenT3ArayuzTest {
             val metin = ic?.getStringExtra(Intent.EXTRA_TEXT).orEmpty()
             assertTrue(metin.contains("Üçgenler"))
             assertTrue("Öğrenci adı paylaşılmamalı: $metin", !metin.contains("Zeynep"))
+        } finally {
+            kaynak.delete()
+        }
+    }
+
+    @Test
+    fun kuyrukSilmeOnayIsterVeGeriAlSoruyuKorur() {
+        val kaynak = testGorseli()
+        try {
+            val grup = runBlocking { requireNotNull(ogretmenDeposu.grupEkle("8A")) }
+            val soru = soruEkle(grup.id, "Geometri", null, kaynak)
+            ekraniAc()
+            compose.waitUntil(5_000) {
+                compose.onAllNodesWithTag("ogretmen_grup_${grup.id}").fetchSemanticsNodes().isNotEmpty()
+            }
+            compose.onNodeWithContentDescription(context.getString(R.string.teacher_nav_queue)).performClick()
+            compose.onNodeWithTag("teacher-queue-list").performScrollToNode(hasText(context.getString(R.string.question_delete)))
+            compose.onNodeWithText(context.getString(R.string.question_delete))
+                .performSemanticsAction(SemanticsActions.OnClick)
+            compose.onNodeWithTag("teacher_queue_delete_dialog").assertIsDisplayed()
+            assertEquals(1, ogretmenDeposu.anlikVeri().sorular.size)
+            compose.onNodeWithText(context.getString(R.string.common_cancel)).performClick()
+            assertEquals(1, ogretmenDeposu.anlikVeri().sorular.size)
+            compose.onNodeWithText(context.getString(R.string.question_delete))
+                .performSemanticsAction(SemanticsActions.OnClick)
+            compose.onNodeWithTag("teacher_queue_delete_confirm").performClick()
+            compose.waitUntil(5_000) { ogretmenDeposu.anlikVeri().sorular.isEmpty() }
+            compose.onNodeWithText(context.getString(R.string.teacher_undo)).performClick()
+            compose.waitUntil(5_000) { ogretmenDeposu.anlikVeri().sorular.any { it.id == soru.id } }
+            val restored = ogretmenDeposu.anlikVeri().sorular.single()
+            assertEquals(soru.gorseller, restored.gorseller)
+            assertEquals(soru.baslik, restored.baslik)
         } finally {
             kaynak.delete()
         }

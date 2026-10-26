@@ -271,7 +271,7 @@ fun FiltreliCalismaEkrani(
                 .padding(insets)
                 .consumeWindowInsets(insets)
                 .testTag("practice-filter-list"),
-            contentPadding = PaddingValues(start = 20.dp, top = 10.dp, end = 20.dp, bottom = 32.dp),
+            contentPadding = PaddingValues(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item {

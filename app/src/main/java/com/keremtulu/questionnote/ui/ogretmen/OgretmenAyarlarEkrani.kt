@@ -110,7 +110,7 @@ internal fun OgretmenAyarlarEkrani(
         modifier = Modifier
             .fillMaxSize()
             .consumeWindowInsets(WindowInsets.safeDrawing),
-        contentPadding = PaddingValues(start = 18.dp, top = 12.dp, end = 18.dp, bottom = 108.dp),
+        contentPadding = PaddingValues(start = 18.dp, top = 20.dp, end = 18.dp, bottom = 108.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         item {

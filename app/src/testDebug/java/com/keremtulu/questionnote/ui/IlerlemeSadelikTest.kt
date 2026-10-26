@@ -39,8 +39,8 @@ class IlerlemeSadelikTest {
         compose.onAllNodesWithTag("analysis-action").assertCountEquals(1)
         val textSize = compose.onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsProperties.Text)).fetchSemanticsNodes()
             .sumOf { node -> node.config[SemanticsProperties.Text].sumOf { it.text.length } }
-        assertTrue("Overview copy budget exceeded: $textSize characters", textSize < 420)
-        compose.onNodeWithTag("progress-list").performScrollToNode(hasTestTag("progress-details"))
+        assertTrue("Overview copy budget exceeded: $textSize characters", textSize < 650)
+        compose.onNodeWithTag("progress-list").performScrollToNode(hasTestTag("progress-collection"))
         compose.onNodeWithTag("progress-collection").assertExists()
         listOf("analysis-section", "progress-time-profile", "progress-xp-breakdown", "progress-lifetime-stats")
             .forEach { compose.onNodeWithTag(it).assertDoesNotExist() }
@@ -63,54 +63,43 @@ class IlerlemeSadelikTest {
         assertEquals(proposal.turBoyutu, route?.second)
     }
 
-    @Test fun detailNavigationComposesOnlyTheChosenSectionAndBackRestoresOverview() {
+    @Test fun weeklySummaryReplacesTechnicalDetailNavigation() {
         val sample = ornekIlerlemeOzeti()
         compose.setContent { YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
             SeviyeSayfasi(SeviyeDurumuUi.ozetten(sample))
         } }
-        bolumAc("progress-details", "progress-list")
-        compose.onNodeWithTag("analysis-section").assertDoesNotExist()
-        bolumAc("progress-open-plan")
-        compose.onNodeWithTag("analysis-plan").assertExists()
-        compose.onNodeWithTag("analysis-comparison").assertDoesNotExist()
-        compose.onNodeWithTag("analysis-groups").assertDoesNotExist()
-        compose.runOnIdle { compose.activity.onBackPressedDispatcher.onBackPressed() }
-        compose.onNodeWithTag("progress-open-plan").assertExists()
-        compose.runOnIdle { compose.activity.onBackPressedDispatcher.onBackPressed() }
-        compose.onNodeWithTag("progress-list").assertExists()
-        compose.onNodeWithTag("progress-details").assertIsDisplayed()
-        compose.onNodeWithTag("analysis-section").assertDoesNotExist()
+        compose.onNodeWithTag("progress-list").performScrollToNode(hasTestTag("progress-weekly-summary"))
+        compose.onNodeWithTag("progress-weekly-summary").assertExists()
+        val a = requireNotNull(sample.analiz)
+        compose.onNodeWithText(text(R.string.progress_weekly_summary,
+            a.ritim.count { it.tekrar > 0 }, a.ritim.sumOf { it.tekrar })).assertExists()
+        compose.onNodeWithTag("progress-details").assertDoesNotExist()
     }
 
-    @Test fun selectedDetailSurvivesSavedStateRestorationWithoutOpeningEverything() {
-        val sample = ornekIlerlemeOzeti()
+    @Test fun collectionSurvivesSavedStateRestoration() {
         val restoration = StateRestorationTester(compose)
         restoration.setContent { YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
-            SeviyeSayfasi(SeviyeDurumuUi.ozetten(sample))
+            SeviyeSayfasi(SeviyeDurumuUi.ozetten(ornekIlerlemeOzeti()))
         } }
-        bolumAc("progress-details", "progress-list")
-        bolumAc("progress-open-comparison")
+        bolumAc("progress-collection", "progress-list")
         restoration.emulateSavedInstanceStateRestore()
-        compose.onNodeWithTag("analysis-comparison").assertExists()
-        compose.onNodeWithTag("analysis-plan").assertDoesNotExist()
-        compose.onNodeWithText(text(R.string.progress_comparison_pending)).assertExists()
+        compose.onNodeWithTag("progress-open-ranks").assertExists()
+        compose.onNodeWithTag("progress-details").assertDoesNotExist()
     }
 
-    @Test fun loadingRefreshKeepsTheChosenDetailInsteadOfReturningToTheOverview() {
+    @Test fun loadingRefreshKeepsCollectionAndBackReturnsToOverview() {
         val sample = ornekIlerlemeOzeti()
         val state = mutableStateOf<SeviyeDurumuUi>(SeviyeDurumuUi.ozetten(sample))
         compose.setContent { YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
             SeviyeSayfasi(state.value)
         } }
-        bolumAc("progress-details", "progress-list")
-        bolumAc("progress-open-plan")
+        bolumAc("progress-collection", "progress-list")
         compose.runOnIdle { state.value = SeviyeDurumuUi.Yukleniyor }
         compose.onNodeWithTag("progress-loading").assertExists()
         compose.runOnIdle { state.value = SeviyeDurumuUi.ozetten(sample) }
-        compose.onNodeWithTag("analysis-plan").assertExists()
-        compose.onNodeWithTag("progress-hero").assertDoesNotExist()
+        compose.onNodeWithTag("progress-open-ranks").assertExists()
         compose.runOnIdle { compose.activity.onBackPressedDispatcher.onBackPressed() }
-        compose.onNodeWithTag("progress-open-plan").assertExists()
+        compose.onNodeWithTag("progress-list").assertExists()
     }
 
     @Test fun realTodayCountUpdatesWithoutClampingItsLabelOrInventingXp() {

@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -151,7 +153,7 @@ fun SorulacaklarEkrani(
                 .padding(insets)
                 .consumeWindowInsets(insets)
                 .testTag("sorulacaklar_liste"),
-            contentPadding = PaddingValues(start = 18.dp, top = 8.dp, end = 18.dp, bottom = 32.dp),
+            contentPadding = PaddingValues(start = 18.dp, top = 20.dp, end = 18.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             item {
@@ -366,6 +368,7 @@ fun SorulacaklarEkrani(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SorulacakSoruKarti(
     ders: Ders,
@@ -427,13 +430,15 @@ private fun SorulacakSoruKarti(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            Row(
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
+                maxItemsInEachRow = if (androidx.compose.ui.platform.LocalDensity.current.fontScale >= 1.5f) 1 else 2,
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 PremiumOutlinedButton(
                     onClick = onTamEkran,
-                    modifier = Modifier.weight(1f).heightIn(min = 46.dp),
+                    modifier = Modifier.weight(1f).heightIn(min = 48.dp),
                     shape = RoundedCornerShape(14.dp),
                 ) {
                     Text(stringResource(R.string.ask_teacher_open_fullscreen))
@@ -442,7 +447,7 @@ private fun SorulacakSoruKarti(
                     onClick = onCozdurdum,
                     modifier = Modifier
                         .weight(1f)
-                        .heightIn(min = 46.dp)
+                        .heightIn(min = 48.dp)
                         .testTag("sorulacak_cozdurdum_${soru.id}"),
                     shape = RoundedCornerShape(14.dp),
                 ) {

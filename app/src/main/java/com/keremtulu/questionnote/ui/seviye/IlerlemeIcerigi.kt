@@ -55,17 +55,11 @@ private val BakirIsik = Color(0xFFEFC18A)
 
 /** Navigation is presentation state only. Opening a detail never creates a measurement or changes a plan. */
 private enum class IlerlemeBolumu(val baslik: Int) {
-    OZET(R.string.progress_headline), AYRINTILAR(R.string.progress_details_title),
-    EMEK(R.string.progress_effort_details), RITIM(R.string.progress_rhythm_short),
-    PLAN(R.string.progress_plan_short), DONEM(R.string.progress_comparison_short),
-    GRUPLAR(R.string.progress_groups_short), DERSLER(R.string.level_lessons_title),
-    SURE(R.string.profile_title), ROZETLER(R.string.progress_collection_title), RUTBELER(R.string.rank_gallery_title);
+    OZET(R.string.progress_headline),
+    ROZETLER(R.string.progress_collection_title), RUTBELER(R.string.rank_gallery_title);
 
-    fun ust(): IlerlemeBolumu = when (this) {
-        OZET, AYRINTILAR, ROZETLER -> OZET
-        RUTBELER -> ROZETLER
-        else -> AYRINTILAR
-    }
+    fun ust(): IlerlemeBolumu = if (this == RUTBELER) ROZETLER else OZET
+
 }
 
 @Composable
@@ -84,11 +78,10 @@ internal fun IlerlemeIcerigi(
     val padding = PaddingValues(20.dp, insets.calculateTopPadding() + 16.dp, 20.dp, insets.calculateBottomPadding() + 24.dp)
 
     if (sayfa == IlerlemeBolumu.OZET) {
-        // Four visual blocks, one primary action. Technical panels are not composed off-screen underneath this summary.
+        // Study first, evidence second, rewards last. No technical report navigation.
         LazyColumn(state = ozetListesi, modifier = Modifier.fillMaxSize().testTag("progress-list"),
             contentPadding = padding, verticalArrangement = Arrangement.spacedBy(16.dp)) {
             item(key = "baslik") { IlerlemeBasligi() }
-            item(key = "rutbe") { YeniRutbeKarti(ozet) }
             item(key = "bugun") {
                 IlerlemePaneli(Modifier.testTag(if (yetersizVeri) "progress-empty" else "progress-today")) {
                     if (ozet.soruSayisi == 0) {
@@ -112,6 +105,16 @@ internal fun IlerlemeIcerigi(
                     }
                 }
             }
+            ozet.analiz?.let { analiz ->
+                item(key = "hafta") { HaftalikCalismaOzeti(analiz) }
+            }
+            if (ozet.dersler.isNotEmpty()) item(key = "dersler") {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    BolumBasligi(stringResource(R.string.level_lessons_title))
+                    DersPekismesi(ozet.dersler)
+                }
+            }
+            item(key = "rutbe") { YeniRutbeKarti(ozet) }
             item(key = "gecisler") {
                 IlerlemePaneli(icerikBosluk = 0) {
                     IlerlemeGecisSatiri(stringResource(R.string.progress_collection_title),
@@ -122,12 +125,7 @@ internal fun IlerlemeIcerigi(
                             if (rozet == null) GizliRozetGorseli(Modifier.size(40.dp))
                             else RozetGorseli(rozet, true, Modifier.size(40.dp))
                         })
-                    if (ozet.soruSayisi > 0) {
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                        IlerlemeGecisSatiri(stringResource(R.string.progress_details_title),
-                            stringResource(R.string.progress_details_hint), "progress-details",
-                            onClick = { sayfa = IlerlemeBolumu.AYRINTILAR })
-                    }
+
                 }
             }
         }
@@ -137,53 +135,17 @@ internal fun IlerlemeIcerigi(
             verticalArrangement = Arrangement.spacedBy(16.dp)) {
             item { AyrintiBasligi(stringResource(sayfa.baslik)) { sayfa = sayfa.ust() } }
             when (sayfa) {
-                IlerlemeBolumu.AYRINTILAR -> item {
-                    IlerlemePaneli(icerikBosluk = 0) {
-                        AyrintiGecisi(IlerlemeBolumu.EMEK, "progress-open-effort") { sayfa = it }
-                        if (ozet.analiz != null) {
-                            if (ozet.tekrarSayisi > 0) {
-                                AyrintiGecisi(IlerlemeBolumu.RITIM, "progress-open-rhythm") { sayfa = it }
-                                AyrintiGecisi(IlerlemeBolumu.GRUPLAR, "progress-open-groups") { sayfa = it }
-                                AyrintiGecisi(IlerlemeBolumu.DONEM, "progress-open-comparison") { sayfa = it }
-                            }
-                            AyrintiGecisi(IlerlemeBolumu.PLAN, "progress-open-plan") { sayfa = it }
-                        }
-                        if (ozet.dersler.isNotEmpty()) AyrintiGecisi(IlerlemeBolumu.DERSLER, "progress-open-lessons") { sayfa = it }
-                        if (ozet.sureKapsami != null && ozet.tekrarSayisi > 0)
-                            AyrintiGecisi(IlerlemeBolumu.SURE, "progress-open-time") { sayfa = it }
-                    }
-                }
-                IlerlemeBolumu.EMEK -> {
-                    item { Text(stringResource(R.string.progress_scope), style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant) }
-                    item { Istatistikler(ozet) }
-                    item { XpDokumu(ozet) }
-                }
                 IlerlemeBolumu.ROZETLER -> {
                     item { IlerlemeGecisSatiri(stringResource(R.string.rank_gallery_title), null, "progress-open-ranks",
                         onClick = { sayfa = IlerlemeBolumu.RUTBELER }) }
                     item { RozetKoleksiyonu(ozet.sahipRozetler, ozet.rozetGirdisi, kazanilmaZamani) }
                 }
                 IlerlemeBolumu.RUTBELER -> item { RutbeYolculugu(ozet.durum, baslikGoster = false) }
-                IlerlemeBolumu.DERSLER -> item { DersPekismesi(ozet.dersler) }
-                IlerlemeBolumu.SURE -> item { ozet.sureKapsami?.let { SureProfiliKarti(it, baslikGoster = false) } }
-                IlerlemeBolumu.RITIM, IlerlemeBolumu.PLAN, IlerlemeBolumu.DONEM, IlerlemeBolumu.GRUPLAR -> item {
-                    ozet.analiz?.let { a -> GelisimAnaliziKarti(a, when (sayfa) {
-                        IlerlemeBolumu.RITIM -> AnalizBolumu.RITIM
-                        IlerlemeBolumu.PLAN -> AnalizBolumu.PLAN
-                        IlerlemeBolumu.DONEM -> AnalizBolumu.DONEM
-                        else -> AnalizBolumu.GRUPLAR
-                    }, onCalis) }
-                }
                 IlerlemeBolumu.OZET -> Unit
             }
         }
     }
 }
-
-@Composable
-private fun AyrintiGecisi(bolum: IlerlemeBolumu, tag: String, onSec: (IlerlemeBolumu) -> Unit) =
-    IlerlemeGecisSatiri(stringResource(bolum.baslik), null, tag, onClick = { onSec(bolum) })
 
 @Composable
 internal fun IlerlemeGecisSatiri(baslik: String, alt: String?, tag: String, onClick: () -> Unit,
@@ -203,6 +165,66 @@ internal fun IlerlemeGecisSatiri(baslik: String, alt: String?, tag: String, onCl
                 drawLine(renk, Offset(size.width * .65f, size.height * .5f), Offset(size.width * .35f, size.height * .8f), 2.dp.toPx(), StrokeCap.Round)
             }
         }
+    }
+}
+
+@Composable
+private fun HaftalikCalismaOzeti(a: com.keremtulu.questionnote.domain.gelisim.GelisimAnalizi) {
+    val toplam = a.ritim.sumOf { it.tekrar }
+    val aktifGun = a.ritim.count { it.tekrar > 0 }
+    val tarih = remember { java.time.format.DateTimeFormatter.ofPattern("d MMM", Locale.forLanguageTag("tr-TR")) }
+    IlerlemePaneli(Modifier.testTag("progress-weekly-summary")) {
+        BolumBasligi(stringResource(R.string.progress_weekly_title))
+        Text(stringResource(R.string.progress_action_scope, a.kapsamAdi),
+            style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(stringResource(R.string.progress_weekly_summary, aktifGun, toplam),
+            style = MaterialTheme.typography.titleMedium)
+        val enYuksek = (a.ritim.maxOfOrNull { it.tekrar } ?: 0).coerceAtLeast(1)
+        if (LocalDensity.current.fontScale < 1.5f) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.Bottom) {
+                a.ritim.forEach { gun ->
+                    val aciklama = tarih.format(java.time.LocalDate.ofEpochDay(gun.gun.toLong())) + ": " +
+                        stringResource(R.string.progress_weekly_reviews, gun.tekrar)
+                    Column(Modifier.weight(1f).clearAndSetSemantics { contentDescription = aciklama },
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(gun.tekrar.toString(), style = MaterialTheme.typography.labelMedium)
+                        Box(Modifier.fillMaxWidth().height(64.dp).clip(RoundedCornerShape(6.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.BottomCenter) {
+                            if (gun.tekrar > 0) Box(Modifier.fillMaxWidth()
+                                .height((64f * gun.tekrar / enYuksek).dp)
+                                .background(if (gun.gun == a.gun) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.secondary))
+                        }
+                        Text(java.time.LocalDate.ofEpochDay(gun.gun.toLong()).dayOfMonth.toString(),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+            }
+        } else {
+            a.ritim.forEach { gun ->
+                Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text(tarih.format(java.time.LocalDate.ofEpochDay(gun.gun.toLong())), Modifier.weight(1f),
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = if (gun.gun == a.gun) FontWeight.SemiBold else FontWeight.Normal)
+                        Text(stringResource(R.string.progress_weekly_reviews, gun.tekrar),
+                            style = MaterialTheme.typography.bodyMedium)
+                    }
+                    // Decorative count bars: exact accessible counts remain in text above; no fake percentage.
+                    Box(Modifier.fillMaxWidth().height(4.dp).clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant).clearAndSetSemantics {}) {
+                        if (gun.tekrar > 0) Box(Modifier.fillMaxWidth(gun.tekrar.toFloat() / enYuksek)
+                            .height(4.dp).background(if (gun.gun == a.gun) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.secondary))
+                    }
+                }
+            }
+        }
+        Text(stringResource(R.string.progress_weekly_note), style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -309,46 +331,6 @@ private fun GunlukHedef(tekrar: Int, hedef: Int) {
             Text(stringResource(R.string.progress_daily_count, tekrar, hedef), style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold, modifier = Modifier.testTag("progress-daily-count"))
         }
-    }
-}
-
-@Composable
-private fun Istatistikler(ozet: SeviyeOzeti) {
-    val veriler = listOf(R.string.level_stat_questions to ozet.soruSayisi, R.string.level_stat_reviews to ozet.tekrarSayisi,
-        R.string.level_stat_independent to ozet.bagimsizSayisi, R.string.level_stat_best_streak to ozet.enUzunSeri)
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.testTag("progress-lifetime-stats")) {
-        val sutun = if (LocalDensity.current.fontScale >= 1.5f) 1 else 2
-        veriler.chunked(sutun).forEach { satir ->
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                satir.forEach { (ad, n) -> IlerlemePaneli(Modifier.weight(1f)) {
-                    Text(sayi(n), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold)
-                    Text(stringResource(ad), style = MaterialTheme.typography.labelMedium)
-                } }
-            }
-        }
-    }
-}
-
-@Composable
-private fun XpDokumu(ozet: SeviyeOzeti) {
-    IlerlemePaneli(Modifier.testTag("progress-xp-breakdown")) {
-        BolumBasligi(stringResource(R.string.level_breakdown_title))
-        Text(stringResource(R.string.progress_xp_note), style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant)
-        val k = ozet.kirilim
-        XpSatiri(stringResource(R.string.level_xp_questions, ozet.soruSayisi), k.ekleme)
-        XpSatiri(stringResource(R.string.level_xp_reviews, ozet.tekrarSayisi), k.tekrar)
-        XpSatiri(stringResource(R.string.level_xp_independent, ozet.bagimsizSayisi), k.bagimsiz)
-        XpSatiri(stringResource(R.string.level_xp_goal, k.hedef / SeviyeHesabi.HEDEF_BONUS_XP), k.hedef)
-        XpSatiri(stringResource(R.string.level_xp_streak), k.seri)
-        XpSatiri(stringResource(R.string.level_xp_badges, ozet.sahipRozetler.size, Rozet.entries.size), k.rozet)
-    }
-}
-@Composable private fun XpSatiri(ad: String, deger: Int) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(ad, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(stringResource(R.string.progress_xp_amount, sayi(deger)), style = MaterialTheme.typography.labelLarge)
     }
 }
 

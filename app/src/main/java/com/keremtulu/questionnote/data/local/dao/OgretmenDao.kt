@@ -90,6 +90,10 @@ interface OgretmenDao {
         guncelleme: Long,
     ): Int
 
+    @Query("UPDATE ogretmen_sorulari SET plan_gun = :gun, guncelleme = :zaman " +
+        "WHERE id = :soruId AND durum = 'BEKLIYOR'")
+    suspend fun planGuncelle(soruId: String, gun: Long?, zaman: Long): Int
+
     @Query("UPDATE ogretmen_sorulari SET grup_id = :grupId, guncelleme = :guncelleme WHERE id = :soruId")
     suspend fun soruTasi(soruId: String, grupId: String, guncelleme: Long): Int
 

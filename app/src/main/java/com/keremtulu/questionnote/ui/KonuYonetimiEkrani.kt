@@ -205,7 +205,7 @@ fun KonuYonetimiEkrani(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(1f),
-                            contentPadding = PaddingValues(start = 18.dp, top = 8.dp, end = 18.dp, bottom = 24.dp),
+                            contentPadding = PaddingValues(start = 18.dp, top = 20.dp, end = 18.dp, bottom = 24.dp),
                             verticalArrangement = Arrangement.spacedBy(10.dp),
                         ) {
                             items(current.konular, key = { it.id }) { konu ->

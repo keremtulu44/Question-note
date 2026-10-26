@@ -180,10 +180,27 @@ class OgretmenDeposuRoomTest {
             soruId = soru.id
             assertTrue(soru.dosyaAdiKaliciMi())
 
+            // Planning touches only the due date, persists across reopening, and respects solved rows.
+            assertTrue(ogretmenDeposu.planDegistir(soruId, 20_000L))
+            val planli = ogretmenDeposu.anlikVeri().sorular.single()
+            assertEquals(20_000L, planli.planGun)
+            assertEquals(soru.baslik, planli.baslik)
+            assertEquals(soru.cevap, planli.cevap)
+            assertEquals(soru.gorseller, planli.gorseller)
+            val tekrarAcilan = OgretmenDeposu(context, gorselDeposu, database)
+            tekrarAcilan.baslat()
+            assertEquals(20_000L, tekrarAcilan.anlikVeri().sorular.single().planGun)
+            assertTrue(ogretmenDeposu.planDegistir(soruId, null))
+            assertNull(ogretmenDeposu.anlikVeri().sorular.single().planGun)
+            assertFalse(ogretmenDeposu.planDegistir("yok", 20_001L))
+
             // Bulk status: one statement, one changed row, the rest stays untouched.
             assertEquals(1, ogretmenDeposu.topluDurumDegistir(setOf(soruId), OgretmenDurum.COZULDU))
             assertEquals(OgretmenDurum.COZULDU, ogretmenDeposu.anlikVeri().sorular.single().durum)
             assertEquals(0, ogretmenDeposu.topluDurumDegistir(setOf("yok"), OgretmenDurum.ARSIV))
+
+            assertFalse(ogretmenDeposu.planDegistir(soruId, 20_001L))
+            assertNull(ogretmenDeposu.anlikVeri().sorular.single().planGun)
 
             // Move keeps the same row and the same file.
             assertTrue(ogretmenDeposu.soruTasi(soruId, g2.id))

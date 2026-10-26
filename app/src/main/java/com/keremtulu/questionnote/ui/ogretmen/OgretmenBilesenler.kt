@@ -9,9 +9,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
@@ -44,6 +48,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -240,7 +245,7 @@ internal fun OgretmenDiyalogu(
     ) {
         Surface(
             modifier = modifier
-                .fillMaxWidth()
+                .fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally).widthIn(max = 560.dp)
                 .windowInsetsPadding(WindowInsets.safeDrawing)
                 .padding(horizontal = 20.dp, vertical = 16.dp)
                 .then(if (testEtiketi != null) Modifier.testTag(testEtiketi) else Modifier),
@@ -329,7 +334,7 @@ private fun SecimSatiri(
     Surface(
         onClick = onClick,
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxWidth().heightIn(min = 48.dp)
             .then(if (testEtiketi != null) Modifier.testTag(testEtiketi) else Modifier),
         shape = RoundedCornerShape(12.dp),
         color = if (secili) vurgu.copy(alpha = 0.14f) else Color.Transparent,
@@ -430,6 +435,7 @@ internal fun SoranKisiCipi(metin: String, modifier: Modifier = Modifier) {
     )
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun OgretmenGrupKarti(
     grup: OgretmenGrubu,
@@ -437,6 +443,7 @@ internal fun OgretmenGrupKarti(
     cozulmus: Int,
     koyuTema: Boolean,
     onClick: () -> Unit,
+    isOzeti: com.keremtulu.questionnote.domain.model.OgretmenIsOzeti? = null,
 ) {
     val vurgu = grupVurguRengi(grup.ad, koyuTema)
     val cozulmusRenk = if (koyuTema) PremiumMarkaRenkler.YesilAcik else PremiumMarkaRenkler.Yesil
@@ -489,7 +496,7 @@ internal fun OgretmenGrupKarti(
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
+                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                     )
                     grup.aciklama?.takeIf { it.isNotBlank() }?.let { not ->
@@ -501,9 +508,9 @@ internal fun OgretmenGrupKarti(
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
-                    Row(
+                    FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
                         if (toplam == 0) {
                             Text(
@@ -535,6 +542,18 @@ internal fun OgretmenGrupKarti(
                     }
                 }
             }
+            if (isOzeti != null && isOzeti.toplam > 0) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(stringResource(R.string.teacher_work_due, isOzeti.bugun),
+                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
+                    Text(stringResource(R.string.teacher_work_overdue, isOzeti.geciken),
+                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.teacher_work_unplanned, isOzeti.plansiz),
+                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
             if (toplam > 0) {
                 val oran = cozulmus.toFloat() / toplam.toFloat()
                 Box(
@@ -561,6 +580,7 @@ internal fun OgretmenGrupKarti(
  * Question card shared by queue, group detail and archive. `secimModu` swaps the footer for a
  * checkbox so a whole class list can be updated in one action.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun OgretmenSoruKarti(
     soru: OgretmenSorusu,
@@ -656,10 +676,10 @@ internal fun OgretmenSoruKarti(
                     }
                 }
             }
-            Row(
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 beklemeEtiketi(soru).let { yas ->
                     EtiketCipi(metin = yas, vurgu = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -698,13 +718,15 @@ internal fun OgretmenSoruKarti(
                 )
             }
             if (!secimModu) {
-                Row(
+                FlowRow(
                     modifier = Modifier.fillMaxWidth(),
+                    maxItemsInEachRow = if (LocalDensity.current.fontScale >= 1.5f) 1 else 2,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     PremiumOutlinedButton(
                         onClick = onTamEkran,
-                        modifier = Modifier.weight(1f).height(46.dp),
+                        modifier = Modifier.weight(1f).heightIn(min = 48.dp),
                         shape = RoundedCornerShape(14.dp),
                     ) {
                         Text(stringResource(R.string.ask_teacher_open_fullscreen))
@@ -713,7 +735,7 @@ internal fun OgretmenSoruKarti(
                         onClick = { onCozulduDegistir(!soru.cozuldu) },
                         modifier = Modifier
                             .weight(1f)
-                            .height(46.dp)
+                            .heightIn(min = 48.dp)
                             .testTag("ogretmen_cozuldu_degistir_${soru.id}"),
                         shape = RoundedCornerShape(14.dp),
                         interactionTur = if (soru.cozuldu) EtkilesimTuru.TIKLAMA else EtkilesimTuru.BASARI,
@@ -728,10 +750,10 @@ internal fun OgretmenSoruKarti(
                     }
                 }
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-                Row(
+                FlowRow(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     PremiumTextButton(
                         onClick = onBaskaGrubaEkle,
@@ -742,7 +764,10 @@ internal fun OgretmenSoruKarti(
                             fontWeight = FontWeight.SemiBold,
                         )
                     }
-                    Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
                         PremiumTextButton(
                             onClick = onPaylas,
                             modifier = Modifier.testTag("ogretmen_paylas_${soru.id}"),

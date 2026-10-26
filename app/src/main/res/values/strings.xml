@@ -1212,4 +1212,20 @@
     <string name="teacher_duplicate_photo_title">Aynı fotoğraf başka bir soruda var</string>
     <string name="teacher_duplicate_photo_message">\"%1$s\" sorusunda da aynı fotoğraf kayıtlı (%2$s). İki kez çözmemek için kontrol et.</string>
     <string name="teacher_duplicate_photo_confirm">Yine de kaydet</string>
+    <string name="today_queue_summary">%1$d geciken · %2$d bugün planlanan soru</string>
+    <string name="today_batch_explanation">Bu turda %1$d soru çalışacağız. Tur dışında %2$d soru sırada kalacak; hepsini bugün bitirmek zorunda değilsin.</string>
+    <string name="today_preview_title">Sıradan kısa bir önizleme</string>
+    <string name="progress_weekly_title">Son 7 gün</string>
+    <string name="progress_weekly_summary">%1$d gün çalıştın · %2$d tekrar yaptın</string>
+    <string name="progress_weekly_reviews">%1$d tekrar</string>
+    <string name="progress_weekly_note">Bugün henüz tamamlanmadı. Bunlar tekrar kayıtlarıdır; net veya sınav başarısı tahmini değildir.</string>
+    <string name="teacher_plan_move_today">Bugüne al</string>
+    <string name="teacher_plan_move_tomorrow">Yarına planla</string>
+    <string name="teacher_plan_updated">Soru planı güncellendi.</string>
+    <string name="teacher_plan_failed">Plan değiştirilemedi. Soru silinmiş veya çözülmüş olabilir.</string>
+    <string name="teacher_queue_plan_date">Plan: %1$s</string>
+    <string name="teacher_queue_no_date">Henüz bir güne planlanmadı</string>
+    <string name="teacher_work_due">Bugün: %1$d</string>
+    <string name="teacher_work_overdue">Geciken: %1$d</string>
+    <string name="teacher_work_unplanned">Plansız: %1$d</string>
 </resources>

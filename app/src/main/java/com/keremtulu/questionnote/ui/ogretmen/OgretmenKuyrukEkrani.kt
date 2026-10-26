@@ -15,10 +15,13 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -72,6 +75,7 @@ internal fun OgretmenKuyrukEkrani(
     var kopyalanacak by remember { mutableStateOf<OgretmenSorusu?>(null) }
     var secimModu by remember { mutableStateOf(false) }
     var seciliIdler by remember { mutableStateOf<Set<String>>(emptySet()) }
+    var silmeOnayi by remember { mutableStateOf<List<OgretmenSorusu>?>(null) }
     var arsivOnayi by remember { mutableStateOf<Int?>(null) }
     val gunFiltresi = KuyrukGunFiltresi.anahtarla(gunFiltresiAdi)
 
@@ -92,6 +96,11 @@ internal fun OgretmenKuyrukEkrani(
             konuAdlari = konuAdlari,
         )
     }
+    // Hidden questions must not remain targets after a search, tab or day-filter change.
+    val gorunurIdler = remember(kuyruk) { kuyruk.mapTo(mutableSetOf()) { it.id } }
+    val etkinSecim = seciliIdler.intersect(gorunurIdler)
+    LaunchedEffect(gorunurIdler) { seciliIdler = seciliIdler.intersect(gorunurIdler) }
+
     val grupAdlari = remember(veri.gruplar) { veri.gruplar.associate { it.id to it.ad } }
     val kullanilanDersler = remember(veri.sorular, dersAdlari) {
         veri.sorular.mapNotNull { it.dersId }.distinct()
@@ -123,8 +132,8 @@ internal fun OgretmenKuyrukEkrani(
 
     Box(Modifier.fillMaxSize()) {
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 18.dp, top = 10.dp, end = 18.dp, bottom = 120.dp),
+            modifier = Modifier.fillMaxSize().testTag("teacher-queue-list"),
+            contentPadding = PaddingValues(start = 18.dp, top = 20.dp, end = 18.dp, bottom = 120.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             item {
@@ -294,27 +303,70 @@ internal fun OgretmenKuyrukEkrani(
                 }
             }
             items(kuyruk, key = { it.id }) { soru ->
-                OgretmenSoruKarti(
-                    soru = soru,
-                    grupAdi = grupAdlari[soru.grupId],
-                    dersAdi = soru.dersId?.let { dersAdlari[it] },
-                    konuAdi = soru.konuId?.let { konuAdlari[it] },
-                    koyuTema = false,
-                    gorselDeposu = gorselDeposu,
-                    onTamEkran = { sunumIndex = kuyruk.indexOfFirst { it.id == soru.id } },
-                    onCozulduDegistir = { cozuldu ->
-                        scope.launch { ogretmenDeposu.cozulduDurumuDegistir(soru.id, cozuldu) }
-                    },
-                    onBaskaGrubaEkle = { kopyalanacak = soru },
-                    onDuzenle = { onGrupAc(soru.grupId) },
-                    onSil = { scope.launch { ogretmenDeposu.soruSil(soru.id) } },
-                    onPaylas = { paylas(listOf(soru)) },
-                    secimModu = secimModu,
-                    secili = soru.id in seciliIdler,
-                    onSecimDegistir = { sec ->
-                        seciliIdler = if (sec) seciliIdler + soru.id else seciliIdler - soru.id
-                    },
-                )
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    OgretmenSoruKarti(
+                        soru = soru,
+                        grupAdi = grupAdlari[soru.grupId],
+                        dersAdi = soru.dersId?.let { dersAdlari[it] },
+                        konuAdi = soru.konuId?.let { konuAdlari[it] },
+                        koyuTema = androidx.compose.foundation.isSystemInDarkTheme(),
+                        gorselDeposu = gorselDeposu,
+                        onTamEkran = { sunumIndex = kuyruk.indexOfFirst { it.id == soru.id } },
+                        onCozulduDegistir = { cozuldu ->
+                            scope.launch { ogretmenDeposu.cozulduDurumuDegistir(soru.id, cozuldu) }
+                        },
+                        onBaskaGrubaEkle = { kopyalanacak = soru },
+                        onDuzenle = { onGrupAc(soru.grupId) },
+                        onSil = { silmeOnayi = listOf(soru) },
+                        onPaylas = { paylas(listOf(soru)) },
+                        secimModu = secimModu,
+                        secili = soru.id in seciliIdler,
+                        onSecimDegistir = { sec ->
+                            seciliIdler = if (sec) seciliIdler + soru.id else seciliIdler - soru.id
+                        },
+                    )
+                    Text(
+                        text = soru.planGun?.let { gun ->
+                            stringResource(R.string.teacher_queue_plan_date,
+                                java.time.LocalDate.ofEpochDay(gun).format(
+                                    java.time.format.DateTimeFormatter.ofPattern("d MMM yyyy", java.util.Locale.forLanguageTag("tr-TR")),
+                                ),
+                            )
+                        } ?: stringResource(R.string.teacher_queue_no_date),
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    if (!secimModu) {
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            item {
+                                PremiumTextButton(onClick = {
+                                    scope.launch {
+                                        val ok = ogretmenDeposu.planDegistir(soru.id, bugun)
+                                        snackbarHostState.showSnackbar(context.getString(
+                                            if (ok) R.string.teacher_plan_updated else R.string.teacher_plan_failed,
+                                        ))
+                                    }
+                                }, modifier = Modifier.testTag("teacher-plan-today-${soru.id}")) {
+                                    Text(stringResource(R.string.teacher_plan_move_today))
+                                }
+                            }
+                            item {
+                                PremiumTextButton(onClick = {
+                                    scope.launch {
+                                        val ok = ogretmenDeposu.planDegistir(soru.id, bugun + 1)
+                                        snackbarHostState.showSnackbar(context.getString(
+                                            if (ok) R.string.teacher_plan_updated else R.string.teacher_plan_failed,
+                                        ))
+                                    }
+                                }, modifier = Modifier.testTag("teacher-plan-tomorrow-${soru.id}")) {
+                                    Text(stringResource(R.string.teacher_plan_move_tomorrow))
+                                }
+                            }
+                        }
+                    }
+                }
+
             }
             if (enEski != null && kuyruk.size > 1) {
                 item {
@@ -330,35 +382,31 @@ internal fun OgretmenKuyrukEkrani(
 
         if (secimModu) {
             SecimCubugu(
-                adet = seciliIdler.size,
+                adet = etkinSecim.size,
                 modifier = Modifier.align(Alignment.BottomCenter).padding(horizontal = 14.dp, vertical = 18.dp),
                 onCoz = {
                     scope.launch {
-                        ogretmenDeposu.topluDurumDegistir(seciliIdler, OgretmenDurum.COZULDU)
+                        ogretmenDeposu.topluDurumDegistir(etkinSecim, OgretmenDurum.COZULDU)
                         seciliIdler = emptySet()
                         secimModu = false
                     }
                 },
                 onCozme = {
                     scope.launch {
-                        ogretmenDeposu.topluDurumDegistir(seciliIdler, OgretmenDurum.BEKLIYOR)
+                        ogretmenDeposu.topluDurumDegistir(etkinSecim, OgretmenDurum.BEKLIYOR)
                         seciliIdler = emptySet()
                         secimModu = false
                     }
                 },
                 onArsivle = {
                     // Arşivleme veriyi silmez ama listeden düşürür: önce ne olacağını söyle.
-                    if (seciliIdler.isEmpty()) Unit else arsivOnayi = seciliIdler.size
+                    if (etkinSecim.isEmpty()) Unit else arsivOnayi = etkinSecim.size
                 },
                 onSil = {
-                    scope.launch {
-                        ogretmenDeposu.topluSil(seciliIdler)
-                        seciliIdler = emptySet()
-                        secimModu = false
-                    }
+                    silmeOnayi = kuyruk.filter { it.id in etkinSecim }.takeIf { it.isNotEmpty() }
                 },
                 onPaylas = {
-                    val hedefler = kuyruk.filter { it.id in seciliIdler }
+                    val hedefler = kuyruk.filter { it.id in etkinSecim }
                     seciliIdler = emptySet()
                     secimModu = false
                     paylas(hedefler)
@@ -386,12 +434,45 @@ internal fun OgretmenKuyrukEkrani(
         )
     }
 
+    silmeOnayi?.let { hedefler ->
+        OgretmenDiyalogu(onDismiss = { silmeOnayi = null }, testEtiketi = "teacher_queue_delete_dialog") {
+            Text(stringResource(R.string.teacher_bulk_delete), style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.teacher_bulk_delete_confirm, hedefler.size))
+            DiyalogDugmeleri {
+                TextButton(onClick = { silmeOnayi = null }) { Text(stringResource(R.string.common_cancel)) }
+                TextButton(onClick = {
+                    silmeOnayi = null
+                    scope.launch {
+                        val adet = ogretmenDeposu.topluSil(hedefler.mapTo(mutableSetOf()) { it.id }, dosyalariKoru = true)
+                        if (adet <= 0) return@launch
+                        seciliIdler = emptySet()
+                        secimModu = false
+                        val sonuc = snackbarHostState.showSnackbar(
+                            context.getString(R.string.teacher_deleted_message, adet),
+                            actionLabel = context.getString(R.string.teacher_undo),
+                            duration = SnackbarDuration.Long,
+                        )
+                        if (sonuc == SnackbarResult.ActionPerformed) {
+                            val geri = ogretmenDeposu.silmeyiGeriAl(hedefler)
+                            snackbarHostState.showSnackbar(context.getString(
+                                if (geri > 0) R.string.teacher_undo_restored else R.string.teacher_undo_failed,
+                            ))
+                        }
+                    }
+                }, modifier = Modifier.testTag("teacher_queue_delete_confirm")) {
+                    Text(stringResource(R.string.question_delete), color = MaterialTheme.colorScheme.error)
+                }
+            }
+        }
+    }
+
     arsivOnayi?.let { adet ->
         ArsivOnayDialogu(
             adet = adet,
             onDismiss = { arsivOnayi = null },
             onOnayla = {
-                val hedef = seciliIdler
+                val hedef = etkinSecim
                 arsivOnayi = null
                 scope.launch {
                     ogretmenDeposu.topluDurumDegistir(hedef, OgretmenDurum.ARSIV)
@@ -434,7 +515,7 @@ internal fun FiltreCipi(
     val vurgu = MaterialTheme.colorScheme.primary
     Surface(
         onClick = onClick,
-        modifier = Modifier.heightIn(min = 38.dp),
+        modifier = Modifier.heightIn(min = 48.dp),
         shape = RoundedCornerShape(999.dp),
         color = if (secili) vurgu.copy(alpha = 0.14f) else MaterialTheme.colorScheme.surface,
         border = BorderStroke(
