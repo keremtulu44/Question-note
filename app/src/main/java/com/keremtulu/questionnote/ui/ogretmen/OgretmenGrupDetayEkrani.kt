@@ -291,7 +291,11 @@ internal fun OgretmenGrupDetayEkrani(
                 }
             }
             item {
-                OgretmenAramaAlani(deger = arama, onDeger = { arama = it })
+                OgretmenAramaAlani(
+                    deger = arama,
+                    onDeger = { arama = it },
+                    sonucSayisi = if (filtreAktif) liste.size else null,
+                )
             }
             if (soranlar.size > 1) {
                 item {

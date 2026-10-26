@@ -1183,7 +1183,7 @@
     <string name="teacher_undo_failed">Silme geri alınamadı; fotoğraflar temizlenmiş olabilir.</string>
     <string name="teacher_answer_hidden_hint">Cevap, sunum ekranında yalnızca "Cevabı göster" ile açılır.</string>
 
-    <!-- Öğretmen modu 1.6.1: arama, "kim sordu", yerel paylaşım, plan filtresi, geri alma -->
+    <!-- Öğretmen modu T3: arama, "kim sordu", yerel paylaşım, plan filtresi, geri alma -->
     <string name="teacher_search_hint">Başlık, soran kişi, ders veya kaynakta ara…</string>
     <string name="teacher_search_clear">Aramayı temizle</string>
     <string name="teacher_search_empty">Aramayla eşleşen soru yok. Aramayı temizleyip tekrar dene.</string>
@@ -1194,7 +1194,6 @@
     <string name="teacher_plan_today">Bugün</string>
     <string name="teacher_plan_overdue">Geciken</string>
     <string name="teacher_plan_unscheduled">Planlanmamış</string>
-    <string name="teacher_lesson_filter">Ders</string>
     <string name="teacher_quick_names">Sık soranlar</string>
     <string name="teacher_share_action">Paylaş</string>
     <string name="teacher_share_chooser">Soruyu paylaş</string>
@@ -1202,8 +1201,6 @@
     <string name="teacher_share_lesson">Ders: %1$s</string>
     <string name="teacher_share_topic">Konu: %1$s</string>
     <string name="teacher_share_source">Kaynak: %1$s</string>
-    <string name="teacher_share_count">%1$d soru</string>
-    <string name="teacher_share_privacy_note">Paylaşımda \"kim sordu\" ve cevap yer almaz; yalnızca soru fotoğrafları ve etiketler gider.</string>
     <string name="teacher_unarchive_restore">Arşivden geri al</string>
     <string name="teacher_unarchive_done">%1$d soru kuyruğa geri alındı.</string>
     <string name="teacher_group_deleted_message">\"%1$s\" grubu ve %2$d soru silindi.</string>

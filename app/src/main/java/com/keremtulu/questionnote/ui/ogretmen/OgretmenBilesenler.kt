@@ -46,6 +46,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -364,43 +366,58 @@ internal fun OgretmenAramaAlani(
     deger: String,
     onDeger: (String) -> Unit,
     modifier: Modifier = Modifier,
+    /** Filtre aktifken eşleşen soru sayısı; `null` ise sayaç satırı çizilmez. */
+    sonucSayisi: Int? = null,
 ) {
-    OutlinedTextField(
-        value = deger,
-        onValueChange = onDeger,
-        modifier = modifier.fillMaxWidth().testTag("ogretmen_arama"),
-        singleLine = true,
-        shape = RoundedCornerShape(16.dp),
-        placeholder = {
-            Text(
-                text = stringResource(R.string.teacher_search_hint),
-                style = MaterialTheme.typography.bodySmall,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        },
-        leadingIcon = {
-            Text(
-                text = "⌕",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        },
-        trailingIcon = {
-            if (deger.isNotEmpty()) {
-                IconButton(
-                    onClick = { onDeger("") },
-                    modifier = Modifier.testTag("ogretmen_arama_temizle"),
-                ) {
-                    Text(
-                        text = "✕",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+    val temizleEtiketi = stringResource(R.string.teacher_search_clear)
+    Column(modifier = modifier.fillMaxWidth()) {
+        OutlinedTextField(
+            value = deger,
+            onValueChange = onDeger,
+            modifier = Modifier.fillMaxWidth().testTag("ogretmen_arama"),
+            singleLine = true,
+            shape = RoundedCornerShape(16.dp),
+            placeholder = {
+                Text(
+                    text = stringResource(R.string.teacher_search_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            },
+            leadingIcon = {
+                Text(
+                    text = "⌕",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            },
+            trailingIcon = {
+                if (deger.isNotEmpty()) {
+                    IconButton(
+                        onClick = { onDeger("") },
+                        modifier = Modifier
+                            .testTag("ogretmen_arama_temizle")
+                            .semantics { contentDescription = temizleEtiketi },
+                    ) {
+                        Text(
+                            text = "✕",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
-            }
-        },
-    )
+            },
+        )
+        if (sonucSayisi != null) {
+            Text(
+                text = stringResource(R.string.teacher_search_count, sonucSayisi),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 6.dp, top = 4.dp).testTag("ogretmen_sonuc_sayisi"),
+            )
+        }
+    }
 }
 
 /** One-line "who asked" chip; the student name is the only field the teacher types as a person. */

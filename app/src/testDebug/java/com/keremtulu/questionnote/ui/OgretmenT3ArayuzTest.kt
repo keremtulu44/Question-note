@@ -7,6 +7,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -145,6 +146,9 @@ class OgretmenT3ArayuzTest {
                 compose.onAllNodesWithTag("ogretmen_soru_kart_${basinc.id}").fetchSemanticsNodes().isNotEmpty() &&
                     compose.onAllNodesWithTag("ogretmen_soru_kart_${oran.id}").fetchSemanticsNodes().isEmpty()
             }
+            // Sayaç, filtrenin ne kadar daralttığını yazıyla söyler.
+            compose.onNodeWithTag("ogretmen_sonuc_sayisi")
+                .assertTextEquals(context.getString(R.string.teacher_search_count, 1))
 
             // Temizle: diğer kart geri gelir, ardından "soran kişi" çipi tek soruyu bırakır.
             compose.onNodeWithTag("ogretmen_arama_temizle").performClick()

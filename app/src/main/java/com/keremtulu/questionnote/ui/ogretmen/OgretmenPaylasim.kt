@@ -8,6 +8,7 @@ import androidx.core.content.FileProvider
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
 import com.keremtulu.questionnote.domain.model.OgretmenSorusu
+import java.io.File
 
 /**
  * Local-only sharing of teacher questions.
@@ -66,9 +67,9 @@ internal object OgretmenPaylasim {
         sorular: List<OgretmenSorusu>,
         gorselDeposu: LocalSoruGorselDeposu,
         cozumDahil: Boolean = false,
-        uriUret: ((java.io.File) -> Uri?)? = null,
+        uriUret: ((File) -> Uri?)? = null,
     ): List<Uri> {
-        val uret = uriUret ?: { dosya: java.io.File -> fileUri(context, dosya) }
+        val uret = uriUret ?: { dosya: File -> fileUri(context, dosya) }
         val uriler = ArrayList<Uri>(MAKS_GORSEL)
         for (soru in sorular) {
             val gorseller = if (cozumDahil) {
@@ -97,7 +98,7 @@ internal object OgretmenPaylasim {
         dersAdlari: Map<String, String> = emptyMap(),
         konuAdlari: Map<String, String> = emptyMap(),
         cozumDahil: Boolean = false,
-        uriUret: ((java.io.File) -> Uri?)? = null,
+        uriUret: ((File) -> Uri?)? = null,
     ): Intent? {
         if (sorular.isEmpty()) return null
         val uriler = gorselUrisi(context, sorular, gorselDeposu, cozumDahil, uriUret)
@@ -145,7 +146,7 @@ internal object OgretmenPaylasim {
 
     private const val GORSEL_TURU = "image/jpeg"
 
-    private fun fileUri(context: Context, dosya: java.io.File): Uri = FileProvider.getUriForFile(
+    private fun fileUri(context: Context, dosya: File): Uri = FileProvider.getUriForFile(
         context,
         "${context.packageName}.fileprovider",
         dosya,

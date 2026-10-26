@@ -140,7 +140,11 @@ internal fun OgretmenKuyrukEkrani(
                 )
             }
             item {
-                OgretmenAramaAlani(deger = arama, onDeger = { arama = it })
+                OgretmenAramaAlani(
+                    deger = arama,
+                    onDeger = { arama = it },
+                    sonucSayisi = if (filtreAktif) kuyruk.size else null,
+                )
             }
             item {
                 Row(
