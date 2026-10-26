@@ -67,6 +67,7 @@ internal fun OgretmenKuyrukEkrani(
     var kopyalanacak by remember { mutableStateOf<OgretmenSorusu?>(null) }
     var secimModu by remember { mutableStateOf(false) }
     var seciliIdler by remember { mutableStateOf<Set<String>>(emptySet()) }
+    var arsivOnayi by remember { mutableStateOf<Int?>(null) }
 
     val kuyruk = remember(veri, seciliGrupId, yalnizGeciken, bugun) {
         veri.kuyruk(grupId = seciliGrupId, yalnizGeciken = yalnizGeciken, bugun = bugun)
@@ -220,11 +221,8 @@ internal fun OgretmenKuyrukEkrani(
                     }
                 },
                 onArsivle = {
-                    scope.launch {
-                        ogretmenDeposu.topluDurumDegistir(seciliIdler, OgretmenDurum.ARSIV)
-                        seciliIdler = emptySet()
-                        secimModu = false
-                    }
+                    // Arşivleme veriyi silmez ama listeden düşürür: önce ne olacağını söyle.
+                    if (seciliIdler.isEmpty()) Unit else arsivOnayi = seciliIdler.size
                 },
                 onSil = {
                     scope.launch {
@@ -250,6 +248,25 @@ internal fun OgretmenKuyrukEkrani(
             onBaskaGrubaEkle = { soru ->
                 sunumIndex = null
                 kopyalanacak = soru
+            },
+        )
+    }
+
+    arsivOnayi?.let { adet ->
+        ArsivOnayDialogu(
+            adet = adet,
+            onDismiss = { arsivOnayi = null },
+            onOnayla = {
+                val hedef = seciliIdler
+                arsivOnayi = null
+                scope.launch {
+                    ogretmenDeposu.topluDurumDegistir(hedef, OgretmenDurum.ARSIV)
+                    seciliIdler = emptySet()
+                    secimModu = false
+                    snackbarHostState.showSnackbar(
+                        context.getString(R.string.teacher_archive_done, hedef.size),
+                    )
+                }
             },
         )
     }
