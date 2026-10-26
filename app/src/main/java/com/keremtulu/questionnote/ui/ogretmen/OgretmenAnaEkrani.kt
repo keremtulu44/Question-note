@@ -1,15 +1,6 @@
 package com.keremtulu.questionnote.ui.ogretmen
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -85,8 +76,6 @@ import com.keremtulu.questionnote.ui.premium.PremiumCard
 import com.keremtulu.questionnote.ui.premium.PremiumGradyanButon
 import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
-import com.keremtulu.questionnote.ui.tema.HareketTuru
-import com.keremtulu.questionnote.ui.tema.LocalHareketPolitikasi
 import kotlinx.coroutines.launch
 
 /**
@@ -129,7 +118,6 @@ fun OgretmenAnaEkrani(
         baslatildi = true
     }
 
-    val hareketPolitikasi = LocalHareketPolitikasi.current
     val klavyeAcik = WindowInsets.ime.getBottom(LocalDensity.current) > 0
     val bugun = remember { bugunEpochGun() }
     val dersAdlari = remember(dersler) { dersler.associate { it.id to it.ad } }
@@ -225,25 +213,10 @@ fun OgretmenAnaEkrani(
                     gorunur = iceAktarmaBandi,
                     onKapat = { iceAktarmaBandi = false },
                 )
-                AnimatedContent(
-                    targetState = altEkran,
-                    modifier = Modifier.weight(1f),
-                    transitionSpec = {
-                        if (hareketPolitikasi.hareketAcik) {
-                            val duration = hareketPolitikasi.sure(HareketTuru.GIRIS)
-                            (fadeIn(tween(duration)) + slideInHorizontally(
-                                animationSpec = tween(duration),
-                                initialOffsetX = { width -> width / 18 },
-                            )) togetherWith (fadeOut(tween(duration)) + slideOutHorizontally(
-                                animationSpec = tween(duration),
-                                targetOffsetX = { width -> -width / 24 },
-                            ))
-                        } else {
-                            EnterTransition.None togetherWith ExitTransition.None
-                        }
-                    },
-                    label = "ogretmen-ekran-gecisi",
-                ) { mevcut ->
+                // Deliberately not AnimatedContent: a screen that owns a Dialog would get its
+                // dialog window re-created on every transition frame, which never settles.
+                Box(Modifier.weight(1f)) {
+                    val mevcut = altEkran
                     when (mevcut) {
                         OgretmenEkranDurumu.Kuyruk -> OgretmenKuyrukEkrani(
                             veri = veri,
