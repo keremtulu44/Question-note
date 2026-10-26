@@ -52,23 +52,28 @@ Ayrıntı, kanıt ve gerekçe: [Öğretmen ihtiyaç araştırması](docs/OGRETME
 Karar bekleyen sorular: PROJECT_BRIEF §8 (A12–A17). **Kullanıcı kararı:** yalnız T3 uygulanır,
 tamamı çevrimdışı/yerel kalır (bulut, hesap, bildirim yok).
 
-**T3 — görünürlük ve iletişim (1.6.x, Room/ZIP sürümü artmaz):**
-- [~] Kuyruk + grup detayında **arama** ve ders/soran/gün filtre çipleri; `rememberSaveable` durum,
-  cevap metni aranmaz. `OgretmenAramaVeFiltreTest` (1.000 soru < 200 ms). Cihaz kapısı bekliyor.
-- [~] **"Kim sordu" yüzeyi:** kart rozeti, sunum satırı, filtre çipleri, formda "Sık soranlar"
+**T3 — görünürlük ve iletişim (1.6.x, Room/ZIP sürümü artmaz):** kod + otomatik testler tamam,
+CI `40344883493` yeşil (Debug 370/0/0/0, Release 293/0/0/0, imza + sertifika eşleşti).
+- [x] Kuyruk + grup detayında **arama** ve ders/soran/gün filtre çipleri; `rememberSaveable` durum,
+  cevap metni aranmaz, "N sonuç" sayacı ve erişilebilir temizle düğmesi. `OgretmenAramaVeFiltreTest`
+  (1.000 soru < 200 ms) + `OgretmenT3ArayuzTest`.
+- [x] **"Kim sordu" yüzeyi:** kart rozeti, sunum satırı, filtre çipleri, formda "Sık soranlar"
   (normalize gruplama). `OgretmenAramaVeFiltreTest`.
-- [~] **Paylaş** (`ACTION_SEND` + `FileProvider`, `ogretmen-img/` + `img/`): tek soru ve seçili N soru,
-  en fazla 9 fotoğraf, `kimSordu`/cevap dışarıda. `OgretmenPaylasimTest` + `OgretmenT3ArayuzTest`.
-  "Soru+çözüm birlikte" seçeneği `cozumDahil` parametresi olarak hazır, UI'da henüz yok.
-- [~] Kuyrukta **Bugün / Geciken / Planlanmamış** filtreleri (+ "Tümü" sıfırlama).
-  "Bugüne al / yarına at" hızlı aksiyonu henüz yok (formdaki tarih çipleri kullanılıyor).
-- [~] **Kapatma döngüsü:** arşiv sekmesinde "Arşivden geri al", grup silmede 10 sn `Snackbar` geri
+- [x] **Paylaş** (`ACTION_SEND` + `FileProvider`, `ogretmen-img/` + `img/`): tek soru ve seçili N soru,
+  en fazla 9 fotoğraf, `kimSordu`/cevap dışarıda. `OgretmenPaylasimTest` (chooser, içerik URI'si,
+  sağlayıcı beyanı) + `OgretmenT3ArayuzTest`. "Soru+çözüm birlikte" `cozumDahil` parametresi olarak
+  hazır, UI'da henüz yok.
+- [x] Kuyrukta **Bugün / Geciken / Planlanmamış** filtreleri (+ "Tümü" sıfırlama).
+  "Bugüne al / yarına at" hızlı aksiyonu yok (formdaki tarih çipleri kullanılıyor).
+- [x] **Kapatma döngüsü:** arşiv sekmesinde "Arşivden geri al", grup silmede 10 sn `Snackbar` geri
   alma (fotoğraflar korunur). `OgretmenGrupGeriAlmaTest` + `OgretmenT3ArayuzTest`. Tüm gruplarda
   ayrı arşiv filtresi yok.
-- [~] **Yedek tazeliği** uyarısı (7+ gün veya hiç yedek yok) ve **aynı görsel** (sha256) onayı.
+- [x] **Yedek tazeliği** uyarısı (7+ gün veya hiç yedek yok) ve **aynı görsel** (sha256) onayı.
+- [x] **Kayıt dayanıklılığı:** form açıkken arşivlenen/silinen ders/konu kimliği kaydı düşürmez
+  (yabancı anahtar hatası tüm soruyu kaybettiriyordu).
 - [ ] **Hafif içgörü kartı:** son 30 gün konu dağılımı, ortalama bekleme, haftalık kapanma (oyunlaştırma yok).
-- [ ] **CI kapısı (T3):** Debug/Release + cihazda (a) 200+ soruluk grupta arama, (b) 5 soru paylaşma,
-  (c) grup silip 10 sn içinde geri alma, (d) 9 günlük yedekte uyarı.
+- [ ] **Cihaz kabulü (T3):** (a) 200+ soruluk grupta arama, (b) 5 soru paylaşma, (c) grup silip 10 sn
+  içinde geri alma, (d) 9 günlük yedekte uyarı. Otomatik test bu kapıyı açmaz.
 
 **T4 — kayıt yükünü azaltma (1.7.0, Room v6 + ZIP v6; v5 yedekleri okunur):**
 - [ ] **Fotoğrafsız sözlü soru** (`gorsel_bekliyor` + "fotoğraf ekle" rozeti) — karar: A12.

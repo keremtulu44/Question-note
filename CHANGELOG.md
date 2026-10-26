@@ -29,7 +29,10 @@ Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih 
   < 200 ms), `OgretmenGrupGeriAlmaTest` (grup silme + geri alma, tekrar çağrı, arşivden dönüş),
   `OgretmenPaylasimTest` (chooser, içerik URI'si, "kim sordu" dışarıda, 9 görsel sınırı,
   `file_paths.xml`/sağlayıcı beyanı), `OgretmenT3ArayuzTest` (arama daraltma, kart paylaşımı,
-  snackbar geri alma). CI kanıtı bekliyor.
+  snackbar geri alma).
+- **CI:** run `40344883493` (commit `8d5c458`) — Debug **370/0/0/0**, Release **293/0/0/0**, imza ve
+  sertifika eşleşti; sürüm artırılmadığı için yayımlanan APK değişmedi (imzalı APK SHA-256
+  `f6b5c7188bdccf1cbfca9b77ab9700c2644938cfe3e9535ff20b743b2e3c4cf8`).
 
 ## [1.6.0] — 2026-10-26
 

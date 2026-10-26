@@ -3,10 +3,15 @@
 **Son güncelleme: 2026-10-26.** Önce bu belge, `docs/DERLEME_RAPORU.md`,
 `docs/PREMIUM_GORSEL_GELISTIRME.md` ve [P4–P6 sözleşme/kanıt kaydı](docs/P4_P5_P6_UYGULAMA.md) okunur.
 
-## T3 uygulandı — CI kapısı bekliyor (2026-10-26)
+## T3 uygulandı ve CI'dan geçti (2026-10-26)
 
 Kullanıcı kararı: **yalnız T3** ve **tamamı çevrimdışı** (bulut/hesap/bildirim yok, Play'e yüklenebilir
 yerel uygulama). `versionName`/`versionCode` artırılmadı; Room/ZIP sürümü değişmedi.
+
+**CI kanıtı:** run `40344883493` (commit `8d5c458`) — Debug **370/0/0/0**, Release **293/0/0/0**,
+imza + beklenen sertifika parmak izi eşleşti. APK SHA-256 `f6b5c7188bdccf1cbfca9b77ab9700c2644938cfe3e9535ff20b743b2e3c4cf8`
+(v1.6.0 etiketi zaten yayımlandığı için Release yeniden oluşturulmadı; sürüm artırılmadan yeni APK
+yayımlanmaz).
 
 - **Arama/filtre:** `OgretmenVerisi.filtrele(...)` + `OgretmenSorusu.aramaHavuzu(...)` (başlık, kim
   sordu, kaynak, ders/konu adı; `aramaAnahtari` = `tr-TR` küçük harf). `KuyrukGunFiltresi`
@@ -35,8 +40,9 @@ yerel uygulama). `versionName`/`versionCode` artırılmadı; Room/ZIP sürümü 
   arşivlenen/silinen bir ders yabancı anahtar hatasıyla tüm soruyu kaybettiriyordu, artık yalnız
   etiket atılır.
 - **Bilinen açıklar:** "bugüne al / yarına at" hızlı plan aksiyonu, soru+çözüm paylaşım düğmesi
-  (`cozumDahil` hazır), tüm-gruplar arşiv filtresi, içgörü kartı ve cihaz kabulü (200+ soru arama,
-  5 soru paylaşma, grup geri alma, 9 günlük yedek uyarısı).
+  (`cozumDahil` hazır), tüm-gruplar arşiv filtresi, içgörü kartı ve **cihaz kabulü** (200+ soru arama,
+  5 soru paylaşma, grup geri alma, 9 günlük yedek uyarısı). Otomatik test yeşil olması cihaz kapısını
+  açmaz.
 
 ## Güncel ve yayımlanmış: 1.6.0 Öğretmen modu — T0 + T1 + P2 başlangıcı
 
