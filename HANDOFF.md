@@ -3,6 +3,14 @@
 **Son güncelleme: 2026-10-26.** Önce bu belge, `docs/DERLEME_RAPORU.md`,
 `docs/PREMIUM_GORSEL_GELISTIRME.md` ve [P4–P6 sözleşme/kanıt kaydı](docs/P4_P5_P6_UYGULAMA.md) okunur.
 
+## 1.6.1 yayımlandı — güncel doğrulama
+
+Son olgunlaştırma değişiklikleri 1.6.1 (40) APK'ya dahil edildi.
+CI `40384089478`, derlenen commit `f4de076`: Debug 380/0, Release ortak 300/0;
+imzalı APK Release v1.6.1'de mevcut. Ayrıntılar `docs/DERLEME_RAPORU.md`.
+Aşağıdaki derleme bekliyor notları önceki yerel çalışma aşamasını anlatır;
+son CI bunların derleme/test kapısını açmıştır. Fiziksel cihaz kabulü hâlâ ayrıdır.
+
 ## Kullanım olgunluğu çalışması (2026-10-26, derleme bekliyor)
 
 `arena/263f59f4-question-note` üzerinde öğrenci Bugün kuyruğu en fazla üç önizlemeye

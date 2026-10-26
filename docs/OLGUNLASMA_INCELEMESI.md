@@ -160,3 +160,12 @@ kontrolü, Compose derlemesi, JUnit ve gerçek cihaz görsel kabulünün yerine 
 
 Çözümü dahil paylaşma, karşılaştırmalı konu önerileri ve başka cihazda yedek kabulü
 bu ikinci geçişte uygulanmış/tamamlanmış sayılmıyor; yukarıdaki sonraki adımlar olarak kalır.
+
+
+## Yayın güncellemesi
+
+Yerel ortam kısıtından sonra GitHub Actions üzerinde derleme tamamlandı:
+[40384089478](https://github.com/keremtulu44/Question-note/actions/runs/40384089478).
+Debug 380 ve Release ortak 300 testin tamamı geçti; 1.6.1 (40) imzalı APK yayımlandı.
+Yukarıdaki “çalıştırılmadı” ifadeleri önceki yerel inceleme anını anlatır. Güncel
+sonuç için `DERLEME_RAPORU.md` geçerlidir. Fiziksel cihaz kabulü tamamlanmış sayılmaz.
