@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDuration
@@ -397,25 +396,25 @@ internal fun OgretmenGrupDetayEkrani(
     }
 
     silinecekIdler?.let { hedefler ->
-        AlertDialog(
-            onDismissRequest = { silinecekIdler = null },
-            shape = RoundedCornerShape(24.dp),
-            title = { Text(stringResource(R.string.teacher_bulk_delete), fontWeight = FontWeight.Bold) },
-            text = { Text(stringResource(R.string.teacher_bulk_delete_confirm, hedefler.size)) },
-            confirmButton = {
+        OgretmenDiyalogu(onDismiss = { silinecekIdler = null }) {
+            Text(
+                text = stringResource(R.string.teacher_bulk_delete),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(stringResource(R.string.teacher_bulk_delete_confirm, hedefler.size))
+            DiyalogDugmeleri {
+                TextButton(onClick = { silinecekIdler = null }) {
+                    Text(stringResource(R.string.common_cancel))
+                }
                 TextButton(onClick = {
                     silinecekIdler = null
                     sil(hedefler)
                 }) {
                     Text(stringResource(R.string.question_delete))
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { silinecekIdler = null }) {
-                    Text(stringResource(R.string.common_cancel))
-                }
-            },
-        )
+            }
+        }
     }
 
     if (grupFormu) {
@@ -437,12 +436,17 @@ internal fun OgretmenGrupDetayEkrani(
             SimpleDateFormat("d MMM yyyy HH:mm", Locale.forLanguageTag("tr-TR"))
                 .format(Date(yedek.olusturmaZamani))
         } ?: stringResource(R.string.teacher_delete_backup_never)
-        AlertDialog(
-            onDismissRequest = { grupSilOnayi = false },
-            shape = RoundedCornerShape(24.dp),
-            title = { Text(stringResource(R.string.teacher_group_delete), fontWeight = FontWeight.Bold) },
-            text = { Text(stringResource(R.string.teacher_delete_confirm_counts, grup.ad, toplam, yedekMetni)) },
-            confirmButton = {
+        OgretmenDiyalogu(onDismiss = { grupSilOnayi = false }) {
+            Text(
+                text = stringResource(R.string.teacher_group_delete),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(stringResource(R.string.teacher_delete_confirm_counts, grup.ad, toplam, yedekMetni))
+            DiyalogDugmeleri {
+                TextButton(onClick = { grupSilOnayi = false }) {
+                    Text(stringResource(R.string.common_cancel))
+                }
                 TextButton(onClick = {
                     grupSilOnayi = false
                     scope.launch {
@@ -452,22 +456,14 @@ internal fun OgretmenGrupDetayEkrani(
                 }) {
                     Text(stringResource(R.string.question_delete))
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { grupSilOnayi = false }) {
-                    Text(stringResource(R.string.common_cancel))
-                }
-            },
-        )
+            }
+        }
     }
 
     if (menuAcik) {
-        AlertDialog(
-            onDismissRequest = { menuAcik = false },
-            shape = RoundedCornerShape(24.dp),
-            title = { Text(grup.ad, fontWeight = FontWeight.Bold) },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        OgretmenDiyalogu(onDismiss = { menuAcik = false }) {
+            Text(grup.ad, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     PremiumTextButton(
                         onClick = {
                             menuAcik = false
@@ -500,14 +496,13 @@ internal fun OgretmenGrupDetayEkrani(
                             color = MaterialTheme.colorScheme.error,
                         )
                     }
-                }
-            },
-            confirmButton = {
+            }
+            DiyalogDugmeleri {
                 TextButton(onClick = { menuAcik = false }) {
                     Text(stringResource(R.string.common_close))
                 }
-            },
-        )
+            }
+        }
     }
 }
 
@@ -604,13 +599,14 @@ internal fun BaskaGrubaEkleDialog(
     onOnayla: (Set<String>) -> Unit,
 ) {
     var secilenler by remember { mutableStateOf<Set<String>>(emptySet()) }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        shape = RoundedCornerShape(24.dp),
-        title = { Text(stringResource(R.string.teacher_copy_to_group), fontWeight = FontWeight.Bold) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                NotKutusu(
+    OgretmenDiyalogu(onDismiss = onDismiss) {
+        Text(
+            text = stringResource(R.string.teacher_copy_to_group),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+        )
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            NotKutusu(
                     metin = stringResource(R.string.teacher_copy_warning),
                     vurgu = PremiumMarkaRenkler.Bakir,
                 )
@@ -639,10 +635,10 @@ internal fun BaskaGrubaEkleDialog(
                             )
                         }
                     }
-                }
             }
-        },
-        confirmButton = {
+        }
+        DiyalogDugmeleri {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
             TextButton(
                 onClick = { onOnayla(secilenler) },
                 enabled = secilenler.isNotEmpty(),
@@ -650,11 +646,8 @@ internal fun BaskaGrubaEkleDialog(
             ) {
                 Text(stringResource(R.string.teacher_copy_action), fontWeight = FontWeight.Bold)
             }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
-        },
-    )
+        }
+    }
 }
 
 @Composable
@@ -663,14 +656,15 @@ internal fun SoruTasiDialog(
     onDismiss: () -> Unit,
     onTasi: (String) -> Unit,
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        shape = RoundedCornerShape(24.dp),
-        title = { Text(stringResource(R.string.teacher_move_title), fontWeight = FontWeight.Bold) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = stringResource(R.string.teacher_move_subtitle),
+    OgretmenDiyalogu(onDismiss = onDismiss) {
+        Text(
+            text = stringResource(R.string.teacher_move_title),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+        )
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                text = stringResource(R.string.teacher_move_subtitle),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -694,13 +688,12 @@ internal fun SoruTasiDialog(
                             )
                         }
                     }
-                }
             }
-        },
-        confirmButton = {
+        }
+        DiyalogDugmeleri {
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
-        },
-    )
+        }
+    }
 }
 
 /** Keeps the FAB out of the selection bar's way. */

@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -326,20 +325,20 @@ internal fun ArsivOnayDialogu(
     onDismiss: () -> Unit,
     onOnayla: () -> Unit,
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        shape = RoundedCornerShape(24.dp),
-        title = { Text(stringResource(R.string.teacher_archive_title), fontWeight = FontWeight.Bold) },
-        text = { Text(stringResource(R.string.teacher_archive_message, adet)) },
-        confirmButton = {
+    OgretmenDiyalogu(onDismiss = onDismiss) {
+        Text(
+            text = stringResource(R.string.teacher_archive_title),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+        )
+        Text(stringResource(R.string.teacher_archive_message, adet))
+        DiyalogDugmeleri {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
             TextButton(onClick = onOnayla, modifier = Modifier.testTag("teacher_archive_confirm")) {
                 Text(stringResource(R.string.teacher_archive_action), fontWeight = FontWeight.Bold)
             }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
-        },
-    )
+        }
+    }
 }
 
 /** Colour tokens used by queue chips; keeps the queue visually distinct from the class list. */

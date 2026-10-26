@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -283,20 +282,23 @@ internal fun OgretmenAyarlarEkrani(
 
     val onaylanan = ozet?.kullanilmayanDosyalar.orEmpty()
     if (temizlikOnayi && onaylanan.isNotEmpty()) {
-        AlertDialog(
-            onDismissRequest = { temizlikOnayi = false },
-            shape = RoundedCornerShape(24.dp),
-            title = { Text(stringResource(R.string.teacher_storage_cleanup)) },
-            text = {
-                Text(
-                    stringResource(
-                        R.string.teacher_storage_cleanup_confirm,
-                        onaylanan.size,
-                        boyut(ozet?.kullanilmayanBayt ?: 0L),
-                    ),
-                )
-            },
-            confirmButton = {
+        OgretmenDiyalogu(onDismiss = { temizlikOnayi = false }) {
+            Text(
+                text = stringResource(R.string.teacher_storage_cleanup),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                stringResource(
+                    R.string.teacher_storage_cleanup_confirm,
+                    onaylanan.size,
+                    boyut(ozet?.kullanilmayanBayt ?: 0L),
+                ),
+            )
+            DiyalogDugmeleri {
+                TextButton(onClick = { temizlikOnayi = false }) {
+                    Text(stringResource(R.string.common_cancel))
+                }
                 TextButton(
                     onClick = {
                         temizlikOnayi = false
@@ -313,13 +315,8 @@ internal fun OgretmenAyarlarEkrani(
                 ) {
                     Text(stringResource(R.string.teacher_storage_cleanup))
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { temizlikOnayi = false }) {
-                    Text(stringResource(R.string.common_cancel))
-                }
-            },
-        )
+            }
+        }
     }
 }
 

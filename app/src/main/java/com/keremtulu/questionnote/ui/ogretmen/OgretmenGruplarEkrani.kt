@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -329,19 +328,15 @@ internal fun GrupFormDialog(
     var dersMenusu by remember { mutableStateOf(false) }
     val gecerli = ad.trim().isNotEmpty()
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        shape = RoundedCornerShape(24.dp),
-        title = {
-            Text(
-                text = stringResource(
-                    if (mevcut == null) R.string.teacher_group_add else R.string.teacher_group_edit,
-                ),
-                fontWeight = FontWeight.Bold,
-            )
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    OgretmenDiyalogu(onDismiss = onDismiss) {
+        Text(
+            text = stringResource(
+                if (mevcut == null) R.string.teacher_group_add else R.string.teacher_group_edit,
+            ),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+        )
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 OutlinedTextField(
                     value = ad,
                     onValueChange = { ad = it },
@@ -385,8 +380,10 @@ internal fun GrupFormDialog(
                     }
                 }
             }
-        },
-        confirmButton = {
+        DiyalogDugmeleri {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.question_form_cancel))
+            }
             TextButton(
                 onClick = { onKaydet(ad.trim(), aciklama.trim().takeIf { it.isNotEmpty() }, dersId) },
                 enabled = gecerli,
@@ -394,13 +391,8 @@ internal fun GrupFormDialog(
             ) {
                 Text(stringResource(R.string.topic_save), fontWeight = FontWeight.Bold)
             }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.question_form_cancel))
-            }
-        },
-    )
+        }
+    }
 
     if (dersMenusu) {
         SecimDialogu(

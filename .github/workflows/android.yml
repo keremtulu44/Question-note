@@ -451,14 +451,20 @@ jobs:
             git commit -m "ci: save signed Android build report [skip ci]"
             # Dal, iş çalışırken ilerlemiş olabilir (elle push). Raporun kaybolmaması için
             # rebase edip yeniden dene; yine olmazsa özeti log'a bas.
-            for deneme in 1 2 3; do
-              if git pull --rebase --autostash origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}"; then
-                echo "Rapor ${GITHUB_REF_NAME} dalına yazıldı (deneme ${deneme})."
-                break
-              fi
-              git rebase --abort || true
-              sleep 5
-            done
+            # Önce düz push: dal iş sırasında ilerlemediyse derin klonla uğraşmaya gerek yok.
+            if ! git push origin "HEAD:${GITHUB_REF_NAME}"; then
+              git fetch --deepen 100 || git fetch --unshallow || true
+              for deneme in 1 2 3; do
+                if git pull --rebase --autostash origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}"; then
+                  echo "Rapor ${GITHUB_REF_NAME} dalına yazıldı (deneme ${deneme})."
+                  break
+                fi
+                git rebase --abort || true
+                sleep 5
+              done
+            else
+              echo "Rapor ${GITHUB_REF_NAME} dalına yazıldı."
+            fi
           fi
           echo "----- derleme raporu özeti -----"
           sed -n '1,20p' docs/DERLEME_RAPORU.md || true

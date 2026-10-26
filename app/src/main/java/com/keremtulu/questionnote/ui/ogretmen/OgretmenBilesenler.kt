@@ -3,6 +3,8 @@ package com.keremtulu.questionnote.ui.ogretmen
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +16,11 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
@@ -40,6 +47,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
 import com.keremtulu.questionnote.domain.model.OgretmenGrubu
@@ -210,6 +219,55 @@ internal fun EtiketCipi(metin: String, vurgu: Color, modifier: Modifier = Modifi
 
 
 /**
+ * Dialog shell for the teacher screens. A raw `Dialog` with an unconstrained width is used on
+ * purpose: the platform-default AlertDialog measure pass never settles under Robolectric UI tests,
+ * so every teacher dialog is built from this single window instead.
+ */
+@Composable
+internal fun OgretmenDiyalogu(
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+    testEtiketi: String? = null,
+    icerik: @Composable ColumnScope.() -> Unit,
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Surface(
+            modifier = modifier
+                .fillMaxWidth()
+                .windowInsetsPadding(WindowInsets.safeDrawing)
+                .padding(horizontal = 20.dp, vertical = 16.dp)
+                .then(if (testEtiketi != null) Modifier.testTag(testEtiketi) else Modifier),
+            shape = RoundedCornerShape(24.dp),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 6.dp,
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                content = icerik,
+            )
+        }
+    }
+}
+
+/** Right-aligned action row used at the bottom of [OgretmenDiyalogu]. */
+@Composable
+internal fun DiyalogDugmeleri(icerik: @Composable RowScope.() -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically,
+        content = icerik,
+    )
+}
+
+/**
  * Version-proof single-choice dialog. `ExposedDropdownMenu` changed its anchor API between
  * Material3 releases, and this screen must compile on the project's BOM without guesswork.
  */
@@ -223,41 +281,37 @@ internal fun SecimDialogu(
     bosEtiket: String? = null,
     testEtiketi: String? = null,
 ) {
-    androidx.compose.material3.AlertDialog(
-        onDismissRequest = onDismiss,
-        shape = RoundedCornerShape(24.dp),
-        title = { Text(baslik, fontWeight = FontWeight.Bold) },
-        text = {
-            androidx.compose.foundation.lazy.LazyColumn(
-                modifier = Modifier.fillMaxWidth().heightIn(max = 380.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                if (bosEtiket != null) {
-                    item {
-                        SecimSatiri(
-                            metin = bosEtiket,
-                            secili = seciliId == null,
-                            onClick = { onSec(null) },
-                            testEtiketi = testEtiketi?.let { it + "_bos" },
-                        )
-                    }
-                }
-                items(secenekler, key = { it.first }) { (id, etiket) ->
+    OgretmenDiyalogu(onDismiss = onDismiss, testEtiketi = testEtiketi) {
+        Text(baslik, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        androidx.compose.foundation.lazy.LazyColumn(
+            modifier = Modifier.fillMaxWidth().heightIn(max = 380.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            if (bosEtiket != null) {
+                item {
                     SecimSatiri(
-                        metin = etiket,
-                        secili = id == seciliId,
-                        onClick = { onSec(id) },
-                        testEtiketi = testEtiketi?.let { it + "_" + id },
+                        metin = bosEtiket,
+                        secili = seciliId == null,
+                        onClick = { onSec(null) },
+                        testEtiketi = testEtiketi?.let { it + "_bos" },
                     )
                 }
             }
-        },
-        confirmButton = {
-            androidx.compose.material3.TextButton(onClick = onDismiss) {
+            items(secenekler, key = { it.first }) { (id, etiket) ->
+                SecimSatiri(
+                    metin = etiket,
+                    secili = id == seciliId,
+                    onClick = { onSec(id) },
+                    testEtiketi = testEtiketi?.let { it + "_" + id },
+                )
+            }
+        }
+        DiyalogDugmeleri {
+            PremiumTextButton(onClick = onDismiss) {
                 Text(stringResource(R.string.common_cancel))
             }
-        },
-    )
+        }
+    }
 }
 
 @Composable
