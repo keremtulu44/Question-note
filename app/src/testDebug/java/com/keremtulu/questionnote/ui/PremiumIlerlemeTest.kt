@@ -92,13 +92,13 @@ class PremiumIlerlemeTest {
 
     @Test fun openingWithMotionEnabledDoesNotPretendTheExistingXpWasJustEarned() {
         val ozet = ornekIlerlemeOzeti()
-        compose.mainClock.autoAdvance = false
         compose.setContent {
             YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Normal) {
                 SeviyeSayfasi(SeviyeDurumuUi.ozetten(ozet))
             }
         }
         compose.onNodeWithTag("progress-list").performScrollToNode(hasTestTag("progress-hero"))
+        compose.mainClock.autoAdvance = false
         val etiket = context.getString(R.string.progress_total_xp,
             NumberFormat.getIntegerInstance(Locale.forLanguageTag("tr-TR")).format(ozet.durum.toplamXp))
         compose.onNodeWithTag("progress-xp-total").assertTextEquals(etiket)

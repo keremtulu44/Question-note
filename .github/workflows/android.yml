@@ -139,7 +139,7 @@ jobs:
               unit_test_exit=1
             fi
             if [[ "$unit_test_exit" -eq 0 ]]; then
-              for name in overview-light overview-dark overview-empty overview-error overview-large details comparison plan; do
+              for name in overview-light overview-dark overview-empty overview-error overview-large weekly collection ranks; do
                 if [[ ! -s "app/build/outputs/progress-previews/$name.png" ]]; then
                   echo "ERROR: Güncel İlerleme önizlemesi eksik: $name" >> "$test_log"
                   unit_test_exit=1
@@ -398,7 +398,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for name in overview-light overview-dark overview-empty overview-error overview-large details comparison plan; do
+          for name in overview-light overview-dark overview-empty overview-error overview-large weekly collection ranks; do
             source="app/build/outputs/progress-previews/$name.png"
             if [[ -f "$source" ]]; then
               # Small, named documentation previews only; never collect arbitrary build outputs.
