@@ -96,7 +96,7 @@ class GorselButunlukVeYerlesimArayuzTest {
             .allowMainThreadQueries()
             .build()
         gorselDeposu = LocalSoruGorselDeposu(context)
-        ogretmenDeposu = OgretmenDeposu(context, gorselDeposu)
+        ogretmenDeposu = OgretmenDeposu(context, gorselDeposu, database)
         denemeDeposu = DenemeDeposu(context)
         profilDeposu = SinavProfiliDeposu(context)
         dersRepository = RoomDersRepository(database, profilDeposu)

@@ -11,6 +11,7 @@ on:
       - arena/abf7be2d-question-note
       - arena/ade0c6b2-question-note
       - arena/9d4e7eac-question-note
+      - arena/5d75ca16-question-note
     paths:
       - 'app/**'
       - 'tools/junit_ozeti.py'

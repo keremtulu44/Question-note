@@ -453,6 +453,9 @@ fun YanlisDefteriUygulamasi(
                 sonYedek = sonYedek,
                 yedeklemeIslemde = yedeklemeIslemde,
                 snackbarHostState = snackbarHostState,
+                // Shared student catalog: the teacher form picks the same lessons/topics.
+                dersRepository = dersRepository,
+                konuRepository = konuRepository,
                 onOgrenciModunaGec = {
                     kurulumGerekli = profilDeposu.kurulumGerekli()
                     profilDeposu.rolKaydet(com.keremtulu.questionnote.domain.model.KullaniciRolu.OGRENCI)

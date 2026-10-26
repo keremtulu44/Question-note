@@ -84,7 +84,7 @@ class KirpmaSorulacakVeOgretmenArayuzTest {
             .allowMainThreadQueries()
             .build()
         gorselDeposu = LocalSoruGorselDeposu(context)
-        ogretmenDeposu = OgretmenDeposu(context, gorselDeposu)
+        ogretmenDeposu = OgretmenDeposu(context, gorselDeposu, database)
         profilDeposu = SinavProfiliDeposu(context)
         dersRepository = RoomDersRepository(database, profilDeposu)
         soruRepository = RoomSoruRepository(database, gorselDeposu, sinav = profilDeposu)

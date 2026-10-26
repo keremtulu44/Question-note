@@ -121,4 +121,88 @@ object YanlisDefteriMigrations {
         }
     }
 
+    /**
+     * Additive only: the teacher workspace moves from one JSON file into indexed tables. Lessons and
+     * topics are shared with the student catalog (no copy), and an existing 1.5.x JSON file is imported
+     * once at runtime by `OgretmenDeposu` — migration itself never touches user files.
+     */
+    val MIGRATION_4_5 = object : Migration(4, 5) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS `ogretmen_gruplari` (
+                    `id` TEXT NOT NULL,
+                    `ad` TEXT NOT NULL,
+                    `aciklama` TEXT,
+                    `ders_id` TEXT,
+                    `arsivli` INTEGER NOT NULL,
+                    `sira` INTEGER NOT NULL,
+                    `olusturma` INTEGER NOT NULL,
+                    PRIMARY KEY(`id`),
+                    FOREIGN KEY(`ders_id`) REFERENCES `dersler`(`id`)
+                        ON UPDATE NO ACTION ON DELETE SET NULL
+                )
+                """.trimIndent(),
+            )
+            database.execSQL("CREATE INDEX IF NOT EXISTS `index_ogretmen_gruplari_sira` ON `ogretmen_gruplari` (`sira`)")
+            database.execSQL("CREATE INDEX IF NOT EXISTS `index_ogretmen_gruplari_ders_id` ON `ogretmen_gruplari` (`ders_id`)")
+
+            database.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS `ogretmen_sorulari` (
+                    `id` TEXT NOT NULL,
+                    `grup_id` TEXT NOT NULL,
+                    `baslik` TEXT,
+                    `ders_id` TEXT,
+                    `konu_id` TEXT,
+                    `kaynak` TEXT,
+                    `kim_sordu` TEXT,
+                    `plan_gun` INTEGER,
+                    `zorluk` TEXT,
+                    `cevap` TEXT,
+                    `durum` TEXT NOT NULL,
+                    `cozulme` INTEGER,
+                    `olusturma` INTEGER NOT NULL,
+                    `guncelleme` INTEGER NOT NULL,
+                    PRIMARY KEY(`id`),
+                    FOREIGN KEY(`grup_id`) REFERENCES `ogretmen_gruplari`(`id`)
+                        ON UPDATE NO ACTION ON DELETE CASCADE,
+                    FOREIGN KEY(`ders_id`) REFERENCES `dersler`(`id`)
+                        ON UPDATE NO ACTION ON DELETE SET NULL,
+                    FOREIGN KEY(`konu_id`) REFERENCES `konular`(`id`)
+                        ON UPDATE NO ACTION ON DELETE SET NULL
+                )
+                """.trimIndent(),
+            )
+            database.execSQL("CREATE INDEX IF NOT EXISTS `index_ogretmen_sorulari_grup_id` ON `ogretmen_sorulari` (`grup_id`)")
+            database.execSQL("CREATE INDEX IF NOT EXISTS `index_ogretmen_sorulari_ders_id` ON `ogretmen_sorulari` (`ders_id`)")
+            database.execSQL("CREATE INDEX IF NOT EXISTS `index_ogretmen_sorulari_konu_id` ON `ogretmen_sorulari` (`konu_id`)")
+            database.execSQL("CREATE INDEX IF NOT EXISTS `index_ogretmen_sorulari_durum` ON `ogretmen_sorulari` (`durum`)")
+            database.execSQL("CREATE INDEX IF NOT EXISTS `index_ogretmen_sorulari_plan_gun` ON `ogretmen_sorulari` (`plan_gun`)")
+
+            database.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS `ogretmen_soru_gorselleri` (
+                    `id` TEXT NOT NULL,
+                    `soru_id` TEXT NOT NULL,
+                    `sira` INTEGER NOT NULL,
+                    `tur` TEXT NOT NULL,
+                    `dosya_adi` TEXT NOT NULL,
+                    `mime_type` TEXT NOT NULL,
+                    `genislik` INTEGER NOT NULL,
+                    `yukseklik` INTEGER NOT NULL,
+                    `boyut` INTEGER NOT NULL,
+                    `sha256` TEXT NOT NULL,
+                    PRIMARY KEY(`id`),
+                    FOREIGN KEY(`soru_id`) REFERENCES `ogretmen_sorulari`(`id`)
+                        ON UPDATE NO ACTION ON DELETE CASCADE
+                )
+                """.trimIndent(),
+            )
+            database.execSQL(
+                "CREATE INDEX IF NOT EXISTS `index_ogretmen_soru_gorselleri_soru_id` " +
+                    "ON `ogretmen_soru_gorselleri` (`soru_id`)",
+            )
+        }
+    }
 }

@@ -1,7 +1,5 @@
 package com.keremtulu.questionnote.ui
 
-import android.Manifest
-import android.content.pm.PackageManager
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -69,7 +67,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.core.content.ContextCompat
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.data.images.KameraCekimi
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
@@ -685,18 +682,6 @@ internal fun CozdurdumDialog(
         }
     }
 
-    val kameraIzni = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { verildi ->
-        if (verildi) {
-            try {
-                val cekim = gorselDeposu.kameraCekimiOlustur()
-                kameraCekimi = cekim
-                takePicture.launch(cekim.uri)
-            } catch (_: Throwable) {
-                onHata(context.getString(R.string.question_form_photo_error))
-            }
-        }
-    }
-
     val galeriSecici = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(5)) { uris ->
         if (uris.isEmpty()) return@rememberLauncherForActivityResult
         scope.launch {
@@ -715,19 +700,17 @@ internal fun CozdurdumDialog(
         }
     }
 
+    /**
+     * No runtime permission gate: the manifest declares no CAMERA permission and the capture intent
+     * writes through our FileProvider, so the old check could only fail and left the button dead.
+     */
     fun kamerayiAc() {
-        val izinli = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
-            PackageManager.PERMISSION_GRANTED
-        if (izinli) {
-            try {
-                val cekim = gorselDeposu.kameraCekimiOlustur()
-                kameraCekimi = cekim
-                takePicture.launch(cekim.uri)
-            } catch (_: Throwable) {
-                onHata(context.getString(R.string.question_form_photo_error))
-            }
-        } else {
-            kameraIzni.launch(Manifest.permission.CAMERA)
+        try {
+            val cekim = gorselDeposu.kameraCekimiOlustur()
+            kameraCekimi = cekim
+            takePicture.launch(cekim.uri)
+        } catch (_: Throwable) {
+            onHata(context.getString(R.string.question_form_photo_error))
         }
     }
 

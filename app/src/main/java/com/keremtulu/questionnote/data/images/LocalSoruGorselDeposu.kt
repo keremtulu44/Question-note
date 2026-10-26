@@ -31,6 +31,18 @@ data class KameraCekimi(
     val uri: Uri,
 )
 
+/** Metadata of a stored teacher image; no hashing, so it is safe to list often. */
+data class DepolananGorselDosyasi(
+    val dosyaAdi: String,
+    val boyut: Long,
+    val sonDegisme: Long,
+)
+
+data class OgretmenDepolamaKullanimi(
+    val adet: Int = 0,
+    val bayt: Long = 0,
+)
+
 class LocalSoruGorselDeposu(context: Context) : GorselDosyaYonetimi {
     private val appContext = context.applicationContext
     private val kaliciDizin = File(appContext.filesDir, KALICI_DIZIN).apply { mkdirs() }
@@ -333,6 +345,21 @@ class LocalSoruGorselDeposu(context: Context) : GorselDosyaYonetimi {
         }
     }
 
+    /**
+     * Verifies any durable image by its own relative name, so a teacher question may reference a
+     * shared `img/` file (added from the archive) or its own `ogretmen-img/` file.
+     */
+    suspend fun depolananDosyayiDogrula(gorsel: SoruGorselGirdisi): Boolean = withContext(Dispatchers.IO) {
+        val file = tumKaliciDosyasi(gorsel.dosyaAdi) ?: return@withContext false
+        file.isFile && gorsel.mimeType == MIME_JPEG && file.length() == gorsel.boyut &&
+            sha256(file) == gorsel.sha256 && boyutlarEslesiyor(file, gorsel.genislik, gorsel.yukseklik)
+    }
+
+    suspend fun depolananDosyayiSil(dosyaAdi: String): Boolean = withContext(Dispatchers.IO) {
+        val file = tumKaliciDosyasi(dosyaAdi) ?: return@withContext false
+        !file.exists() || file.delete()
+    }
+
     suspend fun ogretmenKaliciDosyayiDogrula(gorsel: SoruGorselGirdisi): Boolean = withContext(Dispatchers.IO) {
         val file = ogretmenKaliciDosyasi(gorsel.dosyaAdi) ?: return@withContext false
         file.isFile && gorsel.mimeType == MIME_JPEG && file.length() == gorsel.boyut &&
@@ -376,6 +403,24 @@ class LocalSoruGorselDeposu(context: Context) : GorselDosyaYonetimi {
         ogretmenKaliciDizin.listFiles().orEmpty()
             .filter { it.isFile && it.name.matches(Regex("[0-9a-fA-F-]{36}\\.jpg")) }
             .map { "$OGRETMEN_KALICI_DIZIN/${it.name}" }
+    }
+
+    /** Cheap metadata listing (no hashing) used by the teacher storage card and orphan audit. */
+    suspend fun ogretmenDosyaBilgileri(): List<DepolananGorselDosyasi> = withContext(Dispatchers.IO) {
+        ogretmenKaliciDizin.listFiles().orEmpty()
+            .filter { it.isFile && it.name.matches(Regex("[0-9a-fA-F-]{36}\\.jpg")) }
+            .map { file ->
+                DepolananGorselDosyasi(
+                    dosyaAdi = "$OGRETMEN_KALICI_DIZIN/${file.name}",
+                    boyut = file.length(),
+                    sonDegisme = file.lastModified(),
+                )
+            }
+    }
+
+    suspend fun ogretmenToplamKullanim(): OgretmenDepolamaKullanimi = withContext(Dispatchers.IO) {
+        val files = ogretmenDosyaBilgileri()
+        OgretmenDepolamaKullanimi(adet = files.size, bayt = files.sumOf { it.boyut })
     }
 
     suspend fun kaliciDosyalariListele(): List<KaliciGorselDosyasi> = withContext(Dispatchers.IO) {
