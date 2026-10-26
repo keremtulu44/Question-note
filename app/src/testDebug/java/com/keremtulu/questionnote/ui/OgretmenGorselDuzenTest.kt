@@ -54,7 +54,7 @@ class OgretmenGorselDuzenTest {
                 val bounds = compose.onNodeWithTag(tag).getUnclippedBoundsInRoot()
                 val viewport = compose.onNodeWithTag("viewport").getUnclippedBoundsInRoot()
                 assertTrue("$tag must stay inside the viewport", bounds.left >= viewport.left && bounds.right <= viewport.right)
-                assertTrue("$tag must have a 48dp touch target", bounds.height >= 48.dp)
+                assertTrue("$tag must have a 48dp touch target", bounds.bottom - bounds.top >= 48.dp)
             }
     }
 
