@@ -180,8 +180,12 @@ class OgretmenDeposu(
         }
     }
 
-    /** Questions and images follow the foreign key (`ON DELETE CASCADE`). */
-    suspend fun grupSil(grupId: String): Boolean {
+    /**
+     * Deletes the group and, through the foreign key (`ON DELETE CASCADE`), its questions.
+     * [dosyalariKoru] keeps the photo files on disk so the caller can offer a real undo; the files
+     * are then only collected by the explicit storage-maintenance path.
+     */
+    suspend fun grupSil(grupId: String, dosyalariKoru: Boolean = false): Boolean {
         baslat()
         return mutex.withLock {
             val mevcut = state.value
@@ -200,8 +204,42 @@ class OgretmenDeposu(
             }
             if (!yazildi) return@withLock false
             yenile()
-            temizleKullanilmayanDosyalar(silinenDosyalar)
+            if (!dosyalariKoru) temizleKullanilmayanDosyalar(silinenDosyalar)
             true
+        }
+    }
+
+    /**
+     * Undo for [grupSil] with `dosyalariKoru = true`. The group row and its questions are written in
+     * one transaction with their original ids and file names: a question without its group (or with
+     * a missing photo) would break [OgretmenVerisi.tutarliMi] and the restore path.
+     *
+     * @return how many questions came back, or `null` when nothing could be restored.
+     */
+    suspend fun grupGeriAl(grup: OgretmenGrubu, sorular: List<OgretmenSorusu>): Int? {
+        baslat()
+        return mutex.withLock {
+            val mevcut = state.value
+            if (mevcut.gruplar.any { it.id == grup.id }) return@withLock null
+            val varOlanlar = mevcut.sorular.mapTo(mutableSetOf()) { it.id }
+            val geriGelecek = sorular.filter { soru ->
+                soru.grupId == grup.id && soru.id !in varOlanlar && soru.soruGorselleri().isNotEmpty()
+            }
+            val yazildi = runCatching {
+                db.withTransaction {
+                    dao.grupEkle(grup.copy(sira = mevcut.gruplar.size).toEntity())
+                    geriGelecek.forEach { soru ->
+                        dao.soruEkle(soru.toEntity())
+                        if (soru.gorseller.isNotEmpty()) {
+                            dao.gorselEkle(soru.gorseller.map { it.toEntity(soru.id) })
+                        }
+                    }
+                }
+                true
+            }.getOrDefault(false)
+            if (!yazildi) return@withLock null
+            yenile()
+            geriGelecek.size
         }
     }
 

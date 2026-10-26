@@ -20,6 +20,8 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -28,6 +30,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,6 +57,7 @@ import com.keremtulu.questionnote.domain.model.Konu
 import com.keremtulu.questionnote.domain.model.OgretmenGrubu
 import com.keremtulu.questionnote.domain.model.OgretmenSorusu
 import com.keremtulu.questionnote.domain.model.OgretmenZorluk
+import com.keremtulu.questionnote.domain.model.aramaAnahtari
 import com.keremtulu.questionnote.domain.model.SoruGorselGirdisi
 import com.keremtulu.questionnote.ui.bilesenler.GorselKirpmaAlani
 import com.keremtulu.questionnote.ui.bilesenler.GorselKirpmaDialog
@@ -162,6 +166,14 @@ internal fun OgretmenSoruFormuEkrani(
     var kirpmaIsleniyor by remember { mutableStateOf(false) }
     var dersSecimiAcik by remember { mutableStateOf(false) }
     var konuSecimiAcik by remember { mutableStateOf(false) }
+    // Duplicate photo guard (same sha256 in another question) — confirmed once per form session.
+    var cakisanSoru by remember(mevcutSoru?.id) { mutableStateOf<OgretmenSorusu?>(null) }
+    var cakismaOnaylandi by remember(mevcutSoru?.id) { mutableStateOf(false) }
+    // Which button opened the duplicate dialog: "kaydet" and "kaydet ve yeni" must both survive.
+    var cakismaSonrasiYeniyeDevam by remember(mevcutSoru?.id) { mutableStateOf(false) }
+    val hizliIsimler = remember(ogretmenDeposu) {
+        ogretmenDeposu.anlikVeri().kimSorduIsimleri().take(6)
+    }
 
     // Lessons that are archived in the catalog are still offered when the question already uses one.
     val dersSecenekleri = remember(dersler) {
@@ -186,6 +198,19 @@ internal fun OgretmenSoruFormuEkrani(
         if (gorseller.isEmpty()) {
             formHatasi = R.string.question_error_photo_required
             return
+        }
+        if (!cakismaOnaylandi) {
+            // Same file already attached to another question: almost always the same question
+            // photographed twice. Ask once, then let the teacher decide.
+            val cakisan = ogretmenDeposu.anlikVeri().ayniGorselliSoru(
+                sha256ler = (gorseller + cozumGorselleri).mapTo(mutableSetOf()) { it.sha256 },
+                haricSoruId = mevcutSoru?.id,
+            )
+            if (cakisan != null) {
+                cakismaSonrasiYeniyeDevam = yeniyeDevam
+                cakisanSoru = cakisan
+                return
+            }
         }
         kaydediliyor = true
         formHatasi = null
@@ -489,6 +514,24 @@ internal fun OgretmenSoruFormuEkrani(
                         placeholder = { Text(stringResource(R.string.teacher_form_asked_by_hint)) },
                         shape = RoundedCornerShape(14.dp),
                     )
+                    // Typing the same five names every week is the real cost here: one tap fills the
+                    // field with a name that is already in the workspace.
+                    if (hizliIsimler.isNotEmpty()) {
+                        Text(
+                            text = stringResource(R.string.teacher_quick_names),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            items(hizliIsimler, key = { it }) { ad ->
+                                FiltreCipi(
+                                    metin = ad,
+                                    secili = aramaAnahtari(kimSordu) == aramaAnahtari(ad),
+                                    onClick = { kimSordu = ad },
+                                )
+                            }
+                        }
+                    }
                     BolumBasligi(stringResource(R.string.teacher_form_due_label))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         val bugun = bugunEpochGun()
@@ -630,6 +673,37 @@ internal fun OgretmenSoruFormuEkrani(
             onDismiss = { konuSecimiAcik = false },
             testEtiketi = "ogretmen_konu_secim",
         )
+    }
+
+    cakisanSoru?.let { cakisan ->
+        val grupAdi = ogretmenDeposu.anlikVeri().gruplar.firstOrNull { it.id == cakisan.grupId }?.ad
+        OgretmenDiyalogu(onDismiss = { cakisanSoru = null }, testEtiketi = "ogretmen_ayni_gorsel_dialog") {
+            Text(
+                text = stringResource(R.string.teacher_duplicate_photo_title),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                stringResource(
+                    R.string.teacher_duplicate_photo_message,
+                    cakisan.baslik?.takeIf { it.isNotBlank() }
+                        ?: stringResource(R.string.teacher_untitled_question),
+                    grupAdi ?: "",
+                ),
+            )
+            DiyalogDugmeleri {
+                TextButton(onClick = { cakisanSoru = null }) {
+                    Text(stringResource(R.string.common_cancel))
+                }
+                TextButton(onClick = {
+                    cakisanSoru = null
+                    cakismaOnaylandi = true
+                    kaydet(yeniyeDevam = cakismaSonrasiYeniyeDevam)
+                }) {
+                    Text(stringResource(R.string.teacher_duplicate_photo_confirm))
+                }
+            }
+        }
     }
 
     kirpmaHedefi?.let { hedef ->

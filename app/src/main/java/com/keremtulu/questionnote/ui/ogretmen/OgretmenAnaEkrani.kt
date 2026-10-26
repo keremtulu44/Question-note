@@ -110,6 +110,9 @@ fun OgretmenAnaEkrani(
     val konular by konularDurumu ?: bosKonular
 
     var altEkran by remember { mutableStateOf<OgretmenEkranDurumu>(OgretmenEkranDurumu.Gruplar) }
+    // Host-level scope: a screen that navigates away right after a destructive action (group delete)
+    // must still be able to show and answer its undo snackbar.
+    val kaliciKapsam = rememberCoroutineScope()
     var baslatildi by remember { mutableStateOf(ogretmenDeposu.anlikDurum() != OgretmenAlanDurumu.Yukleniyor) }
     var iceAktarmaBandi by remember { mutableStateOf(true) }
 
@@ -269,6 +272,7 @@ fun OgretmenAnaEkrani(
                                     onSoruDuzenle = { soruId ->
                                         altEkran = OgretmenEkranDurumu.SoruFormu(grup.id, soruId)
                                     },
+                                    kaliciKapsam = kaliciKapsam,
                                 )
                             }
                         }

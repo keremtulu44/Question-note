@@ -3,6 +3,35 @@
 **Son güncelleme: 2026-10-26.** Önce bu belge, `docs/DERLEME_RAPORU.md`,
 `docs/PREMIUM_GORSEL_GELISTIRME.md` ve [P4–P6 sözleşme/kanıt kaydı](docs/P4_P5_P6_UYGULAMA.md) okunur.
 
+## T3 uygulandı — CI kapısı bekliyor (2026-10-26)
+
+Kullanıcı kararı: **yalnız T3** ve **tamamı çevrimdışı** (bulut/hesap/bildirim yok, Play'e yüklenebilir
+yerel uygulama). `versionName`/`versionCode` artırılmadı; Room/ZIP sürümü değişmedi.
+
+- **Arama/filtre:** `OgretmenVerisi.filtrele(...)` + `OgretmenSorusu.aramaHavuzu(...)` (başlık, kim
+  sordu, kaynak, ders/konu adı; `aramaAnahtari` = `tr-TR` küçük harf). `KuyrukGunFiltresi`
+  (HEPSI/BUGUN/GECIKEN/PLANLANMAMIS) `kuyruk(...)` içinde; eski `yalnizGeciken` bayrağı kaldırıldı.
+  UI: `OgretmenAramaAlani` + `FiltreCipi` satırları (gün, ders, soran), `rememberSaveable` durum.
+- **Paylaşım:** `ui/ogretmen/OgretmenPaylasim.kt` — tek yerel `ACTION_SEND`/`ACTION_SEND_MULTIPLE`,
+  `FileProvider` URI'leri (`res/xml/file_paths.xml` → `share_teacher` `ogretmen-img/`, `share_archive`
+  `img/`), en fazla 9 fotoğraf, `FLAG_GRANT_READ_URI_PERMISSION`. **"kim sordu" ve cevap metne
+  girmez.** Manifest değişmedi (provider zaten `exported=false`, izin yok).
+- **Kapatma döngüsü:** `OgretmenDeposu.grupSil(grupId, dosyalariKoru = true)` + yeni
+  `grupGeriAl(grup, sorular): Int?` (grup + sorular tek transaction, aynı kimlikler). Detay ekranı
+  silmeden sonra `onGeri()` çağırıp geri almayı `Snackbar` (10 sn) ile sunar; bu yüzden host
+  `OgretmenAnaEkrani` bir `kaliciKapsam` (host `rememberCoroutineScope`) geçirir — ekran kapanınca
+  coroutine iptal olmasın. Arşiv sekmesinde `ogretmen_arsivden_geri_al` toplu geri alma.
+- **Uyarılar:** `OgretmenAyarlarEkrani` 7+ gün/ hiç yedek yoksa `ogretmen_yedek_uyarisi`;
+  `OgretmenSoruFormuEkrani` aynı `sha256` başka soruda ise `ogretmen_ayni_gorsel_dialog` onayı
+  ("yine de kaydet").
+- **Testler:** `OgretmenAramaVeFiltreTest` (saf JVM; arama/filtre/normalize/aynı görsel/1.000 soru
+  < 200 ms), `OgretmenGrupGeriAlmaTest` (Room undo + tekrar çağrı + arşivden dönüş),
+  `OgretmenPaylasimTest` (chooser/URI/metin/9 sınırı), `OgretmenT3ArayuzTest` (Robolectric Compose:
+  arama, kart paylaşımı, snackbar geri alma).
+- **Bilinen açıklar:** "bugüne al / yarına at" hızlı plan aksiyonu, soru+çözüm paylaşım düğmesi
+  (`cozumDahil` hazır), tüm-gruplar arşiv filtresi, içgörü kartı ve cihaz kabulü (200+ soru arama,
+  5 soru paylaşma, grup geri alma, 9 günlük yedek uyarısı).
+
 ## Güncel ve yayımlanmış: 1.6.0 Öğretmen modu — T0 + T1 + P2 başlangıcı
 
 - **Dal:** `arena/5d75ca16-question-note`. **Sürüm:** `versionName = "1.6.0"` (`versionCode = 39`).

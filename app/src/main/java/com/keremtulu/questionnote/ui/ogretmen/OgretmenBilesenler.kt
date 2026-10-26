@@ -26,7 +26,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -353,6 +355,64 @@ private fun SecimSatiri(
     }
 }
 
+/**
+ * Search box of the queue and the class detail. Kept small on purpose: one line, a clear button
+ * and a test tag so the filtering behaviour is covered by a UI test.
+ */
+@Composable
+internal fun OgretmenAramaAlani(
+    deger: String,
+    onDeger: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    OutlinedTextField(
+        value = deger,
+        onValueChange = onDeger,
+        modifier = modifier.fillMaxWidth().testTag("ogretmen_arama"),
+        singleLine = true,
+        shape = RoundedCornerShape(16.dp),
+        placeholder = {
+            Text(
+                text = stringResource(R.string.teacher_search_hint),
+                style = MaterialTheme.typography.bodySmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        },
+        leadingIcon = {
+            Text(
+                text = "⌕",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        },
+        trailingIcon = {
+            if (deger.isNotEmpty()) {
+                IconButton(
+                    onClick = { onDeger("") },
+                    modifier = Modifier.testTag("ogretmen_arama_temizle"),
+                ) {
+                    Text(
+                        text = "✕",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        },
+    )
+}
+
+/** One-line "who asked" chip; the student name is the only field the teacher types as a person. */
+@Composable
+internal fun SoranKisiCipi(metin: String, modifier: Modifier = Modifier) {
+    EtiketCipi(
+        metin = stringResource(R.string.teacher_asked_by_chip, metin),
+        vurgu = MaterialTheme.colorScheme.tertiary,
+        modifier = modifier,
+    )
+}
+
 @Composable
 internal fun OgretmenGrupKarti(
     grup: OgretmenGrubu,
@@ -497,6 +557,7 @@ internal fun OgretmenSoruKarti(
     onBaskaGrubaEkle: () -> Unit,
     onDuzenle: () -> Unit,
     onSil: () -> Unit,
+    onPaylas: () -> Unit = {},
     secimModu: Boolean = false,
     secili: Boolean = false,
     onSecimDegistir: (Boolean) -> Unit = {},
@@ -605,6 +666,11 @@ internal fun OgretmenSoruKarti(
                     )
                 }
             }
+            // "Who asked" is the field a teacher actually remembers ("Elif'in sorusu"), so it gets
+            // its own line instead of competing with the tag chips for horizontal space.
+            soru.kimSordu?.takeIf { it.isNotBlank() }?.let { ad ->
+                SoranKisiCipi(metin = ad)
+            }
             konuAdi?.takeIf { it.isNotBlank() }?.let { ad ->
                 Text(
                     text = ad,
@@ -660,6 +726,12 @@ internal fun OgretmenSoruKarti(
                         )
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                        PremiumTextButton(
+                            onClick = onPaylas,
+                            modifier = Modifier.testTag("ogretmen_paylas_${soru.id}"),
+                        ) {
+                            Text(stringResource(R.string.teacher_share_action))
+                        }
                         PremiumTextButton(onClick = onDuzenle) {
                             Text(stringResource(R.string.question_edit))
                         }

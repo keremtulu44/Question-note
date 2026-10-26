@@ -42,13 +42,18 @@ Mevcut kullanıcı ilk ekranını kaybetmez. Her kartta grup adı, not, bekleyen
 Grup düzenleme/arşivleme/silme grup detayındaki `⋮` menüsündedir.
 
 ### Bugün (kuyruk)
-Tüm gruplardan **çözülmemiş** sorular tek listede, en uzun bekleyen en üstte. Gecikenler filtresi
-`plan_gun < bugün` koşulunu kullanır. Grup çipleriyle tek sınıfa daraltılabilir. Bu ekran
+Tüm gruplardan **çözülmemiş** sorular tek listede, en uzun bekleyen en üstte. Gün çipleri
+**Tümü / Bugün (`plan_gun == bugün`) / Geciken (`plan_gun < bugün`) / Planlanmamış (`plan_gun == null`)**
+koşullarını uygular; `Tümü` bütün filtreleri (grup dahil) sıfırlar. Grup, ders ve "soran kişi" çipleri
+tek sınıfa/kişiye daraltır, tek satırlık arama başlık + soran kişi + kaynak + ders/konu adında arar
+(cevap metni hiç aranmaz). Filtre durumu `rememberSaveable` ile döndürmede korunur. Bu ekran
 "bugün ne çözeceğim" sorusunun cevabıdır; önceki sürümde beş grubu tek tek açmak gerekiyordu.
 
 ### Grup detayı
-Üç sekme: **Çözmediklerim / Çözdüklerim / Arşiv**. Üstteki menüden grup düzenlenir, arşivlenir
-veya silinir. Grup silme onayı **kaç sorunun** silineceğini ve **son yedeğin tarihini** yazar;
+Üç sekme: **Çözmediklerim / Çözdüklerim / Arşiv**. Sekmenin üstünde arama ve "soran kişi" çipleri
+vardır; arama yalnız açık sekmeyi daraltır. Arşiv sekmesinde **"Arşivden geri al"** filtrelenmiş
+listeyi kuyruğa döndürür. Üstteki menüden grup düzenlenir, arşivlenir veya silinir. Grup silme onayı
+**kaç sorunun** silineceğini, **10 saniyelik geri alma** penceresini ve **son yedeğin tarihini** yazar;
 yedek hiç alınmadıysa bunu açıkça söyler.
 
 ### Sunum (tam ekran)
@@ -87,8 +92,10 @@ düğmesi ölüydü; bu kapı kaldırıldı.
 - **Silme geri alınabilir:** satırlar silinir, dosyalar kısa süre diskte kalır; snackbar'daki
   "Geri al" aynı id ve aynı fotoğrafla kaydı geri getirir. Kullanılmayan dosyalar daha sonra
   Ayarlar → Depolama ve bakım ekranından, **yaş ≥ 7 gün** ve kullanıcı onayıyla temizlenir.
-- **Grup silme geri alınamaz** (fotoğraflar dahil); bu yüzden onay metni soru sayısını ve son yedek
-  tarihini taşır.
+- **Grup silme geri alınabilir:** `grupSil(..., dosyalariKoru = true)` satırları siler, fotoğrafları
+  diskte bırakır; snackbar'daki "Geri al" (10 sn) grup satırını **ve** sorularını aynı kimliklerle tek
+  transaction'da geri yazar. Onay metni yine soru sayısını, pencereyi ve son yedek tarihini taşır.
+  Kullanılmayan kalan dosyalar depolama/bakım ekranından (yaş ≥ 7 gün + onay) temizlenir.
 
 ## 5. Yedekleme
 
@@ -116,6 +123,10 @@ kendi UUID'siyle adlandırılır). Okuma v2/v3/v4/v5 yedeklerini destekler. Ayr�
 | `OgretmenVeSorulacaklarVeriTest` | Öğretmen↔öğrenci köprüsü ve ZIP gidiş-dönüşü |
 | `KirpmaSorulacakVeOgretmenArayuzTest` | Kuyruk/grup/sunum etkileşimi, gizli cevap, başka gruba kopyalama |
 | `GorselButunlukVeYerlesimArayuzTest` | Büyük yazı ölçeğinde taşma, paylaşılan snackbar |
+| `OgretmenAramaVeFiltreTest` | Arama alanları, çok kelimeli eşleşme, cevabın aranmaması, gün filtreleri, soran kişi normalizasyonu, aynı `sha256`, 1.000 soruda < 200 ms |
+| `OgretmenGrupGeriAlmaTest` | Grup silme + gerçek geri alma (aynı id/durum), ikinci çağrının reddi, arşivden kuyruğa dönüş |
+| `OgretmenPaylasimTest` | Chooser, `FileProvider` URI'si, "kim sordu"/cevap dışarıda, 9 görsel sınırı, dosya yoksa metin paylaşımı |
+| `OgretmenT3ArayuzTest` | Arama/soran çipinin listeyi daraltması, karttan paylaşım niyeti, grup silmenin snackbar ile geri alınması |
 
 **Doğrulanmış paket (CI `40280978018`):** Debug 351/0/0/0 · Release 277/0/0/0; `assembleRelease`,
 imza ve beklenen sertifika parmak izi eşleşti, Release `v1.6.0` yayımlandı. Ortak testler iki
@@ -124,3 +135,23 @@ varyantta tekrar eder; sayılar toplanmaz. Fiziksel cihaz kabulü hâlâ açık 
 **Test kuralları:** öğretmen pencereleri `OgretmenDiyalogu` ile çizildiği için testler pencere
 kabuğunu (`ogretmen_kopyala_dialog`) bekler; kart içi aksiyonlar dokunma yönlendirmesine bağlı
 kalmadan semantik `OnClick` ile tetiklenir.
+
+## 8. T3 — arama, "kim sordu", paylaşım (çevrimdışı)
+
+Kullanıcı kararı: yalnız bu blok uygulanır ve **hiçbir adımı çevrimiçi değildir**; uygulama
+Play'e olduğu gibi yüklenebilir (sunucu, hesap, izin, WorkManager, bildirim yok).
+
+- **Arama/filtre:** `OgretmenVerisi.filtrele(liste, arama, dersId, konuId, kimSordu, dersAdlari,
+  konuAdlari)`; normalize anahtar `aramaAnahtari` (`tr-TR` küçük harf + kırpma). Birden çok kelime
+  aynı soruda geçmek zorundadır. Kuyrukta `kuyruk(dersId = …)` artık UI'dan da kullanılır.
+- **"Kim sordu":** kart rozeti (`Soran: …`), sunum başlığında soran/ders/konu satırı, kart ve liste
+  için soran kişi filtresi, formda "Sık soranlar" çipleri. Gruplama normalize anahtarla yapılır,
+  ilk yazım korunur.
+- **Paylaşım:** `OgretmenPaylasim` tek yerel `ACTION_SEND`/`ACTION_SEND_MULTIPLE` üretir; fotoğraflar
+  `FileProvider` içerik URI'siyle ve `FLAG_GRANT_READ_URI_PERMISSION` ile gider (en fazla 9 dosya).
+  `res/xml/file_paths.xml` yalnız iki kök açar: `ogretmen-img/` ve `img/`. Metin başlık, ders, konu ve
+  kaynağı taşır; **"kim sordu" ve cevap paylaşılmaz**. Dosya diskte yoksa yalnız metin paylaşılır.
+- **Uyarılar:** Ayarlar'da 7+ günlük (veya hiç alınmamış) yedek için `ogretmen_yedek_uyarisi`; formda
+  aynı `sha256` başka bir soruda varsa onay penceresi.
+- **Sınır:** T3 içinde içgörü kartı, "bugüne al / yarına at" hızlı plan aksiyonu ve tüm gruplarda
+  ayrı arşiv filtresi yok; Room/ZIP sürümü artmadı.

@@ -2,6 +2,31 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [Yayınlanmadı — T3] — 2026-10-26
+
+- **Arama ve filtreler:** kuyruk ve grup detayında tek satır arama (`rememberSaveable`); başlık,
+  "kim sordu", kaynak, ders ve konu adında Türkçe'ye duyarlı (`tr-TR` küçük harf) eşleşme. Kuyrukta
+  **Tümü / Bugün / Geciken / Planlanmamış** gün çipleri (eski "yalnız gecikenler" onay kutusunun
+  yerine), kullanılan dersler için ders çipleri ve soran kişi çipleri. Cevap metni hiç aranmaz.
+- **"Kim sordu" yüzeyi:** soru kartında "Soran: …" rozeti, sunum ekranında soran/ders/konu satırı,
+  kart ve kuyruk/detay için soran kişi filtresi, formda tek dokunuşla doldurulan "Sık soranlar"
+  çipleri (normalize gruplama: kırpma + `tr-TR` küçük harf).
+- **Yerel paylaşım:** `ACTION_SEND`/`ACTION_SEND_MULTIPLE` + `FileProvider`
+  (`files-path` `ogretmen-img/` ve `img/`), en fazla 9 fotoğraf, `FLAG_GRANT_READ_URI_PERMISSION`,
+  seçili N soru için "seçilenleri paylaş". Metinde başlık/ders/konu/kaynak gider; **"kim sordu" ve
+  cevap asla paylaşılmaz**. Ağ, hesap, WhatsApp API yok.
+- **Kapatma döngüsü:** grup silme fotoğrafları korur ve `Snackbar` (10 sn) üzerinden **gerçek geri
+  alma** sunar — grup satırı ve sorular aynı kimliklerle tek transaction'da döner; arşiv sekmesinde
+  "Arşivden geri al" ile filtrelenmiş liste kuyruğa döner.
+- **Veri güvenliği uyarıları:** Ayarlar'da 7+ günlük veya hiç alınmamış yedek için uyarı; soru
+  formunda aynı `sha256` başka bir soruda varsa "aynı fotoğraf" onayı.
+- **Değişmeyen sözleşme:** Room `ROOM_SCHEMA_VERSION = 5`, ZIP `FORMAT_VERSION = 5`, okuma
+  `{2,3,4,5}`; göç yok. `versionName`/`versionCode` bu commit'te artırılmadı.
+- **Testler:** `OgretmenAramaVeFiltreTest` (arama/filtre/gün filtresi/aynı görsel/1.000 soruda
+  < 200 ms), `OgretmenGrupGeriAlmaTest` (grup silme + geri alma, tekrar çağrı, arşivden dönüş),
+  `OgretmenPaylasimTest` (chooser, URI, "kim sordu" dışarıda, 9 görsel sınırı),
+  `OgretmenT3ArayuzTest` (arama daraltma, kart paylaşımı, snackbar geri alma). CI kanıtı bekliyor.
+
 ## [1.6.0] — 2026-10-26
 
 - **Öğretmen verisi Room v5:** `ogretmen_gruplari`, `ogretmen_sorulari`, `ogretmen_soru_gorselleri` tabloları (5 indeks, `MIGRATION_4_5`); ders/konu bağları `SET NULL`, soru→grup ve görsel→soru `CASCADE`. Eski tek JSON dosyası ilk açılışta toleranslı içe aktarılır, sonra arşivlenir; okunamazsa karantinaya alınır ve çalışma alanı salt-okunur kalır.

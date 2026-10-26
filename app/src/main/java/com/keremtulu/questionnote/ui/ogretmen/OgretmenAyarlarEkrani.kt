@@ -78,6 +78,22 @@ internal fun OgretmenAyarlarEkrani(
 
     fun boyut(bayt: Long): String = Formatter.formatShortFileSize(context, bayt)
 
+    // A backup nobody refreshes is not a backup. 7 days is the same threshold the storage screen
+    // already uses for "fresh", so the two screens cannot contradict each other.
+    val yedekGun = sonYedek?.let { yedek ->
+        java.util.concurrent.TimeUnit.MILLISECONDS.toDays(
+            (System.currentTimeMillis() - yedek.olusturmaZamani).coerceAtLeast(0L),
+        ).toInt()
+    }
+    val yedekUyarisi = when {
+        !veri.bosDegil() && sonYedek == null -> context.getString(R.string.teacher_backup_never_message)
+        !veri.bosDegil() && (yedekGun ?: 0) >= YEDEK_TAZELIK_GUN -> context.getString(
+            R.string.teacher_backup_stale_message,
+            yedekGun,
+        )
+        else -> null
+    }
+
     val sonYedekMetni = sonYedek?.let { backup ->
         val tarih = SimpleDateFormat("d MMM yyyy HH:mm", Locale.forLanguageTag("tr-TR"))
             .format(Date(backup.olusturmaZamani))
@@ -165,6 +181,13 @@ internal fun OgretmenAyarlarEkrani(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                    yedekUyarisi?.let { uyari ->
+                        NotKutusu(
+                            metin = uyari,
+                            vurgu = PremiumMarkaRenkler.Mercan,
+                            modifier = Modifier.testTag("ogretmen_yedek_uyarisi"),
+                        )
+                    }
                     PremiumGradyanButon(
                         onClick = onYedekOlustur,
                         enabled = !yedeklemeIslemde,
@@ -359,9 +382,13 @@ internal fun InceAyrac() {
 
 /** Neutral bordered surface used by dialogs and inline rows. */
 @Composable
-internal fun NotKutusu(metin: String, vurgu: androidx.compose.ui.graphics.Color) {
+internal fun NotKutusu(
+    metin: String,
+    vurgu: androidx.compose.ui.graphics.Color,
+    modifier: Modifier = Modifier,
+) {
     androidx.compose.material3.Surface(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
         color = vurgu.copy(alpha = 0.10f),
         border = BorderStroke(1.dp, vurgu.copy(alpha = 0.30f)),
@@ -374,3 +401,6 @@ internal fun NotKutusu(metin: String, vurgu: androidx.compose.ui.graphics.Color)
         )
     }
 }
+
+/** Same freshness threshold as the storage screen: older than 7 days is a stale backup. */
+private const val YEDEK_TAZELIK_GUN = 7

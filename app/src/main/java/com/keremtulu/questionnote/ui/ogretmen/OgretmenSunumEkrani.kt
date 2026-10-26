@@ -67,6 +67,8 @@ internal fun OgretmenSunumDialog(
     sorular: List<OgretmenSorusu>,
     baslangicIndex: Int,
     grupAdlari: Map<String, String>,
+    dersAdlari: Map<String, String> = emptyMap(),
+    konuAdlari: Map<String, String> = emptyMap(),
     gorselDeposu: LocalSoruGorselDeposu,
     onKapat: () -> Unit,
     onCozulduDegistir: (OgretmenSorusu, Boolean) -> Unit,
@@ -96,6 +98,8 @@ internal fun OgretmenSunumDialog(
             index = index,
             soru = soru,
             grupAdlari = grupAdlari,
+            dersAdlari = dersAdlari,
+            konuAdlari = konuAdlari,
             gorselDeposu = gorselDeposu,
             onKapat = onKapat,
             onOnceki = { if (index > 0) index-- },
@@ -112,6 +116,8 @@ private fun OgretmenSunumIcerigi(
     index: Int,
     soru: OgretmenSorusu,
     grupAdlari: Map<String, String>,
+    dersAdlari: Map<String, String>,
+    konuAdlari: Map<String, String>,
     gorselDeposu: LocalSoruGorselDeposu,
     onKapat: () -> Unit,
     onOnceki: () -> Unit,
@@ -165,6 +171,21 @@ private fun OgretmenSunumIcerigi(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
+                val soranSatiri = listOfNotNull(
+                    soru.kimSordu?.takeIf { it.isNotBlank() }
+                        ?.let { stringResource(R.string.teacher_asked_by_chip, it) },
+                    soru.dersId?.let { dersAdlari[it] }?.takeIf { it.isNotBlank() },
+                    soru.konuId?.let { konuAdlari[it] }?.takeIf { it.isNotBlank() },
+                ).joinToString(" · ")
+                if (soranSatiri.isNotBlank()) {
+                    Text(
+                        text = soranSatiri,
+                        color = PremiumMarkaRenkler.BakirIsik,
+                        style = MaterialTheme.typography.labelMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
                 Text(
                     text = stringResource(R.string.teacher_presentation_progress, index + 1, sorular.size) +
                         " · " + stringResource(R.string.teacher_presentation_keep_awake),

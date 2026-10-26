@@ -1,6 +1,8 @@
 package com.keremtulu.questionnote.ui.ogretmen
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
@@ -26,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +57,7 @@ import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 private enum class GrupSekmesi { COZMEDIKLERIM, COZDUKLERIM, ARSIV }
@@ -71,6 +76,11 @@ internal fun OgretmenGrupDetayEkrani(
     onGeri: () -> Unit,
     onSoruEkle: () -> Unit,
     onSoruDuzenle: (String) -> Unit,
+    /**
+     * Scope of the host screen. Deleting a group navigates back, which disposes this composable and
+     * would cancel a locally remembered scope before the undo snackbar could be answered.
+     */
+    kaliciKapsam: CoroutineScope = rememberCoroutineScope(),
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -86,6 +96,8 @@ internal fun OgretmenGrupDetayEkrani(
     var grupFormu by remember(grup.id) { mutableStateOf(false) }
     var grupSilOnayi by remember(grup.id) { mutableStateOf(false) }
     var menuAcik by remember(grup.id) { mutableStateOf(false) }
+    var arama by rememberSaveable(grup.id) { mutableStateOf("") }
+    var seciliSoran by rememberSaveable(grup.id) { mutableStateOf<String?>(null) }
 
     val bekleyen = remember(sorulari) {
         sorulari.filter { it.durum == OgretmenDurum.BEKLIYOR }
@@ -97,11 +109,24 @@ internal fun OgretmenGrupDetayEkrani(
     val arsiv = remember(sorulari) {
         sorulari.filter { it.durum == OgretmenDurum.ARSIV }.sortedByDescending { it.guncelleme }
     }
-    val liste = when (sekme) {
+    val tumListe = when (sekme) {
         GrupSekmesi.COZMEDIKLERIM -> bekleyen
         GrupSekmesi.COZDUKLERIM -> cozulen
         GrupSekmesi.ARSIV -> arsiv
     }
+    // 200+ questions in one class is normal: the search narrows the current tab, it does not
+    // re-sort or jump to another tab.
+    val soranlar = remember(sorulari) { veri.kimSorduIsimleri(sorulari) }
+    val liste = remember(tumListe, arama, seciliSoran, dersAdlari, konuAdlari) {
+        veri.filtrele(
+            liste = tumListe,
+            arama = arama,
+            kimSordu = seciliSoran,
+            dersAdlari = dersAdlari,
+            konuAdlari = konuAdlari,
+        )
+    }
+    val filtreAktif = arama.isNotBlank() || seciliSoran != null
 
     fun secimiTemizle() {
         secimModu = false
@@ -137,6 +162,42 @@ internal fun OgretmenGrupDetayEkrani(
         scope.launch {
             val degisen = ogretmenDeposu.topluDurumDegistir(idler, durum)
             if (degisen > 0) secimiTemizle()
+        }
+    }
+
+    fun paylas(hedefler: List<OgretmenSorusu>) {
+        if (hedefler.isEmpty()) return
+        val acildi = OgretmenPaylasim.paylas(context, hedefler, gorselDeposu, dersAdlari, konuAdlari)
+        if (!acildi) {
+            scope.launch { snackbarHostState.showSnackbar(context.getString(R.string.teacher_share_failed)) }
+        }
+    }
+
+    /**
+     * Group delete is the most destructive action in the workspace, so the photos are kept and the
+     * snackbar offers a real 10 second undo: the group row and every question come back with the
+     * same ids. Files are only collected by the storage-maintenance screen afterwards.
+     */
+    fun grubuSil() {
+        val hedefler = sorulari
+        val toplam = hedefler.size
+        kaliciKapsam.launch {
+            if (!ogretmenDeposu.grupSil(grup.id, dosyalariKoru = true)) return@launch
+            onGeri()
+            val sonuc = snackbarHostState.showSnackbar(
+                message = context.getString(R.string.teacher_group_deleted_message, grup.ad, toplam),
+                actionLabel = context.getString(R.string.teacher_undo),
+                duration = SnackbarDuration.Long,
+            )
+            if (sonuc == SnackbarResult.ActionPerformed) {
+                val geri = ogretmenDeposu.grupGeriAl(grup, hedefler)
+                snackbarHostState.showSnackbar(
+                    context.getString(
+                        if (geri != null) R.string.teacher_group_undo_restored
+                        else R.string.teacher_group_undo_failed,
+                    ),
+                )
+            }
         }
     }
 
@@ -229,26 +290,48 @@ internal fun OgretmenGrupDetayEkrani(
                     }
                 }
             }
+            item {
+                OgretmenAramaAlani(deger = arama, onDeger = { arama = it })
+            }
+            if (soranlar.size > 1) {
+                item {
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        items(soranlar, key = { it }) { ad ->
+                            FiltreCipi(
+                                metin = stringResource(R.string.teacher_asked_by_filter) + ": " + ad,
+                                secili = seciliSoran == ad,
+                                onClick = { seciliSoran = if (seciliSoran == ad) null else ad },
+                            )
+                        }
+                    }
+                }
+            }
             if (liste.isEmpty()) {
                 item {
                     CamKarti(modifier = Modifier.fillMaxWidth(), elevation = CamYukseklik.DUSUK) {
                         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                             Text(
                                 text = stringResource(
-                                    when (sekme) {
-                                        GrupSekmesi.COZMEDIKLERIM -> R.string.teacher_detail_empty_pending
-                                        GrupSekmesi.COZDUKLERIM -> R.string.teacher_detail_empty_solved
-                                        GrupSekmesi.ARSIV -> R.string.teacher_empty_archive_title
+                                    if (filtreAktif) {
+                                        R.string.teacher_search_empty
+                                    } else {
+                                        when (sekme) {
+                                            GrupSekmesi.COZMEDIKLERIM -> R.string.teacher_detail_empty_pending
+                                            GrupSekmesi.COZDUKLERIM -> R.string.teacher_detail_empty_solved
+                                            GrupSekmesi.ARSIV -> R.string.teacher_empty_archive_title
+                                        }
                                     },
                                 ),
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.SemiBold,
                             )
-                            Text(
-                                text = stringResource(R.string.teacher_detail_empty_pending_hint),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
+                            if (!filtreAktif) {
+                                Text(
+                                    text = stringResource(R.string.teacher_detail_empty_pending_hint),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
                         }
                     }
                 }
@@ -271,6 +354,7 @@ internal fun OgretmenGrupDetayEkrani(
                     onBaskaGrubaEkle = { kopyalanan = soru },
                     onDuzenle = { onSoruDuzenle(soru.id) },
                     onSil = { silinecekIdler = setOf(soru.id) },
+                    onPaylas = { paylas(listOf(soru)) },
                     secimModu = secimModu,
                     secili = secili,
                     onSecimDegistir = { secildi ->
@@ -309,6 +393,26 @@ internal fun OgretmenGrupDetayEkrani(
                             Text(stringResource(R.string.teacher_archive_title))
                         }
                     }
+                    // Archive is not a dead end: one tap brings the whole filtered tab back to the
+                    // queue, which is the opposite of the archive action right above.
+                    if (sekme == GrupSekmesi.ARSIV && liste.isNotEmpty()) {
+                        PremiumTextButton(
+                            onClick = {
+                                val idler = liste.mapTo(mutableSetOf()) { it.id }
+                                scope.launch {
+                                    val sayi = ogretmenDeposu.topluDurumDegistir(idler, OgretmenDurum.BEKLIYOR)
+                                    if (sayi > 0) {
+                                        snackbarHostState.showSnackbar(
+                                            context.getString(R.string.teacher_unarchive_done, sayi),
+                                        )
+                                    }
+                                }
+                            },
+                            modifier = Modifier.testTag("ogretmen_arsivden_geri_al"),
+                        ) {
+                            Text(stringResource(R.string.teacher_unarchive_restore))
+                        }
+                    }
                 }
             }
         }
@@ -321,6 +425,11 @@ internal fun OgretmenGrupDetayEkrani(
                 onCozme = { durumUygula(seciliIdler, OgretmenDurum.BEKLIYOR) },
                 onArsivle = { durumUygula(seciliIdler, OgretmenDurum.ARSIV) },
                 onSil = { silinecekIdler = seciliIdler },
+                onPaylas = {
+                    val hedefler = tumListe.filter { it.id in seciliIdler }
+                    secimiTemizle()
+                    paylas(hedefler)
+                },
             )
         }
 
@@ -339,15 +448,14 @@ internal fun OgretmenGrupDetayEkrani(
     }
 
     sunumId?.let { id ->
-        val aktifListe = when (sekme) {
-            GrupSekmesi.COZMEDIKLERIM -> bekleyen
-            GrupSekmesi.COZDUKLERIM -> cozulen
-            GrupSekmesi.ARSIV -> arsiv
-        }
+        // Present in the order the teacher sees: the filtered tab, not the whole group.
+        val aktifListe = liste
         OgretmenSunumDialog(
             sorular = aktifListe,
             baslangicIndex = aktifListe.indexOfFirst { it.id == id }.coerceAtLeast(0),
             grupAdlari = mapOf(grup.id to grup.ad),
+            dersAdlari = dersAdlari,
+            konuAdlari = konuAdlari,
             gorselDeposu = gorselDeposu,
             onKapat = { sunumId = null },
             onCozulduDegistir = { soru, cozuldu ->
@@ -447,13 +555,13 @@ internal fun OgretmenGrupDetayEkrani(
                 TextButton(onClick = { grupSilOnayi = false }) {
                     Text(stringResource(R.string.common_cancel))
                 }
-                TextButton(onClick = {
-                    grupSilOnayi = false
-                    scope.launch {
-                        // Group delete is permanent (files included), so the backup age is in the text.
-                        if (ogretmenDeposu.grupSil(grup.id)) onGeri()
-                    }
-                }) {
+                TextButton(
+                    onClick = {
+                        grupSilOnayi = false
+                        grubuSil()
+                    },
+                    modifier = Modifier.testTag("ogretmen_grup_sil_onay"),
+                ) {
                     Text(stringResource(R.string.question_delete))
                 }
             }
@@ -546,6 +654,7 @@ internal fun SecimCubugu(
     onCozme: () -> Unit,
     onArsivle: () -> Unit,
     onSil: () -> Unit,
+    onPaylas: () -> Unit = {},
 ) {
     Surface(
         modifier = modifier.fillMaxWidth().testTag("ogretmen_secim_cubugu"),
@@ -562,9 +671,11 @@ internal fun SecimCubugu(
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Bold,
             )
+            // Five actions on a 393dp phone would clip; the row scrolls instead of shrinking the
+            // labels, and the destructive action keeps its own colour.
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 PremiumTextButton(onClick = onCoz, enabled = adet > 0) {
                     Text(stringResource(R.string.teacher_bulk_solve), style = MaterialTheme.typography.labelMedium)
@@ -574,6 +685,13 @@ internal fun SecimCubugu(
                 }
                 PremiumTextButton(onClick = onArsivle, enabled = adet > 0) {
                     Text(stringResource(R.string.teacher_bulk_archive), style = MaterialTheme.typography.labelMedium)
+                }
+                PremiumTextButton(
+                    onClick = onPaylas,
+                    enabled = adet > 0,
+                    modifier = Modifier.testTag("ogretmen_toplu_paylas"),
+                ) {
+                    Text(stringResource(R.string.teacher_share_action), style = MaterialTheme.typography.labelMedium)
                 }
                 PremiumTextButton(onClick = onSil, enabled = adet > 0) {
                     Text(

@@ -1123,7 +1123,7 @@
     <string name="teacher_move_subtitle">Soru, tarihi ve çözüm durumuyla birlikte taşınır; kopya oluşmaz.</string>
     <string name="teacher_move_action">Taşı</string>
     <string name="teacher_move_done">Soru taşındı.</string>
-    <string name="teacher_delete_confirm_counts">%1$s grubunu ve içindeki %2$d soruyu silmek istiyor musun? Son yedek: %3$s.</string>
+    <string name="teacher_delete_confirm_counts">%1$s grubunu ve içindeki %2$d soruyu silmek istiyor musun? 10 saniye içinde geri alabilirsin. Son yedek: %3$s.</string>
     <string name="teacher_delete_backup_never">hiç alınmadı</string>
     <string name="teacher_undo">Geri al</string>
     <string name="teacher_deleted_message">%1$d soru silindi.</string>
@@ -1182,4 +1182,37 @@
     <string name="teacher_copy_done">%1$d gruba kopyalandı.</string>
     <string name="teacher_undo_failed">Silme geri alınamadı; fotoğraflar temizlenmiş olabilir.</string>
     <string name="teacher_answer_hidden_hint">Cevap, sunum ekranında yalnızca "Cevabı göster" ile açılır.</string>
+
+    <!-- Öğretmen modu 1.6.1: arama, "kim sordu", yerel paylaşım, plan filtresi, geri alma -->
+    <string name="teacher_search_hint">Başlık, soran kişi, ders veya kaynakta ara…</string>
+    <string name="teacher_search_clear">Aramayı temizle</string>
+    <string name="teacher_search_empty">Aramayla eşleşen soru yok. Aramayı temizleyip tekrar dene.</string>
+    <string name="teacher_search_count">%1$d sonuç</string>
+    <string name="teacher_asked_by_chip">Soran: %1$s</string>
+    <string name="teacher_asked_by_filter">Soran kişi</string>
+    <string name="teacher_plan_all">Tümü</string>
+    <string name="teacher_plan_today">Bugün</string>
+    <string name="teacher_plan_overdue">Geciken</string>
+    <string name="teacher_plan_unscheduled">Planlanmamış</string>
+    <string name="teacher_lesson_filter">Ders</string>
+    <string name="teacher_quick_names">Sık soranlar</string>
+    <string name="teacher_share_action">Paylaş</string>
+    <string name="teacher_share_chooser">Soruyu paylaş</string>
+    <string name="teacher_share_failed">Paylaşım açılamadı; cihazda uygun bir uygulama yok.</string>
+    <string name="teacher_share_lesson">Ders: %1$s</string>
+    <string name="teacher_share_topic">Konu: %1$s</string>
+    <string name="teacher_share_source">Kaynak: %1$s</string>
+    <string name="teacher_share_count">%1$d soru</string>
+    <string name="teacher_share_privacy_note">Paylaşımda \"kim sordu\" ve cevap yer almaz; yalnızca soru fotoğrafları ve etiketler gider.</string>
+    <string name="teacher_unarchive_restore">Arşivden geri al</string>
+    <string name="teacher_unarchive_done">%1$d soru kuyruğa geri alındı.</string>
+    <string name="teacher_group_deleted_message">\"%1$s\" grubu ve %2$d soru silindi.</string>
+    <string name="teacher_group_undo_restored">Grup geri yüklendi.</string>
+    <string name="teacher_group_undo_failed">Grup geri yüklenemedi.</string>
+    <string name="teacher_backup_stale_title">Yedek taze değil</string>
+    <string name="teacher_backup_stale_message">Son yedek %1$d gün önce alındı. Telefon kaybolur veya bozulursa çalışma alanın kaybolur; yedek al.</string>
+    <string name="teacher_backup_never_message">Henüz yedek almadın. Telefon kaybolur veya bozulursa çalışma alanın kaybolur; ilk yedeği al.</string>
+    <string name="teacher_duplicate_photo_title">Aynı fotoğraf başka bir soruda var</string>
+    <string name="teacher_duplicate_photo_message">\"%1$s\" sorusunda da aynı fotoğraf kayıtlı (%2$s). İki kez çözmemek için kontrol et.</string>
+    <string name="teacher_duplicate_photo_confirm">Yine de kaydet</string>
 </resources>
