@@ -2,15 +2,15 @@
 
 > Bu dosya Android CI tarafından otomatik üretilir. Keystore veya parola değerleri yazılmaz.
 
-- Zaman (UTC): 2026-10-26T06:10:21Z
-- Workflow commit'i: 945ed9adaf6b141ae6f872db075412215e1cba44
+- Zaman (UTC): 2026-10-26T06:26:16Z
+- Workflow commit'i: 8df13c4662e03e0ab47c5520dc21dbdf126a4dd5
 - Dal: arena/5d75ca16-question-note
 - Uygulama sürümü: 1.6.0 (versionCode 39)
 - Android SDK: compileSdk/targetSdk 37, minSdk 26; build-tools 37.0.0
 - Genel sonuç: **BAŞARISIZ**
 - Wrapper çıkış kodu: 0
 - testDebugUnitTest çıkış kodu: 1
-- Birim test özeti (Debug): 351 test; 2 başarısız; 0 hata; 0 atlandı
+- Birim test özeti (Debug): 351 test; 1 başarısız; 0 hata; 0 atlandı
 - testReleaseUnitTest çıkış kodu: 0
 - Birim test özeti (Release ortak testler): 277 test; 0 başarısız; 0 hata; 0 atlandı
 - UI/Preview regresyonları yalnız testDebug; ortak testler iki varyantta çalışır, sayılar toplanmaz.
@@ -56,7 +56,7 @@ OS:            Linux 6.17.0-1022-azure amd64
 
 ```text
 -- Derleyici/Gradle hata satırları --
-107:* What went wrong:
+104:* What went wrong:
 
 -- İlk 100 satır --
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
@@ -76,15 +76,15 @@ Daemon will be stopped at the end of the build
 > Task :app:createDebugCompatibleScreenManifests
 > Task :app:extractDeepLinksDebug
 > Task :app:processDebugMainManifest
+> Task :app:mergeDebugResources
 > Task :app:processDebugManifest
 > Task :app:preDebugUnitTestBuild UP-TO-DATE
 > Task :app:javaPreCompileDebugUnitTest
 > Task :app:processDebugManifestForPackage
 > Task :app:generateDebugAssets UP-TO-DATE
 > Task :app:mergeDebugAssets
-> Task :app:mergeDebugResources
-> Task :app:processDebugUnitTestManifest
 > Task :app:processDebugResources
+> Task :app:processDebugUnitTestManifest
 > Task :app:packageDebugUnitTestForUnitTest
 > Task :app:generateDebugUnitTestConfig
 > Task :app:kspDebugKotlin
@@ -154,11 +154,11 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/c
 KirpmaSorulacakVeOgretmenArayuzTest > rolSecimiVeOgretmenCalismaAlanindaGizliCevapVeGrupKopyalamaCalisir FAILED
     androidx.compose.ui.test.ComposeTimeoutException at KirpmaSorulacakVeOgretmenArayuzTest.kt:312
 
-KirpmaSorulacakVeOgretmenArayuzTest > ogretmenPremiumAnaEkranHazirGrupOnerisiVeAltMenuSekmeGecisiCalisir FAILED
-    androidx.test.espresso.AppNotIdleException at KirpmaSorulacakVeOgretmenArayuzTest.kt:352
+351 tests completed, 1 failed
 
-351 tests completed, 2 failed
+> Task :app:testDebugUnitTest FAILED
 
+[Incubating] Problems report is available at: file:///home/runner/work/Question-note/Question-note/build/reports/problems/problems-report.html
 
 -- Son 80 satır --
 	at org.gradle.internal.execution.steps.TimeoutStep.execute(TimeoutStep.java:55)
@@ -239,7 +239,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD FAILED in 4m 14s
+BUILD FAILED in 3m 34s
 32 actionable tasks: 32 executed
 ```
 
@@ -258,20 +258,20 @@ Daemon will be stopped at the end of the build
 > Task :app:parseReleaseLocalResources FROM-CACHE
 > Task :app:generateReleaseRFile FROM-CACHE
 > Task :app:javaPreCompileRelease FROM-CACHE
-> Task :app:checkReleaseAarMetadata
 > Task :app:mapReleaseSourceSetPaths
+> Task :app:checkReleaseAarMetadata
 > Task :app:compileReleaseNavigationResources FROM-CACHE
 > Task :app:createReleaseCompatibleScreenManifests
 > Task :app:extractDeepLinksRelease FROM-CACHE
 > Task :app:processReleaseMainManifest
 > Task :app:processReleaseManifest
-> Task :app:processReleaseManifestForPackage
 > Task :app:preReleaseUnitTestBuild UP-TO-DATE
 > Task :app:javaPreCompileReleaseUnitTest FROM-CACHE
 > Task :app:generateReleaseAssets UP-TO-DATE
 > Task :app:mergeReleaseAssets
-> Task :app:processReleaseUnitTestManifest
+> Task :app:processReleaseManifestForPackage
 > Task :app:mergeReleaseResources
+> Task :app:processReleaseUnitTestManifest
 > Task :app:processReleaseResources
 > Task :app:packageReleaseUnitTestForUnitTest
 > Task :app:generateReleaseUnitTestConfig
@@ -333,7 +333,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 1m 34s
+BUILD SUCCESSFUL in 2m
 32 actionable tasks: 24 executed, 8 from cache
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 -- Hata satırları ve son bölüm --
@@ -348,20 +348,20 @@ Daemon will be stopped at the end of the build
 > Task :app:parseReleaseLocalResources FROM-CACHE
 > Task :app:generateReleaseRFile FROM-CACHE
 > Task :app:javaPreCompileRelease FROM-CACHE
-> Task :app:checkReleaseAarMetadata
 > Task :app:mapReleaseSourceSetPaths
+> Task :app:checkReleaseAarMetadata
 > Task :app:compileReleaseNavigationResources FROM-CACHE
 > Task :app:createReleaseCompatibleScreenManifests
 > Task :app:extractDeepLinksRelease FROM-CACHE
 > Task :app:processReleaseMainManifest
 > Task :app:processReleaseManifest
-> Task :app:processReleaseManifestForPackage
 > Task :app:preReleaseUnitTestBuild UP-TO-DATE
 > Task :app:javaPreCompileReleaseUnitTest FROM-CACHE
 > Task :app:generateReleaseAssets UP-TO-DATE
 > Task :app:mergeReleaseAssets
-> Task :app:processReleaseUnitTestManifest
+> Task :app:processReleaseManifestForPackage
 > Task :app:mergeReleaseResources
+> Task :app:processReleaseUnitTestManifest
 > Task :app:processReleaseResources
 > Task :app:packageReleaseUnitTestForUnitTest
 > Task :app:generateReleaseUnitTestConfig
@@ -423,7 +423,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 1m 34s
+BUILD SUCCESSFUL in 2m
 32 actionable tasks: 24 executed, 8 from cache
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
 ```
@@ -466,46 +466,6 @@ androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied 
 	at kotlinx.coroutines.test.TestCoroutineScheduler.tryRunNextTaskUnless$kotlinx_coroutines_test(TestCoroutineScheduler.kt:99)
 	at kotlinx.coroutines.test.TestBuildersKt__TestBuildersKt$runTest$2$1$workRunner$1.invokeSuspend(TestBuilders.kt:327)
 	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(Continuat
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.KirpmaSorulacakVeOgretmenArayuzTest > ogretmenPremiumAnaEkranHazirGrupOnerisiVeAltMenuSekmeGecisiCalisir: androidx.test.espresso.AppNotIdleException: androidx.test.espresso.AppNotIdleException: Compose did not get idle after 200015 attempts in 60 SECONDS.  1. Check your measure/layout lambdas for infinite composition loops. 2. Verify that the 'busy' resources listed above are not deadlocked. 3. Increase Espresso's master idling policy if a longer timeout is required.  The following Idle Conditions failed .
-androidx.test.espresso.AppNotIdleException: Compose did not get idle after 200015 attempts in 60 SECONDS.
-
-1. Check your measure/layout lambdas for infinite composition loops.
-2. Verify that the 'busy' resources listed above are not deadlocked.
-3. Increase Espresso's master idling policy if a longer timeout is required.
- The following Idle Conditions failed .
-	at androidx.test.espresso.AppNotIdleException.create(AppNotIdleException.java:11)
-	at androidx.compose.ui.test.RobolectricIdlingStrategy.runUntilIdle$lambda$0(RobolectricIdlingStrategy.android.kt:101)
-	at androidx.compose.ui.test.AndroidSynchronization_androidKt.runOnUiThread(AndroidSynchronization.android.kt:35)
-	at androidx.compose.ui.test.RobolectricIdlingStrategy.runUntilIdle(RobolectricIdlingStrategy.android.kt:66)
-	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment.waitForIdle(ComposeUiTest.android.kt:716)
-	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment.access$waitForIdle(ComposeUiTest.android.kt:481)
-	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidTestOwner.getRoots(ComposeUiTest.android.kt:988)
-	at androidx.compose.ui.test.TestOwnerKt.getAllSemanticsNodes(TestOwner.kt:116)
-	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchSemanticsNodes$ui_test(SemanticsNodeInteraction.kt:64)
-	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow(SemanticsNodeInteraction.kt:157)
-	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow$default(SemanticsNodeInteraction.kt:150)
-	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchSemanticsNode(SemanticsNodeInteraction.kt:84)
-	at androidx.compose.ui.test.ActionsKt.performTouchInput(Actions.kt:403)
-	at androidx.compose.ui.test.AndroidActions.performClickImpl(Actions.android.kt:23)
-	at androidx.compose.ui.test.ActionsKt.performClick(Actions.kt:61)
-	at com.keremtulu.questionnote.ui.KirpmaSorulacakVeOgretmenArayuzTest.ogretmenPremiumAnaEkranHazirGrupOnerisiVeAltMenuSekmeGecisiCalisir(KirpmaSorulacakVeOgretmenArayuzTest.kt:352)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:26)
-	at org.junit.internal.runners.statements.RunAfters.evaluate(RunAfters.java:27)
-	at androidx.compose.ui.test.junit4.AndroidComposeTestRule$apply$testWithDisposal$1.evaluate(AndroidComposeTestRule.android.kt:426)
-	at org.junit.rules.ExternalResource$1.evaluate(ExternalResource.java:54)
-	at androidx.compose.ui.test.junit4.AndroidComposeTestRule$apply$1$evaluate$1.invokeSuspend(AndroidComposeTestRule.android.kt:448)
-	at androidx.compose.ui.test.junit4.AndroidComposeTestRule$apply$1$evaluate$1.invoke(AndroidComposeTestRule.android.kt)
-	at androidx.compose.ui.test.junit4.AndroidComposeTestRule$apply$1$evaluate$1.invoke(AndroidComposeTestRule.android.kt)
-	at androidx.compose
 ```
 
 ## Derleme çıktısı (son 120 satır)
