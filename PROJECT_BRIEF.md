@@ -87,6 +87,8 @@ Android telefonda kullanılacak, tek kişilik bir dijital yanlış defteri:
 | K42 | **Sunum ekranı sınıf içidir:** tam ekran, ekran açık kalır, cevap varsayılan gizli, çözüm fotoğrafı ayrı açılır, "Çözdüm, sıradaki" tek dokunuşla ilerler. Cevap kutusu uzun metinde kendi içinde kaydırılır. |
 | K43 | **Kamera izni yoktur:** `ACTION_IMAGE_CAPTURE` + kendi `FileProvider` yolu kullanılır; manifestte `CAMERA` izni bulunmaz ve runtime izin kapısı yoktur (eski kapı kamera düğmesini ölü bırakıyordu). |
 | K44 | **Yedek biçimi v5'tir:** `teacher_workspace` `data.json` içinde, öğretmen fotoğrafları öğrenci fotoğraflarıyla aynı `images/` klasöründe (UUID adları çakışmaz). Okuma v2–v5. Şifreleme yoktur (kullanıcı kararı). |
+| K45 | **Öğretmen pencereleri tek kabuktan çizilir:** onay, seçim ve form pencereleri `OgretmenDiyalogu` (düz `Dialog` + yüzey) kullanır. Material3 `AlertDialog` Robolectric Compose testlerinde boşta kalmadığı için (AppNotIdle) terk edildi; görünüm ve etiketler korunur. |
+| K46 | **Öğretmen sekme geçişi animasyonsuz:** host ekranları `AnimatedContent` yerine düz `when` ile çizilir. Ekranlar kendi `Dialog` pencerelerini taşıdığı için geçiş animasyonu pencereyi her karede yeniden kuruyordu. |
 | K37 | **Adaptif v2** yeni tekrarları sürüm 2 yazar; eski kayıtları değiştirmez. Kolaylık/aralık/unutma mevcut geçmişten türetildiği için Room v3 / ZIP v3 korunur; eski v4 kolon önerisi bu uygulamada gerekli değildir. |
 
 ### Soru kaydındaki alanlar
@@ -174,7 +176,7 @@ Sosyal özellikler · arkadaş ekleme · çok kullanıcılı hesap sistemi · ç
 canlı senkronizasyon · web yönetim paneli · iOS uygulaması · reklam · abonelik · uzak veritabanı ·
 yapay zekâ ile otomatik soru çözümü · OCR · karmaşık oyunlaştırma · çok ayrıntılı istatistik panelleri.
 
-Öğretmen modu v1.6.0 ile kapsam içine girdi (K38–K44); öğretmen tarafında bulut/hesap
+Öğretmen modu v1.6.0 ile kapsam içine girdi (K38–K46); öğretmen tarafında bulut/hesap
 senkronizasyonu, şifre/biyometrik kilit, OCR/yapay zekâ, XP-oyunlaştırma ve doğrudan WhatsApp
 entegrasyonu kapsam dışı kalır.
 

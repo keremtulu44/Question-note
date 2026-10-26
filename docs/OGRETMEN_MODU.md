@@ -72,6 +72,15 @@ soruları tek oturumda girmek için.
 ve gerekmemez. Önceki sürümdeki "izin verildi mi?" kapısı her zaman başarısız olduğu için kamera
 düğmesi ölüydü; bu kapı kaldırıldı.
 
+### Pencere ve geçiş kuralları
+
+- Onay/seçim/form pencereleri `OgretmenDiyalogu` ile çizilir (düz `Dialog` + yüzey). Material3
+  `AlertDialog` Robolectric Compose testlerinde boşta kalmıyor (Espresso `AppNotIdle`), bu yüzden
+  kullanılmıyor. Etiketler (`teacher_archive_confirm`, `hedef_grup_<id>`, ...) aynı kaldı.
+- Host ekranları `AnimatedContent` kullanmaz: ekranlar kendi `Dialog` pencerelerini taşıdığı için
+  geçiş animasyonu pencereyi her karede yeniden kuruyor ve testler boşta kalamıyordu.
+- Bilgi bandı (içe aktarma) ve alt menü kaydırma ile sekme değiştirme korunur.
+
 ## 4. Toplu işlem, arşiv ve geri alma
 
 - **Toplu seçim:** çözüldü yap / çözülmediye al / arşivle / sil. Durum değişimi tek SQL ifadesidir.

@@ -307,8 +307,14 @@ class KirpmaSorulacakVeOgretmenArayuzTest {
             compose.waitUntil(5_000) {
                 compose.onAllNodesWithTag("ogretmen_baska_gruba_ekle_${soru.id}").fetchSemanticsNodes().isNotEmpty()
             }
+            // Kart aksiyonu listenin altında kalabildiği için önce görünür alana kaydırılır.
+            compose.onNodeWithTag("ogretmen_soru_listesi")
+                .performScrollToNode(hasTestTag("ogretmen_baska_gruba_ekle_${soru.id}"))
             compose.onNodeWithTag("ogretmen_baska_gruba_ekle_${soru.id}").performClick()
-            // A dialog opens in its own window; give it a frame before querying its rows.
+            // Dialog kendi penceresinde açılır: önce kabuğun, sonra satırların çizilmesini bekle.
+            compose.waitUntil(5_000) {
+                compose.onAllNodesWithTag("ogretmen_kopyala_dialog").fetchSemanticsNodes().isNotEmpty()
+            }
             compose.waitUntil(5_000) {
                 compose.onAllNodesWithTag("hedef_grup_${g7C.id}").fetchSemanticsNodes().isNotEmpty()
             }

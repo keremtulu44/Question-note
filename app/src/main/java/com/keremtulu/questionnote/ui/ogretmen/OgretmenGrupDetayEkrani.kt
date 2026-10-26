@@ -142,7 +142,7 @@ internal fun OgretmenGrupDetayEkrani(
 
     Box(Modifier.fillMaxSize()) {
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().testTag("ogretmen_soru_listesi"),
             contentPadding = PaddingValues(start = 18.dp, top = 8.dp, end = 18.dp, bottom = 130.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
@@ -599,7 +599,7 @@ internal fun BaskaGrubaEkleDialog(
     onOnayla: (Set<String>) -> Unit,
 ) {
     var secilenler by remember { mutableStateOf<Set<String>>(emptySet()) }
-    OgretmenDiyalogu(onDismiss = onDismiss) {
+    OgretmenDiyalogu(onDismiss = onDismiss, testEtiketi = "ogretmen_kopyala_dialog") {
         Text(
             text = stringResource(R.string.teacher_copy_to_group),
             style = MaterialTheme.typography.titleLarge,
