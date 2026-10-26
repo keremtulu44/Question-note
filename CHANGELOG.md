@@ -20,12 +20,16 @@ Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih 
   "Arşivden geri al" ile filtrelenmiş liste kuyruğa döner.
 - **Veri güvenliği uyarıları:** Ayarlar'da 7+ günlük veya hiç alınmamış yedek için uyarı; soru
   formunda aynı `sha256` başka bir soruda varsa "aynı fotoğraf" onayı.
+- **Dayanıklılık:** form açıkken arşivlenen veya silinen bir ders/konu kimliği artık kaydı
+  düşürmüyor; yabancı anahtar hatası fotoğrafıyla birlikte tüm soruyu kaybettiriyordu, yalnız o
+  etiket atılıyor.
 - **Değişmeyen sözleşme:** Room `ROOM_SCHEMA_VERSION = 5`, ZIP `FORMAT_VERSION = 5`, okuma
   `{2,3,4,5}`; göç yok. `versionName`/`versionCode` bu commit'te artırılmadı.
 - **Testler:** `OgretmenAramaVeFiltreTest` (arama/filtre/gün filtresi/aynı görsel/1.000 soruda
   < 200 ms), `OgretmenGrupGeriAlmaTest` (grup silme + geri alma, tekrar çağrı, arşivden dönüş),
-  `OgretmenPaylasimTest` (chooser, URI, "kim sordu" dışarıda, 9 görsel sınırı),
-  `OgretmenT3ArayuzTest` (arama daraltma, kart paylaşımı, snackbar geri alma). CI kanıtı bekliyor.
+  `OgretmenPaylasimTest` (chooser, içerik URI'si, "kim sordu" dışarıda, 9 görsel sınırı,
+  `file_paths.xml`/sağlayıcı beyanı), `OgretmenT3ArayuzTest` (arama daraltma, kart paylaşımı,
+  snackbar geri alma). CI kanıtı bekliyor.
 
 ## [1.6.0] — 2026-10-26
 

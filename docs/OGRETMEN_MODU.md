@@ -151,7 +151,14 @@ Play'e olduğu gibi yüklenebilir (sunucu, hesap, izin, WorkManager, bildirim yo
   `FileProvider` içerik URI'siyle ve `FLAG_GRANT_READ_URI_PERMISSION` ile gider (en fazla 9 dosya).
   `res/xml/file_paths.xml` yalnız iki kök açar: `ogretmen-img/` ve `img/`. Metin başlık, ders, konu ve
   kaynağı taşır; **"kim sordu" ve cevap paylaşılmaz**. Dosya diskte yoksa yalnız metin paylaşılır.
+  URI üretimi `uriUret` parametresiyle enjekte edilebilir: `FileProvider` yol stratejisini süreç
+  genelinde yetkiye göre önbelleğe aldığı, Robolectric ise her test metoduna yeni dosya dizini
+  verdiği için sağlayıcı aynı JVM'de iki kez çalıştırılamaz. Sağlayıcı yapılandırması ayrı testte
+  (`file_paths.xml` kökleri + manifestte `exported=false`, `grantUriPermissions=true`) doğrulanır.
 - **Uyarılar:** Ayarlar'da 7+ günlük (veya hiç alınmamış) yedek için `ogretmen_yedek_uyarisi`; formda
   aynı `sha256` başka bir soruda varsa onay penceresi.
+- **Kayıt dayanıklılığı:** `soruKaydet` ders/konu kimliğini katalogda doğrular; form açıkken
+  arşivlenen veya silinen bir ders yabancı anahtar hatasıyla tüm soruyu (fotoğrafıyla) kaybettiriyordu,
+  artık yalnız o etiket atılır.
 - **Sınır:** T3 içinde içgörü kartı, "bugüne al / yarına at" hızlı plan aksiyonu ve tüm gruplarda
   ayrı arşiv filtresi yok; Room/ZIP sürümü artmadı.

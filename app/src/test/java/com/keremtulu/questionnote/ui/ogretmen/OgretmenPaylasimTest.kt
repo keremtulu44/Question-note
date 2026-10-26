@@ -2,12 +2,13 @@ package com.keremtulu.questionnote.ui.ogretmen
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.net.Uri
-import androidx.core.content.FileProvider
 import androidx.room.Room
+import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
 import com.keremtulu.questionnote.data.local.VarsayilanDersleriEkle
 import com.keremtulu.questionnote.data.local.YanlisDefteriDatabase
@@ -28,10 +29,11 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
+import org.xmlpull.v1.XmlPullParser
 
 /**
- * T3 paylaşımı: yerel `ACTION_SEND`, fotoğraflar FileProvider URI'siyle, "kim sordu" asla dışarıda
- * değil. Ağ yok, hesap yok — bu yüzden Play veri beyanı değişmez.
+ * T3 paylaşımı: yerel `ACTION_SEND`, fotoğraflar içerik URI'siyle (cihazda FileProvider), "kim
+ * sordu" asla dışarıda değil. Ağ yok, hesap yok — bu yüzden Play veri beyanı değişmez.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
@@ -93,6 +95,15 @@ class OgretmenPaylasimTest {
     private fun seciciIci(intent: Intent): Intent =
         requireNotNull(intent.getParcelableExtra<Intent>(Intent.EXTRA_INTENT))
 
+    /**
+     * FileProvider önbelleği süreç genelinde yetkiye göre tutulur; Robolectric her test metoduna
+     * yeni bir dosya dizini verdiği için sağlayıcı aynı JVM'de ikinci kez çalıştırılamaz. Bu yüzden
+     * URI üretimi enjekte edilir; sağlayıcı yapılandırması ayrı testte beyan üzerinden doğrulanır.
+     */
+    private val sahteUriUretici: (File) -> Uri = { dosya ->
+        Uri.parse("content://com.keremtulu.questionnote.fileprovider/${dosya.name}")
+    }
+
     @Test
     fun tekSoruFotografiUriOlarakPaylasilirVeSoranKisiGizlenir() {
         val kaynak = testGorseli("paylasim")
@@ -104,14 +115,13 @@ class OgretmenPaylasimTest {
 
             val dosya = requireNotNull(gorselDeposu.dosyaGoruntuIcin(soru.gorseller.single().dosyaAdi))
             assertTrue("Soru fotoğrafı diskte olmalı: ${dosya.absolutePath}", dosya.isFile)
-            assertNull(
-                "FileProvider fotoğrafı paylaşamadı: ${soru.gorseller.single().dosyaAdi}",
-                runCatching {
-                    FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", dosya)
-                }.exceptionOrNull(),
-            )
 
-            val uriler = OgretmenPaylasim.gorselUrisi(context, listOf(soru), gorselDeposu)
+            val uriler = OgretmenPaylasim.gorselUrisi(
+                context,
+                listOf(soru),
+                gorselDeposu,
+                uriUret = sahteUriUretici,
+            )
             assertEquals(1, uriler.size)
             assertTrue(
                 "Fotoğraf content:// URI olarak verilmeli: ${uriler.first()}",
@@ -119,7 +129,7 @@ class OgretmenPaylasimTest {
             )
 
             val paylasim = requireNotNull(
-                OgretmenPaylasim.intent(context, listOf(soru), gorselDeposu),
+                OgretmenPaylasim.intent(context, listOf(soru), gorselDeposu, uriUret = sahteUriUretici),
             )
             assertEquals(Intent.ACTION_CHOOSER, paylasim.action)
             val gonder = seciciIci(paylasim)
@@ -156,6 +166,7 @@ class OgretmenPaylasimTest {
                     sorular = sorular,
                     gorselDeposu = gorselDeposu,
                     dersAdlari = dersAdlari,
+                    uriUret = sahteUriUretici,
                 ),
             )
             val dosyalar = sorular.flatMap { s ->
@@ -166,7 +177,7 @@ class OgretmenPaylasimTest {
                 dosyalar.size == 3 && dosyalar.all { it.second?.isFile == true },
             )
             assertEquals(
-                "Chooser içeriği: ${OgretmenPaylasim.gorselUrisi(context, sorular, gorselDeposu)}",
+                "Chooser içeriği: ${OgretmenPaylasim.gorselUrisi(context, sorular, gorselDeposu, uriUret = sahteUriUretici)}",
                 Intent.ACTION_SEND_MULTIPLE,
                 seciciIci(paylasim).action,
             )
@@ -181,7 +192,12 @@ class OgretmenPaylasimTest {
 
             // 10 soru 10 fotoğraf olsa da gönderilen dosya sayısı sınırı aşmaz.
             val cok = (1..10).flatMap { sorular }
-            val sinirli = OgretmenPaylasim.gorselUrisi(context, cok, gorselDeposu)
+            val sinirli = OgretmenPaylasim.gorselUrisi(
+                context,
+                cok,
+                gorselDeposu,
+                uriUret = sahteUriUretici,
+            )
             assertEquals(OgretmenPaylasim.MAKS_GORSEL, sinirli.size)
         } finally {
             kaynaklar.forEach { it.delete() }
@@ -196,9 +212,17 @@ class OgretmenPaylasimTest {
             val soru = soru(grup.id, "Kesirler", "Zeynep", kaynak)
             // Dosya diskten düşerse paylaşım ölmez; yalnızca metin gider.
             runBlocking { gorselDeposu.depolananDosyayiSil(soru.gorseller.single().dosyaAdi) }
-            assertTrue(OgretmenPaylasim.gorselUrisi(context, listOf(soru), gorselDeposu).isEmpty())
+            assertTrue(
+                OgretmenPaylasim.gorselUrisi(context, listOf(soru), gorselDeposu, uriUret = sahteUriUretici)
+                    .isEmpty(),
+            )
 
-            val paylasim = OgretmenPaylasim.intent(context, listOf(soru), gorselDeposu)
+            val paylasim = OgretmenPaylasim.intent(
+                context,
+                listOf(soru),
+                gorselDeposu,
+                uriUret = sahteUriUretici,
+            )
             assertNotNull(paylasim)
             val gonder = seciciIci(requireNotNull(paylasim))
             assertEquals(Intent.ACTION_SEND, gonder.action)
@@ -207,6 +231,29 @@ class OgretmenPaylasimTest {
         } finally {
             kaynak.delete()
         }
+    }
+
+    @Test
+    fun filePathsVeSaglayiciPaylasimIcinYapilandirilmis() {
+        // Fotoğraflar `filesDir` altındaki iki kökten gelir; sağlayıcı dışa açık değildir ve izin
+        // yalnızca URI başına verilir. Bu, paylaşım niyetinin cihazda çalışmasının ön koşulu.
+        val parser = context.resources.getXml(R.xml.file_paths)
+        val kokler = mutableListOf<Pair<String, String?>>()
+        while (parser.next() != XmlPullParser.END_DOCUMENT) {
+            if (parser.eventType == XmlPullParser.START_TAG) {
+                kokler += parser.name to parser.getAttributeValue(null, "path")
+            }
+        }
+        assertTrue("Kökler: $kokler", ("files-path" to "ogretmen-img/") in kokler)
+        assertTrue("Kökler: $kokler", ("files-path" to "img/") in kokler)
+
+        val saglayici = context.packageManager.resolveContentProvider(
+            "${context.packageName}.fileprovider",
+            PackageManager.GET_META_DATA,
+        )
+        val bilgi = requireNotNull(saglayici) { "FileProvider manifestte bildirilmeli" }
+        assertFalse("Paylaşım sağlayıcısı dışa açık olmamalı", bilgi.exported)
+        assertTrue("URI izni ACTION_SEND sırasında verilir", bilgi.grantUriPermissions)
     }
 
     @Test

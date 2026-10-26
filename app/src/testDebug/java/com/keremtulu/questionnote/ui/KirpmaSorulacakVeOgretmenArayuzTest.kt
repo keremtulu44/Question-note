@@ -302,10 +302,13 @@ class KirpmaSorulacakVeOgretmenArayuzTest {
             compose.onNodeWithText(context.getString(R.string.common_close)).performClick()
 
             // Başka gruba kopyala -> 7C'de Çözmediklerim olarak başlamalı; 6B'de Çözdüm işaretlenebilmeli.
-            // Kart araması eklendikten sonra aksiyon satırı ekranın altında kalabiliyor; önce kaydır.
+            // Kart araması eklendikten sonra aksiyon satırı ekranın altında kalabiliyor: önce
+            // kaydır, sonra düğümün kendi OnClick semantiğini çalıştır (kartın dokunma alanıyla
+            // iç içe geçen düğmelerde dokunma yönlendirmesine güvenilmiyor).
             compose.onNodeWithTag("ogretmen_soru_listesi")
                 .performScrollToNode(hasTestTag("ogretmen_cozuldu_degistir_${soru.id}"))
-            compose.onNodeWithTag("ogretmen_cozuldu_degistir_${soru.id}").performClick()
+            compose.onNodeWithTag("ogretmen_cozuldu_degistir_${soru.id}")
+                .performSemanticsAction(SemanticsActions.OnClick)
             compose.waitUntil(5_000) { ogretmenDeposu.anlikVeri().sorular.single().cozuldu }
 
             compose.onNodeWithTag("sekme_cozduklerim").performClick()

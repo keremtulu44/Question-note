@@ -54,13 +54,21 @@ internal object OgretmenPaylasim {
         return bloklar.joinToString("\n\n")
     }
 
-    /** Content URIs of the photos that will travel with the share; unreadable files are skipped. */
+    /**
+     * Content URIs of the photos that will travel with the share; unreadable files are skipped.
+     *
+     * [uriUret] exists for tests: [FileProvider] caches its path strategy per authority for the
+     * whole process, while Robolectric hands out a new files directory for every test method, so
+     * the provider cannot be exercised twice in one JVM. Production always uses the default.
+     */
     fun gorselUrisi(
         context: Context,
         sorular: List<OgretmenSorusu>,
         gorselDeposu: LocalSoruGorselDeposu,
         cozumDahil: Boolean = false,
+        uriUret: ((java.io.File) -> Uri?)? = null,
     ): List<Uri> {
+        val uret = uriUret ?: { dosya: java.io.File -> fileUri(context, dosya) }
         val uriler = ArrayList<Uri>(MAKS_GORSEL)
         for (soru in sorular) {
             val gorseller = if (cozumDahil) {
@@ -71,7 +79,7 @@ internal object OgretmenPaylasim {
             for (gorsel in gorseller) {
                 if (uriler.size >= MAKS_GORSEL) return uriler
                 val dosya = gorselDeposu.dosyaGoruntuIcin(gorsel.dosyaAdi) ?: continue
-                val uri = runCatching { fileUri(context, dosya) }.getOrNull() ?: continue
+                val uri = runCatching { uret(dosya) }.getOrNull() ?: continue
                 uriler += uri
             }
         }
@@ -89,9 +97,10 @@ internal object OgretmenPaylasim {
         dersAdlari: Map<String, String> = emptyMap(),
         konuAdlari: Map<String, String> = emptyMap(),
         cozumDahil: Boolean = false,
+        uriUret: ((java.io.File) -> Uri?)? = null,
     ): Intent? {
         if (sorular.isEmpty()) return null
-        val uriler = gorselUrisi(context, sorular, gorselDeposu, cozumDahil)
+        val uriler = gorselUrisi(context, sorular, gorselDeposu, cozumDahil, uriUret)
         val metin = metin(context, sorular, dersAdlari, konuAdlari)
         val gonder = when {
             uriler.isEmpty() -> Intent(Intent.ACTION_SEND).apply {

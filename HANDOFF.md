@@ -26,8 +26,14 @@ yerel uygulama). `versionName`/`versionCode` artırılmadı; Room/ZIP sürümü 
   ("yine de kaydet").
 - **Testler:** `OgretmenAramaVeFiltreTest` (saf JVM; arama/filtre/normalize/aynı görsel/1.000 soru
   < 200 ms), `OgretmenGrupGeriAlmaTest` (Room undo + tekrar çağrı + arşivden dönüş),
-  `OgretmenPaylasimTest` (chooser/URI/metin/9 sınırı), `OgretmenT3ArayuzTest` (Robolectric Compose:
-  arama, kart paylaşımı, snackbar geri alma).
+  `OgretmenPaylasimTest` (chooser/içerik URI'si/metin/9 sınırı + `file_paths.xml` ve sağlayıcı
+  beyanı), `OgretmenT3ArayuzTest` (Robolectric Compose: arama, kart paylaşımı, snackbar geri alma).
+  Paylaşımda URI üretimi `uriUret` ile enjekte edilir: `FileProvider` yol stratejisini süreç
+  genelinde önbelleğe aldığı, Robolectric'in her test metoduna yeni `filesDir` verdiği için
+  sağlayıcı aynı JVM'de iki kez çalıştırılamıyor (`Failed to find configured root`).
+- **Kayıt dayanıklılığı:** `soruKaydet` ders/konu kimliğini katalogda doğrular; form açıkken
+  arşivlenen/silinen bir ders yabancı anahtar hatasıyla tüm soruyu kaybettiriyordu, artık yalnız
+  etiket atılır.
 - **Bilinen açıklar:** "bugüne al / yarına at" hızlı plan aksiyonu, soru+çözüm paylaşım düğmesi
   (`cozumDahil` hazır), tüm-gruplar arşiv filtresi, içgörü kartı ve cihaz kabulü (200+ soru arama,
   5 soru paylaşma, grup geri alma, 9 günlük yedek uyarısı).
