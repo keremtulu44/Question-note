@@ -548,6 +548,9 @@ class OgretmenDeposu(
     private suspend fun temizleKullanilmayanDosyalar(adayAdlar: List<String>) {
         val kullanilan = state.value.kaliciDosyaAdlari()
         adayAdlar.distinct()
+            // Never touch `img/`: a file shared with the student archive is only removed by the
+            // student-side maintenance path, which knows every reference.
+            .filter { it.startsWith(OGRETMEN_DIZIN_ONEKI) }
             .filterNot { it in kullanilan }
             .forEach { runCatching { gorselDeposu.depolananDosyayiSil(it) } }
     }
@@ -638,6 +641,7 @@ class OgretmenDeposu(
         private const val MAX_METIN = 50_000
         private const val MAX_KIMLIK = 120
         private const val MAX_GORSEL_ADEDI = 20
+        private const val OGRETMEN_DIZIN_ONEKI = "ogretmen-img/"
         private const val MAX_BAKIM_LISTESI = 200
         private const val YETIM_MIN_YASI_MS = 7L * 24L * 60L * 60L * 1000L
 

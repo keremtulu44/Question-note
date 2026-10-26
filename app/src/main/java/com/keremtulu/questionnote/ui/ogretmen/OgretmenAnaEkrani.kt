@@ -472,10 +472,13 @@ internal fun OgretmenHeroKarti(
     bekleyen: Int,
     cozulen: Int,
     grupSayisi: Int,
-    birinciEtiket: String = stringResource(R.string.teacher_stat_groups),
-    ikinciEtiket: String = stringResource(R.string.teacher_stat_unsolved),
-    ucuncuEtiket: String = stringResource(R.string.teacher_stat_solved),
+    birinciEtiket: String? = null,
+    ikinciEtiket: String? = null,
+    ucuncuEtiket: String? = null,
 ) {
+    val birinci = birinciEtiket ?: stringResource(R.string.teacher_stat_groups)
+    val ikinci = ikinciEtiket ?: stringResource(R.string.teacher_stat_unsolved)
+    val ucuncu = ucuncuEtiket ?: stringResource(R.string.teacher_stat_solved)
     com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart(
         modifier = Modifier.fillMaxWidth(),
         borderAnimation = false,
@@ -504,19 +507,19 @@ internal fun OgretmenHeroKarti(
             ) {
                 HeroSayacKutusu(
                     deger = grupSayisi,
-                    etiket = birinciEtiket,
+                    etiket = birinci,
                     vurgu = PremiumMarkaRenkler.Kagit,
                     modifier = Modifier.weight(1f),
                 )
                 HeroSayacKutusu(
                     deger = bekleyen,
-                    etiket = ikinciEtiket,
+                    etiket = ikinci,
                     vurgu = PremiumMarkaRenkler.BakirIsik,
                     modifier = Modifier.weight(1f),
                 )
                 HeroSayacKutusu(
                     deger = cozulen,
-                    etiket = ucuncuEtiket,
+                    etiket = ucuncu,
                     vurgu = PremiumMarkaRenkler.YesilAcik,
                     modifier = Modifier.weight(1f),
                 )
@@ -574,8 +577,6 @@ internal fun KuyrukButonu(onClick: () -> Unit, modifier: Modifier = Modifier) {
 }
 
 internal val OgretmenIcerikPadding = PaddingValues(start = 18.dp, top = 10.dp, end = 18.dp, bottom = 104.dp)
-
-internal val OgretmenGuvenliInsets = WindowInsets.safeDrawing
 
 /** Scaffold-level helper: keeps the FAB hidden while the keyboard is open. */
 @Composable

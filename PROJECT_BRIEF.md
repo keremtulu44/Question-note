@@ -80,6 +80,13 @@ Android telefonda kullanılacak, tek kişilik bir dijital yanlış defteri:
 | K31 | **Karne uygulama notları (v1.0.10):** kova/oran hesabı `KarneHesabi`; seri ve hafta penceresi `SeriHesabi`/`HaftaPenceresi`; ilerleme rakamları `IlerlemeHizmeti` ile `tekrarlar` tablosundan anlık hesaplanır (yeni tablo yok). Rozetler `SharedPreferences` (`karne_rozetleri/kazanilanlar`) içinde tutulur ve ZIP yedeğine girmez; kazanım idempotenttir. İstikrar rozeti üst üste 5 **gün** (her gün ≥5 soru ve ≥%70 bağımsız) olarak uygulanır. Haftalık karşılaştırma eşiği `KISA_OTURUM_ESIGI` ile aynı sabitten okunur. |
 | K35 | **30 rozet, 5 gizli:** açık koşul/ilerleme, gizli rozetlerde kazanılana kadar ad+çizim+koşul kapalı. Sahiplik ve tam ekran kutlama kuyruğu atomik kaydedilir; yeni rozet +50 yalnız bir kez verilir. |
 | K36 | **Odak Stüdyosu** öz değerlendirmedir; otomatik doğrulama/AI cevap üretimi yapmaz. Mola, sona bırak, çözüm açmadan sonuç seçme, ayrı Kaydet ve ilerle eylemi, karne ve kalıcı devam noktası vardır. |
+| K38 | **Öğretmen modu verisi Room v5'tedir** (2026-10-26). Üç tablo: `ogretmen_gruplari`, `ogretmen_sorulari`, `ogretmen_soru_gorselleri`. Eski `ogretmen_calisma_alani.json` bir kez toleranslı içe aktarılır (`*.ice-aktarildi.json` olarak saklanır); bozuk dosya karantinaya alınır ve uygulama boş ama çalışır açılır. JSON artık yalnız yedek/aktarım biçimidir. Ayrıntı: `docs/OGRETMEN_MODU.md`. |
+| K39 | **Ders/konu kataloğu öğrenci ve öğretmen tarafında ortaktır.** Öğretmen soruları `ders_id`/`konu_id` ile aynı `dersler`/`konular` satırlarına bağlanır (`ON DELETE SET NULL`); katalog kopyası tutulmaz, katalog silmesi soruyu silmez. |
+| K40 | **Öğretmen kuyruğu tek listedir:** tüm gruplardan `durum = BEKLIYOR` sorular, en uzun bekleyen (veya `plan_gun` en eski) üstte. "Bugün" sekmesi bunu gösterir; grup listesi açılış sekmesi olarak kalır. |
+| K41 | **Silme güvenliği:** soru silme kısa süre geri alınabilir (satırlar silinir, dosyalar bekletilir; snackbar "Geri al" aynı id ile geri yükler). Kullanılmayan dosyalar yalnız Ayarlar → Depolama ve bakım ekranından, ≥7 gün yaş ve açık onayla silinir. Grup silme geri alınamaz ve onay metni soru sayısı + son yedek tarihini taşır. |
+| K42 | **Sunum ekranı sınıf içidir:** tam ekran, ekran açık kalır, cevap varsayılan gizli, çözüm fotoğrafı ayrı açılır, "Çözdüm, sıradaki" tek dokunuşla ilerler. Cevap kutusu uzun metinde kendi içinde kaydırılır. |
+| K43 | **Kamera izni yoktur:** `ACTION_IMAGE_CAPTURE` + kendi `FileProvider` yolu kullanılır; manifestte `CAMERA` izni bulunmaz ve runtime izin kapısı yoktur (eski kapı kamera düğmesini ölü bırakıyordu). |
+| K44 | **Yedek biçimi v5'tir:** `teacher_workspace` `data.json` içinde, öğretmen fotoğrafları öğrenci fotoğraflarıyla aynı `images/` klasöründe (UUID adları çakışmaz). Okuma v2–v5. Şifreleme yoktur (kullanıcı kararı). |
 | K37 | **Adaptif v2** yeni tekrarları sürüm 2 yazar; eski kayıtları değiştirmez. Kolaylık/aralık/unutma mevcut geçmişten türetildiği için Room v3 / ZIP v3 korunur; eski v4 kolon önerisi bu uygulamada gerekli değildir. |
 
 ### Soru kaydındaki alanlar
@@ -163,9 +170,13 @@ işareti. Soru notu alanı arayüzde yoktur; eski kayıtları silmeden saklamak/
 
 ## 7. Kapsam dışı (aksi kararlaştırılmadıkça)
 
-Sosyal özellikler · arkadaş ekleme · öğretmen paneli · çok kullanıcılı hesap sistemi · çoklu cihaz
+Sosyal özellikler · arkadaş ekleme · çok kullanıcılı hesap sistemi · çoklu cihaz
 canlı senkronizasyon · web yönetim paneli · iOS uygulaması · reklam · abonelik · uzak veritabanı ·
 yapay zekâ ile otomatik soru çözümü · OCR · karmaşık oyunlaştırma · çok ayrıntılı istatistik panelleri.
+
+Öğretmen modu v1.6.0 ile kapsam içine girdi (K38–K44); öğretmen tarafında bulut/hesap
+senkronizasyonu, şifre/biyometrik kilit, OCR/yapay zekâ, XP-oyunlaştırma ve doğrudan WhatsApp
+entegrasyonu kapsam dışı kalır.
 
 Ayrıca v1'de yok: otomatik yedekleme, Drive API/OAuth bağlantısı, yedek şifreleme, kırpma ekranı,
 "birleştir" tipi geri yükleme, PDF çalışma kâğıdı, bildirimler.

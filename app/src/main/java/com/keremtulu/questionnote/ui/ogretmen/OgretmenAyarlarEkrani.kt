@@ -202,8 +202,8 @@ internal fun OgretmenAyarlarEkrani(
                         Text(
                             text = stringResource(
                                 R.string.teacher_storage_summary,
-                                mevcut.disktekiDosya,
-                                boyut(mevcut.disktedekiBayt),
+                                mevcut.disktedekiDosya,
+                                boyut(mevcut.disktekiBayt),
                             ),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface,

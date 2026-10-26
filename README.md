@@ -25,6 +25,20 @@ cevaplamak ve çözümü öğrenme sürecinden ayrı saklamaktır.
 
 ## Durum
 
+**v1.6.0 hazırlanıyor — öğretmen modu (T0 + T1 + P2 başlangıcı).** Dal
+`arena/5d75ca16-question-note`; CI sonucu `docs/DERLEME_RAPORU.md` içine yazılır.
+
+- **Öğretmen verisi Room v5'te:** gruplar, sorular ve soru/çözüm fotoğrafları üç tabloda; eski
+  `ogretmen_calisma_alani.json` bir kez toleranslı içe aktarılır ve arşivlenir. JSON artık yalnız
+  yedek/aktarım biçimi. Ayrıntı: [Öğretmen modu](docs/OGRETMEN_MODU.md).
+- **Ortak ders/konu kataloğu:** öğrenci tarafında açılan ders/konu, öğretmen formunda anında seçilir.
+- **Kuyruk ve sunum:** tüm gruplardan "Bugün" listesi, geciken filtresi, toplu işlem, arşiv, silme
+  geri alma; sınıf içi tam ekran sunumda ekran açık kalır, cevap gizlidir, çözüm ayrı açılır.
+- **Kamera düzeltmesi:** gereksiz izin kapısı kaldırıldı; manifestte `CAMERA` izni yok.
+- **Yedek:** ZIP/Room sürümü 5; okuma v2–v5. Şifreleme yok.
+
+## Önceki yayım — v1.5.1
+
 **v1.5.1 yayımlandı** (versionCode19). [İndir](https://github.com/keremtulu44/Question-note/releases/download/v1.5.1/yanlis-defteri-1.5.1.apk) · [CI `39158221022`](https://github.com/keremtulu44/Question-note/actions/runs/39158221022).
 **Debug 312/0/0/0 · Release 258/0/0/0**; APK/imza/sertifika ve yayımlanan asset digest doğrulandı.
 Ortak testler iki varyantta tekrar eder; sayılar toplanmaz.

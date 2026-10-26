@@ -1,9 +1,36 @@
 # HANDOFF — Yanlış Defteri
 
-**Son güncelleme: 2026-10-25.** Önce bu belge, `docs/DERLEME_RAPORU.md`,
+**Son güncelleme: 2026-10-26.** Önce bu belge, `docs/DERLEME_RAPORU.md`,
 `docs/PREMIUM_GORSEL_GELISTIRME.md` ve [P4–P6 sözleşme/kanıt kaydı](docs/P4_P5_P6_UYGULAMA.md) okunur.
 
-## Güncel doğrulanmış teslim: 1.5.108 Uygulama Geneli Görsel, Geometrik & Tipografik Bütünlük Denetimi
+## Güncel çalışma: 1.6.0 Öğretmen modu — T0 + T1 + P2 başlangıcı (CI bekliyor)
+
+- **Dal:** `arena/5d75ca16-question-note`. **Sürüm:** `versionName = "1.6.0"` (`versionCode = 39`).
+- **Veri katmanı (Room v5):** öğretmen çalışma alanı artık veritabanında:
+  `ogretmen_gruplari` (FK `dersler` SET NULL), `ogretmen_sorulari` (FK grup CASCADE, ders/konu SET NULL),
+  `ogretmen_soru_gorselleri` (FK soru CASCADE, `tur` = SORU/COZUM). `MIGRATION_4_5` yalnız ekleme yapar.
+  `OgretmenDeposu` Room tabanlı; her mutasyon `baslat()` sonrası tek transaction + `state` yenileme.
+- **Eski JSON:** `ogretmen_calisma_alani.json` açılışta bir kez toleranslı içe aktarılır, sonra
+  `ogretmen_calisma_alani.ice-aktarildi.json` olarak saklanır; okunamayan dosya
+  `ogretmen_calisma_alani.bozuk-<zaman>.json` karantinasına alınır ve `OgretmenAlanDurumu` ile bildirilir.
+  İçe aktarmada `ders_id`/`konu_id` ortak katalogla doğrulanır (FK güvenliği) ve görselsiz sorular atlanır.
+- **Arayüz:** `OgretmenAnaEkrani` üç hedefe ayrıldı (Gruplarım / Bugün / Ayarlar) ve 2.561 satırlık
+  monolit `ui/ogretmen/` altında dosyalara bölündü: `OgretmenBilesenler`, `OgretmenGruplarEkrani`,
+  `OgretmenKuyrukEkrani`, `OgretmenGrupDetayEkrani`, `OgretmenSoruFormuEkrani`, `OgretmenSunumEkrani`,
+  `OgretmenAyarlarEkrani`. Kuyruk, toplu işlem, arşiv, silme geri alma, taşıma/kopyalama, sunum
+  (ekran açık + gizli cevap + çözüm ayrı) ve depolama/bakım kartı bu pakette.
+- **Kamera:** manifestte `CAMERA` izni yok; `SorulacaklarEkrani` ve öğretmen formundaki runtime izin
+  kapısı kaldırıldı. `ACTION_IMAGE_CAPTURE` doğrudan `FileProvider` yoluna yazıyor.
+- **Yedek:** `FORMAT_VERSION = 5`, `ROOM_SCHEMA_VERSION = 5`, okuma `{2,3,4,5}`; öğretmen görselleri
+  `img/` veya `ogretmen-img/` olabilir, ZIP'te tek `images/` klasörü. `teacher_workspace_version` ve
+  görsel türü/sayı doğrulamaları eklendi.
+- **Testler:** `OgretmenMigrationTest` (gerçek v4 şemasından 4→5, indeksler, CASCADE/SET NULL),
+  `OgretmenDeposuRoomTest` (JSON içe aktarma, toplu durum, taşıma, kopyalama, silme geri alma);
+  mevcut üç test dosyası artık `OgretmenDeposu(context, gorselDeposu, database)` ile in-memory DB kullanıyor.
+- **Açık kalanlar:** CI sonucu `docs/DERLEME_RAPORU.md`'ye yazılacak; fiziksel cihaz kabulü
+  (kamera, süreç öldürme, 200+ soru, 1.6x yazı ölçeği) ve T2 maddeleri `ROADMAP.md` içinde.
+
+## Önceki doğrulanmış teslim: 1.5.108 Uygulama Geneli Görsel, Geometrik & Tipografik Bütünlük Denetimi
 
 - **Sürüm:** `versionName = "1.5.108"` (`versionCode = 38`), çalışma dalı `arena/9d4e7eac-question-note`.
 - **Tam ekran görüntüleyici ve yakınlaştırma sınırları:** `SoruGorselBileseni` içinde `SoruGorselTamEkran` tam ekran görüntüleyicisinin `0px` yüksekliğe çökmesine neden olan `matchParentSize` / `fillMaxWidth` hatası düzeltildi; `SoruGorselTamEkran`, `SorulacakTamEkranSunumDialog` ve `OgretmenTamEkranSoruDialog` bileşenlerine `.clipToBounds()`, çift dokunuşla `2.4x` yakınlaştırma, `1x Sıfırla`, koyu stüdyo kenarlık kontrastı ve devre dışı buton soluklaştırması eklendi.

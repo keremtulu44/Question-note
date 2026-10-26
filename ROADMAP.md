@@ -18,6 +18,29 @@ P0–P5 kod/otomatik kapıları geçti; P6 son yayın CI `39144684877`: Debug298
 - [~] **P5 uygulandı:** gerçek kaynak/konu/ritim/dönem/iş yükü, uygun filtre/Odak eylemi ve kalıcı tek kutlama host’u. CI 274/0.
 - [~] **P6:** birleşik Debug298/0 + Release258/0; iki host benchmark ve beş önizleme, APK/imza/sertifika doğrulandı. Fiziksel cihaz/TalkBack/SAF/frame-p95 bekliyor.
 
+## Yeni geliştirme — v1.6.0: öğretmen modu T0 + T1 + P2 başlangıcı (2026-10-26)
+
+Değerlendirme ve gerekçeler: [Öğretmen modu değerlendirmesi](docs/OGRETMEN_MODU_DEGERLENDIRME.md) ·
+uygulama sözleşmesi: [Öğretmen modu](docs/OGRETMEN_MODU.md).
+
+- [~] **T0 — veri dayanıklılığı:** öğretmen verisi Room v5'e taşındı (3 tablo, 5 indeks,
+  `MIGRATION_4_5`); eski JSON tek seferlik toleranslı içe aktarma + karantina; silme geri alma;
+  depolama/bakım ekranı (yetim dosya yaşı ≥7 gün, açık onay); grup silme onayında soru sayısı ve
+  son yedek tarihi. Kamera izin kapısı kaldırıldı (hem öğretmen hem "Sorulacaklar" formu).
+- [~] **T1 — gerçek öğretmen akışı:** tüm gruplardan "Bugün" kuyruğu, geciken filtresi, grup çipleri;
+  sunum ekranı (ekran açık, cevap gizli, çözüm ayrı, "Çözdüm, sıradaki"); ders/konu/kaynak/
+  "kim sordu"/çözüm günü alanları ortak katalogla; toplu seçim + arşiv; kaydet-ve-yeni;
+  başka gruba kopyalama uyarısı, soru taşıma.
+- [~] **P2 başlangıcı:** Room v5 + ZIP `FORMAT_VERSION` 5, `teacher_workspace` ve paylaşılan
+  `images/`; v2–v5 okuma.
+- [ ] CI kapısı: bu paket push edildi, sonuç `docs/DERLEME_RAPORU.md` içine yazılacak.
+- [ ] Fiziksel cihaz: kamera (izin istemeden açılmalı), süreç öldürme, 200+ soruluk grupta liste
+  performansı, 1.6x yazı ölçeğinde sunum/klavye taşması.
+- [ ] **T2 (sıradaki):** öğretmen↔öğrenci kapalı döngü yüzeyi (öğrenci "hocaya sor" durumunun
+  öğretmen tarafında görünmesi), tekrar eden soruların otomatik hatırlatılması, dışa aktarma
+  (paylaşım sayfası), erişilebilirlik taraması, 2561 satırlık monolitten ayrılmış ekranların
+  gerçek cihaz ölçümü.
+
 ## Son yayımlanan — v1.5.1 / code19
 
 - [x] İlerleme ana görünümü: rütbe, bugünkü hedef ve tek eylem; rapor yığını kaldırıldı.
