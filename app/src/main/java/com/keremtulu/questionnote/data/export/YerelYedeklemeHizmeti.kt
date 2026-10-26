@@ -865,6 +865,7 @@ class YerelYedeklemeHizmeti(
                 2 -> 2
                 3 -> 3
                 4 -> 4
+                5 -> 5
                 else -> throw IOException("Desteklenmeyen yedek sürümü.")
             }
             if (manifest.getInt("room_schema_version") != expectedSchemaVersion) {
@@ -877,7 +878,7 @@ class YerelYedeklemeHizmeti(
             if (createdAt <= 0L) throw IOException("Yedek tarihi geçersiz.")
             val manifestCounts = manifest.getJSONObject("counts")
             val counts = manifestCounts.toCounts(formatVersion)
-            val catalogOptionCount = if (formatVersion in 3..4) {
+            val catalogOptionCount = if (formatVersion in 3..5) {
                 manifestCounts.getInt("catalog_options").also {
                     if (it < 0) throw IOException("Manifest içindeki katalog sayısı negatif.")
                 }
@@ -896,7 +897,7 @@ class YerelYedeklemeHizmeti(
             val expectedCsvFiles = when (formatVersion) {
                 2 -> LEGACY_REQUIRED_CSV_FILES
                 3 -> V3_REQUIRED_CSV_FILES
-                4 -> REQUIRED_CSV_FILES
+                4, 5 -> REQUIRED_CSV_FILES
                 else -> throw IOException("Desteklenmeyen CSV sürümü.")
             }
             if (declaredCsv != expectedCsvFiles || !inventoryPaths.containsAll(expectedCsvFiles)) {
@@ -1029,7 +1030,7 @@ class YerelYedeklemeHizmeti(
         }
         val options = when (formatVersion) {
             2 -> legacyCatalogOptions(questions)
-            3, 4 -> {
+            3, 4, 5 -> {
             json.getJSONArray("catalog_options").toTypedList(MAX_ROWS_PER_TABLE) { item ->
                 val type = runCatching { SoruSecenekTuru.valueOf(item.getString("type")) }
                     .getOrElse { throw IOException("Yedekte bilinmeyen katalog türü var.") }

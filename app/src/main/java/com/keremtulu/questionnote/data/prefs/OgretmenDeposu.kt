@@ -96,7 +96,11 @@ class OgretmenDeposu(
             if (hazir) return
             withContext(Dispatchers.IO) {
                 if (dao.grupSayisi() == 0 && dao.soruSayisi() == 0) iceriAktarEskiJson()
-                durumState.value = OgretmenAlanDurumu.Hazir
+                // An import result (moved / quarantined) must survive startup, otherwise the UI
+                // would silently hide that a legacy file was skipped.
+                if (durumState.value == OgretmenAlanDurumu.Yukleniyor) {
+                    durumState.value = OgretmenAlanDurumu.Hazir
+                }
                 yenile()
             }
             hazir = true
