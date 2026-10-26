@@ -2,17 +2,17 @@
 
 > Bu dosya Android CI tarafından otomatik üretilir. Keystore veya parola değerleri yazılmaz.
 
-- Zaman (UTC): 2026-10-26T14:41:18Z
-- Workflow commit'i: 529c09072696ea2e813cc231c3f72c8972daa6ac
+- Zaman (UTC): 2026-10-26T14:51:45Z
+- Workflow commit'i: bf94fa35ec9245873e53a13f7f8d9c326c7d6aee
 - Dal: arena/5d75ca16-question-note
 - Uygulama sürümü: 1.6.0 (versionCode 39)
 - Android SDK: compileSdk/targetSdk 37, minSdk 26; build-tools 37.0.0
 - Genel sonuç: **BAŞARISIZ**
 - Wrapper çıkış kodu: 0
 - testDebugUnitTest çıkış kodu: 1
-- Birim test özeti (Debug): 369 test; 5 başarısız; 0 hata; 0 atlandı
+- Birim test özeti (Debug): 369 test; 3 başarısız; 0 hata; 0 atlandı
 - testReleaseUnitTest çıkış kodu: 1
-- Birim test özeti (Release ortak testler): 292 test; 2 başarısız; 0 hata; 0 atlandı
+- Birim test özeti (Release ortak testler): 292 test; 1 başarısız; 0 hata; 0 atlandı
 - UI/Preview regresyonları yalnız testDebug; ortak testler iki varyantta çalışır, sayılar toplanmaz.
 - assembleRelease çıkış kodu: 125
 - İmzalama secret durumu: İki gerekli secret dolu (değerler gösterilmez)
@@ -56,7 +56,7 @@ OS:            Linux 6.17.0-1022-azure amd64
 
 ```text
 -- Derleyici/Gradle hata satırları --
-122:* What went wrong:
+115:* What went wrong:
 
 -- İlk 100 satır --
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
@@ -68,9 +68,9 @@ Daemon will be stopped at the end of the build
 > Task :app:packageDebugResources
 > Task :app:processDebugNavigationResources
 > Task :app:javaPreCompileDebug FROM-CACHE
+> Task :app:checkDebugAarMetadata
 > Task :app:mapDebugSourceSetPaths
 > Task :app:compileDebugNavigationResources FROM-CACHE
-> Task :app:checkDebugAarMetadata
 > Task :app:parseDebugLocalResources
 > Task :app:createDebugCompatibleScreenManifests
 > Task :app:extractDeepLinksDebug FROM-CACHE
@@ -123,8 +123,8 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 
 > Task :app:compileDebugJavaWithJavac
 > Task :app:processDebugJavaRes
-> Task :app:bundleDebugClassesToCompileJar
 > Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:bundleDebugClassesToCompileJar
 > Task :app:kspDebugUnitTestKotlin
 
 > Task :app:compileDebugUnitTestKotlin
@@ -132,9 +132,9 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/ke
 w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/export/YerelDisaAktarmaHizmetiTest.kt:151:85 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
 w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/images/LocalSoruGorselDeposuTest.kt:46:60 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
 w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/images/LocalSoruGorselDeposuTest.kt:47:61 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
-w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/ui/ogretmen/OgretmenPaylasimTest.kt:92:31 'fun <T : Parcelable!> getParcelableExtra(p0: String!): T?' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/ui/ogretmen/OgretmenPaylasimTest.kt:118:51 'fun <T : Parcelable!> getParcelableExtra(p0: String!): T?' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/ui/ogretmen/OgretmenPaylasimTest.kt:150:48 'fun <T : Parcelable!> getParcelableArrayListExtra(p0: String!): ArrayList<T!>?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/ui/ogretmen/OgretmenPaylasimTest.kt:94:31 'fun <T : Parcelable!> getParcelableExtra(p0: String!): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/ui/ogretmen/OgretmenPaylasimTest.kt:131:51 'fun <T : Parcelable!> getParcelableExtra(p0: String!): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/ui/ogretmen/OgretmenPaylasimTest.kt:174:48 'fun <T : Parcelable!> getParcelableArrayListExtra(p0: String!): ArrayList<T!>?' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/com/keremtulu/questionnote/ui/DenemeVeKurulumArayuzTest.kt:61:19 'fun <reified A : ComponentActivity> createAndroidComposeRule(effectContext: CoroutineContext = ...): AndroidComposeTestRule<ActivityScenarioRule<A>, A>' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createAndroidComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
 w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/com/keremtulu/questionnote/ui/DenemeVeKurulumArayuzTest.kt:229:40 'static field SOFT_INPUT_ADJUST_RESIZE: Int' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/com/keremtulu/questionnote/ui/GorselButunlukVeYerlesimArayuzTest.kt:73:19 'fun <reified A : ComponentActivity> createAndroidComposeRule(effectContext: CoroutineContext = ...): AndroidComposeTestRule<ActivityScenarioRule<A>, A>' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createAndroidComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
@@ -154,11 +154,11 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/c
 
 > Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
 > Task :app:processDebugUnitTestJavaRes
-
 > Task :app:testDebugUnitTest
 
-OgretmenAramaVeFiltreTest > binSorudaAramaKabulKapisiAltindaKalir FAILED
-    java.lang.AssertionError at OgretmenAramaVeFiltreTest.kt:185
+KirpmaSorulacakVeOgretmenArayuzTest > rolSecimiVeOgretmenCalismaAlanindaGizliCevapVeGrupKopyalamaCalisir FAILED
+    androidx.compose.ui.test.ComposeTimeoutException at KirpmaSorulacakVeOgretmenArayuzTest.kt:309
+
 
 -- Son 80 satır --
 	at org.gradle.internal.execution.steps.TimeoutStep.execute(TimeoutStep.java:55)
@@ -230,7 +230,7 @@ OgretmenAramaVeFiltreTest > binSorudaAramaKabulKapisiAltindaKalir FAILED
 	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:38)
 	at org.gradle.internal.execution.impl.DefaultExecutionEngine$1.execute(DefaultExecutionEngine.java:68)
 	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.doExecute(DefaultTaskNodeExecutor.java:364)
-	... 25 more
+	... 55 more
 
 
 Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
@@ -239,7 +239,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD FAILED in 2m 48s
+BUILD FAILED in 2m 39s
 32 actionable tasks: 24 executed, 8 from cache
 ```
 
@@ -259,8 +259,8 @@ Daemon will be stopped at the end of the build
 > Task :app:generateReleaseRFile FROM-CACHE
 > Task :app:javaPreCompileRelease FROM-CACHE
 > Task :app:mapReleaseSourceSetPaths
-> Task :app:checkReleaseAarMetadata
 > Task :app:compileReleaseNavigationResources FROM-CACHE
+> Task :app:checkReleaseAarMetadata
 > Task :app:createReleaseCompatibleScreenManifests
 > Task :app:extractDeepLinksRelease FROM-CACHE
 > Task :app:processReleaseMainManifest FROM-CACHE
@@ -311,8 +311,8 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 
 > Task :app:compileReleaseJavaWithJavac
 > Task :app:processReleaseJavaRes
-> Task :app:bundleReleaseClassesToCompileJar
 > Task :app:bundleReleaseClassesToRuntimeJar
+> Task :app:bundleReleaseClassesToCompileJar
 > Task :app:kspReleaseUnitTestKotlin
 
 > Task :app:compileReleaseUnitTestKotlin
@@ -320,25 +320,25 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/ke
 w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/export/YerelDisaAktarmaHizmetiTest.kt:151:85 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
 w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/images/LocalSoruGorselDeposuTest.kt:46:60 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
 w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/data/images/LocalSoruGorselDeposuTest.kt:47:61 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
-w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/ui/ogretmen/OgretmenPaylasimTest.kt:92:31 'fun <T : Parcelable!> getParcelableExtra(p0: String!): T?' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/ui/ogretmen/OgretmenPaylasimTest.kt:118:51 'fun <T : Parcelable!> getParcelableExtra(p0: String!): T?' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/ui/ogretmen/OgretmenPaylasimTest.kt:150:48 'fun <T : Parcelable!> getParcelableArrayListExtra(p0: String!): ArrayList<T!>?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/ui/ogretmen/OgretmenPaylasimTest.kt:94:31 'fun <T : Parcelable!> getParcelableExtra(p0: String!): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/ui/ogretmen/OgretmenPaylasimTest.kt:131:51 'fun <T : Parcelable!> getParcelableExtra(p0: String!): T?' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/keremtulu/questionnote/ui/ogretmen/OgretmenPaylasimTest.kt:174:48 'fun <T : Parcelable!> getParcelableArrayListExtra(p0: String!): ArrayList<T!>?' is deprecated. Deprecated in Java.
 
 > Task :app:compileReleaseUnitTestJavaWithJavac NO-SOURCE
 > Task :app:processReleaseUnitTestJavaRes
 
 > Task :app:testReleaseUnitTest
 
-OgretmenAramaVeFiltreTest > binSorudaAramaKabulKapisiAltindaKalir FAILED
-    java.lang.AssertionError at OgretmenAramaVeFiltreTest.kt:185
-
 OgretmenPaylasimTest > tekSoruFotografiUriOlarakPaylasilirVeSoranKisiGizlenir FAILED
-    java.lang.IllegalArgumentException at OgretmenPaylasimTest.kt:76
+    java.lang.AssertionError at OgretmenPaylasimTest.kt:107
 
-292 tests completed, 2 failed
+292 tests completed, 1 failed
 
+> Task :app:testReleaseUnitTest FAILED
+
+[Incubating] Problems report is available at: file:///home/runner/work/Question-note/Question-note/build/reports/problems/problems-report.html
 -- Hata satırları ve son bölüm --
-97:* What went wrong:
+94:* What went wrong:
 	at org.gradle.internal.operations.DefaultBuildOperationRunner.run(DefaultBuildOperationRunner.java:48)
 	at org.gradle.api.internal.tasks.execution.TaskExecution.executeAction(TaskExecution.java:253)
 	at org.gradle.api.internal.tasks.execution.TaskExecution.executeActions(TaskExecution.java:236)
@@ -437,102 +437,18 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD FAILED in 2m 9s
+BUILD FAILED in 1m 52s
 32 actionable tasks: 20 executed, 12 from cache
 ```
 
 ## JUnit başarısızlık ayrıntıları
 
 ```text
-testDebugUnitTest: com.keremtulu.questionnote.domain.model.OgretmenAramaVeFiltreTest > binSorudaAramaKabulKapisiAltindaKalir: java.lang.AssertionError: java.lang.AssertionError
-java.lang.AssertionError
-	at org.junit.Assert.fail(Assert.java:87)
-	at org.junit.Assert.assertTrue(Assert.java:42)
-	at org.junit.Assert.assertTrue(Assert.java:53)
-	at com.keremtulu.questionnote.domain.model.OgretmenAramaVeFiltreTest.binSorudaAramaKabulKapisiAltindaKalir(OgretmenAramaVeFiltreTest.kt:185)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
-	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:63)
-	at org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:79)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:329)
-	at org.junit.runners.ParentRunner.access$100(ParentRunner.java:66)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:293)
-	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:413)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:115)
-	at org.gradle.api.internal.tasks.testing.junit.JUnitTestExecutor.runRequest(JUnitTestExecutor.java:174)
-	at org.gradle.api.internal.tasks.testing.junit.JUnitTestExecutor.accept(JUnitTestExecutor.java:84)
-	at org.gradle.api.internal.tasks.testing.junit.JUnitTestExecutor.accept(JUnitTestExecutor.java:47)
-	at org.gradle.api.internal.tasks.testing.junit.AbstractJUnitTestDefinitionProcessor.processTestDefinition(AbstractJUnitTestDefinitionProcessor.java:65)
-	at org.gradle.api.internal.tasks.testing.SuiteTestDefinitionProcessor.processTestDefinition(SuiteTestDefinitionProcessor.java:53)
-	at jdk.internal.reflect.GeneratedMethodAccessor50.invoke(Unknown Source)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.gradle.internal.dispatch.MethodInvocation.invokeOn(MethodInvocation.java:77)
-	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:28)
-	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:19)
-	at org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch(ContextClassLoaderDispatch.java:33)
-	at org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke(ProxyDispatchAdapter.java:88)
-	at jdk.proxy1/jdk.proxy1.$Proxy4.processTestDefinition(Unknown Source)
-	at org.gradle.api.internal.tasks.testing.worker.TestWorker$2.run(TestWorker.java:178)
-	at org.gradle.api.internal.ta
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.DenemeVeKurulumArayuzTest > denemeDetayKaydederKatalogSenkronlarGizliDersiKorurVeSilmeOnayiIster: org.junit.ComparisonFailure: org.junit.ComparisonFailure: expected:<Miray TG [2]> but was:<Miray TG [1]>
-org.junit.ComparisonFailure: expected:<Miray TG [2]> but was:<Miray TG [1]>
-	at org.junit.Assert.assertEquals(Assert.java:117)
-	at org.junit.Assert.assertEquals(Assert.java:146)
-	at com.keremtulu.questionnote.ui.DenemeVeKurulumArayuzTest.denemeDetayKaydederKatalogSenkronlarGizliDersiKorurVeSilmeOnayiIster(DenemeVeKurulumArayuzTest.kt:205)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:26)
-	at org.junit.internal.runners.statements.RunAfters.evaluate(RunAfters.java:27)
-	at androidx.compose.ui.test.junit4.AndroidComposeTestRule$apply$testWithDisposal$1.evaluate(AndroidComposeTestRule.android.kt:426)
-	at org.junit.rules.ExternalResource$1.evaluate(ExternalResource.java:54)
-	at androidx.compose.ui.test.junit4.AndroidComposeTestRule$apply$1$evaluate$1.invokeSuspend(AndroidComposeTestRule.android.kt:448)
-	at androidx.compose.ui.test.junit4.AndroidComposeTestRule$apply$1$evaluate$1.invoke(AndroidComposeTestRule.android.kt)
-	at androidx.compose.ui.test.junit4.AndroidComposeTestRule$apply$1$evaluate$1.invoke(AndroidComposeTestRule.android.kt)
-	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$runTest$1$1$1$1$1.invokeSuspend(ComposeUiTest.android.kt:689)
-	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$runTest$1$1$1$1$1.invoke(ComposeUiTest.android.kt)
-	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$runTest$1$1$1$1$1.invoke(ComposeUiTest.android.kt)
-	at androidx.compose.ui.test.IdlingStrategy.withStrategy$suspendImpl(IdlingStrategy.android.kt:55)
-	at androidx.compose.ui.test.IdlingStrategy.withStrategy(IdlingStrategy.android.kt)
-	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$runTest$1$1.invokeSuspend(ComposeUiTest.android.kt:686)
-	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$runTest$1$1.invoke(ComposeUiTest.android.kt)
-	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$runTest$1$1.invoke(ComposeUiTest.android.kt)
-	at kotlinx.coroutines.test.TestBuildersKt__TestBuildersKt$runTest$2$1$1.invokeSuspend(TestBuilders.kt:318)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.test.TestDispatcher.processEvent$kotlinx_coroutines_test(TestDispatcher.kt:24)
-	at kotlinx.coroutines.test.TestCoroutineScheduler.tryRunNextTaskUnless$kotlinx_coroutines_test(TestCoroutineScheduler.kt:99)
-	at kotlinx.coroutines.test.TestBuildersKt__TestBuildersKt$runTest$2$1$workRunner$1.invokeSuspend(TestBuilders.kt:327)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:263)
-	at k
-
 testDebugUnitTest: com.keremtulu.questionnote.ui.KirpmaSorulacakVeOgretmenArayuzTest > rolSecimiVeOgretmenCalismaAlanindaGizliCevapVeGrupKopyalamaCalisir: androidx.compose.ui.test.ComposeTimeoutException: androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 5000 ms
 androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 5000 ms
 	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:901)
 	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:500)
-	at com.keremtulu.questionnote.ui.KirpmaSorulacakVeOgretmenArayuzTest.rolSecimiVeOgretmenCalismaAlanindaGizliCevapVeGrupKopyalamaCalisir(KirpmaSorulacakVeOgretmenArayuzTest.kt:306)
+	at com.keremtulu.questionnote.ui.KirpmaSorulacakVeOgretmenArayuzTest.rolSecimiVeOgretmenCalismaAlanindaGizliCevapVeGrupKopyalamaCalisir(KirpmaSorulacakVeOgretmenArayuzTest.kt:309)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -564,11 +480,10 @@ androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied 
 	at kotlinx.coroutines.test.TestBuildersKt__TestBuildersKt$runTest$2$1$workRunner$1.invokeSuspend(TestBuilders.kt:327)
 	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(Continuat
 
-testDebugUnitTest: com.keremtulu.questionnote.ui.ogretmen.OgretmenPaylasimTest > cokluSoruTekIntentteVeGorselSinirindaKalir: org.junit.ComparisonFailure: org.junit.ComparisonFailure: expected:<...d.intent.action.SEND[_MULTIPLE]> but was:<...d.intent.action.SEND[]>
-org.junit.ComparisonFailure: expected:<...d.intent.action.SEND[_MULTIPLE]> but was:<...d.intent.action.SEND[]>
+testDebugUnitTest: com.keremtulu.questionnote.ui.ogretmen.OgretmenPaylasimTest > cokluSoruTekIntentteVeGorselSinirindaKalir: org.junit.ComparisonFailure: org.junit.ComparisonFailure: Chooser içeriği: [] expected:<...d.intent.action.SEND[_MULTIPLE]> but was:<...d.intent.action.SEND[]>
+org.junit.ComparisonFailure: Chooser içeriği: [] expected:<...d.intent.action.SEND[_MULTIPLE]> but was:<...d.intent.action.SEND[]>
 	at org.junit.Assert.assertEquals(Assert.java:117)
-	at org.junit.Assert.assertEquals(Assert.java:146)
-	at com.keremtulu.questionnote.ui.ogretmen.OgretmenPaylasimTest.cokluSoruTekIntentteVeGorselSinirindaKalir(OgretmenPaylasimTest.kt:149)
+	at com.keremtulu.questionnote.ui.ogretmen.OgretmenPaylasimTest.cokluSoruTekIntentteVeGorselSinirindaKalir(OgretmenPaylasimTest.kt:168)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -597,19 +512,12 @@ org.junit.ComparisonFailure: expected:<...d.intent.action.SEND[_MULTIPLE]> but w
 	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
 	at java.base/java.lang.Thread.run(Thread.java:840)
 
-testDebugUnitTest: com.keremtulu.questionnote.ui.ogretmen.OgretmenPaylasimTest > tekSoruFotografiUriOlarakPaylasilirVeSoranKisiGizlenir: java.lang.IllegalArgumentException: java.lang.IllegalArgumentException: Required value was null.
-java.lang.IllegalArgumentException: Required value was null.
-	at com.keremtulu.questionnote.ui.ogretmen.OgretmenPaylasimTest$soru$1.invokeSuspend(OgretmenPaylasimTest.kt:77)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:263)
-	at kotlinx.coroutines.BlockingCoroutine.joinBlocking(Builders.kt:95)
-	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking(Builders.kt:69)
-	at kotlinx.coroutines.BuildersKt.runBlocking(Unknown Source)
-	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking$default(Builders.kt:47)
-	at kotlinx.coroutines.BuildersKt.runBlocking$default(Unknown Source)
-	at com.keremtulu.questionnote.ui.ogretmen.OgretmenPaylasimTest.soru(OgretmenPaylasimTest.kt:76)
-	at com.keremtulu.questionnote.ui.ogretmen.OgretmenPaylasimTest.tekSoruFotografiUriOlarakPaylasilirVeSoranKisiGizlenir(OgretmenPaylasimTest.kt:99)
+testDebugUnitTest: com.keremtulu.questionnote.ui.ogretmen.OgretmenPaylasimTest > tekSoruFotografiUriOlarakPaylasilirVeSoranKisiGizlenir: java.lang.AssertionError: java.lang.AssertionError: FileProvider fotoğrafı paylaşamadı: ogretmen-img/7d76699c-c99d-4b4b-b034-34a4b13f62b0.jpg expected null, but was:<java.lang.IllegalArgumentException: Failed to find configured root that contains /tmp/robolectric-OgretmenPaylasimTest_tekSoruFotografiUriOlarakPaylasilirVeSoranKisiGizlenir17606521247821178359/com.keremtulu.questionnote-dataDir/files/ogretmen-img/7d76699c-c99d-4b4b-b034-34a4b13f62b0.jpg>
+java.lang.AssertionError: FileProvider fotoğrafı paylaşamadı: ogretmen-img/7d76699c-c99d-4b4b-b034-34a4b13f62b0.jpg expected null, but was:<java.lang.IllegalArgumentException: Failed to find configured root that contains /tmp/robolectric-OgretmenPaylasimTest_tekSoruFotografiUriOlarakPaylasilirVeSoranKisiGizlenir17606521247821178359/com.keremtulu.questionnote-dataDir/files/ogretmen-img/7d76699c-c99d-4b4b-b034-34a4b13f62b0.jpg>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotNull(Assert.java:756)
+	at org.junit.Assert.assertNull(Assert.java:738)
+	at com.keremtulu.questionnote.ui.ogretmen.OgretmenPaylasimTest.tekSoruFotografiUriOlarakPaylasilirVeSoranKisiGizlenir(OgretmenPaylasimTest.kt:107)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -638,64 +546,12 @@ java.lang.IllegalArgumentException: Required value was null.
 	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
 	at java.base/java.lang.Thread.run(Thread.java:840)
 
-testReleaseUnitTest: com.keremtulu.questionnote.domain.model.OgretmenAramaVeFiltreTest > binSorudaAramaKabulKapisiAltindaKalir: java.lang.AssertionError: java.lang.AssertionError
-java.lang.AssertionError
-	at org.junit.Assert.fail(Assert.java:87)
-	at org.junit.Assert.assertTrue(Assert.java:42)
-	at org.junit.Assert.assertTrue(Assert.java:53)
-	at com.keremtulu.questionnote.domain.model.OgretmenAramaVeFiltreTest.binSorudaAramaKabulKapisiAltindaKalir(OgretmenAramaVeFiltreTest.kt:185)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
-	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:63)
-	at org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:79)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:329)
-	at org.junit.runners.ParentRunner.access$100(ParentRunner.java:66)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:293)
-	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:413)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:115)
-	at org.gradle.api.internal.tasks.testing.junit.JUnitTestExecutor.runRequest(JUnitTestExecutor.java:174)
-	at org.gradle.api.internal.tasks.testing.junit.JUnitTestExecutor.accept(JUnitTestExecutor.java:84)
-	at org.gradle.api.internal.tasks.testing.junit.JUnitTestExecutor.accept(JUnitTestExecutor.java:47)
-	at org.gradle.api.internal.tasks.testing.junit.AbstractJUnitTestDefinitionProcessor.processTestDefinition(AbstractJUnitTestDefinitionProcessor.java:65)
-	at org.gradle.api.internal.tasks.testing.SuiteTestDefinitionProcessor.processTestDefinition(SuiteTestDefinitionProcessor.java:53)
-	at jdk.internal.reflect.GeneratedMethodAccessor50.invoke(Unknown Source)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.gradle.internal.dispatch.MethodInvocation.invokeOn(MethodInvocation.java:77)
-	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:28)
-	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:19)
-	at org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch(ContextClassLoaderDispatch.java:33)
-	at org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke(ProxyDispatchAdapter.java:88)
-	at jdk.proxy1/jdk.proxy1.$Proxy4.processTestDefinition(Unknown Source)
-	at org.gradle.api.internal.tasks.testing.worker.TestWorker$2.run(TestWorker.java:178)
-	at org.gradle.api.internal.ta
-
-testReleaseUnitTest: com.keremtulu.questionnote.ui.ogretmen.OgretmenPaylasimTest > tekSoruFotografiUriOlarakPaylasilirVeSoranKisiGizlenir: java.lang.IllegalArgumentException: java.lang.IllegalArgumentException: Required value was null.
-java.lang.IllegalArgumentException: Required value was null.
-	at com.keremtulu.questionnote.ui.ogretmen.OgretmenPaylasimTest$soru$1.invokeSuspend(OgretmenPaylasimTest.kt:77)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:263)
-	at kotlinx.coroutines.BlockingCoroutine.joinBlocking(Builders.kt:95)
-	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking(Builders.kt:69)
-	at kotlinx.coroutines.BuildersKt.runBlocking(Unknown Source)
-	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking$default(Builders.kt:47)
-	at kotlinx.coroutines.BuildersKt.runBlocking$default(Unknown Source)
-	at com.keremtulu.questionnote.ui.ogretmen.OgretmenPaylasimTest.soru(OgretmenPaylasimTest.kt:76)
-	at com.keremtulu.questionnote.ui.ogretmen.OgretmenPaylasimTest.tekSoruFotografiUriOlarakPaylasilirVeSoranKisiGizlenir(OgretmenPaylasimTest.kt:99)
+testReleaseUnitTest: com.keremtulu.questionnote.ui.ogretmen.OgretmenPaylasimTest > tekSoruFotografiUriOlarakPaylasilirVeSoranKisiGizlenir: java.lang.AssertionError: java.lang.AssertionError: FileProvider fotoğrafı paylaşamadı: ogretmen-img/eb410e11-0652-477c-9c02-cdc3ca7f0701.jpg expected null, but was:<java.lang.IllegalArgumentException: Failed to find configured root that contains /tmp/robolectric-OgretmenPaylasimTest_tekSoruFotografiUriOlarakPaylasilirVeSoranKisiGizlenir16788344544007431807/com.keremtulu.questionnote-dataDir/files/ogretmen-img/eb410e11-0652-477c-9c02-cdc3ca7f0701.jpg>
+java.lang.AssertionError: FileProvider fotoğrafı paylaşamadı: ogretmen-img/eb410e11-0652-477c-9c02-cdc3ca7f0701.jpg expected null, but was:<java.lang.IllegalArgumentException: Failed to find configured root that contains /tmp/robolectric-OgretmenPaylasimTest_tekSoruFotografiUriOlarakPaylasilirVeSoranKisiGizlenir16788344544007431807/com.keremtulu.questionnote-dataDir/files/ogretmen-img/eb410e11-0652-477c-9c02-cdc3ca7f0701.jpg>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotNull(Assert.java:756)
+	at org.junit.Assert.assertNull(Assert.java:738)
+	at com.keremtulu.questionnote.ui.ogretmen.OgretmenPaylasimTest.tekSoruFotografiUriOlarakPaylasilirVeSoranKisiGizlenir(OgretmenPaylasimTest.kt:107)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
