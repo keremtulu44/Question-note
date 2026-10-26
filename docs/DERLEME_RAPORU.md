@@ -2,17 +2,17 @@
 
 > Bu dosya Android CI tarafından otomatik üretilir. Keystore veya parola değerleri yazılmaz.
 
-- Zaman (UTC): 2026-10-26T05:48:00Z
-- Workflow commit'i: 9790e52c81edc49b3a2eecf535c54d7bf64f1712
+- Zaman (UTC): 2026-10-26T06:03:10Z
+- Workflow commit'i: faa4c01b7190f1ea0155cf80235c890fa7551c8b
 - Dal: arena/5d75ca16-question-note
 - Uygulama sürümü: 1.6.0 (versionCode 39)
 - Android SDK: compileSdk/targetSdk 37, minSdk 26; build-tools 37.0.0
 - Genel sonuç: **BAŞARISIZ**
 - Wrapper çıkış kodu: 0
 - testDebugUnitTest çıkış kodu: 1
-- Birim test özeti (Debug): 351 test; 20 başarısız; 0 hata; 0 atlandı
+- Birim test özeti (Debug): 351 test; 6 başarısız; 0 hata; 0 atlandı
 - testReleaseUnitTest çıkış kodu: 1
-- Birim test özeti (Release ortak testler): 277 test; 17 başarısız; 0 hata; 0 atlandı
+- Birim test özeti (Release ortak testler): 277 test; 4 başarısız; 0 hata; 0 atlandı
 - UI/Preview regresyonları yalnız testDebug; ortak testler iki varyantta çalışır, sayılar toplanmaz.
 - assembleRelease çıkış kodu: 125
 - İmzalama secret durumu: İki gerekli secret dolu (değerler gösterilmez)
@@ -56,7 +56,7 @@ OS:            Linux 6.17.0-1022-azure amd64
 
 ```text
 -- Derleyici/Gradle hata satırları --
-175:* What went wrong:
+122:* What went wrong:
 
 -- İlk 100 satır --
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
@@ -77,10 +77,10 @@ Daemon will be stopped at the end of the build
 > Task :app:extractDeepLinksDebug
 > Task :app:processDebugMainManifest
 > Task :app:processDebugManifest
-> Task :app:processDebugManifestForPackage
 > Task :app:preDebugUnitTestBuild UP-TO-DATE
-> Task :app:generateDebugAssets UP-TO-DATE
 > Task :app:javaPreCompileDebugUnitTest
+> Task :app:processDebugManifestForPackage
+> Task :app:generateDebugAssets UP-TO-DATE
 > Task :app:mergeDebugAssets
 > Task :app:mergeDebugResources
 > Task :app:processDebugUnitTestManifest
@@ -152,12 +152,12 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/testDebug/java/c
 
 > Task :app:testDebugUnitTest
 
-OgretmenDeposuRoomTest > eskiJsonBirKezIceAktarilirVeKayitlarKorunur FAILED
-    java.lang.AssertionError at OgretmenDeposuRoomTest.kt:77
+OlcumMigrationTest > realVersionThreeSchemaMigratesWithoutRewritingReviewsOrInventingMeasurements FAILED
+    java.lang.IllegalStateException at OlcumMigrationTest.kt:17
 
-OgretmenVeSorulacaklarVeriTest > zipYedeklemeOgretmenCalismaAlaniniVeSorulacakDurumunuKorur FAILED
-    java.io.IOException at YerelYedeklemeHizmeti.kt:868
-        Caused by: java.io.IOException at YerelYedeklemeHizmeti.kt:868
+YanlisDefteriDatabaseTest > migrationTwoToFourKeepsQuestionTextAndBackfillsGlobalChoices FAILED
+    java.lang.IllegalStateException at RoomConnectionManager.kt:224
+        Caused by: java.lang.IllegalStateException at RoomConnectionManager.kt:224
 
 
 -- Son 80 satır --
@@ -230,7 +230,7 @@ OgretmenVeSorulacaklarVeriTest > zipYedeklemeOgretmenCalismaAlaniniVeSorulacakDu
 	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:38)
 	at org.gradle.internal.execution.impl.DefaultExecutionEngine$1.execute(DefaultExecutionEngine.java:68)
 	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.doExecute(DefaultTaskNodeExecutor.java:364)
-	... 25 more
+	... 55 more
 
 
 Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
@@ -239,7 +239,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD FAILED in 4m 37s
+BUILD FAILED in 4m 20s
 32 actionable tasks: 32 executed
 ```
 
@@ -259,8 +259,8 @@ Daemon will be stopped at the end of the build
 > Task :app:generateReleaseRFile FROM-CACHE
 > Task :app:javaPreCompileRelease FROM-CACHE
 > Task :app:mapReleaseSourceSetPaths
-> Task :app:checkReleaseAarMetadata
 > Task :app:compileReleaseNavigationResources FROM-CACHE
+> Task :app:checkReleaseAarMetadata
 > Task :app:createReleaseCompatibleScreenManifests
 > Task :app:extractDeepLinksRelease FROM-CACHE
 > Task :app:processReleaseMainManifest
@@ -269,9 +269,9 @@ Daemon will be stopped at the end of the build
 > Task :app:javaPreCompileReleaseUnitTest FROM-CACHE
 > Task :app:generateReleaseAssets UP-TO-DATE
 > Task :app:mergeReleaseAssets
+> Task :app:mergeReleaseResources
 > Task :app:processReleaseUnitTestManifest
 > Task :app:processReleaseManifestForPackage
-> Task :app:mergeReleaseResources
 > Task :app:processReleaseResources
 > Task :app:packageReleaseUnitTestForUnitTest
 > Task :app:generateReleaseUnitTestConfig
@@ -311,8 +311,8 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/main/java/com/ke
 
 > Task :app:compileReleaseJavaWithJavac
 > Task :app:processReleaseJavaRes
-> Task :app:bundleReleaseClassesToCompileJar
 > Task :app:bundleReleaseClassesToRuntimeJar
+> Task :app:bundleReleaseClassesToCompileJar
 > Task :app:kspReleaseUnitTestKotlin
 
 > Task :app:compileReleaseUnitTestKotlin
@@ -326,19 +326,19 @@ w: file:///home/runner/work/Question-note/Question-note/app/src/test/java/com/ke
 
 > Task :app:testReleaseUnitTest
 
-OgretmenDeposuRoomTest > eskiJsonBirKezIceAktarilirVeKayitlarKorunur FAILED
-    java.lang.AssertionError at OgretmenDeposuRoomTest.kt:77
+OlcumMigrationTest > realVersionThreeSchemaMigratesWithoutRewritingReviewsOrInventingMeasurements FAILED
+    java.lang.IllegalStateException at OlcumMigrationTest.kt:17
 
-OgretmenVeSorulacaklarVeriTest > zipYedeklemeOgretmenCalismaAlaniniVeSorulacakDurumunuKorur FAILED
-    java.io.IOException at YerelYedeklemeHizmeti.kt:868
-        Caused by: java.io.IOException at YerelYedeklemeHizmeti.kt:868
+YanlisDefteriDatabaseTest > migrationTwoToFourKeepsQuestionTextAndBackfillsGlobalChoices FAILED
+    java.lang.IllegalStateException at RoomConnectionManager.kt:224
+        Caused by: java.lang.IllegalStateException at RoomConnectionManager.kt:224
 
-YerelDisaAktarmaHizmetiTest > exportContainsEveryRoomTableAndReferencedImageBytes FAILED
-    java.lang.AssertionError at YerelDisaAktarmaHizmetiTest.kt:55
+YanlisDefteriDatabaseTest > schemaCreatesAllPlannedTablesAtVersionFour FAILED
+    java.lang.AssertionError at YanlisDefteriDatabaseTest.kt:112
 
-YerelYedeklemeHizmetiTest > verifiedRestoreClearsCosmeticQueuesBeforeRecoveryMarkerAndKeepsOwnership FAILED
+YanlisDefteriDatabaseTest > migrationOneToFourAddsOptionsAndRecoveryMarkerWithoutLosingExistingRows FAILED
 -- Hata satırları ve son bölüm --
-151:* What went wrong:
+102:* What went wrong:
 	at org.gradle.internal.operations.DefaultBuildOperationRunner.run(DefaultBuildOperationRunner.java:48)
 	at org.gradle.api.internal.tasks.execution.TaskExecution.executeAction(TaskExecution.java:253)
 	at org.gradle.api.internal.tasks.execution.TaskExecution.executeActions(TaskExecution.java:236)
@@ -428,7 +428,7 @@ YerelYedeklemeHizmetiTest > verifiedRestoreClearsCosmeticQueuesBeforeRecoveryMar
 	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:38)
 	at org.gradle.internal.execution.impl.DefaultExecutionEngine$1.execute(DefaultExecutionEngine.java:68)
 	at org.gradle.api.internal.tasks.execution.DefaultTaskNodeExecutor.doExecute(DefaultTaskNodeExecutor.java:364)
-	... 25 more
+	... 55 more
 
 
 Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
@@ -437,364 +437,13 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD FAILED in 2m 4s
+BUILD FAILED in 1m 34s
 32 actionable tasks: 24 executed, 8 from cache
 ```
 
 ## JUnit başarısızlık ayrıntıları
 
 ```text
-testDebugUnitTest: com.keremtulu.questionnote.data.OgretmenDeposuRoomTest > eskiJsonBirKezIceAktarilirVeKayitlarKorunur: java.lang.AssertionError: java.lang.AssertionError
-java.lang.AssertionError
-	at org.junit.Assert.fail(Assert.java:87)
-	at org.junit.Assert.assertTrue(Assert.java:42)
-	at org.junit.Assert.assertTrue(Assert.java:53)
-	at com.keremtulu.questionnote.data.OgretmenDeposuRoomTest$eskiJsonBirKezIceAktarilirVeKayitlarKorunur$1.invokeSuspend(OgretmenDeposuRoomTest.kt:155)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:263)
-	at kotlinx.coroutines.BlockingCoroutine.joinBlocking(Builders.kt:95)
-	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking(Builders.kt:69)
-	at kotlinx.coroutines.BuildersKt.runBlocking(Unknown Source)
-	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking$default(Builders.kt:47)
-	at kotlinx.coroutines.BuildersKt.runBlocking$default(Unknown Source)
-	at com.keremtulu.questionnote.data.OgretmenDeposuRoomTest.eskiJsonBirKezIceAktarilirVeKayitlarKorunur(OgretmenDeposuRoomTest.kt:77)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:26)
-	at org.junit.internal.runners.statements.RunAfters.evaluate(RunAfters.java:27)
-	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
-	at org.robolectric.RobolectricTestRunner$HelperTestRunner$1.evaluate(RobolectricTestRunner.java:524)
-	at org.robolectric.internal.SandboxTestRunner.executeInSandbox(SandboxTestRunner.java:494)
-	at org.robolectric.internal.SandboxTestRunner.access$900(SandboxTestRunner.java:67)
-	at org.robolectric.internal.SandboxTestRunner$7.evaluate(SandboxTestRunner.java:442)
-	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
-	at org.robolectric.internal.SandboxTestRunner.access$600(SandboxTestRunner.java:67)
-	at org.robolectric.internal.SandboxTestRunner$6.evaluate(SandboxTestRunner.java:333)
-	at org.robolectric.internal.SandboxTestRunner$3.evaluate(SandboxTestRunner.java:233)
-	at org.robolectric.internal.SandboxTestRunner$5.lambda$evaluate$0(SandboxTestRunner.java:317)
-	at org.robolectric.internal.bytecode.Sandbox.lambda$runOnMainThread$0(Sandbox.java:101)
-	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
-	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
-	at java.base/java.lang.Thread.run(Thread.java:840)
-
-testDebugUnitTest: com.keremtulu.questionnote.data.OgretmenVeSorulacaklarVeriTest > zipYedeklemeOgretmenCalismaAlaniniVeSorulacakDurumunuKorur: java.io.IOException: java.io.IOException: Desteklenmeyen yedek sürümü.
-java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$uriIleOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:177)
-	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:42)
-	at com.keremtulu.questionnote.data.OgretmenVeSorulacaklarVeriTest$zipYedeklemeOgretmenCalismaAlaniniVeSorulacakDurumunuKorur$1.invokeSuspend(OgretmenVeSorulacaklarVeriTest.kt:235)
-Caused by: java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$uriIleOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:177)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:113)
-	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:823)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)
-
-testDebugUnitTest: com.keremtulu.questionnote.data.export.YerelDisaAktarmaHizmetiTest > exportContainsEveryRoomTableAndReferencedImageBytes: java.lang.AssertionError: java.lang.AssertionError: expected:<4> but was:<5>
-java.lang.AssertionError: expected:<4> but was:<5>
-	at org.junit.Assert.fail(Assert.java:89)
-	at org.junit.Assert.failNotEquals(Assert.java:835)
-	at org.junit.Assert.assertEquals(Assert.java:120)
-	at org.junit.Assert.assertEquals(Assert.java:146)
-	at com.keremtulu.questionnote.data.export.YerelDisaAktarmaHizmetiTest$exportContainsEveryRoomTableAndReferencedImageBytes$1.invokeSuspend(YerelDisaAktarmaHizmetiTest.kt:156)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:263)
-	at kotlinx.coroutines.BlockingCoroutine.joinBlocking(Builders.kt:95)
-	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking(Builders.kt:69)
-	at kotlinx.coroutines.BuildersKt.runBlocking(Unknown Source)
-	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking$default(Builders.kt:47)
-	at kotlinx.coroutines.BuildersKt.runBlocking$default(Unknown Source)
-	at com.keremtulu.questionnote.data.export.YerelDisaAktarmaHizmetiTest.exportContainsEveryRoomTableAndReferencedImageBytes(YerelDisaAktarmaHizmetiTest.kt:55)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:26)
-	at org.junit.internal.runners.statements.RunAfters.evaluate(RunAfters.java:27)
-	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
-	at org.robolectric.RobolectricTestRunner$HelperTestRunner$1.evaluate(RobolectricTestRunner.java:524)
-	at org.robolectric.internal.SandboxTestRunner.executeInSandbox(SandboxTestRunner.java:494)
-	at org.robolectric.internal.SandboxTestRunner.access$900(SandboxTestRunner.java:67)
-	at org.robolectric.internal.SandboxTestRunner$7.evaluate(SandboxTestRunner.java:442)
-	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
-	at org.robolectric.internal.SandboxTestRunner.access$600(SandboxTestRunner.java:67)
-	at org.robolectric.internal.SandboxTestRunner$6.evaluate(SandboxTestRunner.java:333)
-	at org.robolectric.internal.SandboxTestRunner$3.evaluate(SandboxTestRunner.java:233)
-	at org.robolectric.internal.SandboxTestRunner$5.lambda$evaluate$0(SandboxTestRunner.java:317)
-	at org.robolectric.internal.bytecode.Sandbox.lambda$runOnMainThread$0(Sandbox.java:101)
-	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
-	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
-	at java.base/java.lang.Thread.run(Thread.java:840)
-
-testDebugUnitTest: com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest > verifiedRestoreClearsCosmeticQueuesBeforeRecoveryMarkerAndKeepsOwnership: java.io.IOException: java.io.IOException: Desteklenmeyen yedek sürümü.
-java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:42)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest$verifiedRestoreClearsCosmeticQueuesBeforeRecoveryMarkerAndKeepsOwnership$1.invokeSuspend(YerelYedeklemeHizmetiTest.kt:514)
-Caused by: java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:113)
-	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:823)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)
-
-testDebugUnitTest: com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest > failedRestoreBeforeCommitPreservesResumeEvenWhenIdsMatchBackup: java.io.IOException: java.io.IOException: Desteklenmeyen yedek sürümü.
-java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:42)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest$failedRestoreBeforeCommitPreservesResumeEvenWhenIdsMatchBackup$1.invokeSuspend(YerelYedeklemeHizmetiTest.kt:316)
-Caused by: java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:113)
-	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:823)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)
-
-testDebugUnitTest: com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest > shadowDecisionVersionTwoRoundTripsZipFourAndDiagnosticsAreTruthful: java.io.IOException: java.io.IOException: Desteklenmeyen yedek sürümü.
-java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:42)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest$shadowDecisionVersionTwoRoundTripsZipFourAndDiagnosticsAreTruthful$1.invokeSuspend(YerelYedeklemeHizmetiTest.kt:464)
-Caused by: java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:113)
-	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:823)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)
-
-testDebugUnitTest: com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest > versionFourRoundTripsMeasurementsQualityAndDecisionContextWithoutChangingTheV2Plan: java.lang.AssertionError: java.lang.AssertionError: expected:<4> but was:<5>
-java.lang.AssertionError: expected:<4> but was:<5>
-	at org.junit.Assert.fail(Assert.java:89)
-	at org.junit.Assert.failNotEquals(Assert.java:835)
-	at org.junit.Assert.assertEquals(Assert.java:120)
-	at org.junit.Assert.assertEquals(Assert.java:146)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest$versionFourRoundTripsMeasurementsQualityAndDecisionContextWithoutChangingTheV2Plan$1.invokeSuspend(YerelYedeklemeHizmetiTest.kt:373)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:263)
-	at kotlinx.coroutines.BlockingCoroutine.joinBlocking(Builders.kt:95)
-	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking(Builders.kt:69)
-	at kotlinx.coroutines.BuildersKt.runBlocking(Unknown Source)
-	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking$default(Builders.kt:47)
-	at kotlinx.coroutines.BuildersKt.runBlocking$default(Unknown Source)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest.versionFourRoundTripsMeasurementsQualityAndDecisionContextWithoutChangingTheV2Plan(YerelYedeklemeHizmetiTest.kt:367)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:26)
-	at org.junit.internal.runners.statements.RunAfters.evaluate(RunAfters.java:27)
-	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
-	at org.robolectric.RobolectricTestRunner$HelperTestRunner$1.evaluate(RobolectricTestRunner.java:524)
-	at org.robolectric.internal.SandboxTestRunner.executeInSandbox(SandboxTestRunner.java:494)
-	at org.robolectric.internal.SandboxTestRunner.access$900(SandboxTestRunner.java:67)
-	at org.robolectric.internal.SandboxTestRunner$7.evaluate(SandboxTestRunner.java:442)
-	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
-	at org.robolectric.internal.SandboxTestRunner.access$600(SandboxTestRunner.java:67)
-	at org.robolectric.internal.SandboxTestRunner$6.evaluate(SandboxTestRunner.java:333)
-	at org.robolectric.internal.SandboxTestRunner$3.evaluate(SandboxTestRunner.java:233)
-	at org.robolectric.internal.SandboxTestRunner$5.lambda$evaluate$0(SandboxTestRunner.java:317)
-	at org.robolectric.internal.bytecode.Sandbox.lambda$runOnMainThread$0(Sandbox.java:101)
-	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
-	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
-	at java.base/java.lang.
-
-testDebugUnitTest: com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest > explicitlyGatedActiveRecordsRoundTripThenRollbackWritesOnlyNewV2History: java.io.IOException: java.io.IOException: Desteklenmeyen yedek sürümü.
-java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:42)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest$explicitlyGatedActiveRecordsRoundTripThenRollbackWritesOnlyNewV2History$1.invokeSuspend(YerelYedeklemeHizmetiTest.kt:474)
-Caused by: java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:113)
-	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:823)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)
-
-testDebugUnitTest: com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest > checkpointClearFailureKeepsCommitMarkerUntilRecoveryCanInvalidateOldSession: java.io.IOException: java.io.IOException: Desteklenmeyen yedek sürümü.
-java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:42)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest$checkpointClearFailureKeepsCommitMarkerUntilRecoveryCanInvalidateOldSession$1.invokeSuspend(YerelYedeklemeHizmetiTest.kt:350)
-Caused by: java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:113)
-	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:823)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)
-
-testDebugUnitTest: com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest > mockExamsRoundTripThroughZipBackupAndReconcileLessonIdsOnRestore: java.io.IOException: java.io.IOException: Desteklenmeyen yedek sürümü.
-java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:42)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest$mockExamsRoundTripThroughZipBackupAndReconcileLessonIdsOnRestore$1.invokeSuspend(YerelYedeklemeHizmetiTest.kt:787)
-Caused by: java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:113)
-	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:823)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)
-
-testDebugUnitTest: com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest > v2AlgorithmHistoryRoundTripsInCurrentBackupWithoutRewritingHistory: java.io.IOException: java.io.IOException: Desteklenmeyen yedek sürümü.
-java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:42)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest$v2AlgorithmHistoryRoundTripsInCurrentBackupWithoutRewritingHistory$1.invokeSuspend(YerelYedeklemeHizmetiTest.kt:169)
-Caused by: java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:113)
-	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:823)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)
-
-testDebugUnitTest: com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest > fullRestoreReplacesRowsRewritesImagePathsAndLeavesSafetyArchive: java.io.IOException: java.io.IOException: Desteklenmeyen yedek sürümü.
-java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:42)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest$fullRestoreReplacesRowsRewritesImagePathsAndLeavesSafetyArchive$1.invokeSuspend(YerelYedeklemeHizmetiTest.kt:119)
-Caused by: java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:113)
-	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:823)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)
-
-testDebugUnitTest: com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest > successfulRestoreClearsResumeEvenWhenQuestionIdsAreReused: java.io.IOException: java.io.IOException: Desteklenmeyen yedek sürümü.
-java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:42)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest$successfulRestoreClearsResumeEvenWhenQuestionIdsAreReused$1.invokeSuspend(YerelYedeklemeHizmetiTest.kt:335)
-Caused by: java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:113)
-	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:823)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)
-
 testDebugUnitTest: com.keremtulu.questionnote.data.local.OlcumMigrationTest > realVersionThreeSchemaMigratesWithoutRewritingReviewsOrInventingMeasurements: java.lang.IllegalStateException: java.lang.IllegalStateException: A migration from 3 to 5 was required but not found. Please provide the necessary Migration path via RoomDatabase.Builder.addMigration(...) or allow for destructive migrations via one of the RoomDatabase.Builder.fallbackToDestructiveMigration* functions.
 java.lang.IllegalStateException: A migration from 3 to 5 was required but not found. Please provide the necessary Migration path via RoomDatabase.Builder.addMigration(...) or allow for destructive migrations via one of the RoomDatabase.Builder.fallbackToDestructiveMigration* functions.
 	at androidx.room.BaseRoomConnectionManager.onMigrate(RoomConnectionManager.kt:224)
@@ -937,31 +586,9 @@ Caused by: java.lang.IllegalStateException: A migration from 1 to 5 was required
 	at android.database.sqlite.SQLiteOpenHelper.$$robo$$android_database_sqlite_SQLiteOpenHelper$getDatabaseLocked(SQLiteOpenHelper.java:415)
 	at android.database.sqlite.SQLiteOpenHelper.getDatabaseLock
 
-testDebugUnitTest: com.keremtulu.questionnote.ui.GorselButunlukVeYerlesimArayuzTest > ogretmenModuPaylasilanSnackbarVeYedekOnizlemeSayilariniGosterir: java.io.IOException: java.io.IOException: Desteklenmeyen yedek sürümü.
-java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:42)
-	at com.keremtulu.questionnote.ui.GorselButunlukVeYerlesimArayuzTest$ogretmenModuPaylasilanSnackbarVeYedekOnizlemeSayilariniGosterir$onizleme$1.invokeSuspend(GorselButunlukVeYerlesimArayuzTest.kt:328)
-Caused by: java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:113)
-	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:823)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)
-
-testDebugUnitTest: com.keremtulu.questionnote.ui.KirpmaSorulacakVeOgretmenArayuzTest > rolSecimiVeOgretmenCalismaAlanindaGizliCevapVeGrupKopyalamaCalisir: java.lang.AssertionError: java.lang.AssertionError: Failed to inject touch input. Reason: Expected exactly '1' node but could not find any node that satisfies: (TestTag = 'hedef_grup_0bf2779b-7823-43ba-87b6-1c044bcbc58e') 
+testDebugUnitTest: com.keremtulu.questionnote.ui.KirpmaSorulacakVeOgretmenArayuzTest > rolSecimiVeOgretmenCalismaAlanindaGizliCevapVeGrupKopyalamaCalisir: java.lang.AssertionError: java.lang.AssertionError: Failed to inject touch input. Reason: Expected exactly '1' node but could not find any node that satisfies: (TestTag = 'hedef_grup_6df627a2-afdf-4971-8544-3df2068d23cf') 
 java.lang.AssertionError: Failed to inject touch input.
-Reason: Expected exactly '1' node but could not find any node that satisfies: (TestTag = 'hedef_grup_0bf2779b-7823-43ba-87b6-1c044bcbc58e')
+Reason: Expected exactly '1' node but could not find any node that satisfies: (TestTag = 'hedef_grup_6df627a2-afdf-4971-8544-3df2068d23cf')
 
 	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow(SemanticsNodeInteraction.kt:178)
 	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow$default(SemanticsNodeInteraction.kt:150)
@@ -998,8 +625,8 @@ Reason: Expected exactly '1' node but could not find any node that satisfies: (T
 	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
 	at kotlinx
 
-testDebugUnitTest: com.keremtulu.questionnote.ui.KirpmaSorulacakVeOgretmenArayuzTest > ogretmenPremiumAnaEkranHazirGrupOnerisiVeAltMenuSekmeGecisiCalisir: androidx.test.espresso.AppNotIdleException: androidx.test.espresso.AppNotIdleException: Compose did not get idle after 144140 attempts in 60 SECONDS.  1. Check your measure/layout lambdas for infinite composition loops. 2. Verify that the 'busy' resources listed above are not deadlocked. 3. Increase Espresso's master idling policy if a longer timeout is required.  The following Idle Conditions failed .
-androidx.test.espresso.AppNotIdleException: Compose did not get idle after 144140 attempts in 60 SECONDS.
+testDebugUnitTest: com.keremtulu.questionnote.ui.KirpmaSorulacakVeOgretmenArayuzTest > ogretmenPremiumAnaEkranHazirGrupOnerisiVeAltMenuSekmeGecisiCalisir: androidx.test.espresso.AppNotIdleException: androidx.test.espresso.AppNotIdleException: Compose did not get idle after 254055 attempts in 60 SECONDS.  1. Check your measure/layout lambdas for infinite composition loops. 2. Verify that the 'busy' resources listed above are not deadlocked. 3. Increase Espresso's master idling policy if a longer timeout is required.  The following Idle Conditions failed .
+androidx.test.espresso.AppNotIdleException: Compose did not get idle after 254055 attempts in 60 SECONDS.
 
 1. Check your measure/layout lambdas for infinite composition loops.
 2. Verify that the 'busy' resources listed above are not deadlocked.
@@ -1037,357 +664,6 @@ androidx.test.espresso.AppNotIdleException: Compose did not get idle after 14414
 	at androidx.compose.ui.test.junit4.AndroidComposeTestRule$apply$1$evaluate$1.invoke(AndroidComposeTestRule.android.kt)
 	at androidx.compose.ui.test.junit4.AndroidComposeTestRule$apply$1$evaluate$1.invoke(AndroidComposeTestRule.android.kt)
 	at androidx.compose
-
-testReleaseUnitTest: com.keremtulu.questionnote.data.OgretmenDeposuRoomTest > eskiJsonBirKezIceAktarilirVeKayitlarKorunur: java.lang.AssertionError: java.lang.AssertionError
-java.lang.AssertionError
-	at org.junit.Assert.fail(Assert.java:87)
-	at org.junit.Assert.assertTrue(Assert.java:42)
-	at org.junit.Assert.assertTrue(Assert.java:53)
-	at com.keremtulu.questionnote.data.OgretmenDeposuRoomTest$eskiJsonBirKezIceAktarilirVeKayitlarKorunur$1.invokeSuspend(OgretmenDeposuRoomTest.kt:155)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:263)
-	at kotlinx.coroutines.BlockingCoroutine.joinBlocking(Builders.kt:95)
-	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking(Builders.kt:69)
-	at kotlinx.coroutines.BuildersKt.runBlocking(Unknown Source)
-	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking$default(Builders.kt:47)
-	at kotlinx.coroutines.BuildersKt.runBlocking$default(Unknown Source)
-	at com.keremtulu.questionnote.data.OgretmenDeposuRoomTest.eskiJsonBirKezIceAktarilirVeKayitlarKorunur(OgretmenDeposuRoomTest.kt:77)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:26)
-	at org.junit.internal.runners.statements.RunAfters.evaluate(RunAfters.java:27)
-	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
-	at org.robolectric.RobolectricTestRunner$HelperTestRunner$1.evaluate(RobolectricTestRunner.java:524)
-	at org.robolectric.internal.SandboxTestRunner.executeInSandbox(SandboxTestRunner.java:494)
-	at org.robolectric.internal.SandboxTestRunner.access$900(SandboxTestRunner.java:67)
-	at org.robolectric.internal.SandboxTestRunner$7.evaluate(SandboxTestRunner.java:442)
-	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
-	at org.robolectric.internal.SandboxTestRunner.access$600(SandboxTestRunner.java:67)
-	at org.robolectric.internal.SandboxTestRunner$6.evaluate(SandboxTestRunner.java:333)
-	at org.robolectric.internal.SandboxTestRunner$3.evaluate(SandboxTestRunner.java:233)
-	at org.robolectric.internal.SandboxTestRunner$5.lambda$evaluate$0(SandboxTestRunner.java:317)
-	at org.robolectric.internal.bytecode.Sandbox.lambda$runOnMainThread$0(Sandbox.java:101)
-	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
-	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
-	at java.base/java.lang.Thread.run(Thread.java:840)
-
-testReleaseUnitTest: com.keremtulu.questionnote.data.OgretmenVeSorulacaklarVeriTest > zipYedeklemeOgretmenCalismaAlaniniVeSorulacakDurumunuKorur: java.io.IOException: java.io.IOException: Desteklenmeyen yedek sürümü.
-java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$uriIleOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:177)
-	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:42)
-	at com.keremtulu.questionnote.data.OgretmenVeSorulacaklarVeriTest$zipYedeklemeOgretmenCalismaAlaniniVeSorulacakDurumunuKorur$1.invokeSuspend(OgretmenVeSorulacaklarVeriTest.kt:235)
-Caused by: java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$uriIleOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:177)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:113)
-	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:823)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)
-
-testReleaseUnitTest: com.keremtulu.questionnote.data.export.YerelDisaAktarmaHizmetiTest > exportContainsEveryRoomTableAndReferencedImageBytes: java.lang.AssertionError: java.lang.AssertionError: expected:<4> but was:<5>
-java.lang.AssertionError: expected:<4> but was:<5>
-	at org.junit.Assert.fail(Assert.java:89)
-	at org.junit.Assert.failNotEquals(Assert.java:835)
-	at org.junit.Assert.assertEquals(Assert.java:120)
-	at org.junit.Assert.assertEquals(Assert.java:146)
-	at com.keremtulu.questionnote.data.export.YerelDisaAktarmaHizmetiTest$exportContainsEveryRoomTableAndReferencedImageBytes$1.invokeSuspend(YerelDisaAktarmaHizmetiTest.kt:156)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:263)
-	at kotlinx.coroutines.BlockingCoroutine.joinBlocking(Builders.kt:95)
-	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking(Builders.kt:69)
-	at kotlinx.coroutines.BuildersKt.runBlocking(Unknown Source)
-	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking$default(Builders.kt:47)
-	at kotlinx.coroutines.BuildersKt.runBlocking$default(Unknown Source)
-	at com.keremtulu.questionnote.data.export.YerelDisaAktarmaHizmetiTest.exportContainsEveryRoomTableAndReferencedImageBytes(YerelDisaAktarmaHizmetiTest.kt:55)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:26)
-	at org.junit.internal.runners.statements.RunAfters.evaluate(RunAfters.java:27)
-	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
-	at org.robolectric.RobolectricTestRunner$HelperTestRunner$1.evaluate(RobolectricTestRunner.java:524)
-	at org.robolectric.internal.SandboxTestRunner.executeInSandbox(SandboxTestRunner.java:494)
-	at org.robolectric.internal.SandboxTestRunner.access$900(SandboxTestRunner.java:67)
-	at org.robolectric.internal.SandboxTestRunner$7.evaluate(SandboxTestRunner.java:442)
-	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
-	at org.robolectric.internal.SandboxTestRunner.access$600(SandboxTestRunner.java:67)
-	at org.robolectric.internal.SandboxTestRunner$6.evaluate(SandboxTestRunner.java:333)
-	at org.robolectric.internal.SandboxTestRunner$3.evaluate(SandboxTestRunner.java:233)
-	at org.robolectric.internal.SandboxTestRunner$5.lambda$evaluate$0(SandboxTestRunner.java:317)
-	at org.robolectric.internal.bytecode.Sandbox.lambda$runOnMainThread$0(Sandbox.java:101)
-	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
-	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
-	at java.base/java.lang.Thread.run(Thread.java:840)
-
-testReleaseUnitTest: com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest > verifiedRestoreClearsCosmeticQueuesBeforeRecoveryMarkerAndKeepsOwnership: java.io.IOException: java.io.IOException: Desteklenmeyen yedek sürümü.
-java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:42)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest$verifiedRestoreClearsCosmeticQueuesBeforeRecoveryMarkerAndKeepsOwnership$1.invokeSuspend(YerelYedeklemeHizmetiTest.kt:514)
-Caused by: java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:113)
-	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:823)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)
-
-testReleaseUnitTest: com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest > failedRestoreBeforeCommitPreservesResumeEvenWhenIdsMatchBackup: java.io.IOException: java.io.IOException: Desteklenmeyen yedek sürümü.
-java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:42)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest$failedRestoreBeforeCommitPreservesResumeEvenWhenIdsMatchBackup$1.invokeSuspend(YerelYedeklemeHizmetiTest.kt:316)
-Caused by: java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:113)
-	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:823)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)
-
-testReleaseUnitTest: com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest > shadowDecisionVersionTwoRoundTripsZipFourAndDiagnosticsAreTruthful: java.io.IOException: java.io.IOException: Desteklenmeyen yedek sürümü.
-java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:42)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest$shadowDecisionVersionTwoRoundTripsZipFourAndDiagnosticsAreTruthful$1.invokeSuspend(YerelYedeklemeHizmetiTest.kt:464)
-Caused by: java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:113)
-	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:823)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)
-
-testReleaseUnitTest: com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest > versionFourRoundTripsMeasurementsQualityAndDecisionContextWithoutChangingTheV2Plan: java.lang.AssertionError: java.lang.AssertionError: expected:<4> but was:<5>
-java.lang.AssertionError: expected:<4> but was:<5>
-	at org.junit.Assert.fail(Assert.java:89)
-	at org.junit.Assert.failNotEquals(Assert.java:835)
-	at org.junit.Assert.assertEquals(Assert.java:120)
-	at org.junit.Assert.assertEquals(Assert.java:146)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest$versionFourRoundTripsMeasurementsQualityAndDecisionContextWithoutChangingTheV2Plan$1.invokeSuspend(YerelYedeklemeHizmetiTest.kt:373)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:263)
-	at kotlinx.coroutines.BlockingCoroutine.joinBlocking(Builders.kt:95)
-	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking(Builders.kt:69)
-	at kotlinx.coroutines.BuildersKt.runBlocking(Unknown Source)
-	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking$default(Builders.kt:47)
-	at kotlinx.coroutines.BuildersKt.runBlocking$default(Unknown Source)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest.versionFourRoundTripsMeasurementsQualityAndDecisionContextWithoutChangingTheV2Plan(YerelYedeklemeHizmetiTest.kt:367)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:26)
-	at org.junit.internal.runners.statements.RunAfters.evaluate(RunAfters.java:27)
-	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
-	at org.robolectric.RobolectricTestRunner$HelperTestRunner$1.evaluate(RobolectricTestRunner.java:524)
-	at org.robolectric.internal.SandboxTestRunner.executeInSandbox(SandboxTestRunner.java:494)
-	at org.robolectric.internal.SandboxTestRunner.access$900(SandboxTestRunner.java:67)
-	at org.robolectric.internal.SandboxTestRunner$7.evaluate(SandboxTestRunner.java:442)
-	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
-	at org.robolectric.internal.SandboxTestRunner.access$600(SandboxTestRunner.java:67)
-	at org.robolectric.internal.SandboxTestRunner$6.evaluate(SandboxTestRunner.java:333)
-	at org.robolectric.internal.SandboxTestRunner$3.evaluate(SandboxTestRunner.java:233)
-	at org.robolectric.internal.SandboxTestRunner$5.lambda$evaluate$0(SandboxTestRunner.java:317)
-	at org.robolectric.internal.bytecode.Sandbox.lambda$runOnMainThread$0(Sandbox.java:101)
-	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
-	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
-	at java.base/java.lang.
-
-testReleaseUnitTest: com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest > explicitlyGatedActiveRecordsRoundTripThenRollbackWritesOnlyNewV2History: java.io.IOException: java.io.IOException: Desteklenmeyen yedek sürümü.
-java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:42)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest$explicitlyGatedActiveRecordsRoundTripThenRollbackWritesOnlyNewV2History$1.invokeSuspend(YerelYedeklemeHizmetiTest.kt:474)
-Caused by: java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:113)
-	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:823)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)
-
-testReleaseUnitTest: com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest > checkpointClearFailureKeepsCommitMarkerUntilRecoveryCanInvalidateOldSession: java.io.IOException: java.io.IOException: Desteklenmeyen yedek sürümü.
-java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:42)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest$checkpointClearFailureKeepsCommitMarkerUntilRecoveryCanInvalidateOldSession$1.invokeSuspend(YerelYedeklemeHizmetiTest.kt:350)
-Caused by: java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:113)
-	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:823)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)
-
-testReleaseUnitTest: com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest > mockExamsRoundTripThroughZipBackupAndReconcileLessonIdsOnRestore: java.io.IOException: java.io.IOException: Desteklenmeyen yedek sürümü.
-java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:42)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest$mockExamsRoundTripThroughZipBackupAndReconcileLessonIdsOnRestore$1.invokeSuspend(YerelYedeklemeHizmetiTest.kt:787)
-Caused by: java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:113)
-	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:823)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)
-
-testReleaseUnitTest: com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest > v2AlgorithmHistoryRoundTripsInCurrentBackupWithoutRewritingHistory: java.io.IOException: java.io.IOException: Desteklenmeyen yedek sürümü.
-java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:42)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest$v2AlgorithmHistoryRoundTripsInCurrentBackupWithoutRewritingHistory$1.invokeSuspend(YerelYedeklemeHizmetiTest.kt:169)
-Caused by: java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:113)
-	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:823)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)
-
-testReleaseUnitTest: com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest > fullRestoreReplacesRowsRewritesImagePathsAndLeavesSafetyArchive: java.io.IOException: java.io.IOException: Desteklenmeyen yedek sürümü.
-java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:42)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest$fullRestoreReplacesRowsRewritesImagePathsAndLeavesSafetyArchive$1.invokeSuspend(YerelYedeklemeHizmetiTest.kt:119)
-Caused by: java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:113)
-	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:823)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)
-
-testReleaseUnitTest: com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest > successfulRestoreClearsResumeEvenWhenQuestionIdsAreReused: java.io.IOException: java.io.IOException: Desteklenmeyen yedek sürümü.
-java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:42)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest$successfulRestoreClearsResumeEvenWhenQuestionIdsAreReused$1.invokeSuspend(YerelYedeklemeHizmetiTest.kt:335)
-Caused by: java.io.IOException: Desteklenmeyen yedek sürümü.
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.verifyArchive(YerelYedeklemeHizmeti.kt:868)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.previewCopiedArchive(YerelYedeklemeHizmeti.kt:234)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti.access$previewCopiedArchive(YerelYedeklemeHizmeti.kt:93)
-	at com.keremtulu.questionnote.data.export.YerelYedeklemeHizmeti$dosyadanOnizle$2.invokeSuspend(YerelYedeklemeHizmeti.kt:197)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:113)
-	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:823)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)
 
 testReleaseUnitTest: com.keremtulu.questionnote.data.local.OlcumMigrationTest > realVersionThreeSchemaMigratesWithoutRewritingReviewsOrInventingMeasurements: java.lang.IllegalStateException: java.lang.IllegalStateException: A migration from 3 to 5 was required but not found. Please provide the necessary Migration path via RoomDatabase.Builder.addMigration(...) or allow for destructive migrations via one of the RoomDatabase.Builder.fallbackToDestructiveMigration* functions.
 java.lang.IllegalStateException: A migration from 3 to 5 was required but not found. Please provide the necessary Migration path via RoomDatabase.Builder.addMigration(...) or allow for destructive migrations via one of the RoomDatabase.Builder.fallbackToDestructiveMigration* functions.
