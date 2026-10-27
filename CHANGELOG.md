@@ -25,8 +25,10 @@ Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih 
   açık/koyu ekran görüntüsü üretir; CI bunları `docs/ui/today/` altına yazar.
 - **Test:** `UstPanelArayuzTest` (hedef/seri/tarih, oyunlaştırma kelimesi yokluğu, 48dp hedef,
   tıklama, 2× yazı). Mevcut test etiketleri/sözleşmeleri korundu.
-- **Doğrulama:** JDK/Android SDK olmadığı için derleme ve test çalıştırılmadı; tree-sitter ile
-  0 sözdizimi hatası, `R.*` referanslarında 0 eksik. Sürüm/Room/ZIP değişmedi.
+- **CI:** run `40534071050` (commit `52f27e0`) — Debug **388/0/0/0**, Release ortak
+  **303/0/0/0**, `assembleRelease` 0, imza ve sertifika eşleşti. Sürüm/Room/ZIP değişmedi;
+  v1.6.3 etiketi zaten yayımlandığı için yeni Release oluşturulmadı.
+- **Görsel kanıt:** `docs/ui/today/bugun-light.png`, `bugun-dark.png` (yerel Compose, sentetik veri).
 
 ## [Yayınlanmadı — T3] — 2026-10-26
 

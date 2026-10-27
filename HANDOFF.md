@@ -25,9 +25,11 @@ oyunlaştırma (XP/para/enerji) yok. Panel yalnız gerçek bugün durumunu taş�
   Panel yalnız sekme köklerinde (`UygulamaEkrani.altMenuGorunur()`) görünür; detay/form
   ekranlarında gizlenir.
 - **Insets sözleşmesi**: host `Scaffold` `contentWindowInsets = 0`; üst/alt boşlukları paneller
-  taşır. Sekme kökleri `ekranPencereInsetsi()` ile yalnız **yatay** güvenli alan ekler; böylece
-  alt menünün üstünde ikinci bir gezinme çubuğu boşluğu kalmaz. Detay ekranları tam
-  `safeDrawing` kullanmaya devam eder.
+  taşır. Sekme kökleri (`Bugün`, `Dersler`, `Filtreli`, `İlerleme`, `Ayarlar`) `ekranPencereInsetsi()`
+  ile yalnız **yatay** güvenli alan ekler; böylece alt menünün üstünde ikinci bir gezinme çubuğu
+  boşluğu kalmaz. Panel göstermeyen detay/form ekranları (SoruDetay, SoruFormu, Sorulacaklar,
+  Ders çalışma, Katalog, Konu yönetimi, Görsel bakım, Odak, Deneme, Karne, öğretmen) tam
+  `safeDrawing` kullanmaya devam eder — onlarda üst boşluğu panel değil durum çubuğu taşır.
 - **Bugün** (`ui/BugunEkrani.kt`): başlık ("Bugün" + tek satır bağlam + 48dp `+`), gradyan
   **odak kartı** (GÜNÜN ODAĞI, sayı + "soru" birimi, günlük hedefin ince ölçeği, tek bakır CTA),
   isteğe bağlı devam satırı, kuyruk kartı (3 önizleme, gecikme etiketi), sorulacaklar/deneme
@@ -46,10 +48,13 @@ oyunlaştırma (XP/para/enerji) yok. Panel yalnız gerçek bugün durumunu taş�
   `docs/ui/today/bugun-light|dark.png`). Mevcut test sözleşmeleri korundu
   (`bugun_sorulacaklar_karti`, `today-deneme-card`, ilerleme etiketleri).
 
-**Doğrulama durumu:** Bu ortamda JDK/Android SDK yok; derleme ve JUnit çalıştırılmadı.
-CI ilk turda yalnız yeni test dosyasında derleme hatası verdi (`DpRect.height/width`), düzeltildi;
-ikinci turda yalnız yeni testler kaldı (FK'sız tekrar kaydı, %200 ölçü beklentisi) ve onlar da
-gerçek şemaya/ürün davranışına göre düzeltildi.
+**CI kanıtı (2026-10-27, run `40534071050`, commit `52f27e0`):** Debug **388/0/0/0**,
+Release ortak **303/0/0/0**, `assembleRelease` 0, imza + beklenen sertifika doğrulandı.
+Önceki turlarda yalnız yeni test dosyaları kırıldı ve düzeltildi: `DpRect.height/width`
+(Kotlin uzantısı importu), `SoruEntity` zorunlu `olusturma/guncelleme` alanları, tekrar
+kaydı öncesi dış anahtarlı soru, %200 yazıda gizlenen "Hedef" etiketi beklentisi ve
+`DenemeVeKurulumArayuzTest` içindeki tek `waitForIdle` yarışı (`waitUntil`'e çevrildi).
+Görsel önizlemeler `docs/ui/today/bugun-light.png` ve `bugun-dark.png` olarak repoda.
 Tüm `app/src/**/*.kt` tree-sitter ile **0 sözdizimi hatası**, tüm `R.*` referansları
 **0 eksik** (values + drawable*/font/raw/xml), `values*.xml` iyi biçimli. Gerçek kapı CI'dır;
 sürüm/Room/ZIP değişmedi.

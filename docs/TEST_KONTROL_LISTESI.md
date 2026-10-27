@@ -22,6 +22,8 @@ APK/imza/sertifika/yayın, API digest/tag ve sekiz native çıktı doğrulandı.
 > Bu bölümdeki otomatik testler **yazıldı**, ancak bu ortamda JDK/Android SDK olmadığı için
 > **çalıştırılmadı**. `[ ]` = CI'da koşacak. Hiçbir satır "geçti" sayılmaz.
 
+- [x] **YZ (CI)** Run `40534071050` (commit `52f27e0`): Debug **388/0/0/0**, Release ortak
+      **303/0/0/0**; aşağıdaki otomatik satırlar bu koşuda geçti. Fiziksel cihaz satırları açık.
 - [ ] **YZ (CI)** `UstPanelArayuzTest.hedefSeriVeTarihGorunurTekDokunuslaIlerlemeyeGider`:
       `1 / 10`, `1 günlük seri`, tr-TR tarih; XP/para/enerji/elmas metni yok; hedef düğmesi
       ≥48dp; tıklama İlerleme yönlendirmesi.
