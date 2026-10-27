@@ -30,6 +30,8 @@ APK/imza/sertifika/yayın, API digest/tag ve sekiz native çıktı doğrulandı.
 - [ ] **YZ (CI)** Mevcut `IlerlemeSadelikTest`, `PremiumIlerlemeTest`,
       `KirpmaSorulacakVeOgretmenArayuzTest`, `OneridenOdagaAkisTest` regresyonları:
       metin bütçesi, `progress-xp-bar`, `bugun_sorulacaklar_karti`, akış.
+- [ ] **YZ (CI)** `BugunUstPanelOnizlemeTest`: üst panel + alt menü + gerçek Bugün kabuğu,
+      `docs/ui/today/bugun-light.png` ve `bugun-dark.png` üretimi (6 soru, 3/10 hedef, gecikenler).
 - [ ] **KULLANICI (S24 FE)** Üst panel: çentik/durum çubuğu çakışması, tarih/seri/hedef
       okunurluğu, 3 tuşlu navigasyon ve hareket azaltma açık/kapalı.
 - [ ] **KULLANICI (S24 FE)** Sekme köklerinde alt menü üstünde ekstra boşluk kalmadığı;

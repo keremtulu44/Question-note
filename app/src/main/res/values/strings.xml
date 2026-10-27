@@ -505,16 +505,15 @@
     <!-- Bugün · üst panel eşi ve daha ince ilerleme dili -->
     <string name="today_goal_progress">%1$d / %2$d</string>
     <string name="today_question_unit">soru</string>
-    <string name="today_list_ready">Tekrar sırası gelen sorular</string>
     <string name="today_queue_turn">Bu turda %1$d soru · %2$d sonraki tura</string>
     <string name="ust_panel_goal_label">Hedef</string>
     <string name="ust_panel_open_progress">İlerlemeyi aç</string>
     <string name="ust_panel_progress">%1$d / %2$d</string>
     <string name="ust_panel_loading">—</string>
     <string name="ust_panel_streak_start">Seri bugün başlayabilir</string>
-    <plurals name="today_waiting_count">
-        <item quantity="one">%d soru seni bekliyor</item>
-        <item quantity="other">%d soru seni bekliyor</item>
+    <plurals name="today_overdue_count">
+        <item quantity="one">%d soru gecikmiş</item>
+        <item quantity="other">%d soru gecikmiş</item>
     </plurals>
 
     <!-- Seviye, rütbe ve rozet açıklamaları (v1.1.0) -->

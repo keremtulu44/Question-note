@@ -172,6 +172,7 @@ fun BugunEkrani(
                 // Boş havuzda tek ekleme daveti kartta durur; başlıktaki + ikinci kez çağırmaz.
                 BugunBasligi(
                     durum = durum,
+                    geciken = plan?.geciken,
                     onSoruEkle = onSoruEkle,
                     ekleGoster = !(hazir != null && hazir.sorular.isEmpty()),
                 )
@@ -229,17 +230,17 @@ fun BugunEkrani(
 @Composable
 private fun BugunBasligi(
     durum: BugunDurumu,
+    geciken: Int?,
     onSoruEkle: () -> Unit,
     ekleGoster: Boolean,
 ) {
-    // Sayı yalnız odak kartında bir kez büyük olarak yazılır; başlıkta tekrar edilmez.
-    val altSatir = when (val current = durum) {
+    // Sayı odak kartında bir kez büyük yazılır. Başlıkta yalnız başka yerde olmayan
+    // bilgi kalır: yükleniyor ya da kaç sorunun geciktiği. Boş/hata metni kartında durur.
+    val altSatir = when (durum) {
         BugunDurumu.Yukleniyor -> stringResource(R.string.today_loading_count)
         BugunDurumu.Hata -> null
-        is BugunDurumu.Hazir -> if (current.sorular.isEmpty()) {
-            stringResource(R.string.today_focus_empty)
-        } else {
-            stringResource(R.string.today_list_ready)
+        is BugunDurumu.Hazir -> geciken?.takeIf { it > 0 }?.let {
+            pluralStringResource(R.plurals.today_overdue_count, it, it)
         }
     }
     Row(

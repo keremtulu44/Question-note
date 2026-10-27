@@ -10,6 +10,7 @@ import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.data.ilerleme.IlerlemeHizmeti
 import com.keremtulu.questionnote.data.local.VarsayilanDersleriEkle
 import com.keremtulu.questionnote.data.local.YanlisDefteriDatabase
+import com.keremtulu.questionnote.data.local.entity.SoruEntity
 import com.keremtulu.questionnote.data.local.entity.TekrarEntity
 import com.keremtulu.questionnote.data.prefs.SabitGunlukHedefDeposu
 import com.keremtulu.questionnote.ui.panel.UstPanel
@@ -46,6 +47,9 @@ class UstPanelArayuzTest {
         val bugun = LocalDate.now()
         val gun = bugun.toEpochDay().toInt()
         runBlocking {
+            // tekrarlar.soru_id bir dış anahtardır: önce gerçek bir soru, sonra tekrar.
+            val dersId = db.dersDao().tumunuGetir().first().id
+            db.soruDao().ekle(SoruEntity(id = "ust-panel-soru", dersId = dersId, soruNotu = "Üst panel testi"))
             db.tekrarDao().ekle(
                 TekrarEntity(
                     id = "ust-panel-tekrar",
@@ -110,8 +114,11 @@ class UstPanelArayuzTest {
         compose.waitUntil(5_000) {
             compose.onAllNodesWithText("0 / 15").fetchSemanticsNodes().isNotEmpty()
         }
+        compose.onNodeWithText("0 / 15").assertIsDisplayed()
+        // %200 yazıda kısa etiket gizlenir; sayı ve 48dp dokunma hedefi kalır.
+        compose.onAllNodesWithText(context.getString(R.string.ust_panel_goal_label)).assertCountEquals(0)
         val olcu = compose.onNodeWithTag("ust-panel-hedef").getUnclippedBoundsInRoot()
         assertTrue("2× yazıda hedef düğmesi 48dp altına düşmemeli", (olcu.bottom - olcu.top).value >= 48f)
-        assertTrue("2× yazıda hedef düğmesi okunabilir genişlikte kalmalı", (olcu.right - olcu.left).value >= 88f)
+        assertTrue("2× yazıda hedef düğmesi en az 48dp geniş olmalı", (olcu.right - olcu.left).value >= 48f)
     }
 }

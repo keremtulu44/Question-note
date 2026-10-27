@@ -42,10 +42,14 @@ oyunlaştırma (XP/para/enerji) yok. Panel yalnız gerçek bugün durumunu taş�
 - **Kaldırılanlar**: Filtreli çalışma ekranındaki gereksiz "Geri" düğmesi (sekme kökü; alt menü
   ve sistem geri tuşu yeterli), Bugün'deki "Hedef tamam / N soru daha" ikinci satırı ve FAB.
 - **Test**: yeni `UstPanelArayuzTest` (hedef/seri/tarih, XP-benzeri kelime yokluğu, 48dp hedef,
-  tıklama yönlendirmesi, 2× yazıda ölçü). Mevcut test sözleşmeleri korundu
+  tıklama yönlendirmesi, 2× yazıda ölçü) ve `BugunUstPanelOnizlemeTest` (gerçek kabukta
+  `docs/ui/today/bugun-light|dark.png`). Mevcut test sözleşmeleri korundu
   (`bugun_sorulacaklar_karti`, `today-deneme-card`, ilerleme etiketleri).
 
 **Doğrulama durumu:** Bu ortamda JDK/Android SDK yok; derleme ve JUnit çalıştırılmadı.
+CI ilk turda yalnız yeni test dosyasında derleme hatası verdi (`DpRect.height/width`), düzeltildi;
+ikinci turda yalnız yeni testler kaldı (FK'sız tekrar kaydı, %200 ölçü beklentisi) ve onlar da
+gerçek şemaya/ürün davranışına göre düzeltildi.
 Tüm `app/src/**/*.kt` tree-sitter ile **0 sözdizimi hatası**, tüm `R.*` referansları
 **0 eksik** (values + drawable*/font/raw/xml), `values*.xml` iyi biçimli. Gerçek kapı CI'dır;
 sürüm/Room/ZIP değişmedi.

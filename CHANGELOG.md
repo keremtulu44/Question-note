@@ -18,6 +18,10 @@ Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih 
   rütbe kutlamasında 9 noktalı yol, rütbe galerisinde 15 noktalı yol.
 - **Kaldırılan:** Filtreli çalışma ekranındaki sekme kökü "Geri" düğmesi; Bugün'deki ikinci
   hedef cümlesi ve FAB.
+- **Başlık alt satırı:** Bugün'de yalnız yeni bilgi kaldı (yükleniyor ya da "%d soru gecikmiş");
+  odak kartındaki sayı başlıkta tekrarlanmaz.
+- **Görsel kanıt:** `BugunUstPanelOnizlemeTest` gerçek kabukta (üst panel + alt menü + Bugün)
+  açık/koyu ekran görüntüsü üretir; CI bunları `docs/ui/today/` altına yazar.
 - **Test:** `UstPanelArayuzTest` (hedef/seri/tarih, oyunlaştırma kelimesi yokluğu, 48dp hedef,
   tıklama, 2× yazı). Mevcut test etiketleri/sözleşmeleri korundu.
 - **Doğrulama:** JDK/Android SDK olmadığı için derleme ve test çalıştırılmadı; tree-sitter ile

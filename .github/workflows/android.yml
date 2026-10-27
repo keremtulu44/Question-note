@@ -409,6 +409,21 @@ jobs:
             fi
           done
 
+      - name: Bugün ve üst panel yerel Compose önizlemelerini sakla
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in bugun-light bugun-dark; do
+            source="app/build/outputs/today-previews/$name.png"
+            if [[ -f "$source" ]]; then
+              # Küçük, adlandırılmış doküman görselleri; rastgele derleme çıktısı toplanmaz.
+              test "$(stat -c%s "$source")" -lt 1500000
+              mkdir -p docs/ui/today
+              cp "$source" "docs/ui/today/$name.png"
+            fi
+          done
+
       - name: P6 ölçüm ve yerel Compose kanıtlarını sakla
         if: always()
         shell: bash
@@ -439,6 +454,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/DERLEME_RAPORU.md
           if [[ -d docs/ui/progress ]]; then git add docs/ui/progress; fi
+          if [[ -d docs/ui/today ]]; then git add docs/ui/today; fi
           if [[ -d docs/ui/p6 ]]; then git add docs/ui/p6; fi
           for report in docs/PERFORMANS_DEBUG.md docs/PERFORMANS_RELEASE.md; do
             if [[ -f "$report" ]]; then git add "$report"; fi
