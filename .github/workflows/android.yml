@@ -394,6 +394,16 @@ jobs:
         if: steps.release.outputs.wrapper_exit != '0' || steps.release.outputs.unit_test_exit != '0' || steps.release.outputs.release_test_exit != '0' || steps.release.outputs.build_exit != '0' || steps.release.outputs.signing_exit != '0' || steps.release.outputs.fingerprint_exit != '0' || steps.release.outputs.release_exit != '0'
         run: exit 1
 
+      - name: İmzalı APK'yı indirilebilir artefakt olarak yükle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: yanlis-defteri-apk
+          if-no-files-found: warn
+          retention-days: 30
+          path: |
+            app/build/outputs/apk/release/yanlis-defteri-*.apk
+
       - name: Sade İlerleme yerel Compose önizlemelerini sakla
         if: always()
         shell: bash
