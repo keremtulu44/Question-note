@@ -87,6 +87,13 @@ import java.util.Locale
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.sp
+import com.keremtulu.questionnote.domain.karne.RozetGirdisi
+import com.keremtulu.questionnote.domain.karne.RozetKurallari
+import com.keremtulu.questionnote.ui.bilesenler.premium.CamKarti
+import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
 
 data class DagilimSatiri(val etiket: String, val sayi: Int)
 

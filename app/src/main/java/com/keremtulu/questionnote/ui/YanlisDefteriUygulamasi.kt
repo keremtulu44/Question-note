@@ -100,6 +100,9 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import com.keremtulu.questionnote.ui.premium.PremiumButton
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import com.keremtulu.questionnote.ui.karne.RozetKutlamaHost
 
 private sealed interface UygulamaEkrani {
     data object Bugun : UygulamaEkrani

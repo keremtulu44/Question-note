@@ -67,6 +67,9 @@ import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
 
 private sealed interface KonuListesiDurumu {
     data object Yukleniyor : KonuListesiDurumu

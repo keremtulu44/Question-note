@@ -43,6 +43,9 @@ import java.text.NumberFormat
 import java.util.Locale
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import com.keremtulu.questionnote.ui.premium.PremiumButton
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.unit.sp
+import com.keremtulu.questionnote.domain.seviye.SeviyeHesabi
 
 // Established petrol/copper hero palette; deliberately independent of the page's light/dark surfaces.
 

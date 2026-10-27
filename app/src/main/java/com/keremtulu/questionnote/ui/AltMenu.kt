@@ -50,6 +50,10 @@ import com.keremtulu.questionnote.data.ses.SesYoneticisi
 import com.keremtulu.questionnote.ui.animasyon.horizontalSwipeNavigation
 import kotlin.math.cos
 import kotlin.math.sin
+import androidx.compose.ui.draw.drawBehind
+import com.keremtulu.questionnote.ui.animasyon.SureToken
+import com.keremtulu.questionnote.ui.animasyon.animateFloatPremium
+import com.keremtulu.questionnote.ui.animasyon.tweenPremium
 
 enum class AltSekme { BUGUN, DERSLER, FILTRELI, SEVIYE, AYARLAR }
 

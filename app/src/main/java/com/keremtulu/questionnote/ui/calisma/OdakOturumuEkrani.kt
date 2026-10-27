@@ -95,6 +95,16 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import com.keremtulu.questionnote.ui.premium.PremiumCard
+import android.content.Context
+import android.content.ContextWrapper
+import androidx.activity.ComponentActivity
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import com.keremtulu.questionnote.domain.repeat.AkilliTekrarKurali
+import com.keremtulu.questionnote.ui.premium.PremiumGradyanButon
 
 /** A focused review surface; no archive/delete controls, no forced solution reveal, no speed score. */
 @Composable
