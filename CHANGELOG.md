@@ -18,8 +18,9 @@ Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih 
   rütbe kutlamasında 9 noktalı yol, rütbe galerisinde 15 noktalı yol.
 - **Kaldırılan:** Filtreli çalışma ekranındaki sekme kökü "Geri" düğmesi; Bugün'deki ikinci
   hedef cümlesi ve FAB.
-- **Başlık alt satırı:** Bugün'de yalnız yeni bilgi kaldı (yükleniyor ya da "%d soru gecikmiş");
-  odak kartındaki sayı başlıkta tekrarlanmaz.
+- **Tekrar eden metinler:** Bugün başlığı yalnız yeni bilgi taşır (yükleniyor ya da
+  "%d soru gecikmiş"); odak kartında üst paneldeki "3 / 10" yerine "%d soru kaldı" /
+  "Hedef tamam" yazar; deneme kısayolunun uzun alt metni kısaldı.
 - **Görsel kanıt:** `BugunUstPanelOnizlemeTest` gerçek kabukta (üst panel + alt menü + Bugün)
   açık/koyu ekran görüntüsü üretir; CI bunları `docs/ui/today/` altına yazar.
 - **Test:** `UstPanelArayuzTest` (hedef/seri/tarih, oyunlaştırma kelimesi yokluğu, 48dp hedef,

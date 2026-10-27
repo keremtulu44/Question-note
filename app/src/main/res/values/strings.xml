@@ -70,7 +70,7 @@
     <string name="deneme_delete_confirm_action">Sil</string>
     <string name="deneme_error_name">Lütfen deneme için bir ad yaz.</string>
     <string name="deneme_error_scores">En az bir ders için geçerli soru sayısı gir ve doğru + yanlış toplamının soru sayısını aşmadığından emin ol.</string>
-    <string name="today_deneme_subtitle_empty">Deneme netlerini kaydet, yanlış ve boşlarını deftere bağla</string>
+    <string name="today_deneme_subtitle_empty">Deneme netlerini kaydet</string>
     <string name="today_deneme_subtitle_summary">%1$d kayıt · Son: %2$s (%3$s net)</string>
     <string name="onboarding_kicker">İLK KURULUM · ÇALIŞMA ALANIN</string>
     <string name="onboarding_title">Hangi derslerle çalışacaksın?</string>
@@ -503,7 +503,8 @@
     <string name="today_streak">%1$d günlük seri</string>
 
     <!-- Bugün · üst panel eşi ve daha ince ilerleme dili -->
-    <string name="today_goal_progress">%1$d / %2$d</string>
+    <string name="today_goal_left">%1$d soru kaldı</string>
+    <string name="today_goal_met">Hedef tamam</string>
     <string name="today_question_unit">soru</string>
     <string name="today_queue_turn">Bu turda %1$d soru · %2$d sonraki tura</string>
     <string name="ust_panel_goal_label">Hedef</string>

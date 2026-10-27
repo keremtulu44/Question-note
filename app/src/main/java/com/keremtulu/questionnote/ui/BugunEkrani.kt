@@ -425,11 +425,16 @@ private fun OdakHedefiVeEylemi(
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 0.8.sp,
             )
+            // Sayı üst panelde zaten var; burada yeni bilgi kalsın: kaç soru kaldığı.
             Text(
-                text = stringResource(R.string.today_goal_progress, yapilan, hedef),
-                color = kagit,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold,
+                text = if (yapilan >= hedef) {
+                    stringResource(R.string.today_goal_met)
+                } else {
+                    stringResource(R.string.today_goal_left, hedef - yapilan)
+                },
+                color = kagit.copy(alpha = 0.82f),
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
             )
         }
         InceOlcek(
