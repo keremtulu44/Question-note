@@ -31,12 +31,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -57,7 +55,6 @@ import com.keremtulu.questionnote.domain.model.kaynakla
 import com.keremtulu.questionnote.domain.repository.KonuRepository
 import com.keremtulu.questionnote.domain.repository.SoruRepository
 import com.keremtulu.questionnote.ui.animasyon.animateItemInsertion
-import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
 import com.keremtulu.questionnote.ui.bilesenler.premium.IskeletKart
 import com.keremtulu.questionnote.ui.bilesenler.premium.PremiumBosDurum
 import com.keremtulu.questionnote.ui.bilesenler.premium.VarsayilanIlustrasyon
@@ -171,26 +168,10 @@ fun DersCalismaEkrani(
                             }
                         }
                     }
-                    GradyanKart(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(24.dp),
-                        borderAnimation = false,
-                    ) {
-                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Text(
-                                text = ders.ad,
-                                style = MaterialTheme.typography.headlineSmall,
-                                color = PremiumMarkaRenkler.Kagit,
-                                fontWeight = FontWeight.Bold,
-                            )
-                            Text(
-                                text = if (dersArsivli) stringResource(R.string.lesson_archived_read_only)
-                                else stringResource(R.string.question_screen_subtitle),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.86f),
-                            )
-                        }
-                    }
+                    com.keremtulu.questionnote.ui.bilesenler.DuzBaslik(
+                    baslik = ders.ad,
+                    alt = if (dersArsivli) stringResource(R.string.lesson_archived_read_only) else stringResource(R.string.question_screen_subtitle),
+                )
                 }
             }
 

@@ -27,12 +27,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,11 +45,10 @@ import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.domain.model.Ders
 import com.keremtulu.questionnote.domain.model.dersAnahtari
 import com.keremtulu.questionnote.domain.repository.DersRepository
-import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
 import com.keremtulu.questionnote.ui.dersKartStiliGetir
 import com.keremtulu.questionnote.ui.premium.EtkilesimTuru
 import com.keremtulu.questionnote.ui.premium.PremiumCard
-import com.keremtulu.questionnote.ui.premium.PremiumGradyanButon
+import com.keremtulu.questionnote.ui.bilesenler.SadeAnaButon
 import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
@@ -148,27 +145,10 @@ fun DersKurulumEkrani(
                 .testTag("onboarding-screen"),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            GradyanKart(modifier = Modifier.fillMaxWidth(), borderAnimation = false) {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(
-                        text = stringResource(R.string.onboarding_kicker),
-                        color = PremiumMarkaRenkler.BakirIsik,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    Text(
-                        text = stringResource(R.string.onboarding_title),
-                        color = PremiumMarkaRenkler.Kagit,
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    Text(
-                        text = stringResource(R.string.onboarding_subtitle),
-                        color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.82f),
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
-            }
+            com.keremtulu.questionnote.ui.bilesenler.DuzBaslik(
+                    baslik = stringResource(R.string.onboarding_title),
+                    alt = stringResource(R.string.onboarding_subtitle),
+                )
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -275,7 +255,7 @@ fun DersKurulumEkrani(
                 )
             }
 
-            PremiumGradyanButon(
+            SadeAnaButon(
                 enabled = !kaydediliyor && secili.isNotEmpty(),
                 onClick = {
                     kaydediliyor = true

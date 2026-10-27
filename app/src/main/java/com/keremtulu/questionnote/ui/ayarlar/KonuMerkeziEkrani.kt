@@ -20,16 +20,13 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.domain.model.Ders
@@ -37,8 +34,6 @@ import com.keremtulu.questionnote.domain.repository.DersRepository
 import com.keremtulu.questionnote.domain.repository.KonuRepository
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
-import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
-import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import com.keremtulu.questionnote.ui.premium.PremiumCard
 
@@ -79,21 +74,10 @@ fun KonuMerkeziEkrani(
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     PremiumTextButton(onClick = onGeri) { Text(stringResource(R.string.common_back)) }
-                    GradyanKart(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), borderAnimation = false) {
-                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Text(
-                                stringResource(R.string.settings_topics),
-                                color = PremiumMarkaRenkler.Kagit,
-                                style = MaterialTheme.typography.headlineMedium,
-                                fontWeight = FontWeight.Bold,
-                            )
-                            Text(
-                                stringResource(R.string.topics_center_note),
-                                color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.86f),
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
-                        }
-                    }
+                    com.keremtulu.questionnote.ui.bilesenler.DuzBaslik(
+                    baslik = stringResource(R.string.settings_topics),
+                    alt = stringResource(R.string.topics_center_note),
+                )
                 }
             }
             item {

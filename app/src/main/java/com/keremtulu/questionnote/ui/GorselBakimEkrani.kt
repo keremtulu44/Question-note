@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
@@ -20,24 +19,19 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.data.images.GorselBakimRaporu
 import com.keremtulu.questionnote.data.images.GorselTutarliligiHizmeti
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
-import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
-import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import com.keremtulu.questionnote.ui.premium.PremiumButton
 
@@ -80,21 +74,10 @@ fun GorselBakimEkrani(
         ) {
             Column(Modifier.fillMaxWidth().padding(start = 20.dp, top = 8.dp, end = 20.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 PremiumTextButton(onClick = onGeri) { Text(stringResource(R.string.common_back)) }
-                GradyanKart(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), borderAnimation = false) {
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text(
-                            stringResource(R.string.image_maintenance_title),
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = PremiumMarkaRenkler.Kagit,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Text(
-                            stringResource(R.string.image_maintenance_description),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.86f),
-                        )
-                    }
-                }
+                com.keremtulu.questionnote.ui.bilesenler.DuzBaslik(
+                    baslik = stringResource(R.string.image_maintenance_title),
+                    alt = stringResource(R.string.image_maintenance_description),
+                )
             }
             Row(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 22.dp),

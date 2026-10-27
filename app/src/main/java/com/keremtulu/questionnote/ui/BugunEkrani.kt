@@ -34,7 +34,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,12 +53,11 @@ import com.keremtulu.questionnote.ui.animasyon.SureToken
 import com.keremtulu.questionnote.ui.animasyon.animateFloatPremium
 import com.keremtulu.questionnote.ui.animasyon.tweenPremium
 import com.keremtulu.questionnote.ui.bilesenler.premium.BosDurumSoruYok
-import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
 import com.keremtulu.questionnote.ui.bilesenler.premium.KutlamaParcaciklari
 import com.keremtulu.questionnote.ui.premium.EtkilesimTuru
 import com.keremtulu.questionnote.ui.premium.PremiumCard
 import com.keremtulu.questionnote.ui.premium.PremiumExtendedFloatingActionButton
-import com.keremtulu.questionnote.ui.premium.PremiumGradyanButon
+import com.keremtulu.questionnote.ui.bilesenler.SadeAnaButon
 import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 import com.keremtulu.questionnote.ui.premium.PremiumOutlinedButton
 import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
@@ -178,30 +176,10 @@ fun BugunEkrani(
             contentPadding = PaddingValues(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 104.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            item {
-                GradyanKart(modifier = Modifier.fillMaxWidth(), borderAnimation = false) {
-                    Column {
-                        Text(
-                            text = stringResource(R.string.today_kicker),
-                            color = PremiumMarkaRenkler.BakirIsik,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 1,
-                        )
-                        Text(
-                            text = stringResource(R.string.today_title),
-                            modifier = Modifier.padding(top = 4.dp),
-                            color = PremiumMarkaRenkler.Kagit,
-                            style = MaterialTheme.typography.displaySmall,
-                        )
-                        Text(
-                            text = dateText,
-                            modifier = Modifier.padding(top = 2.dp),
-                            color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.74f),
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    }
-                }
+            item(key = "sayfa-basligi") {
+                com.keremtulu.questionnote.ui.bilesenler.SayfaBasligi(
+                    stringResource(R.string.today_title), dateText,
+                )
             }
             if (onDevam != null) item {
                 PremiumOutlinedButton(onClick = onDevam, modifier = Modifier.fillMaxWidth()) {
@@ -423,7 +401,7 @@ private fun BugunGunKarti(
                         style = MaterialTheme.typography.bodyMedium,
                         color = colors.onPrimaryContainer,
                     )
-                    PremiumGradyanButon(
+                    SadeAnaButon(
                         onClick = { onOturumBaslat(sorular, dersler) },
                         modifier = Modifier.fillMaxWidth(),
                         interactionTur = EtkilesimTuru.ODAK_BASLADI,

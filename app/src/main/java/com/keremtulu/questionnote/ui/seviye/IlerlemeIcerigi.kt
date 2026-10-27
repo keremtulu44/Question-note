@@ -20,7 +20,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -31,14 +30,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.data.seviye.DersIlerlemesi
 import com.keremtulu.questionnote.data.seviye.SeviyeOzeti
 import com.keremtulu.questionnote.domain.karne.Rozet
 import com.keremtulu.questionnote.domain.model.SoruCalismaFiltresi
 import com.keremtulu.questionnote.domain.seviye.Rutbe
-import com.keremtulu.questionnote.domain.seviye.SeviyeHesabi
 import com.keremtulu.questionnote.ui.karne.GizliRozetGorseli
 import com.keremtulu.questionnote.ui.karne.RozetGorseli
 import com.keremtulu.questionnote.ui.tema.*
@@ -48,10 +45,6 @@ import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import com.keremtulu.questionnote.ui.premium.PremiumButton
 
 // Established petrol/copper hero palette; deliberately independent of the page's light/dark surfaces.
-private val Murekkep = Color(0xFF153544)
-private val Gece = Color(0xFF0C202C)
-private val Kagit = Color(0xFFFFF7E8)
-private val BakirIsik = Color(0xFFEFC18A)
 
 /** Navigation is presentation state only. Opening a detail never creates a measurement or changes a plan. */
 private enum class IlerlemeBolumu(val baslik: Int) {
@@ -82,6 +75,8 @@ internal fun IlerlemeIcerigi(
         LazyColumn(state = ozetListesi, modifier = Modifier.fillMaxSize().testTag("progress-list"),
             contentPadding = padding, verticalArrangement = Arrangement.spacedBy(16.dp)) {
             item(key = "baslik") { IlerlemeBasligi() }
+            // Level first: this is the "how far have I come" screen, the action comes right below it.
+            item(key = "rutbe") { YeniRutbeKarti(ozet) }
             item(key = "bugun") {
                 IlerlemePaneli(Modifier.testTag(if (yetersizVeri) "progress-empty" else "progress-today")) {
                     if (ozet.soruSayisi == 0) {
@@ -114,7 +109,6 @@ internal fun IlerlemeIcerigi(
                     DersPekismesi(ozet.dersler)
                 }
             }
-            item(key = "rutbe") { YeniRutbeKarti(ozet) }
             item(key = "gecisler") {
                 IlerlemePaneli(icerikBosluk = 0) {
                     IlerlemeGecisSatiri(stringResource(R.string.progress_collection_title),
@@ -249,13 +243,11 @@ private fun YeniRutbeKarti(ozet: SeviyeOzeti) {
     val politika = LocalHareketPolitikasi.current
     val xp = if (politika.azaltildi) durum.toplamXp else
         animateIntAsState(durum.toplamXp, tween(politika.sure(HareketTuru.DEGER)), label = "xp-degisim").value
-    Surface(shape = RoundedCornerShape(28.dp), color = Gece, border = BorderStroke(1.dp, BakirIsik.copy(alpha = 0.2f)),
+    val yuzeyRenkleri = MaterialTheme.colorScheme
+    Surface(shape = RoundedCornerShape(24.dp), color = yuzeyRenkleri.surface,
+        border = BorderStroke(1.dp, yuzeyRenkleri.outlineVariant.copy(alpha = 0.7f)),
         modifier = Modifier.fillMaxWidth().testTag("progress-hero")) {
-        Box(Modifier.background(Brush.linearGradient(listOf(Murekkep, Gece)))) {
-            Canvas(Modifier.matchParentSize()) {
-                repeat(3) { i -> drawCircle(BakirIsik.copy(alpha = 0.065f), 62.dp.toPx() + i * 32.dp.toPx(),
-                    Offset(size.width * .92f, size.height * .22f), style = Stroke(1.dp.toPx())) }
-            }
+        Box {
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 if (LocalDensity.current.fontScale >= 1.5f) Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     EmekEtiketi(); XpMetni(xp)
@@ -270,7 +262,7 @@ private fun YeniRutbeKarti(ozet: SeviyeOzeti) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     key(durum.seviye) { XpCubugu(durum.oran) }
                     Text(stringResource(R.string.progress_level_remaining, sayi(durum.kalanXp)),
-                        color = Kagit.copy(alpha = .8f), style = MaterialTheme.typography.bodySmall)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
                 }
             }
         }
@@ -278,21 +270,22 @@ private fun YeniRutbeKarti(ozet: SeviyeOzeti) {
 }
 
 @Composable private fun EmekEtiketi() {
-    Text(stringResource(R.string.progress_effort_label), color = BakirIsik,
+    Text(stringResource(R.string.progress_effort_label), color = MaterialTheme.colorScheme.primary,
         style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
 }
 @Composable private fun XpMetni(xp: Int) {
-    Text(stringResource(R.string.progress_total_xp, sayi(xp)), color = Kagit.copy(alpha = .85f),
+    Text(stringResource(R.string.progress_total_xp, sayi(xp)), color = MaterialTheme.colorScheme.onSurface,
         style = MaterialTheme.typography.labelLarge, modifier = Modifier.testTag("progress-xp-total"))
 }
 @Composable private fun RutbeBasligi(rutbe: Rutbe, seviye: Int) {
-    Text(rutbe.ad, color = Kagit, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-    Text(stringResource(R.string.level_number, seviye), color = BakirIsik, style = MaterialTheme.typography.bodyMedium)
+    Text(rutbe.ad, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.headlineMedium,
+        fontWeight = FontWeight.Bold)
+    Text(stringResource(R.string.level_number, seviye), color = MaterialTheme.colorScheme.onSurfaceVariant,
+        style = MaterialTheme.typography.bodyMedium)
 }
 @Composable private fun RutbeMadalyonu(rutbe: Rutbe) {
-    Box(Modifier.size(80.dp).background(Brush.radialGradient(listOf(Color.White.copy(alpha = .16f), Color.White.copy(alpha = .02f))), CircleShape),
-        contentAlignment = Alignment.Center) {
-        Canvas(Modifier.fillMaxSize()) { drawCircle(BakirIsik.copy(alpha = .25f), style = Stroke(1.dp.toPx())) }
+    // Flat medallion: no fake glass highlight over the emblem.
+    Box(Modifier.size(80.dp), contentAlignment = Alignment.Center) {
         Image(painterResource(rutbe.gorsel), contentDescription = null, modifier = Modifier.size(72.dp))
     }
 }
@@ -301,10 +294,10 @@ private fun YeniRutbeKarti(ozet: SeviyeOzeti) {
     val hedef = oran.coerceIn(0f, 1f)
     val ilerleme = if (politika.azaltildi) hedef else animateFloatAsState(hedef,
         tween(politika.sure(HareketTuru.DEGER)), label = "xp-ilerleme").value
-    Box(Modifier.fillMaxWidth().height(7.dp).clip(CircleShape).background(Color.White.copy(alpha = .12f))
+    Box(Modifier.fillMaxWidth().height(7.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant)
         .testTag("progress-xp-bar").semantics { progressBarRangeInfo = ProgressBarRangeInfo(hedef, 0f..1f) }) {
         Box(Modifier.fillMaxWidth(ilerleme.coerceIn(0f, 1f)).height(7.dp)
-            .background(Brush.horizontalGradient(listOf(Color(0xFFCE9566), BakirIsik))))
+            .background(MaterialTheme.colorScheme.primary))
     }
 }
 

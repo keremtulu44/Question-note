@@ -43,9 +43,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.domain.model.KullaniciRolu
-import com.keremtulu.questionnote.ui.bilesenler.premium.CamKarti
+import com.keremtulu.questionnote.ui.bilesenler.SadeKart
 import com.keremtulu.questionnote.ui.bilesenler.premium.CamYukseklik
-import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
 import com.keremtulu.questionnote.ui.premium.EtkilesimTuru
 import com.keremtulu.questionnote.ui.premium.PremiumCard
 import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
@@ -68,27 +67,10 @@ fun RolSecimEkrani(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             item {
-                GradyanKart(modifier = Modifier.fillMaxWidth(), borderAnimation = false) {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(
-                            text = stringResource(R.string.role_kicker),
-                            color = PremiumMarkaRenkler.BakirIsik,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Text(
-                            text = stringResource(R.string.role_select_title),
-                            color = PremiumMarkaRenkler.Kagit,
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Text(
-                            text = stringResource(R.string.role_select_subtitle),
-                            color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.86f),
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    }
-                }
+                com.keremtulu.questionnote.ui.bilesenler.DuzBaslik(
+                    baslik = stringResource(R.string.role_select_title),
+                    alt = stringResource(R.string.role_select_subtitle),
+                )
             }
             item {
                 RolSecenekKarti(
@@ -121,7 +103,7 @@ fun RolSecimEkrani(
                 )
             }
             if (com.keremtulu.questionnote.domain.model.UrunKapsami.OGRETMEN_MODU_GORUNUR) item {
-                CamKarti(
+                SadeKart(
                     modifier = Modifier.fillMaxWidth(),
                     elevation = CamYukseklik.DUSUK,
                 ) {

@@ -4,7 +4,6 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,15 +17,10 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
@@ -34,9 +28,7 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.domain.model.Ders
 import com.keremtulu.questionnote.domain.model.dersAnahtari
@@ -44,10 +36,8 @@ import com.keremtulu.questionnote.domain.repository.DersRepository
 import com.keremtulu.questionnote.ui.bilesenler.DersKartVerisi
 import com.keremtulu.questionnote.ui.bilesenler.DersKarti
 import com.keremtulu.questionnote.ui.animasyon.animateItemInsertion
-import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
 import com.keremtulu.questionnote.ui.bilesenler.premium.IskeletKart
 import com.keremtulu.questionnote.ui.bilesenler.premium.PremiumBosDurum
-import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 import com.keremtulu.questionnote.ui.tema.DersRenkleri
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
@@ -128,59 +118,11 @@ fun DerslerEkrani(
     ) { padding ->
         @Composable
         fun DerslerUstBaslik(modifier: Modifier = Modifier) {
-            GradyanKart(
-                modifier = modifier.fillMaxWidth(),
-                borderAnimation = false,
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        text = stringResource(R.string.lessons_kicker),
-                        color = PremiumMarkaRenkler.BakirIsik,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                    )
-                    Text(
-                        text = stringResource(if (soruEkleModu) R.string.lessons_choose_title else R.string.lessons_title),
-                        color = PremiumMarkaRenkler.Kagit,
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    Text(
-                        text = stringResource(if (soruEkleModu) R.string.lessons_choose_subtitle else R.string.lessons_browse_subtitle),
-                        color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.86f),
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                        if (profilAdi.isNotBlank()) {
-                            Surface(
-                                shape = androidx.compose.foundation.shape.CircleShape,
-                                color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.14f),
-                            ) {
-                                Text(
-                                    text = profilAdi,
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
-                                    color = PremiumMarkaRenkler.Kagit,
-                                    style = MaterialTheme.typography.labelMedium,
-                                )
-                            }
-                        }
-                        if (durum is DersSecimDurumu.Hazir) {
-                            Surface(
-                                shape = androidx.compose.foundation.shape.CircleShape,
-                                color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.14f),
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.lessons_count, durum.dersler.size),
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
-                                    color = PremiumMarkaRenkler.Kagit,
-                                    style = MaterialTheme.typography.labelMedium,
-                                )
-                            }
-                        }
-                    }
-                }
-            }
+            com.keremtulu.questionnote.ui.bilesenler.SayfaBasligi(
+                baslik = stringResource(if (soruEkleModu) R.string.lessons_choose_title else R.string.lessons_title),
+                alt = if (soruEkleModu) stringResource(R.string.lessons_choose_subtitle) else profilAdi.takeIf { it.isNotBlank() },
+                modifier = modifier,
+            )
         }
 
         Column(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding)) {
