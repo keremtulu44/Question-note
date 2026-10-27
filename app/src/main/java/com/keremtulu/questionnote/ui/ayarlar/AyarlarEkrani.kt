@@ -146,7 +146,7 @@ fun AyarlarEkrani(
                     }
                 }
             }
-            item {
+            if (com.keremtulu.questionnote.domain.model.UrunKapsami.OGRETMEN_MODU_GORUNUR) item {
                 Bolum(stringResource(R.string.settings_role_section_title)) {
                     Text(
                         stringResource(R.string.settings_role_current_student),

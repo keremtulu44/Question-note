@@ -105,7 +105,7 @@ fun RolSecimEkrani(
                     onClick = { onRolSecildi(KullaniciRolu.OGRENCI) },
                 )
             }
-            item {
+            if (com.keremtulu.questionnote.domain.model.UrunKapsami.OGRETMEN_MODU_GORUNUR) item {
                 RolSecenekKarti(
                     vurgu = PremiumMarkaRenkler.Bakir,
                     baslik = stringResource(R.string.role_teacher_title),
@@ -120,7 +120,7 @@ fun RolSecimEkrani(
                     onClick = { onRolSecildi(KullaniciRolu.OGRETMEN) },
                 )
             }
-            item {
+            if (com.keremtulu.questionnote.domain.model.UrunKapsami.OGRETMEN_MODU_GORUNUR) item {
                 CamKarti(
                     modifier = Modifier.fillMaxWidth(),
                     elevation = CamYukseklik.DUSUK,

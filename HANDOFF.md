@@ -3,6 +3,17 @@
 **Son güncelleme: 2026-10-26.** Önce bu belge, `docs/DERLEME_RAPORU.md`,
 `docs/PREMIUM_GORSEL_GELISTIRME.md` ve [P4–P6 sözleşme/kanıt kaydı](docs/P4_P5_P6_UYGULAMA.md) okunur.
 
+## Güncel ürün kararı — 2026-10-27: öğretmen modu gizli ve askıda
+
+**Önce kökteki `AGENTS.md` okunur.** Kullanıcı öğretmen tarafının gizlenmesini ve
+sonraki oturumlarda geliştirilmemesini istedi. Önceki "öğretmen geçişi korunsun"
+kararı artık geçerli değildir. `UrunKapsami.OGRETMEN_MODU_GORUNUR = false`:
+kurulum/ayar girişleri gizli; eski kayıtlı öğretmen rolü de ekranda öğrenciye
+ yönlenir. Rol tercihi, kod, tablolar, fotoğraflar ve yedek desteği korunur.
+Öğrencinin öğretmene sorulacaklar akışı aktiftir. Kullanıcı açıkça yeniden
+istemeden öğretmen alanına geliştirme/refaktör/görsel değişiklik yapılmamalı.
+Bu gizleme değişikliği yayımlanmış 1.6.1 APK'da henüz yoktur.
+
 ## 1.6.1 yayımlandı — güncel doğrulama
 
 Son olgunlaştırma değişiklikleri 1.6.1 (40) APK'ya dahil edildi.

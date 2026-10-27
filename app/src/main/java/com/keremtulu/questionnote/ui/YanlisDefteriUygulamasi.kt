@@ -175,7 +175,8 @@ fun YanlisDefteriUygulamasi(
     }
     var ekran by remember { mutableStateOf<UygulamaEkrani>(UygulamaEkrani.Bugun) }
     var kurulumGerekli by remember { mutableStateOf(profilDeposu.kurulumGerekli()) }
-    val aktifRol by profilDeposu.rolIzle.collectAsState()
+    val kayitliRol by profilDeposu.rolIzle.collectAsState()
+    val aktifRol = com.keremtulu.questionnote.domain.model.UrunKapsami.gorunenRol(kayitliRol)
     val rolSecildi by profilDeposu.rolSecildiIzle.collectAsState()
     val tahtaOturumId = (ekran as? UygulamaEkrani.FiltreliOturum)?.oturum?.id
     val tahtaOturumCizimBellegi = remember(tahtaOturumId) { TahtaOturumCizimBellegi() }
@@ -420,7 +421,7 @@ fun YanlisDefteriUygulamasi(
         ekranSec(ekran.geriHedefi())
     }
 
-    if (!rolSecildi && kurulumGerekli) {
+    if (com.keremtulu.questionnote.domain.model.UrunKapsami.OGRETMEN_MODU_GORUNUR && !rolSecildi && kurulumGerekli) {
         com.keremtulu.questionnote.ui.kurulum.RolSecimEkrani(
             onRolSecildi = { secilenRol ->
                 profilDeposu.rolKaydet(secilenRol)
@@ -761,7 +762,9 @@ fun YanlisDefteriUygulamasi(
                             )
                         },
                         onOgretmenModunaGec = {
-                            profilDeposu.rolKaydet(com.keremtulu.questionnote.domain.model.KullaniciRolu.OGRETMEN)
+                            if (com.keremtulu.questionnote.domain.model.UrunKapsami.OGRETMEN_MODU_GORUNUR) {
+                                profilDeposu.rolKaydet(com.keremtulu.questionnote.domain.model.KullaniciRolu.OGRETMEN)
+                            }
                         },
                     )
                 }

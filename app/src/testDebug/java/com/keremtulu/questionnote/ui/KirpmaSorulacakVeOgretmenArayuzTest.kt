@@ -9,6 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -104,6 +105,20 @@ class KirpmaSorulacakVeOgretmenArayuzTest {
         file.outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
         bmp.recycle()
         return file
+    }
+
+    @Test
+    fun rolSecimindeOgretmenGirisiVeGecisVaadiGizlidir() {
+        var secilen: KullaniciRolu? = null
+        compose.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                RolSecimEkrani(onRolSecildi = { secilen = it })
+            }
+        }
+        compose.onNodeWithTag("rol_secim_ogretmen").assertDoesNotExist()
+        compose.onNodeWithText(context.getString(R.string.role_switch_anytime_hint)).assertDoesNotExist()
+        compose.onNodeWithTag("rol_secim_ogrenci").assertIsDisplayed().performClick()
+        org.junit.Assert.assertEquals(KullaniciRolu.OGRENCI, secilen)
     }
 
     @Test
@@ -261,26 +276,21 @@ class KirpmaSorulacakVeOgretmenArayuzTest {
                 )
             }
 
-            var secilenRol by mutableStateOf<KullaniciRolu?>(null)
+            // Parked teacher workspace: test it directly, not through a public role entry.
             compose.setContent {
                 YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
-                    if (secilenRol == null) {
-                        RolSecimEkrani(onRolSecildi = { secilenRol = it })
-                    } else {
-                        OgretmenAnaEkrani(
-                            ogretmenDeposu = ogretmenDeposu,
-                            gorselDeposu = gorselDeposu,
-                            sonYedek = null,
-                            yedeklemeIslemde = false,
-                            onOgrenciModunaGec = { secilenRol = null },
-                            onYedekOlustur = {},
-                            onYedekGeriYukle = {},
-                        )
-                    }
+                    OgretmenAnaEkrani(
+                        ogretmenDeposu = ogretmenDeposu,
+                        gorselDeposu = gorselDeposu,
+                        sonYedek = null,
+                        yedeklemeIslemde = false,
+                        onOgrenciModunaGec = {},
+                        onYedekOlustur = {},
+                        onYedekGeriYukle = {},
+                    )
                 }
             }
 
-            compose.onNodeWithTag("rol_secim_ogretmen").assertIsDisplayed().performClick()
             compose.waitUntil(5_000) {
                 compose.onAllNodesWithTag("ogretmen_grup_${g6B.id}").fetchSemanticsNodes().isNotEmpty()
             }
