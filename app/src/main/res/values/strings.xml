@@ -651,6 +651,8 @@
     <string name="rank_remaining">Bu rütbeye %1$d XP kaldı</string>
     <string name="rank_earned">Bu rütbeye ulaştın</string>
     <string name="rank_locked">Henüz ulaşılmadı</string>
+    <string name="rank_next_label">SIRADAKİ RÜTBE</string>
+    <string name="rank_next_remaining">%1$d XP kaldı</string>
     <string name="level_retry">Yeniden yükle</string>
     <string name="focus_kicker">ODAK STÜDYOSU</string>
     <string name="focus_ambient_title">Odak ambiyansı</string>

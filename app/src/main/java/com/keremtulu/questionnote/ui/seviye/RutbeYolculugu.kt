@@ -36,6 +36,7 @@ import com.keremtulu.questionnote.domain.seviye.Rutbe
 import com.keremtulu.questionnote.domain.seviye.SeviyeDurumu
 import com.keremtulu.questionnote.domain.seviye.SeviyeHesabi
 import com.keremtulu.questionnote.ui.bilesenler.HedefHalkasi
+import com.keremtulu.questionnote.ui.bilesenler.InceOlcek
 import com.keremtulu.questionnote.ui.bilesenler.KucukOnay
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import com.keremtulu.questionnote.ui.premium.PremiumCard
@@ -82,6 +83,66 @@ fun RutbeYolculugu(durum: SeviyeDurumu, baslikGoster: Boolean = true) {
                                 kalinlik = 1.5.dp,
                             )
                         }
+                    }
+                }
+            }
+        }
+        if (baslikGoster) {
+            // Galerinin altında boşluk yerine tek, ölçülebilir bir sonraki adım:
+            // sıradaki rütbe, kalan XP ve ince ölçek. Yeni oyunlaştırma değil, mevcut XP'nin özeti.
+            val sonraki = Rutbe.entries.firstOrNull { it.baslangicSeviye > durum.seviye }
+            if (sonraki != null) {
+                val esik = SeviyeHesabi.seviyeEsigi(sonraki.baslangicSeviye)
+                val oncekiEsik = SeviyeHesabi.seviyeEsigi(sonraki.baslangicSeviye - 1)
+                val aralik = (esik - oncekiEsik).coerceAtLeast(1)
+                val ilerleme = ((durum.toplamXp - oncekiEsik).toFloat() / aralik).coerceIn(0f, 1f)
+                PremiumCard(
+                    modifier = Modifier.fillMaxWidth().testTag("rank-next-card"),
+                    shape = RoundedCornerShape(22.dp),
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(14.dp),
+                        ) {
+                            Image(
+                                painterResource(sonraki.gorsel),
+                                contentDescription = null,
+                                modifier = Modifier.size(48.dp).alpha(0.55f),
+                            )
+                            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                Text(
+                                    text = stringResource(R.string.rank_next_label),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                                Text(
+                                    text = sonraki.ad,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                                Text(
+                                    text = stringResource(
+                                        R.string.rank_next_remaining,
+                                        (esik - durum.toplamXp).coerceAtLeast(0),
+                                    ),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                        InceOlcek(
+                            oran = ilerleme,
+                            modifier = Modifier.fillMaxWidth().height(6.dp).clearAndSetSemantics { },
+                            izRenk = MaterialTheme.colorScheme.surfaceVariant,
+                            dolguRenk = MaterialTheme.colorScheme.primary,
+                            bolme = 8,
+                            yukseklik = 6.dp,
+                        )
                     }
                 }
             }
