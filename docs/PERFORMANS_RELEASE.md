@@ -1,8 +1,8 @@
 # P6 sentetik analitik ölçümü · release
 
-Kaynak: `30bb41cdcc883dea8cdbd1abcaf3f321dfff8384`
+Kaynak: `cb7f523d560c2578dab9fe9dc304ff69da179b30`
 
-Robolectric 4.15.1 / SDK 35 / yerel SQLite / OpenJDK 64-Bit Server VM 17.0.20.1 / Linux amd64
+Robolectric 4.15.1 / SDK 35 / yerel SQLite / OpenJDK 64-Bit Server VM 17.0.21 / Linux amd64
 
 1.000 soru, 20.000 tekrar ve bağlam/ölçüm; 4 ders, 40 konu, 100 ders/kaynak grubu, 20 gün; tüm sonuç/kalite türleri. Veri yalnız testte üretildi, Git'e yazılmadı.
 
@@ -10,12 +10,12 @@ Analiz başına **4 uygulama SELECT**; karar JSON'u taşınmadı (veritabanında
 
 | İşlem | Örnek | medyan ms | p95 ms* | ham ms |
 |---|---:|---:|---:|---|
-| Sentetik veri üretimi + transaction yükleme | 1 | 1925.81 | 1925.81 | 1925.81 |
-| İlk analiz çağrısı (DB kurulumu hariç) | 1 | 825.41 | 825.41 | 825.41 |
-| Isınmış toplu analiz (5 tekrar) | 5 | 597.29 | 626.61 | 575.07, 626.61, 597.29, 612.16, 379.44 |
-| Tek ders profili (ince projeksiyon) | 1 | 37.16 | 37.16 | 37.16 |
-| Tüm ders süre kapsamı | 1 | 313.39 | 313.39 | 313.39 |
-| Tam İlerleme özeti (XP + profil + analiz) | 1 | 704.74 | 704.74 | 704.74 |
+| Sentetik veri üretimi + transaction yükleme | 1 | 1832.68 | 1832.68 | 1832.68 |
+| İlk analiz çağrısı (DB kurulumu hariç) | 1 | 775.10 | 775.10 | 775.10 |
+| Isınmış toplu analiz (5 tekrar) | 5 | 607.68 | 759.82 | 605.98, 759.82, 607.68, 615.49, 541.01 |
+| Tek ders profili (ince projeksiyon) | 1 | 35.47 | 35.47 | 35.47 |
+| Tüm ders süre kapsamı | 1 | 306.70 | 306.70 | 306.70 |
+| Tam İlerleme özeti (XP + profil + analiz) | 1 | 704.53 | 704.53 | 704.53 |
 
 *Az sayıda host örneğinin nearest-rank yüzdeliği; kare/frame p95 değildir. İlk çağrı gerçek telefon soğuk açılışı değildir. GC/CI paylaşımı sonuçları etkileyebilir; bu sayılar cihaz performansı veya S24 FE kabulü diye yorumlanamaz.
 
