@@ -17,6 +17,28 @@ APK/imza/sertifika/yayın, API digest/tag ve sekiz native çıktı doğrulandı.
 > Beş native Compose çizimi sentetik önizlemedir; fiziksel test değildir. Aşağıdaki fiziksel cihaz satırları otomatik olarak işaretlenmez.
 
 
+## 2026-10-27 — üst panel ve Bugün (derleme bekliyor)
+
+> Bu bölümdeki otomatik testler **yazıldı**, ancak bu ortamda JDK/Android SDK olmadığı için
+> **çalıştırılmadı**. `[ ]` = CI'da koşacak. Hiçbir satır "geçti" sayılmaz.
+
+- [ ] **YZ (CI)** `UstPanelArayuzTest.hedefSeriVeTarihGorunurTekDokunuslaIlerlemeyeGider`:
+      `1 / 10`, `1 günlük seri`, tr-TR tarih; XP/para/enerji/elmas metni yok; hedef düğmesi
+      ≥48dp; tıklama İlerleme yönlendirmesi.
+- [ ] **YZ (CI)** `UstPanelArayuzTest.buyukYazidaHedefDugmesiHalaOkunurVeDokunulabilir`:
+      2× yazı ölçeğinde hedef düğmesi ≥48dp ve ≥88dp genişlik.
+- [ ] **YZ (CI)** Mevcut `IlerlemeSadelikTest`, `PremiumIlerlemeTest`,
+      `KirpmaSorulacakVeOgretmenArayuzTest`, `OneridenOdagaAkisTest` regresyonları:
+      metin bütçesi, `progress-xp-bar`, `bugun_sorulacaklar_karti`, akış.
+- [ ] **KULLANICI (S24 FE)** Üst panel: çentik/durum çubuğu çakışması, tarih/seri/hedef
+      okunurluğu, 3 tuşlu navigasyon ve hareket azaltma açık/kapalı.
+- [ ] **KULLANICI (S24 FE)** Sekme köklerinde alt menü üstünde ekstra boşluk kalmadığı;
+      detay/form ekranlarında panelin görünmediği; Filtreli'de geri düğmesinin yokluğu.
+- [ ] **KULLANICI (S24 FE)** Bugün: boş havuz, hata, yükleniyor, hedef tamam ve devam eden
+      oturum durumları; `+` düğmesi ve kuyruk satırına dokunma.
+- [ ] **KULLANICI (S24 FE)** İlerleme: rütbe madalyonu yayı, rozet halkası, rütbe kutlaması
+      9 noktalı yol, rütbe galerisi 15 noktalı yol; TalkBack `stateDescription`.
+
 > Her testte **kim** yaptığı açıkça yazılır. Yapay zekâ, çalıştırmadığı bir testi "geçti" olarak
 > işaretleyemez.
 >

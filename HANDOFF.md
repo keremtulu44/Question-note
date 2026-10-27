@@ -1,6 +1,6 @@
 # HANDOFF — Yanlış Defteri
 
-**Son güncelleme: 2026-10-26.** Önce bu belge, `docs/DERLEME_RAPORU.md`,
+**Son güncelleme: 2026-10-27.** Önce bu belge, `docs/DERLEME_RAPORU.md`,
 `docs/PREMIUM_GORSEL_GELISTIRME.md` ve [P4–P6 sözleşme/kanıt kaydı](docs/P4_P5_P6_UYGULAMA.md) okunur.
 
 ## Güncel ürün kararı — 2026-10-27: öğretmen modu gizli ve askıda
@@ -13,6 +13,42 @@ kurulum/ayar girişleri gizli; eski kayıtlı öğretmen rolü de ekranda öğre
 Öğrencinin öğretmene sorulacaklar akışı aktiftir. Kullanıcı açıkça yeniden
 istemeden öğretmen alanına geliştirme/refaktör/görsel değişiklik yapılmamalı.
 Bu gizleme değişikliği yayımlanmış 1.6.1 APK'da henüz yoktur.
+
+## Premium üst panel + Bugün + ince ilerleme (2026-10-27, derleme bekliyor)
+
+Kullanıcı isteğiyle üst boşluk, alt menünün kalıcı eşi olan bir **üst panelle** dolduruldu;
+oyunlaştırma (XP/para/enerji) yok. Panel yalnız gerçek bugün durumunu taşır:
+
+- **Üst panel** (`ui/panel/UstPanel.kt`): sol tarafta `Damga` + canlı tarih (`d MMMM EEEE`,
+  tr-TR) + `SeriAlevi` ile seri; sağda `HedefHalkasi` (16 çentik + yay) ve `yapılan / hedef`.
+  Hedef düğmesi 48dp, tek anlamlı geçişle İlerleme sekmesini açar; `onClickLabel` = "İlerlemeyi aç".
+  Panel yalnız sekme köklerinde (`UygulamaEkrani.altMenuGorunur()`) görünür; detay/form
+  ekranlarında gizlenir.
+- **Insets sözleşmesi**: host `Scaffold` `contentWindowInsets = 0`; üst/alt boşlukları paneller
+  taşır. Sekme kökleri `ekranPencereInsetsi()` ile yalnız **yatay** güvenli alan ekler; böylece
+  alt menünün üstünde ikinci bir gezinme çubuğu boşluğu kalmaz. Detay ekranları tam
+  `safeDrawing` kullanmaya devam eder.
+- **Bugün** (`ui/BugunEkrani.kt`): başlık ("Bugün" + tek satır bağlam + 48dp `+`), gradyan
+  **odak kartı** (GÜNÜN ODAĞI, sayı + "soru" birimi, günlük hedefin ince ölçeği, tek bakır CTA),
+  isteğe bağlı devam satırı, kuyruk kartı (3 önizleme, gecikme etiketi), sorulacaklar/deneme
+  kısayolları. Boş havuzda sıfırlı kahraman kart yerine tek `BosDurumSoruYok`; hatada tek
+  `DurumKarti`; yüklenirken CTA/ölçek çizilmez. FAB yok; `+` her durumda görünür.
+- **İnce ilerleme detayları**: yeni `ui/bilesenler/InceCizimler.kt` (Damga, HedefHalkasi,
+  InceOlcek, SeriAlevi, SoruIsareti, InceOk, KucukArti, KucukOnay, OynatSimgesi, YolNoktalari)
+  Canvas ile çizilir; varlık dosyası eklenmedi. XP çubuğu 10 bölmeli `InceOlcek`; rütbe
+  madalyonu 1dp dış halka + 2dp iz + bakır yay; rozet başlığında 54dp `HedefHalkasi(24)`;
+  rozet kartlarında 4 bölmeli ölçek; `KutlamaHost` rütbe görselinin altında 9 noktalı yol.
+  Rütbe galerisinde 15 noktalı yol + çizilmiş ✓/halka (metin glifi yerine).
+- **Kaldırılanlar**: Filtreli çalışma ekranındaki gereksiz "Geri" düğmesi (sekme kökü; alt menü
+  ve sistem geri tuşu yeterli), Bugün'deki "Hedef tamam / N soru daha" ikinci satırı ve FAB.
+- **Test**: yeni `UstPanelArayuzTest` (hedef/seri/tarih, XP-benzeri kelime yokluğu, 48dp hedef,
+  tıklama yönlendirmesi, 2× yazıda ölçü). Mevcut test sözleşmeleri korundu
+  (`bugun_sorulacaklar_karti`, `today-deneme-card`, ilerleme etiketleri).
+
+**Doğrulama durumu:** Bu ortamda JDK/Android SDK yok; derleme ve JUnit çalıştırılmadı.
+Tüm `app/src/**/*.kt` tree-sitter ile **0 sözdizimi hatası**, tüm `R.*` referansları
+**0 eksik** (values + drawable*/font/raw/xml), `values*.xml` iyi biçimli. Gerçek kapı CI'dır;
+sürüm/Room/ZIP değişmedi.
 
 ## 1.6.1 yayımlandı — güncel doğrulama
 

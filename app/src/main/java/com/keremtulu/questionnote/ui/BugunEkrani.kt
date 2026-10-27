@@ -1,27 +1,24 @@
 package com.keremtulu.questionnote.ui
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import com.keremtulu.questionnote.domain.repeat.GunlukCalismaPlani
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -34,51 +31,56 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.keremtulu.questionnote.R
+import com.keremtulu.questionnote.data.ilerleme.IlerlemeHizmeti
+import com.keremtulu.questionnote.data.prefs.GunlukHedefDeposu
+import com.keremtulu.questionnote.domain.model.DenemeKaydi
+import com.keremtulu.questionnote.domain.model.Ders
+import com.keremtulu.questionnote.domain.model.Soru
+import com.keremtulu.questionnote.domain.repeat.GunlukCalismaPlani
+import com.keremtulu.questionnote.domain.repository.DersRepository
+import com.keremtulu.questionnote.domain.repository.SoruRepository
 import com.keremtulu.questionnote.ui.animasyon.SureToken
 import com.keremtulu.questionnote.ui.animasyon.animateFloatPremium
 import com.keremtulu.questionnote.ui.animasyon.tweenPremium
+import com.keremtulu.questionnote.ui.bilesenler.InceOk
+import com.keremtulu.questionnote.ui.bilesenler.InceOlcek
+import com.keremtulu.questionnote.ui.bilesenler.KucukArti
+import com.keremtulu.questionnote.ui.bilesenler.KucukOnay
+import com.keremtulu.questionnote.ui.bilesenler.OynatSimgesi
+import com.keremtulu.questionnote.ui.bilesenler.SadeKart
+import com.keremtulu.questionnote.ui.bilesenler.SoruIsareti
+import com.keremtulu.questionnote.ui.bilesenler.hatirlaYerelGun
 import com.keremtulu.questionnote.ui.bilesenler.premium.BosDurumSoruYok
+import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
 import com.keremtulu.questionnote.ui.bilesenler.premium.KutlamaParcaciklari
+import com.keremtulu.questionnote.ui.deneme.netYazi
+import com.keremtulu.questionnote.ui.panel.ekranPencereInsetsi
 import com.keremtulu.questionnote.ui.premium.EtkilesimTuru
-import com.keremtulu.questionnote.ui.premium.PremiumCard
-import com.keremtulu.questionnote.ui.premium.PremiumExtendedFloatingActionButton
-import com.keremtulu.questionnote.ui.bilesenler.SadeAnaButon
+import com.keremtulu.questionnote.ui.premium.PremiumButton
+import com.keremtulu.questionnote.ui.premium.PremiumGradyanlar
 import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
-import com.keremtulu.questionnote.ui.premium.PremiumOutlinedButton
-import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
-import com.keremtulu.questionnote.data.ilerleme.IlerlemeHizmeti
-import com.keremtulu.questionnote.data.prefs.GunlukHedefDeposu
-import com.keremtulu.questionnote.domain.model.Ders
-import com.keremtulu.questionnote.domain.model.GorselTuru
-import com.keremtulu.questionnote.domain.model.Soru
-import com.keremtulu.questionnote.domain.repository.DersRepository
-import com.keremtulu.questionnote.domain.repository.SoruRepository
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
-import androidx.compose.runtime.setValue
-import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
-import com.keremtulu.questionnote.ui.premium.PremiumGradyanButon
+import java.time.LocalDate
 
 private data class BugunSoruSatiri(
     val soru: Soru,
@@ -92,9 +94,9 @@ private sealed interface BugunDurumu {
 }
 
 /**
- * Bugün ekranı bilinçli olarak tek bir akış halinde: başlık kartı + gün kartı.
- * Gün kartı; odak özetini, günlük hedef halkasını, sıraya girmiş soruları ve başlatma
- * düğmesini taşır. Liste içeriği ve tıklama sözleşmesi eski çok kartlı düzenle birebir aynıdır.
+ * Bugün ekranı: tek bir karşılama başlığı, günün odağını taşıyan tek koyu kart ve
+ * ardından sıra/kısayol kartları. Durum çubuğu ve günlük hedef üst paneldedir; burada
+ * aynı bilgi ikinci kez büyük başlık olarak tekrarlanmaz.
  */
 @Composable
 fun BugunEkrani(
@@ -107,23 +109,20 @@ fun BugunEkrani(
     onDevam: (() -> Unit)? = null,
     onDeneme: () -> Unit = {},
     onSorulacaklar: () -> Unit = {},
-    denemeler: List<com.keremtulu.questionnote.domain.model.DenemeKaydi> = emptyList(),
+    denemeler: List<DenemeKaydi> = emptyList(),
 ) {
-    val today = com.keremtulu.questionnote.ui.bilesenler.hatirlaYerelGun()
-    val dateText = remember(today) {
-        today.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", Locale.forLanguageTag("tr-TR")))
-            .replaceFirstChar { it.titlecase(Locale.forLanguageTag("tr-TR")) }
-    }
+    val today = hatirlaYerelGun()
+    val bugunGun = today.toEpochDay().toInt()
     var yenileme by remember { mutableIntStateOf(0) }
-    val questionsFlow = remember(soruRepository, today.toEpochDay(), yenileme) {
-        soruRepository.bugunTekrarlanacaklariIzle(today.toEpochDay().toInt())
+    val questionsFlow = remember(soruRepository, bugunGun, yenileme) {
+        soruRepository.bugunTekrarlanacaklariIzle(bugunGun)
     }
     val lessonsFlow = remember(dersRepository) { dersRepository.aktifDersleriIzle() }
     val sorulacaklarFlow = remember(soruRepository, lessonsFlow, yenileme) {
-        combine(soruRepository.ogretmeneSorulacaklariIzle(), lessonsFlow) { questions, lessons ->
-            val byId = lessons.associateBy { it.id }
-            questions.groupBy { it.dersId }
-                .mapNotNull { (dersId, liste) -> byId[dersId]?.let { it to liste.size } }
+        combine(soruRepository.ogretmeneSorulacaklariIzle(), lessonsFlow) { sorular, dersler ->
+            val dersIdleri = dersler.associateBy { it.id }
+            sorular.groupBy { it.dersId }
+                .mapNotNull { (dersId, liste) -> dersIdleri[dersId]?.let { it to liste.size } }
                 .sortedWith(compareBy<Pair<Ders, Int>> { it.first.sira }.thenBy { it.first.ad })
         }
     }
@@ -131,120 +130,183 @@ fun BugunEkrani(
         sorulacaklarFlow.catch { emit(emptyList()) }.collect { value = it }
     }
     val homeFlow = remember(questionsFlow, lessonsFlow) {
-        combine(questionsFlow, lessonsFlow) { questions, lessons ->
-            val byId = lessons.associateBy { it.id }
-            questions.mapNotNull { question ->
-                byId[question.dersId]?.let { lesson -> BugunSoruSatiri(question, lesson) }
+        combine(questionsFlow, lessonsFlow) { sorular, dersler ->
+            val dersIdleri = dersler.associateBy { it.id }
+            sorular.mapNotNull { soru ->
+                dersIdleri[soru.dersId]?.let { ders -> BugunSoruSatiri(soru, ders) }
             }
         }
     }
-    val state = produceState<BugunDurumu>(BugunDurumu.Yukleniyor, homeFlow) {
+    val durum by produceState<BugunDurumu>(BugunDurumu.Yukleniyor, homeFlow) {
         homeFlow.catch { value = BugunDurumu.Hata }
             .collect { value = BugunDurumu.Hazir(it) }
-    }.value
-    val bugunGun = today.toEpochDay().toInt()
-    val bugunAkisi = remember(ilerlemeHizmeti, bugunGun) {
-        ilerlemeHizmeti.bugunSayisiIzle(bugunGun)
     }
-    val seriAkisi = remember(ilerlemeHizmeti, bugunGun) { ilerlemeHizmeti.seriIzle(bugunGun) }
+    val bugunAkisi = remember(ilerlemeHizmeti, bugunGun) { ilerlemeHizmeti.bugunSayisiIzle(bugunGun) }
     val gunluk by produceState(0, bugunAkisi) {
         bugunAkisi.catch { emit(0) }.collect { value = it }
     }
-    val seri by produceState(0, seriAkisi) {
-        seriAkisi.catch { emit(0) }.collect { value = it }
+    // Üst panel hedefi canlı izler; Bugün de aynı akışı kullanır ki iki yüzey çelişmesin.
+    val hedefAkisi = remember(gunlukHedefDeposu) { gunlukHedefDeposu.izle() }
+    val hedef by produceState(gunlukHedefDeposu.hedef().coerceAtLeast(1), hedefAkisi) {
+        hedefAkisi.catch { }.collect { value = it.coerceAtLeast(1) }
     }
-    val hedef = remember(gunlukHedefDeposu) { gunlukHedefDeposu.hedef() }
+    val hazir = durum as? BugunDurumu.Hazir
+    val plan = remember(hazir?.sorular, today, hedef, gunluk) {
+        hazir?.let { gun ->
+            GunlukCalismaPlani.olustur(gun.sorular.map { it.soru }, bugunGun, hedef, gunluk)
+        }
+    }
+    val dersler = remember(hazir) { hazir?.sorular?.associate { it.ders.id to it.ders }.orEmpty() }
+    val satirlar = remember(hazir) { hazir?.sorular?.associateBy { it.soru.id }.orEmpty() }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        contentWindowInsets = WindowInsets.safeDrawing,
-        floatingActionButton = {
-            PremiumExtendedFloatingActionButton(
-                onClick = onSoruEkle,
-                shape = RoundedCornerShape(20.dp),
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-            ) {
-                Text("+", fontSize = 24.sp, fontWeight = FontWeight.Light)
-                Text(
-                    text = stringResource(R.string.today_add_question),
-                    modifier = Modifier.padding(start = 8.dp),
-                    style = MaterialTheme.typography.labelLarge,
-                )
-            }
-        },
+        contentWindowInsets = ekranPencereInsetsi(),
     ) { insets ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets),
-            contentPadding = PaddingValues(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 104.dp),
+            contentPadding = PaddingValues(start = 20.dp, top = 18.dp, end = 20.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            item(key = "sayfa-basligi") {
-                com.keremtulu.questionnote.ui.bilesenler.SayfaBasligi(
-                    stringResource(R.string.today_title), dateText,
+            item(key = "bugun-baslik") {
+                // Boş havuzda tek ekleme daveti kartta durur; başlıktaki + ikinci kez çağırmaz.
+                BugunBasligi(
+                    durum = durum,
+                    onSoruEkle = onSoruEkle,
+                    ekleGoster = !(hazir != null && hazir.sorular.isEmpty()),
                 )
             }
-            if (onDevam != null) item {
-                PremiumOutlinedButton(onClick = onDevam, modifier = Modifier.fillMaxWidth()) {
-                    Text(stringResource(R.string.focus_continue_session))
-                }
-            }
-            item {
-                BugunGunKarti(
-                    today = today,
-                    dateText = dateText,
-                    hedef = hedef,
-                    yapilan = gunluk,
-                    seri = seri,
-                    state = state,
-                    onOturumBaslat = onOturumBaslat,
-                )
-            }
-            if (sorulacakGruplar.isNotEmpty()) {
-                item(key = "bugun_sorulacaklar") {
-                    BugunSorulacaklarKarti(
-                        gruplar = sorulacakGruplar,
-                        onClick = onSorulacaklar,
-                    )
-                }
-            }
-            item {
-                BugunDenemeKarti(
-                    denemeler = denemeler,
-                    onClick = onDeneme,
-                )
-            }
-            when (val current = state) {
-                BugunDurumu.Yukleniyor -> Unit
-                BugunDurumu.Hata -> item {
+            if (durum is BugunDurumu.Hata) {
+                // Hata durumunda odak kartı yerine tek, eyleme dönük kart: aynı metin iki kez yazılmaz.
+                item(key = "bugun-hata") {
                     DurumKarti(
                         metin = stringResource(R.string.today_load_error),
                         onRetry = { yenileme++ },
                     )
                 }
-                is BugunDurumu.Hazir -> if (current.sorular.isEmpty()) {
-                    item { BosDurumSoruYok(onSoruEkle) }
+            } else if (hazir != null && hazir.sorular.isEmpty()) {
+                // Boş havuzda sıfırlı bir kahraman kart göstermek yerine tek, dürüst bir davet.
+                item(key = "bugun-bos") { BosDurumSoruYok(onSoruEkle) }
+            } else {
+                item(key = "bugun-odak") {
+                    BugunOdakKarti(
+                        hedef = hedef,
+                        yapilan = gunluk,
+                        durum = durum,
+                        turSorulari = plan?.tur.orEmpty(),
+                        dersler = dersler,
+                        onOturumBaslat = onOturumBaslat,
+                    )
                 }
+                if (plan != null && hazir != null) {
+                    item(key = "bugun-kuyruk") {
+                        BugunKuyrukKarti(
+                            plan = plan,
+                            satirlar = satirlar,
+                            today = today,
+                            onSoru = { satir ->
+                                onOturumBaslat(listOf(satir.soru), mapOf(satir.ders.id to satir.ders))
+                            },
+                        )
+                    }
+                }
+            }
+            onDevam?.let { devam ->
+                item(key = "bugun-devam") { DevamSatiri(devam) }
+            }
+            item(key = "bugun-kisayollar") {
+                BugunKisayollari(
+                    sorulacakGruplar = sorulacakGruplar,
+                    denemeler = denemeler,
+                    onSorulacaklar = onSorulacaklar,
+                    onDeneme = onDeneme,
+                )
             }
         }
     }
 }
 
 @Composable
-private fun BugunGunKarti(
-    today: LocalDate,
-    dateText: String,
+private fun BugunBasligi(
+    durum: BugunDurumu,
+    onSoruEkle: () -> Unit,
+    ekleGoster: Boolean,
+) {
+    // Sayı yalnız odak kartında bir kez büyük olarak yazılır; başlıkta tekrar edilmez.
+    val altSatir = when (val current = durum) {
+        BugunDurumu.Yukleniyor -> stringResource(R.string.today_loading_count)
+        BugunDurumu.Hata -> null
+        is BugunDurumu.Hazir -> if (current.sorular.isEmpty()) {
+            stringResource(R.string.today_focus_empty)
+        } else {
+            stringResource(R.string.today_list_ready)
+        }
+    }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.today_title),
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.semantics { heading() },
+            )
+            if (altSatir != null) {
+                Text(
+                    text = altSatir,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        if (ekleGoster) EkleDugmesi(onClick = onSoruEkle)
+    }
+}
+
+/** Tek soru ekleme eylemi: başlığın yanında, akışın üstünde; içeriği örten FAB yok. */
+@Composable
+private fun EkleDugmesi(onClick: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    val etiket = stringResource(R.string.today_add_question)
+    Box(
+        modifier = Modifier
+            .size(48.dp)
+            .clickable(role = androidx.compose.ui.semantics.Role.Button, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            modifier = Modifier.size(38.dp).background(colors.primaryContainer, CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            KucukArti(
+                modifier = Modifier.size(16.dp).semantics { contentDescription = etiket },
+                renk = colors.onPrimaryContainer,
+            )
+        }
+    }
+}
+
+@Composable
+private fun BugunOdakKarti(
     hedef: Int,
     yapilan: Int,
-    seri: Int,
-    state: BugunDurumu,
+    durum: BugunDurumu,
+    turSorulari: List<Soru>,
+    dersler: Map<String, Ders>,
     onOturumBaslat: (List<Soru>, Map<String, Ders>) -> Unit,
 ) {
-    val colors = MaterialTheme.colorScheme
+    val kagit = PremiumMarkaRenkler.Kagit
+    val bakir = PremiumMarkaRenkler.BakirIsik
     val guvenliHedef = hedef.coerceAtLeast(1)
-    val oran = (yapilan.toFloat() / guvenliHedef).coerceIn(0f, 1f)
     val tamamlandi = yapilan >= guvenliHedef
-    // Celebrate only a fresh crossing of the goal, never a re-entry while it is already complete.
+    // Hedefin yalnız yeni aşıldığı anda tek bir kutlama; ekrana dönüşte tekrar oynamaz.
     var oncekiTamam by remember { mutableStateOf(tamamlandi) }
     var kutlama by remember { mutableStateOf(false) }
     LaunchedEffect(tamamlandi) {
@@ -255,284 +317,369 @@ private fun BugunGunKarti(
         }
         oncekiTamam = tamamlandi
     }
-    // One calm sweep on entry; later goal changes keep animating from wherever the ring is.
-    var halkaGoster by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { halkaGoster = true }
-    val halka = animateFloatPremium(
-        target = if (halkaGoster) oran else 0f,
+    var olcekGoster by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { olcekGoster = true }
+    val oran = (yapilan.toFloat() / guvenliHedef).coerceIn(0f, 1f)
+    val olcek = animateFloatPremium(
+        target = if (olcekGoster) oran else 0f,
         animationSpec = tweenPremium(SureToken.VERY_SLOW),
-        label = "bugun-hedef-halkasi",
+        label = "bugun-hedef-olcegi",
     )
-    val ready = state as? BugunDurumu.Hazir
-    val count = ready?.sorular?.size
-
-    PremiumCard(
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.cardColors(containerColor = colors.primaryContainer),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-    ) {
-        Box {
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(22.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
+    val hazir = durum as? BugunDurumu.Hazir
+    val adet = hazir?.sorular?.size
+    val mesaj = when {
+        durum is BugunDurumu.Yukleniyor -> stringResource(R.string.today_loading_count)
+        durum is BugunDurumu.Hata -> stringResource(R.string.today_load_error)
+        adet == 0 -> stringResource(R.string.today_focus_empty)
+        else -> stringResource(R.string.today_focus_message)
+    }
+    Box(Modifier.fillMaxWidth()) {
+        GradyanKart(
+            modifier = Modifier.fillMaxWidth(),
+            gradyan = PremiumGradyanlar.KAHRAMAN_GRADYAN,
+            shape = RoundedCornerShape(26.dp),
+            borderAnimation = false,
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(
-                            text = stringResource(R.string.today_focus_label),
-                            color = colors.onPrimaryContainer.copy(alpha = 0.72f),
-                            style = MaterialTheme.typography.labelMedium,
-                            letterSpacing = 1.1.sp,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Text(
-                            text = count?.let {
-                                pluralStringResource(R.plurals.today_question_count, it, it)
-                            } ?: stringResource(R.string.today_loading_count),
-                            modifier = Modifier.padding(top = 4.dp),
-                            color = colors.onPrimaryContainer,
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Text(
-                            text = when {
-                                count == null -> dateText
-                                count == 0 -> stringResource(R.string.today_focus_empty)
-                                else -> stringResource(R.string.today_focus_message)
-                            },
-                            color = colors.onPrimaryContainer.copy(alpha = 0.78f),
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                        Text(
-                            text = stringResource(R.string.today_goal_title),
-                            modifier = Modifier.padding(top = 6.dp),
-                            color = colors.onPrimaryContainer.copy(alpha = 0.72f),
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Text(
-                            text = if (tamamlandi) {
-                                stringResource(R.string.today_goal_done)
-                            } else {
-                                stringResource(R.string.today_goal_remaining, guvenliHedef - yapilan)
-                            },
-                            color = colors.onPrimaryContainer,
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                        Text(
-                            text = if (seri > 0) {
-                                stringResource(R.string.today_streak, seri)
-                            } else {
-                                stringResource(R.string.today_streak_start)
-                            },
-                            color = colors.primary,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.SemiBold,
-                        )
+                    Text(
+                        text = stringResource(R.string.today_focus_label),
+                        color = bakir,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.4.sp,
+                        modifier = Modifier.weight(1f),
+                    )
+                    if (tamamlandi) {
+                        KucukOnay(Modifier.size(18.dp).clearAndSetSemantics { }, bakir)
                     }
-                    Box(Modifier.size(76.dp), contentAlignment = Alignment.Center) {
-                        Canvas(Modifier.fillMaxSize()) {
-                            val kalinlik = 8.dp.toPx()
-                            val inset = kalinlik / 2f
-                            val boyut = Size(size.width - kalinlik, size.height - kalinlik)
-                            drawArc(
-                                color = colors.onPrimaryContainer.copy(alpha = 0.16f),
-                                startAngle = -90f,
-                                sweepAngle = 360f,
-                                useCenter = false,
-                                topLeft = Offset(inset, inset),
-                                size = boyut,
-                                style = Stroke(width = kalinlik),
-                            )
-                            drawArc(
-                                color = if (tamamlandi) colors.primary else colors.secondary,
-                                startAngle = -90f,
-                                sweepAngle = 360f * halka.value,
-                                useCenter = false,
-                                topLeft = Offset(inset, inset),
-                                size = boyut,
-                                style = Stroke(width = kalinlik, cap = StrokeCap.Round),
-                            )
-                        }
+                }
+                if (adet != null) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
                         Text(
-                            text = "$yapilan/$guvenliHedef",
-                            color = colors.onPrimaryContainer,
-                            style = MaterialTheme.typography.labelLarge,
+                            text = adet.toString(),
+                            color = kagit,
+                            style = MaterialTheme.typography.displaySmall,
                             fontWeight = FontWeight.Bold,
+                        )
+                        Text(
+                            text = stringResource(R.string.today_question_unit),
+                            color = kagit.copy(alpha = 0.7f),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Medium,
                         )
                     }
                 }
-                if (ready != null && count != null && count > 0) {
-                    HorizontalDivider(color = colors.onPrimaryContainer.copy(alpha = 0.14f))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = stringResource(R.string.today_section_title),
-                            color = colors.onPrimaryContainer,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                        Text(
-                            text = count.toString(),
-                            color = colors.primary,
-                            style = MaterialTheme.typography.labelLarge,
-                        )
-                    }
-                    val plan = remember(ready.sorular, today, hedef, yapilan) {
-                        GunlukCalismaPlani.olustur(
-                            ready.sorular.map { it.soru }, today.toEpochDay().toInt(), hedef, yapilan,
-                        )
-                    }
-                    val dersler = ready.sorular.associate { it.ders.id to it.ders }
-                    val satirlar = ready.sorular.associateBy { it.soru.id }
-                    val sorular = plan.tur
-                    Text(
-                        stringResource(R.string.today_queue_summary, plan.geciken, count - plan.geciken),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = colors.onPrimaryContainer,
+                Text(
+                    text = mesaj,
+                    color = kagit.copy(alpha = 0.78f),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                // Yüklenirken hedef/CTA iskeleti gösterilmez: yanlış "0 soru" düğmesi doğmaz.
+                if (adet != null) {
+                    OdakHedefiVeEylemi(
+                        yapilan = yapilan,
+                        hedef = guvenliHedef,
+                        oran = olcek.value,
+                        turSorulari = turSorulari,
+                        dersler = dersler,
+                        onOturumBaslat = onOturumBaslat,
                     )
-                    Text(
-                        stringResource(R.string.today_batch_explanation, sorular.size, plan.kalan),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = colors.onPrimaryContainer,
-                    )
-                    SadeAnaButon(
-                        onClick = { onOturumBaslat(sorular, dersler) },
-                        modifier = Modifier.fillMaxWidth(),
-                        interactionTur = EtkilesimTuru.ODAK_BASLADI,
-                    ) {
-                        Column(Modifier.padding(vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(stringResource(R.string.focus_start_today), fontWeight = FontWeight.Bold)
-                            Text(
-                                stringResource(R.string.focus_start_count, sorular.size),
-                                style = MaterialTheme.typography.labelSmall,
-                            )
-                        }
-                    }
-                    Text(
-                        stringResource(R.string.today_preview_title),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = colors.onPrimaryContainer,
-                    )
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        plan.onizleme.forEach { soru ->
-                            val row = satirlar.getValue(soru.id)
-                            GunSoruSatiri(row, today) {
-                                onOturumBaslat(listOf(row.soru), mapOf(row.ders.id to row.ders))
-                            }
-                        }
-                    }
-
                 }
             }
-            KutlamaParcaciklari(
-                visible = kutlama,
-                modifier = Modifier.matchParentSize(),
+        }
+        KutlamaParcaciklari(visible = kutlama, modifier = Modifier.matchParentSize())
+    }
+}
+
+/** Kahraman kartın alt yarısı: günlük hedefin ince ölçeği ve tek birincil eylem. */
+@Composable
+private fun OdakHedefiVeEylemi(
+    yapilan: Int,
+    hedef: Int,
+    oran: Float,
+    turSorulari: List<Soru>,
+    dersler: Map<String, Ders>,
+    onOturumBaslat: (List<Soru>, Map<String, Ders>) -> Unit,
+) {
+    val kagit = PremiumMarkaRenkler.Kagit
+    val bakir = PremiumMarkaRenkler.BakirIsik
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.today_goal_title),
+                color = bakir,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 0.8.sp,
             )
+            Text(
+                text = stringResource(R.string.today_goal_progress, yapilan, hedef),
+                color = kagit,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+        InceOlcek(
+            oran = oran,
+            modifier = Modifier.fillMaxWidth().height(8.dp).clearAndSetSemantics { },
+            izRenk = Color.White.copy(alpha = 0.16f),
+            dolguRenk = bakir,
+            bolme = 10,
+            yukseklik = 8.dp,
+        )
+    }
+    PremiumButton(
+        onClick = { onOturumBaslat(turSorulari, dersler) },
+        enabled = turSorulari.isNotEmpty(),
+        modifier = Modifier.fillMaxWidth().heightIn(min = 54.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = bakir,
+            contentColor = PremiumMarkaRenkler.Gece,
+        ),
+        contentPadding = PaddingValues(horizontal = 18.dp, vertical = 10.dp),
+        interactionTur = EtkilesimTuru.ODAK_BASLADI,
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
+                Text(
+                    text = stringResource(R.string.focus_start_today),
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    text = stringResource(R.string.focus_start_count, turSorulari.size),
+                    style = MaterialTheme.typography.labelSmall,
+                )
+            }
+            InceOk(Modifier.size(18.dp).clearAndSetSemantics { }, PremiumMarkaRenkler.Gece)
         }
     }
 }
 
 @Composable
-private fun GunSoruSatiri(
-    row: BugunSoruSatiri,
+private fun DevamSatiri(onDevam: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    Surface(
+        onClick = onDevam,
+        shape = RoundedCornerShape(18.dp),
+        color = colors.secondaryContainer.copy(alpha = 0.6f),
+        modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            OynatSimgesi(Modifier.size(18.dp), colors.onSecondaryContainer)
+            Text(
+                text = stringResource(R.string.focus_continue_session),
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = colors.onSecondaryContainer,
+            )
+            InceOk(Modifier.size(16.dp), colors.onSecondaryContainer)
+        }
+    }
+}
+
+@Composable
+private fun BugunKuyrukKarti(
+    plan: GunlukCalismaPlani,
+    satirlar: Map<String, BugunSoruSatiri>,
+    today: LocalDate,
+    onSoru: (BugunSoruSatiri) -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    SadeKart(shape = RoundedCornerShape(22.dp)) {
+        Column {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.today_section_title),
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    text = plan.sirali.size.toString(),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.primary,
+                )
+            }
+            plan.onizleme.forEachIndexed { index, soru ->
+                val satir = satirlar[soru.id] ?: return@forEachIndexed
+                KuyrukSatiri(satir = satir, today = today) { onSoru(satir) }
+                if (index != plan.onizleme.lastIndex) {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = colors.outlineVariant.copy(alpha = 0.45f),
+                    )
+                }
+            }
+            if (plan.kalan > 0) {
+                Text(
+                    text = stringResource(R.string.today_queue_turn, plan.tur.size, plan.kalan),
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 14.dp),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.onSurfaceVariant,
+                )
+            } else {
+                Spacer(Modifier.height(8.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun KuyrukSatiri(
+    satir: BugunSoruSatiri,
     today: LocalDate,
     onClick: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
-    val dueDay = row.soru.sonrakiTekrarGun ?: today.toEpochDay().toInt()
-    val lateDays = (today.toEpochDay().toInt() - dueDay).coerceAtLeast(0)
+    val dueDay = satir.soru.sonrakiTekrarGun ?: today.toEpochDay().toInt()
+    val gecikme = (today.toEpochDay().toInt() - dueDay).coerceAtLeast(0)
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
             .clickable(onClick = onClick)
-            .padding(vertical = 10.dp, horizontal = 2.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
+            .padding(horizontal = 16.dp, vertical = 11.dp),
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Text(
+                    text = satir.ders.ad,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.primary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
+                )
+                if (gecikme > 0) {
+                    Text(
+                        text = pluralStringResource(R.plurals.today_overdue_days, gecikme, gecikme),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = colors.error,
+                        maxLines = 1,
+                    )
+                }
+            }
             Text(
-                text = row.ders.ad,
-                color = colors.primary,
-                style = MaterialTheme.typography.labelLarge,
+                text = satir.soru.soruNotu?.trim()?.takeIf { it.isNotEmpty() }
+                    ?: satir.soru.kaynak?.trim()?.takeIf { it.isNotEmpty() }
+                    ?: stringResource(R.string.question_photo_only),
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                fontWeight = FontWeight.SemiBold,
             )
+        }
+        InceOk(Modifier.size(16.dp), colors.onSurfaceVariant)
+    }
+}
+
+@Composable
+private fun BugunKisayollari(
+    sorulacakGruplar: List<Pair<Ders, Int>>,
+    denemeler: List<DenemeKaydi>,
+    onSorulacaklar: () -> Unit,
+    onDeneme: () -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    SadeKart(shape = RoundedCornerShape(22.dp)) {
+        Column {
+            if (sorulacakGruplar.isNotEmpty()) {
+                SorulacaklarSatiri(gruplar = sorulacakGruplar, onClick = onSorulacaklar)
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = colors.outlineVariant.copy(alpha = 0.45f),
+                )
+            }
+            DenemeSatiri(denemeler = denemeler, onClick = onDeneme)
+        }
+    }
+}
+
+@Composable
+private fun SorulacaklarSatiri(
+    gruplar: List<Pair<Ders, Int>>,
+    onClick: () -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    val dersOzeti = remember(gruplar) {
+        gruplar.joinToString(" · ") { (ders, adet) -> "${ders.ad} ($adet)" }
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("bugun_sorulacaklar_karti")
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Box(
+            modifier = Modifier.size(38.dp).background(colors.secondaryContainer, RoundedCornerShape(12.dp)),
+            contentAlignment = Alignment.Center,
+        ) {
+            SoruIsareti(Modifier.size(18.dp), colors.onSecondaryContainer)
+        }
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
             Text(
-                text = row.soru.soruNotu?.trim()?.takeIf { it.isNotEmpty() }
-                    ?: row.soru.kaynak?.trim()?.takeIf { it.isNotEmpty() }
-                    ?: stringResource(R.string.question_photo_only),
-                color = colors.onPrimaryContainer,
-                style = MaterialTheme.typography.titleMedium,
+                text = stringResource(R.string.today_ask_teacher_title),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = stringResource(R.string.today_photo_count, row.soru.gorseller.count { it.tur == GorselTuru.SORU }),
-                    color = colors.onPrimaryContainer.copy(alpha = 0.72f),
-                    style = MaterialTheme.typography.bodySmall,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Text("·", color = colors.onPrimaryContainer.copy(alpha = 0.72f))
-                Text(
-                    text = stringResource(R.string.today_tap_to_review),
-                    modifier = Modifier.weight(1f, fill = false),
-                    color = colors.onPrimaryContainer.copy(alpha = 0.72f),
-                    style = MaterialTheme.typography.bodySmall,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            Surface(
-                shape = CircleShape,
-                color = if (lateDays == 0) colors.secondaryContainer else colors.errorContainer,
-            ) {
-                Text(
-                    text = if (lateDays == 0) stringResource(R.string.today_due_today)
-                    else pluralStringResource(R.plurals.today_overdue_days, lateDays, lateDays),
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-                    color = if (lateDays == 0) colors.onSecondaryContainer else colors.onErrorContainer,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.SemiBold,
-                )
-            }
+            Text(
+                text = dersOzeti,
+                style = MaterialTheme.typography.bodySmall,
+                color = colors.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
-
+        InceOk(Modifier.size(16.dp), colors.onSurfaceVariant)
     }
 }
 
 @Composable
-private fun DurumKarti(
-    metin: String,
-    onRetry: () -> Unit,
-) {
-    PremiumCard(
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
-    ) {
-        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(metin, color = MaterialTheme.colorScheme.onErrorContainer)
-            PremiumTextButton(onClick = onRetry) { Text(stringResource(R.string.topic_retry)) }
-        }
-    }
-}
-
-@Composable
-private fun BugunDenemeKarti(
-    denemeler: List<com.keremtulu.questionnote.domain.model.DenemeKaydi>,
+private fun DenemeSatiri(
+    denemeler: List<DenemeKaydi>,
     onClick: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
@@ -544,156 +691,66 @@ private fun BugunDenemeKarti(
             R.string.today_deneme_subtitle_summary,
             denemeler.size,
             sonDeneme.ad,
-            com.keremtulu.questionnote.ui.deneme.netYazi(sonDeneme.toplamNet()),
+            netYazi(sonDeneme.toplamNet()),
         )
     }
-
-    PremiumCard(
-        onClick = onClick,
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .testTag("today-deneme-card"),
-        colors = CardDefaults.cardColors(containerColor = colors.surface),
-        border = BorderStroke(1.dp, colors.outlineVariant.copy(alpha = 0.55f)),
-        interactionTur = EtkilesimTuru.KART_ACILIS,
+            .testTag("today-deneme-card")
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        Box(
+            modifier = Modifier.size(38.dp).background(colors.primaryContainer, RoundedCornerShape(12.dp)),
+            contentAlignment = Alignment.Center,
         ) {
-            val bakirVurgu = if (isSystemInDarkTheme()) PremiumMarkaRenkler.BakirIsik else PremiumMarkaRenkler.Bakir
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(bakirVurgu.copy(alpha = 0.16f)),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = "◈",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = bakirVurgu,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = PremiumSembolAilesi,
-                )
-            }
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
-            ) {
-                Text(
-                    text = stringResource(R.string.deneme_open),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                )
-                Text(
-                    text = altMetin,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = colors.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            Text(
-                text = "→",
-                style = MaterialTheme.typography.titleMedium,
-                color = colors.primary,
-                fontWeight = FontWeight.Bold,
+            com.keremtulu.questionnote.ui.bilesenler.HedefHalkasi(
+                oran = 0.72f,
+                modifier = Modifier.size(18.dp),
+                izRenk = colors.primary.copy(alpha = 0.25f),
+                dolguRenk = colors.primary,
+                kalinlik = 2.dp,
+                isaretSayisi = 12,
             )
         }
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.deneme_open),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Text(
+                text = altMetin,
+                style = MaterialTheme.typography.bodySmall,
+                color = colors.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        InceOk(Modifier.size(16.dp), colors.onSurfaceVariant)
     }
 }
 
 @Composable
-private fun BugunSorulacaklarKarti(
-    gruplar: List<Pair<Ders, Int>>,
-    onClick: () -> Unit,
+private fun DurumKarti(
+    metin: String,
+    onRetry: () -> Unit,
 ) {
-    val colors = MaterialTheme.colorScheme
-    val bakirVurgu = if (isSystemInDarkTheme()) PremiumMarkaRenkler.BakirIsik else PremiumMarkaRenkler.Bakir
-    val toplamSoru = gruplar.sumOf { it.second }
-    val dersOzeti = remember(gruplar) {
-        gruplar.joinToString(" · ") { (ders, adet) -> "${ders.ad} ($adet)" }
-    }
-
-    PremiumCard(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth().testTag("bugun_sorulacaklar_karti"),
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(containerColor = colors.secondaryContainer.copy(alpha = 0.65f)),
-        border = BorderStroke(1.2.dp, bakirVurgu.copy(alpha = 0.45f)),
-        interactionTur = EtkilesimTuru.KART_ACILIS,
-    ) {
+    SadeKart(shape = RoundedCornerShape(20.dp)) {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(42.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(bakirVurgu.copy(alpha = 0.18f)),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = "?",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = bakirVurgu,
-                        fontWeight = FontWeight.ExtraBold,
-                    )
-                }
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
-                ) {
-                    Text(
-                        text = stringResource(R.string.today_ask_teacher_title),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = colors.onSurface,
-                    )
-                    Text(
-                        text = stringResource(R.string.today_ask_teacher_subtitle, gruplar.size, toplamSoru),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = colors.onSurfaceVariant,
-                    )
-                }
-            }
-            Text(
-                text = dersOzeti,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.SemiBold,
-                color = colors.primary,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-            ) {
-                Surface(
-                    shape = CircleShape,
-                    color = colors.primary,
-                ) {
-                    Text(
-                        text = stringResource(R.string.today_ask_teacher_action) + " →",
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = colors.onPrimary,
-                    )
-                }
+            Text(metin, color = MaterialTheme.colorScheme.onSurface)
+            PremiumTextButton(onClick = onRetry) {
+                Text(stringResource(R.string.topic_retry))
             }
         }
     }
 }
-
-

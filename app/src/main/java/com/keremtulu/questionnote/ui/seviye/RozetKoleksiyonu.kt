@@ -1,9 +1,7 @@
 package com.keremtulu.questionnote.ui.seviye
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -29,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -44,6 +43,8 @@ import com.keremtulu.questionnote.ui.karne.rozetAdi
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import com.keremtulu.questionnote.ui.bilesenler.HedefHalkasi
+import com.keremtulu.questionnote.ui.bilesenler.InceOlcek
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import com.keremtulu.questionnote.ui.premium.PremiumCard
 
@@ -66,10 +67,26 @@ fun RozetKoleksiyonu(sahip: Set<Rozet>, girdi: RozetGirdisi, kazanilmaZamani: (R
         else -> true
     } }
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(stringResource(R.string.level_badges_title, sahip.size, Rozet.entries.size),
-            style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-        Text(stringResource(R.string.badge_gallery_note), style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            HedefHalkasi(
+                oran = sahip.size.toFloat() / Rozet.entries.size,
+                modifier = Modifier.size(54.dp).clearAndSetSemantics { },
+                izRenk = MaterialTheme.colorScheme.surfaceVariant,
+                dolguRenk = MaterialTheme.colorScheme.primary,
+                kalinlik = 3.dp,
+                isaretSayisi = 24,
+            )
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Text(stringResource(R.string.level_badges_title, sahip.size, Rozet.entries.size),
+                    style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.badge_gallery_note), style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
         Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             listOf("all" to R.string.badge_filter_all, "earned" to R.string.badge_filter_earned,
                 "locked" to R.string.badge_filter_locked, "secret" to R.string.badge_filter_secret).forEach { (key, label) ->
@@ -98,9 +115,14 @@ fun RozetKoleksiyonu(sahip: Set<Rozet>, girdi: RozetGirdisi, kazanilmaZamani: (R
                                 color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium)
                             else if (!gizli && rozet !in oturumRozetleri) {
                                 val ilerleme = RozetKurallari.ilerleme(rozet, girdi)
-                                Box(Modifier.fillMaxWidth().height(4.dp).background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(4.dp))) {
-                                    Box(Modifier.fillMaxWidth(ilerleme.oran).height(4.dp).background(MaterialTheme.colorScheme.primary, RoundedCornerShape(4.dp)))
-                                }
+                                InceOlcek(
+                                    oran = ilerleme.oran,
+                                    modifier = Modifier.fillMaxWidth().height(5.dp).clearAndSetSemantics { },
+                                    izRenk = MaterialTheme.colorScheme.surfaceVariant,
+                                    dolguRenk = MaterialTheme.colorScheme.primary,
+                                    bolme = 4,
+                                    yukseklik = 5.dp,
+                                )
                                 Text(stringResource(R.string.badge_progress, ilerleme.mevcut.coerceAtMost(ilerleme.hedef), ilerleme.hedef),
                                     style = MaterialTheme.typography.labelSmall)
                             }

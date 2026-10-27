@@ -4,8 +4,6 @@ import android.content.Context
 import android.content.ContextWrapper
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -26,6 +24,7 @@ import com.keremtulu.questionnote.domain.karne.Rozet
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
+import com.keremtulu.questionnote.ui.panel.ekranPencereInsetsi
 
 /** Explicit presentation states. Preview fixtures live in src/debug, never in the release data path. */
 sealed interface SeviyeDurumuUi {
@@ -73,7 +72,7 @@ fun SeviyeEkrani(
     }
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        contentWindowInsets = WindowInsets.safeDrawing,
+        contentWindowInsets = ekranPencereInsetsi(),
     ) { insets ->
         SeviyeSayfasi(
             durum = durum, insets = insets,

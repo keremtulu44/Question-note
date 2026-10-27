@@ -8,13 +8,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
@@ -78,6 +76,7 @@ import com.keremtulu.questionnote.ui.bilesenler.premium.CamKarti
 import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
 import com.keremtulu.questionnote.ui.premium.PremiumGradyanButon
 import java.time.LocalDate
+import com.keremtulu.questionnote.ui.panel.ekranPencereInsetsi
 
 /** State kept by the app shell so opening a question does not discard the chosen filters. */
 data class FiltreliCalismaEkraniAyar(
@@ -117,7 +116,6 @@ fun FiltreliCalismaEkrani(
     soruRepository: SoruRepository,
     ayar: FiltreliCalismaEkraniAyar,
     onAyarDegisti: (FiltreliCalismaEkraniAyar) -> Unit,
-    onGeri: () -> Unit,
     onOturumBaslat: (List<Soru>, Map<String, Ders>) -> Unit,
     onDevam: (() -> Unit)? = null,
 ) {
@@ -265,7 +263,7 @@ fun FiltreliCalismaEkrani(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        contentWindowInsets = WindowInsets.safeDrawing,
+        contentWindowInsets = ekranPencereInsetsi(),
     ) { insets ->
         LazyColumn(
             modifier = Modifier
@@ -277,15 +275,11 @@ fun FiltreliCalismaEkrani(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    PremiumTextButton(
-                        onClick = onGeri,
-                        interactionTur = EtkilesimTuru.GERI,
-                    ) { Text(androidx.compose.ui.res.stringResource(R.string.common_back)) }
-                    com.keremtulu.questionnote.ui.bilesenler.SayfaBasligi(
-                        androidx.compose.ui.res.stringResource(R.string.filtered_practice_title),
-                    )
-                }
+                // Sekme kökünde "Geri" düğmesi yok: geri zaten alt menü ve sistem tuşuyla çalışır.
+                com.keremtulu.questionnote.ui.bilesenler.SayfaBasligi(
+                    baslik = androidx.compose.ui.res.stringResource(R.string.filtered_practice_title),
+                    alt = androidx.compose.ui.res.stringResource(R.string.filtered_practice_subtitle),
+                )
             }
 
             when (secenekDurumu) {

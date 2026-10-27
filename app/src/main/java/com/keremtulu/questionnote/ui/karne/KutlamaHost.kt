@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -87,6 +88,14 @@ fun RutbeKutlamasiIcerigi(r: RutbeKutlamasi, mesgul: Boolean = false, hata: Bool
                 val v = if (p.azaltildi) 1f else giris.value
                 scaleX = 0.9f + v * 0.1f; scaleY = scaleX; alpha = v
             })
+            // Rütbe yolculuğunun küçük noktaları: kutlama anında soldan sağa dolar.
+            com.keremtulu.questionnote.ui.bilesenler.YolNoktalari(
+                oran = if (p.azaltildi) 1f else giris.value,
+                modifier = Modifier.width(168.dp).height(12.dp).clearAndSetSemantics { },
+                renk = Color(0xFFEFC18A).copy(alpha = 0.35f),
+                dolguRenk = Color(0xFFEFC18A),
+                noktaSayisi = 9,
+            )
             Text(r.son.ad, color = Color.White, style = MaterialTheme.typography.headlineLarge, textAlign = TextAlign.Center)
             Text(stringResource(R.string.rank_celebration_summary, r.gecilenEsik, r.onceki.ad, r.son.ad),
                 color = Color.White, textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyLarge)

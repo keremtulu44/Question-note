@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -41,6 +42,7 @@ import com.keremtulu.questionnote.ui.karne.RozetGorseli
 import com.keremtulu.questionnote.ui.tema.*
 import java.text.NumberFormat
 import java.util.Locale
+import com.keremtulu.questionnote.ui.bilesenler.InceOlcek
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import com.keremtulu.questionnote.ui.premium.PremiumButton
 import androidx.compose.ui.graphics.Brush
@@ -117,6 +119,7 @@ internal fun IlerlemeIcerigi(
                     IlerlemeGecisSatiri(stringResource(R.string.progress_collection_title),
                         stringResource(R.string.progress_badge_count, ozet.sahipRozetler.size, Rozet.entries.size),
                         "progress-collection", onClick = { sayfa = IlerlemeBolumu.ROZETLER },
+                        ilerleme = ozet.sahipRozetler.size.toFloat() / Rozet.entries.size,
                         simge = {
                             val rozet = Rozet.entries.firstOrNull { it in ozet.sahipRozetler }
                             if (rozet == null) GizliRozetGorseli(Modifier.size(40.dp))
@@ -133,8 +136,9 @@ internal fun IlerlemeIcerigi(
             item { AyrintiBasligi(stringResource(sayfa.baslik)) { sayfa = sayfa.ust() } }
             when (sayfa) {
                 IlerlemeBolumu.ROZETLER -> {
-                    item { IlerlemeGecisSatiri(stringResource(R.string.rank_gallery_title), null, "progress-open-ranks",
-                        onClick = { sayfa = IlerlemeBolumu.RUTBELER }) }
+                    item { IlerlemeGecisSatiri(stringResource(R.string.rank_gallery_title),
+                        stringResource(R.string.level_number, ozet.durum.seviye), "progress-open-ranks",
+                        onClick = { sayfa = IlerlemeBolumu.RUTBELER }, ilerleme = ozet.durum.oran) }
                     item { RozetKoleksiyonu(ozet.sahipRozetler, ozet.rozetGirdisi, kazanilmaZamani) }
                 }
                 IlerlemeBolumu.RUTBELER -> item { RutbeYolculugu(ozet.durum, baslikGoster = false) }
@@ -146,7 +150,8 @@ internal fun IlerlemeIcerigi(
 
 @Composable
 internal fun IlerlemeGecisSatiri(baslik: String, alt: String?, tag: String, onClick: () -> Unit,
-    simge: (@Composable () -> Unit)? = null) {
+    simge: (@Composable () -> Unit)? = null, ilerleme: Float? = null) {
+    val gecisRenkleri = MaterialTheme.colorScheme
     Surface(onClick = onClick, shape = RoundedCornerShape(16.dp), color = Color.Transparent,
         modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp).testTag(tag)) {
         Row(Modifier.padding(vertical = 12.dp, horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically,
@@ -155,6 +160,14 @@ internal fun IlerlemeGecisSatiri(baslik: String, alt: String?, tag: String, onCl
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(baslik, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
                 if (alt != null) Text(alt, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (ilerleme != null) InceOlcek(
+                    oran = ilerleme,
+                    modifier = Modifier.fillMaxWidth().height(5.dp).padding(top = 1.dp).clearAndSetSemantics { },
+                    izRenk = gecisRenkleri.surfaceVariant,
+                    dolguRenk = gecisRenkleri.primary,
+                    bolme = 6,
+                    yukseklik = 5.dp,
+                )
             }
             val renk = MaterialTheme.colorScheme.onSurfaceVariant
             Canvas(Modifier.size(16.dp).clearAndSetSemantics {}) {
@@ -257,9 +270,9 @@ private fun YeniRutbeKarti(ozet: SeviyeOzeti) {
                 } else Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically) { EmekEtiketi(); XpMetni(xp) }
                 if (LocalDensity.current.fontScale >= 1.5f) Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    RutbeMadalyonu(durum.rutbe); RutbeBasligi(durum.rutbe, durum.seviye)
+                    RutbeMadalyonu(durum.rutbe, durum.oran); RutbeBasligi(durum.rutbe, durum.seviye)
                 } else Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    RutbeMadalyonu(durum.rutbe)
+                    RutbeMadalyonu(durum.rutbe, durum.oran)
                     Column(Modifier.weight(1f)) { RutbeBasligi(durum.rutbe, durum.seviye) }
                 }
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -286,10 +299,20 @@ private fun YeniRutbeKarti(ozet: SeviyeOzeti) {
     Text(stringResource(R.string.level_number, seviye), color = MaterialTheme.colorScheme.onSurfaceVariant,
         style = MaterialTheme.typography.bodyMedium)
 }
-@Composable private fun RutbeMadalyonu(rutbe: Rutbe) {
-    // Flat medallion: no fake glass highlight over the emblem.
+@Composable private fun RutbeMadalyonu(rutbe: Rutbe, oran: Float) {
+    // Flat medallion; ince çift halka ve seviye içi bakır yay süs değil, ilerlemenin kendisidir.
+    val renk = MaterialTheme.colorScheme
     Box(Modifier.size(80.dp), contentAlignment = Alignment.Center) {
-        Image(painterResource(rutbe.gorsel), contentDescription = null, modifier = Modifier.size(72.dp))
+        Canvas(Modifier.fillMaxSize().clearAndSetSemantics { }) {
+            drawCircle(renk.outlineVariant.copy(alpha = 0.65f), radius = size.minDimension / 2f - 0.5.dp.toPx(),
+                style = Stroke(1.dp.toPx()))
+            val dis = size.minDimension / 2f - 4.dp.toPx()
+            drawCircle(renk.surfaceVariant, radius = dis, style = Stroke(2.dp.toPx()))
+            if (oran > 0f) drawArc(renk.primary, -90f, 360f * oran.coerceIn(0f, 1f), false,
+                topLeft = Offset(size.width / 2f - dis, size.height / 2f - dis), size = Size(dis * 2f, dis * 2f),
+                style = Stroke(2.dp.toPx(), cap = StrokeCap.Round))
+        }
+        Image(painterResource(rutbe.gorsel), contentDescription = null, modifier = Modifier.size(64.dp))
     }
 }
 @Composable private fun XpCubugu(oran: Float) {
@@ -297,10 +320,16 @@ private fun YeniRutbeKarti(ozet: SeviyeOzeti) {
     val hedef = oran.coerceIn(0f, 1f)
     val ilerleme = if (politika.azaltildi) hedef else animateFloatAsState(hedef,
         tween(politika.sure(HareketTuru.DEGER)), label = "xp-ilerleme").value
-    Box(Modifier.fillMaxWidth().height(7.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant)
-        .testTag("progress-xp-bar").semantics { progressBarRangeInfo = ProgressBarRangeInfo(hedef, 0f..1f) }) {
-        Box(Modifier.fillMaxWidth(ilerleme.coerceIn(0f, 1f)).height(7.dp)
-            .background(MaterialTheme.colorScheme.primary))
+    Box(Modifier.fillMaxWidth().testTag("progress-xp-bar")
+        .semantics { progressBarRangeInfo = ProgressBarRangeInfo(hedef, 0f..1f) }) {
+        InceOlcek(
+            oran = ilerleme.coerceIn(0f, 1f),
+            modifier = Modifier.fillMaxWidth().height(9.dp),
+            izRenk = MaterialTheme.colorScheme.surfaceVariant,
+            dolguRenk = MaterialTheme.colorScheme.primary,
+            bolme = 10,
+            yukseklik = 9.dp,
+        )
     }
 }
 

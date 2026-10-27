@@ -2,6 +2,27 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [Yayınlanmadı — üst panel] — 2026-10-27
+
+- **Üst panel:** alt menünün kalıcı eşi. Canlı tarih (`d MMMM EEEE`), seri ve günlük hedef
+  (`yapılan / hedef`) + 16 çentikli hedef halkası. Tek dokunuşla İlerleme; XP/para/enerji gibi
+  oyunlaştırma yok. Yalnız sekme köklerinde görünür, detay/form ekranlarında gizlenir.
+- **Insets:** host `Scaffold` boşlukları panellere devretti; sekme kökleri yalnız yatay güvenli
+  alan ekler. Alt menü üstünde ikinci boşluk şeridi kalktı; detay ekranları tam `safeDrawing`.
+- **Bugün:** başlık + `+`, gradyan odak kartı (sayı + "soru", günlük hedefin ince ölçeği,
+  tek bakır CTA), devam satırı, kuyruk kartı, sorulacaklar/deneme kısayolları. Boş/hata/yükleme
+  durumları ayrı; FAB ve mükerrer hedef metinleri kaldırıldı.
+- **İnce ilerleme:** Canvas ile çizilmiş `Damga`, `HedefHalkasi`, `InceOlcek`, `SeriAlevi`,
+  `SoruIsareti`, `InceOk`, `KucukArti`, `KucukOnay`, `OynatSimgesi`, `YolNoktalari`. XP çubuğu
+  bölmeli, rütbe madalyonunda ince halka + yay, rozet galerisinde halka ve 4 bölmeli ölçek,
+  rütbe kutlamasında 9 noktalı yol, rütbe galerisinde 15 noktalı yol.
+- **Kaldırılan:** Filtreli çalışma ekranındaki sekme kökü "Geri" düğmesi; Bugün'deki ikinci
+  hedef cümlesi ve FAB.
+- **Test:** `UstPanelArayuzTest` (hedef/seri/tarih, oyunlaştırma kelimesi yokluğu, 48dp hedef,
+  tıklama, 2× yazı). Mevcut test etiketleri/sözleşmeleri korundu.
+- **Doğrulama:** JDK/Android SDK olmadığı için derleme ve test çalıştırılmadı; tree-sitter ile
+  0 sözdizimi hatası, `R.*` referanslarında 0 eksik. Sürüm/Room/ZIP değişmedi.
+
 ## [Yayınlanmadı — T3] — 2026-10-26
 
 - **Arama ve filtreler:** kuyruk ve grup detayında tek satır arama (`rememberSaveable`); başlık,
