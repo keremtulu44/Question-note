@@ -380,7 +380,7 @@ private fun BugunOdakKarti(
                 }
                 Text(
                     text = mesaj,
-                    color = kagit.copy(alpha = 0.78f),
+                    color = kagit.copy(alpha = 0.88f),
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 // Yüklenirken hedef/CTA iskeleti gösterilmez: yanlış "0 soru" düğmesi doğmaz.
@@ -432,7 +432,7 @@ private fun OdakHedefiVeEylemi(
                 } else {
                     stringResource(R.string.today_goal_left, hedef - yapilan)
                 },
-                color = kagit.copy(alpha = 0.82f),
+                color = kagit.copy(alpha = 0.95f),
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
             )

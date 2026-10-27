@@ -158,7 +158,7 @@ fun UstPanel(
                                 stringResource(R.string.ust_panel_streak_start)
                             },
                             style = MaterialTheme.typography.bodySmall,
-                            color = colors.onSurfaceVariant,
+                            color = colors.onSurfaceVariant.copy(alpha = 0.92f),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
