@@ -84,7 +84,7 @@ class UstPanelArayuzTest {
 
         val hedefDugmesi = compose.onNodeWithTag("ust-panel-hedef")
         val olcu = hedefDugmesi.getUnclippedBoundsInRoot()
-        assertTrue("Hedef düğmesi en az 48dp yüksek olmalı", olcu.height >= 48.dp)
+        assertTrue("Hedef düğmesi en az 48dp yüksek olmalı", olcu.bottom - olcu.top >= 48.dp)
         hedefDugmesi.performSemanticsAction(SemanticsActions.OnClick) { it() }
         assertTrue("Hedef düğmesi İlerleme sekmesine gitmeli", ilerlemeAcildi)
     }
@@ -111,7 +111,7 @@ class UstPanelArayuzTest {
             compose.onAllNodesWithText("0 / 15").fetchSemanticsNodes().isNotEmpty()
         }
         val olcu = compose.onNodeWithTag("ust-panel-hedef").getUnclippedBoundsInRoot()
-        assertTrue("2× yazıda hedef düğmesi 48dp altına düşmemeli", olcu.height.value >= 48f)
-        assertTrue("2× yazıda hedef düğmesi okunabilir genişlikte kalmalı", olcu.width.value >= 88f)
+        assertTrue("2× yazıda hedef düğmesi 48dp altına düşmemeli", (olcu.bottom - olcu.top).value >= 48f)
+        assertTrue("2× yazıda hedef düğmesi okunabilir genişlikte kalmalı", (olcu.right - olcu.left).value >= 88f)
     }
 }
