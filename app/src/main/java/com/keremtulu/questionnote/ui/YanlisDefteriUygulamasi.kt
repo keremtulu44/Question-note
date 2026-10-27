@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
@@ -49,7 +51,6 @@ import com.keremtulu.questionnote.data.ses.SesYoneticisi
 import com.keremtulu.questionnote.ui.ayarlar.KonuMerkeziEkrani
 import com.keremtulu.questionnote.ui.calisma.OdakOturumuEkrani
 import com.keremtulu.questionnote.ui.calisma.TahtaOturumCizimBellegi
-import com.keremtulu.questionnote.ui.karne.RozetKutlamaHost
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -61,12 +62,10 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.UUID
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -101,6 +100,9 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import com.keremtulu.questionnote.ui.premium.PremiumButton
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import com.keremtulu.questionnote.ui.karne.RozetKutlamaHost
 
 private sealed interface UygulamaEkrani {
     data object Bugun : UygulamaEkrani
@@ -173,7 +175,8 @@ fun YanlisDefteriUygulamasi(
     }
     var ekran by remember { mutableStateOf<UygulamaEkrani>(UygulamaEkrani.Bugun) }
     var kurulumGerekli by remember { mutableStateOf(profilDeposu.kurulumGerekli()) }
-    val aktifRol by profilDeposu.rolIzle.collectAsState()
+    val kayitliRol by profilDeposu.rolIzle.collectAsState()
+    val aktifRol = com.keremtulu.questionnote.domain.model.UrunKapsami.gorunenRol(kayitliRol)
     val rolSecildi by profilDeposu.rolSecildiIzle.collectAsState()
     val tahtaOturumId = (ekran as? UygulamaEkrani.FiltreliOturum)?.oturum?.id
     val tahtaOturumCizimBellegi = remember(tahtaOturumId) { TahtaOturumCizimBellegi() }
@@ -418,7 +421,7 @@ fun YanlisDefteriUygulamasi(
         ekranSec(ekran.geriHedefi())
     }
 
-    if (!rolSecildi && kurulumGerekli) {
+    if (com.keremtulu.questionnote.domain.model.UrunKapsami.OGRETMEN_MODU_GORUNUR && !rolSecildi && kurulumGerekli) {
         com.keremtulu.questionnote.ui.kurulum.RolSecimEkrani(
             onRolSecildi = { secilenRol ->
                 profilDeposu.rolKaydet(secilenRol)
@@ -453,6 +456,9 @@ fun YanlisDefteriUygulamasi(
                 sonYedek = sonYedek,
                 yedeklemeIslemde = yedeklemeIslemde,
                 snackbarHostState = snackbarHostState,
+                // Shared student catalog: the teacher form picks the same lessons/topics.
+                dersRepository = dersRepository,
+                konuRepository = konuRepository,
                 onOgrenciModunaGec = {
                     kurulumGerekli = profilDeposu.kurulumGerekli()
                     profilDeposu.rolKaydet(com.keremtulu.questionnote.domain.model.KullaniciRolu.OGRENCI)
@@ -514,7 +520,8 @@ fun YanlisDefteriUygulamasi(
             }
         },
     ) { insets ->
-        Box(Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets)) {
+        Box(Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets)
+            .wrapContentWidth(androidx.compose.ui.Alignment.CenterHorizontally).widthIn(max = 840.dp)) {
             AnimatedContent(
                 targetState = ekran,
                 transitionSpec = {
@@ -755,7 +762,9 @@ fun YanlisDefteriUygulamasi(
                             )
                         },
                         onOgretmenModunaGec = {
-                            profilDeposu.rolKaydet(com.keremtulu.questionnote.domain.model.KullaniciRolu.OGRETMEN)
+                            if (com.keremtulu.questionnote.domain.model.UrunKapsami.OGRETMEN_MODU_GORUNUR) {
+                                profilDeposu.rolKaydet(com.keremtulu.questionnote.domain.model.KullaniciRolu.OGRETMEN)
+                            }
                         },
                     )
                 }

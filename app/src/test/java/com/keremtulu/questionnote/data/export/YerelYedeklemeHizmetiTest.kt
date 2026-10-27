@@ -370,8 +370,8 @@ class YerelYedeklemeHizmetiTest {
         val reviews = database.tekrarDao().tumunuGetir()
         ZipFile(archive).use { zip ->
             val manifest = zip.getInputStream(zip.getEntry("manifest.json")).use { JSONObject(it.readBytes().toString(Charsets.UTF_8)) }
-            assertEquals(4, manifest.getInt("format_version"))
-            assertEquals(4, manifest.getInt("room_schema_version"))
+            assertEquals(5, manifest.getInt("format_version"))
+            assertEquals(5, manifest.getInt("room_schema_version"))
             assertEquals(4, manifest.getJSONObject("counts").getInt("measurements"))
             val csv = zip.getInputStream(zip.getEntry("csv/measurements.csv")).bufferedReader().use { it.readText() }
             assertTrue(csv.contains("attempt_active_ms"))

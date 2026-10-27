@@ -23,17 +23,14 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.domain.model.SoruSecenekTuru
@@ -44,9 +41,12 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import com.keremtulu.questionnote.ui.premium.PremiumTextButton
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.font.FontWeight
 import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
 import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
-import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 
 private sealed interface KatalogDurumu {
     data object Yukleniyor : KatalogDurumu
@@ -92,21 +92,10 @@ fun KatalogYonetimiEkrani(
             }
             @Composable
             fun KatalogUstKart(modifier: Modifier = Modifier) {
-                GradyanKart(modifier = modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), borderAnimation = false) {
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text(
-                            stringResource(R.string.catalog_manage_title),
-                            color = PremiumMarkaRenkler.Kagit,
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Text(
-                            stringResource(R.string.catalog_manage_subtitle),
-                            color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.86f),
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    }
-                }
+                com.keremtulu.questionnote.ui.bilesenler.DuzBaslik(
+                    baslik = stringResource(R.string.catalog_manage_title),
+                    alt = stringResource(R.string.catalog_manage_subtitle),
+                )
             }
             when (val current = durum) {
                 KatalogDurumu.Yukleniyor -> {

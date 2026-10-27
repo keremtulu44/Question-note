@@ -29,7 +29,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
@@ -41,7 +40,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -49,7 +47,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -95,16 +92,15 @@ import com.keremtulu.questionnote.ui.animasyon.animateFloatPremium
 import com.keremtulu.questionnote.ui.animasyon.animateItemInsertion
 import com.keremtulu.questionnote.ui.animasyon.tweenPremium
 import com.keremtulu.questionnote.ui.bilesenler.hatirlaYerelGun
-import com.keremtulu.questionnote.ui.bilesenler.premium.CamKarti
+import com.keremtulu.questionnote.ui.bilesenler.SadeKart
 import com.keremtulu.questionnote.ui.bilesenler.premium.CamYukseklik
-import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
 import com.keremtulu.questionnote.ui.bilesenler.premium.PremiumBosDurum
 import com.keremtulu.questionnote.ui.dersKartStiliGetir
 import com.keremtulu.questionnote.ui.premium.EtkilesimTuru
 import com.keremtulu.questionnote.ui.premium.PremiumButton
 import com.keremtulu.questionnote.ui.premium.PremiumCard
 import com.keremtulu.questionnote.ui.premium.PremiumExtendedFloatingActionButton
-import com.keremtulu.questionnote.ui.premium.PremiumGradyanButon
+import com.keremtulu.questionnote.ui.bilesenler.SadeAnaButon
 import com.keremtulu.questionnote.ui.premium.PremiumOutlinedButton
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
@@ -121,6 +117,12 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import com.keremtulu.questionnote.ui.bilesenler.premium.CamKarti
+import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
+import com.keremtulu.questionnote.ui.premium.PremiumGradyanButon
 
 private val DenemeTurkceLocale: Locale = Locale.forLanguageTag("tr-TR")
 private val DenemeTarihBicimi: DateTimeFormatter =
@@ -265,31 +267,14 @@ fun DenemeListesiEkrani(
                     verticalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
                     item {
-                        GradyanKart(modifier = Modifier.fillMaxWidth(), borderAnimation = false) {
-                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Text(
-                                    text = stringResource(R.string.deneme_kicker),
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = PremiumMarkaRenkler.BakirIsik,
-                                    fontWeight = FontWeight.Bold,
-                                )
-                                Text(
-                                    text = stringResource(R.string.deneme_title),
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    color = PremiumMarkaRenkler.Kagit,
-                                    fontWeight = FontWeight.Bold,
-                                )
-                                Text(
-                                    text = stringResource(R.string.deneme_list_subtitle),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.78f),
-                                )
-                            }
-                        }
+                        com.keremtulu.questionnote.ui.bilesenler.DuzBaslik(
+                    baslik = stringResource(R.string.deneme_title),
+                    alt = stringResource(R.string.deneme_list_subtitle),
+                )
                     }
 
                     item {
-                        CamKarti(elevation = CamYukseklik.DUSUK) {
+                        SadeKart(elevation = CamYukseklik.DUSUK) {
                             Column(
                                 modifier = Modifier.padding(18.dp),
                                 verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -370,7 +355,7 @@ fun DenemeListesiEkrani(
 
                     if (sonDeneme != null && sonDeneme.satirlar.isNotEmpty()) {
                         item {
-                            CamKarti(elevation = CamYukseklik.DUSUK) {
+                            SadeKart(elevation = CamYukseklik.DUSUK) {
                                 Column(
                                     modifier = Modifier.padding(18.dp),
                                     verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -1035,52 +1020,14 @@ fun DenemeDetayEkrani(
                 verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
                 item {
-                    GradyanKart(modifier = Modifier.fillMaxWidth(), borderAnimation = false) {
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text(
-                                text = stringResource(R.string.deneme_live_kicker),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = PremiumMarkaRenkler.BakirIsik,
-                                fontWeight = FontWeight.Bold,
-                            )
-                            Text(
-                                text = stringResource(R.string.deneme_net_line, netYazi(anlikToplamNet)),
-                                style = MaterialTheme.typography.displaySmall,
-                                color = PremiumMarkaRenkler.Kagit,
-                                fontWeight = FontWeight.Bold,
-                            )
-                            Text(
-                                text = stringResource(
-                                    R.string.deneme_live_counts,
-                                    anlikDogru,
-                                    anlikYanlis,
-                                    anlikBos,
-                                ),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.80f),
-                            )
-                            if (mevcut != null && toplamYuklenen > 0 && onDenemeyiCalis != null) {
-                                Spacer(Modifier.height(2.dp))
-                                PremiumButton(
-                                    onClick = { onDenemeyiCalis(mevcut.ad) },
-                                    modifier = Modifier.testTag("deneme-study-button"),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = PremiumMarkaRenkler.Kagit.copy(alpha = 0.16f),
-                                        contentColor = PremiumMarkaRenkler.Kagit,
-                                    ),
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.deneme_study_action, toplamYuklenen),
-                                        fontWeight = FontWeight.SemiBold,
-                                    )
-                                }
-                            }
-                        }
-                    }
+                    com.keremtulu.questionnote.ui.bilesenler.DuzBaslik(
+                    baslik = stringResource(R.string.deneme_net_line, netYazi(anlikToplamNet)),
+                    alt = stringResource( R.string.deneme_live_counts, anlikDogru, anlikYanlis, anlikBos, ),
+                )
                 }
 
                 item {
-                    CamKarti(elevation = CamYukseklik.DUSUK) {
+                    SadeKart(elevation = CamYukseklik.DUSUK) {
                         Column(
                             modifier = Modifier.padding(18.dp),
                             verticalArrangement = Arrangement.spacedBy(14.dp),
@@ -1233,7 +1180,7 @@ fun DenemeDetayEkrani(
                 }
 
                 item {
-                    PremiumGradyanButon(
+                    SadeAnaButon(
                         enabled = !islemde,
                         onClick = {
                             scope.launch {

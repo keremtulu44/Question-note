@@ -63,7 +63,7 @@ class OgretmenVeSorulacaklarVeriTest {
             .allowMainThreadQueries()
             .build()
         gorselDeposu = LocalSoruGorselDeposu(context)
-        ogretmenDeposu = OgretmenDeposu(context, gorselDeposu)
+        ogretmenDeposu = OgretmenDeposu(context, gorselDeposu, database)
         soruRepository = RoomSoruRepository(database, gorselDeposu, saat = saat)
     }
 

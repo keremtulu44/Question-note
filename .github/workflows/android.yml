@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - arena/263f59f4-question-note
       - arena/0ec2226d-question-note
       - arena/59c6570d-question-note
       - arena/1c0f41d0-question-note
@@ -11,6 +12,7 @@ on:
       - arena/abf7be2d-question-note
       - arena/ade0c6b2-question-note
       - arena/9d4e7eac-question-note
+      - arena/5d75ca16-question-note
     paths:
       - 'app/**'
       - 'tools/junit_ozeti.py'
@@ -137,7 +139,7 @@ jobs:
               unit_test_exit=1
             fi
             if [[ "$unit_test_exit" -eq 0 ]]; then
-              for name in overview-light overview-dark overview-empty overview-error overview-large details comparison plan; do
+              for name in overview-light overview-dark overview-empty overview-error overview-large weekly collection ranks; do
                 if [[ ! -s "app/build/outputs/progress-previews/$name.png" ]]; then
                   echo "ERROR: Güncel İlerleme önizlemesi eksik: $name" >> "$test_log"
                   unit_test_exit=1
@@ -396,7 +398,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for name in overview-light overview-dark overview-empty overview-error overview-large details comparison plan; do
+          for name in overview-light overview-dark overview-empty overview-error overview-large weekly collection ranks; do
             source="app/build/outputs/progress-previews/$name.png"
             if [[ -f "$source" ]]; then
               # Small, named documentation previews only; never collect arbitrary build outputs.
@@ -448,5 +450,22 @@ jobs:
             echo "Rapor/wrapper değişmedi; commit atlanıyor."
           else
             git commit -m "ci: save signed Android build report [skip ci]"
-            git push origin "HEAD:${GITHUB_REF_NAME}"
+            # Dal, iş çalışırken ilerlemiş olabilir (elle push). Raporun kaybolmaması için
+            # rebase edip yeniden dene; yine olmazsa özeti log'a bas.
+            # Önce düz push: dal iş sırasında ilerlemediyse derin klonla uğraşmaya gerek yok.
+            if ! git push origin "HEAD:${GITHUB_REF_NAME}"; then
+              git fetch --deepen 100 || git fetch --unshallow || true
+              for deneme in 1 2 3; do
+                if git pull --rebase --autostash origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}"; then
+                  echo "Rapor ${GITHUB_REF_NAME} dalına yazıldı (deneme ${deneme})."
+                  break
+                fi
+                git rebase --abort || true
+                sleep 5
+              done
+            else
+              echo "Rapor ${GITHUB_REF_NAME} dalına yazıldı."
+            fi
           fi
+          echo "----- derleme raporu özeti -----"
+          sed -n '1,20p' docs/DERLEME_RAPORU.md || true

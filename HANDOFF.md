@@ -1,9 +1,132 @@
 # HANDOFF — Yanlış Defteri
 
-**Son güncelleme: 2026-10-25.** Önce bu belge, `docs/DERLEME_RAPORU.md`,
+**Son güncelleme: 2026-10-26.** Önce bu belge, `docs/DERLEME_RAPORU.md`,
 `docs/PREMIUM_GORSEL_GELISTIRME.md` ve [P4–P6 sözleşme/kanıt kaydı](docs/P4_P5_P6_UYGULAMA.md) okunur.
 
-## Güncel doğrulanmış teslim: 1.5.108 Uygulama Geneli Görsel, Geometrik & Tipografik Bütünlük Denetimi
+## Güncel ürün kararı — 2026-10-27: öğretmen modu gizli ve askıda
+
+**Önce kökteki `AGENTS.md` okunur.** Kullanıcı öğretmen tarafının gizlenmesini ve
+sonraki oturumlarda geliştirilmemesini istedi. Önceki "öğretmen geçişi korunsun"
+kararı artık geçerli değildir. `UrunKapsami.OGRETMEN_MODU_GORUNUR = false`:
+kurulum/ayar girişleri gizli; eski kayıtlı öğretmen rolü de ekranda öğrenciye
+ yönlenir. Rol tercihi, kod, tablolar, fotoğraflar ve yedek desteği korunur.
+Öğrencinin öğretmene sorulacaklar akışı aktiftir. Kullanıcı açıkça yeniden
+istemeden öğretmen alanına geliştirme/refaktör/görsel değişiklik yapılmamalı.
+Bu gizleme değişikliği yayımlanmış 1.6.1 APK'da henüz yoktur.
+
+## 1.6.1 yayımlandı — güncel doğrulama
+
+Son olgunlaştırma değişiklikleri 1.6.1 (40) APK'ya dahil edildi.
+CI `40384089478`, derlenen commit `f4de076`: Debug 380/0, Release ortak 300/0;
+imzalı APK Release v1.6.1'de mevcut. Ayrıntılar `docs/DERLEME_RAPORU.md`.
+Aşağıdaki derleme bekliyor notları önceki yerel çalışma aşamasını anlatır;
+son CI bunların derleme/test kapısını açmıştır. Fiziksel cihaz kabulü hâlâ ayrıdır.
+
+## Kullanım olgunluğu çalışması (2026-10-26, derleme bekliyor)
+
+`arena/263f59f4-question-note` üzerinde öğrenci Bugün kuyruğu en fazla üç önizlemeye
+indirildi; tur/önizleme aynı saf `GunlukCalismaPlani` sırasını kullanır. Öğrenci
+ayarlarında demo/motor kartları ve ilerlemede teknik ayrıntı menüsü kaldırıldı;
+öğretmen moduna geçiş korundu. İlerleme çalışma önerisi, yedi günlük kayıt ve ders
+pekişmesini öne alır. Öğretmen host safeDrawing, geniş ekran içerik sınırı, tema ve
+canlı tarih düzeltmeleri; kuyrukta hedefli Room güncellemesiyle hızlı planlama eklendi.
+
+İkinci geçiş: kart etiket/işlemleri sarılır, büyük yazı düğmeleri alt alta gelir;
+gruba özgü iş özeti, kuyruk silme onayı + geri alma ve görünür listeyle sınırlı
+toplu seçim eklendi. Yeni 320 dp / yüzde 200 yazı testleri ve kuyruk silme testi
+kaynak olarak hazır; çalıştırılmadı. 30 değişen/yeni Kotlin dosyasında ayrıştırıcı
+sözdizimi hatası yok (derleme kanıtı değildir).
+
+Ayrıntılar, ihtiyaç temelli öneriler ve cihaz kabul listesi:
+[`docs/OLGUNLASMA_INCELEMESI.md`](docs/OLGUNLASMA_INCELEMESI.md).
+Statik kaynak kontrolü ve diff kontrolü geçti. **Java/SDK olmadığı için yeni Kotlin,
+JUnit, APK ve görsel doğrulama yapılmadı.** Aşağıdaki eski CI sonuçları bu değişikliklerin
+kanıtı değildir. Sürüm, Room şeması, yedek biçimi artırılmadı.
+
+## T3 uygulandı ve CI'dan geçti (2026-10-26)
+
+Kullanıcı kararı: **yalnız T3** ve **tamamı çevrimdışı** (bulut/hesap/bildirim yok, Play'e yüklenebilir
+yerel uygulama). `versionName`/`versionCode` artırılmadı; Room/ZIP sürümü değişmedi.
+
+**CI kanıtı:** run `40344883493` (commit `8d5c458`) — Debug **370/0/0/0**, Release **293/0/0/0**,
+imza + beklenen sertifika parmak izi eşleşti. APK SHA-256 `f6b5c7188bdccf1cbfca9b77ab9700c2644938cfe3e9535ff20b743b2e3c4cf8`
+(v1.6.0 etiketi zaten yayımlandığı için Release yeniden oluşturulmadı; sürüm artırılmadan yeni APK
+yayımlanmaz).
+
+- **Arama/filtre:** `OgretmenVerisi.filtrele(...)` + `OgretmenSorusu.aramaHavuzu(...)` (başlık, kim
+  sordu, kaynak, ders/konu adı; `aramaAnahtari` = `tr-TR` küçük harf). `KuyrukGunFiltresi`
+  (HEPSI/BUGUN/GECIKEN/PLANLANMAMIS) `kuyruk(...)` içinde; eski `yalnizGeciken` bayrağı kaldırıldı.
+  UI: `OgretmenAramaAlani` + `FiltreCipi` satırları (gün, ders, soran), `rememberSaveable` durum.
+- **Paylaşım:** `ui/ogretmen/OgretmenPaylasim.kt` — tek yerel `ACTION_SEND`/`ACTION_SEND_MULTIPLE`,
+  `FileProvider` URI'leri (`res/xml/file_paths.xml` → `share_teacher` `ogretmen-img/`, `share_archive`
+  `img/`), en fazla 9 fotoğraf, `FLAG_GRANT_READ_URI_PERMISSION`. **"kim sordu" ve cevap metne
+  girmez.** Manifest değişmedi (provider zaten `exported=false`, izin yok).
+- **Kapatma döngüsü:** `OgretmenDeposu.grupSil(grupId, dosyalariKoru = true)` + yeni
+  `grupGeriAl(grup, sorular): Int?` (grup + sorular tek transaction, aynı kimlikler). Detay ekranı
+  silmeden sonra `onGeri()` çağırıp geri almayı `Snackbar` (10 sn) ile sunar; bu yüzden host
+  `OgretmenAnaEkrani` bir `kaliciKapsam` (host `rememberCoroutineScope`) geçirir — ekran kapanınca
+  coroutine iptal olmasın. Arşiv sekmesinde `ogretmen_arsivden_geri_al` toplu geri alma.
+- **Uyarılar:** `OgretmenAyarlarEkrani` 7+ gün/ hiç yedek yoksa `ogretmen_yedek_uyarisi`;
+  `OgretmenSoruFormuEkrani` aynı `sha256` başka soruda ise `ogretmen_ayni_gorsel_dialog` onayı
+  ("yine de kaydet").
+- **Testler:** `OgretmenAramaVeFiltreTest` (saf JVM; arama/filtre/normalize/aynı görsel/1.000 soru
+  < 200 ms), `OgretmenGrupGeriAlmaTest` (Room undo + tekrar çağrı + arşivden dönüş),
+  `OgretmenPaylasimTest` (chooser/içerik URI'si/metin/9 sınırı + `file_paths.xml` ve sağlayıcı
+  beyanı), `OgretmenT3ArayuzTest` (Robolectric Compose: arama, kart paylaşımı, snackbar geri alma).
+  Paylaşımda URI üretimi `uriUret` ile enjekte edilir: `FileProvider` yol stratejisini süreç
+  genelinde önbelleğe aldığı, Robolectric'in her test metoduna yeni `filesDir` verdiği için
+  sağlayıcı aynı JVM'de iki kez çalıştırılamıyor (`Failed to find configured root`).
+- **Kayıt dayanıklılığı:** `soruKaydet` ders/konu kimliğini katalogda doğrular; form açıkken
+  arşivlenen/silinen bir ders yabancı anahtar hatasıyla tüm soruyu kaybettiriyordu, artık yalnız
+  etiket atılır.
+- **Bilinen açıklar:** "bugüne al / yarına at" hızlı plan aksiyonu, soru+çözüm paylaşım düğmesi
+  (`cozumDahil` hazır), tüm-gruplar arşiv filtresi, içgörü kartı ve **cihaz kabulü** (200+ soru arama,
+  5 soru paylaşma, grup geri alma, 9 günlük yedek uyarısı). Otomatik test yeşil olması cihaz kapısını
+  açmaz.
+
+## Güncel ve yayımlanmış: 1.6.0 Öğretmen modu — T0 + T1 + P2 başlangıcı
+
+- **Dal:** `arena/5d75ca16-question-note`. **Sürüm:** `versionName = "1.6.0"` (`versionCode = 39`).
+- **Veri katmanı (Room v5):** öğretmen çalışma alanı artık veritabanında:
+  `ogretmen_gruplari` (FK `dersler` SET NULL), `ogretmen_sorulari` (FK grup CASCADE, ders/konu SET NULL),
+  `ogretmen_soru_gorselleri` (FK soru CASCADE, `tur` = SORU/COZUM). `MIGRATION_4_5` yalnız ekleme yapar.
+  `OgretmenDeposu` Room tabanlı; her mutasyon `baslat()` sonrası tek transaction + `state` yenileme.
+- **Eski JSON:** `ogretmen_calisma_alani.json` açılışta bir kez toleranslı içe aktarılır, sonra
+  `ogretmen_calisma_alani.ice-aktarildi.json` olarak saklanır; okunamayan dosya
+  `ogretmen_calisma_alani.bozuk-<zaman>.json` karantinasına alınır ve `OgretmenAlanDurumu` ile bildirilir.
+  İçe aktarmada `ders_id`/`konu_id` ortak katalogla doğrulanır (FK güvenliği) ve görselsiz sorular atlanır.
+- **Arayüz:** `OgretmenAnaEkrani` üç hedefe ayrıldı (Gruplarım / Bugün / Ayarlar) ve 2.561 satırlık
+  monolit `ui/ogretmen/` altında dosyalara bölündü: `OgretmenBilesenler`, `OgretmenGruplarEkrani`,
+  `OgretmenKuyrukEkrani`, `OgretmenGrupDetayEkrani`, `OgretmenSoruFormuEkrani`, `OgretmenSunumEkrani`,
+  `OgretmenAyarlarEkrani`. Kuyruk, toplu işlem, arşiv, silme geri alma, taşıma/kopyalama, sunum
+  (ekran açık + gizli cevap + çözüm ayrı) ve depolama/bakım kartı bu pakette.
+- **Kamera:** manifestte `CAMERA` izni yok; `SorulacaklarEkrani` ve öğretmen formundaki runtime izin
+  kapısı kaldırıldı. `ACTION_IMAGE_CAPTURE` doğrudan `FileProvider` yoluna yazıyor.
+- **Yedek:** `FORMAT_VERSION = 5`, `ROOM_SCHEMA_VERSION = 5`, okuma `{2,3,4,5}`; öğretmen görselleri
+  `img/` veya `ogretmen-img/` olabilir, ZIP'te tek `images/` klasörü. `teacher_workspace_version` ve
+  görsel türü/sayı doğrulamaları eklendi.
+- **Testler:** `OgretmenMigrationTest` (gerçek v4 şemasından 4→5, indeksler, CASCADE/SET NULL),
+  `OgretmenDeposuRoomTest` (JSON içe aktarma, toplu durum, taşıma, kopyalama, silme geri alma);
+  mevcut üç test dosyası artık `OgretmenDeposu(context, gorselDeposu, database)` ile in-memory DB kullanıyor.
+- **Doğrulanmış CI:** `40280978018` — **Debug 351/0/0/0 · Release 277/0/0/0**, `assembleRelease`,
+  imza + beklenen sertifika parmak izi eşleşti; Release `v1.6.0` yayımlandı, APK
+  `yanlis-defteri-1.6.0.apk` (13.653.001 bayt, SHA-256
+  `db756b455b2d3942be7f2d009f00062696e100482938206b951c6b161f4c470f`). Sayılar iki varyantta
+  tekrar eder, toplanmaz.
+- **Arayüz kararları (K45/K46):** öğretmen onay/seçim/form pencereleri tek `OgretmenDiyalogu`
+  kabuğunda (düz `Dialog`); Material3 `AlertDialog` Robolectric Compose testlerinde boşta kalmıyordu.
+  Host ekranları animasyonsuz `when` ile çizilir; `AnimatedContent` dialog penceresini her karede
+  yeniden kuruyordu.
+- **CI altyapısı:** rapor adımı önce düz `git push` deniyor, yalnız reddedilirse derinleştirip
+  rebase ediyor ve rapor özetini log'a basıyor; böylece test sonuçları dalda kaybolmuyor.
+- **Açık kalanlar:** fiziksel cihaz kabulü (kamera izinsiz açılmalı, süreç öldürme, 200+ soru,
+  1.6x yazı ölçeğinde sunum/klavye) ve T2 maddeleri (`ROADMAP.md`).
+- **Sıradaki iş önerisi:** [öğretmen ihtiyaç araştırması](docs/OGRETMEN_IHTIYAC_ARASTIRMASI.md)
+  (2026-10-26) — kanıtlı 14 boşluk, 22 fikir ve T3/T4 sıralaması. T3 tamamen mevcut v5 verisiyle
+  yapılabilir (arama, "kim sordu" yüzeyi, paylaşım, plan grupları, arşiv geri alma, yedek tazeliği);
+  T4 (fotoğrafsız sözlü soru, taslak kutusu) **Room/ZIP v6** gerektirir ve A12/A16 kararlarına bağlı.
+
+## Önceki doğrulanmış teslim: 1.5.108 Uygulama Geneli Görsel, Geometrik & Tipografik Bütünlük Denetimi
 
 - **Sürüm:** `versionName = "1.5.108"` (`versionCode = 38`), çalışma dalı `arena/9d4e7eac-question-note`.
 - **Tam ekran görüntüleyici ve yakınlaştırma sınırları:** `SoruGorselBileseni` içinde `SoruGorselTamEkran` tam ekran görüntüleyicisinin `0px` yüksekliğe çökmesine neden olan `matchParentSize` / `fillMaxWidth` hatası düzeltildi; `SoruGorselTamEkran`, `SorulacakTamEkranSunumDialog` ve `OgretmenTamEkranSoruDialog` bileşenlerine `.clipToBounds()`, çift dokunuşla `2.4x` yakınlaştırma, `1x Sıfırla`, koyu stüdyo kenarlık kontrastı ve devre dışı buton soluklaştırması eklendi.

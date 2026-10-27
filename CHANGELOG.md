@@ -2,6 +2,49 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [Yayınlanmadı — T3] — 2026-10-26
+
+- **Arama ve filtreler:** kuyruk ve grup detayında tek satır arama (`rememberSaveable`); başlık,
+  "kim sordu", kaynak, ders ve konu adında Türkçe'ye duyarlı (`tr-TR` küçük harf) eşleşme. Kuyrukta
+  **Tümü / Bugün / Geciken / Planlanmamış** gün çipleri (eski "yalnız gecikenler" onay kutusunun
+  yerine), kullanılan dersler için ders çipleri ve soran kişi çipleri. Cevap metni hiç aranmaz.
+- **"Kim sordu" yüzeyi:** soru kartında "Soran: …" rozeti, sunum ekranında soran/ders/konu satırı,
+  kart ve kuyruk/detay için soran kişi filtresi, formda tek dokunuşla doldurulan "Sık soranlar"
+  çipleri (normalize gruplama: kırpma + `tr-TR` küçük harf).
+- **Yerel paylaşım:** `ACTION_SEND`/`ACTION_SEND_MULTIPLE` + `FileProvider`
+  (`files-path` `ogretmen-img/` ve `img/`), en fazla 9 fotoğraf, `FLAG_GRANT_READ_URI_PERMISSION`,
+  seçili N soru için "seçilenleri paylaş". Metinde başlık/ders/konu/kaynak gider; **"kim sordu" ve
+  cevap asla paylaşılmaz**. Ağ, hesap, WhatsApp API yok.
+- **Kapatma döngüsü:** grup silme fotoğrafları korur ve `Snackbar` (10 sn) üzerinden **gerçek geri
+  alma** sunar — grup satırı ve sorular aynı kimliklerle tek transaction'da döner; arşiv sekmesinde
+  "Arşivden geri al" ile filtrelenmiş liste kuyruğa döner.
+- **Veri güvenliği uyarıları:** Ayarlar'da 7+ günlük veya hiç alınmamış yedek için uyarı; soru
+  formunda aynı `sha256` başka bir soruda varsa "aynı fotoğraf" onayı.
+- **Dayanıklılık:** form açıkken arşivlenen veya silinen bir ders/konu kimliği artık kaydı
+  düşürmüyor; yabancı anahtar hatası fotoğrafıyla birlikte tüm soruyu kaybettiriyordu, yalnız o
+  etiket atılıyor.
+- **Değişmeyen sözleşme:** Room `ROOM_SCHEMA_VERSION = 5`, ZIP `FORMAT_VERSION = 5`, okuma
+  `{2,3,4,5}`; göç yok. `versionName`/`versionCode` bu commit'te artırılmadı.
+- **Testler:** `OgretmenAramaVeFiltreTest` (arama/filtre/gün filtresi/aynı görsel/1.000 soruda
+  < 200 ms), `OgretmenGrupGeriAlmaTest` (grup silme + geri alma, tekrar çağrı, arşivden dönüş),
+  `OgretmenPaylasimTest` (chooser, içerik URI'si, "kim sordu" dışarıda, 9 görsel sınırı,
+  `file_paths.xml`/sağlayıcı beyanı), `OgretmenT3ArayuzTest` (arama daraltma, kart paylaşımı,
+  snackbar geri alma).
+- **CI:** run `40344883493` (commit `8d5c458`) — Debug **370/0/0/0**, Release **293/0/0/0**, imza ve
+  sertifika eşleşti; sürüm artırılmadığı için yayımlanan APK değişmedi (imzalı APK SHA-256
+  `f6b5c7188bdccf1cbfca9b77ab9700c2644938cfe3e9535ff20b743b2e3c4cf8`).
+
+## [1.6.0] — 2026-10-26
+
+- **Öğretmen verisi Room v5:** `ogretmen_gruplari`, `ogretmen_sorulari`, `ogretmen_soru_gorselleri` tabloları (5 indeks, `MIGRATION_4_5`); ders/konu bağları `SET NULL`, soru→grup ve görsel→soru `CASCADE`. Eski tek JSON dosyası ilk açılışta toleranslı içe aktarılır, sonra arşivlenir; okunamazsa karantinaya alınır ve çalışma alanı salt-okunur kalır.
+- **Gerçek öğretmen akışı:** tüm gruplardan "Bugün" kuyruğu (geciken filtresi, grup çipleri, sıralama), ders/konu/kaynak/"kim sordu"/çözüm günü alanları (ortak katalog), başka gruba kopyalama uyarısı, soru taşıma, toplu seçim + onaylı arşivleme, silme ve geri alma, kaydet-ve-yeni.
+- **Sınıf içi sunum:** tam ekran dialog; ekran açık kalır, cevap varsayılan gizli, çözüm ayrı açılır, "Çözdüm, sıradaki" ve sunumdan kopyalama.
+- **Kamera:** gereksiz izin kapısı kaldırıldı; manifestte `CAMERA` izni yok.
+- **Yedek:** ZIP `FORMAT_VERSION` 5, `teacher_workspace` `data.json` içinde, öğretmen görselleri öğrenci `images/` klasöründe; v2–v5 okuma, sıkı doğrulama. Şifreleme yok.
+- **Arayüz kararları:** öğretmen onay/seçim/form pencereleri tek `OgretmenDiyalogu` kabuğunda (Material3 `AlertDialog` testlerde boşta kalmıyordu); host ekranları animasyonsuz geçiş kullanır.
+- CI `40280978018`: **Debug 351/0/0/0 · Release 277/0/0/0**, imza + sertifika doğrulandı; yayımlanan APK SHA-256 `db756b455b2d3942be7f2d009f00062696e100482938206b951c6b161f4c470f`.
+- Sürüm: `versionCode 39` / `versionName 1.6.0`.
+
 ## [1.5.108] — 2026-10-25
 
 - **Tam ekran görsel görüntüleyicisi ve yakınlaştırma düzeltmeleri:** `SoruGorselTamEkran` içinde `matchParentSize()` + yüksekliksiz `fillMaxWidth()` bileşimi nedeniyle soru ve çözüm fotoğraflarının tam ekranda `0px` yüksekliğe çökerek siyah ekran göstermesine yol açan kritik hata giderildi. Tüm tam ekran görüntüleyicilere (`SoruGorselTamEkran`, `SorulacakTamEkranSunumDialog`, `OgretmenTamEkranSoruDialog`) `safeDrawing` pencere boşluğu, yakınlaştırma taşmasını önleyen `.clipToBounds()`, çift dokunuşla `2.4x` yakınlaştırma, **`1x Sıfırla`** aksiyonu ve devre dışı sayfa/sıralama düğmeleri için doğru soluklaştırma eklendi.

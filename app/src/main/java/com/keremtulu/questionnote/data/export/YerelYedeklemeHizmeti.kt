@@ -529,14 +529,16 @@ class YerelYedeklemeHizmeti(
                 .distinctBy { it.dosyaAdi }
             uniqueTeacherImages.forEach { img ->
                 val input = img.toGirdi()
-                if (!gorselDeposu.ogretmenKaliciDosyayiDogrula(input)) {
+                if (!gorselDeposu.depolananDosyayiDogrula(input)) {
                     throw IOException("Eksik veya bozuk öğretmen görseli bulundu: ${img.id}")
                 }
                 val file = gorselDeposu.dosyaGoruntuIcin(img.dosyaAdi)
                     ?: throw IOException("Öğretmen görseli bulunamadı: ${img.id}")
                 if (file.length() != img.boyut) throw IOException("Öğretmen görsel boyutu değişti: ${img.id}")
                 val zipPath = com.keremtulu.questionnote.data.prefs.OgretmenDeposu.zipAdi(img.dosyaAdi)
-                payloads += payloadFromFile(zipPath, file, img.boyut, img.sha256)
+                if (payloads.none { it.name == zipPath }) {
+                    payloads += payloadFromFile(zipPath, file, img.boyut, img.sha256)
+                }
             }
             val payloadSize = payloads.sumOf { it.sizeBytes }
             if (payloads.size + 1 > MAX_ARCHIVE_ENTRIES || payloadSize > MAX_TOTAL_UNCOMPRESSED_BYTES) {
@@ -666,6 +668,10 @@ class YerelYedeklemeHizmeti(
                 put(
                     "teacher_workspace",
                     com.keremtulu.questionnote.data.prefs.OgretmenDeposu.jsonYaz(data.ogretmenVerisi),
+                )
+                put(
+                    "teacher_workspace_version",
+                    com.keremtulu.questionnote.data.prefs.OgretmenDeposu.SURUM,
                 )
             }
         }
@@ -859,6 +865,7 @@ class YerelYedeklemeHizmeti(
                 2 -> 2
                 3 -> 3
                 4 -> 4
+                5 -> 5
                 else -> throw IOException("Desteklenmeyen yedek sürümü.")
             }
             if (manifest.getInt("room_schema_version") != expectedSchemaVersion) {
@@ -871,7 +878,7 @@ class YerelYedeklemeHizmeti(
             if (createdAt <= 0L) throw IOException("Yedek tarihi geçersiz.")
             val manifestCounts = manifest.getJSONObject("counts")
             val counts = manifestCounts.toCounts(formatVersion)
-            val catalogOptionCount = if (formatVersion in 3..4) {
+            val catalogOptionCount = if (formatVersion in 3..5) {
                 manifestCounts.getInt("catalog_options").also {
                     if (it < 0) throw IOException("Manifest içindeki katalog sayısı negatif.")
                 }
@@ -890,7 +897,7 @@ class YerelYedeklemeHizmeti(
             val expectedCsvFiles = when (formatVersion) {
                 2 -> LEGACY_REQUIRED_CSV_FILES
                 3 -> V3_REQUIRED_CSV_FILES
-                4 -> REQUIRED_CSV_FILES
+                4, 5 -> REQUIRED_CSV_FILES
                 else -> throw IOException("Desteklenmeyen CSV sürümü.")
             }
             if (declaredCsv != expectedCsvFiles || !inventoryPaths.containsAll(expectedCsvFiles)) {
@@ -900,7 +907,8 @@ class YerelYedeklemeHizmeti(
             if (inventoryPaths != expectedCsvFiles + DATA_FILE + imageEntries) {
                 throw IOException("ZIP envanteri biçim sürümünün tablolarıyla eşleşmiyor.")
             }
-            if (imageEntries.size != counts.gorselSayisi + teacherImageCount ||
+            val beklenenGorselUst = counts.gorselSayisi + teacherImageCount
+            if (imageEntries.size > beklenenGorselUst || imageEntries.size < counts.gorselSayisi ||
                 imageEntries.any { !IMAGE_PATH.matches(it) }
             ) {
                 throw IOException("Yedek görsel envanteri geçersiz.")
@@ -942,8 +950,9 @@ class YerelYedeklemeHizmeti(
             if (teacherZipPaths.size != teacherImageCount) {
                 throw IOException("Öğretmen görsel sayısı manifest ile uyuşmuyor.")
             }
+            // A teacher question may reuse a student image file, so the union is compared, not the sum.
             val dataImagePaths = (data.images.map { it.zipFileName } + teacherZipPaths).toSet()
-            if (dataImagePaths.size != data.images.size + teacherZipPaths.size || dataImagePaths != imageEntries.toSet()) {
+            if (dataImagePaths != imageEntries.toSet()) {
                 throw IOException("JSON görsel ilişkileri ZIP girdileriyle uyuşmuyor.")
             }
             return VerifiedArchive(
@@ -1021,7 +1030,7 @@ class YerelYedeklemeHizmeti(
         }
         val options = when (formatVersion) {
             2 -> legacyCatalogOptions(questions)
-            3, 4 -> {
+            3, 4, 5 -> {
             json.getJSONArray("catalog_options").toTypedList(MAX_ROWS_PER_TABLE) { item ->
                 val type = runCatching { SoruSecenekTuru.valueOf(item.getString("type")) }
                     .getOrElse { throw IOException("Yedekte bilinmeyen katalog türü var.") }
@@ -1079,7 +1088,7 @@ class YerelYedeklemeHizmeti(
                 if (json.has("measurements")) throw IOException("Eski biçim ölçüm tablosu içeremez.")
                 emptyList()
             }
-            4 -> json.getJSONArray("measurements").toTypedList(MAX_ROWS_PER_TABLE, OlcumSerilestirme::oku)
+            4, 5 -> json.getJSONArray("measurements").toTypedList(MAX_ROWS_PER_TABLE, OlcumSerilestirme::oku)
             else -> throw IOException("Desteklenmeyen ölçüm tablosu sürümü.")
         }
         val mockExams = if (json.has("mock_exams") && !json.isNull("mock_exams")) {
@@ -1090,6 +1099,14 @@ class YerelYedeklemeHizmeti(
             emptyList()
         }
         val teacherWorkspace = if (json.has("teacher_workspace") && !json.isNull("teacher_workspace")) {
+            val bildirilenSurum = if (json.has("teacher_workspace_version")) {
+                json.getInt("teacher_workspace_version")
+            } else {
+                1
+            }
+            if (bildirilenSurum > com.keremtulu.questionnote.data.prefs.OgretmenDeposu.SURUM) {
+                throw IOException("Yedek, bu uygulamanın okuyamadığı yeni bir öğretmen çalışma alanı sürümü içeriyor.")
+            }
             com.keremtulu.questionnote.data.prefs.OgretmenDeposu.jsonOku(json.getJSONObject("teacher_workspace"))
         } else {
             com.keremtulu.questionnote.domain.model.OgretmenVerisi()
@@ -1255,7 +1272,9 @@ class YerelYedeklemeHizmeti(
         }
         uniqueIds(data.ogretmenVerisi.sorular.map { it.id }, "öğretmen sorusu")
         data.ogretmenVerisi.sorular.forEach { s ->
-            if (s.grupId !in teacherGroupIds || s.gorseller.isEmpty() || s.gorseller.size > 20) {
+            if (s.grupId !in teacherGroupIds || s.gorseller.isEmpty() || s.gorseller.size > 20 ||
+                s.soruGorselleri().isEmpty() || s.cozumGorselleri().size + s.soruGorselleri().size != s.gorseller.size
+            ) {
                 throw IOException("Yedekte geçersiz öğretmen sorusu var: ${s.id}")
             }
             s.gorseller.forEach { img ->
@@ -1309,7 +1328,7 @@ class YerelYedeklemeHizmeti(
         soruSayisi = getInt("questions"),
         gorselSayisi = getInt("images"),
         tekrarSayisi = getInt("reviews"),
-        olcumSayisi = if (formatVersion == 4) OlcumSerilestirme.tamInt(this, "measurements") else 0,
+        olcumSayisi = if (formatVersion >= 4) OlcumSerilestirme.tamInt(this, "measurements") else 0,
     ).also { counts ->
         if (listOf(counts.dersSayisi, counts.konuSayisi, counts.soruSayisi, counts.gorselSayisi, counts.tekrarSayisi, counts.olcumSayisi).any { it < 0 }) {
             throw IOException("Manifest içindeki sayı negatif.")
@@ -1697,9 +1716,9 @@ class YerelYedeklemeHizmeti(
         const val FORMAT_ID = "yanlis-defteri-backup"
         const val LEGACY_FORMAT_VERSION = 2
         const val LEGACY_ROOM_SCHEMA_VERSION = 2
-        const val FORMAT_VERSION = 4
-        const val ROOM_SCHEMA_VERSION = 4
-        val SUPPORTED_FORMAT_VERSIONS = setOf(2, 3, 4)
+        const val FORMAT_VERSION = 5
+        const val ROOM_SCHEMA_VERSION = 5
+        val SUPPORTED_FORMAT_VERSIONS = setOf(2, 3, 4, 5)
         const val STATE_PREPARED = "PREPARED"
         const val STATE_COMMITTED = "COMMITTED"
         const val JPEG_MIME = "image/jpeg"
@@ -1721,7 +1740,10 @@ class YerelYedeklemeHizmeti(
         val IMAGE_ID = UUID_PATTERN
         val IMAGE_PATH = Regex("images/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\.jpg")
         val PERMANENT_IMAGE_PATH = Regex("img/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\.jpg")
-        val TEACHER_PERMANENT_IMAGE_PATH = Regex("ogretmen-img/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\.jpg")
+        // A teacher question may reference a shared student-archive image (`img/`) added from the archive.
+        val TEACHER_PERMANENT_IMAGE_PATH = Regex(
+            "(?:ogretmen-img|img)/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\.jpg",
+        )
         val SAFETY_NAME = Regex("safety-[0-9a-fA-F-]{36}\\.zip")
         val SHA256 = Regex("[0-9a-f]{64}")
         val LEGACY_REQUIRED_CSV_FILES = setOf(

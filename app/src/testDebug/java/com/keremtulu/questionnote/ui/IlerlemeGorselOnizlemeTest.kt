@@ -33,9 +33,9 @@ class IlerlemeGorselOnizlemeTest {
     @Test fun firstDay() = kaydet("overview-empty", SeviyeDurumuUi.ozetten(ornekIlerlemeOzeti(bos = true)))
     @Test fun error() = kaydet("overview-error", SeviyeDurumuUi.Hata)
     @Test fun largeText() = kaydet("overview-large", SeviyeDurumuUi.ozetten(ornekIlerlemeOzeti()), koyu = true, olcek = 2f)
-    @Test fun detailMenu() = kaydet("details", SeviyeDurumuUi.ozetten(ornekIlerlemeOzeti()), bolum = "menu")
-    @Test fun comparison() = kaydet("comparison", SeviyeDurumuUi.ozetten(ornekIlerlemeOzeti()), bolum = "comparison")
-    @Test fun plan() = kaydet("plan", SeviyeDurumuUi.ozetten(ornekIlerlemeOzeti()), bolum = "plan")
+    @Test fun weeklySummary() = kaydet("weekly", SeviyeDurumuUi.ozetten(ornekIlerlemeOzeti()), bolum = "weekly")
+    @Test fun collection() = kaydet("collection", SeviyeDurumuUi.ozetten(ornekIlerlemeOzeti()), bolum = "collection")
+    @Test fun ranks() = kaydet("ranks", SeviyeDurumuUi.ozetten(ornekIlerlemeOzeti()), bolum = "ranks")
 
     private fun kaydet(ad: String, durum: SeviyeDurumuUi, koyu: Boolean = false, olcek: Float = 1f, bolum: String? = null) {
         compose.setContent {
@@ -43,13 +43,14 @@ class IlerlemeGorselOnizlemeTest {
                 IlerlemeTasarimOnizlemesi(durum, koyu)
             }
         }
-        if (bolum != null) {
-            compose.onNodeWithTag("progress-list").performScrollToNode(hasTestTag("progress-details"))
-            compose.onNodeWithTag("progress-details").performScrollTo()
+        if (bolum == "weekly") {
+            compose.onNodeWithTag("progress-list").performScrollToNode(hasTestTag("progress-weekly-summary"))
+        } else if (bolum != null) {
+            compose.onNodeWithTag("progress-list").performScrollToNode(hasTestTag("progress-collection"))
+            compose.onNodeWithTag("progress-collection").performScrollTo()
                 .performSemanticsAction(SemanticsActions.OnClick) { it() }
-            if (bolum != "menu") {
-                compose.onNodeWithTag("progress-detail-list").performScrollToNode(hasTestTag("progress-open-$bolum"))
-                compose.onNodeWithTag("progress-open-$bolum").performScrollTo()
+            if (bolum == "ranks") {
+                compose.onNodeWithTag("progress-open-ranks").performScrollTo()
                     .performSemanticsAction(SemanticsActions.OnClick) { it() }
             }
         }

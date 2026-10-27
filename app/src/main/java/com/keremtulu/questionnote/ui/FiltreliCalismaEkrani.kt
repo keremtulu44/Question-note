@@ -27,12 +27,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -57,25 +55,29 @@ import com.keremtulu.questionnote.domain.repository.KonuRepository
 import com.keremtulu.questionnote.domain.repository.SoruRepository
 import com.keremtulu.questionnote.ui.animasyon.animateItemInsertion
 import com.keremtulu.questionnote.ui.animasyon.rememberShimmer
-import com.keremtulu.questionnote.ui.bilesenler.premium.CamKarti
+import com.keremtulu.questionnote.ui.bilesenler.SadeKart
 import com.keremtulu.questionnote.ui.bilesenler.premium.CamYukseklik
-import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
 import com.keremtulu.questionnote.ui.bilesenler.premium.IskeletKart
 import com.keremtulu.questionnote.ui.bilesenler.premium.IskeletMetin
 import com.keremtulu.questionnote.ui.bilesenler.premium.PremiumBosDurum
 import com.keremtulu.questionnote.ui.bilesenler.premium.VarsayilanIlustrasyon
 import com.keremtulu.questionnote.ui.premium.EtkilesimTuru
-import com.keremtulu.questionnote.ui.premium.PremiumGradyanButon
+import com.keremtulu.questionnote.ui.bilesenler.SadeAnaButon
 import com.keremtulu.questionnote.ui.premium.PremiumCard
 import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 import com.keremtulu.questionnote.ui.premium.PremiumOutlinedButton
 import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import java.time.ZoneId
-import java.time.LocalDate
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import com.keremtulu.questionnote.ui.bilesenler.premium.CamKarti
+import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
+import com.keremtulu.questionnote.ui.premium.PremiumGradyanButon
+import java.time.LocalDate
 
 /** State kept by the app shell so opening a question does not discard the chosen filters. */
 data class FiltreliCalismaEkraniAyar(
@@ -271,7 +273,7 @@ fun FiltreliCalismaEkrani(
                 .padding(insets)
                 .consumeWindowInsets(insets)
                 .testTag("practice-filter-list"),
-            contentPadding = PaddingValues(start = 20.dp, top = 10.dp, end = 20.dp, bottom = 32.dp),
+            contentPadding = PaddingValues(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item {
@@ -280,33 +282,9 @@ fun FiltreliCalismaEkrani(
                         onClick = onGeri,
                         interactionTur = EtkilesimTuru.GERI,
                     ) { Text(androidx.compose.ui.res.stringResource(R.string.common_back)) }
-                    GradyanKart(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(24.dp),
-                        borderAnimation = false,
-                    ) {
-                        Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
-                            Text(
-                                text = androidx.compose.ui.res.stringResource(R.string.filtered_practice_kicker),
-                                color = PremiumMarkaRenkler.BakirIsik,
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.Bold,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                            Text(
-                                text = androidx.compose.ui.res.stringResource(R.string.filtered_practice_title),
-                                color = PremiumMarkaRenkler.Kagit,
-                                style = MaterialTheme.typography.headlineMedium,
-                                fontWeight = FontWeight.Bold,
-                            )
-                            Text(
-                                text = androidx.compose.ui.res.stringResource(R.string.filtered_practice_subtitle),
-                                color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.86f),
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
-                        }
-                    }
+                    com.keremtulu.questionnote.ui.bilesenler.SayfaBasligi(
+                        androidx.compose.ui.res.stringResource(R.string.filtered_practice_title),
+                    )
                 }
             }
 
@@ -314,7 +292,7 @@ fun FiltreliCalismaEkrani(
                 EkranYukleme.Yukleniyor -> item {
                     val loadingLabel = androidx.compose.ui.res.stringResource(R.string.filtered_practice_loading)
                     val shimmer = rememberShimmer()
-                    CamKarti(
+                    SadeKart(
                         modifier = Modifier.fillMaxWidth().semantics {
                             contentDescription = loadingLabel
                             liveRegion = LiveRegionMode.Polite
@@ -349,7 +327,7 @@ fun FiltreliCalismaEkrani(
                     )
                 }
                 is EkranYukleme.Hazir -> item {
-                    CamKarti(
+                    SadeKart(
                         modifier = Modifier.fillMaxWidth(),
                         elevation = CamYukseklik.DUSUK,
                         shape = RoundedCornerShape(24.dp),
@@ -464,7 +442,7 @@ fun FiltreliCalismaEkrani(
                 }
             }
             if (secenekDurumu is EkranYukleme.Hazir) item {
-                CamKarti(
+                SadeKart(
                     modifier = Modifier.fillMaxWidth(),
                     elevation = CamYukseklik.DUSUK,
                     shape = RoundedCornerShape(24.dp),
@@ -594,12 +572,12 @@ fun FiltreliCalismaEkrani(
                                         style = MaterialTheme.typography.bodySmall,
                                     )
                                 }
-                                PremiumGradyanButon(
+                                SadeAnaButon(
                                     modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
                                     enabled = secenekler != null && secilecekSoruSayisi != null,
                                     contentPadding = PaddingValues(vertical = 16.dp),
                                     onClick = {
-                                        val count = secilecekSoruSayisi ?: return@PremiumGradyanButon
+                                        val count = secilecekSoruSayisi ?: return@SadeAnaButon
                                         val lessonMap = secenekler?.dersler.orEmpty().associateBy { it.id }
                                         val selected = siraliSorular.take(count)
                                         if (selected.isNotEmpty() && selected.all { it.dersId in lessonMap }) {

@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import com.keremtulu.questionnote.domain.repeat.CalismaSorulariniSirala
+import com.keremtulu.questionnote.domain.repeat.GunlukCalismaPlani
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -34,7 +34,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,12 +53,11 @@ import com.keremtulu.questionnote.ui.animasyon.SureToken
 import com.keremtulu.questionnote.ui.animasyon.animateFloatPremium
 import com.keremtulu.questionnote.ui.animasyon.tweenPremium
 import com.keremtulu.questionnote.ui.bilesenler.premium.BosDurumSoruYok
-import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
 import com.keremtulu.questionnote.ui.bilesenler.premium.KutlamaParcaciklari
 import com.keremtulu.questionnote.ui.premium.EtkilesimTuru
 import com.keremtulu.questionnote.ui.premium.PremiumCard
 import com.keremtulu.questionnote.ui.premium.PremiumExtendedFloatingActionButton
-import com.keremtulu.questionnote.ui.premium.PremiumGradyanButon
+import com.keremtulu.questionnote.ui.bilesenler.SadeAnaButon
 import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 import com.keremtulu.questionnote.ui.premium.PremiumOutlinedButton
 import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
@@ -78,6 +76,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import androidx.compose.runtime.setValue
+import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
+import com.keremtulu.questionnote.ui.premium.PremiumGradyanButon
 
 private data class BugunSoruSatiri(
     val soru: Soru,
@@ -175,33 +176,13 @@ fun BugunEkrani(
     ) { insets ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets),
-            contentPadding = PaddingValues(start = 20.dp, top = 10.dp, end = 20.dp, bottom = 104.dp),
+            contentPadding = PaddingValues(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 104.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            item {
-                GradyanKart(modifier = Modifier.fillMaxWidth(), borderAnimation = false) {
-                    Column {
-                        Text(
-                            text = stringResource(R.string.today_kicker),
-                            color = PremiumMarkaRenkler.BakirIsik,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 1,
-                        )
-                        Text(
-                            text = stringResource(R.string.today_title),
-                            modifier = Modifier.padding(top = 4.dp),
-                            color = PremiumMarkaRenkler.Kagit,
-                            style = MaterialTheme.typography.displaySmall,
-                        )
-                        Text(
-                            text = dateText,
-                            modifier = Modifier.padding(top = 2.dp),
-                            color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.74f),
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    }
-                }
+            item(key = "sayfa-basligi") {
+                com.keremtulu.questionnote.ui.bilesenler.SayfaBasligi(
+                    stringResource(R.string.today_title), dateText,
+                )
             }
             if (onDevam != null) item {
                 PremiumOutlinedButton(onClick = onDevam, modifier = Modifier.fillMaxWidth()) {
@@ -405,23 +386,25 @@ private fun BugunGunKarti(
                             style = MaterialTheme.typography.labelLarge,
                         )
                     }
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        ready.sorular.forEach { row ->
-                            GunSoruSatiri(
-                                row = row,
-                                today = today,
-                                onClick = {
-                                    onOturumBaslat(listOf(row.soru), mapOf(row.ders.id to row.ders))
-                                },
-                            )
-                        }
+                    val plan = remember(ready.sorular, today, hedef, yapilan) {
+                        GunlukCalismaPlani.olustur(
+                            ready.sorular.map { it.soru }, today.toEpochDay().toInt(), hedef, yapilan,
+                        )
                     }
                     val dersler = ready.sorular.associate { it.ders.id to it.ders }
-                    val sorular = CalismaSorulariniSirala.akilliOncelik(
-                        ready.sorular.map { it.soru },
-                        today.toEpochDay().toInt(),
-                    ).take((hedef - yapilan).coerceIn(5, 30))
-                    PremiumGradyanButon(
+                    val satirlar = ready.sorular.associateBy { it.soru.id }
+                    val sorular = plan.tur
+                    Text(
+                        stringResource(R.string.today_queue_summary, plan.geciken, count - plan.geciken),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colors.onPrimaryContainer,
+                    )
+                    Text(
+                        stringResource(R.string.today_batch_explanation, sorular.size, plan.kalan),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = colors.onPrimaryContainer,
+                    )
+                    SadeAnaButon(
                         onClick = { onOturumBaslat(sorular, dersler) },
                         modifier = Modifier.fillMaxWidth(),
                         interactionTur = EtkilesimTuru.ODAK_BASLADI,
@@ -434,6 +417,20 @@ private fun BugunGunKarti(
                             )
                         }
                     }
+                    Text(
+                        stringResource(R.string.today_preview_title),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = colors.onPrimaryContainer,
+                    )
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        plan.onizleme.forEach { soru ->
+                            val row = satirlar.getValue(soru.id)
+                            GunSoruSatiri(row, today) {
+                                onOturumBaslat(listOf(row.soru), mapOf(row.ders.id to row.ders))
+                            }
+                        }
+                    }
+
                 }
             }
             KutlamaParcaciklari(
@@ -498,20 +495,21 @@ private fun GunSoruSatiri(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
+            Surface(
+                shape = CircleShape,
+                color = if (lateDays == 0) colors.secondaryContainer else colors.errorContainer,
+            ) {
+                Text(
+                    text = if (lateDays == 0) stringResource(R.string.today_due_today)
+                    else pluralStringResource(R.plurals.today_overdue_days, lateDays, lateDays),
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                    color = if (lateDays == 0) colors.onSecondaryContainer else colors.onErrorContainer,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
         }
-        Surface(
-            shape = CircleShape,
-            color = if (lateDays == 0) colors.secondaryContainer else colors.errorContainer,
-        ) {
-            Text(
-                text = if (lateDays == 0) stringResource(R.string.today_due_today)
-                else pluralStringResource(R.plurals.today_overdue_days, lateDays, lateDays),
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-                color = if (lateDays == 0) colors.onSecondaryContainer else colors.onErrorContainer,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.SemiBold,
-            )
-        }
+
     }
 }
 

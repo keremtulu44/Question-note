@@ -32,12 +32,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -55,7 +53,6 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
 import com.keremtulu.questionnote.data.ilerleme.IlerlemeHizmeti
@@ -68,16 +65,13 @@ import com.keremtulu.questionnote.domain.karne.KarneKovasi
 import com.keremtulu.questionnote.domain.karne.KarneSayilari
 import com.keremtulu.questionnote.domain.karne.OturumSonucu
 import com.keremtulu.questionnote.domain.karne.Rozet
-import com.keremtulu.questionnote.domain.karne.RozetGirdisi
-import com.keremtulu.questionnote.domain.karne.RozetKurallari
 import com.keremtulu.questionnote.domain.karne.TebrikSeviyesi
 import com.keremtulu.questionnote.domain.model.Ders
 import com.keremtulu.questionnote.domain.model.Konu
 import com.keremtulu.questionnote.domain.model.Soru
 import com.keremtulu.questionnote.domain.repository.KonuRepository
-import com.keremtulu.questionnote.ui.bilesenler.premium.CamKarti
+import com.keremtulu.questionnote.ui.bilesenler.SadeKart
 import com.keremtulu.questionnote.ui.bilesenler.premium.CamYukseklik
-import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
 import com.keremtulu.questionnote.ui.bilesenler.premium.IskeletKart
 import com.keremtulu.questionnote.ui.premium.EtkilesimTuru
 import com.keremtulu.questionnote.ui.premium.PremiumButton
@@ -93,6 +87,13 @@ import java.util.Locale
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.sp
+import com.keremtulu.questionnote.domain.karne.RozetGirdisi
+import com.keremtulu.questionnote.domain.karne.RozetKurallari
+import com.keremtulu.questionnote.ui.bilesenler.premium.CamKarti
+import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
 
 data class DagilimSatiri(val etiket: String, val sayi: Int)
 
@@ -184,21 +185,11 @@ fun KarneEkrani(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 item(key = "hero") {
-                    GradyanKart(
+                    Column(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(24.dp),
-                        borderAnimation = false,
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text(
-                                stringResource(R.string.karne_kicker),
-                                color = PremiumMarkaRenkler.BakirIsik,
-                                style = MaterialTheme.typography.labelMedium,
-                                letterSpacing = 1.4.sp,
-                                fontWeight = FontWeight.Bold,
-                            )
-                            Baslik(sayilar, animasyonAcik, hero = true)
-                        }
+                        Baslik(sayilar, animasyonAcik, hero = true)
                     }
                 }
                 item(key = "ratio") {
@@ -255,7 +246,7 @@ fun KarneEkrani(
                 }
                 if (ekBilgiHatasi) {
                     item(key = "progress-error") {
-                        CamKarti(
+                        SadeKart(
                             modifier = Modifier.fillMaxWidth(),
                             elevation = CamYukseklik.DUSUK,
                             shape = RoundedCornerShape(20.dp),
@@ -487,7 +478,7 @@ private fun KovaBolumu(sayilar: KarneSayilari, animasyonAcik: Boolean) {
 
 @Composable
 private fun BolumKarti(baslik: String, icerik: @Composable () -> Unit) {
-    CamKarti(
+    SadeKart(
         modifier = Modifier.fillMaxWidth(),
         elevation = CamYukseklik.DUSUK,
         shape = RoundedCornerShape(20.dp),

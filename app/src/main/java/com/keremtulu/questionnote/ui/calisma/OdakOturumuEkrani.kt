@@ -1,8 +1,5 @@
 package com.keremtulu.questionnote.ui.calisma
 
-import android.content.Context
-import android.content.ContextWrapper
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -40,14 +37,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -61,9 +56,6 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
 import com.keremtulu.questionnote.data.prefs.OdakOturumuDeposu
@@ -80,7 +72,7 @@ import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
 import com.keremtulu.questionnote.ui.animasyon.SureToken
 import com.keremtulu.questionnote.ui.animasyon.animateFloatPremium
 import com.keremtulu.questionnote.ui.animasyon.tweenPremium
-import com.keremtulu.questionnote.ui.premium.PremiumGradyanButon
+import com.keremtulu.questionnote.ui.bilesenler.SadeAnaButon
 import androidx.compose.ui.graphics.graphicsLayer
 import com.keremtulu.questionnote.domain.karne.KarneHesabi
 import com.keremtulu.questionnote.domain.karne.OturumSonucu
@@ -92,7 +84,6 @@ import com.keremtulu.questionnote.domain.model.SoruGorseli
 import com.keremtulu.questionnote.domain.model.SoruIslemSonucu
 import com.keremtulu.questionnote.domain.model.TekrarKaydi
 import com.keremtulu.questionnote.domain.model.TekrarSonucu
-import com.keremtulu.questionnote.domain.repeat.AkilliTekrarKurali
 import com.keremtulu.questionnote.domain.repository.SoruRepository
 import com.keremtulu.questionnote.ui.bilesenler.SoruGorselResmi
 import com.keremtulu.questionnote.ui.bilesenler.SoruGorselTamEkran
@@ -104,6 +95,16 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import com.keremtulu.questionnote.ui.premium.PremiumCard
+import android.content.Context
+import android.content.ContextWrapper
+import androidx.activity.ComponentActivity
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import com.keremtulu.questionnote.domain.repeat.AkilliTekrarKurali
+import com.keremtulu.questionnote.ui.premium.PremiumGradyanButon
 
 /** A focused review surface; no archive/delete controls, no forced solution reveal, no speed score. */
 @Composable
@@ -269,7 +270,7 @@ fun OdakOturumuEkrani(
                         Text(stringResource(if (kullanilamaz) R.string.filtered_practice_question_unavailable else R.string.focus_duplicate), style = MaterialTheme.typography.bodySmall)
                         PremiumButton(onClick = { olcum.aktiflik(false); onAtla() }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.focus_skip)) }
                     } else if (!degerlendirme) {
-                        PremiumGradyanButon(onClick = {
+                        SadeAnaButon(onClick = {
                             if (!gorselHazir) olcum.kismi(OlcumNedeni.GORSEL_EKSIK)
                             olcum.dondur()
                         }, enabled = oncekiKayitlar != null && !mesgul,
@@ -277,9 +278,9 @@ fun OdakOturumuEkrani(
                             interactionTur = EtkilesimTuru.DEGERLENDIRME) { Text(stringResource(R.string.focus_assess)) }
                     } else {
                         Text(stringResource(R.string.focus_plan_note), style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant)
-                        PremiumGradyanButon(onClick = ::kaydet, enabled = secim != null && !mesgul && onizlemeler != null,
+                        SadeAnaButon(onClick = ::kaydet, enabled = secim != null && !mesgul && onizlemeler != null,
                             modifier = Modifier.fillMaxWidth(), interactionTur = EtkilesimTuru.TIKLAMA) {
-                            if (kaydediliyor) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp, color = Color.White)
+                            if (kaydediliyor) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
                             Text(stringResource(when {
                                 kaydediliyor -> R.string.focus_saving
                                 sira == toplam -> R.string.focus_save_last

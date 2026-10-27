@@ -9,6 +9,7 @@ import com.keremtulu.questionnote.data.local.dao.DersDao
 import com.keremtulu.questionnote.data.local.dao.KonuDao
 import com.keremtulu.questionnote.data.local.dao.GorselDao
 import com.keremtulu.questionnote.data.local.dao.IlerlemeDao
+import com.keremtulu.questionnote.data.local.dao.OgretmenDao
 import com.keremtulu.questionnote.data.local.dao.GeriYuklemeIsaretiDao
 import com.keremtulu.questionnote.data.local.dao.SoruDao
 import com.keremtulu.questionnote.data.local.dao.SoruSecenegiDao
@@ -17,6 +18,9 @@ import com.keremtulu.questionnote.data.local.entity.DersEntity
 import com.keremtulu.questionnote.data.local.entity.GorselEntity
 import com.keremtulu.questionnote.data.local.entity.GeriYuklemeIsaretiEntity
 import com.keremtulu.questionnote.data.local.entity.KonuEntity
+import com.keremtulu.questionnote.data.local.entity.OgretmenGrupEntity
+import com.keremtulu.questionnote.data.local.entity.OgretmenSoruEntity
+import com.keremtulu.questionnote.data.local.entity.OgretmenSoruGorselEntity
 import com.keremtulu.questionnote.data.local.entity.SoruEntity
 import com.keremtulu.questionnote.data.local.entity.SoruSecenegiEntity
 import com.keremtulu.questionnote.data.local.entity.TekrarEntity
@@ -31,8 +35,11 @@ import com.keremtulu.questionnote.data.local.entity.TekrarEntity
         TekrarOlcumEntity::class,
         GeriYuklemeIsaretiEntity::class,
         SoruSecenegiEntity::class,
+        OgretmenGrupEntity::class,
+        OgretmenSoruEntity::class,
+        OgretmenSoruGorselEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
 )
 abstract class YanlisDefteriDatabase : RoomDatabase() {
@@ -45,6 +52,7 @@ abstract class YanlisDefteriDatabase : RoomDatabase() {
     abstract fun tekrarOlcumDao(): TekrarOlcumDao
     abstract fun ilerlemeDao(): IlerlemeDao
     abstract fun geriYuklemeIsaretiDao(): GeriYuklemeIsaretiDao
+    abstract fun ogretmenDao(): OgretmenDao
 
     companion object {
         const val DATABASE_NAME = "yanlis_defteri.db"

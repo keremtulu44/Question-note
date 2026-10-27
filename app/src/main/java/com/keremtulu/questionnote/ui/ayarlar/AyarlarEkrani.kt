@@ -24,15 +24,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -50,19 +49,22 @@ import com.keremtulu.questionnote.data.prefs.TercihGunlukHedefDeposu
 import com.keremtulu.questionnote.domain.model.Ders
 import com.keremtulu.questionnote.domain.repository.DersRepository
 import com.keremtulu.questionnote.ui.LocalUygulamaSesleri
-import com.keremtulu.questionnote.ui.bilesenler.premium.CamKarti
+import com.keremtulu.questionnote.ui.bilesenler.SadeKart
 import com.keremtulu.questionnote.ui.bilesenler.premium.CamYukseklik
-import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
 import com.keremtulu.questionnote.ui.premium.EtkilesimTuru
-import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 import com.keremtulu.questionnote.ui.premium.PremiumOutlinedButton
 import com.keremtulu.questionnote.ui.premium.PremiumSwitch
-import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import com.keremtulu.questionnote.ui.bilesenler.premium.CamKarti
+import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
+import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
+import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 
 @Composable
 fun AyarlarEkrani(
@@ -111,41 +113,16 @@ fun AyarlarEkrani(
             modifier = Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets),
             contentPadding = PaddingValues(
                 start = 20.dp,
-                top = 12.dp,
+                top = 20.dp,
                 end = 20.dp,
                 bottom = 24.dp,
             ),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             item {
-                GradyanKart(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(24.dp),
-                    borderAnimation = false,
-                ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(
-                            stringResource(R.string.settings_kicker),
-                            color = PremiumMarkaRenkler.BakirIsik,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 1,
-                        )
-                        Text(
-                            stringResource(R.string.settings_title),
-                            color = PremiumMarkaRenkler.Kagit,
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Text(
-                            stringResource(R.string.settings_header_subtitle),
-                            color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.86f),
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    }
-                }
+                com.keremtulu.questionnote.ui.bilesenler.SayfaBasligi(stringResource(R.string.settings_title))
             }
-            item {
+            if (com.keremtulu.questionnote.domain.model.UrunKapsami.OGRETMEN_MODU_GORUNUR) item {
                 Bolum(stringResource(R.string.settings_role_section_title)) {
                     Text(
                         stringResource(R.string.settings_role_current_student),
@@ -170,7 +147,6 @@ fun AyarlarEkrani(
                     }
                 }
             }
-            item { MotorAyarlariKarti(tekrarPolitikasi, motorTanisi) }
             item {
                 val tumDersler by produceState(emptyList<Ders>()) {
                     dersRepository.dersleriIzle(false).collect { value = it }
@@ -321,9 +297,12 @@ fun AyarlarEkrani(
                             fontWeight = FontWeight.SemiBold,
                         )
                     }
-                    Row(
+                    @OptIn(ExperimentalLayoutApi::class)
+                    FlowRow(
                         modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                        maxItemsInEachRow = if (LocalDensity.current.fontScale >= 1.5f) 1 else 2,
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         PremiumOutlinedButton(
                             modifier = Modifier.weight(1f),
@@ -342,62 +321,17 @@ fun AyarlarEkrani(
             }
             item {
                 Bolum(stringResource(R.string.settings_category_other)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Column(Modifier.weight(1f).padding(end = 12.dp)) {
-                            Text(stringResource(R.string.settings_premium_title), style = MaterialTheme.typography.bodyMedium)
-                            Text(stringResource(R.string.settings_premium_note), style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                        PremiumOutlinedButton(onClick = onPremiumDemo, enabled = !yedeklemeIslemde) {
-                            Text(stringResource(R.string.settings_premium_open))
-                        }
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Text(
-                            stringResource(R.string.menu_image_maintenance),
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                        PremiumOutlinedButton(onClick = onGorselBakimi, enabled = !yedeklemeIslemde) {
-                            Text(stringResource(R.string.settings_open))
-                        }
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Text(
-                            stringResource(R.string.menu_catalog),
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                        PremiumOutlinedButton(onClick = onKatalog) {
-                            Text(stringResource(R.string.settings_open))
-                        }
-                    }
-                    Row(
-                        Modifier.fillMaxWidth().padding(top = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        Column(Modifier.weight(1f)) {
-                            Text(stringResource(R.string.settings_topics), style = MaterialTheme.typography.bodyMedium)
-                            Text(stringResource(R.string.settings_topics_note), style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                        PremiumOutlinedButton(onClick = onKonular, enabled = !yedeklemeIslemde) {
-                            Text(stringResource(R.string.settings_open))
-                        }
-                    }
+                    com.keremtulu.questionnote.ui.bilesenler.GezinmeSatiri(
+                        stringResource(R.string.menu_catalog), onKatalog, enabled = !yedeklemeIslemde,
+                    )
+                    androidx.compose.material3.HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                    com.keremtulu.questionnote.ui.bilesenler.GezinmeSatiri(
+                        stringResource(R.string.settings_topics), onKonular, enabled = !yedeklemeIslemde,
+                    )
+                    androidx.compose.material3.HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                    com.keremtulu.questionnote.ui.bilesenler.GezinmeSatiri(
+                        stringResource(R.string.menu_image_maintenance), onGorselBakimi, enabled = !yedeklemeIslemde,
+                    )
                 }
             }
             item {
@@ -429,7 +363,7 @@ private fun Bolum(baslik: String, icerik: @Composable () -> Unit) {
             style = MaterialTheme.typography.labelMedium,
             letterSpacing = 1.sp,
         )
-        CamKarti(
+        SadeKart(
             modifier = Modifier.fillMaxWidth(),
             elevation = CamYukseklik.DUSUK,
             shape = RoundedCornerShape(22.dp),

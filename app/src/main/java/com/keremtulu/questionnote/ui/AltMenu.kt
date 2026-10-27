@@ -47,13 +47,13 @@ import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.data.ses.HapticTipi
 import com.keremtulu.questionnote.data.ses.SesTuruGenis
 import com.keremtulu.questionnote.data.ses.SesYoneticisi
-import com.keremtulu.questionnote.ui.animasyon.SureToken
-import com.keremtulu.questionnote.ui.animasyon.animateFloatPremium
 import com.keremtulu.questionnote.ui.animasyon.horizontalSwipeNavigation
-import com.keremtulu.questionnote.ui.animasyon.tweenPremium
-import androidx.compose.ui.draw.drawBehind
 import kotlin.math.cos
 import kotlin.math.sin
+import androidx.compose.ui.draw.drawBehind
+import com.keremtulu.questionnote.ui.animasyon.SureToken
+import com.keremtulu.questionnote.ui.animasyon.animateFloatPremium
+import com.keremtulu.questionnote.ui.animasyon.tweenPremium
 
 enum class AltSekme { BUGUN, DERSLER, FILTRELI, SEVIYE, AYARLAR }
 
@@ -115,19 +115,9 @@ fun AltMenu(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
-                    val aktiflik = if (aktif) 1f else 0f
-                    val gosterge = animateFloatPremium(
-                        target = aktiflik,
-                        animationSpec = tweenPremium(SureToken.NORMAL),
-                        label = "alt-menu-gosterge",
-                    )
+                    // No pill, glow or reflection behind the icon: colour and weight carry the state.
                     Box(
-                        Modifier.size(52.dp, 32.dp).drawBehind {
-                            drawRoundRect(
-                                color = colors.primary.copy(alpha = 0.16f * gosterge.value),
-                                cornerRadius = CornerRadius(16.dp.toPx()),
-                            )
-                        },
+                        Modifier.size(52.dp, 32.dp),
                         contentAlignment = Alignment.Center,
                     ) {
                         MenuSimgesi(sekme, if (aktif) colors.primary else colors.onSurfaceVariant)

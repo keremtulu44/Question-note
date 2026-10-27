@@ -5,9 +5,8 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import androidx.activity.ComponentActivity
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -17,7 +16,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
-import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.room.Room
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
@@ -56,6 +55,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.test.performTextReplacement
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], qualifiers = "w393dp-h852dp-mdpi")
@@ -84,7 +86,7 @@ class KirpmaSorulacakVeOgretmenArayuzTest {
             .allowMainThreadQueries()
             .build()
         gorselDeposu = LocalSoruGorselDeposu(context)
-        ogretmenDeposu = OgretmenDeposu(context, gorselDeposu)
+        ogretmenDeposu = OgretmenDeposu(context, gorselDeposu, database)
         profilDeposu = SinavProfiliDeposu(context)
         dersRepository = RoomDersRepository(database, profilDeposu)
         soruRepository = RoomSoruRepository(database, gorselDeposu, sinav = profilDeposu)
@@ -102,6 +104,20 @@ class KirpmaSorulacakVeOgretmenArayuzTest {
         file.outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
         bmp.recycle()
         return file
+    }
+
+    @Test
+    fun rolSecimindeOgretmenGirisiVeGecisVaadiGizlidir() {
+        var secilen: KullaniciRolu? = null
+        compose.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                RolSecimEkrani(onRolSecildi = { secilen = it })
+            }
+        }
+        compose.onNodeWithTag("rol_secim_ogretmen").assertDoesNotExist()
+        compose.onNodeWithText(context.getString(R.string.role_switch_anytime_hint)).assertDoesNotExist()
+        compose.onNodeWithTag("rol_secim_ogrenci").assertIsDisplayed().performClick()
+        org.junit.Assert.assertEquals(KullaniciRolu.OGRENCI, secilen)
     }
 
     @Test
@@ -259,26 +275,21 @@ class KirpmaSorulacakVeOgretmenArayuzTest {
                 )
             }
 
-            var secilenRol by mutableStateOf<KullaniciRolu?>(null)
+            // Parked teacher workspace: test it directly, not through a public role entry.
             compose.setContent {
                 YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
-                    if (secilenRol == null) {
-                        RolSecimEkrani(onRolSecildi = { secilenRol = it })
-                    } else {
-                        OgretmenAnaEkrani(
-                            ogretmenDeposu = ogretmenDeposu,
-                            gorselDeposu = gorselDeposu,
-                            sonYedek = null,
-                            yedeklemeIslemde = false,
-                            onOgrenciModunaGec = { secilenRol = null },
-                            onYedekOlustur = {},
-                            onYedekGeriYukle = {},
-                        )
-                    }
+                    OgretmenAnaEkrani(
+                        ogretmenDeposu = ogretmenDeposu,
+                        gorselDeposu = gorselDeposu,
+                        sonYedek = null,
+                        yedeklemeIslemde = false,
+                        onOgrenciModunaGec = {},
+                        onYedekOlustur = {},
+                        onYedekGeriYukle = {},
+                    )
                 }
             }
 
-            compose.onNodeWithTag("rol_secim_ogretmen").assertIsDisplayed().performClick()
             compose.waitUntil(5_000) {
                 compose.onAllNodesWithTag("ogretmen_grup_${g6B.id}").fetchSemanticsNodes().isNotEmpty()
             }
@@ -300,14 +311,33 @@ class KirpmaSorulacakVeOgretmenArayuzTest {
             compose.onNodeWithText(context.getString(R.string.common_close)).performClick()
 
             // Başka gruba kopyala -> 7C'de Çözmediklerim olarak başlamalı; 6B'de Çözdüm işaretlenebilmeli.
-            compose.onNodeWithTag("ogretmen_cozuldu_degistir_${soru.id}").performClick()
+            // Kart araması eklendikten sonra aksiyon satırı ekranın altında kalabiliyor: önce
+            // kaydır, sonra düğümün kendi OnClick semantiğini çalıştır (kartın dokunma alanıyla
+            // iç içe geçen düğmelerde dokunma yönlendirmesine güvenilmiyor).
+            compose.onNodeWithTag("ogretmen_soru_listesi")
+                .performScrollToNode(hasTestTag("ogretmen_cozuldu_degistir_${soru.id}"))
+            compose.onNodeWithTag("ogretmen_cozuldu_degistir_${soru.id}")
+                .performSemanticsAction(SemanticsActions.OnClick)
             compose.waitUntil(5_000) { ogretmenDeposu.anlikVeri().sorular.single().cozuldu }
 
             compose.onNodeWithTag("sekme_cozduklerim").performClick()
             compose.waitUntil(5_000) {
                 compose.onAllNodesWithTag("ogretmen_baska_gruba_ekle_${soru.id}").fetchSemanticsNodes().isNotEmpty()
             }
-            compose.onNodeWithTag("ogretmen_baska_gruba_ekle_${soru.id}").performClick()
+            // Kart aksiyonu listenin altında kalabildiği için önce görünür alana kaydırılır.
+            compose.onNodeWithTag("ogretmen_soru_listesi")
+                .performScrollToNode(hasTestTag("ogretmen_baska_gruba_ekle_${soru.id}"))
+            // Kart tıklaması ile iç içe geçen dokunma alanı testte kaybolabiliyor; düğümün kendi
+            // OnClick semantiği doğrudan çalıştırılır (dokunma yönlendirmesine bağlı kalmadan).
+            compose.onNodeWithTag("ogretmen_baska_gruba_ekle_${soru.id}")
+                .performSemanticsAction(SemanticsActions.OnClick)
+            // Dialog kendi penceresinde açılır: önce kabuğun, sonra satırların çizilmesini bekle.
+            compose.waitUntil(5_000) {
+                compose.onAllNodesWithTag("ogretmen_kopyala_dialog").fetchSemanticsNodes().isNotEmpty()
+            }
+            compose.waitUntil(5_000) {
+                compose.onAllNodesWithTag("hedef_grup_${g7C.id}").fetchSemanticsNodes().isNotEmpty()
+            }
             compose.onNodeWithTag("hedef_grup_${g7C.id}").performClick()
             compose.onNodeWithTag("hedef_gruplara_kopyala_onay").performClick()
 

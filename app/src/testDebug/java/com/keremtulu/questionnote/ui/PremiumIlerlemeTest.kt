@@ -92,12 +92,13 @@ class PremiumIlerlemeTest {
 
     @Test fun openingWithMotionEnabledDoesNotPretendTheExistingXpWasJustEarned() {
         val ozet = ornekIlerlemeOzeti()
-        compose.mainClock.autoAdvance = false
         compose.setContent {
             YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Normal) {
                 SeviyeSayfasi(SeviyeDurumuUi.ozetten(ozet))
             }
         }
+        compose.onNodeWithTag("progress-list").performScrollToNode(hasTestTag("progress-hero"))
+        compose.mainClock.autoAdvance = false
         val etiket = context.getString(R.string.progress_total_xp,
             NumberFormat.getIntegerInstance(Locale.forLanguageTag("tr-TR")).format(ozet.durum.toplamXp))
         compose.onNodeWithTag("progress-xp-total").assertTextEquals(etiket)
@@ -111,6 +112,7 @@ class PremiumIlerlemeTest {
                 SeviyeSayfasi(SeviyeDurumuUi.ozetten(ozet.value))
             }
         }
+        compose.onNodeWithTag("progress-list").performScrollToNode(hasTestTag("progress-hero"))
         fun etiket(xp: Int) = context.getString(R.string.progress_total_xp,
             NumberFormat.getIntegerInstance(Locale.forLanguageTag("tr-TR")).format(xp))
         compose.onNodeWithTag("progress-xp-total").assertTextEquals(etiket(ozet.value.durum.toplamXp))
@@ -132,6 +134,7 @@ class PremiumIlerlemeTest {
                 SeviyeSayfasi(SeviyeDurumuUi.ozetten(ozet.value))
             }
         }
+        compose.onNodeWithTag("progress-list").performScrollToNode(hasTestTag("progress-hero"))
         compose.waitForIdle()
         val baslangic = compose.mainClock.currentTime
         val hedef = ozet.value.durum.toplamXp + 100
@@ -141,7 +144,7 @@ class PremiumIlerlemeTest {
         assertTrue(compose.mainClock.currentTime - baslangic in 400..800)
     }
 
-    @Test fun twoHundredPercentTextKeepsTheActionUsableAndExplainsXpOnlyInDetails() {
+    @Test fun twoHundredPercentTextKeepsTheActionUsableWithoutTechnicalDetails() {
         var bugun = 0
         val ozet = ornekIlerlemeOzeti(bos = true).copy(soruSayisi = 3, analiz = null)
         compose.setContent {
@@ -160,10 +163,7 @@ class PremiumIlerlemeTest {
         assertTrue(alan.width >= 48 && alan.height >= 48)
         assertEquals(1, bugun)
         compose.onNodeWithText(context.getString(R.string.progress_xp_note)).assertDoesNotExist()
-        detayAc("progress-details", "progress-list")
-        detayAc("progress-open-effort", "progress-detail-list")
-        compose.onNodeWithTag("progress-detail-list").performScrollToNode(hasText(context.getString(R.string.progress_xp_note)))
-        compose.onNodeWithText(context.getString(R.string.progress_xp_note)).performScrollTo().assertIsDisplayed()
+        compose.onNodeWithTag("progress-details").assertDoesNotExist()
     }
 
     @Test fun collapsedCollectionDoesNotExposeHiddenNamesAndBadgeDenominatorIsThirty() {
@@ -173,15 +173,6 @@ class PremiumIlerlemeTest {
             }
         }
         compose.onNodeWithText(context.getString(R.string.progress_xp_note)).assertDoesNotExist()
-        detayAc("progress-details", "progress-list")
-        detayAc("progress-open-effort", "progress-detail-list")
-        val rozet = context.getString(R.string.level_xp_badges, 8, 30)
-        compose.onNodeWithTag("progress-detail-list").performScrollToNode(hasText(rozet))
-        compose.onNodeWithText(rozet).assertExists()
-        repeat(2) {
-            compose.onNodeWithTag("progress-detail-list").performScrollToIndex(0)
-            compose.onNodeWithTag("progress-back").performSemanticsAction(SemanticsActions.OnClick) { it() }
-        }
         compose.onNodeWithTag("progress-list").performScrollToNode(hasTestTag("progress-collection"))
         compose.onNodeWithTag("progress-collection").assertExists()
         compose.onAllNodesWithText("Gizli rozet").assertCountEquals(0)

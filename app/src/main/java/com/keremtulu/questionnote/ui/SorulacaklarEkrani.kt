@@ -1,7 +1,5 @@
 package com.keremtulu.questionnote.ui
 
-import android.Manifest
-import android.content.pm.PackageManager
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -18,6 +16,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,7 +33,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
@@ -45,14 +44,12 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -69,7 +66,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.core.content.ContextCompat
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.data.images.KameraCekimi
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
@@ -84,7 +80,6 @@ import com.keremtulu.questionnote.ui.bilesenler.GorselKirpmaAlani
 import com.keremtulu.questionnote.ui.bilesenler.GorselKirpmaDialog
 import com.keremtulu.questionnote.ui.bilesenler.GorselSecimBolumu
 import com.keremtulu.questionnote.ui.bilesenler.SoruGorselResmi
-import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
 import com.keremtulu.questionnote.ui.bilesenler.premium.PremiumBosDurum
 import com.keremtulu.questionnote.ui.premium.PremiumButton
 import com.keremtulu.questionnote.ui.premium.PremiumCard
@@ -96,6 +91,10 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
 
 private data class DersSorulacakGrubu(
     val ders: Ders,
@@ -154,7 +153,7 @@ fun SorulacaklarEkrani(
                 .padding(insets)
                 .consumeWindowInsets(insets)
                 .testTag("sorulacaklar_liste"),
-            contentPadding = PaddingValues(start = 18.dp, top = 8.dp, end = 18.dp, bottom = 32.dp),
+            contentPadding = PaddingValues(start = 18.dp, top = 20.dp, end = 18.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             item {
@@ -172,27 +171,10 @@ fun SorulacaklarEkrani(
                 }
             }
             item {
-                GradyanKart(modifier = Modifier.fillMaxWidth(), borderAnimation = false) {
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text(
-                            text = stringResource(R.string.ask_teacher_kicker),
-                            color = PremiumMarkaRenkler.BakirIsik,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Text(
-                            text = stringResource(R.string.ask_teacher_screen_title),
-                            color = PremiumMarkaRenkler.Kagit,
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Text(
-                            text = stringResource(R.string.ask_teacher_screen_subtitle),
-                            color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.84f),
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    }
-                }
+                com.keremtulu.questionnote.ui.bilesenler.DuzBaslik(
+                    baslik = stringResource(R.string.ask_teacher_screen_title),
+                    alt = stringResource(R.string.ask_teacher_screen_subtitle),
+                )
             }
 
             when (val current = durum) {
@@ -369,6 +351,7 @@ fun SorulacaklarEkrani(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SorulacakSoruKarti(
     ders: Ders,
@@ -430,13 +413,15 @@ private fun SorulacakSoruKarti(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            Row(
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
+                maxItemsInEachRow = if (androidx.compose.ui.platform.LocalDensity.current.fontScale >= 1.5f) 1 else 2,
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 PremiumOutlinedButton(
                     onClick = onTamEkran,
-                    modifier = Modifier.weight(1f).heightIn(min = 46.dp),
+                    modifier = Modifier.weight(1f).heightIn(min = 48.dp),
                     shape = RoundedCornerShape(14.dp),
                 ) {
                     Text(stringResource(R.string.ask_teacher_open_fullscreen))
@@ -445,7 +430,7 @@ private fun SorulacakSoruKarti(
                     onClick = onCozdurdum,
                     modifier = Modifier
                         .weight(1f)
-                        .heightIn(min = 46.dp)
+                        .heightIn(min = 48.dp)
                         .testTag("sorulacak_cozdurdum_${soru.id}"),
                     shape = RoundedCornerShape(14.dp),
                 ) {
@@ -685,18 +670,6 @@ internal fun CozdurdumDialog(
         }
     }
 
-    val kameraIzni = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { verildi ->
-        if (verildi) {
-            try {
-                val cekim = gorselDeposu.kameraCekimiOlustur()
-                kameraCekimi = cekim
-                takePicture.launch(cekim.uri)
-            } catch (_: Throwable) {
-                onHata(context.getString(R.string.question_form_photo_error))
-            }
-        }
-    }
-
     val galeriSecici = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(5)) { uris ->
         if (uris.isEmpty()) return@rememberLauncherForActivityResult
         scope.launch {
@@ -715,19 +688,17 @@ internal fun CozdurdumDialog(
         }
     }
 
+    /**
+     * No runtime permission gate: the manifest declares no CAMERA permission and the capture intent
+     * writes through our FileProvider, so the old check could only fail and left the button dead.
+     */
     fun kamerayiAc() {
-        val izinli = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
-            PackageManager.PERMISSION_GRANTED
-        if (izinli) {
-            try {
-                val cekim = gorselDeposu.kameraCekimiOlustur()
-                kameraCekimi = cekim
-                takePicture.launch(cekim.uri)
-            } catch (_: Throwable) {
-                onHata(context.getString(R.string.question_form_photo_error))
-            }
-        } else {
-            kameraIzni.launch(Manifest.permission.CAMERA)
+        try {
+            val cekim = gorselDeposu.kameraCekimiOlustur()
+            kameraCekimi = cekim
+            takePicture.launch(cekim.uri)
+        } catch (_: Throwable) {
+            onHata(context.getString(R.string.question_form_photo_error))
         }
     }
 

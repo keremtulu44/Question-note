@@ -153,8 +153,8 @@ class YerelDisaAktarmaHizmetiTest {
                     JSONObject(it.readText())
                 }
                 assertEquals("yanlis-defteri-backup", manifest.getString("format"))
-                assertEquals(4, manifest.getInt("format_version"))
-                assertEquals(4, manifest.getInt("room_schema_version"))
+                assertEquals(5, manifest.getInt("format_version"))
+                assertEquals(5, manifest.getInt("room_schema_version"))
                 assertTrue(manifest.getJSONArray("files").length() >= 9)
                 val inventory = manifest.getJSONArray("files")
                 for (index in 0 until inventory.length()) {

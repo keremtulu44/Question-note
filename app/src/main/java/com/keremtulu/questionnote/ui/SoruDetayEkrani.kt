@@ -26,13 +26,11 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -61,9 +59,8 @@ import com.keremtulu.questionnote.domain.repository.SoruRepository
 import com.keremtulu.questionnote.ui.bilesenler.SoruGorselResmi
 import com.keremtulu.questionnote.ui.bilesenler.SoruGorselTamEkran
 import com.keremtulu.questionnote.ui.calisma.CozumTahtasiDialog
-import com.keremtulu.questionnote.ui.bilesenler.premium.CamKarti
+import com.keremtulu.questionnote.ui.bilesenler.SadeKart
 import com.keremtulu.questionnote.ui.bilesenler.premium.CamYukseklik
-import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
 import com.keremtulu.questionnote.ui.bilesenler.premium.IskeletKart
 import com.keremtulu.questionnote.ui.bilesenler.premium.PremiumBosDurum
 import com.keremtulu.questionnote.ui.bilesenler.premium.VarsayilanIlustrasyon
@@ -71,7 +68,6 @@ import com.keremtulu.questionnote.ui.premium.EtkilesimTuru
 import com.keremtulu.questionnote.ui.premium.PremiumButton
 import com.keremtulu.questionnote.ui.premium.PremiumOutlinedButton
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
-import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
@@ -81,6 +77,11 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlinx.coroutines.CancellationException
 import com.keremtulu.questionnote.ui.premium.PremiumCard
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import com.keremtulu.questionnote.ui.bilesenler.premium.CamKarti
+import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
+import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 
 private sealed interface SoruDetayDurumu {
     data object Yukleniyor : SoruDetayDurumu
@@ -233,7 +234,7 @@ fun SoruDetayEkrani(
                 val cozumVar = !soru.cozumNotu.isNullOrBlank() || cozumGorselleri.isNotEmpty()
                 LazyColumn(
                     modifier = Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding),
-                    contentPadding = PaddingValues(start = 20.dp, top = 8.dp, end = 20.dp, bottom = 32.dp),
+                    contentPadding = PaddingValues(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 32.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     item {
@@ -250,39 +251,19 @@ fun SoruDetayEkrani(
                                     fontWeight = FontWeight.SemiBold,
                                 )
                             }
-                            GradyanKart(
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(24.dp),
-                                borderAnimation = false,
-                            ) {
-                                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    Text(
-                                        text = soru.soruNotu?.takeIf { it.isNotBlank() }
-                                            ?: stringResource(R.string.question_untitled),
-                                        style = MaterialTheme.typography.headlineSmall,
-                                        color = PremiumMarkaRenkler.Kagit,
-                                        fontWeight = FontWeight.Bold,
-                                        maxLines = 2,
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.question_lesson_label, ders.ad),
-                                        color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.86f),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                    )
-                                    soru.konuId?.let { id ->
-                                        topicMap[id]?.let { topic ->
-                                            Text(
-                                                text = stringResource(
-                                                    if (topic.arsivli) R.string.topic_name_archived else R.string.question_topic_label,
-                                                    topic.ad,
-                                                ),
-                                                color = PremiumMarkaRenkler.BakirIsik,
-                                                style = MaterialTheme.typography.labelMedium,
-                                            )
-                                        }
-                                    }
-                                }
+                            val konuEtiketi = soru.konuId?.let { topicMap[it] }?.let { topic ->
+                                stringResource(
+                                    if (topic.arsivli) R.string.topic_name_archived else R.string.question_topic_label,
+                                    topic.ad,
+                                )
                             }
+                            com.keremtulu.questionnote.ui.bilesenler.DuzBaslik(
+                                baslik = soru.soruNotu?.takeIf { it.isNotBlank() }
+                                    ?: stringResource(R.string.question_untitled),
+                                alt = stringResource(R.string.question_lesson_label, ders.ad),
+                                ek = konuEtiketi,
+                                vurgu = MaterialTheme.colorScheme.primary,
+                            )
                         }
                     }
                     val denemeKaydi = denemeler.kaynakla(soru.kaynak)
@@ -411,7 +392,7 @@ fun SoruDetayEkrani(
                             )
                         }
                         TekrarGecmisiDurumu.Hata -> item {
-                            CamKarti(
+                            SadeKart(
                                 modifier = Modifier.fillMaxWidth(),
                                 elevation = CamYukseklik.DUSUK,
                                 shape = RoundedCornerShape(18.dp),

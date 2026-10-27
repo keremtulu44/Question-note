@@ -1,9 +1,9 @@
-# Veri Modeli (Room şema v4)
+# Veri Modeli (Room şema v5)
 
-> Room v4: önceki soru/katalog/recovery şemasına 0..1 tekrar ölçümü ve tarihsel bağlam eklenir.
-> `MIGRATION_3_4` yalnız yeni tablo/indeks ekler; eski tekrarlar, plan tarihleri ve notlar değişmez.
-> 1→2→3→4 zinciri korunur. Güncel CI kanıtı `DERLEME_RAPORU.md` içinde; fiziksel cihaz kabulü ayrıdır.
-> Son güncelleme: 2026-10-18.
+> Room v5: öğretmen çalışma alanı JSON dosyasından veritabanına taşındı. `MIGRATION_4_5` yalnız üç
+> yeni tablo ve beş indeks ekler; öğrenci tablolarına, tekrarlara ve ölçümlere dokunmaz.
+> 1→2→3→4→5 zinciri korunur. Güncel CI kanıtı `DERLEME_RAPORU.md` içinde; fiziksel cihaz kabulü ayrıdır.
+> Son güncelleme: 2026-10-26.
 
 Veritabanı: **Room / SQLite**. Yerel veri tek doğruluk kaynağıdır.
 
@@ -266,3 +266,56 @@ snapshot1/2'yi açıkça seçer. Geçmiş algoritma 1/2/3 yönlendirmesi, v3 eas
 geri dönüş desteklenir; eski satırlar yeniden yazılmaz. Etkin v3 cihaz/gölge kabul kapıları kapalıdır.
 Analitik ince projeksiyonla 4 toplu SELECT; ayar tanısı yalnız en yeni 100 kararın içeriğini doğrular.
 [P4–P6 sözleşmesi ve kanıtı](P4_P5_P6_UYGULAMA.md).
+
+## v1.6.x / öğretmen modu — şema v5
+
+Öğretmen verisi artık **Room v5**'tedir; `ogretmen_calisma_alani.json` yalnız yedek/aktarım
+biçimidir. Eski dosya açılışta bir kez toleranslı olarak içe aktarılır
+(`OgretmenDeposu.iceriAktarEskiJson`) ve `ogretmen_calisma_alani.ice-aktarildi.json` adıyla saklanır.
+Bozuk dosya içe aktarılmaz, `ogretmen_calisma_alani.bozuk-<zaman>.json` olarak karantinaya alınır;
+uygulama boş ama **çalışır** açılır.
+
+### `ogretmen_gruplari`
+| Kolon | Tip | Not |
+|---|---|---|
+| `id` | TEXT PK | UUID |
+| `ad` | TEXT | Grup adı; uygulama içinde büyük/küçük harf duyarsız benzersiz |
+| `aciklama` | TEXT? | Not (gün/saat) |
+| `ders_id` | TEXT? FK → `dersler.id` | **SET NULL**; ortak katalog, zorunlu değil |
+| `arsivli` | INTEGER | 0/1 |
+| `sira` | INTEGER | Liste sırası; silmede yeniden numaralanır |
+| `olusturma` | INTEGER | epoch ms |
+
+### `ogretmen_sorulari`
+| Kolon | Tip | Not |
+|---|---|---|
+| `id` | TEXT PK | UUID |
+| `grup_id` | TEXT FK → `ogretmen_gruplari.id` | **CASCADE** |
+| `baslik` | TEXT? | İsteğe bağlı |
+| `ders_id` / `konu_id` | TEXT? FK → `dersler` / `konular` | **SET NULL**; öğrenci kataloğuyla ortak |
+| `kaynak`, `kim_sordu` | TEXT? | Serbest metin |
+| `plan_gun` | INTEGER? | Yerel epoch gün; yalnız sıralama/geciken filtresi |
+| `zorluk` | TEXT? | `KOLAY`/`ORTA`/`ZOR` |
+| `cevap` | TEXT? | Sunumda varsayılan gizli |
+| `durum` | TEXT | `BEKLIYOR`/`COZULDU`/`ARSIV` (varsayılan `BEKLIYOR`) |
+| `cozulme` | INTEGER? | Durum `BEKLIYOR` dışına çıktığında yazılır |
+| `olusturma` / `guncelleme` | INTEGER | epoch ms |
+
+### `ogretmen_soru_gorselleri`
+| Kolon | Tip | Not |
+|---|---|---|
+| `id` | TEXT PK | UUID |
+| `soru_id` | TEXT FK → `ogretmen_sorulari.id` | **CASCADE** |
+| `sira` | INTEGER | Görsel sırası |
+| `tur` | TEXT | `SORU` / `COZUM`; en az bir `SORU` görseli zorunlu |
+| `dosya_adi` | TEXT | `ogretmen-img/<uuid>.jpg` veya ortak `img/<uuid>.jpg` |
+| `mime_type`, `genislik`, `yukseklik`, `boyut`, `sha256` | | Bütünlük doğrulaması |
+
+İndeksler: `index_ogretmen_gruplari_sira`, `index_ogretmen_gruplari_ders_id`,
+`index_ogretmen_sorulari_grup_id`, `..._ders_id`, `..._konu_id`, `..._durum`, `..._plan_gun`,
+`index_ogretmen_soru_gorselleri_soru_id`.
+
+Bütünlük kuralları `OgretmenVerisi.tutarliMi()` içinde: her soru var olan bir gruba işaret eder ve
+en az bir `SORU` görseli taşır. Kuyruk sorgusu `durum = 'BEKLIYOR'` + `plan_gun`/`olusturma`
+sırasıdır; "geciken" filtresi `plan_gun < bugün` koşulunu ekler. Silme geri alma
+(`silmeyiGeriAl`) aynı id'yi yeniden yazar; dosyalar `dosyalariKoru = true` ile diskte tutulur.

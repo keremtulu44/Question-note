@@ -1,6 +1,6 @@
-# Tam ZIP yedek biçimi — v4
+# Tam ZIP yedek biçimi — v5
 
-Güncel yazım: `yanlis-defteri-backup`, **ZIP v4 / Room v4**. Okuma: **v2, v3, v4**; her biri
+Güncel yazım: `yanlis-defteri-backup`, **ZIP v5 / Room v5**. Okuma: **v2, v3, v4, v5**; her biri
 kendi şema/CSV/alan sözleşmesiyle doğrulanır. Algoritma ve karar snapshot sürümleri bunlardan ayrıdır.
 Varsayılan **Gölge**, v2 planını uygular ve ayrı v3 adayı saklar. Son güncelleme: 2026-10-18.
 
@@ -9,7 +9,7 @@ Varsayılan **Gölge**, v2 planını uygular ve ayrı v3 adayı saklar. Son gün
 ```text
 yanlis-defteri-yedek.zip
 ├── manifest.json
-├── data.json                 # kanonik geri yükleme kaynağı
+├── data.json                 # kanonik geri yükleme kaynağı (öğretmen çalışma alanı dahil)
 ├── csv/
 │   ├── lessons.csv
 │   ├── topics.csv
@@ -35,6 +35,7 @@ Cihazdaki mutlak dosya yolu, bitmap önizlemesi veya saniyelik olay günlüğü 
 | v2 | 2 | 5 CSV; kaynak/neden kataloğu sorulardan yeniden kurulur; locator/ölçüm yok |
 | v3 | 3 | 6 CSV; katalog ve `source_location` korunur; ölçüm yok |
 | v4 | 4 | 7 CSV; `measurements` JSON/CSV, manifest ölçüm sayısı |
+| v5 | 5 | 7 CSV; `teacher_workspace` JSON'da (öğretmen grupları/soruları); öğretmen fotoğrafları paylaşılan `images/` altında |
 
 Eski yedekten süre veya o günkü bilinmeyen konu/kaynak bilgisi uydurulmaz; ölçüm tablosu boş
 kalır. Yeni ölçümsüz tekrarın bağlamı kaydedilebilir ama süreleri null, kalitesi `YOK` olur.
@@ -96,6 +97,33 @@ uyuşmazlığında veya doğrulama hatasında normal kullanım kilitlenir; kulla
 Geç kalan checkpoint IO işi, silinen oturumu diriltemez. Profiller kalıcı cache olmadığından
 restore sonrasında yeni veri kümesinden yeniden hesaplanır.
 
+## 5b. Öğretmen çalışma alanı (v5)
+
+Öğretmen verisi Room v5'te tutulur ve ZIP'e `data.json` içindeki `teacher_workspace` nesnesiyle girer:
+
+```json
+"teacher_workspace": {
+  "schema_version": 2,
+  "groups": [{ "id", "name", "description", "lesson_id", "archived", "order", "created_at" }],
+  "questions": [{
+    "id", "group_id", "title", "lesson_id", "topic_id", "source", "asked_by",
+    "due_day", "difficulty", "answer", "status", "solved", "solved_at",
+    "created_at", "updated_at",
+    "images": [{ "id", "order", "kind", "file_name", "zip_file_name", "mime_type",
+                 "width", "height", "size_bytes", "sha256" }]
+  }]
+}
+```
+
+- `status` üç değerlidir (`BEKLIYOR`/`COZULDU`/`ARSIV`); `solved` alanı eski okuyucular için
+  senkron tutulur (`status != BEKLIYOR`).
+- `teacher_workspace_version` manifest/veri anahtarı sürümü doğrular; ileri sürüm reddedilir.
+- Öğretmen fotoğrafları öğrenci fotoğraflarıyla **aynı `images/` klasöründe** durur; her dosya kendi
+  UUID adıyla yazıldığı için çakışma yoktur. Aynı payload iki kez eklenmez.
+- Doğrulama: her soru var olan bir gruba işaret eder, en az bir `SORU` görseli taşır, görsel türü
+  sayıları toplamla uyuşur, `file_name` yolu `img/` veya `ogretmen-img/` ile başlar.
+- v1/v2 JSON çalışma alanı dosyaları da okunur (toleranslı: bozuk kayıt atlanır ve sayılır).
+
 ## 6. Dahil olmayanlar ve gizlilik
 
 Rozet/rütbe sahiplik/görülme/kutlama durumu, motor politikası, günlük hedef, seçili sınav formatı ve **yarım oturumun cihaz-yerel
@@ -107,9 +135,9 @@ Güvenli saklama kullanıcıya aittir. Daha yeni ZIP'i eski APK'ya verme veya DB
 
 ## 7. Doğrulama
 
-Otomatik kapsam: v2/v3 import; v4 tam tur; ölçüm null/kalite, snapshot1/2 ve v3 geçmişinin korunması; hash/envanter;
+Otomatik kapsam: v2/v3 import; v4 tam tur; v5 öğretmen çalışma alanı ve Room 4→5 göçü; ölçüm null/kalite, snapshot1/2 ve v3 geçmişinin korunması; hash/envanter;
 semantik bozulma/taşma/orphan/tekrar reddi; safety kopyası; commit/rollback ve checkpoint sınırı;
-Room 1/2/3→4. Güncel sonuç [DERLEME_RAPORU.md](DERLEME_RAPORU.md) içindedir.
+Room 1/2/3→4→5. Güncel sonuç [DERLEME_RAPORU.md](DERLEME_RAPORU.md) içindedir.
 
 Bunlar fiziksel telefon, SAF/bulut sağlayıcısı, gerçek düşük depolama veya süreç öldürme kabulü
 değildir. [TEST_KONTROL_LISTESI.md](TEST_KONTROL_LISTESI.md) içindeki cihaz kapıları açık tutulur.

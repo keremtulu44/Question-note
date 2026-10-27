@@ -18,6 +18,71 @@ P0–P5 kod/otomatik kapıları geçti; P6 son yayın CI `39144684877`: Debug298
 - [~] **P5 uygulandı:** gerçek kaynak/konu/ritim/dönem/iş yükü, uygun filtre/Odak eylemi ve kalıcı tek kutlama host’u. CI 274/0.
 - [~] **P6:** birleşik Debug298/0 + Release258/0; iki host benchmark ve beş önizleme, APK/imza/sertifika doğrulandı. Fiziksel cihaz/TalkBack/SAF/frame-p95 bekliyor.
 
+## Yeni geliştirme — v1.6.0: öğretmen modu T0 + T1 + P2 başlangıcı (2026-10-26)
+
+Değerlendirme ve gerekçeler: [Öğretmen modu değerlendirmesi](docs/OGRETMEN_MODU_DEGERLENDIRME.md) ·
+uygulama sözleşmesi: [Öğretmen modu](docs/OGRETMEN_MODU.md).
+
+- [~] **T0 — veri dayanıklılığı:** öğretmen verisi Room v5'e taşındı (3 tablo, 5 indeks,
+  `MIGRATION_4_5`); eski JSON tek seferlik toleranslı içe aktarma + karantina; silme geri alma;
+  depolama/bakım ekranı (yetim dosya yaşı ≥7 gün, açık onay); grup silme onayında soru sayısı ve
+  son yedek tarihi. Kamera izin kapısı kaldırıldı (hem öğretmen hem "Sorulacaklar" formu).
+- [~] **T1 — gerçek öğretmen akışı:** tüm gruplardan "Bugün" kuyruğu, geciken filtresi, grup çipleri;
+  sunum ekranı (ekran açık, cevap gizli, çözüm ayrı, "Çözdüm, sıradaki"); ders/konu/kaynak/
+  "kim sordu"/çözüm günü alanları ortak katalogla; toplu seçim + arşiv; kaydet-ve-yeni;
+  başka gruba kopyalama uyarısı, soru taşıma.
+- [~] **P2 başlangıcı:** Room v5 + ZIP `FORMAT_VERSION` 5, `teacher_workspace` ve paylaşılan
+  `images/`; v2–v5 okuma.
+- [x] **CI kapısı:** `40280978018` — **Debug 351/0/0/0 · Release 277/0/0/0**, `assembleRelease`,
+  imza + beklenen sertifika parmak izi eşleşti ve Release yayımlandı.
+  [v1.6.0 APK](https://github.com/keremtulu44/Question-note/releases/download/v1.6.0/yanlis-defteri-1.6.0.apk)
+  · SHA-256 `db756b455b2d3942be7f2d009f00062696e100482938206b951c6b161f4c470f`
+  · [rapor](docs/DERLEME_RAPORU.md).
+- [ ] Fiziksel cihaz: kamera (izin istemeden açılmalı), süreç öldürme, 200+ soruluk grupta liste
+  performansı, 1.6x yazı ölçeğinde sunum/klavye taşması. Otomatik kapı yeşil olduğu için T0/T1/P2
+  maddeleri `[~]` kalır; cihaz kabulü tamamlanınca `[x]` olur.
+- [ ] **T2 (sıradaki):** öğretmen↔öğrenci kapalı döngü yüzeyi (öğrenci "hocaya sor" durumunun
+  öğretmen tarafında görünmesi), tekrar eden soruların otomatik hatırlatılması, dışa aktarma
+  (paylaşım sayfası), erişilebilirlik taraması, 2561 satırlık monolitten ayrılmış ekranların
+  gerçek cihaz ölçümü.
+
+## Öğretmen ihtiyaç araştırması — T3/T4 adayları (2026-10-26)
+
+Ayrıntı, kanıt ve gerekçe: [Öğretmen ihtiyaç araştırması](docs/OGRETMEN_IHTIYAC_ARASTIRMASI.md).
+Karar bekleyen sorular: PROJECT_BRIEF §8 (A12–A17). **Kullanıcı kararı:** yalnız T3 uygulanır,
+tamamı çevrimdışı/yerel kalır (bulut, hesap, bildirim yok).
+
+**T3 — görünürlük ve iletişim (1.6.x, Room/ZIP sürümü artmaz):** kod + otomatik testler tamam,
+CI `40344883493` yeşil (Debug 370/0/0/0, Release 293/0/0/0, imza + sertifika eşleşti).
+- [x] Kuyruk + grup detayında **arama** ve ders/soran/gün filtre çipleri; `rememberSaveable` durum,
+  cevap metni aranmaz, "N sonuç" sayacı ve erişilebilir temizle düğmesi. `OgretmenAramaVeFiltreTest`
+  (1.000 soru < 200 ms) + `OgretmenT3ArayuzTest`.
+- [x] **"Kim sordu" yüzeyi:** kart rozeti, sunum satırı, filtre çipleri, formda "Sık soranlar"
+  (normalize gruplama). `OgretmenAramaVeFiltreTest`.
+- [x] **Paylaş** (`ACTION_SEND` + `FileProvider`, `ogretmen-img/` + `img/`): tek soru ve seçili N soru,
+  en fazla 9 fotoğraf, `kimSordu`/cevap dışarıda. `OgretmenPaylasimTest` (chooser, içerik URI'si,
+  sağlayıcı beyanı) + `OgretmenT3ArayuzTest`. "Soru+çözüm birlikte" `cozumDahil` parametresi olarak
+  hazır, UI'da henüz yok.
+- [x] Kuyrukta **Bugün / Geciken / Planlanmamış** filtreleri (+ "Tümü" sıfırlama).
+  "Bugüne al / yarına at" hızlı aksiyonu yok (formdaki tarih çipleri kullanılıyor).
+- [x] **Kapatma döngüsü:** arşiv sekmesinde "Arşivden geri al", grup silmede 10 sn `Snackbar` geri
+  alma (fotoğraflar korunur). `OgretmenGrupGeriAlmaTest` + `OgretmenT3ArayuzTest`. Tüm gruplarda
+  ayrı arşiv filtresi yok.
+- [x] **Yedek tazeliği** uyarısı (7+ gün veya hiç yedek yok) ve **aynı görsel** (sha256) onayı.
+- [x] **Kayıt dayanıklılığı:** form açıkken arşivlenen/silinen ders/konu kimliği kaydı düşürmez
+  (yabancı anahtar hatası tüm soruyu kaybettiriyordu).
+- [ ] **Hafif içgörü kartı:** son 30 gün konu dağılımı, ortalama bekleme, haftalık kapanma (oyunlaştırma yok).
+- [ ] **Cihaz kabulü (T3):** (a) 200+ soruluk grupta arama, (b) 5 soru paylaşma, (c) grup silip 10 sn
+  içinde geri alma, (d) 9 günlük yedekte uyarı. Otomatik test bu kapıyı açmaz.
+
+**T4 — kayıt yükünü azaltma (1.7.0, Room v6 + ZIP v6; v5 yedekleri okunur):**
+- [ ] **Fotoğrafsız sözlü soru** (`gorsel_bekliyor` + "fotoğraf ekle" rozeti) — karar: A12.
+- [ ] **Hızlı toplama / taslak kutusu:** tek oturumda çok fotoğraf, toplu alan atama, taslak yaşı.
+- [ ] **Bana sorulanlar** şeridi (öğrenci "hocaya sor" işaretleri, aynı cihaz varsayımı) — karar: A16.
+- [ ] **Dönemi kapat** (toplu arşiv + özet) ve paylaşım kullanımı ölçüldükten sonra **PDF çalışma kâğıdı** — karar: A17.
+- [ ] Yatay/tablet iki panel (yalnız cihaz verisi varsa) — karar: A15.
+- [ ] Günlük özet bildirimi (varsayılan kapalı, tek özet) — karar: A14.
+
 ## Son yayımlanan — v1.5.1 / code19
 
 - [x] İlerleme ana görünümü: rütbe, bugünkü hedef ve tek eylem; rapor yığını kaldırıldı.
