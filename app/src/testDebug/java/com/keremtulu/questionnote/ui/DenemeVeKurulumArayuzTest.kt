@@ -198,7 +198,8 @@ class DenemeVeKurulumArayuzTest {
         compose.onNodeWithTag("deneme-lesson-${almanca.id}").assertIsDisplayed()
         compose.onNodeWithTag("deneme-detail-list").performScrollToNode(hasTestTag("deneme-save-button"))
         compose.onNodeWithTag("deneme-save-button").performClick()
-        compose.waitForIdle()
+        // Kaydetme askıya alınabilir bir Room yazımından geçer: waitForIdle tek başına yetmez.
+        compose.waitUntil(5_000) { denemeDeposu.getir("d-1")?.ad == "Miray TG 2" }
 
         val guncel = denemeDeposu.getir("d-1")
         assertNotNull(guncel)
