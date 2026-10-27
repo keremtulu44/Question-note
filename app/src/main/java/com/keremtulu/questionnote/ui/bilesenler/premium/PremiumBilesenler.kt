@@ -192,15 +192,35 @@ fun GradyanKart(
             .clip(shape)
             .background(gradyan)
             .drawBehind {
+                // Yumuşak ışık: düz daire kenarı keskin bir "leke" gibi görünüyordu; artık
+                // merkeze doğru sönümlenen iki radyal parlama var, kartın köşeleri temiz kalır.
+                val ustSag = Offset(size.width * 0.92f, size.height * 0.08f)
+                val ustSagYaricap = size.maxDimension * 0.42f
                 drawCircle(
-                    color = PremiumMarkaRenkler.BakirIsik.copy(alpha = 0.16f),
-                    radius = size.maxDimension * 0.42f,
-                    center = Offset(size.width * 0.92f, size.height * 0.08f),
+                    brush = Brush.radialGradient(
+                        colors = listOf(
+                            PremiumMarkaRenkler.BakirIsik.copy(alpha = 0.20f),
+                            Color.Transparent,
+                        ),
+                        center = ustSag,
+                        radius = ustSagYaricap,
+                    ),
+                    radius = ustSagYaricap,
+                    center = ustSag,
                 )
+                val altSol = Offset(size.width * 0.08f, size.height * 0.95f)
+                val altSolYaricap = size.maxDimension * 0.34f
                 drawCircle(
-                    color = PremiumMarkaRenkler.DenizAcik.copy(alpha = 0.10f),
-                    radius = size.maxDimension * 0.34f,
-                    center = Offset(size.width * 0.08f, size.height * 0.95f),
+                    brush = Brush.radialGradient(
+                        colors = listOf(
+                            PremiumMarkaRenkler.DenizAcik.copy(alpha = 0.12f),
+                            Color.Transparent,
+                        ),
+                        center = altSol,
+                        radius = altSolYaricap,
+                    ),
+                    radius = altSolYaricap,
+                    center = altSol,
                 )
             }
             .border(
