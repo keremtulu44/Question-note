@@ -30,6 +30,10 @@ Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih 
   **303/0/0/0**, `assembleRelease` 0, imza ve sertifika eşleşti. Sürüm/Room/ZIP değişmedi;
   v1.6.3 etiketi zaten yayımlandığı için yeni Release oluşturulmadı.
 - **Görsel kanıt:** `docs/ui/today/bugun-light.png`, `bugun-dark.png` (yerel Compose, sentetik veri).
+- **APK:** uygulama adı/sürümü değişmedi (1.6.3 / 42). Sürüm etiketi dolu olduğu için bu derlemenin
+  imzalı APK'sı `preview-1.6.3` prerelease'ine yüklenir; her koşuda `--clobber` ile güncellenir:
+  https://github.com/keremtulu44/Question-note/releases/tag/preview-1.6.3
+  (SHA-256 `0d270161494d04d7a2149b7d50f4eab4d8c578b9b92432b16d92095cda847bf1`).
 
 ## [Yayınlanmadı — T3] — 2026-10-26
 
