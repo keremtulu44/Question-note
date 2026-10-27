@@ -256,10 +256,31 @@ jobs:
               release_result="Ara doğrulama başarılı; yayın kapısı kapalı, Release oluşturulmadı"
               printf '%s\n' "$release_result" > "$release_log"
             elif gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-              release_exit=0
-              release_result="Bu sürüm etiketi için Release zaten mevcut; yeniden oluşturulmadı"
-              release_url=$(gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json url --jq .url 2>/dev/null)
-              printf '%s\n' "$release_result" > "$release_log"
+              # Sürüm etiketi çoktan yayımlandı: uygulamanın adı/sürümü değiştirilmez, yeni bir
+              # sürüm numarası uydurulmaz. Bu derlemenin imzalı APK'sı yine de indirilebilsin diye
+              # sabit bir "preview-<sürüm>" etiketine (prerelease) yüklenir; her koşuda üzerine yazılır.
+              onizleme_tag="preview-${version_name}"
+              if gh release view "$onizleme_tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+                gh release upload "$onizleme_tag" "$signed_apk" --clobber --repo "$GITHUB_REPOSITORY" > "$release_log" 2>&1
+                release_exit=$?
+                release_result="Sürüm etiketi mevcut; önizleme APK'sı güncellendi"
+              else
+                gh release create "$onizleme_tag" \
+                  --repo "$GITHUB_REPOSITORY" \
+                  --target "$GITHUB_SHA" \
+                  --title "Yanlış Defterim ${version_name} · önizleme derlemesi" \
+                  --prerelease \
+                  --notes-file "$notes_file" \
+                  "$signed_apk" > "$release_log" 2>&1
+                release_exit=$?
+                release_result="Sürüm etiketi mevcut; önizleme derlemesi oluşturuldu"
+              fi
+              if [[ "$release_exit" -eq 0 ]]; then
+                release_url=$(gh release view "$onizleme_tag" --repo "$GITHUB_REPOSITORY" --json url --jq .url 2>/dev/null)
+              else
+                release_result="Önizleme APK'sı yüklenemedi"
+                printf '%s\n' "$release_result" >> "$release_log"
+              fi
             else
               gh release create "$tag" \
                 --repo "$GITHUB_REPOSITORY" \
