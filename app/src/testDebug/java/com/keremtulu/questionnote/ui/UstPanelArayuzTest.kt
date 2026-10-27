@@ -49,7 +49,15 @@ class UstPanelArayuzTest {
         runBlocking {
             // tekrarlar.soru_id bir dış anahtardır: önce gerçek bir soru, sonra tekrar.
             val dersId = db.dersDao().tumunuGetir().first().id
-            db.soruDao().ekle(SoruEntity(id = "ust-panel-soru", dersId = dersId, soruNotu = "Üst panel testi"))
+            db.soruDao().ekle(
+                SoruEntity(
+                    id = "ust-panel-soru",
+                    dersId = dersId,
+                    soruNotu = "Üst panel testi",
+                    olusturma = 1,
+                    guncelleme = 1,
+                ),
+            )
             db.tekrarDao().ekle(
                 TekrarEntity(
                     id = "ust-panel-tekrar",
