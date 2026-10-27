@@ -35,6 +35,11 @@ oyunlaştırma (XP/para/enerji) yok. Panel yalnız gerçek bugün durumunu taş�
   isteğe bağlı devam satırı, kuyruk kartı (3 önizleme, gecikme etiketi), sorulacaklar/deneme
   kısayolları. Boş havuzda sıfırlı kahraman kart yerine tek `BosDurumSoruYok`; hatada tek
   `DurumKarti`; yüklenirken CTA/ölçek çizilmez. FAB yok; `+` her durumda görünür.
+- **Rütbe galerisi**: 15 noktalı yol + sıradaki rütbe kartı (görsel, "60 XP kaldı",
+  8 bölmeli ince ölçek); kartlar `stateDescription` ile "Bu rütbeye ulaştın"/"Henüz ulaşılmadı"
+  bildirir, ✓/halka metin glifi yerine çizilir.
+- **GradyanKart ışığı**: düz yarı saydam dairelerin keskin kenarı koyu temada leke gibi
+  görünüyordu; iki radyal parlamaya çevrildi.
 - **İnce ilerleme detayları**: yeni `ui/bilesenler/InceCizimler.kt` (Damga, HedefHalkasi,
   InceOlcek, SeriAlevi, SoruIsareti, InceOk, KucukArti, KucukOnay, OynatSimgesi, YolNoktalari)
   Canvas ile çizilir; varlık dosyası eklenmedi. XP çubuğu 10 bölmeli `InceOlcek`; rütbe
@@ -48,7 +53,7 @@ oyunlaştırma (XP/para/enerji) yok. Panel yalnız gerçek bugün durumunu taş�
   `docs/ui/today/bugun-light|dark.png`). Mevcut test sözleşmeleri korundu
   (`bugun_sorulacaklar_karti`, `today-deneme-card`, ilerleme etiketleri).
 
-**CI kanıtı (2026-10-27, run `40534071050`, commit `52f27e0`):** Debug **388/0/0/0**,
+**CI kanıtı (2026-10-27, run `40541253872`, commit `e51ab43`):** Debug **388/0/0/0**,
 Release ortak **303/0/0/0**, `assembleRelease` 0, imza + beklenen sertifika doğrulandı.
 Önceki turlarda yalnız yeni test dosyaları kırıldı ve düzeltildi: `DpRect.height/width`
 (Kotlin uzantısı importu), `SoruEntity` zorunlu `olusturma/guncelleme` alanları, tekrar
