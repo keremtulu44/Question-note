@@ -18,6 +18,7 @@
     <string name="deneme_kicker">DENEME TAKİBİ</string>
     <string name="deneme_title">Deneme kayıtları</string>
     <string name="deneme_list_subtitle">Net gidişatını izle, takıldığın soruları doğrudan deftere bağla.</string>
+    <string name="deneme_history_header">Deneme geçmişi · %1$d kayıt</string>
     <string name="deneme_new">Yeni deneme</string>
     <string name="deneme_empty_title">Henüz deneme kaydın yok</string>
     <string name="deneme_empty">İlk denemeni kaydettiğinde net gidişatın, ders karşılaştırman ve deftere eklenecek soru takibin burada oluşur.</string>

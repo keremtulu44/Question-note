@@ -12,9 +12,11 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -160,8 +162,13 @@ class DenemeVeKurulumArayuzTest {
         compose.waitForIdle()
 
         compose.onNodeWithTag("deneme-net-chart").assertIsDisplayed()
+        val history = compose.activity.getString(R.string.deneme_history_header, 2)
+        compose.onNodeWithTag("deneme-list").performScrollToNode(hasText(history))
+        compose.onNodeWithText(history).assertIsDisplayed()
         compose.onNodeWithTag("deneme-list").performScrollToNode(hasTestTag("deneme-card-d2"))
         compose.onNodeWithTag("deneme-card-d2").assertIsDisplayed()
+        val delta = compose.activity.getString(R.string.deneme_chart_change, "+9")
+        compose.onNodeWithContentDescription(delta, useUnmergedTree = true).assertExists()
     }
 
     @Test

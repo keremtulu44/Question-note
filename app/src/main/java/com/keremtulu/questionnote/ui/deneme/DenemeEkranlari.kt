@@ -67,6 +67,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -292,10 +294,11 @@ fun DenemeListesiEkrani(
                     verticalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
                     item {
-                        com.keremtulu.questionnote.ui.bilesenler.DuzBaslik(
-                    baslik = stringResource(R.string.deneme_title),
-                    alt = stringResource(R.string.deneme_list_subtitle),
-                )
+                        Text(
+                            text = stringResource(R.string.deneme_list_subtitle),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
 
                     if (soruTakibi == DenemeSoruTakibi.Hata && soruRepository != null) {
@@ -329,6 +332,15 @@ fun DenemeListesiEkrani(
                                 dersAdlari = dersAdlari,
                             )
                         }
+                    }
+
+                    item {
+                        Text(
+                            text = stringResource(R.string.deneme_history_header, kayitlar.size),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.padding(top = 4.dp),
+                        )
                     }
 
                     itemsIndexed(kayitlar, key = { _, deneme -> deneme.id }) { index, deneme ->
@@ -470,16 +482,19 @@ private fun NetOzetRozeti(
             } else {
                 if (koyu) PremiumMarkaRenkler.BakirIsik else PremiumMarkaRenkler.Bakir
             }
+            val farkYazi = if (artis) {
+                stringResource(R.string.deneme_delta_positive, netYazi(fark))
+            } else {
+                netYazi(fark)
+            }
+            val farkAciklamasi = stringResource(R.string.deneme_chart_change, farkYazi)
             Surface(
+                modifier = Modifier.clearAndSetSemantics { contentDescription = farkAciklamasi },
                 shape = RoundedCornerShape(999.dp),
                 color = vurgu.copy(alpha = 0.15f),
             ) {
                 Text(
-                    text = if (artis) {
-                        stringResource(R.string.deneme_delta_positive, netYazi(fark))
-                    } else {
-                        netYazi(fark)
-                    },
+                    text = farkYazi,
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
                     style = MaterialTheme.typography.labelSmall,
                     color = vurgu,

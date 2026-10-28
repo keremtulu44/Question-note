@@ -50,5 +50,7 @@ tekrar algoritması ve XP kuralları değiştirilmedi.
 - Yeni deneme hesabı sınırları için 8 saf Kotlin/JUnit testi eklendi veya güncellendi; bunlar
   yerel Kotlin 2.4.0/JDK 17 ortamında çalıştırıldı.
 - Puanlama/kapsam seçimi, grafik açıklaması, soru sayısı hata durumu ve odak ekranı için
-  Robolectric/Compose testleri eklendi. Bunların sonucu Android test ortamında ayrıca
-  doğrulanmalıdır; kaynakta bulunmaları geçmiş CI sonucunu bu değişikliklerin kanıtı yapmaz.
+  Robolectric/Compose testleri eklendi. `9c0a3c2` commit'inde GitHub Android CI'nın Debug ve
+  Release birim testleri [başarılı](https://github.com/keremtulu44/Question-note/actions/runs/40725057162).
+  Sonraki değişiklikler için PR'daki en güncel CI sonucu esas alınmalıdır. Fiziksel cihaz,
+  gerçek kamera/SAF/Drive ve TalkBack kabulü henüz yapılmadı.
