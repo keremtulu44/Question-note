@@ -226,8 +226,9 @@ fun SoruFormuEkrani(
     // edilir; kimlik + URI kalıcı saklanmazsa çekilen fotoğraf sessizce kaybolur.
     var bekleyenCekimId by rememberSaveable(formAnahtari) { mutableStateOf<String?>(null) }
     var bekleyenCekimUri by rememberSaveable(formAnahtari) { mutableStateOf<String?>(null) }
-    val kameraCekimi: KameraCekimi?
-        get() = bekleyenCekimId?.let { id ->
+
+    fun bekleyenKameraCekimi(): KameraCekimi? =
+        bekleyenCekimId?.let { id ->
             bekleyenCekimUri?.let { uri -> KameraCekimi(id, Uri.parse(uri)) }
         }
 
@@ -367,7 +368,7 @@ fun SoruFormuEkrani(
     }
 
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
-        val capture = kameraCekimi
+        val capture = bekleyenKameraCekimi()
         if (capture != null) {
             val tur = kameraTuru
             bekleyenCekimiAyarla(null)
