@@ -35,7 +35,53 @@ Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih 
   https://github.com/keremtulu44/Question-note/releases/tag/preview-1.6.3
   (SHA-256 `0d270161494d04d7a2149b7d50f4eab4d8c578b9b92432b16d92095cda847bf1`).
 
-## [Yayınlanmadı — T3] — 2026-10-26
+## [Yayınlanmadı — form/CI/belge] — 2026-10-28
+
+- **Soru formu süreç ölümüne dayanıklı:** kamera/galeri açıkken Android uygulamayı bellekten
+  atarsa form alanları, hazırlanmış görseller ve bekleyen kamera çekimi artık kaybolmuyor
+  (`rememberSaveable` + saver'lar). Çekilen fotoğrafın sessizce düşmesi giderildi; düzenleme
+  formunda kurtarılan değerler veritabanındaki eski kayıtla ezilmiyor. Kök gezinme durumu da
+  aynı şekilde kurtarılıyor (odak oturumu, kalıcı devam noktasından gelişini koruyor).
+  Yeni testler: `SoruFormuDurumKurtarmaTest`.
+- **CI iki işe bölündü:** PR'larda yalnız test (salt-okunur token, imza secret'ı yok,
+  kanıt artifact + step summary); derleme/imza/Release yalnız `main` push'u ve `v*`
+  etiketinde, test işi geçtikten sonra. Elle yazılmış çalışma dalı listesi kaldırıldı;
+  `preview-<sürüm>` güncelleme, imzalı APK artefaktı ve Today/P6/Progress önizleme
+  kanıtları bölünmüş akışta aynen korundu.
+- **Belgeler 1.6.3 ile senkronize edildi;** öğretmen çalışma alanının gizli/askıda olduğu
+  README ve bu dosyada güncel karara (`AGENTS.md`) göre ifade edildi. Öğretmen kodu, Room
+  tabloları, görseller ve yedek desteği silinmedi; mod arkada gizli kalıyor.
+- **Değişmeyen sözleşme:** Room v5, ZIP v5 (okuma v2–v5); göç yok. `versionName`/`versionCode`
+  artırılmadı, APK küçültme (R8) kapalı kalmaya devam ediyor.
+
+## [1.6.3] — 2026-10-27
+
+- Sürüm: `versionCode 42` / `versionName 1.6.3`. Derlenen commit `9e9df5b`.
+- **Debug 384/0/0/0 · Release 303/0/0/0**; imza + sertifika parmak izi doğrulandı.
+  APK `yanlis-defteri-1.6.3.apk` (13.706.249 bayt, SHA-256
+  `787690fca609207a057b258c22dfb16f0e205cdec5bef237656c35ed5cad7218`).
+- Room v5 / ZIP v5 değişmedi; etkin v3 kapalı (varsayılan Gölge, tarihler v2).
+  Fiziksel cihaz, TalkBack, SAF ve frame-p95 kabulü hâlâ ayrı.
+- Not: 1.6.1–1.6.3 kayıtları, GitHub Release ve CI üst verilerinden sonradan tamamlandı.
+
+## [1.6.2] — 2026-10-27
+
+- **Öğretmen çalışma alanı gizlendi** (ürün kararı 2026-10-27, `AGENTS.md`):
+  `UrunKapsami.OGRETMEN_MODU_GORUNUR = false`. Kayıtlı rol, öğretmen verisi, fotoğraflar
+  ve yedek desteği korunur; görünen ürün öğrenci tarafıdır. Öğrencinin "öğretmene
+  sorulacaklar" akışı aktif kalır.
+- Sürüm: `versionCode 41` / `versionName 1.6.2`. Derlenen commit `ebe6eef`.
+- **Debug 384/0/0/0 · Release 303/0/0/0**; imza + sertifika parmak izi doğrulandı.
+  APK SHA-256 `5ec7fd326fb3579536453dae4afd63c6b06b4ce5381876bbe3737749fe15b5b4`.
+
+## [1.6.1] — 2026-10-26
+
+- Olgunlaştırma düzeltmeleri ve aşağıdaki T3 içeriği bu sürümle yayımlandı.
+  CI `40384089478` (commit `f4de076`): **Debug 380/0/0/0 · Release 300/0/0/0**,
+  imza + sertifika doğrulandı; APK SHA-256
+  `e11e85f04d8a648ab24be0ebb83961fa9f4de8b60e2a0b42a682f3a77bf76abe`.
+  Sürüm: `versionCode 40` / `versionName 1.6.1`.
+- Öğretmen modunu gizleme kararı bu APK'da **henüz yoktur** (1.6.2 ile geldi).
 
 - **Arama ve filtreler:** kuyruk ve grup detayında tek satır arama (`rememberSaveable`); başlık,
   "kim sordu", kaynak, ders ve konu adında Türkçe'ye duyarlı (`tr-TR` küçük harf) eşleşme. Kuyrukta
@@ -57,7 +103,7 @@ Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih 
   düşürmüyor; yabancı anahtar hatası fotoğrafıyla birlikte tüm soruyu kaybettiriyordu, yalnız o
   etiket atılıyor.
 - **Değişmeyen sözleşme:** Room `ROOM_SCHEMA_VERSION = 5`, ZIP `FORMAT_VERSION = 5`, okuma
-  `{2,3,4,5}`; göç yok. `versionName`/`versionCode` bu commit'te artırılmadı.
+  `{2,3,4,5}`; göç yok. T3 commit'inde sürüm artırılmamıştı; artış 1.6.1 yayımında yapıldı.
 - **Testler:** `OgretmenAramaVeFiltreTest` (arama/filtre/gün filtresi/aynı görsel/1.000 soruda
   < 200 ms), `OgretmenGrupGeriAlmaTest` (grup silme + geri alma, tekrar çağrı, arşivden dönüş),
   `OgretmenPaylasimTest` (chooser, içerik URI'si, "kim sordu" dışarıda, 9 görsel sınırı,

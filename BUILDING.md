@@ -3,13 +3,13 @@
 > Bu belge **değerleri değil**, sırların nerede ve nasıl tutulduğunu anlatır.
 > Hiçbir anahtar, parola veya token bu depoya yazılmaz.
 
-- Son güncelleme: 2026-10-23
-- Son yayımlanan sürüm: **v1.5.96 (versionCode 26)**. CI `39957379330`: **Debug320/0/0/0**, **Release262/0/0/0**; Release derlemesi, imza ve sertifika doğrulandı.
-- [Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.5.96) · [APK indir](https://github.com/keremtulu44/Question-note/releases/download/v1.5.96/yanlis-defteri-1.5.96.apk).
-  APK **12.780.271 bayt**; SHA-256 `5f0f1a8fc7206aa414511fedebc7bf52ac3269e914ac5bdf5cda5acc6c996143`.
-  Derlenen commit `67607f36291f63456648859590cd4c4618484e9a`; sertifika SHA-256 `FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54`.
-- 1.5.96 çözüm atölyesi düzenini iyileştirir. Uygulama kimliği, Room/ZIP şeması, kullanıcı çalışma verileri ve tekrar kuralları değiştirilmedi.
-- P0–P5 ve P6 otomatik kalite kapıları yayımlandı; Room/ZIP4, geçmiş/snapshot uyumluluğu korunur.
+- Son güncelleme: 2026-10-28
+- Son yayımlanan sürüm: **v1.6.3 (versionCode 42)**. **Debug 384/0/0/0**, **Release 303/0/0/0**; Release derlemesi, imza ve sertifika doğrulandı.
+- [Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.6.3) · [APK indir](https://github.com/keremtulu44/Question-note/releases/download/v1.6.3/yanlis-defteri-1.6.3.apk).
+  APK **13.706.249 bayt**; SHA-256 `787690fca609207a057b258c22dfb16f0e205cdec5bef237656c35ed5cad7218`.
+  Derlenen commit `9e9df5b27801dbd3bb90b9b4bbac76f184426e5f`; sertifika SHA-256 `FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54`.
+- Uygulama kimliği aynı; Room v5 / ZIP v5, geçmiş/snapshot uyumluluğu korunur.
+- P0–P5 ve P6 otomatik kalite kapıları yayımlandı.
   Varsayılan **Gölge v2 tarihi uygular; etkin v3 kapalıdır**. XP/30 rozet/15 rütbe katsayıları aynı.
 - **Fiziksel cihaz kabulü ayrıdır**; otomatik testin yeşil olması gerçek cihaz testi yapıldığı anlamına gelmez.
   Ayrıntı `docs/TEST_KONTROL_LISTESI.md`; host benchmark telefon/frame/cold-start ölçümü değildir.
@@ -18,9 +18,11 @@
 
 ## Varyant ve kanıt kapısı
 
-- 1.5.96/code26, son yayın CI `39957379330`: Debug320/0, Release262/0 ve APK/imza/sertifika/yayın başarılı.
-  Güncel sonuç ve kaynak: [DERLEME_RAPORU.md](docs/DERLEME_RAPORU.md).
-- Debug başarısız olsa da Release testi çalışır; APK için **ikisi de** geçmelidir. CI sırası `:app:testDebugUnitTest` → `:app:testReleaseUnitTest` → `:app:assembleRelease` →
+- CI iki iştir: **`test`** (PR + `main`/`v*` push; salt-okunur token, imza secret'ı yok) ve
+  **`release`** (yalnız `main` push veya `v*` etiketi; `test` geçmeden başlamaz). Güncel
+  sonuç ve kaynak: [DERLEME_RAPORU.md](docs/DERLEME_RAPORU.md) (yalnız `main` release
+  çalıştırmalarında güncellenir; PR kanıtı Actions artifact + step summary'dedir).
+- Debug başarısız olsa da Release testi çalışır; APK için **ikisi de** geçmelidir. Sıra: `test` işinde `:app:testDebugUnitTest` → `:app:testReleaseUnitTest`; `release` işinde `:app:assembleRelease` →
   imza/sertifika → yayın. Ortak testler iki varyantta; UI/Preview `src/testDebug`'da, sayılar toplanmaz.
 - `androidComponents` host UnitTest seçimi açık. CI test sonuçları cache/up-to-date ile atlanmaz;
   derleyici/dependency cache korunur. Her benchmark/önizleme o koşuda üretilir.
@@ -51,7 +53,7 @@ Kullanıcının telefonunda Android SDK, Gradle veya Termux kurması **gerekmez*
 
 - Tek Gradle modülü, Kotlin + Jetpack Compose.
 - Sürümler `gradle/libs.versions.toml` içinde sabitlenir; Gradle wrapper depoda tutulur.
-- minSdk 26, compileSdk/targetSdk 37; yayımlanmış v1.5.92 `versionCode=22` (v1.5.91: 21; v1.5.90: 20; v1.5.1: 19).
+- minSdk 26, compileSdk/targetSdk 37; yayımlanmış v1.6.3 `versionCode=42` (v1.6.2: 41; v1.6.1: 40; v1.6.0: 39).
 - Yapay zekâ ortamında Java/Android SDK ve Maven erişimi yoktur → derleme **yalnızca** Actions'ta olur.
 
 ## 3. İmzalama düzeni (kritik)
@@ -89,13 +91,16 @@ için uygun değildir.
 
 ## 4. Actions kullanımı
 
-- Derleme **push ile otomatik** çalışır (`main` ve bu oturumun geliştirme dalı; yalnızca workflow'da
-  izlenen dosyalar değişince). Elle tetikleme (`workflow_dispatch`) izni 403 olsa da gerekmez.
-  G2/G3/G4 derlemeleri push ile çalıştı.
-- Workflow'un **kendi token'ı** `permissions: contents: write` ile rapor commit edebiliyor; aynı izinle
-  v1.0.0, v1.0.1, v1.0.2, v1.0.3 ve v1.0.4 GitHub Release'leri oluşturuldu.
-- **Log okuma deseni:** derleme logları dışarıdan indirilemiyor; her iş akışı ölçüm/özet çıktısını
-  (sürümler, APK SHA-256, imza/parmak izi ve hata metni) **`docs/DERLEME_RAPORU.md` dosyasına yazar**.
+- Derleme/test **otomatik** çalışır: `main` push ve `v*` etiketlerinde iki iş de, pull request'lerde
+  yalnız `test` işi (yalnızca workflow'da izlenen dosyalar değişince). Geliştirme dalında CI almak
+  için (taslak) PR açmak yeterlidir. Elle tetik: `workflow_dispatch` (release işi yine yalnız
+  `main` ref'inde çalışır).
+- Token en az yetkiyle bölündü: üst düzey `permissions: contents: read`; yalnız `release` işi
+  `contents: write` alır (Release oluşturma + rapor commit'i). İmza secret'ları da yalnız
+  `release` işinin imza adımındadır; testler secret'sız ortamda çalışır.
+- **Log okuma deseni:** `main` release çalıştırması özet çıktısını (sürümler, APK SHA-256,
+  imza/parmak izi ve hata metni) **`docs/DERLEME_RAPORU.md` dosyasına yazar**; PR çalıştırmalarında
+  aynı kanıt Actions **artifact**'ında (`test-kaniti`) ve **step summary**'de yer alır.
 - Kotlin/Compose derlemesi hatasız bitmeden "APK hazır" denmez; başarısız derleme için Release
   oluşturulmaz.
 - GitHub Actions kotası ve kullanım koşulları kurulum sırasında kontrol edilir; sınırsız/ücretsiz
