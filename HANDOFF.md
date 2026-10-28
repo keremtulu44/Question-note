@@ -28,8 +28,10 @@ Kullanıcı onayıyla üç iş uygulandı; **sürüm artırılmadı** (APK yayı
    BUILDING sürüm/CI satırları. Öğretmen modu ifadeleri güncel "gizli/askıda" kararına çekildi.
 
 Doğrulama: yerel ortamda Java/SDK yok; `statik_kontrol.py` + `denge.py` + workflow YAML/bash
-(`bash -n`) kontrolleri yeşil. Kotlin derleme/JUnit kanıtı PR'ın `test` işinden gelecek.
-Üç iş, üst panel işini içeren güncel main (`5410c15`, Debug 388) üzerine taşındı.
+(`bash -n`) kontrolleri yeşil. PR #13 run `40703967953` (commit `0f2951c`): bölünmüş `test`
+işi yeşil — Debug **394** (yeni 6 restorasyon testi dahil) + Release birim testleri 0 hata;
+`release` işi PR'da beklendiği gibi atlandı. Üç iş, üst panel işini içeren güncel main
+(`5410c15`, Debug 388) üzerine taşındı.
 Room/ZIP sürümü, tekrar motoru, XP/rozet katsayıları değişmedi.
 
 > Not (üst panel bölümündeki APK notu için): sürüm etiketi dolu olduğu için en güncel imzalı
