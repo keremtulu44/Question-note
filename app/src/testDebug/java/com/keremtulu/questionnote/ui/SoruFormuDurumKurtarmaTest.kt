@@ -246,26 +246,32 @@ class SoruFormuDurumKurtarmaTest {
                 }
             }
 
+            // Konum alanı LazyColumn'da ekran altında olabilir; önce kaydır,
+            // kaydı Room'dan yüklenen değerle görünmesini sonra bekle.
+            compose.waitUntil(5_000) {
+                compose.onAllNodes(hasTestTag("soru_formu_liste"))
+                    .fetchSemanticsNodes().isNotEmpty()
+            }
+            compose.onNodeWithTag("soru_formu_liste")
+                .performScrollToNode(hasTestTag("soru_formu_kaynak_konumu"))
             compose.waitUntil(5_000) {
                 compose.onAllNodes(
                     hasTestTag("soru_formu_kaynak_konumu") and hasText("sayfa 3"),
                 ).fetchSemanticsNodes().isNotEmpty()
             }
-            compose.onNodeWithTag("soru_formu_liste")
-                .performScrollToNode(hasTestTag("soru_formu_kaynak_konumu"))
             compose.onNodeWithTag("soru_formu_kaynak_konumu").performTextReplacement("sayfa 9")
             compose.waitForIdle()
 
             restoration.emulateSavedInstanceStateRestore()
             compose.waitForIdle()
 
+            compose.onNodeWithTag("soru_formu_liste")
+                .performScrollToNode(hasTestTag("soru_formu_kaynak_konumu"))
             compose.waitUntil(5_000) {
                 compose.onAllNodes(
                     hasTestTag("soru_formu_kaynak_konumu") and hasText("sayfa 9"),
                 ).fetchSemanticsNodes().isNotEmpty()
             }
-            compose.onNodeWithTag("soru_formu_liste")
-                .performScrollToNode(hasTestTag("soru_formu_kaynak_konumu"))
             compose.onNode(hasTestTag("soru_formu_kaynak_konumu") and hasText("sayfa 9"))
                 .assertExists()
         } finally {
