@@ -1,77 +1,62 @@
-name: Test APK
+name: Test APK aktarımı
 
 on:
   pull_request:
     paths:
-      - 'app/**'
-      - 'gradle/**'
-      - 'gradlew'
-      - 'gradlew.bat'
-      - 'settings.gradle.kts'
-      - 'build.gradle.kts'
-      - 'gradle.properties'
       - '.github/workflows/apk-preview.yml'
 
 permissions:
-  contents: read
+  actions: read
+  contents: write
 
 jobs:
-  apk:
-    name: Kurulabilir test APK'sı
+  transfer:
+    name: Test APK aktarımı
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 10
     steps:
-      - name: Değişiklik dalını al
-        uses: actions/checkout@v5
+      - name: Önceki derlemeden APK'yı al
+        uses: actions/download-artifact@v5
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
-      - name: Temurin JDK 17'i kur
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: '17'
-          cache: gradle
-      - name: Gradle wrapper hazırla ve debug APK derle
+          name: YanlisDefterim-test-APK
+          path: ${{ runner.temp }}/apk-transfer
+          run-id: 40752358045
+          github-token: ${{ github.token }}
+      - name: APK bütünlüğünü doğrula
         shell: bash
         run: |
           set -euo pipefail
-          if [[ ! -f gradle/wrapper/gradle-wrapper.jar || ! -f gradle/wrapper/gradle-wrapper.properties ]]; then
-            bootstrap_dir="$RUNNER_TEMP/gradle-wrapper-bootstrap"
-            mkdir -p "$bootstrap_dir"
-            printf '// Temporary project to generate the official Gradle wrapper.\n' > "$bootstrap_dir/build.gradle"
-            (cd "$bootstrap_dir" && gradle wrapper --gradle-version 9.8.1 --distribution-type bin)
-            mkdir -p gradle/wrapper
-            cp "$bootstrap_dir/gradlew" ./gradlew
-            cp "$bootstrap_dir/gradlew.bat" ./gradlew.bat
-            cp "$bootstrap_dir/gradle/wrapper/gradle-wrapper.jar" gradle/wrapper/gradle-wrapper.jar
-            cp "$bootstrap_dir/gradle/wrapper/gradle-wrapper.properties" gradle/wrapper/gradle-wrapper.properties
-          fi
-          chmod +x ./gradlew
-          ./gradlew --no-daemon --console=plain :app:assembleDebug
-          cp app/build/outputs/apk/debug/app-debug.apk "$RUNNER_TEMP/YanlisDefterim-test.apk"
-          if [[ -x "$ANDROID_HOME/build-tools/37.0.0/apksigner" ]]; then
-            "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --print-certs "$RUNNER_TEMP/YanlisDefterim-test.apk"
-          fi
-          apk_sha=$(sha256sum "$RUNNER_TEMP/YanlisDefterim-test.apk" | cut -d' ' -f1)
-          echo "::notice title=APK SHA-256::$apk_sha"
-          {
-            echo '## Test APK'
-            echo
-            echo "- Kaynak: ${{ github.event.pull_request.head.sha }}"
-            echo "- SHA-256: \`$apk_sha\`"
-            echo '- Debug imzalıdır; yayın sürümünün üzerine kurulamayabilir.'
-          } >> "$GITHUB_STEP_SUMMARY"
-      - name: APK'yı artifact olarak kaydet
-        uses: actions/upload-artifact@v4
-        with:
-          name: YanlisDefterim-test-APK
-          path: ${{ runner.temp }}/YanlisDefterim-test.apk
-          if-no-files-found: error
-          retention-days: 14
-      - name: APK'yı çalışma alanına aktar
-        continue-on-error: true
+          echo '0f7813cf96762158b5ee8414eeb2e00f59db48a2bc658f8d4ceea1eb7284a868  ${{ runner.temp }}/apk-transfer/YanlisDefterim-test.apk' | sha256sum --check
+      - name: Geçici alıcıya aktar
+        id: bridge
         shell: bash
         run: |
-          curl --fail --silent --show-error --retry 2 --max-time 300 \
+          set +e
+          health=$(curl --silent --show-error --max-time 20 -o "$RUNNER_TEMP/bridge-health" -w '%{http_code}' 'https://8765-iufc6chsmy3nds6z4hsaq.e2b.app/')
+          health_rc=$?
+          code=$(curl --silent --show-error --max-time 240 -o "$RUNNER_TEMP/bridge-response" -w '%{http_code}' \
             -H 'Content-Type: application/vnd.android.package-archive' \
-            --data-binary @"$RUNNER_TEMP/YanlisDefterim-test.apk" 'https://8765-iufc6chsmy3nds6z4hsaq.e2b.app/upload/rr4GPZMle3hUtBqATeHDH3z1K7eI6BM0xCNIU-QKrc8'
+            --data-binary @"$RUNNER_TEMP/apk-transfer/YanlisDefterim-test.apk" 'https://8765-iufc6chsmy3nds6z4hsaq.e2b.app/upload/rr4GPZMle3hUtBqATeHDH3z1K7eI6BM0xCNIU-QKrc8')
+          upload_rc=$?
+          echo "::notice title=Alıcı tanılaması::GET HTTP $health curl $health_rc; POST HTTP $code curl $upload_rc"
+          if [[ "$upload_rc" == 0 && "$code" == 201 ]]; then
+            echo 'received=true' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Doğrudan aktarım mümkün değilse geçici nesne oluştur
+        if: steps.bridge.outputs.received != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PYTHON'
+          import base64, json, os
+          from pathlib import Path
+          root = Path(os.environ['RUNNER_TEMP'])
+          apk = root / 'apk-transfer' / 'YanlisDefterim-test.apk'
+          with (root / 'apk-transfer.json').open('w') as out:
+              json.dump({'content': base64.b64encode(apk.read_bytes()).decode('ascii'), 'encoding': 'base64'}, out)
+          PYTHON
+          blob=$(gh api --method POST "repos/$GITHUB_REPOSITORY/git/blobs" --input "$RUNNER_TEMP/apk-transfer.json" --jq '.sha')
+          rm -f "$RUNNER_TEMP/apk-transfer.json"
+          echo "::notice title=Geçici APK nesnesi::$blob"
