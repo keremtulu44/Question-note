@@ -6,14 +6,9 @@ import android.graphics.Canvas
 import android.graphics.Color
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.saveable.SaverScope
-import androidx.compose.ui.test.assertExists
-import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performScrollToNode
-import androidx.compose.ui.test.performTextReplacement
 import androidx.room.Room
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
 import com.keremtulu.questionnote.data.local.VarsayilanDersleriEkle
@@ -205,6 +200,10 @@ class SoruFormuDurumKurtarmaTest {
         restoration.emulateSavedInstanceStateRestore()
         compose.waitForIdle()
 
+        compose.waitUntil(5_000) {
+            compose.onAllNodes(hasTestTag("soru_formu_kaynak_konumu") and hasText("Soru 14"))
+                .fetchSemanticsNodes().isNotEmpty()
+        }
         compose.onNodeWithTag("soru_formu_liste")
             .performScrollToNode(hasTestTag("soru_formu_kaynak_konumu"))
         compose.onNode(hasTestTag("soru_formu_kaynak_konumu") and hasText("Soru 14"))
@@ -260,6 +259,11 @@ class SoruFormuDurumKurtarmaTest {
             restoration.emulateSavedInstanceStateRestore()
             compose.waitForIdle()
 
+            compose.waitUntil(5_000) {
+                compose.onAllNodes(
+                    hasTestTag("soru_formu_kaynak_konumu") and hasText("sayfa 9"),
+                ).fetchSemanticsNodes().isNotEmpty()
+            }
             compose.onNodeWithTag("soru_formu_liste")
                 .performScrollToNode(hasTestTag("soru_formu_kaynak_konumu"))
             compose.onNode(hasTestTag("soru_formu_kaynak_konumu") and hasText("sayfa 9"))
