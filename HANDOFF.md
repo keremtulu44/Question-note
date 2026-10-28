@@ -1,7 +1,41 @@
 # HANDOFF — Yanlış Defteri
 
-**Son güncelleme: 2026-10-27.** Önce bu belge, `docs/DERLEME_RAPORU.md`,
+**Son güncelleme: 2026-10-28.** Önce bu belge, `docs/DERLEME_RAPORU.md`,
 `docs/PREMIUM_GORSEL_GELISTIRME.md` ve [P4–P6 sözleşme/kanıt kaydı](docs/P4_P5_P6_UYGULAMA.md) okunur.
+
+## 2026-10-28 — üç iş: form kurtarma, CI bölme, belge senkronu (dal: `arena/35cb2bf0-question-note`)
+
+Kullanıcı onayıyla üç iş uygulandı; **sürüm artırılmadı** (APK yayımları kullanıcı kapısında),
+**APK küçültme/R8'e dokunulmadı**, öğretmen modu arkada gizli bırakıldı (kod/veri/test silinmedi).
+
+1. **Soru formu süreç ölümüne dayanıklı:** `SoruFormuEkrani` kalıcı alanları, hazırlanmış
+   görseller ve bekleyen kamera çekimi `rememberSaveable` + saver'larla yaşıyor; kök gezinme
+   durumu `UygulamaEkraniSaver` (JSON) ile kurtarılıyor (odak oturumu ekranı bilerek Bugün'e
+   döner, oturum devam noktası deposundan gelir). Düzenlemede kurtarılan değer DB ile
+   ezilmiyor; kaydet/vazgeç taslağı sıfırlıyor. Yeni test: `SoruFormuDurumKurtarmaTest`
+   (saver round-trip + `StateRestorationTester`). Aynı desen `SorulacaklarEkrani`
+   Çözdürdüm dialogunda da var; dialog hedefi (`Soru`) kalıcı olmadığından bilinçli olarak
+   kapsam dışı bırakıldı — ayrı küçük iş olarak yapılabilir.
+2. **CI bölündü:** `.github/workflows/android.yml` → `test` (PR + main/v*; salt-okunur,
+   secret'sız; kanıt artifact + step summary) ve `release` (yalnız main/v*, `needs: test`;
+   imza/Release/rapor commit'i burada). Elle dal listesi kaldırıldı; dalda CI için PR açmak
+   yeterli. `preview-<sürüm>` prerelease güncelleme, imzalı APK artefaktı ve
+   Today/P6/Progress önizleme kanıtları bölünmüş akışta aynen korunur.
+   `docs/DERLEME_RAPORU.md` artık yalnız main release çalıştırmasında güncellenir —
+   PR sonucu için Actions özeti/artifact'a bakılır.
+3. **Belgeler 1.6.3'e senkronize:** README durum + indirme (1.6.3, asset SHA-256
+   `787690fc…`), CHANGELOG'a 1.6.1/1.6.2/1.6.3 kayıtları (Release üst verisinden tamamlandı),
+   BUILDING sürüm/CI satırları. Öğretmen modu ifadeleri güncel "gizli/askıda" kararına çekildi.
+
+Doğrulama: yerel ortamda Java/SDK yok; `statik_kontrol.py` + `denge.py` + workflow YAML/bash
+(`bash -n`) kontrolleri yeşil. Kotlin derleme/JUnit kanıtı PR'ın `test` işinden gelecek.
+Üç iş, üst panel işini içeren güncel main (`5410c15`, Debug 388) üzerine taşındı.
+Room/ZIP sürümü, tekrar motoru, XP/rozet katsayıları değişmedi.
+
+> Not (üst panel bölümündeki APK notu için): sürüm etiketi dolu olduğu için en güncel imzalı
+> derleme `preview-1.6.3` prerelease'inden indirilir; yayımlanmış v1.6.3 asset'i üst panel
+> öncesi derlemedir. README "Durum" bölümü yayımlanmış sürümü, bu belge ve
+> `docs/DERLEME_RAPORU.md` en güncel derlemeyi anlatır.
 
 ## Güncel ürün kararı — 2026-10-27: öğretmen modu gizli ve askıda
 

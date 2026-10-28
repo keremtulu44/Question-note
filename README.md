@@ -25,22 +25,22 @@ cevaplamak ve çözümü öğrenme sürecinden ayrı saklamaktır.
 
 ## Durum
 
-**v1.6.0 yayımlandı** (versionCode 39) — öğretmen modu (T0 + T1 + P2 başlangıcı).
-[İndir](https://github.com/keremtulu44/Question-note/releases/download/v1.6.0/yanlis-defteri-1.6.0.apk) ·
-[CI `40280978018`](https://github.com/keremtulu44/Question-note/actions/runs/40280978018).
-**Debug 351/0/0/0 · Release 277/0/0/0**; APK imza ve sertifika parmak izi doğrulandı
-(`db756b455b2d3942be7f2d009f00062696e100482938206b951c6b161f4c470f`). Ortak testler iki
-varyantta tekrar eder; sayılar toplanmaz.
+**v1.6.3 yayımlandı** (versionCode 42, 2026-10-27) — güncel öğrenci ürünü.
+[İndir](https://github.com/keremtulu44/Question-note/releases/download/v1.6.3/yanlis-defteri-1.6.3.apk) ·
+[Release sayfası](https://github.com/keremtulu44/Question-note/releases/tag/v1.6.3).
+**Debug 384/0/0/0 · Release 303/0/0/0**; APK imza ve sertifika parmak izi doğrulandı
+(APK SHA-256 `787690fca609207a057b258c22dfb16f0e205cdec5bef237656c35ed5cad7218`).
+Ortak testler iki varyantta tekrar eder; sayılar toplanmaz. Güncel CI kanıtı:
+[DERLEME_RAPORU](docs/DERLEME_RAPORU.md).
 
-- **Öğretmen verisi Room v5'te:** gruplar, sorular ve soru/çözüm fotoğrafları üç tabloda; eski
-  `ogretmen_calisma_alani.json` bir kez toleranslı içe aktarılır ve arşivlenir. JSON artık yalnız
-  yedek/aktarım biçimi. Ayrıntı: [Öğretmen modu](docs/OGRETMEN_MODU.md).
-- **Ortak ders/konu kataloğu:** öğrenci tarafında açılan ders/konu, öğretmen formunda anında seçilir.
-- **Kuyruk ve sunum:** tüm gruplardan "Bugün" listesi, geciken filtresi, toplu işlem (onaylı arşiv),
-  silme geri alma; sınıf içi tam ekran sunumda ekran açık kalır, cevap gizlidir, çözüm ayrı açılır.
-- **Kamera düzeltmesi:** gereksiz izin kapısı kaldırıldı; manifestte `CAMERA` izni yok.
-- **Yedek:** ZIP/Room sürümü 5; okuma v2–v5. Şifreleme yok.
-- **Açık kalan:** fiziksel cihaz kabulü (kamera, süreç öldürme, 200+ soruluk grup, 1.6x yazı ölçeği).
+- **Öğretmen çalışma alanı gizli/askıda (1.6.2+):** ürün odağı öğrenci tarafıdır
+  (güncel karar: [AGENTS.md](AGENTS.md)). Öğretmen kodu, Room v5 tabloları, kayıtlı rol,
+  fotoğraflar ve yedek desteği **silinmeden** arkada korunur; kurulumda/ayarlarda öğretmen
+  girişi görünmez. Öğrencinin "öğretmene sorulacaklar / çözdürdüm" akışı aktif üründür.
+- **Veri:** Room v5; öğretmen verisi de üç Room tablosunda. **Yedek:** ZIP sürümü 5,
+  okuma v2–v5. Şifreleme yok.
+- **Açık kalan:** fiziksel cihaz kabulü (kamera, süreç öldürme, SAF/Drive, TalkBack,
+  büyük arşivde frame-p95) — [TEST_KONTROL_LISTESI](docs/TEST_KONTROL_LISTESI.md).
 
 ## Önceki yayım — v1.5.1
 
@@ -112,9 +112,9 @@ turu denemedim” ifadesinin checklist eşlemesi hâlâ teyitsiz; ayrıntı
 ## Kullanım / APK erişimi
 
 İmzalı APK'lar GitHub [Releases](https://github.com/keremtulu44/Question-note/releases) bölümünde.
-[v1.5.0 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.5.0/yanlis-defteri-1.5.0.apk).
+[v1.6.3 APK'yı indir](https://github.com/keremtulu44/Question-note/releases/download/v1.6.3/yanlis-defteri-1.6.3.apk).
 
-APK: 10.791.135 bayt. SHA-256: `3e7158345d0e0c88bf03698b8ba21db1fedef6a123758de5e7b13f8e5a5470db`. CI raporu ile GitHub asset digest eşleşiyor.
+APK: 13.706.249 bayt. SHA-256: `787690fca609207a057b258c22dfb16f0e205cdec5bef237656c35ed5cad7218`. GitHub asset digest'i ile Release notundaki değer eşleşiyor.
 Güncellemeden önce Ayarlar’dan ZIP yedeği al. Mevcut uygulamayı **kaldırmadan** üzerine kur; eski kayıtların korunduğunu doğrula. Alt menüdeki beş
 sekmeyi gez; **İlerleme** sekmesinde rütbe amblemini, XP çubuğunu, rozet galerisini ve tahmini kontrol et.
 **Ayarlar**'da günlük hedefi değiştir, yedek al. Konu ve kaynak/neden silmeyi dene (kullanımdaysa
