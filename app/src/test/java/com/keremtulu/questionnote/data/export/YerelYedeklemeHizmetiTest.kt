@@ -796,7 +796,7 @@ class YerelYedeklemeHizmetiTest {
     }
 
     @Test
-    fun bozukDenemeDisariAktarimiEngellerAmaYedektenGuvenliGeriYuklenir() = runBlocking {
+    fun bozukDenemeDisariAktarimiEngellerAmaYedektenGuvenliGeriYuklenir() = runBlocking<Unit> {
         val context = RuntimeEnvironment.getApplication()
         val prefs = context.getSharedPreferences("denemeler", android.content.Context.MODE_PRIVATE)
         prefs.edit().clear().commit()
@@ -865,7 +865,7 @@ class YerelYedeklemeHizmetiTest {
     }
 
     @Test
-    fun hamDenemeGeriYuklemesiKesilirseGunlukTekrarOynatilabilir() = runBlocking {
+    fun hamDenemeGeriYuklemesiKesilirseGunlukTekrarOynatilabilir() = runBlocking<Unit> {
         val context = RuntimeEnvironment.getApplication()
         val prefs = context.getSharedPreferences("denemeler", android.content.Context.MODE_PRIVATE)
         prefs.edit().clear().commit()
@@ -898,7 +898,7 @@ class YerelYedeklemeHizmetiTest {
     }
 
     @Test
-    fun yanlisTiptekiBozukDenemeGuvenlikYedegindeTipiniKorur() = runBlocking {
+    fun yanlisTiptekiBozukDenemeGuvenlikYedegindeTipiniKorur() = runBlocking<Unit> {
         val context = RuntimeEnvironment.getApplication()
         val prefs = context.getSharedPreferences("denemeler", android.content.Context.MODE_PRIVATE)
         prefs.edit().clear().commit()
@@ -916,7 +916,7 @@ class YerelYedeklemeHizmetiTest {
     }
 
     @Test
-    fun tekrarliHamDenemeGuvenlikYedegiSikistirmaSinirinaTakilmaz() = runBlocking {
+    fun tekrarliHamDenemeGuvenlikYedegiSikistirmaSinirinaTakilmaz() = runBlocking<Unit> {
         val context = RuntimeEnvironment.getApplication()
         val prefs = context.getSharedPreferences("denemeler", android.content.Context.MODE_PRIVATE)
         prefs.edit().clear().commit()
@@ -937,7 +937,7 @@ class YerelYedeklemeHizmetiTest {
     }
 
     @Test
-    fun asiriBuyukBozukDenemedeGeriYuklemeDegisiklikYapmadanDurur() = runBlocking {
+    fun asiriBuyukBozukDenemedeGeriYuklemeDegisiklikYapmadanDurur() = runBlocking<Unit> {
         val context = RuntimeEnvironment.getApplication()
         val prefs = context.getSharedPreferences("denemeler", android.content.Context.MODE_PRIVATE)
         prefs.edit().clear().commit()
