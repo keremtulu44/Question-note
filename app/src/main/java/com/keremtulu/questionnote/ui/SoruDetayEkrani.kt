@@ -460,6 +460,14 @@ fun SoruDetayEkrani(
                                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.78f),
                                         style = MaterialTheme.typography.bodySmall,
                                     )
+                                    Text(
+                                        stringResource(R.string.review_one_tap_note),
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.78f),
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
+                                    if (tekrarKaydediliyor) {
+                                        Text(stringResource(R.string.review_saving), style = MaterialTheme.typography.bodySmall)
+                                    }
                                     PremiumOutlinedButton(
                                         modifier = Modifier.fillMaxWidth(),
                                         enabled = !tekrarKaydediliyor,
@@ -472,18 +480,12 @@ fun SoruDetayEkrani(
                                         interactionTur = EtkilesimTuru.TIKLAMA,
                                         onClick = { tekrarSonucunuKaydet(soru, TekrarSonucu.ZORLANDIM) },
                                     ) { Text(stringResource(R.string.review_result_struggled)) }
-                                    PremiumButton(
+                                    PremiumOutlinedButton(
                                         modifier = Modifier.fillMaxWidth(),
                                         enabled = !tekrarKaydediliyor,
                                         interactionTur = EtkilesimTuru.TIKLAMA,
                                         onClick = { tekrarSonucunuKaydet(soru, TekrarSonucu.RAHAT) },
-                                    ) {
-                                        Text(
-                                            stringResource(
-                                                if (tekrarKaydediliyor) R.string.review_saving else R.string.review_result_easy,
-                                            ),
-                                        )
-                                    }
+                                    ) { Text(stringResource(R.string.review_result_easy)) }
                                 }
                             }
                         }

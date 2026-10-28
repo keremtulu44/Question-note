@@ -20,10 +20,11 @@ data class DenemeDersSatiri(
     val yanlis: Int,
     val dersAdi: String? = null,
 ) {
-    val bos: Int get() = (soruSayisi - dogru - yanlis).coerceAtLeast(0)
-    val yuklenecek: Int get() = yanlis + bos
+    // Long arithmetic also keeps an invalid imported record from overflowing before validation.
+    val bos: Int get() = (soruSayisi.toLong() - dogru - yanlis).coerceIn(0, Int.MAX_VALUE.toLong()).toInt()
+    val yuklenecek: Int get() = (yanlis.toLong() + bos).coerceIn(0, Int.MAX_VALUE.toLong()).toInt()
     fun gecerli(): Boolean =
-        soruSayisi >= 0 && dogru >= 0 && yanlis >= 0 && dogru + yanlis <= soruSayisi
+        soruSayisi >= 0 && dogru >= 0 && yanlis >= 0 && dogru.toLong() + yanlis <= soruSayisi.toLong()
 }
 
 data class DenemeKaydi(

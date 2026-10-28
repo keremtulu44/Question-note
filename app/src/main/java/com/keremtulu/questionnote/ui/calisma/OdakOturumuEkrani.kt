@@ -1,7 +1,12 @@
 package com.keremtulu.questionnote.ui.calisma
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.progressSemantics
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -29,6 +34,7 @@ import com.keremtulu.questionnote.ui.premium.PremiumButton
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import com.keremtulu.questionnote.ui.premium.PremiumOutlinedButton
 import com.keremtulu.questionnote.ui.premium.PremiumSwitch
 import androidx.compose.material3.Scaffold
@@ -49,8 +55,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -107,6 +115,7 @@ import com.keremtulu.questionnote.domain.repeat.AkilliTekrarKurali
 import com.keremtulu.questionnote.ui.premium.PremiumGradyanButon
 
 /** A focused review surface; no archive/delete controls, no forced solution reveal, no speed score. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun OdakOturumuEkrani(
     soru: Soru,
@@ -145,6 +154,7 @@ fun OdakOturumuEkrani(
     var mola by rememberSaveable(soru.id) { mutableStateOf(false) }
     var beyazTahtaAcik by rememberSaveable(soru.id) { mutableStateOf(false) }
     var cozumGorunur by rememberSaveable(soru.id) { mutableStateOf(false) }
+    var planDetayiAcik by rememberSaveable(soru.id) { mutableStateOf(false) }
     var kaydediliyor by remember(soru.id) { mutableStateOf(false) }
     var cozumAciliyor by remember(soru.id) { mutableStateOf(false) }
     var cozumKayitHatasi by remember(soru.id) { mutableStateOf(false) }
@@ -293,18 +303,20 @@ fun OdakOturumuEkrani(
         },
     ) { insets ->
         LazyColumn(
-            Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets),
+            Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets).testTag("focus-list"),
             state = liste,
             contentPadding = PaddingValues(18.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             item {
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween) {
-                    PremiumTextButton(onClick = { if (!kaydediliyor && !cozumAciliyor) { olcum.aktiflik(false); onGeri() } }, enabled = !mesgul) { Text(stringResource(R.string.common_back)) }
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween) {
+                        PremiumTextButton(onClick = { if (!kaydediliyor && !cozumAciliyor) { olcum.aktiflik(false); onGeri() } }, enabled = !mesgul) { Text(stringResource(R.string.common_back)) }
+                        PremiumTextButton(onClick = { if (!kaydediliyor && !cozumAciliyor) { olcum.aktiflik(false); mola = true } }, enabled = !mesgul) { Text(stringResource(R.string.focus_pause)) }
+                    }
                     Text(stringResource(R.string.filtered_practice_session_progress, sira, toplam),
                         style = MaterialTheme.typography.labelLarge, color = colors.primary)
-                    PremiumTextButton(onClick = { if (!kaydediliyor && !cozumAciliyor) { olcum.aktiflik(false); mola = true } }, enabled = !mesgul) { Text(stringResource(R.string.focus_pause)) }
                 }
             }
             item {
@@ -321,37 +333,21 @@ fun OdakOturumuEkrani(
                     if (olcum.nokta.olcum.kalite != OlcumKalitesi.TAM) Text(stringResource(
                         if (olcum.nokta.olcum.kalite == OlcumKalitesi.KISMI) R.string.measure_partial else R.string.measure_invalid),
                         color = Color(0xFFF0D18E), style = MaterialTheme.typography.labelSmall)
-                    Box(Modifier.fillMaxWidth().height(5.dp).background(Color.White.copy(alpha = 0.2f), RoundedCornerShape(4.dp))) {
-                        Box(Modifier.fillMaxWidth(((sira - 1).toFloat() / toplam.coerceAtLeast(1)).coerceIn(0f, 1f)).height(5.dp)
+                    val tamamlananOran = (sonuclar.size.toFloat() / toplam.coerceAtLeast(1)).coerceIn(0f, 1f)
+                    val tamamlananMetni = stringResource(R.string.focus_done, sonuclar.size)
+                    Box(Modifier.fillMaxWidth().height(5.dp)
+                        .progressSemantics(tamamlananOran)
+                        .semantics { contentDescription = tamamlananMetni }
+                        .testTag("focus-session-progress")
+                        .background(Color.White.copy(alpha = 0.2f), RoundedCornerShape(4.dp))) {
+                        Box(Modifier.fillMaxWidth(tamamlananOran).height(5.dp)
                             .background(Color(0xFFF0D18E), RoundedCornerShape(4.dp)))
                     }
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(stringResource(R.string.focus_done, sonuclar.size), color = Color.White, style = MaterialTheme.typography.labelSmall)
+                    FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(tamamlananMetni, color = Color.White, style = MaterialTheme.typography.labelSmall)
                         Text(stringResource(R.string.focus_effort_xp, sonuclar.size * 5 + sayilar.bagimsiz * 5),
                             color = Color(0xFFF0D18E), style = MaterialTheme.typography.labelSmall)
-                    }
-                }
-            }
-            item {
-                PremiumCard(
-                    shape = MaterialTheme.shapes.large,
-                    colors = CardDefaults.cardColors(containerColor = colors.surfaceVariant.copy(alpha = 0.62f)),
-                ) {
-                    Row(
-                        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Column(Modifier.weight(1f).padding(end = 12.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                            Text(stringResource(R.string.focus_ambient_title), fontWeight = FontWeight.SemiBold)
-                            Text(stringResource(R.string.focus_ambient_note), style = MaterialTheme.typography.bodySmall,
-                                color = colors.onSurfaceVariant)
-                        }
-                        PremiumSwitch(
-                            checked = ambiyansAcik,
-                            onCheckedChange = { ambiyansAcik = it },
-                            enabled = !mesgul,
-                        )
                     }
                 }
             }
@@ -364,7 +360,8 @@ fun OdakOturumuEkrani(
                 }
             }
             if (!soru.soruNotu.isNullOrBlank()) item {
-                Text(soru.soruNotu.orEmpty(), style = MaterialTheme.typography.bodyLarge, color = colors.onSurface)
+                Text(soru.soruNotu.orEmpty(), modifier = Modifier.testTag("focus-question-note"),
+                    style = MaterialTheme.typography.bodyLarge, color = colors.onSurface)
             }
             val denemeKaydi = denemeler.kaynakla(soru.kaynak)
             if (denemeKaydi != null) {
@@ -384,7 +381,9 @@ fun OdakOturumuEkrani(
                         if (durum == GorselHazirligi.HATA) olcum.kismi(OlcumNedeni.GORSEL_EKSIK)
                     }) { olcum.tamEkran(); gorsel = image }
             }
-            item { Text(stringResource(R.string.focus_image_hint), style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant) }
+            if (soru.gorseller.any { it.tur == GorselTuru.SORU }) item {
+                Text(stringResource(R.string.focus_image_hint), style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant)
+            }
             item {
                 PremiumOutlinedButton(
                     onClick = { beyazTahtaAcik = true },
@@ -445,6 +444,32 @@ fun OdakOturumuEkrani(
                     }
                 }
             }
+            item {
+                val ambiyansEtiketi = stringResource(R.string.focus_ambient_title)
+                PremiumCard(
+                    modifier = Modifier.testTag("focus-ambient-card"),
+                    shape = MaterialTheme.shapes.large,
+                    colors = CardDefaults.cardColors(containerColor = colors.surfaceVariant.copy(alpha = 0.62f)),
+                ) {
+                    Row(
+                        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Column(Modifier.weight(1f).padding(end = 12.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                            Text(stringResource(R.string.focus_ambient_title), fontWeight = FontWeight.SemiBold)
+                            Text(stringResource(R.string.focus_ambient_note), style = MaterialTheme.typography.bodySmall,
+                                color = colors.onSurfaceVariant)
+                        }
+                        PremiumSwitch(
+                            checked = ambiyansAcik,
+                            onCheckedChange = { ambiyansAcik = it },
+                            modifier = Modifier.semantics { contentDescription = ambiyansEtiketi },
+                            enabled = !mesgul,
+                        )
+                    }
+                }
+            }
             if (yuklemeHatasi) item {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(stringResource(R.string.focus_load_error), color = colors.error)
@@ -453,38 +478,57 @@ fun OdakOturumuEkrani(
             }
             if (degerlendirme && oncekiKayitlar != null && !tekrarli && !kullanilamaz) item {
                 Column(
-                    modifier = Modifier.fillMaxWidth().graphicsLayer { alpha = degerlendirmeGirisi.value },
+                    modifier = Modifier.fillMaxWidth().testTag("focus-assessment")
+                        .graphicsLayer { alpha = degerlendirmeGirisi.value },
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     Text(stringResource(R.string.focus_assess_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     Text(stringResource(R.string.focus_assess_note), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
-                    Text(stringResource(R.string.measure_frozen_note), style = MaterialTheme.typography.bodySmall)
-                    PremiumTextButton(onClick = { olcum.calismayaDon(); planYenilendi = false }, enabled = !mesgul) {
-                        Text(stringResource(R.string.measure_return_to_study))
-                    }
+                    Text(stringResource(R.string.measure_frozen_note), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
                     if (onizlemeler == null && !planHatasi) Text(stringResource(R.string.measure_preparing))
-                    onizlemeler?.get(secim ?: TekrarSonucu.RAHAT)?.karar?.let { KararAciklamasi(it) }
-                    TekrarSonucu.entries.forEach { sonuc ->
-                        val plan = onizlemeler?.get(sonuc)?.plan
-                        val secili = secim == sonuc
-                        PremiumCard(onClick = { olcum.dondur(sonuc) }, enabled = !mesgul && plan != null,
-                            modifier = Modifier.fillMaxWidth().semantics { selected = secili; role = Role.RadioButton },
-                            shape = MaterialTheme.shapes.large,
-                            colors = CardDefaults.cardColors(containerColor = if (secili) colors.primaryContainer else colors.surface)) {
-                            Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween) {
-                                Text(stringResource(when (sonuc) {
-                                    TekrarSonucu.COZEMEDIM -> R.string.review_result_not_solved
-                                    TekrarSonucu.ZORLANDIM -> R.string.review_result_struggled
-                                    TekrarSonucu.RAHAT -> R.string.review_result_easy
-                                }), fontWeight = FontWeight.SemiBold)
-                                Column(horizontalAlignment = Alignment.End) {
-                                    Text(if (plan == null) "—" else if (plan.sonrakiAralik == 1) stringResource(R.string.focus_tomorrow)
-                                    else stringResource(R.string.focus_next_days, plan.sonrakiAralik), style = MaterialTheme.typography.labelSmall)
-                                    if (secili) Text("✓", color = colors.primary, fontFamily = PremiumSembolAilesi)
+                    Column(Modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        TekrarSonucu.entries.forEach { sonuc ->
+                            val plan = onizlemeler?.get(sonuc)?.plan
+                            val secili = secim == sonuc
+                            val sonraki = if (plan == null) "—" else if (plan.sonrakiAralik == 1) {
+                                stringResource(R.string.focus_tomorrow)
+                            } else {
+                                stringResource(R.string.focus_next_days, plan.sonrakiAralik)
+                            }
+                            PremiumCard(
+                                onClick = { olcum.dondur(sonuc) },
+                                enabled = !mesgul && plan != null,
+                                modifier = Modifier.fillMaxWidth().testTag("focus-result-${sonuc.name}")
+                                    .semantics { selected = secili; role = Role.RadioButton },
+                                shape = RoundedCornerShape(18.dp),
+                                border = BorderStroke(1.dp, if (secili) colors.primary else colors.outlineVariant),
+                                colors = CardDefaults.cardColors(containerColor = if (secili) colors.primaryContainer else colors.surface),
+                            ) {
+                                Row(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
+                                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    RadioButton(selected = secili, onClick = null, enabled = !mesgul && plan != null, modifier = Modifier.size(24.dp))
+                                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                                        Text(stringResource(when (sonuc) {
+                                            TekrarSonucu.COZEMEDIM -> R.string.review_result_not_solved
+                                            TekrarSonucu.ZORLANDIM -> R.string.review_result_struggled
+                                            TekrarSonucu.RAHAT -> R.string.review_result_easy
+                                        }), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
+                                        Text(stringResource(R.string.focus_next_preview, sonraki), style = MaterialTheme.typography.bodySmall,
+                                            color = if (secili) colors.onPrimaryContainer else colors.onSurfaceVariant)
+                                    }
                                 }
                             }
                         }
+                    }
+                    PremiumTextButton(onClick = { olcum.calismayaDon(); planYenilendi = false }, enabled = !mesgul) {
+                        Text(stringResource(R.string.measure_return_to_study))
+                    }
+                    val secilenKarar = secim?.let { onizlemeler?.get(it)?.karar }
+                    if (secilenKarar != null) {
+                        PremiumTextButton(onClick = { planDetayiAcik = !planDetayiAcik }) {
+                            Text(stringResource(if (planDetayiAcik) R.string.focus_plan_details_hide else R.string.focus_plan_details))
+                        }
+                        if (planDetayiAcik) KararAciklamasi(secilenKarar)
                     }
                 }
             }
