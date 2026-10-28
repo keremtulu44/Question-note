@@ -35,7 +35,7 @@ data class DenemeKaydi(
     val gun: Int,
     val satirlar: List<DenemeDersSatiri>,
 ) {
-    val toplamYuklenecek: Int get() = satirlar.sumOf { it.yuklenecek }
+    val toplamYuklenecek: Long get() = satirlar.sumOf { it.yuklenecek.toLong() }
     fun toplamNet(): Double = satirlar.sumOf { kural.net(it.dogru, it.yanlis) }
     fun satir(dersId: String): DenemeDersSatiri? = satirlar.firstOrNull { it.dersId == dersId }
 }

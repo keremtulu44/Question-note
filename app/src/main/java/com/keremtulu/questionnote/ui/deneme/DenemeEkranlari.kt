@@ -375,9 +375,9 @@ private fun DenemeListeKarti(
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
-    val dogruToplam = deneme.satirlar.sumOf { it.dogru }
-    val yanlisToplam = deneme.satirlar.sumOf { it.yanlis }
-    val bosToplam = deneme.satirlar.sumOf { it.bos }
+    val dogruToplam = deneme.satirlar.sumOf { it.dogru.toLong() }
+    val yanlisToplam = deneme.satirlar.sumOf { it.yanlis.toLong() }
+    val bosToplam = deneme.satirlar.sumOf { it.bos.toLong() }
     val hedefYukleme = deneme.toplamYuklenecek
 
     PremiumCard(
@@ -430,7 +430,7 @@ private fun DenemeListeKarti(
                 )
                 if (yuklenenSoruSayisi != null) {
                     val (etiket, arkaPlan, metinRengi) = when {
-                        hedefYukleme == 0 -> Triple(
+                        hedefYukleme == 0L -> Triple(
                             stringResource(R.string.deneme_upload_clean),
                             colors.secondaryContainer.copy(alpha = 0.6f),
                             colors.onSecondaryContainer,
@@ -638,9 +638,9 @@ fun DenemeDetayEkrani(
     val anlikToplamNet = remember(gecerliSatirlar, kural) {
         gecerliSatirlar.sumOf { kural.net(it.dogru, it.yanlis) }
     }
-    val anlikDogru = remember(gecerliSatirlar) { gecerliSatirlar.sumOf { it.dogru } }
-    val anlikYanlis = remember(gecerliSatirlar) { gecerliSatirlar.sumOf { it.yanlis } }
-    val anlikBos = remember(gecerliSatirlar) { gecerliSatirlar.sumOf { it.bos } }
+    val anlikDogru = remember(gecerliSatirlar) { gecerliSatirlar.sumOf { it.dogru.toLong() } }
+    val anlikYanlis = remember(gecerliSatirlar) { gecerliSatirlar.sumOf { it.yanlis.toLong() } }
+    val anlikBos = remember(gecerliSatirlar) { gecerliSatirlar.sumOf { it.bos.toLong() } }
 
     suspend fun dogrulaVeKaydet(): DenemeKaydi? {
         val temizAd = ad.trim()

@@ -230,6 +230,24 @@ class DenemeVeKurulumArayuzTest {
     }
 
     @Test
+    fun eskiBuyukKayitlardaDerslerArasiToplamlarTasmaz() {
+        runBlocking { dersRepository.kataloguHazirla() }
+        val dersler = runBlocking { database.dersDao().tumunuGetir().take(2) }
+        denemeDeposu.kaydet(DenemeKaydi("buyuk", "Eski kayıt", NetKurali.YOK, 1, 20_000,
+            dersler.map { DenemeDersSatiri(it.id, Int.MAX_VALUE, 0, 0, it.ad) }))
+        compose.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                DenemeListesiEkrani(denemeDeposu, dersRepository, soruRepository, onGeri = {}, onYeni = {}, onAc = {})
+            }
+        }
+        compose.waitForIdle()
+        compose.onNodeWithTag("deneme-list").performScrollToNode(hasTestTag("deneme-card-buyuk"))
+        val toplam = 2L * Int.MAX_VALUE
+        compose.onNodeWithText(compose.activity.getString(R.string.deneme_card_counts, 0L, 0L, toplam), useUnmergedTree = true).assertExists()
+        compose.onNodeWithText(compose.activity.getString(R.string.deneme_upload_progress, 0, toplam), useUnmergedTree = true).assertExists()
+    }
+
+    @Test
     fun denemeGrafigiSonAltiVeSonOnIkiAraliginiDegistirir() {
         runBlocking { dersRepository.kataloguHazirla() }
         val mat = runBlocking { database.dersDao().tumunuGetir().first { it.ad == "Matematik" }.id }

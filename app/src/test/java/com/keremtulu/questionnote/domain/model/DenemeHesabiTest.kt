@@ -121,6 +121,18 @@ class DenemeHesabiTest {
     }
 
     @Test
+    fun derslerArasiToplamYuklenecekTamsayiSiniriniAsabilir() {
+        val deneme = DenemeKaydi(
+            "buyuk", "Eski kayıt", NetKurali.YOK, 1, 1,
+            listOf(
+                DenemeDersSatiri("a", Int.MAX_VALUE, 0, 0),
+                DenemeDersSatiri("b", Int.MAX_VALUE, 0, 0),
+            ),
+        )
+        assertEquals(2L * Int.MAX_VALUE, deneme.toplamYuklenecek)
+    }
+
+    @Test
     fun kaynaklaNormalizeEdilmisDenemeAdiniEslerVeNegatifNetBarlariniKorur() {
         val deneme = DenemeKaydi(
             id = "d1",
