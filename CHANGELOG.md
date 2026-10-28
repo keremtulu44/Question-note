@@ -2,6 +2,16 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [Yayınlanmadı — öğrenci denemeleri ve veri güvenliği] — 2026-10-28
+
+- Deneme trendi, puanlama/kapsam seçimi, doğru–yanlış–boş dağılımı ve ders karşılaştırmaları
+  yenilendi; soru çözme/öz değerlendirme akışı sadeleştirildi. Öğretmen ürün alanına dokunulmadı.
+- Okunamayan deneme verisi sessizce boş liste sayılmıyor; yazma ve eksik normal yedek engelleniyor.
+  Sağlam yedekten dönüşte ham veri özel güvenlik ZIP'inde korunuyor; onaylı sıfırlama seçeneği var.
+  Son cihaz içi güvenlik kopyası Ayarlar'dan yeniden doğrulanıp önizlenebiliyor.
+- Normal yedek v5, Room v5 olarak kalır; bozuk ham deneme içeren güvenlik kopyası v6'dır.
+  Geri yükleme günlük ve öğretmen veri uyumluluğu testleri eklendi. Ayrıntı: `docs/YEDEK_FORMATI.md`.
+
 ## [Yayınlanmadı — üst panel] — 2026-10-27
 
 - **Üst panel:** alt menünün kalıcı eşi. Canlı tarih (`d MMMM EEEE`), seri ve günlük hedef

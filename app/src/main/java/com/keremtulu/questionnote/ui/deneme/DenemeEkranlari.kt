@@ -5,6 +5,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -67,6 +69,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -74,16 +78,21 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.data.prefs.DenemeDeposu
+import com.keremtulu.questionnote.domain.model.DenemeAdiDurumu
 import com.keremtulu.questionnote.domain.model.DenemeDersSatiri
 import com.keremtulu.questionnote.domain.model.DenemeKaydi
+import com.keremtulu.questionnote.domain.model.SORU_SECENEGI_ADI_UST_SINIR
+import com.keremtulu.questionnote.domain.model.denemeAdiDogrula
 import com.keremtulu.questionnote.domain.model.Ders
 import com.keremtulu.questionnote.domain.model.DersNetKarsilastirma
 import com.keremtulu.questionnote.domain.model.NetKurali
 import com.keremtulu.questionnote.domain.model.Soru
 import com.keremtulu.questionnote.domain.model.denemeKaynakEslesir
 import com.keremtulu.questionnote.domain.model.dersBarlari
-import com.keremtulu.questionnote.domain.model.grafikNoktalari
-import com.keremtulu.questionnote.domain.model.oncekiAyniKural
+import com.keremtulu.questionnote.domain.model.karsilastirilabilirler
+import com.keremtulu.questionnote.domain.model.kapsamTemsilcileri
+import com.keremtulu.questionnote.domain.model.kronolojik
+import com.keremtulu.questionnote.domain.model.oncekiKarsilastirilabilir
 import com.keremtulu.questionnote.domain.model.yerelTarih
 import com.keremtulu.questionnote.domain.repository.DersRepository
 import com.keremtulu.questionnote.domain.repository.SoruRepository
@@ -113,6 +122,9 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
@@ -156,28 +168,36 @@ fun netYazi(deger: Double): String {
 }
 
 @Composable
-private fun netKuraliEtiketi(kural: NetKurali): String = when (kural) {
+internal fun netKuraliEtiketi(kural: NetKurali): String = when (kural) {
     NetKurali.DORTTE_BIR -> stringResource(R.string.deneme_rule_4)
     NetKurali.UCTE_BIR -> stringResource(R.string.deneme_rule_3)
     NetKurali.YOK -> stringResource(R.string.deneme_rule_none)
+}
+
+private sealed interface DenemeSoruTakibi {
+    data object Yukleniyor : DenemeSoruTakibi
+    data object Hata : DenemeSoruTakibi
+    data class Hazir(val sorular: List<Soru>) : DenemeSoruTakibi
 }
 
 @Composable
 private fun tumSorulariIzle(
     dersler: List<Ders>,
     soruRepository: SoruRepository?,
-): List<Soru> {
+): DenemeSoruTakibi {
     val akis = remember(dersler, soruRepository) {
         if (soruRepository == null || dersler.isEmpty()) {
             flowOf(emptyList())
         } else {
             combine(dersler.map { ders -> soruRepository.sorulariIzle(ders.id) }) { gruplar ->
                 gruplar.flatMap { it }
-            }.catch { emit(emptyList()) }
+            }
         }
     }
-    val sonuc by produceState(emptyList<Soru>(), akis) {
-        akis.collect { value = it }
+    val sonuc by produceState<DenemeSoruTakibi>(DenemeSoruTakibi.Yukleniyor, akis) {
+        value = DenemeSoruTakibi.Yukleniyor
+        akis.catch { value = DenemeSoruTakibi.Hata }
+            .collect { value = DenemeSoruTakibi.Hazir(it) }
     }
     return sonuc
 }
@@ -191,8 +211,10 @@ fun DenemeListesiEkrani(
     onGeri: () -> Unit,
     onYeni: () -> Unit,
     onAc: (String) -> Unit,
+    onYedekAyarlari: (() -> Unit)? = null,
 ) {
     val kayitlar by denemeDeposu.kayitlariIzle.collectAsState()
+    val veriBozuk by denemeDeposu.bozukMuIzle.collectAsState()
     val tumDersler by remember(dersRepository) {
         combine(
             dersRepository.dersleriIzle(false),
@@ -200,25 +222,36 @@ fun DenemeListesiEkrani(
         ) { acik, arsiv -> acik + arsiv }
     }.collectAsState(initial = emptyList())
     val dersAdlari = remember(tumDersler) { tumDersler.associate { it.id to it.ad } }
-    val tumSorular = tumSorulariIzle(tumDersler, soruRepository)
+    val soruTakibi = tumSorulariIzle(tumDersler, soruRepository)
+    val tumSorular = (soruTakibi as? DenemeSoruTakibi.Hazir)?.sorular
 
     val mevcutKurallar = remember(kayitlar) { kayitlar.map { it.kural }.distinct() }
     var seciliKuralAdi by rememberSaveable { mutableStateOf<String?>(null) }
+    var seciliKapsamId by rememberSaveable { mutableStateOf<String?>(null) }
+    var grafikLimit by rememberSaveable { mutableIntStateOf(12) }
     val seciliKural = remember(seciliKuralAdi, mevcutKurallar) {
         seciliKuralAdi?.let { ad -> NetKurali.entries.firstOrNull { it.name == ad } }
-            ?.takeIf { it in mevcutKurallar }
+            ?.takeIf { it in mevcutKurallar } ?: mevcutKurallar.firstOrNull()
     }
-    val grafikKayitlari = remember(kayitlar, seciliKural) {
-        val filtreli = if (seciliKural == null) kayitlar else kayitlar.filter { it.kural == seciliKural }
-        filtreli.grafikNoktalari()
+    val seciliKuralKayitlari = remember(kayitlar, seciliKural) {
+        kayitlar.filter { it.kural == seciliKural }.kronolojik()
     }
-    val sonDeneme = grafikKayitlari.lastOrNull() ?: kayitlar.firstOrNull()
+    val kapsamlar = remember(seciliKuralKayitlari) { seciliKuralKayitlari.kapsamTemsilcileri() }
+    // Keep a selected group even when a newer exam is added to it; fall back safely if it was deleted.
+    val kapsamOrnegi = seciliKuralKayitlari.firstOrNull { it.id == seciliKapsamId }
+        ?: kapsamlar.firstOrNull()
+    val eslesenKayitlar = remember(kayitlar, kapsamOrnegi) {
+        kapsamOrnegi?.let { kayitlar.karsilastirilabilirler(it) }.orEmpty()
+    }
+    val sonDeneme = eslesenKayitlar.lastOrNull()
+    val grafikKayitlari = remember(eslesenKayitlar, grafikLimit) { eslesenKayitlar.takeLast(grafikLimit) }
+    val uyumsuzSayisi = (seciliKuralKayitlari.size - eslesenKayitlar.size).coerceAtLeast(0)
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets.safeDrawing,
         floatingActionButton = {
-            if (kayitlar.isNotEmpty()) {
+            if (!veriBozuk && kayitlar.isNotEmpty()) {
                 PremiumExtendedFloatingActionButton(
                     onClick = onYeni,
                     modifier = Modifier.testTag("deneme-fab-new"),
@@ -247,7 +280,9 @@ fun DenemeListesiEkrani(
                 onGeri = onGeri,
             )
 
-            if (kayitlar.isEmpty()) {
+            if (veriBozuk) {
+                DenemeBozukIcerik(denemeDeposu, onYedekAyarlari)
+            } else if (kayitlar.isEmpty()) {
                 PremiumBosDurum(
                     illustration = { DenemeBosIlustrasyon() },
                     baslik = stringResource(R.string.deneme_empty_title),
@@ -267,123 +302,60 @@ fun DenemeListesiEkrani(
                     verticalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
                     item {
-                        com.keremtulu.questionnote.ui.bilesenler.DuzBaslik(
-                    baslik = stringResource(R.string.deneme_title),
-                    alt = stringResource(R.string.deneme_list_subtitle),
-                )
+                        Text(
+                            text = stringResource(R.string.deneme_list_subtitle),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+
+                    if (soruTakibi == DenemeSoruTakibi.Hata && soruRepository != null) {
+                        item {
+                            Text(stringResource(R.string.deneme_question_counts_error),
+                                style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.testTag("deneme-question-counts-error"))
+                        }
+                    }
+                    if (sonDeneme != null && seciliKural != null) {
+                        item {
+                            DenemeTrendKarti(
+                                noktalar = grafikKayitlari,
+                                kurallar = mevcutKurallar,
+                                seciliKural = seciliKural,
+                                kapsamlar = kapsamlar,
+                                uyumsuzSayisi = uyumsuzSayisi,
+                                toplamEslesen = eslesenKayitlar.size,
+                                limit = grafikLimit,
+                                oncekiNet = kayitlar.oncekiKarsilastirilabilir(sonDeneme)?.toplamNet(),
+                                onKuralSec = { seciliKuralAdi = it.name; seciliKapsamId = null },
+                                onKapsamSec = { seciliKapsamId = it.id },
+                                onLimitSec = { grafikLimit = it },
+                            )
+                        }
+                        item { DenemeDagilimKarti(sonDeneme) }
+                        item {
+                            DenemeDersKarti(
+                                son = sonDeneme,
+                                barlar = kayitlar.dersBarlari(sonDeneme),
+                                dersAdlari = dersAdlari,
+                            )
+                        }
                     }
 
                     item {
-                        SadeKart(elevation = CamYukseklik.DUSUK) {
-                            Column(
-                                modifier = Modifier.padding(18.dp),
-                                verticalArrangement = Arrangement.spacedBy(12.dp),
-                            ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    Column(Modifier.weight(1f)) {
-                                        Text(
-                                            text = stringResource(R.string.deneme_chart_net),
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Bold,
-                                        )
-                                        if (grafikKayitlari.size >= 2) {
-                                            val enDusuk = grafikKayitlari.minOf { it.toplamNet() }
-                                            val enYuksek = grafikKayitlari.maxOf { it.toplamNet() }
-                                            Text(
-                                                text = stringResource(
-                                                    R.string.deneme_chart_range,
-                                                    netYazi(enDusuk),
-                                                    netYazi(enYuksek),
-                                                ),
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            )
-                                        }
-                                    }
-                                    grafikKayitlari.lastOrNull()?.let { enSon ->
-                                        val onceki = kayitlar.oncekiAyniKural(enSon)
-                                        NetOzetRozeti(
-                                            net = enSon.toplamNet(),
-                                            fark = onceki?.let { enSon.toplamNet() - it.toplamNet() },
-                                        )
-                                    }
-                                }
-
-                                if (mevcutKurallar.size > 1) {
-                                    FlowRow(
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalArrangement = Arrangement.spacedBy(6.dp),
-                                    ) {
-                                        FilterChip(
-                                            selected = seciliKural == null,
-                                            onClick = { seciliKuralAdi = null },
-                                            label = { Text(stringResource(R.string.deneme_chart_all_rules)) },
-                                        )
-                                        mevcutKurallar.forEach { kural ->
-                                            FilterChip(
-                                                selected = seciliKural == kural,
-                                                onClick = { seciliKuralAdi = kural.name },
-                                                label = { Text(netKuraliEtiketi(kural)) },
-                                            )
-                                        }
-                                    }
-                                    if (seciliKural == null) {
-                                        Text(
-                                            text = stringResource(R.string.deneme_chart_mixed),
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        )
-                                    }
-                                }
-
-                                NetCizgisi(grafikKayitlari)
-
-                                if (grafikKayitlari.size < 2) {
-                                    Text(
-                                        text = stringResource(R.string.deneme_chart_need_more),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    if (sonDeneme != null && sonDeneme.satirlar.isNotEmpty()) {
-                        item {
-                            SadeKart(elevation = CamYukseklik.DUSUK) {
-                                Column(
-                                    modifier = Modifier.padding(18.dp),
-                                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.deneme_chart_lessons, sonDeneme.ad),
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold,
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.deneme_chart_legend),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                    DersNetBarlari(
-                                        barlar = kayitlar.dersBarlari(sonDeneme),
-                                        dersAdlari = dersAdlari,
-                                    )
-                                }
-                            }
-                        }
+                        Text(
+                            text = stringResource(R.string.deneme_history_header, kayitlar.size),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.padding(top = 4.dp),
+                        )
                     }
 
                     itemsIndexed(kayitlar, key = { _, deneme -> deneme.id }) { index, deneme ->
                         val giris by animateItemInsertion(index)
-                        val onceki = remember(kayitlar, deneme.id) { kayitlar.oncekiAyniKural(deneme) }
+                        val onceki = remember(kayitlar, deneme.id) { kayitlar.oncekiKarsilastirilabilir(deneme) }
                         val yuklenen = remember(tumSorular, deneme.ad) {
-                            tumSorular.count { denemeKaynakEslesir(it.kaynak, deneme.ad) }
+                            tumSorular?.count { denemeKaynakEslesir(it.kaynak, deneme.ad) }
                         }
                         DenemeListeKarti(
                             deneme = deneme,
@@ -403,6 +375,84 @@ fun DenemeListesiEkrani(
 }
 
 @Composable
+private fun DenemeBozukIcerik(denemeDeposu: DenemeDeposu, onYedekAyarlari: (() -> Unit)?) {
+    val scope = rememberCoroutineScope()
+    var onay by rememberSaveable { mutableStateOf(false) }
+    var islemde by remember { mutableStateOf(false) }
+    var hata by remember { mutableStateOf(false) }
+
+    if (onay) {
+        AlertDialog(
+            onDismissRequest = { if (!islemde) onay = false },
+            title = { Text(stringResource(R.string.deneme_storage_reset_title)) },
+            text = {
+                Text(
+                    text = stringResource(R.string.deneme_storage_reset_body),
+                    modifier = Modifier.verticalScroll(rememberScrollState()),
+                )
+            },
+            confirmButton = {
+                PremiumButton(
+                    enabled = !islemde,
+                    modifier = Modifier.testTag("deneme-storage-reset-confirm"),
+                    onClick = {
+                        scope.launch {
+                            islemde = true
+                            try {
+                                withContext(Dispatchers.IO) { denemeDeposu.bozukKayitlariSifirla() }
+                                onay = false
+                            } catch (cancel: CancellationException) {
+                                throw cancel
+                            } catch (_: Exception) {
+                                hata = true
+                                onay = false
+                            } finally {
+                                islemde = false
+                            }
+                        }
+                    },
+                ) { Text(stringResource(R.string.deneme_storage_reset)) }
+            },
+            dismissButton = {
+                PremiumTextButton(enabled = !islemde, onClick = { onay = false }) {
+                    Text(stringResource(R.string.topic_cancel))
+                }
+            },
+        )
+    }
+
+    Column(
+        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+            .padding(20.dp).testTag("deneme-storage-error"),
+    ) {
+        SadeKart {
+            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                Text(
+                    text = stringResource(R.string.deneme_storage_error_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.error,
+                )
+                Text(
+                    text = stringResource(R.string.deneme_storage_error_body),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                if (onYedekAyarlari != null) {
+                    PremiumButton(onClick = onYedekAyarlari, enabled = !islemde) {
+                        Text(stringResource(R.string.deneme_storage_backup_settings))
+                    }
+                }
+                PremiumOutlinedButton(
+                    onClick = { onay = true },
+                    enabled = !islemde,
+                    modifier = Modifier.testTag("deneme-storage-reset"),
+                ) { Text(stringResource(R.string.deneme_storage_reset)) }
+                if (hata) Text(stringResource(R.string.deneme_storage_reset_failed), color = MaterialTheme.colorScheme.error)
+            }
+        }
+    }
+}
+
+@Composable
 private fun DenemeListeKarti(
     deneme: DenemeKaydi,
     fark: Double?,
@@ -411,9 +461,9 @@ private fun DenemeListeKarti(
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
-    val dogruToplam = deneme.satirlar.sumOf { it.dogru }
-    val yanlisToplam = deneme.satirlar.sumOf { it.yanlis }
-    val bosToplam = deneme.satirlar.sumOf { it.bos }
+    val dogruToplam = deneme.satirlar.sumOf { it.dogru.toLong() }
+    val yanlisToplam = deneme.satirlar.sumOf { it.yanlis.toLong() }
+    val bosToplam = deneme.satirlar.sumOf { it.bos.toLong() }
     val hedefYukleme = deneme.toplamYuklenecek
 
     PremiumCard(
@@ -466,7 +516,7 @@ private fun DenemeListeKarti(
                 )
                 if (yuklenenSoruSayisi != null) {
                     val (etiket, arkaPlan, metinRengi) = when {
-                        hedefYukleme == 0 -> Triple(
+                        hedefYukleme == 0L -> Triple(
                             stringResource(R.string.deneme_upload_clean),
                             colors.secondaryContainer.copy(alpha = 0.6f),
                             colors.onSecondaryContainer,
@@ -518,16 +568,19 @@ private fun NetOzetRozeti(
             } else {
                 if (koyu) PremiumMarkaRenkler.BakirIsik else PremiumMarkaRenkler.Bakir
             }
+            val farkYazi = if (artis) {
+                stringResource(R.string.deneme_delta_positive, netYazi(fark))
+            } else {
+                netYazi(fark)
+            }
+            val farkAciklamasi = stringResource(R.string.deneme_chart_change, farkYazi)
             Surface(
+                modifier = Modifier.clearAndSetSemantics { contentDescription = farkAciklamasi },
                 shape = RoundedCornerShape(999.dp),
                 color = vurgu.copy(alpha = 0.15f),
             ) {
                 Text(
-                    text = if (artis) {
-                        stringResource(R.string.deneme_delta_positive, netYazi(fark))
-                    } else {
-                        netYazi(fark)
-                    },
+                    text = farkYazi,
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
                     style = MaterialTheme.typography.labelSmall,
                     color = vurgu,
@@ -551,238 +604,6 @@ private fun NetOzetRozeti(
     }
 }
 
-@Composable
-private fun NetCizgisi(noktalar: List<DenemeKaydi>) {
-    if (noktalar.isEmpty()) return
-    val cizgiRengi = MaterialTheme.colorScheme.primary
-    val izRengi = MaterialTheme.colorScheme.outlineVariant
-    val yuzeyRengi = MaterialTheme.colorScheme.surface
-    val ilerleme by animateFloatPremium(
-        target = 1f,
-        animationSpec = tweenPremium(SureToken.SLOW),
-        label = "deneme-line-progress",
-    )
-
-    Canvas(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(148.dp)
-            .testTag("deneme-net-chart"),
-    ) {
-        val yatayIcBosluk = 14.dp.toPx()
-        val dikeyIcBosluk = 14.dp.toPx()
-        val icGenislik = (size.width - yatayIcBosluk * 2f).coerceAtLeast(1f)
-        val icYukseklik = (size.height - dikeyIcBosluk * 2f).coerceAtLeast(1f)
-
-        val degerler = noktalar.map { it.toplamNet().toFloat() }
-        val altSinir = min(0f, degerler.minOrNull() ?: 0f)
-        val hamUst = degerler.maxOrNull() ?: 1f
-        val ustSinir = max(altSinir + 4f, hamUst * 1.08f)
-        val aralik = (ustSinir - altSinir).coerceAtLeast(1f)
-
-        fun yKonumu(deger: Float): Float =
-            dikeyIcBosluk + icYukseklik * (1f - ((deger - altSinir) / aralik).coerceIn(0f, 1f))
-
-        listOf(0f, 0.5f, 1f).forEach { oran ->
-            val y = dikeyIcBosluk + icYukseklik * oran
-            drawLine(
-                color = izRengi.copy(alpha = 0.45f),
-                start = Offset(yatayIcBosluk, y),
-                end = Offset(size.width - yatayIcBosluk, y),
-                strokeWidth = 1.dp.toPx(),
-                pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 6f)),
-            )
-        }
-
-        if (altSinir < 0f) {
-            val sifirY = yKonumu(0f)
-            drawLine(
-                color = izRengi.copy(alpha = 0.85f),
-                start = Offset(yatayIcBosluk, sifirY),
-                end = Offset(size.width - yatayIcBosluk, sifirY),
-                strokeWidth = 1.2.dp.toPx(),
-            )
-        }
-
-        val konumlar = degerler.mapIndexed { indeks, deger ->
-            val x = if (degerler.size == 1) {
-                size.width / 2f
-            } else {
-                yatayIcBosluk + icGenislik * indeks / (degerler.lastIndex.toFloat())
-            }
-            Offset(x, yKonumu(deger * ilerleme.coerceIn(0f, 1f)))
-        }
-
-        if (konumlar.size >= 2) {
-            val tabanY = dikeyIcBosluk + icYukseklik
-            val alanYolu = Path().apply {
-                moveTo(konumlar.first().x, tabanY)
-                konumlar.forEach { nokta -> lineTo(nokta.x, nokta.y) }
-                lineTo(konumlar.last().x, tabanY)
-                close()
-            }
-            drawPath(
-                path = alanYolu,
-                brush = Brush.verticalGradient(
-                    colors = listOf(cizgiRengi.copy(alpha = 0.24f), Color.Transparent),
-                    startY = dikeyIcBosluk,
-                    endY = tabanY,
-                ),
-            )
-
-            val cizgiYolu = Path().apply {
-                konumlar.forEachIndexed { indeks, nokta ->
-                    if (indeks == 0) moveTo(nokta.x, nokta.y) else lineTo(nokta.x, nokta.y)
-                }
-            }
-            drawPath(
-                path = cizgiYolu,
-                color = cizgiRengi,
-                style = Stroke(
-                    width = 2.8.dp.toPx(),
-                    cap = StrokeCap.Round,
-                    join = StrokeJoin.Round,
-                ),
-            )
-        }
-
-        konumlar.forEachIndexed { indeks, nokta ->
-            val sonMu = indeks == konumlar.lastIndex
-            val disCap = if (sonMu) 6.dp.toPx() else 4.5.dp.toPx()
-            if (sonMu) {
-                drawCircle(
-                    color = cizgiRengi.copy(alpha = 0.20f),
-                    radius = 10.dp.toPx(),
-                    center = nokta,
-                )
-            }
-            drawCircle(color = cizgiRengi, radius = disCap, center = nokta)
-            drawCircle(color = yuzeyRengi, radius = (disCap - 2.dp.toPx()).coerceAtLeast(1.5f), center = nokta)
-        }
-    }
-}
-
-@Composable
-private fun DersNetBarlari(
-    barlar: List<DersNetKarsilastirma>,
-    dersAdlari: Map<String, String>,
-) {
-    if (barlar.isEmpty()) return
-    val koyu = isSystemInDarkTheme()
-    val colors = MaterialTheme.colorScheme
-    val tumDegerler = barlar.flatMap { listOfNotNull(it.sonNet, it.oncekiOrtalama) }
-    val enKucuk = min(0.0, tumDegerler.minOrNull() ?: 0.0)
-    val enBuyuk = max(1.0, tumDegerler.maxOrNull() ?: 1.0)
-    val toplamAralik = (enBuyuk - enKucuk).coerceAtLeast(1.0)
-
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        barlar.forEach { bar ->
-            val ad = dersAdlari[bar.dersId] ?: bar.dersAdi ?: "—"
-            val stil = dersKartStiliGetir(ad)
-            val vurgu = if (koyu) stil.koyuRenk else stil.acikRenk
-            val sembol = stringResource(stil.isaret)
-            val fark = bar.oncekiOrtalama?.let { bar.sonNet - it }
-
-            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Row(
-                        modifier = Modifier.weight(1f).padding(end = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(24.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(vurgu.copy(alpha = 0.16f)),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Text(
-                                text = sembol,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = vurgu,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = PremiumSembolAilesi,
-                            )
-                        }
-                        Text(
-                            text = ad,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    ) {
-                        if (fark != null && abs(fark) >= 0.05) {
-                            Text(
-                                text = if (fark > 0) "+${netYazi(fark)}" else netYazi(fark),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = colors.onSurfaceVariant,
-                            )
-                        }
-                        Text(
-                            text = netYazi(bar.sonNet),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = vurgu,
-                            fontWeight = FontWeight.Bold,
-                        )
-                    }
-                }
-
-                Canvas(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(14.dp),
-                ) {
-                    val sifirX = ((-enKucuk / toplamAralik).toFloat() * size.width).coerceIn(0f, size.width)
-                    val kose = CornerRadius(6.dp.toPx(), 6.dp.toPx())
-                    drawRoundRect(
-                        color = colors.surfaceVariant.copy(alpha = 0.65f),
-                        size = size,
-                        cornerRadius = kose,
-                    )
-
-                    fun cubukCiz(deger: Double, renk: Color, ustBosluk: Float, yukseklik: Float) {
-                        val hedefX = (((deger - enKucuk) / toplamAralik).toFloat() * size.width)
-                            .coerceIn(0f, size.width)
-                        val sol = min(sifirX, hedefX)
-                        val genislik = abs(hedefX - sifirX).coerceAtLeast(2.dp.toPx())
-                        drawRoundRect(
-                            color = renk,
-                            topLeft = Offset(sol, ustBosluk),
-                            size = Size(genislik.coerceAtMost(size.width - sol), yukseklik),
-                            cornerRadius = CornerRadius(yukseklik / 2f, yukseklik / 2f),
-                        )
-                    }
-
-                    bar.oncekiOrtalama?.let { ort ->
-                        cubukCiz(ort, vurgu.copy(alpha = 0.30f), 0f, size.height)
-                    }
-                    cubukCiz(bar.sonNet, vurgu, 2.dp.toPx(), (size.height - 4.dp.toPx()).coerceAtLeast(4f))
-
-                    if (enKucuk < 0.0) {
-                        drawLine(
-                            color = colors.outline.copy(alpha = 0.65f),
-                            start = Offset(sifirX, 0f),
-                            end = Offset(sifirX, size.height),
-                            strokeWidth = 1.dp.toPx(),
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
 private data class DenemeFormDersi(
     val ders: Ders,
     val gizli: Boolean,
@@ -799,7 +620,18 @@ fun DenemeDetayEkrani(
     onKaydedildi: (String) -> Unit,
     onSoruEkle: (Ders, String, String) -> Unit,
     onDenemeyiCalis: ((String) -> Unit)? = null,
+    onYedekAyarlari: (() -> Unit)? = null,
 ) {
+    val veriBozuk by denemeDeposu.bozukMuIzle.collectAsState()
+    if (veriBozuk) {
+        Scaffold(containerColor = MaterialTheme.colorScheme.background, contentWindowInsets = WindowInsets.safeDrawing) { insets ->
+            Column(Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets)) {
+                DenemeUstCubuk(baslik = stringResource(R.string.deneme_title), onGeri = onGeri)
+                DenemeBozukIcerik(denemeDeposu, onYedekAyarlari)
+            }
+        }
+        return
+    }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbar = remember { SnackbarHostState() }
@@ -819,7 +651,8 @@ fun DenemeDetayEkrani(
             dersRepository.dersleriIzle(true),
         ) { acik, arsiv -> acik + arsiv }
     }.collectAsState(initial = emptyList())
-    val tumSorular = tumSorulariIzle(tumDersler, soruRepository)
+    val soruTakibi = tumSorulariIzle(tumDersler, soruRepository)
+    val tumSorular = (soruTakibi as? DenemeSoruTakibi.Hazir)?.sorular
 
     val formDersleri = remember(aktifDersler, tumDersler, mevcut) {
         val aktifIdler = aktifDersler.map { it.id }.toSet()
@@ -871,10 +704,8 @@ fun DenemeDetayEkrani(
 
     val yuklenenSayilar = remember(tumSorular, mevcut?.ad, ad) {
         val hedefKaynak = mevcut?.ad ?: ad
-        if (hedefKaynak.isBlank()) {
-            emptyMap()
-        } else {
-            tumSorular
+        tumSorular?.let { sorular ->
+            if (hedefKaynak.isBlank()) emptyMap() else sorular
                 .filter { denemeKaynakEslesir(it.kaynak, hedefKaynak) }
                 .groupingBy { it.dersId }
                 .eachCount()
@@ -904,15 +735,25 @@ fun DenemeDetayEkrani(
     val anlikToplamNet = remember(gecerliSatirlar, kural) {
         gecerliSatirlar.sumOf { kural.net(it.dogru, it.yanlis) }
     }
-    val anlikDogru = remember(gecerliSatirlar) { gecerliSatirlar.sumOf { it.dogru } }
-    val anlikYanlis = remember(gecerliSatirlar) { gecerliSatirlar.sumOf { it.yanlis } }
-    val anlikBos = remember(gecerliSatirlar) { gecerliSatirlar.sumOf { it.bos } }
-    val toplamYuklenen = remember(yuklenenSayilar) { yuklenenSayilar.values.sum() }
+    val anlikDogru = remember(gecerliSatirlar) { gecerliSatirlar.sumOf { it.dogru.toLong() } }
+    val anlikYanlis = remember(gecerliSatirlar) { gecerliSatirlar.sumOf { it.yanlis.toLong() } }
+    val anlikBos = remember(gecerliSatirlar) { gecerliSatirlar.sumOf { it.bos.toLong() } }
 
     suspend fun dogrulaVeKaydet(): DenemeKaydi? {
+        if (!withContext(Dispatchers.IO) { denemeDeposu.yazilabilirMi() }) {
+            snackbar.showSnackbar(context.getString(R.string.deneme_storage_error_title))
+            return null
+        }
         val temizAd = ad.trim()
-        if (temizAd.isEmpty()) {
-            snackbar.showSnackbar(context.getString(R.string.deneme_error_name))
+        val adHatasi = when (kayitlar.denemeAdiDogrula(temizAd, mevcut?.id)) {
+            DenemeAdiDurumu.GECERLI -> null
+            DenemeAdiDurumu.BOS -> context.getString(R.string.deneme_error_name)
+            DenemeAdiDurumu.COK_UZUN -> context.getString(R.string.deneme_error_name_too_long, SORU_SECENEGI_ADI_UST_SINIR)
+            DenemeAdiDurumu.AYNI_AD_VAR -> context.getString(R.string.deneme_error_duplicate_name)
+            DenemeAdiDurumu.ESKI_AD_PAYLASILMIS -> context.getString(R.string.deneme_error_shared_name)
+        }
+        if (adHatasi != null) {
+            snackbar.showSnackbar(adHatasi)
             return null
         }
         val hataliVar = anlikSatirlar.any { !it.gecerli() || it.soruSayisi <= 0 }
@@ -929,9 +770,16 @@ fun DenemeDetayEkrani(
             gun = seciliGun,
             satirlar = gecerliSatirlar,
         )
-        soruRepository.kaynakAdiDegistir(mevcut?.ad, temizAd)
-        denemeDeposu.kaydet(kaydedilecek)
-        return kaydedilecek
+        return try {
+            soruRepository.kaynakAdiDegistir(mevcut?.ad, temizAd)
+            withContext(Dispatchers.IO) { denemeDeposu.kaydet(kaydedilecek) }
+            kaydedilecek
+        } catch (iptal: CancellationException) {
+            throw iptal
+        } catch (_: Exception) {
+            snackbar.showSnackbar(context.getString(R.string.deneme_error_save))
+            null
+        }
     }
 
     if (silmeOnayiAcik && mevcut != null) {
@@ -943,8 +791,16 @@ fun DenemeDetayEkrani(
                 PremiumButton(
                     onClick = {
                         silmeOnayiAcik = false
-                        denemeDeposu.sil(mevcut.id)
-                        onGeri()
+                        scope.launch {
+                            try {
+                                withContext(Dispatchers.IO) { denemeDeposu.sil(mevcut.id) }
+                                onGeri()
+                            } catch (cancel: CancellationException) {
+                                throw cancel
+                            } catch (_: Exception) {
+                                snackbar.showSnackbar(context.getString(R.string.deneme_error_save))
+                            }
+                        }
                     },
                 ) {
                     Text(stringResource(R.string.deneme_delete_confirm_action))
@@ -1124,6 +980,11 @@ fun DenemeDetayEkrani(
                     }
                 }
 
+                if (soruTakibi == DenemeSoruTakibi.Hata) item {
+                    Text(stringResource(R.string.deneme_question_counts_error),
+                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.testTag("deneme-question-counts-error"))
+                }
                 item {
                     Text(
                         text = stringResource(R.string.deneme_lessons_section),
@@ -1145,7 +1006,7 @@ fun DenemeDetayEkrani(
                         yanlis = yanlisAdet,
                         dersAdi = ders.ad,
                     )
-                    val yuklenen = yuklenenSayilar[ders.id] ?: 0
+                    val yuklenen = yuklenenSayilar?.let { it[ders.id] ?: 0 }
                     DenemeDersSkorKarti(
                         ders = ders,
                         gizli = oge.gizli,
@@ -1221,7 +1082,7 @@ private fun DenemeDersSkorKarti(
     yanlisMetni: String,
     satir: DenemeDersSatiri,
     kural: NetKurali,
-    yuklenen: Int,
+    yuklenen: Int?,
     fotografAktif: Boolean,
     onSoruDegisti: (String) -> Unit,
     onDogruDegisti: (String) -> Unit,
@@ -1353,7 +1214,7 @@ private fun DenemeDersSkorKarti(
                     color = colors.error,
                 )
             } else if (!gizli && satir.soruSayisi > 0 && satir.yuklenecek > 0) {
-                val kalan = (satir.yuklenecek - yuklenen).coerceAtLeast(0)
+                val kalan = yuklenen?.let { (satir.yuklenecek - it).coerceAtLeast(0) }
                 PremiumOutlinedButton(
                     enabled = fotografAktif,
                     onClick = onFotografYukle,
@@ -1362,10 +1223,10 @@ private fun DenemeDersSkorKarti(
                         .testTag("deneme-photo-${ders.id}"),
                 ) {
                     Text(
-                        text = if (kalan > 0) {
-                            stringResource(R.string.deneme_add_photo, kalan)
-                        } else {
-                            stringResource(R.string.deneme_add_more_photo, yuklenen)
+                        text = when {
+                            kalan == null -> stringResource(R.string.deneme_add_photo_unknown)
+                            kalan > 0 -> stringResource(R.string.deneme_add_photo, kalan)
+                            else -> stringResource(R.string.deneme_add_more_photo, yuklenen ?: 0)
                         },
                     )
                 }

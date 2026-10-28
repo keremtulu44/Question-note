@@ -1,8 +1,10 @@
-# Tam ZIP yedek biçimi — v5
+# Tam ZIP yedek biçimi — v5 / kurtarma v6
 
-Güncel yazım: `yanlis-defteri-backup`, **ZIP v5 / Room v5**. Okuma: **v2, v3, v4, v5**; her biri
-kendi şema/CSV/alan sözleşmesiyle doğrulanır. Algoritma ve karar snapshot sürümleri bunlardan ayrıdır.
-Varsayılan **Gölge**, v2 planını uygular ve ayrı v3 adayı saklar. Son güncelleme: 2026-10-18.
+Normal yazım: `yanlis-defteri-backup`, **ZIP v5 / Room v5**. Okuma: **v2–v6**; v6 yalnız
+okunamayan deneme ham verisini taşıyan geri yükleme güvenlik kopyasıdır ve Room v5 kullanır.
+Her sürüm kendi şema/CSV/alan sözleşmesiyle doğrulanır. Algoritma ve karar snapshot sürümleri
+bunlardan ayrıdır. Varsayılan **Gölge**, v2 planını uygular ve ayrı v3 adayı saklar.
+Son güncelleme: 2026-10-28.
 
 ## 1. Arşiv yapısı
 
@@ -36,6 +38,7 @@ Cihazdaki mutlak dosya yolu, bitmap önizlemesi veya saniyelik olay günlüğü 
 | v3 | 3 | 6 CSV; katalog ve `source_location` korunur; ölçüm yok |
 | v4 | 4 | 7 CSV; `measurements` JSON/CSV, manifest ölçüm sayısı |
 | v5 | 5 | 7 CSV; `teacher_workspace` JSON'da (öğretmen grupları/soruları); öğretmen fotoğrafları paylaşılan `images/` altında |
+| v6 | 5 | Yalnız geri yükleme güvenlik kopyası: v5 içeriği ve `mock_exams_corrupt_raw` ham deneme değeri; eski okuyucular reddeder |
 
 Eski yedekten süre veya o günkü bilinmeyen konu/kaynak bilgisi uydurulmaz; ölçüm tablosu boş
 kalır. Yeni ölçümsüz tekrarın bağlamı kaydedilebilir ama süreleri null, kalitesi `YOK` olur.
@@ -58,7 +61,7 @@ beklenen CSV kümesi ve her payload için göreli yol, byte uzunluğu, SHA-256. 
 göre tam eşleşir. Görsellerin JPEG türü, boyutu, SHA-256'sı ve çözünürlüğü ayrıca doğrulanır.
 
 Üst sınırlar: ZIP **512 MiB**; açılmış toplam **1 GiB**; tek girdi **128 MiB**; JSON **64 MiB**;
-manifest **1 MiB**; manifest dahil **10.009 girdi**; **10.000 görsel**; tablo başına **200.000 satır**;
+bozuk deneme ham-kurtarma nesnesi **4 MiB**; manifest **1 MiB**; manifest dahil **10.009 girdi**; **10.000 görsel**; tablo başına **200.000 satır**;
 görsel kenarı **3.000 px**; sıkıştırma oranı **1.000:1**. Karar JSON'u en çok **16 KiB**;
 ölçüm fazı başına **24 saat**. İçe/dışa aktarma ve görsel kopyalamada boş alan kontrol edilir.
 
@@ -96,6 +99,33 @@ alınır ve eski arşiv/oturum kalır; işaret varsa yeni arşivin temizliği ta
 uyuşmazlığında veya doğrulama hatasında normal kullanım kilitlenir; kullanıcı yeniden deneyebilir.
 Geç kalan checkpoint IO işi, silinen oturumu diriltemez. Profiller kalıcı cache olmadığından
 restore sonrasında yeni veri kümesinden yeniden hesaplanır.
+
+## 5a. Okunamayan deneme verisi (kurtarma v6)
+
+Depo; bozuk JSON, bilinmeyen alan/kural, geçersiz skor veya beklenmeyen tercih türünü boş ve
+geçerli bir liste olarak sunmaz. Normal kayıt/silme ve dışa aktarma durur; kullanıcı bilgilendirilir.
+Sağlam bir ZIP geri yüklenirken mevcut ham değer güvenlik kopyasına şu nesneyle girer:
+
+```json
+"mock_exams_corrupt_raw": { "version": 1, "type": "string", "value": "[okunamayan ham veri" }
+```
+
+`type`, SharedPreferences değerine göre `string`, `int`, `long`, `boolean`, `float_bits` veya
+`string_set` olabilir; tamsayı türü ve float bitleri korunur. Bu nesne yalnız v6'da zorunludur,
+geçerli `mock_exams` kayıtlarıyla birlikte bulunamaz ve en çok 4 MiB olabilir. İçerik, diğer
+`data.json` alanları gibi manifest uzunluğu ve SHA-256'sıyla doğrulanır. Çok tekrar eden ham
+verilerde kabul sınırını aşan sıkıştırma oranı oluşmaması için v6 `data.json` sıkıştırılmaz.
+
+Eski APK'lar v6'yı reddeder; böylece ham denemeler sessizce boşaltılmaz. Güncel uygulama v6'yı
+geri yüklerken önizlemede uyarır ve ham değeri işlem günlüğüyle tekrar oynatılabilir biçimde geri
+yazar; veri hâlâ bozuksa denemeler yine kullanılamaz. Bu bir **otomatik onarım** değildir.
+Ham nesne 4 MiB'yi aşarsa mevcut veriler değiştirilmeden geri yükleme durur. Son yedek bilgisi
+bir cihaz içi güvenlik kopyasına işaret ediyorsa Ayarlar'dan bu kopya yeniden doğrulanıp önizlenebilir;
+önizleme onay vermeden geri yükleme yapmaz.
+
+Kullanıcı açıkça denemeleri sıfırlarsa ham tercih değeri aynı cihazda ayrı bir anahtara alınır;
+bu yerel kopya normal ZIP'e eklenmez ve uygulama kaldırılırsa kaybolabilir. Sıfırlama soruları,
+fotoğrafları veya öğretmen verisini silmez. Tam yedek geri yükleme ise bütün arşivi değiştirir.
 
 ## 5b. Öğretmen çalışma alanı (v5)
 
@@ -135,7 +165,8 @@ Güvenli saklama kullanıcıya aittir. Daha yeni ZIP'i eski APK'ya verme veya DB
 
 ## 7. Doğrulama
 
-Otomatik kapsam: v2/v3 import; v4 tam tur; v5 öğretmen çalışma alanı ve Room 4→5 göçü; ölçüm null/kalite, snapshot1/2 ve v3 geçmişinin korunması; hash/envanter;
+Otomatik kapsam: v2/v3 import; v4 tam tur; v5 öğretmen çalışma alanı ve Room 4→5 göçü;
+v6 bozuk deneme ham verisi, güvenlik ZIP'i, tip ve işlem günlüğü turu; ölçüm null/kalite, snapshot1/2 ve v3 geçmişinin korunması; hash/envanter;
 semantik bozulma/taşma/orphan/tekrar reddi; safety kopyası; commit/rollback ve checkpoint sınırı;
 Room 1/2/3→4→5. Güncel sonuç [DERLEME_RAPORU.md](DERLEME_RAPORU.md) içindedir.
 

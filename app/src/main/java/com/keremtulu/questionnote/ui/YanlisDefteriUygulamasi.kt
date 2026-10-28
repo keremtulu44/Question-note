@@ -10,6 +10,8 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -505,6 +507,8 @@ fun YanlisDefteriUygulamasi(
                     snackbarHostState.showSnackbar(context.getString(R.string.export_success))
                 } catch (cancel: CancellationException) {
                     throw cancel
+                } catch (_: com.keremtulu.questionnote.data.prefs.DenemeVerisiOkunamadiException) {
+                    snackbarHostState.showSnackbar(context.getString(R.string.deneme_storage_export_error))
                 } catch (_: Exception) {
                     snackbarHostState.showSnackbar(context.getString(R.string.export_error))
                 } finally {
@@ -529,6 +533,22 @@ fun YanlisDefteriUygulamasi(
                 } finally {
                     yedeklemeIslemde = false
                 }
+            }
+        }
+    }
+
+    fun guvenlikYedeginiIncele() {
+        if (yedeklemeIslemde || kurtarma != KurtarmaDurumu.HAZIR) return
+        scope.launch {
+            yedeklemeIslemde = true
+            try {
+                geriYuklemeOnizlemesi = disaAktarmaHizmeti.sonGuvenlikYedeginiOnizle()
+            } catch (cancel: CancellationException) {
+                throw cancel
+            } catch (_: Exception) {
+                snackbarHostState.showSnackbar(context.getString(R.string.backup_restore_error))
+            } finally {
+                yedeklemeIslemde = false
             }
         }
     }
@@ -843,6 +863,7 @@ fun YanlisDefteriUygulamasi(
                         onGeri = { ekran = UygulamaEkrani.Bugun },
                         onYeni = { ekran = UygulamaEkrani.DenemeDetay(null) },
                         onAc = { ekran = UygulamaEkrani.DenemeDetay(it) },
+                        onYedekAyarlari = { ekranSec(UygulamaEkrani.Ayarlar) },
                     )
                     is UygulamaEkrani.DenemeDetay -> com.keremtulu.questionnote.ui.deneme.DenemeDetayEkrani(
                         denemeId = current.denemeId,
@@ -856,6 +877,7 @@ fun YanlisDefteriUygulamasi(
                         onSoruEkle = { ders, kaynak, id ->
                             ekran = UygulamaEkrani.SoruFormu(ders, null, UygulamaEkrani.DenemeDetay(id), kaynak)
                         },
+                        onYedekAyarlari = { ekranSec(UygulamaEkrani.Ayarlar) },
                         onDenemeyiCalis = { kaynakAdi ->
                             filtreliCalismaAyar = FiltreliCalismaEkraniAyar(
                                 filtre = SoruCalismaFiltresi(kaynak = kaynakAdi),
@@ -893,6 +915,7 @@ fun YanlisDefteriUygulamasi(
                         motorTanisi = motorTanisi,
                         sonYedek = sonYedek,
                         yedeklemeIslemde = yedeklemeIslemde,
+                        onGuvenlikYedeginiIncele = ::guvenlikYedeginiIncele,
                         onYedekOlustur = {
                             if (!yedeklemeIslemde) exportLauncher.launch("yanlis-defteri-yedek.zip")
                         },
@@ -989,6 +1012,10 @@ fun YanlisDefteriUygulamasi(
                     } else {
                         ""
                     }
+                    val denemeUyarisi = buildString {
+                        if (preview.mevcutDenemeBozuk) append("\n\n").append(context.getString(R.string.backup_restore_current_corrupt))
+                        if (preview.yedekteDenemeBozuk) append("\n\n").append(context.getString(R.string.backup_restore_source_corrupt))
+                    }
                     Text(
                         context.getString(
                             R.string.backup_restore_confirm,
@@ -998,7 +1025,8 @@ fun YanlisDefteriUygulamasi(
                             preview.mevcut.soruSayisi,
                             preview.mevcut.gorselSayisi,
                         ) + "\n\n" + context.getString(R.string.backup_measurement_count, preview.yedek.sayilar.olcumSayisi) +
-                            ogretmenSatiri,
+                            ogretmenSatiri + denemeUyarisi,
+                        modifier = Modifier.verticalScroll(rememberScrollState()),
                     )
                 }
             },
@@ -1026,7 +1054,9 @@ fun YanlisDefteriUygulamasi(
                                 sonYedek = disaAktarmaHizmeti.sonYedekBilgisiGetir()
                                 snackbarHostState.showSnackbar(
                                     context.getString(R.string.backup_restore_success, result.guvenlikYedegiAdi) +
-                                        if (profilHazir) "" else "\n" + context.getString(R.string.settings_profile_error),
+                                        (if (result.bozukDenemeGuvenlikYedeginde) "\n" + context.getString(R.string.backup_restore_raw_preserved) else "") +
+                                        (if (result.yedektenGelenDenemeBozuk) "\n" + context.getString(R.string.backup_restore_source_corrupt) else "") +
+                                        (if (profilHazir) "" else "\n" + context.getString(R.string.settings_profile_error)),
                                 )
                             } catch (cancel: CancellationException) {
                                 throw cancel

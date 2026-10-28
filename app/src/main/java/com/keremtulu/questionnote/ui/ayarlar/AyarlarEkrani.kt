@@ -81,6 +81,7 @@ fun AyarlarEkrani(
     onKonular: () -> Unit,
     onPremiumDemo: () -> Unit = {},
     onOgretmenModunaGec: () -> Unit = {},
+    onGuvenlikYedeginiIncele: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -109,7 +110,7 @@ fun AyarlarEkrani(
         contentWindowInsets = ekranPencereInsetsi(),
     ) { insets ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets),
+            modifier = Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets).testTag("settings-list"),
             contentPadding = PaddingValues(
                 start = 20.dp,
                 top = 20.dp,
@@ -315,6 +316,13 @@ fun AyarlarEkrani(
                             interactionTur = EtkilesimTuru.TIKLAMA,
                             onClick = onYedekGeriYukle,
                         ) { Text(stringResource(R.string.menu_restore_backup)) }
+                    }
+                    if (sonYedek?.guvenlikKopyasi == true) {
+                        PremiumTextButton(
+                            onClick = onGuvenlikYedeginiIncele,
+                            enabled = !yedeklemeIslemde,
+                            modifier = Modifier.testTag("settings-safety-backup-preview"),
+                        ) { Text(stringResource(R.string.backup_safety_preview)) }
                     }
                 }
             }

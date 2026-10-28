@@ -8,11 +8,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -23,23 +27,33 @@ import androidx.compose.ui.unit.height
 import androidx.room.Room
 import com.keremtulu.questionnote.MainActivity
 import com.keremtulu.questionnote.R
+import com.keremtulu.questionnote.data.export.SonYedekBilgisi
+import com.keremtulu.questionnote.data.gelisim.MotorTaniHizmeti
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
 import com.keremtulu.questionnote.data.local.VarsayilanDersleriEkle
 import com.keremtulu.questionnote.data.local.YanlisDefteriDatabase
 import com.keremtulu.questionnote.data.prefs.DenemeDeposu
 import com.keremtulu.questionnote.data.prefs.SinavProfiliDeposu
+import com.keremtulu.questionnote.data.prefs.TekrarPolitikasiDeposu
+import com.keremtulu.questionnote.data.prefs.TercihGunlukHedefDeposu
 import com.keremtulu.questionnote.data.repository.RoomDersRepository
 import com.keremtulu.questionnote.data.repository.RoomSoruRepository
 import com.keremtulu.questionnote.domain.model.DenemeDersSatiri
 import com.keremtulu.questionnote.domain.model.DenemeKaydi
 import com.keremtulu.questionnote.domain.model.NetKurali
 import com.keremtulu.questionnote.domain.model.SoruSecenekTuru
+import com.keremtulu.questionnote.domain.model.Soru
+import com.keremtulu.questionnote.domain.repository.SoruRepository
+import com.keremtulu.questionnote.ui.ayarlar.AyarlarEkrani
 import com.keremtulu.questionnote.ui.deneme.DenemeDetayEkrani
 import com.keremtulu.questionnote.ui.deneme.DenemeListesiEkrani
+import com.keremtulu.questionnote.ui.deneme.denemeTarihYazi
 import com.keremtulu.questionnote.ui.kurulum.DersKurulumEkrani
 import com.keremtulu.questionnote.ui.tema.HareketPolitikasi
 import com.keremtulu.questionnote.ui.tema.YanlisDefteriTema
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -125,6 +139,81 @@ class DenemeVeKurulumArayuzTest {
     }
 
     @Test
+    fun bozukDenemelerBosGosterilmezVeSifirlamaAcikOnayIster() {
+        val prefs = compose.activity.getSharedPreferences("denemeler", Context.MODE_PRIVATE)
+        val ham = "[bozuk deneme"
+        prefs.edit().putString("liste", ham).commit()
+        val bozukDepo = DenemeDeposu(compose.activity)
+        var yedekAyarlariAcildi = false
+        compose.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                DenemeListesiEkrani(
+                    denemeDeposu = bozukDepo,
+                    dersRepository = dersRepository,
+                    soruRepository = soruRepository,
+                    onGeri = {}, onYeni = {}, onAc = {},
+                    onYedekAyarlari = { yedekAyarlariAcildi = true },
+                )
+            }
+        }
+        compose.waitForIdle()
+        compose.onNodeWithTag("deneme-storage-error").assertIsDisplayed()
+        compose.onNodeWithTag("deneme-empty-state").assertDoesNotExist()
+        compose.onNodeWithTag("deneme-fab-new").assertDoesNotExist()
+        compose.onNodeWithText(compose.activity.getString(R.string.deneme_storage_backup_settings)).performClick()
+        assertTrue(yedekAyarlariAcildi)
+        compose.onNodeWithTag("deneme-storage-reset").performClick()
+        compose.onNodeWithText(compose.activity.getString(R.string.deneme_storage_reset_body)).assertIsDisplayed()
+        assertEquals(ham, prefs.getString("liste", null))
+        compose.onNodeWithTag("deneme-storage-reset-confirm").performClick()
+        compose.waitUntil(5_000) { !bozukDepo.bozukMuIzle.value }
+        compose.onNodeWithTag("deneme-empty-state").assertIsDisplayed()
+        assertEquals(ham, prefs.all.filterKeys { it.startsWith("bozuk_liste_") }.values.single())
+    }
+
+    @Test
+    fun bozukDenemedeEskiDetayEkraniFormYerineHataGosterir() {
+        compose.activity.getSharedPreferences("denemeler", Context.MODE_PRIVATE)
+            .edit().putString("liste", "{bozuk}").commit()
+        val bozukDepo = DenemeDeposu(compose.activity)
+        compose.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                DenemeDetayEkrani(
+                    denemeId = "eski", denemeDeposu = bozukDepo,
+                    dersRepository = dersRepository, soruRepository = soruRepository,
+                    onGeri = {}, onKaydedildi = {}, onSoruEkle = { _, _, _ -> },
+                )
+            }
+        }
+        compose.onNodeWithTag("deneme-storage-error").assertIsDisplayed()
+        compose.onNodeWithText(compose.activity.getString(R.string.deneme_save)).assertDoesNotExist()
+    }
+
+    @Test
+    fun ayarlardanCihazdakiGuvenlikKopyasiIncelenebilir() {
+        var incelendi = false
+        val context = RuntimeEnvironment.getApplication()
+        compose.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                AyarlarEkrani(
+                    gunlukHedefDeposu = TercihGunlukHedefDeposu(context),
+                    profilDeposu = profilDeposu,
+                    tekrarPolitikasi = TekrarPolitikasiDeposu(context),
+                    motorTanisi = MotorTaniHizmeti(database),
+                    dersRepository = dersRepository,
+                    sonYedek = SonYedekBilgisi("safety-test.zip", 1L, 100L, guvenlikKopyasi = true),
+                    yedeklemeIslemde = false,
+                    onYedekOlustur = {}, onYedekGeriYukle = {}, onGorselBakimi = {},
+                    onKatalog = {}, onKonular = {}, onGuvenlikYedeginiIncele = { incelendi = true },
+                )
+            }
+        }
+        compose.onNodeWithTag("settings-list").performScrollToNode(hasTestTag("settings-safety-backup-preview"))
+        compose.onNodeWithTag("settings-safety-backup-preview").assertIsDisplayed().performClick()
+        assertTrue(incelendi)
+    }
+
+    @Test
     fun denemeListesiBosDurumuVeDoluGrafikKartlariniGosterir() {
         runBlocking { dersRepository.kataloguHazirla() }
 
@@ -153,8 +242,112 @@ class DenemeVeKurulumArayuzTest {
         compose.waitForIdle()
 
         compose.onNodeWithTag("deneme-net-chart").assertIsDisplayed()
+        val history = compose.activity.getString(R.string.deneme_history_header, 2)
+        compose.onNodeWithTag("deneme-list").performScrollToNode(hasText(history))
+        compose.onNodeWithText(history).assertIsDisplayed()
         compose.onNodeWithTag("deneme-list").performScrollToNode(hasTestTag("deneme-card-d2"))
         compose.onNodeWithTag("deneme-card-d2").assertIsDisplayed()
+        val delta = compose.activity.getString(R.string.deneme_chart_change, "+9")
+        compose.onNodeWithContentDescription(delta, useUnmergedTree = true).assertExists()
+    }
+
+    @Test
+    fun denemeGrafigiKuralVeKapsamSecimindeYalnizBenzerKayitlariGosterir() {
+        runBlocking { dersRepository.kataloguHazirla() }
+        val mat = runBlocking { database.dersDao().tumunuGetir().first { it.ad == "Matematik" }.id }
+        listOf(
+            DenemeKaydi("a", "TYT 1", NetKurali.DORTTE_BIR, 1, 20_000, listOf(DenemeDersSatiri(mat, 40, 20, 8, "Matematik"))),
+            DenemeKaydi("b", "TYT 2", NetKurali.DORTTE_BIR, 2, 20_001, listOf(DenemeDersSatiri(mat, 40, 28, 4, "Matematik"))),
+            DenemeKaydi("c", "Farklı kapsam", NetKurali.DORTTE_BIR, 3, 20_002, listOf(DenemeDersSatiri(mat, 20, 10, 4, "Matematik"))),
+            DenemeKaydi("d", "Üç yanlış", NetKurali.UCTE_BIR, 4, 20_003, listOf(DenemeDersSatiri(mat, 40, 20, 3, "Matematik"))),
+        ).forEach(denemeDeposu::kaydet)
+        compose.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                DenemeListesiEkrani(denemeDeposu, dersRepository, soruRepository, onGeri = {}, onYeni = {}, onAc = {})
+            }
+        }
+        compose.waitForIdle()
+        compose.onNodeWithTag("deneme-rule-DORTTE_BIR").performClick()
+        compose.onNodeWithTag("deneme-list").performScrollToNode(hasTestTag("deneme-scope-selector"))
+        compose.onNodeWithTag("deneme-scope-selector").performClick()
+        compose.onNodeWithTag("deneme-scope-option-b").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("deneme-list").performScrollToNode(hasTestTag("deneme-net-chart"))
+        val grafik = compose.onNodeWithTag("deneme-net-chart").fetchSemanticsNode()
+            .config[SemanticsProperties.ContentDescription].joinToString()
+        assertTrue(grafik.contains(denemeTarihYazi(20_000)))
+        assertTrue(grafik.contains(denemeTarihYazi(20_001)))
+        assertTrue(!grafik.contains(denemeTarihYazi(20_002)))
+        assertTrue(!grafik.contains(denemeTarihYazi(20_003)))
+
+        compose.onNodeWithTag("deneme-list").performScrollToNode(hasTestTag("deneme-distribution-chart"))
+        val dagilim = compose.onNodeWithTag("deneme-distribution-chart").fetchSemanticsNode()
+            .config[SemanticsProperties.ContentDescription].joinToString()
+        assertTrue(dagilim.contains("28 doğru, 4 yanlış, 8 boş"))
+        compose.onNodeWithTag("deneme-list").performScrollToNode(hasTestTag("deneme-lessons-card"))
+        compose.onNodeWithTag("deneme-lessons-card").assertIsDisplayed()
+    }
+
+    @Test
+    fun soruSayilariOkunamazsaSifirGibiGosterilmez() {
+        runBlocking { dersRepository.kataloguHazirla() }
+        val mat = runBlocking { database.dersDao().tumunuGetir().first { it.ad == "Matematik" }.id }
+        denemeDeposu.kaydet(DenemeKaydi("d1", "Deneme", NetKurali.DORTTE_BIR, 1, 20_000,
+            listOf(DenemeDersSatiri(mat, 40, 20, 8, "Matematik"))))
+        val bozukKaynak = object : SoruRepository by soruRepository {
+            override fun sorulariIzle(dersId: String, konuId: String?, konusuz: Boolean): Flow<List<Soru>> =
+                flow { throw IllegalStateException("Test okuma hatası") }
+        }
+        compose.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                DenemeListesiEkrani(denemeDeposu, dersRepository, bozukKaynak, onGeri = {}, onYeni = {}, onAc = {})
+            }
+        }
+        compose.waitUntil(5_000) { compose.onAllNodesWithTag("deneme-question-counts-error").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("deneme-question-counts-error").assertIsDisplayed()
+        compose.onNodeWithTag("deneme-list").performScrollToNode(hasTestTag("deneme-card-d1"))
+        compose.onNodeWithText(compose.activity.getString(R.string.deneme_upload_progress, 0, 20)).assertDoesNotExist()
+    }
+
+    @Test
+    fun eskiBuyukKayitlardaDerslerArasiToplamlarTasmaz() {
+        runBlocking { dersRepository.kataloguHazirla() }
+        val dersler = runBlocking { database.dersDao().tumunuGetir().take(2) }
+        denemeDeposu.kaydet(DenemeKaydi("buyuk", "Eski kayıt", NetKurali.YOK, 1, 20_000,
+            dersler.map { DenemeDersSatiri(it.id, Int.MAX_VALUE, 0, 0, it.ad) }))
+        compose.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                DenemeListesiEkrani(denemeDeposu, dersRepository, soruRepository, onGeri = {}, onYeni = {}, onAc = {})
+            }
+        }
+        compose.waitForIdle()
+        compose.onNodeWithTag("deneme-list").performScrollToNode(hasTestTag("deneme-card-buyuk"))
+        val toplam = 2L * Int.MAX_VALUE
+        compose.onNodeWithText(compose.activity.getString(R.string.deneme_card_counts, 0L, 0L, toplam), useUnmergedTree = true).assertExists()
+        compose.onNodeWithText(compose.activity.getString(R.string.deneme_upload_progress, 0, toplam), useUnmergedTree = true).assertExists()
+    }
+
+    @Test
+    fun denemeGrafigiSonAltiVeSonOnIkiAraliginiDegistirir() {
+        runBlocking { dersRepository.kataloguHazirla() }
+        val mat = runBlocking { database.dersDao().tumunuGetir().first { it.ad == "Matematik" }.id }
+        repeat(13) { index ->
+            denemeDeposu.kaydet(DenemeKaydi("d$index", "Deneme $index", NetKurali.DORTTE_BIR,
+                index.toLong(), 20_000 + index, listOf(DenemeDersSatiri(mat, 40, 10 + index, 4, "Matematik"))))
+        }
+        compose.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                DenemeListesiEkrani(denemeDeposu, dersRepository, soruRepository, onGeri = {}, onYeni = {}, onAc = {})
+            }
+        }
+        compose.waitForIdle()
+        compose.onNodeWithTag("deneme-range-6").performClick()
+        compose.onNodeWithTag("deneme-list").performScrollToNode(hasTestTag("deneme-net-chart"))
+        val grafik = compose.onNodeWithTag("deneme-net-chart").fetchSemanticsNode()
+            .config[SemanticsProperties.ContentDescription].joinToString()
+        assertTrue(grafik.contains(denemeTarihYazi(20_007)))
+        assertTrue(grafik.contains(denemeTarihYazi(20_012)))
+        assertTrue(!grafik.contains(denemeTarihYazi(20_006)))
     }
 
     @Test
