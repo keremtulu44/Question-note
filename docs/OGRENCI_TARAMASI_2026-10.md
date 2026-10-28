@@ -1,8 +1,10 @@
 # Öğrenci akışı incelemesi — 2026-10-28
 
 Bu inceleme deneme takibi ve öğrencinin soru çözme/öz değerlendirme akışına odaklanır.
-Öğretmen çalışma alanı, verileri ve testleri değiştirilmedi. Room şeması, ZIP biçimi,
-tekrar algoritması ve XP kuralları değiştirilmedi.
+Öğretmen çalışma alanına özellik eklenmedi; verileri ve mevcut testleri korundu. Room şeması,
+tekrar algoritması ve XP kuralları değiştirilmedi. Normal ZIP sürümü 5 olarak kalır; bozuk
+ham denemeleri içeren geri yükleme güvenlik kopyası, eski okuyucuların sessizce eksik
+kayıt yüklememesi için 6 numaralı özel kurtarma biçimini kullanır.
 
 ## Düzeltilen bulgular
 
@@ -27,14 +29,21 @@ tekrar algoritması ve XP kuralları değiştirilmedi.
    gerçek tekrar önizlemeleriyle sunuluyor. Henüz seçilmemiş “Rahat” sonucu için karar
    açıklaması gösterilmiyor. Tamamlanan çubuğu atlanan soru sayısını tamamlanmış saymıyor.
 
+6. **Bozuk deneme verisi ve yedekleme:** Okunamayan, bilinmeyen alan/kural veya geçersiz
+   kayıt içeren deneme verisi artık boş ve yazılabilir sanılmıyor. Yeni kayıt/silme ve normal
+   dışa aktarma durur; ekranda yedekten geri yükleme ve açık onaylı sıfırlama sunulur. Sağlam
+   bir yedekten geri yüklerken ham veri türüyle birlikte güvenlik ZIP'inde saklanır. Bu özel
+   ZIP geri yüklenirse ham veriyi aynı hâliyle geri getirir; işlem günlüğü kesinti sonrasında
+   tekrar oynatılabilir. Sıfırlama seçilirse ham kopya yalnız cihazda tutulur ve normal ZIP'e
+   dahil edilmez; soru, fotoğraf ve öğretmen verisine dokunulmaz. Tam yedek geri yükleme ise
+   önceki davranışındaki gibi tüm arşivi seçilen yedekle değiştirir.
+
 ## Açık riskler ve öneriler
 
-- **Öncelikli veri güvenliği:** `DenemeDeposu.oku()` bozuk JSON'u boş listeye çeviriyor;
-  ardından yeni kayıt yazılması bozuk ham verinin üzerine yazabilir. Bir yedek de bu kayıtları
-  eksik alabilir. Bu turda kurtarma/ZIP davranışı değiştirilmedi: güvenli çözüm, ham veriyi
-  koruyan hata durumu, yazma engeli ve hem yedek alma hem geri yüklemede açık kurtarma
-  senaryolarının birlikte tasarlanıp test edilmesidir. Böyle bir durumdan şüphelenildiğinde
-  yeni deneme kaydetmeden mevcut yedekler korunmalıdır.
+- **Bozuk veri otomatik onarılmaz:** Ham veriyi korumak kayıtları onarmak demek değildir;
+  kullanılabilir denemeler için sağlam bir yedek gerekir. Ham kurtarma verisi 4 MiB sınırını
+  aşarsa güvenlik kopyası oluşturulamaz ve geri yükleme mevcut verileri değiştirmeden durur.
+  Kullanıcı onaylı sıfırlamada cihazdaki ham kopya uygulama kaldırılırsa kaybolabilir.
 - **Çapraz-depo işlem sınırı:** Deneme adı SharedPreferences'ta, soru kaynakları Room'da
   tutuluyor. Yeniden adlandırma sırasında iki depodan biri başarısız olursa tam atomiklik
   garanti edilemiyor. Kalıcı deneme kimliğiyle ilişkilendirme ve veri/ZIP göçü ayrı bir iş
@@ -51,7 +60,7 @@ tekrar algoritması ve XP kuralları değiştirilmedi.
 - Deneme hesabı ve sınırları için 9 saf Kotlin/JUnit testi yerel Kotlin 2.4.0/JDK 17
   ortamında başarıyla çalıştırıldı.
 - Puanlama/kapsam seçimi, grafik açıklaması, soru sayısı hata durumu ve odak ekranı için
-  Robolectric/Compose testleri eklendi. `4d42bbe` commit'inde GitHub Android CI'nın Debug ve
-  Release birim testleri [başarılı](https://github.com/keremtulu44/Question-note/actions/runs/40726201616).
-  Sonraki değişiklikler için PR'daki en güncel CI sonucu esas alınmalıdır. Fiziksel cihaz,
-  gerçek kamera/SAF/Drive ve TalkBack kabulü henüz yapılmadı.
+  Robolectric/Compose testleri eklendi. Bozuk veri/yazma engeli, sıfırlama, eski yedekler,
+  ham veri güvenlik ZIP'i, geri yükleme günlüğü ve ortak yedekte öğretmen verisinin korunması
+  için yeni testler de eklendi. PR'daki en güncel Android CI sonucu esas alınmalıdır.
+  Fiziksel cihaz, gerçek kamera/SAF/Drive ve TalkBack kabulü henüz yapılmadı.

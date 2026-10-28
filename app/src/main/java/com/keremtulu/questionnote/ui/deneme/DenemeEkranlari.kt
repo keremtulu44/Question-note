@@ -5,6 +5,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -121,6 +123,8 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
@@ -207,8 +211,10 @@ fun DenemeListesiEkrani(
     onGeri: () -> Unit,
     onYeni: () -> Unit,
     onAc: (String) -> Unit,
+    onYedekAyarlari: (() -> Unit)? = null,
 ) {
     val kayitlar by denemeDeposu.kayitlariIzle.collectAsState()
+    val veriBozuk by denemeDeposu.bozukMuIzle.collectAsState()
     val tumDersler by remember(dersRepository) {
         combine(
             dersRepository.dersleriIzle(false),
@@ -245,7 +251,7 @@ fun DenemeListesiEkrani(
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets.safeDrawing,
         floatingActionButton = {
-            if (kayitlar.isNotEmpty()) {
+            if (!veriBozuk && kayitlar.isNotEmpty()) {
                 PremiumExtendedFloatingActionButton(
                     onClick = onYeni,
                     modifier = Modifier.testTag("deneme-fab-new"),
@@ -274,7 +280,9 @@ fun DenemeListesiEkrani(
                 onGeri = onGeri,
             )
 
-            if (kayitlar.isEmpty()) {
+            if (veriBozuk) {
+                DenemeBozukIcerik(denemeDeposu, onYedekAyarlari)
+            } else if (kayitlar.isEmpty()) {
                 PremiumBosDurum(
                     illustration = { DenemeBosIlustrasyon() },
                     baslik = stringResource(R.string.deneme_empty_title),
@@ -361,6 +369,84 @@ fun DenemeListesiEkrani(
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DenemeBozukIcerik(denemeDeposu: DenemeDeposu, onYedekAyarlari: (() -> Unit)?) {
+    val scope = rememberCoroutineScope()
+    var onay by rememberSaveable { mutableStateOf(false) }
+    var islemde by remember { mutableStateOf(false) }
+    var hata by remember { mutableStateOf(false) }
+
+    if (onay) {
+        AlertDialog(
+            onDismissRequest = { if (!islemde) onay = false },
+            title = { Text(stringResource(R.string.deneme_storage_reset_title)) },
+            text = {
+                Text(
+                    text = stringResource(R.string.deneme_storage_reset_body),
+                    modifier = Modifier.verticalScroll(rememberScrollState()),
+                )
+            },
+            confirmButton = {
+                PremiumButton(
+                    enabled = !islemde,
+                    modifier = Modifier.testTag("deneme-storage-reset-confirm"),
+                    onClick = {
+                        scope.launch {
+                            islemde = true
+                            try {
+                                withContext(Dispatchers.IO) { denemeDeposu.bozukKayitlariSifirla() }
+                                onay = false
+                            } catch (cancel: CancellationException) {
+                                throw cancel
+                            } catch (_: Exception) {
+                                hata = true
+                                onay = false
+                            } finally {
+                                islemde = false
+                            }
+                        }
+                    },
+                ) { Text(stringResource(R.string.deneme_storage_reset)) }
+            },
+            dismissButton = {
+                PremiumTextButton(enabled = !islemde, onClick = { onay = false }) {
+                    Text(stringResource(R.string.topic_cancel))
+                }
+            },
+        )
+    }
+
+    Column(
+        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+            .padding(20.dp).testTag("deneme-storage-error"),
+    ) {
+        SadeKart {
+            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                Text(
+                    text = stringResource(R.string.deneme_storage_error_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.error,
+                )
+                Text(
+                    text = stringResource(R.string.deneme_storage_error_body),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                if (onYedekAyarlari != null) {
+                    PremiumButton(onClick = onYedekAyarlari, enabled = !islemde) {
+                        Text(stringResource(R.string.deneme_storage_backup_settings))
+                    }
+                }
+                PremiumOutlinedButton(
+                    onClick = { onay = true },
+                    enabled = !islemde,
+                    modifier = Modifier.testTag("deneme-storage-reset"),
+                ) { Text(stringResource(R.string.deneme_storage_reset)) }
+                if (hata) Text(stringResource(R.string.deneme_storage_reset_failed), color = MaterialTheme.colorScheme.error)
             }
         }
     }
@@ -534,7 +620,18 @@ fun DenemeDetayEkrani(
     onKaydedildi: (String) -> Unit,
     onSoruEkle: (Ders, String, String) -> Unit,
     onDenemeyiCalis: ((String) -> Unit)? = null,
+    onYedekAyarlari: (() -> Unit)? = null,
 ) {
+    val veriBozuk by denemeDeposu.bozukMuIzle.collectAsState()
+    if (veriBozuk) {
+        Scaffold(containerColor = MaterialTheme.colorScheme.background, contentWindowInsets = WindowInsets.safeDrawing) { insets ->
+            Column(Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets)) {
+                DenemeUstCubuk(baslik = stringResource(R.string.deneme_title), onGeri = onGeri)
+                DenemeBozukIcerik(denemeDeposu, onYedekAyarlari)
+            }
+        }
+        return
+    }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbar = remember { SnackbarHostState() }
@@ -643,6 +740,10 @@ fun DenemeDetayEkrani(
     val anlikBos = remember(gecerliSatirlar) { gecerliSatirlar.sumOf { it.bos.toLong() } }
 
     suspend fun dogrulaVeKaydet(): DenemeKaydi? {
+        if (!withContext(Dispatchers.IO) { denemeDeposu.yazilabilirMi() }) {
+            snackbar.showSnackbar(context.getString(R.string.deneme_storage_error_title))
+            return null
+        }
         val temizAd = ad.trim()
         val adHatasi = when (kayitlar.denemeAdiDogrula(temizAd, mevcut?.id)) {
             DenemeAdiDurumu.GECERLI -> null
@@ -671,7 +772,7 @@ fun DenemeDetayEkrani(
         )
         return try {
             soruRepository.kaynakAdiDegistir(mevcut?.ad, temizAd)
-            denemeDeposu.kaydet(kaydedilecek)
+            withContext(Dispatchers.IO) { denemeDeposu.kaydet(kaydedilecek) }
             kaydedilecek
         } catch (iptal: CancellationException) {
             throw iptal
@@ -690,8 +791,16 @@ fun DenemeDetayEkrani(
                 PremiumButton(
                     onClick = {
                         silmeOnayiAcik = false
-                        denemeDeposu.sil(mevcut.id)
-                        onGeri()
+                        scope.launch {
+                            try {
+                                withContext(Dispatchers.IO) { denemeDeposu.sil(mevcut.id) }
+                                onGeri()
+                            } catch (cancel: CancellationException) {
+                                throw cancel
+                            } catch (_: Exception) {
+                                snackbar.showSnackbar(context.getString(R.string.deneme_error_save))
+                            }
+                        }
                     },
                 ) {
                     Text(stringResource(R.string.deneme_delete_confirm_action))

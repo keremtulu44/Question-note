@@ -134,6 +134,57 @@ class DenemeVeKurulumArayuzTest {
     }
 
     @Test
+    fun bozukDenemelerBosGosterilmezVeSifirlamaAcikOnayIster() {
+        val prefs = compose.activity.getSharedPreferences("denemeler", Context.MODE_PRIVATE)
+        val ham = "[bozuk deneme"
+        prefs.edit().putString("liste", ham).commit()
+        val bozukDepo = DenemeDeposu(compose.activity)
+        var yedekAyarlariAcildi = false
+        compose.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                DenemeListesiEkrani(
+                    denemeDeposu = bozukDepo,
+                    dersRepository = dersRepository,
+                    soruRepository = soruRepository,
+                    onGeri = {}, onYeni = {}, onAc = {},
+                    onYedekAyarlari = { yedekAyarlariAcildi = true },
+                )
+            }
+        }
+        compose.waitForIdle()
+        compose.onNodeWithTag("deneme-storage-error").assertIsDisplayed()
+        compose.onNodeWithTag("deneme-empty-state").assertDoesNotExist()
+        compose.onNodeWithTag("deneme-fab-new").assertDoesNotExist()
+        compose.onNodeWithText(compose.activity.getString(R.string.deneme_storage_backup_settings)).performClick()
+        assertTrue(yedekAyarlariAcildi)
+        compose.onNodeWithTag("deneme-storage-reset").performClick()
+        compose.onNodeWithText(compose.activity.getString(R.string.deneme_storage_reset_body)).assertIsDisplayed()
+        assertEquals(ham, prefs.getString("liste", null))
+        compose.onNodeWithTag("deneme-storage-reset-confirm").performClick()
+        compose.waitUntil(5_000) { !bozukDepo.bozukMuIzle.value }
+        compose.onNodeWithTag("deneme-empty-state").assertIsDisplayed()
+        assertEquals(ham, prefs.all.filterKeys { it.startsWith("bozuk_liste_") }.values.single())
+    }
+
+    @Test
+    fun bozukDenemedeEskiDetayEkraniFormYerineHataGosterir() {
+        compose.activity.getSharedPreferences("denemeler", Context.MODE_PRIVATE)
+            .edit().putString("liste", "{bozuk}").commit()
+        val bozukDepo = DenemeDeposu(compose.activity)
+        compose.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                DenemeDetayEkrani(
+                    denemeId = "eski", denemeDeposu = bozukDepo,
+                    dersRepository = dersRepository, soruRepository = soruRepository,
+                    onGeri = {}, onKaydedildi = {}, onSoruEkle = { _, _, _ -> },
+                )
+            }
+        }
+        compose.onNodeWithTag("deneme-storage-error").assertIsDisplayed()
+        compose.onNodeWithText(compose.activity.getString(R.string.deneme_save)).assertDoesNotExist()
+    }
+
+    @Test
     fun denemeListesiBosDurumuVeDoluGrafikKartlariniGosterir() {
         runBlocking { dersRepository.kataloguHazirla() }
 

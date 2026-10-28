@@ -556,7 +556,7 @@ class YerelYedeklemeHizmetiTest {
                 manifest.getJSONObject("counts").remove("measurements")
             }
             payloads["data.json"] = data.toString().toByteArray(Charsets.UTF_8)
-            manifest.put("format_version", version).put("room_schema_version", version)
+            manifest.put("format_version", version).put("room_schema_version", if (version == 6) 5 else version)
                 .put("csv_files", JSONArray(payloads.keys.filter { it.startsWith("csv/") }.sorted()))
             manifest.put("files", JSONArray().apply { payloads.toSortedMap().forEach { (name, bytes) ->
                 val hash = java.security.MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02x".format(it.toInt() and 0xff) }
@@ -793,6 +793,169 @@ class YerelYedeklemeHizmetiTest {
         assertEquals(matematik.id, geriYuklenen.satirlar.single().dersId)
         assertEquals("Matematik", geriYuklenen.satirlar.single().dersAdi)
         context.getSharedPreferences("denemeler", android.content.Context.MODE_PRIVATE).edit().clear().commit()
+    }
+
+    @Test
+    fun bozukDenemeDisariAktarimiEngellerAmaYedektenGuvenliGeriYuklenir() = runBlocking {
+        val context = RuntimeEnvironment.getApplication()
+        val prefs = context.getSharedPreferences("denemeler", android.content.Context.MODE_PRIVATE)
+        prefs.edit().clear().commit()
+        val depo = com.keremtulu.questionnote.data.prefs.DenemeDeposu(context)
+        val ogretmen = com.keremtulu.questionnote.data.prefs.OgretmenDeposu(context, store, database)
+        val grup = requireNotNull(ogretmen.grupEkle("Korunacak grup"))
+        val servis = YerelYedeklemeHizmeti(context, database, store, depo, ogretmen)
+        val ders = database.dersDao().tumunuGetir().first()
+        val deneme = com.keremtulu.questionnote.domain.model.DenemeKaydi(
+            "saglam", "Sağlam deneme", com.keremtulu.questionnote.domain.model.NetKurali.DORTTE_BIR,
+            100L, 20_000, listOf(com.keremtulu.questionnote.domain.model.DenemeDersSatiri(ders.id, 40, 30, 4, ders.ad)),
+        )
+        depo.kaydet(deneme)
+        val saglamYedek = servis.zipOlustur().also(temporaryFiles::add)
+        val ham = "[bozuk içerik — ham veri"
+        prefs.edit().putString("liste", ham).commit()
+        val bozukDepo = com.keremtulu.questionnote.data.prefs.DenemeDeposu(context)
+        val bozukServis = YerelYedeklemeHizmeti(context, database, store, bozukDepo, ogretmen)
+
+        assertThrows(com.keremtulu.questionnote.data.prefs.DenemeVerisiOkunamadiException::class.java) {
+            runBlocking { bozukServis.zipOlustur() }
+        }
+        assertEquals(ham, prefs.getString("liste", null))
+        val onizleme = bozukServis.dosyadanOnizle(saglamYedek)
+        assertTrue(onizleme.mevcutDenemeBozuk)
+        assertFalse(onizleme.yedekteDenemeBozuk)
+        val sonuc = bozukServis.geriYukle(onizleme)
+        assertTrue(sonuc.bozukDenemeGuvenlikYedeginde)
+        assertFalse(sonuc.yedektenGelenDenemeBozuk)
+        assertFalse(bozukDepo.bozukMuIzle.value)
+        assertEquals(deneme, bozukDepo.kayitlariIzle.value.single())
+        assertEquals(grup.id, ogretmen.anlikVeri().gruplar.single().id)
+
+        val guvenlikYedegi = File(context.filesDir, "yedekler/${sonuc.guvenlikYedegiAdi}")
+        ZipFile(guvenlikYedegi).use { zip ->
+            val manifest = JSONObject(zip.getInputStream(zip.getEntry("manifest.json")).bufferedReader().readText())
+            val data = JSONObject(zip.getInputStream(zip.getEntry("data.json")).bufferedReader().readText())
+            assertEquals(6, manifest.getInt("format_version"))
+            assertEquals(5, manifest.getInt("room_schema_version"))
+            assertEquals(ham, data.getJSONObject("mock_exams_corrupt_raw").getString("value"))
+            assertEquals(grup.id, data.getJSONObject("teacher_workspace").getJSONArray("groups").getJSONObject(0).getString("id"))
+        }
+
+        // Even with a recomputed manifest, invalid raw data or conflicting records must be rejected.
+        val gecersiz = File(context.cacheDir, "invalid-raw-${System.nanoTime()}.zip").also(temporaryFiles::add)
+        rewriteMeasuredArchive(guvenlikYedegi, gecersiz, version = 6) {
+            it.getJSONObject("mock_exams_corrupt_raw").put("type", "unknown")
+        }
+        assertThrows(IOException::class.java) { runBlocking { bozukServis.dosyadanOnizle(gecersiz) } }
+        val celiskili = File(context.cacheDir, "conflicting-raw-${System.nanoTime()}.zip").also(temporaryFiles::add)
+        rewriteMeasuredArchive(guvenlikYedegi, celiskili, version = 6) {
+            it.put("mock_exams", JSONArray().put(com.keremtulu.questionnote.data.prefs.DenemeDeposu.jsonYaz(deneme)))
+        }
+        assertThrows(IOException::class.java) { runBlocking { bozukServis.dosyadanOnizle(celiskili) } }
+
+        val geriOnizleme = bozukServis.dosyadanOnizle(guvenlikYedegi)
+        assertFalse(geriOnizleme.mevcutDenemeBozuk)
+        assertTrue(geriOnizleme.yedekteDenemeBozuk)
+        val geriSonuc = bozukServis.geriYukle(geriOnizleme)
+        assertTrue(geriSonuc.yedektenGelenDenemeBozuk)
+        assertEquals(ham, prefs.getString("liste", null))
+        assertTrue(bozukDepo.bozukMuIzle.value)
+        assertTrue(com.keremtulu.questionnote.data.prefs.DenemeDeposu(context).bozukMuIzle.value)
+        assertEquals(grup.id, ogretmen.anlikVeri().gruplar.single().id)
+        prefs.edit().clear().commit()
+    }
+
+    @Test
+    fun hamDenemeGeriYuklemesiKesilirseGunlukTekrarOynatilabilir() = runBlocking {
+        val context = RuntimeEnvironment.getApplication()
+        val prefs = context.getSharedPreferences("denemeler", android.content.Context.MODE_PRIVATE)
+        prefs.edit().clear().commit()
+        val saglamDepo = com.keremtulu.questionnote.data.prefs.DenemeDeposu(context)
+        val saglamServis = YerelYedeklemeHizmeti(context, database, store, saglamDepo)
+        val saglamYedek = saglamServis.zipOlustur().also(temporaryFiles::add)
+        val ham = "[çözülemeyen ham deneme"
+        prefs.edit().putString("liste", ham).commit()
+        val depo = com.keremtulu.questionnote.data.prefs.DenemeDeposu(context)
+        val servis = YerelYedeklemeHizmeti(context, database, store, depo)
+        val sonuc = servis.geriYukle(servis.dosyadanOnizle(saglamYedek))
+        val safety = File(context.filesDir, "yedekler/${sonuc.guvenlikYedegiAdi}")
+        val onizleme = servis.dosyadanOnizle(safety)
+        val kesilen = YerelYedeklemeHizmeti(context, database, store, depo) {
+            throw IOException("Kesinti simülasyonu")
+        }
+        assertThrows(IOException::class.java) { runBlocking { kesilen.geriYukle(onizleme) } }
+        assertEquals(onizleme.id, database.geriYuklemeIsaretiDao().idGetir())
+        val journal = JSONObject(File(context.filesDir, "yedekler/geri-yukleme.json").readText())
+        assertEquals(ham, journal.getJSONObject("mock_exams_raw").getString("value"))
+        assertTrue(journal.getJSONArray("mock_exams").getJSONObject(0).getBoolean("raw_recovery_required"))
+        val yenidenAcilanDepo = com.keremtulu.questionnote.data.prefs.DenemeDeposu(context)
+        val kurtarma = YerelYedeklemeHizmeti(context, database, store, yenidenAcilanDepo)
+        assertTrue(kurtarma.kesintiliGeriYuklemeyiTamamla())
+        assertNull(database.geriYuklemeIsaretiDao().idGetir())
+        assertEquals(ham, prefs.getString("liste", null))
+        assertTrue(yenidenAcilanDepo.bozukMuIzle.value)
+        assertFalse(kurtarma.kesintiliGeriYuklemeyiTamamla())
+        prefs.edit().clear().commit()
+    }
+
+    @Test
+    fun yanlisTiptekiBozukDenemeGuvenlikYedegindeTipiniKorur() = runBlocking {
+        val context = RuntimeEnvironment.getApplication()
+        val prefs = context.getSharedPreferences("denemeler", android.content.Context.MODE_PRIVATE)
+        prefs.edit().clear().commit()
+        val saglam = YerelYedeklemeHizmeti(context, database, store, com.keremtulu.questionnote.data.prefs.DenemeDeposu(context))
+        val yedek = saglam.zipOlustur().also(temporaryFiles::add)
+        prefs.edit().putLong("liste", 42L).commit()
+        val depo = com.keremtulu.questionnote.data.prefs.DenemeDeposu(context)
+        val servis = YerelYedeklemeHizmeti(context, database, store, depo)
+        val sonuc = servis.geriYukle(servis.dosyadanOnizle(yedek))
+        val safety = File(context.filesDir, "yedekler/${sonuc.guvenlikYedegiAdi}")
+        servis.geriYukle(servis.dosyadanOnizle(safety))
+        assertEquals(42L, prefs.all["liste"])
+        assertTrue(depo.bozukMuIzle.value)
+        prefs.edit().clear().commit()
+    }
+
+    @Test
+    fun tekrarliHamDenemeGuvenlikYedegiSikistirmaSinirinaTakilmaz() = runBlocking {
+        val context = RuntimeEnvironment.getApplication()
+        val prefs = context.getSharedPreferences("denemeler", android.content.Context.MODE_PRIVATE)
+        prefs.edit().clear().commit()
+        val saglam = YerelYedeklemeHizmeti(context, database, store, com.keremtulu.questionnote.data.prefs.DenemeDeposu(context))
+        val yedek = saglam.zipOlustur().also(temporaryFiles::add)
+        val ham = "[" + "x".repeat(2 * 1024 * 1024)
+        prefs.edit().putString("liste", ham).commit()
+        val depo = com.keremtulu.questionnote.data.prefs.DenemeDeposu(context)
+        val servis = YerelYedeklemeHizmeti(context, database, store, depo)
+        val sonuc = servis.geriYukle(servis.dosyadanOnizle(yedek))
+        val safety = File(context.filesDir, "yedekler/${sonuc.guvenlikYedegiAdi}")
+        val hamOnizleme = servis.dosyadanOnizle(safety)
+        assertTrue(hamOnizleme.yedekteDenemeBozuk)
+        servis.geriYukle(hamOnizleme)
+        assertEquals(ham, prefs.getString("liste", null))
+        assertTrue(depo.bozukMuIzle.value)
+        prefs.edit().clear().commit()
+    }
+
+    @Test
+    fun asiriBuyukBozukDenemedeGeriYuklemeDegisiklikYapmadanDurur() = runBlocking {
+        val context = RuntimeEnvironment.getApplication()
+        val prefs = context.getSharedPreferences("denemeler", android.content.Context.MODE_PRIVATE)
+        prefs.edit().clear().commit()
+        val saglam = YerelYedeklemeHizmeti(context, database, store, com.keremtulu.questionnote.data.prefs.DenemeDeposu(context))
+        val yedek = saglam.zipOlustur().also(temporaryFiles::add)
+        val ham = "[" + "x".repeat(4 * 1024 * 1024)
+        prefs.edit().putString("liste", ham).commit()
+        val depo = com.keremtulu.questionnote.data.prefs.DenemeDeposu(context)
+        val servis = YerelYedeklemeHizmeti(context, database, store, depo)
+        val onizleme = servis.dosyadanOnizle(yedek)
+        val oncekiDersler = database.dersDao().tumunuGetir()
+        assertThrows(IOException::class.java) { runBlocking { servis.geriYukle(onizleme) } }
+        assertEquals(ham, prefs.getString("liste", null))
+        assertEquals(oncekiDersler, database.dersDao().tumunuGetir())
+        assertNull(database.geriYuklemeIsaretiDao().idGetir())
+        assertFalse(File(context.filesDir, "yedekler/geri-yukleme.json").exists())
+        servis.hazirlananYedegiIptalEt(onizleme.id)
+        prefs.edit().clear().commit()
     }
 
     private fun SoruGorselGirdisi.toEntity(questionId: String) = GorselEntity(

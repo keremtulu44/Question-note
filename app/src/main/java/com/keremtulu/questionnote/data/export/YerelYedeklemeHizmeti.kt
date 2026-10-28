@@ -36,6 +36,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.security.MessageDigest
 import java.util.UUID
+import java.util.zip.Deflater
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
@@ -72,11 +73,15 @@ data class GeriYuklemeOnizlemesi internal constructor(
     val yedekOgretmenSoruSayisi: Int = 0,
     val mevcutOgretmenGrupSayisi: Int = 0,
     val mevcutOgretmenSoruSayisi: Int = 0,
+    val mevcutDenemeBozuk: Boolean = false,
+    val yedekteDenemeBozuk: Boolean = false,
 )
 
 data class GeriYuklemeSonucu(
     val sayilar: YedekSayilari,
     val guvenlikYedegiAdi: String,
+    val bozukDenemeGuvenlikYedeginde: Boolean = false,
+    val yedektenGelenDenemeBozuk: Boolean = false,
 )
 
 data class SonYedekBilgisi(
@@ -243,6 +248,8 @@ class YerelYedeklemeHizmeti(
             yedekOgretmenSoruSayisi = verified.data.ogretmenVerisi.sorular.size,
             mevcutOgretmenGrupSayisi = mevcutOgretmen.gruplar.size,
             mevcutOgretmenSoruSayisi = mevcutOgretmen.sorular.size,
+            mevcutDenemeBozuk = denemeDeposu?.yazilabilirMi() == false,
+            yedekteDenemeBozuk = verified.data.denemeHam != null,
         )
     }
 
@@ -257,7 +264,13 @@ class YerelYedeklemeHizmeti(
         val payloadDirectory = File(directory, PAYLOAD_DIRECTORY)
         payloadDirectory.deleteRecursively()
         val verified = verifyArchive(archive, payloadDirectory)
-        val current = currentSnapshot()
+        if (denemeDeposu == null && (verified.data.denemeler.isNotEmpty() || verified.data.denemeHam != null)) {
+            throw IOException("Deneme deposu olmadan deneme kayıtları geri yüklenemez.")
+        }
+        val current = currentSnapshot(bozukDenemeyeIzinVer = true)
+        if (preview.mevcutDenemeBozuk != (current.denemeHam != null) ||
+            preview.yedekteDenemeBozuk != (verified.data.denemeHam != null)
+        ) throw IOException("Deneme verisi önizlemeden sonra değişti; yedeği yeniden seçin.")
         val safetyName = "safety-${UUID.randomUUID()}.zip"
         val safetyArchive = File(root, safetyName)
         try {
@@ -282,7 +295,8 @@ class YerelYedeklemeHizmeti(
             .distinctBy { it.dosyaAdi }
         val restoreImageBytes = verified.data.images.sumOf { it.sizeBytes } +
             uniqueTeacherImages.sumOf { it.boyut }
-        ensureFreeSpace(root, restoreImageBytes + MIN_FREE_SPACE_RESERVE_BYTES)
+        val rawJournalBytes = verified.data.denemeHam?.toByteArray(Charsets.UTF_8)?.size?.toLong() ?: 0L
+        ensureFreeSpace(root, restoreImageBytes + rawJournalBytes + MIN_FREE_SPACE_RESERVE_BYTES)
 
         val newFileNames = verified.data.images.map { image ->
             image.permanentFileName(preview.id)
@@ -307,6 +321,7 @@ class YerelYedeklemeHizmeti(
             oldFileNames = current.gorseller.map { it.dosyaAdi }.distinct(),
             newFileNames = newFileNames,
             mockExams = verified.data.denemeler,
+            mockExamsRaw = verified.data.denemeHam,
             oldTeacherFileNames = current.ogretmenVerisi.kaliciDosyaAdlari().toList(),
             newTeacherFileNames = newTeacherFileNames,
             teacherWorkspace = remappedTeacherWorkspace,
@@ -391,6 +406,8 @@ class YerelYedeklemeHizmeti(
             GeriYuklemeSonucu(
                 sayilar = verified.summary.sayilar,
                 guvenlikYedegiAdi = safetyName,
+                bozukDenemeGuvenlikYedeginde = current.denemeHam != null,
+                yedektenGelenDenemeBozuk = verified.data.denemeHam != null,
             )
         } catch (cancel: CancellationException) {
             // Keep the durable journal; startup recovery decides commit vs. rollback from the DB marker.
@@ -451,7 +468,12 @@ class YerelYedeklemeHizmeti(
         // A failed pre-commit restore preserves the old session. A committed replacement must
         // never resume an old question ID, even when the imported backup reuses that ID.
         // If preference persistence fails, retain journal/DB marker and block recovery safely.
-        denemeDeposu?.geriYukleVeUzlastir(journal.mockExams, database.dersDao().tumunuGetir())
+        if (journal.mockExamsRaw != null) {
+            val depo = denemeDeposu ?: throw IOException("Ham deneme verisini yüklemek için deneme deposu bulunamadı.")
+            depo.hamYedegiGeriYukle(journal.mockExamsRaw)
+        } else {
+            denemeDeposu?.geriYukleVeUzlastir(journal.mockExams, database.dersDao().tumunuGetir())
+        }
         ogretmenDeposu?.geriYukle(journal.teacherWorkspace)
         oturumTemizle()
         journal.oldFileNames.filterNot { it in journal.newFileNames }
@@ -477,14 +499,15 @@ class YerelYedeklemeHizmeti(
         )
     }
 
-    private suspend fun currentSnapshot(): ExportSnapshot = database.withTransaction {
+    private suspend fun currentSnapshot(bozukDenemeyeIzinVer: Boolean = false): ExportSnapshot = database.withTransaction {
         val dersler = database.dersDao().tumunuGetir()
         val dersHaritasi = dersler.associateBy { it.id }
-        val denemeler = denemeDeposu?.kayitlariIzle?.value.orEmpty().mapNotNull { deneme ->
+        val goruntu = denemeDeposu?.yedekGoruntusu(bozukHamIle = bozukDenemeyeIzinVer)
+        val denemeler = goruntu?.kayitlar.orEmpty().map { deneme ->
             val satirlar = deneme.satirlar.map { satir ->
                 satir.copy(dersAdi = satir.dersAdi ?: dersHaritasi[satir.dersId]?.ad)
-            }.filter { it.gecerli() }.distinctBy { it.dersId }
-            if (deneme.ad.isBlank() || satirlar.isEmpty()) null else deneme.copy(satirlar = satirlar)
+            }
+            deneme.copy(satirlar = satirlar)
         }
         ExportSnapshot(
             dersler = dersler,
@@ -495,6 +518,7 @@ class YerelYedeklemeHizmeti(
             tekrarlar = database.tekrarDao().tumunuGetir(),
             olcumler = database.tekrarOlcumDao().tumunuGetir(),
             denemeler = denemeler,
+            denemeHam = goruntu?.bozukHam,
             ogretmenVerisi = ogretmenDeposu?.anlikVeri() ?: com.keremtulu.questionnote.domain.model.OgretmenVerisi(),
         )
     }
@@ -550,6 +574,7 @@ class YerelYedeklemeHizmeti(
                 counts = backupData.counts(),
                 catalogOptionCount = backupData.secenekler.size,
                 teacherImageCount = uniqueTeacherImages.size,
+                formatVersion = if (backupData.denemeHam != null) RECOVERY_FORMAT_VERSION else FORMAT_VERSION,
                 createdAt = createdAt,
                 payloads = payloads,
             ).toString(2).toByteArray(Charsets.UTF_8)
@@ -559,7 +584,12 @@ class YerelYedeklemeHizmeti(
             val zip = ZipOutputStream(BufferedOutputStream(fileOutput))
             try {
                 zip.putBytes(MANIFEST_FILE, manifestBytes)
-                payloads.sortedBy { it.name }.forEach { payload -> writePayload(zip, payload) }
+                payloads.sortedBy { it.name }.forEach { payload ->
+                    // A corrupt value may be highly repetitive; keep our own recovery ZIP within
+                    // the same compression-ratio limit enforced for all incoming archives.
+                    zip.setLevel(if (backupData.denemeHam != null && payload.name == DATA_FILE) Deflater.NO_COMPRESSION else Deflater.DEFAULT_COMPRESSION)
+                    writePayload(zip, payload)
+                }
                 zip.finish()
                 zip.flush()
                 fileOutput.fd.sync()
@@ -615,11 +645,12 @@ class YerelYedeklemeHizmeti(
         counts: YedekSayilari,
         catalogOptionCount: Int,
         teacherImageCount: Int,
+        formatVersion: Int,
         createdAt: Long,
         payloads: List<ArchivePayload>,
     ) = JSONObject()
         .put("format", FORMAT_ID)
-        .put("format_version", FORMAT_VERSION)
+        .put("format_version", formatVersion)
         .put("room_schema_version", ROOM_SCHEMA_VERSION)
         .put("created_at_epoch_ms", createdAt)
         .put("data_file", DATA_FILE)
@@ -654,6 +685,7 @@ class YerelYedeklemeHizmeti(
         .put("reviews", JSONArray().apply { data.tekrarlar.forEach { put(it.toJson()) } })
         .put("measurements", JSONArray().apply { data.olcumler.forEach { put(OlcumSerilestirme.yaz(it)) } })
         .apply {
+            if (data.denemeHam != null) put("mock_exams_corrupt_raw", JSONObject(data.denemeHam))
             if (data.denemeler.isNotEmpty()) {
                 put(
                     "mock_exams",
@@ -831,6 +863,7 @@ class YerelYedeklemeHizmeti(
             tekrarlar = tekrarlar,
             olcumler = olcumler,
             denemeler = denemeler,
+            denemeHam = denemeHam,
             ogretmenVerisi = ogretmenVerisi,
         )
     }
@@ -865,7 +898,7 @@ class YerelYedeklemeHizmeti(
                 2 -> 2
                 3 -> 3
                 4 -> 4
-                5 -> 5
+                5, 6 -> 5
                 else -> throw IOException("Desteklenmeyen yedek sürümü.")
             }
             if (manifest.getInt("room_schema_version") != expectedSchemaVersion) {
@@ -878,7 +911,7 @@ class YerelYedeklemeHizmeti(
             if (createdAt <= 0L) throw IOException("Yedek tarihi geçersiz.")
             val manifestCounts = manifest.getJSONObject("counts")
             val counts = manifestCounts.toCounts(formatVersion)
-            val catalogOptionCount = if (formatVersion in 3..5) {
+            val catalogOptionCount = if (formatVersion in 3..6) {
                 manifestCounts.getInt("catalog_options").also {
                     if (it < 0) throw IOException("Manifest içindeki katalog sayısı negatif.")
                 }
@@ -897,7 +930,7 @@ class YerelYedeklemeHizmeti(
             val expectedCsvFiles = when (formatVersion) {
                 2 -> LEGACY_REQUIRED_CSV_FILES
                 3 -> V3_REQUIRED_CSV_FILES
-                4, 5 -> REQUIRED_CSV_FILES
+                4, 5, 6 -> REQUIRED_CSV_FILES
                 else -> throw IOException("Desteklenmeyen CSV sürümü.")
             }
             if (declaredCsv != expectedCsvFiles || !inventoryPaths.containsAll(expectedCsvFiles)) {
@@ -1030,7 +1063,7 @@ class YerelYedeklemeHizmeti(
         }
         val options = when (formatVersion) {
             2 -> legacyCatalogOptions(questions)
-            3, 4, 5 -> {
+            3, 4, 5, 6 -> {
             json.getJSONArray("catalog_options").toTypedList(MAX_ROWS_PER_TABLE) { item ->
                 val type = runCatching { SoruSecenekTuru.valueOf(item.getString("type")) }
                     .getOrElse { throw IOException("Yedekte bilinmeyen katalog türü var.") }
@@ -1088,7 +1121,7 @@ class YerelYedeklemeHizmeti(
                 if (json.has("measurements")) throw IOException("Eski biçim ölçüm tablosu içeremez.")
                 emptyList()
             }
-            4, 5 -> json.getJSONArray("measurements").toTypedList(MAX_ROWS_PER_TABLE, OlcumSerilestirme::oku)
+            4, 5, 6 -> json.getJSONArray("measurements").toTypedList(MAX_ROWS_PER_TABLE, OlcumSerilestirme::oku)
             else -> throw IOException("Desteklenmeyen ölçüm tablosu sürümü.")
         }
         val mockExams = if (json.has("mock_exams") && !json.isNull("mock_exams")) {
@@ -1097,6 +1130,15 @@ class YerelYedeklemeHizmeti(
             }
         } else {
             emptyList()
+        }
+        val rawExam = if (formatVersion == RECOVERY_FORMAT_VERSION) {
+            if (!json.has("mock_exams_corrupt_raw") || json.isNull("mock_exams_corrupt_raw") || mockExams.isNotEmpty()) {
+                throw IOException("Ham deneme verisi güvenlik yedeğinde eksik veya çelişkili.")
+            }
+            json.getJSONObject("mock_exams_corrupt_raw").toString().also(::validateRawMockExams)
+        } else {
+            if (json.has("mock_exams_corrupt_raw")) throw IOException("Beklenmeyen ham deneme verisi.")
+            null
         }
         val teacherWorkspace = if (json.has("teacher_workspace") && !json.isNull("teacher_workspace")) {
             val bildirilenSurum = if (json.has("teacher_workspace_version")) {
@@ -1120,6 +1162,7 @@ class YerelYedeklemeHizmeti(
             tekrarlar = reviews,
             olcumler = measurements,
             denemeler = mockExams,
+            denemeHam = rawExam,
             ogretmenVerisi = teacherWorkspace,
         )
     } catch (error: IOException) {
@@ -1159,7 +1202,18 @@ class YerelYedeklemeHizmeti(
         return options.values.toList()
     }
 
+    private fun validateRawMockExams(raw: String) {
+        if (raw.toByteArray(Charsets.UTF_8).size > MAX_CORRUPT_EXAM_BYTES) {
+            throw IOException("Bozuk deneme verisi güvenlik yedeği için çok büyük.")
+        }
+        com.keremtulu.questionnote.data.prefs.DenemeDeposu.hamYedekDogrula(raw)
+    }
+
     private fun validateBackupData(data: BackupData, extractedPayload: File?) {
+        data.denemeHam?.let {
+            if (data.denemeler.isNotEmpty()) throw IOException("Ham ve geçerli deneme verileri birlikte bulunamaz.")
+            validateRawMockExams(it)
+        }
         if (data.dersler.isEmpty()) throw IOException("Yedek en az bir ders içermeli.")
         val lessonIds = uniqueIds(data.dersler.map { it.id }, "ders")
         val topicIds = uniqueIds(data.konular.map { it.id }, "konu")
@@ -1467,11 +1521,17 @@ class YerelYedeklemeHizmeti(
             .put(
                 "mock_exams",
                 JSONArray().apply {
-                    journal.mockExams.forEach {
-                        put(com.keremtulu.questionnote.data.prefs.DenemeDeposu.jsonYaz(it))
+                    if (journal.mockExamsRaw != null) {
+                        // Old app versions must fail closed instead of treating raw data as an empty list.
+                        put(JSONObject().put("raw_recovery_required", true))
+                    } else {
+                        journal.mockExams.forEach {
+                            put(com.keremtulu.questionnote.data.prefs.DenemeDeposu.jsonYaz(it))
+                        }
                     }
                 },
             )
+            .apply { journal.mockExamsRaw?.let { put("mock_exams_raw", JSONObject(it)) } }
         writeAtomic(journalFile, json.toString().toByteArray(Charsets.UTF_8))
     }
 
@@ -1501,7 +1561,16 @@ class YerelYedeklemeHizmeti(
         } else {
             com.keremtulu.questionnote.domain.model.OgretmenVerisi()
         }
-        val mockExams = if (json.has("mock_exams") && !json.isNull("mock_exams")) {
+        val hamDeneme = if (json.has("mock_exams_raw") && !json.isNull("mock_exams_raw")) {
+            val marker = json.getJSONArray("mock_exams")
+            if (marker.length() != 1 || marker.getJSONObject(0).length() != 1 ||
+                marker.getJSONObject(0).opt("raw_recovery_required") != true
+            ) throw IOException("Ham deneme kurtarma günlüğü geçersiz.")
+            json.getJSONObject("mock_exams_raw").toString().also(::validateRawMockExams)
+        } else null
+        val mockExams = if (hamDeneme != null) {
+            emptyList()
+        } else if (json.has("mock_exams") && !json.isNull("mock_exams")) {
             json.getJSONArray("mock_exams").toTypedList(MAX_ROWS_PER_TABLE) { item ->
                 com.keremtulu.questionnote.data.prefs.DenemeDeposu.jsonOku(item, strict = true)
             }
@@ -1516,6 +1585,7 @@ class YerelYedeklemeHizmeti(
             oldFileNames = oldFiles,
             newFileNames = newFiles,
             mockExams = mockExams,
+            mockExamsRaw = hamDeneme,
             oldTeacherFileNames = oldTeacherFiles,
             newTeacherFileNames = newTeacherFiles,
             teacherWorkspace = teacherWorkspace,
@@ -1647,6 +1717,7 @@ class YerelYedeklemeHizmeti(
         val tekrarlar: List<TekrarEntity>,
         val olcumler: List<TekrarOlcumEntity>,
         val denemeler: List<com.keremtulu.questionnote.domain.model.DenemeKaydi> = emptyList(),
+        val denemeHam: String? = null,
         val ogretmenVerisi: com.keremtulu.questionnote.domain.model.OgretmenVerisi =
             com.keremtulu.questionnote.domain.model.OgretmenVerisi(),
     )
@@ -1660,6 +1731,7 @@ class YerelYedeklemeHizmeti(
         val tekrarlar: List<TekrarEntity>,
         val olcumler: List<TekrarOlcumEntity>,
         val denemeler: List<com.keremtulu.questionnote.domain.model.DenemeKaydi> = emptyList(),
+        val denemeHam: String? = null,
         val ogretmenVerisi: com.keremtulu.questionnote.domain.model.OgretmenVerisi =
             com.keremtulu.questionnote.domain.model.OgretmenVerisi(),
     )
@@ -1696,6 +1768,7 @@ class YerelYedeklemeHizmeti(
         val oldFileNames: List<String>,
         val newFileNames: List<String>,
         val mockExams: List<com.keremtulu.questionnote.domain.model.DenemeKaydi> = emptyList(),
+        val mockExamsRaw: String? = null,
         val oldTeacherFileNames: List<String> = emptyList(),
         val newTeacherFileNames: List<String> = emptyList(),
         val teacherWorkspace: com.keremtulu.questionnote.domain.model.OgretmenVerisi =
@@ -1717,8 +1790,10 @@ class YerelYedeklemeHizmeti(
         const val LEGACY_FORMAT_VERSION = 2
         const val LEGACY_ROOM_SCHEMA_VERSION = 2
         const val FORMAT_VERSION = 5
+        // Only safety copies containing unreadable raw exams use v6; old readers reject it safely.
+        const val RECOVERY_FORMAT_VERSION = 6
         const val ROOM_SCHEMA_VERSION = 5
-        val SUPPORTED_FORMAT_VERSIONS = setOf(2, 3, 4, 5)
+        val SUPPORTED_FORMAT_VERSIONS = setOf(2, 3, 4, 5, 6)
         const val STATE_PREPARED = "PREPARED"
         const val STATE_COMMITTED = "COMMITTED"
         const val JPEG_MIME = "image/jpeg"
@@ -1726,6 +1801,7 @@ class YerelYedeklemeHizmeti(
         const val MAX_TOTAL_UNCOMPRESSED_BYTES = 1_024L * 1024L * 1024L
         const val MAX_ENTRY_BYTES = 128L * 1024L * 1024L
         const val MAX_JSON_BYTES = 64L * 1024L * 1024L
+        const val MAX_CORRUPT_EXAM_BYTES = 4 * 1024 * 1024
         const val MAX_MANIFEST_BYTES = 1 * 1024 * 1024
         const val MAX_ARCHIVE_ENTRIES = 10_009
         const val MAX_IMAGES = 10_000
