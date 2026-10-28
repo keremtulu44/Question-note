@@ -2,6 +2,39 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [Yayınlanmadı — üst panel] — 2026-10-27
+
+- **Üst panel:** alt menünün kalıcı eşi. Canlı tarih (`d MMMM EEEE`), seri ve günlük hedef
+  (`yapılan / hedef`) + 16 çentikli hedef halkası. Tek dokunuşla İlerleme; XP/para/enerji gibi
+  oyunlaştırma yok. Yalnız sekme köklerinde görünür, detay/form ekranlarında gizlenir.
+- **Insets:** host `Scaffold` boşlukları panellere devretti; sekme kökleri yalnız yatay güvenli
+  alan ekler. Alt menü üstünde ikinci boşluk şeridi kalktı; detay ekranları tam `safeDrawing`.
+- **Bugün:** başlık + `+`, gradyan odak kartı (sayı + "soru", günlük hedefin ince ölçeği,
+  tek bakır CTA), devam satırı, kuyruk kartı, sorulacaklar/deneme kısayolları. Boş/hata/yükleme
+  durumları ayrı; FAB ve mükerrer hedef metinleri kaldırıldı.
+- **İnce ilerleme:** Canvas ile çizilmiş `Damga`, `HedefHalkasi`, `InceOlcek`, `SeriAlevi`,
+  `SoruIsareti`, `InceOk`, `KucukArti`, `KucukOnay`, `OynatSimgesi`, `YolNoktalari`. XP çubuğu
+  bölmeli, rütbe madalyonunda ince halka + yay, rozet galerisinde halka ve 4 bölmeli ölçek,
+  rütbe kutlamasında 9 noktalı yol, rütbe galerisinde 15 noktalı yol ve sıradaki rütbe kartı
+  (görsel, "%d XP kaldı", 8 bölmeli ölçek). `GradyanKart` ışığı radyal parlamaya çevrildi.
+- **Kaldırılan:** Filtreli çalışma ekranındaki sekme kökü "Geri" düğmesi; Bugün'deki ikinci
+  hedef cümlesi ve FAB.
+- **Tekrar eden metinler:** Bugün başlığı yalnız yeni bilgi taşır (yükleniyor ya da
+  "%d soru gecikmiş"); odak kartında üst paneldeki "3 / 10" yerine "%d soru kaldı" /
+  "Hedef tamam" yazar; deneme kısayolunun uzun alt metni kısaldı.
+- **Görsel kanıt:** `BugunUstPanelOnizlemeTest` gerçek kabukta (üst panel + alt menü + Bugün)
+  açık/koyu ekran görüntüsü üretir; CI bunları `docs/ui/today/` altına yazar.
+- **Test:** `UstPanelArayuzTest` (hedef/seri/tarih, oyunlaştırma kelimesi yokluğu, 48dp hedef,
+  tıklama, 2× yazı). Mevcut test etiketleri/sözleşmeleri korundu.
+- **CI:** run `40541253872` (commit `e51ab43`) — Debug **388/0/0/0**, Release ortak
+  **303/0/0/0**, `assembleRelease` 0, imza ve sertifika eşleşti. Sürüm/Room/ZIP değişmedi;
+  v1.6.3 etiketi zaten yayımlandığı için yeni Release oluşturulmadı.
+- **Görsel kanıt:** `docs/ui/today/bugun-light.png`, `bugun-dark.png` (yerel Compose, sentetik veri).
+- **APK:** uygulama adı/sürümü değişmedi (1.6.3 / 42). Sürüm etiketi dolu olduğu için bu derlemenin
+  imzalı APK'sı `preview-1.6.3` prerelease'ine yüklenir; her koşuda `--clobber` ile güncellenir:
+  https://github.com/keremtulu44/Question-note/releases/tag/preview-1.6.3
+  (SHA-256 `0d270161494d04d7a2149b7d50f4eab4d8c578b9b92432b16d92095cda847bf1`).
+
 ## [Yayınlanmadı — T3] — 2026-10-26
 
 - **Arama ve filtreler:** kuyruk ve grup detayında tek satır arama (`rememberSaveable`); başlık,

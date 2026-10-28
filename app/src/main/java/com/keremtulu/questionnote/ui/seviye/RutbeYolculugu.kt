@@ -3,7 +3,9 @@ package com.keremtulu.questionnote.ui.seviye
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -22,16 +24,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.keremtulu.questionnote.R
-import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
 import com.keremtulu.questionnote.domain.seviye.Rutbe
 import com.keremtulu.questionnote.domain.seviye.SeviyeDurumu
 import com.keremtulu.questionnote.domain.seviye.SeviyeHesabi
+import com.keremtulu.questionnote.ui.bilesenler.HedefHalkasi
+import com.keremtulu.questionnote.ui.bilesenler.InceOlcek
+import com.keremtulu.questionnote.ui.bilesenler.KucukOnay
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import com.keremtulu.questionnote.ui.premium.PremiumCard
 
@@ -43,10 +51,22 @@ fun RutbeYolculugu(durum: SeviyeDurumu, baslikGoster: Boolean = true) {
         if (baslikGoster) Text(stringResource(R.string.rank_gallery_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         Text(stringResource(R.string.rank_gallery_note), style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant)
+        // Küçük yol: 15 rütbenin neresinde olduğumuz, tek bakışta.
+        com.keremtulu.questionnote.ui.bilesenler.YolNoktalari(
+            oran = ((durum.seviye - 1).toFloat() / (Rutbe.entries.size - 1).coerceAtLeast(1)).coerceIn(0f, 1f),
+            modifier = Modifier.width(232.dp).height(14.dp).clearAndSetSemantics { },
+            renk = MaterialTheme.colorScheme.surfaceVariant,
+            dolguRenk = MaterialTheme.colorScheme.primary,
+            noktaSayisi = Rutbe.entries.size.coerceIn(2, 15),
+        )
         LazyRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             items(Rutbe.entries.toList(), key = { it.anahtar }) { rutbe ->
                 val aktif = durum.seviye >= rutbe.baslangicSeviye
-                PremiumCard(onClick = { detay = rutbe }, modifier = Modifier.width(kartGenisligi), shape = RoundedCornerShape(22.dp),
+                val durumMetni = stringResource(if (aktif) R.string.rank_earned else R.string.rank_locked)
+                PremiumCard(onClick = { detay = rutbe },
+                    modifier = Modifier.width(kartGenisligi)
+                        .semantics { stateDescription = durumMetni },
+                    shape = RoundedCornerShape(22.dp),
                     colors = CardDefaults.cardColors(containerColor = if (rutbe == durum.rutbe) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface)) {
                     Column(Modifier.fillMaxWidth().padding(14.dp), horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -54,9 +74,76 @@ fun RutbeYolculugu(durum: SeviyeDurumu, baslikGoster: Boolean = true) {
                             modifier = Modifier.size(80.dp).alpha(if (aktif) 1f else 0.45f))
                         Text(rutbe.ad, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                         Text(stringResource(R.string.level_number, rutbe.baslangicSeviye), style = MaterialTheme.typography.labelSmall)
-                        if (aktif) Text("✓", color = MaterialTheme.colorScheme.primary, fontFamily = PremiumSembolAilesi)
-                            else Text("◊", color = MaterialTheme.colorScheme.primary)
+                        if (aktif) {
+                            KucukOnay(Modifier.size(14.dp).clearAndSetSemantics { }, MaterialTheme.colorScheme.primary)
+                        } else {
+                            HedefHalkasi(
+                                oran = 0f,
+                                modifier = Modifier.size(12.dp).clearAndSetSemantics { },
+                                izRenk = MaterialTheme.colorScheme.outlineVariant,
+                                dolguRenk = MaterialTheme.colorScheme.primary,
+                                kalinlik = 1.5.dp,
+                            )
+                        }
                     }
+                }
+            }
+        }
+        // Galerin altında kalan boşluk yerine tek, ölçülebilir bir sonraki adım:
+        // sıradaki rütbe, kalan XP ve ince ölçek. Yeni oyunlaştırma değil, mevcut XP'nin özeti.
+        val sonraki = Rutbe.entries.firstOrNull { it.baslangicSeviye > durum.seviye }
+        if (sonraki != null) {
+            val esik = SeviyeHesabi.seviyeEsigi(sonraki.baslangicSeviye)
+            val oncekiEsik = SeviyeHesabi.seviyeEsigi(sonraki.baslangicSeviye - 1)
+            val aralik = (esik - oncekiEsik).coerceAtLeast(1)
+            val ilerleme = ((durum.toplamXp - oncekiEsik).toFloat() / aralik).coerceIn(0f, 1f)
+            PremiumCard(
+                modifier = Modifier.fillMaxWidth().testTag("rank-next-card"),
+                shape = RoundedCornerShape(22.dp),
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    ) {
+                        Image(
+                            painterResource(sonraki.gorsel),
+                            contentDescription = null,
+                            modifier = Modifier.size(48.dp).alpha(0.55f),
+                        )
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            Text(
+                                text = stringResource(R.string.rank_next_label),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                            Text(
+                                text = sonraki.ad,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                            )
+                            Text(
+                                text = stringResource(
+                                    R.string.rank_next_remaining,
+                                    (esik - durum.toplamXp).coerceAtLeast(0),
+                                ),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                    InceOlcek(
+                        oran = ilerleme,
+                        modifier = Modifier.fillMaxWidth().height(6.dp).clearAndSetSemantics { },
+                        izRenk = MaterialTheme.colorScheme.surfaceVariant,
+                        dolguRenk = MaterialTheme.colorScheme.primary,
+                        bolme = 8,
+                        yukseklik = 6.dp,
+                    )
                 }
             }
         }

@@ -4,12 +4,10 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -51,6 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.keremtulu.questionnote.ui.bilesenler.premium.GradyanKart
 import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
+import com.keremtulu.questionnote.ui.panel.ekranPencereInsetsi
 
 private sealed interface DersSecimDurumu {
     data object Yukleniyor : DersSecimDurumu
@@ -124,7 +123,7 @@ fun DerslerEkrani(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = colors.background,
-        contentWindowInsets = WindowInsets.safeDrawing,
+        contentWindowInsets = ekranPencereInsetsi(),
     ) { padding ->
         @Composable
         fun DerslerUstBaslik(modifier: Modifier = Modifier) {

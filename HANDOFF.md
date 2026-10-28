@@ -1,6 +1,6 @@
 # HANDOFF — Yanlış Defteri
 
-**Son güncelleme: 2026-10-26.** Önce bu belge, `docs/DERLEME_RAPORU.md`,
+**Son güncelleme: 2026-10-27.** Önce bu belge, `docs/DERLEME_RAPORU.md`,
 `docs/PREMIUM_GORSEL_GELISTIRME.md` ve [P4–P6 sözleşme/kanıt kaydı](docs/P4_P5_P6_UYGULAMA.md) okunur.
 
 ## Güncel ürün kararı — 2026-10-27: öğretmen modu gizli ve askıda
@@ -13,6 +13,63 @@ kurulum/ayar girişleri gizli; eski kayıtlı öğretmen rolü de ekranda öğre
 Öğrencinin öğretmene sorulacaklar akışı aktiftir. Kullanıcı açıkça yeniden
 istemeden öğretmen alanına geliştirme/refaktör/görsel değişiklik yapılmamalı.
 Bu gizleme değişikliği yayımlanmış 1.6.1 APK'da henüz yoktur.
+
+## Premium üst panel + Bugün + ince ilerleme (2026-10-27, derleme bekliyor)
+
+Kullanıcı isteğiyle üst boşluk, alt menünün kalıcı eşi olan bir **üst panelle** dolduruldu;
+oyunlaştırma (XP/para/enerji) yok. Panel yalnız gerçek bugün durumunu taşır:
+
+- **Üst panel** (`ui/panel/UstPanel.kt`): sol tarafta `Damga` + canlı tarih (`d MMMM EEEE`,
+  tr-TR) + `SeriAlevi` ile seri; sağda `HedefHalkasi` (16 çentik + yay) ve `yapılan / hedef`.
+  Hedef düğmesi 48dp, tek anlamlı geçişle İlerleme sekmesini açar; `onClickLabel` = "İlerlemeyi aç".
+  Panel yalnız sekme köklerinde (`UygulamaEkrani.altMenuGorunur()`) görünür; detay/form
+  ekranlarında gizlenir.
+- **Insets sözleşmesi**: host `Scaffold` `contentWindowInsets = 0`; üst/alt boşlukları paneller
+  taşır. Sekme kökleri (`Bugün`, `Dersler`, `Filtreli`, `İlerleme`, `Ayarlar`) `ekranPencereInsetsi()`
+  ile yalnız **yatay** güvenli alan ekler; böylece alt menünün üstünde ikinci bir gezinme çubuğu
+  boşluğu kalmaz. Panel göstermeyen detay/form ekranları (SoruDetay, SoruFormu, Sorulacaklar,
+  Ders çalışma, Katalog, Konu yönetimi, Görsel bakım, Odak, Deneme, Karne, öğretmen) tam
+  `safeDrawing` kullanmaya devam eder — onlarda üst boşluğu panel değil durum çubuğu taşır.
+- **Bugün** (`ui/BugunEkrani.kt`): başlık ("Bugün" + tek satır bağlam + 48dp `+`), gradyan
+  **odak kartı** (GÜNÜN ODAĞI, sayı + "soru" birimi, günlük hedefin ince ölçeği, tek bakır CTA),
+  isteğe bağlı devam satırı, kuyruk kartı (3 önizleme, gecikme etiketi), sorulacaklar/deneme
+  kısayolları. Boş havuzda sıfırlı kahraman kart yerine tek `BosDurumSoruYok`; hatada tek
+  `DurumKarti`; yüklenirken CTA/ölçek çizilmez. FAB yok; `+` her durumda görünür.
+- **Rütbe galerisi**: 15 noktalı yol + sıradaki rütbe kartı (görsel, "60 XP kaldı",
+  8 bölmeli ince ölçek); kartlar `stateDescription` ile "Bu rütbeye ulaştın"/"Henüz ulaşılmadı"
+  bildirir, ✓/halka metin glifi yerine çizilir.
+- **GradyanKart ışığı**: düz yarı saydam dairelerin keskin kenarı koyu temada leke gibi
+  görünüyordu; iki radyal parlamaya çevrildi.
+- **İnce ilerleme detayları**: yeni `ui/bilesenler/InceCizimler.kt` (Damga, HedefHalkasi,
+  InceOlcek, SeriAlevi, SoruIsareti, InceOk, KucukArti, KucukOnay, OynatSimgesi, YolNoktalari)
+  Canvas ile çizilir; varlık dosyası eklenmedi. XP çubuğu 10 bölmeli `InceOlcek`; rütbe
+  madalyonu 1dp dış halka + 2dp iz + bakır yay; rozet başlığında 54dp `HedefHalkasi(24)`;
+  rozet kartlarında 4 bölmeli ölçek; `KutlamaHost` rütbe görselinin altında 9 noktalı yol.
+  Rütbe galerisinde 15 noktalı yol + çizilmiş ✓/halka (metin glifi yerine).
+- **Kaldırılanlar**: Filtreli çalışma ekranındaki gereksiz "Geri" düğmesi (sekme kökü; alt menü
+  ve sistem geri tuşu yeterli), Bugün'deki "Hedef tamam / N soru daha" ikinci satırı ve FAB.
+- **Test**: yeni `UstPanelArayuzTest` (hedef/seri/tarih, XP-benzeri kelime yokluğu, 48dp hedef,
+  tıklama yönlendirmesi, 2× yazıda ölçü) ve `BugunUstPanelOnizlemeTest` (gerçek kabukta
+  `docs/ui/today/bugun-light|dark.png`). Mevcut test sözleşmeleri korundu
+  (`bugun_sorulacaklar_karti`, `today-deneme-card`, ilerleme etiketleri).
+
+**CI kanıtı (2026-10-27, run `40541253872`, commit `e51ab43`):** Debug **388/0/0/0**,
+Release ortak **303/0/0/0**, `assembleRelease` 0, imza + beklenen sertifika doğrulandı.
+Önceki turlarda yalnız yeni test dosyaları kırıldı ve düzeltildi: `DpRect.height/width`
+(Kotlin uzantısı importu), `SoruEntity` zorunlu `olusturma/guncelleme` alanları, tekrar
+kaydı öncesi dış anahtarlı soru, %200 yazıda gizlenen "Hedef" etiketi beklentisi ve
+`DenemeVeKurulumArayuzTest` içindeki tek `waitForIdle` yarışı (`waitUntil`'e çevrildi).
+Görsel önizlemeler `docs/ui/today/bugun-light.png` ve `bugun-dark.png` olarak repoda.
+
+**APK dağıtımı:** sürüm adı/numarası değiştirilmedi. CI artık iki yerden indirilebilir APK üretir:
+(1) Actions artefaktı `yanlis-defteri-apk` (30 gün, GitHub girişi gerekir), (2) sürüm etiketi
+doluysa `preview-<sürüm>` prerelease'i — girişsiz indirme, her koşuda `--clobber` ile güncellenir.
+Bu tur: https://github.com/keremtulu44/Question-note/releases/tag/preview-1.6.3 ·
+SHA-256 `0d270161494d04d7a2149b7d50f4eab4d8c578b9b92432b16d92095cda847bf1`
+(run `40559677656`, commit `4a43ba8`, Debug 388/0, Release ortak 303/0, imza doğrulandı).
+Tüm `app/src/**/*.kt` tree-sitter ile **0 sözdizimi hatası**, tüm `R.*` referansları
+**0 eksik** (values + drawable*/font/raw/xml), `values*.xml` iyi biçimli. Gerçek kapı CI'dır;
+sürüm/Room/ZIP değişmedi.
 
 ## 1.6.1 yayımlandı — güncel doğrulama
 

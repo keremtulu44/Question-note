@@ -81,3 +81,30 @@ prefs, gezinme durum makinesi ve ölçüm mantığına dokunulmadı; test metinl
   `PUBLISH_RELEASE` kapalı: yalnız test+derleme+imza, halka açık release yok).
 - Statik denetimler: süslü/parantez dengesi, import–kullanım eşleşmesi, kalan `return@`
   etiketleri, konumsal argüman tuzakları — hepsi temiz.
+
+## 2026-10-27 — Üst panel, Bugün hiyerarşisi ve ince ilerleme (derleme bekliyor)
+
+**Kapsam:** `ui/` + `res/values/strings.xml`. Domain, Room, ZIP, prefs, tekrar kuralları ve
+öğretmen alanı değişmedi.
+
+- **Üst panel (`ui/panel/UstPanel.kt`)**: alt menünün kalıcı eşi; yalnız sekme köklerinde.
+  Sol: `Damga` + canlı tarih (`d MMMM EEEE`, tr-TR) + `SeriAlevi` + seri. Sağ: `HedefHalkasi`
+  (16 çentik, 2.5dp yay) + `yapılan / hedef`. Hedef düğmesi 48dp, `onClickLabel` = "İlerlemeyi aç".
+  XP/para/enerji yok; tek geçiş İlerleme sekmesi.
+- **Insets**: `LocalUstPanelVar` ile sekme kökleri `ekranPencereInsetsi()` üzerinden yalnız yatay
+  güvenli alan ekler; üst/alt boşluk panellerde. Alt menü üstünde ikinci boşluk şeridi kalktı.
+- **Bugün**: başlık + `+` → gradyan odak kartı (GÜNÜN ODAĞI, sayı + "soru", ince hedef ölçeği,
+  bakır CTA) → devam → kuyruk (3 önizleme) → kısayollar. Boşta `BosDurumSoruYok`, hatada tek
+  `DurumKarti`, yüklenirken CTA yok. FAB kaldırıldı.
+- **Mikro çizimler (`ui/bilesenler/InceCizimler.kt`)**: yeni `YolNoktalari` (2–15 nokta, iz çizgisi,
+  dolu/boş nokta yarıçapları) ve mevcut Canvas ailesi. Varlık dosyası yok, APK büyümedi.
+- **İlerleme**: XP çubuğu 10 bölmeli `InceOlcek`; `RutbeMadalyonu` 1dp dış halka + 2dp iz +
+  bakır `drawArc` (seviye içi gerçek oran); rozet başlığı 54dp `HedefHalkasi(24)`; rozet
+  kartlarında 4 bölmeli ölçek; rütbe kutlamasında 9 noktalı `YolNoktalari`; rütbe galerisinde
+  15 noktalı yol ve `✓`/halka çizimleri (`stateDescription` ile erişilebilir).
+- **Korunanlar**: `progress-xp-bar` `ProgressBarRangeInfo`, tek `analysis-action`, `progress-*`
+  test etiketleri, `bugun_sorulacaklar_karti`, `today-deneme-card`, metin bütçesi ve %200
+  yerleşim sözleşmeleri. Yeni test: `UstPanelArayuzTest`.
+
+**Doğrulama:** JDK/Android SDK yok → derleme/JUnit yok. tree-sitter: 0 sözdizimi hatası;
+`R.*`: 0 eksik; `values*.xml` iyi biçimli. Gerçek kapı CI'dır.

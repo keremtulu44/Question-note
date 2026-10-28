@@ -35,6 +35,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.key
 import com.keremtulu.questionnote.data.ilerleme.RozetHizmeti
@@ -103,6 +104,8 @@ import com.keremtulu.questionnote.ui.premium.PremiumButton
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import com.keremtulu.questionnote.ui.karne.RozetKutlamaHost
+import com.keremtulu.questionnote.ui.panel.LocalUstPanelVar
+import com.keremtulu.questionnote.ui.panel.UstPanel
 
 private sealed interface UygulamaEkrani {
     data object Bugun : UygulamaEkrani
@@ -514,12 +517,23 @@ fun YanlisDefteriUygulamasi(
             }
         },
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        topBar = {
+            // Alt menünün üstteki eşi: yalnız sekme köklerinde, gün ve hedef kimliğiyle.
+            if (altMenuGorunur) {
+                UstPanel(
+                    ilerlemeHizmeti = ilerlemeHizmeti,
+                    gunlukHedefDeposu = gunlukHedefDeposu,
+                    onIlerleme = { sekmeSec(AltSekme.SEVIYE) },
+                )
+            }
+        },
         bottomBar = {
             if (altMenuGorunur && !klavyeAcik) {
                 AltMenu(secili = ekran.aktifSekme(), onSec = ::sekmeSec)
             }
         },
     ) { insets ->
+        CompositionLocalProvider(LocalUstPanelVar provides altMenuGorunur) {
         Box(Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets)
             .wrapContentWidth(androidx.compose.ui.Alignment.CenterHorizontally).widthIn(max = 840.dp)) {
             AnimatedContent(
@@ -624,7 +638,6 @@ fun YanlisDefteriUygulamasi(
                         soruRepository = soruRepository,
                         ayar = filtreliCalismaAyar,
                         onAyarDegisti = { filtreliCalismaAyar = it },
-                        onGeri = { ekran = UygulamaEkrani.Bugun },
                         onOturumBaslat = { questions, lessons -> oturumBaslat(questions, lessons) },
                         onDevam = bekleyenOturum?.let { onceki -> { ekran = onceki; bekleyenOturum = null } },
                     )
@@ -770,6 +783,7 @@ fun YanlisDefteriUygulamasi(
                 }
             }
             }
+        }
         }
     }
     }
