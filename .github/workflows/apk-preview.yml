@@ -1,0 +1,77 @@
+name: Test APK
+
+on:
+  pull_request:
+    paths:
+      - 'app/**'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - 'settings.gradle.kts'
+      - 'build.gradle.kts'
+      - 'gradle.properties'
+      - '.github/workflows/apk-preview.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  apk:
+    name: Kurulabilir test APK'sı
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Değişiklik dalını al
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Temurin JDK 17'i kur
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+      - name: Gradle wrapper hazırla ve debug APK derle
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! -f gradle/wrapper/gradle-wrapper.jar || ! -f gradle/wrapper/gradle-wrapper.properties ]]; then
+            bootstrap_dir="$RUNNER_TEMP/gradle-wrapper-bootstrap"
+            mkdir -p "$bootstrap_dir"
+            printf '// Temporary project to generate the official Gradle wrapper.\n' > "$bootstrap_dir/build.gradle"
+            (cd "$bootstrap_dir" && gradle wrapper --gradle-version 9.8.1 --distribution-type bin)
+            mkdir -p gradle/wrapper
+            cp "$bootstrap_dir/gradlew" ./gradlew
+            cp "$bootstrap_dir/gradlew.bat" ./gradlew.bat
+            cp "$bootstrap_dir/gradle/wrapper/gradle-wrapper.jar" gradle/wrapper/gradle-wrapper.jar
+            cp "$bootstrap_dir/gradle/wrapper/gradle-wrapper.properties" gradle/wrapper/gradle-wrapper.properties
+          fi
+          chmod +x ./gradlew
+          ./gradlew --no-daemon --console=plain :app:assembleDebug
+          cp app/build/outputs/apk/debug/app-debug.apk "$RUNNER_TEMP/YanlisDefterim-test.apk"
+          if [[ -x "$ANDROID_HOME/build-tools/37.0.0/apksigner" ]]; then
+            "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --print-certs "$RUNNER_TEMP/YanlisDefterim-test.apk"
+          fi
+          apk_sha=$(sha256sum "$RUNNER_TEMP/YanlisDefterim-test.apk" | cut -d' ' -f1)
+          echo "::notice title=APK SHA-256::$apk_sha"
+          {
+            echo '## Test APK'
+            echo
+            echo "- Kaynak: ${{ github.event.pull_request.head.sha }}"
+            echo "- SHA-256: \`$apk_sha\`"
+            echo '- Debug imzalıdır; yayın sürümünün üzerine kurulamayabilir.'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: APK'yı artifact olarak kaydet
+        uses: actions/upload-artifact@v4
+        with:
+          name: YanlisDefterim-test-APK
+          path: ${{ runner.temp }}/YanlisDefterim-test.apk
+          if-no-files-found: error
+          retention-days: 14
+      - name: APK'yı çalışma alanına aktar
+        continue-on-error: true
+        shell: bash
+        run: |
+          curl --fail --silent --show-error --retry 2 --max-time 300 \
+            -H 'Content-Type: application/vnd.android.package-archive' \
+            --data-binary @"$RUNNER_TEMP/YanlisDefterim-test.apk" 'https://8765-iufc6chsmy3nds6z4hsaq.e2b.app/upload/rr4GPZMle3hUtBqATeHDH3z1K7eI6BM0xCNIU-QKrc8'
