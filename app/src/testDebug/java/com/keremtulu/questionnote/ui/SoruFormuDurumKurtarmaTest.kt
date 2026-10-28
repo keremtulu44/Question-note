@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -99,11 +100,13 @@ class SoruFormuDurumKurtarmaTest {
         )
 
         val kaydedilen = with(SoruGorselGirdileriSaver) { TestSaverScope.save(girdiler) }
+        assertNotNull("Dolu görsel listesi kaydı null olmamalı", kaydedilen)
         assertEquals(girdiler, SoruGorselGirdileriSaver.restore(kaydedilen!!))
 
         val bosKaydedilen = with(SoruGorselGirdileriSaver) {
             TestSaverScope.save(emptyList())
         }
+        assertNotNull("Boş görsel listesi kaydı null olmamalı", bosKaydedilen)
         assertEquals(
             emptyList<SoruGorselGirdisi>(),
             SoruGorselGirdileriSaver.restore(bosKaydedilen!!),

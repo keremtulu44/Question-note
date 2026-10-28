@@ -92,7 +92,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.contentDescription
@@ -106,7 +105,7 @@ import com.keremtulu.questionnote.ui.bilesenler.SoruGorselResmi
  * bu değerler `rememberSaveable` ile saklanır. Görsel girdileri yalnız üst
  * veridir; dosyaların kendisi geçici/kalıcı dizinlerde ayrıca yaşar.
  */
-internal val SoruGorselGirdileriSaver = listSaver<List<SoruGorselGirdisi>, Any>(
+internal val SoruGorselGirdileriSaver = Saver<List<SoruGorselGirdisi>, List<Any>>(
     save = { girdiler ->
         girdiler.flatMap { girdi ->
             listOf<Any>(
