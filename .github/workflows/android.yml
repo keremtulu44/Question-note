@@ -1,19 +1,18 @@
 name: Android CI
 
+# İki iş:
+# - test: PR'larda ve main/etiket push'larında çalışır; salt-okunur token,
+#   imza secret'ı YOK. Kanıt (log, özet, önizleme) artifact + step summary.
+# - release: yalnız main push'u ve v* etiketinde, test işi geçtikten sonra
+#   çalışır; build + imza + GitHub Release + DERLEME_RAPORU commit'i burada.
+# Dalda çalışırken CI almak için (taslak) PR açmak yeterli.
+
 on:
   push:
     branches:
       - main
-      - arena/c9cdb479-question-note
-      - arena/263f59f4-question-note
-      - arena/0ec2226d-question-note
-      - arena/59c6570d-question-note
-      - arena/1c0f41d0-question-note
-      - arena/be352b3c-question-note
-      - arena/abf7be2d-question-note
-      - arena/ade0c6b2-question-note
-      - arena/9d4e7eac-question-note
-      - arena/5d75ca16-question-note
+    tags:
+      - 'v*'
     paths:
       - 'app/**'
       - 'tools/junit_ozeti.py'
@@ -24,16 +23,29 @@ on:
       - 'build.gradle.kts'
       - 'gradle.properties'
       - '.github/workflows/android.yml'
+  pull_request:
+    paths:
+      - 'app/**'
+      - 'tools/junit_ozeti.py'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - 'settings.gradle.kts'
+      - 'build.gradle.kts'
+      - 'gradle.properties'
+      - '.github/workflows/android.yml'
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: android-ci-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  build:
+  test:
+    name: Testler (Debug + Release)
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -47,12 +59,158 @@ jobs:
           java-version: "17"
           cache: gradle
 
-      - name: A2 testlerini çalıştır, derle, imzala ve yayımla
+      - name: Debug ve Release birim testlerini çalıştır
+        id: testler
+        shell: bash
+        env:
+          WRAPPER_VERSION: "9.8.1"
+        run: |
+          set +e
+          set -o pipefail
+          wrapper_log="$RUNNER_TEMP/wrapper-bootstrap.log"
+          test_log="$RUNNER_TEMP/android-unit-tests.log"
+          release_test_log="$RUNNER_TEMP/android-release-unit-tests.log"
+          gradle_info="$RUNNER_TEMP/gradle-version.txt"
+          wrapper_exit=0
+          unit_test_exit=125
+          release_test_exit=125
+          release_test_summary="Release JUnit sonucu henüz yok"
+          unit_test_summary="JUnit sonucu henüz yok"
+          unit_test_failure_details="JUnit hata ayrıntısı henüz yok"
+
+          gradle --version > "$gradle_info" 2>&1
+
+          if [[ ! -f gradle/wrapper/gradle-wrapper.jar || ! -f gradle/wrapper/gradle-wrapper.properties ]]; then
+            bootstrap_dir="$RUNNER_TEMP/gradle-wrapper-bootstrap"
+            mkdir -p "$bootstrap_dir"
+            printf '// Temporary project used only to generate the official Gradle wrapper.\n' > "$bootstrap_dir/build.gradle"
+            (cd "$bootstrap_dir" && gradle wrapper --gradle-version "$WRAPPER_VERSION" --distribution-type bin) > "$wrapper_log" 2>&1
+            wrapper_exit=$?
+            if [[ "$wrapper_exit" -eq 0 ]]; then
+              mkdir -p gradle/wrapper
+              cp "$bootstrap_dir/gradlew" ./gradlew && \
+                cp "$bootstrap_dir/gradlew.bat" ./gradlew.bat && \
+                cp "$bootstrap_dir/gradle/wrapper/gradle-wrapper.jar" gradle/wrapper/gradle-wrapper.jar && \
+                cp "$bootstrap_dir/gradle/wrapper/gradle-wrapper.properties" gradle/wrapper/gradle-wrapper.properties
+              wrapper_exit=$?
+              if [[ "$wrapper_exit" -eq 0 ]]; then chmod +x ./gradlew; fi
+            fi
+          fi
+
+          if [[ "$wrapper_exit" -eq 0 ]]; then
+            chmod +x ./gradlew
+            ./gradlew --no-daemon --console=plain --stacktrace :app:testDebugUnitTest > "$test_log" 2>&1
+            unit_test_exit=$?
+            unit_test_summary=$(python3 tools/junit_ozeti.py summary app/build/test-results/testDebugUnitTest \
+              --require-class com.keremtulu.questionnote.ui.OneridenOdagaAkisTest \
+              --require-class com.keremtulu.questionnote.ui.P5P6ArayuzTest \
+              --require-class com.keremtulu.questionnote.ui.IlerlemeSadelikTest \
+              --require-class com.keremtulu.questionnote.ui.IlerlemeGorselOnizlemeTest \
+              --require-class com.keremtulu.questionnote.ui.P6GorselOnizlemeTest \
+              --require-class com.keremtulu.questionnote.data.gelisim.AnalizPerformansTest)
+            test_summary_exit=$?
+            if [[ "$unit_test_exit" -eq 0 && "$test_summary_exit" -ne 0 ]]; then
+              unit_test_exit=1
+            fi
+            if [[ "$unit_test_exit" -eq 0 ]]; then
+              for name in overview-light overview-dark overview-empty overview-error overview-large weekly collection ranks; do
+                if [[ ! -s "app/build/outputs/progress-previews/$name.png" ]]; then
+                  echo "ERROR: Güncel İlerleme önizlemesi eksik: $name" >> "$test_log"
+                  unit_test_exit=1
+                fi
+              done
+            fi
+            # İki bağımsız kapı da çalışır; Debug başarısız olsa bile Release sonucu görülür.
+            ./gradlew --no-daemon --console=plain --stacktrace :app:testReleaseUnitTest > "$release_test_log" 2>&1
+            release_test_exit=$?
+            release_test_summary=$(python3 tools/junit_ozeti.py summary app/build/test-results/testReleaseUnitTest \
+              --require-class com.keremtulu.questionnote.data.gelisim.AnalizPerformansTest \
+              --require-class com.keremtulu.questionnote.data.gelisim.MotorTaniHizmetiTest \
+              --require-class com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest)
+            release_summary_exit=$?
+            if [[ "$release_test_exit" -eq 0 && "$release_summary_exit" -ne 0 ]]; then release_test_exit=1; fi
+            unit_test_failure_details=$(python3 tools/junit_ozeti.py failures app/build/test-results/testDebugUnitTest app/build/test-results/testReleaseUnitTest)
+          fi
+
+          {
+            echo "## Android testleri"
+            echo
+            echo "- testDebugUnitTest çıkış kodu: $unit_test_exit — $unit_test_summary"
+            echo "- testReleaseUnitTest çıkış kodu: $release_test_exit — $release_test_summary"
+            echo
+            echo '```text'
+            printf '%s\n' "$unit_test_failure_details"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          kanit="$RUNNER_TEMP/test-kaniti"
+          mkdir -p "$kanit/progress-previews" "$kanit/p6-previews" "$kanit/p6-benchmark" "$kanit/today-previews"
+          cp "$gradle_info" "$kanit/gradle-version.txt" 2>/dev/null || true
+          if [[ -f "$test_log" ]]; then cp "$test_log" "$kanit/android-unit-tests.log"; fi
+          if [[ -f "$release_test_log" ]]; then cp "$release_test_log" "$kanit/android-release-unit-tests.log"; fi
+          printf '%s' "$unit_test_summary" > "$kanit/unit-test-summary.txt"
+          printf '%s' "$release_test_summary" > "$kanit/release-test-summary.txt"
+          printf '%s' "$unit_test_failure_details" > "$kanit/junit-failures.txt"
+          printf '%s' "$wrapper_exit" > "$kanit/wrapper-exit.txt"
+          printf '%s' "$unit_test_exit" > "$kanit/unit-test-exit.txt"
+          printf '%s' "$release_test_exit" > "$kanit/release-test-exit.txt"
+          cp app/build/outputs/progress-previews/*.png "$kanit/progress-previews/" 2>/dev/null || true
+          cp app/build/outputs/p6-previews/*.png "$kanit/p6-previews/" 2>/dev/null || true
+          cp app/build/outputs/today-previews/*.png "$kanit/today-previews/" 2>/dev/null || true
+          cp app/build/outputs/p6-benchmark/*.md "$kanit/p6-benchmark/" 2>/dev/null || true
+          if [[ -d app/schemas ]]; then
+            mkdir -p "$kanit/schemas"
+            cp -r app/schemas/. "$kanit/schemas/"
+          fi
+
+          echo "wrapper_exit=$wrapper_exit" >> "$GITHUB_OUTPUT"
+          echo "unit_test_exit=$unit_test_exit" >> "$GITHUB_OUTPUT"
+          echo "release_test_exit=$release_test_exit" >> "$GITHUB_OUTPUT"
+
+      - name: Test kanıtını artifact olarak sakla
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-kaniti
+          path: ${{ runner.temp }}/test-kaniti/**
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Test başarısızsa işi kırmızıya çevir
+        if: steps.testler.outputs.wrapper_exit != '0' || steps.testler.outputs.unit_test_exit != '0' || steps.testler.outputs.release_test_exit != '0'
+        run: exit 1
+
+  release:
+    name: Release (derle + imzala + yayımla)
+    needs: test
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - name: Depoyu al
+        uses: actions/checkout@v5
+
+      - name: Temurin JDK 17'i kur
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Test kanıtını indir
+        uses: actions/download-artifact@v4
+        with:
+          name: test-kaniti
+          path: ${{ runner.temp }}/test-kaniti
+
+      - name: Derle, imzala ve yayımla
         id: release
         shell: bash
         env:
-          # Arena branch releases follow the repo's normal release flow; tags are version-gated.
-          PUBLISH_RELEASE: "true" # 39156980764: Debug312/0, Release258/0, signed APK + native review. Active-v3 remains CLOSED.
+          # Ana dal/etiket yayımları normal akışı izler; etiketler sürüm kapılıdır.
+          PUBLISH_RELEASE: "true"
           WRAPPER_VERSION: "9.8.1"
           BUILD_TOOLS_VERSION: "37.0.0"
           EXPECTED_FINGERPRINT: "FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54"
@@ -63,21 +221,23 @@ jobs:
           set +e
           set -o pipefail
           mkdir -p docs
+          kanit="$RUNNER_TEMP/test-kaniti"
           wrapper_log="$RUNNER_TEMP/wrapper-bootstrap.log"
-          test_log="$RUNNER_TEMP/android-unit-tests.log"
-          release_test_log="$RUNNER_TEMP/android-release-unit-tests.log"
+          test_log="$kanit/android-unit-tests.log"
+          release_test_log="$kanit/android-release-unit-tests.log"
           build_log="$RUNNER_TEMP/android-build.log"
           sign_log="$RUNNER_TEMP/android-sign.log"
           verify_log="$RUNNER_TEMP/android-verify.log"
           release_log="$RUNNER_TEMP/github-release.log"
-          gradle_info="$RUNNER_TEMP/gradle-version.txt"
+          gradle_info="$kanit/gradle-version.txt"
           apk_info="$RUNNER_TEMP/apk-info.txt"
-          wrapper_exit=0
-          unit_test_exit=125
-          release_test_exit=125
-          release_test_summary="Release JUnit sonucu henüz yok"
-          unit_test_summary="JUnit sonucu henüz yok"
-          unit_test_failure_details="JUnit hata ayrıntısı henüz yok"
+          wrapper_exit=$(cat "$kanit/wrapper-exit.txt" 2>/dev/null || echo 0)
+          unit_test_exit=$(cat "$kanit/unit-test-exit.txt" 2>/dev/null || echo 125)
+          release_test_exit=$(cat "$kanit/release-test-exit.txt" 2>/dev/null || echo 125)
+          unit_test_summary=$(cat "$kanit/unit-test-summary.txt" 2>/dev/null || echo "JUnit özeti bulunamadı")
+          release_test_summary=$(cat "$kanit/release-test-summary.txt" 2>/dev/null || echo "Release JUnit özeti bulunamadı")
+          unit_test_failure_details=$(cat "$kanit/junit-failures.txt" 2>/dev/null || echo "JUnit hata ayrıntısı bulunamadı")
+          if [[ ! -s "$gradle_info" ]]; then gradle --version > "$gradle_info" 2>&1; fi
           build_exit=125
           signing_exit=125
           zipalign_exit=125
@@ -106,8 +266,7 @@ jobs:
             secret_status="Eksik veya boş secret var (değerler gösterilmez)"
           fi
 
-          gradle --version > "$gradle_info" 2>&1
-
+          if [[ ! -x ./gradlew ]]; then chmod +x ./gradlew 2>/dev/null || true; fi
           if [[ ! -f gradle/wrapper/gradle-wrapper.jar || ! -f gradle/wrapper/gradle-wrapper.properties ]]; then
             bootstrap_dir="$RUNNER_TEMP/gradle-wrapper-bootstrap"
             mkdir -p "$bootstrap_dir"
@@ -125,44 +284,12 @@ jobs:
             fi
           fi
 
+          # needs: test, iki test kapısının da geçtiğini garanti eder.
           if [[ "$wrapper_exit" -eq 0 ]]; then
-            ./gradlew --no-daemon --console=plain --stacktrace :app:testDebugUnitTest > "$test_log" 2>&1
-            unit_test_exit=$?
-            unit_test_summary=$(python3 tools/junit_ozeti.py summary app/build/test-results/testDebugUnitTest \
-              --require-class com.keremtulu.questionnote.ui.OneridenOdagaAkisTest \
-              --require-class com.keremtulu.questionnote.ui.P5P6ArayuzTest \
-              --require-class com.keremtulu.questionnote.ui.IlerlemeSadelikTest \
-              --require-class com.keremtulu.questionnote.ui.IlerlemeGorselOnizlemeTest \
-              --require-class com.keremtulu.questionnote.ui.P6GorselOnizlemeTest \
-              --require-class com.keremtulu.questionnote.data.gelisim.AnalizPerformansTest)
-            test_summary_exit=$?
-            if [[ "$unit_test_exit" -eq 0 && "$test_summary_exit" -ne 0 ]]; then
-              unit_test_exit=1
-            fi
-            if [[ "$unit_test_exit" -eq 0 ]]; then
-              for name in overview-light overview-dark overview-empty overview-error overview-large weekly collection ranks; do
-                if [[ ! -s "app/build/outputs/progress-previews/$name.png" ]]; then
-                  echo "ERROR: Güncel İlerleme önizlemesi eksik: $name" >> "$test_log"
-                  unit_test_exit=1
-                fi
-              done
-            fi
-            # Run both independent gates even if Debug fails; build/sign/publish still require BOTH.
-            ./gradlew --no-daemon --console=plain --stacktrace :app:testReleaseUnitTest > "$release_test_log" 2>&1
-            release_test_exit=$?
-            release_test_summary=$(python3 tools/junit_ozeti.py summary app/build/test-results/testReleaseUnitTest \
-              --require-class com.keremtulu.questionnote.data.gelisim.AnalizPerformansTest \
-              --require-class com.keremtulu.questionnote.data.gelisim.MotorTaniHizmetiTest \
-              --require-class com.keremtulu.questionnote.data.export.YerelYedeklemeHizmetiTest)
-            release_summary_exit=$?
-            if [[ "$release_test_exit" -eq 0 && "$release_summary_exit" -ne 0 ]]; then release_test_exit=1; fi
-            unit_test_failure_details=$(python3 tools/junit_ozeti.py failures app/build/test-results/testDebugUnitTest app/build/test-results/testReleaseUnitTest)
-            if [[ "$unit_test_exit" -eq 0 && "$release_test_exit" -eq 0 ]]; then
-              ./gradlew --no-daemon --console=plain --stacktrace :app:assembleRelease > "$build_log" 2>&1
-              build_exit=$?
-            else
-              printf '%s\n' "assembleRelease, Debug/Release birim test kapılarından biri geçmediği için çalıştırılmadı." > "$build_log"
-            fi
+            ./gradlew --no-daemon --console=plain --stacktrace :app:assembleRelease > "$build_log" 2>&1
+            build_exit=$?
+          else
+            printf '%s\n' "assembleRelease, Gradle wrapper hazırlanamadığı için çalıştırılmadı." > "$build_log"
           fi
 
           if [[ "$build_exit" -eq 0 && -f "$unsigned_apk" ]]; then
@@ -348,7 +475,7 @@ jobs:
               echo "-- Son 80 satır --"
               tail -n 80 "$test_log"
             else
-              echo "Birim testleri çalıştırılmadı."
+              echo "Birim test çıktısı (artifact) bulunamadı."
             fi
             echo '```'
             echo
@@ -362,7 +489,7 @@ jobs:
               grep -nEi '(^e: |error:|unresolved reference|compilation error|what went wrong|failed to)' "$release_test_log" | head -n 80 || true
               tail -n 100 "$release_test_log"
             else
-              echo "Release birim testi başlatılmadı."
+              echo "Release birim test çıktısı (artifact) bulunamadı."
             fi
             echo '```'
             echo
@@ -411,8 +538,8 @@ jobs:
           echo "fingerprint_exit=$fingerprint_exit" >> "$GITHUB_OUTPUT"
           echo "release_exit=$release_exit" >> "$GITHUB_OUTPUT"
 
-      - name: Test, derleme, imza veya Release başarısızsa işi kırmızıya çevir
-        if: steps.release.outputs.wrapper_exit != '0' || steps.release.outputs.unit_test_exit != '0' || steps.release.outputs.release_test_exit != '0' || steps.release.outputs.build_exit != '0' || steps.release.outputs.signing_exit != '0' || steps.release.outputs.fingerprint_exit != '0' || steps.release.outputs.release_exit != '0'
+      - name: Derleme, imza veya Release başarısızsa işi kırmızıya çevir
+        if: steps.release.outputs.build_exit != '0' || steps.release.outputs.signing_exit != '0' || steps.release.outputs.fingerprint_exit != '0' || steps.release.outputs.release_exit != '0'
         run: exit 1
 
       - name: İmzalı APK'yı indirilebilir artefakt olarak yükle
@@ -425,59 +552,60 @@ jobs:
           path: |
             app/build/outputs/apk/release/yanlis-defteri-*.apk
 
-      - name: Sade İlerleme yerel Compose önizlemelerini sakla
+      - name: Test kanıtındaki önizleme, performans ve şemaları docs'a kopyala
         if: always()
         shell: bash
         run: |
           set -euo pipefail
-          for name in overview-light overview-dark overview-empty overview-error overview-large weekly collection ranks; do
-            source="app/build/outputs/progress-previews/$name.png"
-            if [[ -f "$source" ]]; then
-              # Small, named documentation previews only; never collect arbitrary build outputs.
+          kanit="$RUNNER_TEMP/test-kaniti"
+          # Small, named documentation previews only; never collect arbitrary build outputs.
+          if [[ -d "$kanit/progress-previews" ]]; then
+            mkdir -p docs/ui/progress
+            for source in "$kanit"/progress-previews/*.png; do
+              [[ -f "$source" ]] || continue
               test "$(stat -c%s "$source")" -lt 1500000
-              mkdir -p docs/ui/progress
-              cp "$source" "docs/ui/progress/$name.png"
-            fi
-          done
-
-      - name: Bugün ve üst panel yerel Compose önizlemelerini sakla
-        if: always()
-        shell: bash
-        run: |
-          set -euo pipefail
-          for name in bugun-light bugun-dark; do
-            source="app/build/outputs/today-previews/$name.png"
-            if [[ -f "$source" ]]; then
-              # Küçük, adlandırılmış doküman görselleri; rastgele derleme çıktısı toplanmaz.
+              cp "$source" "docs/ui/progress/$(basename "$source")"
+            done
+          fi
+          if [[ -d "$kanit/p6-previews" ]]; then
+            mkdir -p docs/ui/p6
+            for source in "$kanit"/p6-previews/*.png; do
+              [[ -f "$source" ]] || continue
               test "$(stat -c%s "$source")" -lt 1500000
-              mkdir -p docs/ui/today
-              cp "$source" "docs/ui/today/$name.png"
-            fi
-          done
-
-      - name: P6 ölçüm ve yerel Compose kanıtlarını sakla
-        if: always()
-        shell: bash
-        run: |
-          set -euo pipefail
-          for name in p6-action-light p6-action-dark p6-analysis p6-large p6-empty; do
-            source="app/build/outputs/p6-previews/$name.png"
-            if [[ -f "$source" ]]; then
+              cp "$source" "docs/ui/p6/$(basename "$source")"
+            done
+          fi
+          if [[ -d "$kanit/today-previews" ]]; then
+            mkdir -p docs/ui/today
+            for source in "$kanit"/today-previews/*.png; do
+              [[ -f "$source" ]] || continue
               test "$(stat -c%s "$source")" -lt 1500000
-              mkdir -p docs/ui/p6
-              cp "$source" "docs/ui/p6/$name.png"
-            fi
-          done
+              cp "$source" "docs/ui/today/$(basename "$source")"
+            done
+          fi
           for variant in debug release; do
-            source="app/build/outputs/p6-benchmark/$variant.md"
+            source="$kanit/p6-benchmark/$variant.md"
             if [[ -f "$source" ]]; then
               test "$(stat -c%s "$source")" -lt 100000
               cp "$source" "docs/PERFORMANS_${variant^^}.md"
             fi
           done
+          if [[ -d "$kanit/schemas" ]]; then
+            mkdir -p app/schemas
+            cp -r "$kanit/schemas/." app/schemas/
+          fi
 
-      - name: Wrapper ve raporu repoya yaz
-        if: always()
+      - name: Raporu artifact olarak sakla (etiket çalıştırmaları)
+        if: always() && startsWith(github.ref, 'refs/tags/v')
+        uses: actions/upload-artifact@v4
+        with:
+          name: derleme-raporu
+          path: docs/DERLEME_RAPORU.md
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Wrapper ve raporu main dalına yaz
+        if: always() && github.ref == 'refs/heads/main'
         shell: bash
         run: |
           set -euo pipefail
@@ -485,8 +613,8 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/DERLEME_RAPORU.md
           if [[ -d docs/ui/progress ]]; then git add docs/ui/progress; fi
-          if [[ -d docs/ui/today ]]; then git add docs/ui/today; fi
           if [[ -d docs/ui/p6 ]]; then git add docs/ui/p6; fi
+          if [[ -d docs/ui/today ]]; then git add docs/ui/today; fi
           for report in docs/PERFORMANS_DEBUG.md docs/PERFORMANS_RELEASE.md; do
             if [[ -f "$report" ]]; then git add "$report"; fi
           done
@@ -500,7 +628,6 @@ jobs:
             git commit -m "ci: save signed Android build report [skip ci]"
             # Dal, iş çalışırken ilerlemiş olabilir (elle push). Raporun kaybolmaması için
             # rebase edip yeniden dene; yine olmazsa özeti log'a bas.
-            # Önce düz push: dal iş sırasında ilerlemediyse derin klonla uğraşmaya gerek yok.
             if ! git push origin "HEAD:${GITHUB_REF_NAME}"; then
               git fetch --deepen 100 || git fetch --unshallow || true
               for deneme in 1 2 3; do
