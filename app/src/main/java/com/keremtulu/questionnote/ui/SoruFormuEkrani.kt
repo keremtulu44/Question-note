@@ -91,10 +91,72 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.sp
 import com.keremtulu.questionnote.ui.bilesenler.SoruGorselResmi
+
+/**
+ * Formun kalıcı alanları için saver'lar. Süreç ölümü (kamera/galeri açıkken
+ * Android'in uygulamayı bellekten atması gibi) sonrasında [SoruFormuEkrani]'nin
+ * kullanıcının yazdıklarına ve hazırladığı görsellere geri dönebilmesi için
+ * bu değerler `rememberSaveable` ile saklanır. Görsel girdileri yalnız üst
+ * veridir; dosyaların kendisi geçici/kalıcı dizinlerde ayrıca yaşar.
+ */
+internal val SoruGorselGirdileriSaver = listSaver<List<SoruGorselGirdisi>, Any>(
+    save = { girdiler ->
+        girdiler.flatMap { girdi ->
+            listOf<Any>(
+                girdi.id,
+                girdi.tur.name,
+                girdi.sira,
+                girdi.dosyaAdi,
+                girdi.gecici,
+                girdi.mimeType,
+                girdi.genislik,
+                girdi.yukseklik,
+                girdi.boyut,
+                girdi.sha256,
+            )
+        }
+    },
+    restore = { kayitli ->
+        kayitli.chunked(10).mapNotNull { parca ->
+            if (parca.size != 10) return@mapNotNull null
+            runCatching {
+                SoruGorselGirdisi(
+                    id = parca[0] as String,
+                    tur = GorselTuru.valueOf(parca[1] as String),
+                    sira = (parca[2] as Number).toInt(),
+                    dosyaAdi = parca[3] as String,
+                    gecici = parca[4] as Boolean,
+                    mimeType = parca[5] as String,
+                    genislik = (parca[6] as Number).toInt(),
+                    yukseklik = (parca[7] as Number).toInt(),
+                    boyut = (parca[8] as Number).toLong(),
+                    sha256 = parca[9] as String,
+                )
+            }.getOrNull()
+        }
+    },
+)
+
+internal val SoruPlanDurumuSaver = Saver<SoruPlanDurumu, String>(
+    save = { it.name },
+    restore = { ad ->
+        runCatching { SoruPlanDurumu.valueOf(ad) }.getOrDefault(SoruPlanDurumu.AKTIF)
+    },
+)
+
+internal val GorselTuruSaver = Saver<GorselTuru, String>(
+    save = { it.name },
+    restore = { ad ->
+        runCatching { GorselTuru.valueOf(ad) }.getOrDefault(GorselTuru.SORU)
+    },
+)
 
 private sealed interface KonuSecenekleriDurumu {
     data object Yukleniyor : KonuSecenekleriDurumu
@@ -126,19 +188,31 @@ fun SoruFormuEkrani(
     var yuklemeBasarisiz by remember(soruId) { mutableStateOf(false) }
     var formHatasi by remember { mutableStateOf<Int?>(null) }
     var kaydediliyor by remember { mutableStateOf(false) }
-    var cozumNotu by remember(soruId) { mutableStateOf("") }
-    var kaynak by remember(soruId) { mutableStateOf(gizliKaynak.orEmpty()) }
-    var kaynakKonumu by remember(soruId) { mutableStateOf("") }
-    var yanlisNedeni by remember(soruId) { mutableStateOf("") }
+    // Kalıcı alanlar: süreç ölümü formu sıfırlamasın diye rememberSaveable.
+    // Anahtar ders + soru + gizli kaynak: başka bir form açıldığında eski taslak
+    // sızmaz. Kaydet/Vazgeç yolları bu alanları ayrıca sıfırlar
+    // (kaliciFormDurumunuTemizle) ki aynı form yeniden açıldığında hayalet taslak gelmesin.
+    val formAnahtari = "soru-formu:${ders.id}:${soruId ?: "yeni"}:${gizliKaynak.orEmpty()}"
+    var kayitYuklendi by rememberSaveable(formAnahtari) { mutableStateOf(false) }
+    var cozumNotu by rememberSaveable(formAnahtari) { mutableStateOf("") }
+    var kaynak by rememberSaveable(formAnahtari) { mutableStateOf(gizliKaynak.orEmpty()) }
+    var kaynakKonumu by rememberSaveable(formAnahtari) { mutableStateOf("") }
+    var yanlisNedeni by rememberSaveable(formAnahtari) { mutableStateOf("") }
     var katalogDialogTuru by remember { mutableStateOf<SoruSecenekTuru?>(null) }
     var yeniSecenekAdi by remember { mutableStateOf("") }
     var katalogDialogHatasi by remember { mutableStateOf<Int?>(null) }
     var katalogKaydediliyor by remember { mutableStateOf(false) }
-    var konuId by remember(soruId) { mutableStateOf<String?>(null) }
-    var planDurumu by remember(soruId) { mutableStateOf(SoruPlanDurumu.AKTIF) }
-    var favori by remember(soruId) { mutableStateOf(false) }
-    var soruGorselleri by remember(soruId) { mutableStateOf<List<SoruGorselGirdisi>>(emptyList()) }
-    var cozumGorselleri by remember(soruId) { mutableStateOf<List<SoruGorselGirdisi>>(emptyList()) }
+    var konuId by rememberSaveable(formAnahtari) { mutableStateOf<String?>(null) }
+    var planDurumu by rememberSaveable(formAnahtari, stateSaver = SoruPlanDurumuSaver) {
+        mutableStateOf(SoruPlanDurumu.AKTIF)
+    }
+    var favori by rememberSaveable(formAnahtari) { mutableStateOf(false) }
+    var soruGorselleri by rememberSaveable(formAnahtari, stateSaver = SoruGorselGirdileriSaver) {
+        mutableStateOf<List<SoruGorselGirdisi>>(emptyList())
+    }
+    var cozumGorselleri by rememberSaveable(formAnahtari, stateSaver = SoruGorselGirdileriSaver) {
+        mutableStateOf<List<SoruGorselGirdisi>>(emptyList())
+    }
     var kirpmaHedefi by remember(soruId) { mutableStateOf<SoruGorselGirdisi?>(null) }
     var kirpmaIsleniyor by remember(soruId) { mutableStateOf(false) }
     var konuMenu by remember { mutableStateOf(false) }
@@ -148,9 +222,25 @@ fun SoruFormuEkrani(
     var konuKaydediliyor by remember { mutableStateOf(false) }
     var yeniEklenenKonuAdi by remember { mutableStateOf<String?>(null) }
     var konuAkisiYenileme by remember { mutableIntStateOf(0) }
-    var kameraCekimi by remember { mutableStateOf<KameraCekimi?>(null) }
-    var kameraTuru by remember { mutableStateOf(GorselTuru.SORU) }
-    var galeriTuru by remember { mutableStateOf(GorselTuru.SORU) }
+    // Bekleyen kamera çekimi: TakePicture sonucu süreç ölümünden sonra da teslim
+    // edilir; kimlik + URI kalıcı saklanmazsa çekilen fotoğraf sessizce kaybolur.
+    var bekleyenCekimId by rememberSaveable(formAnahtari) { mutableStateOf<String?>(null) }
+    var bekleyenCekimUri by rememberSaveable(formAnahtari) { mutableStateOf<String?>(null) }
+    val kameraCekimi: KameraCekimi?
+        get() = bekleyenCekimId?.let { id ->
+            bekleyenCekimUri?.let { uri -> KameraCekimi(id, Uri.parse(uri)) }
+        }
+
+    fun bekleyenCekimiAyarla(cekim: KameraCekimi?) {
+        bekleyenCekimId = cekim?.id
+        bekleyenCekimUri = cekim?.uri?.toString()
+    }
+    var kameraTuru by rememberSaveable(formAnahtari, stateSaver = GorselTuruSaver) {
+        mutableStateOf(GorselTuru.SORU)
+    }
+    var galeriTuru by rememberSaveable(formAnahtari, stateSaver = GorselTuruSaver) {
+        mutableStateOf(GorselTuru.SORU)
+    }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -192,6 +282,12 @@ fun SoruFormuEkrani(
             yukleniyor = false
             return@LaunchedEffect
         }
+        if (kayitYuklendi) {
+            // Süreç ölümünden kurtarılan alanlar kullanıcının son hâlidir;
+            // veritabanındaki eski kayıtla üzerlerine yazma.
+            yukleniyor = false
+            return@LaunchedEffect
+        }
         try {
             val current = soruRepository.soruGetir(soruId)
             if (current == null) {
@@ -206,6 +302,7 @@ fun SoruFormuEkrani(
                 favori = current.favori
                 soruGorselleri = current.gorseller.filter { it.tur == GorselTuru.SORU }.map { it.toGirdi() }
                 cozumGorselleri = current.gorseller.filter { it.tur == GorselTuru.COZUM }.map { it.toGirdi() }
+                kayitYuklendi = true
             }
         } catch (cancel: CancellationException) {
             throw cancel
@@ -216,11 +313,28 @@ fun SoruFormuEkrani(
         }
     }
 
+    /** Form normal yoldan kapanırken kurtarılabilir taslağı sıfırlar. */
+    fun kaliciFormDurumunuTemizle() {
+        cozumNotu = ""
+        kaynak = gizliKaynak.orEmpty()
+        kaynakKonumu = ""
+        yanlisNedeni = ""
+        konuId = null
+        planDurumu = SoruPlanDurumu.AKTIF
+        favori = false
+        soruGorselleri = emptyList()
+        cozumGorselleri = emptyList()
+        bekleyenCekimiAyarla(null)
+        kayitYuklendi = false
+    }
+
     fun cancelAndReturn() {
         if (kaydediliyor) return
+        val silinecekGeciciler = (soruGorselleri + cozumGorselleri).filter { it.gecici }
         scope.launch {
-            (soruGorselleri + cozumGorselleri).filter { it.gecici }
+            silinecekGeciciler
                 .forEach { runCatching { gorselDeposu.geciciDosyayiSil(it.dosyaAdi) } }
+            kaliciFormDurumunuTemizle()
             onGeri()
         }
     }
@@ -256,7 +370,7 @@ fun SoruFormuEkrani(
         val capture = kameraCekimi
         if (capture != null) {
             val tur = kameraTuru
-            kameraCekimi = null
+            bekleyenCekimiAyarla(null)
             scope.launch {
                 if (success) {
                     try {
@@ -284,7 +398,7 @@ fun SoruFormuEkrani(
         }
         try {
             val capture = gorselDeposu.kameraCekimiOlustur()
-            kameraCekimi = capture
+            bekleyenCekimiAyarla(capture)
             kameraTuru = tur
             cameraLauncher.launch(capture.uri)
         } catch (_: Exception) {
@@ -418,6 +532,7 @@ fun SoruFormuEkrani(
                 null
             }
             if (result == SoruIslemSonucu.Basarili) {
+                kaliciFormDurumunuTemizle()
                 onGeri()
             } else {
                 kaydediliyor = false

@@ -67,6 +67,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
+import org.json.JSONObject
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -107,7 +110,7 @@ import com.keremtulu.questionnote.ui.karne.RozetKutlamaHost
 import com.keremtulu.questionnote.ui.panel.LocalUstPanelVar
 import com.keremtulu.questionnote.ui.panel.UstPanel
 
-private sealed interface UygulamaEkrani {
+internal sealed interface UygulamaEkrani {
     data object Bugun : UygulamaEkrani
     data class DersSecimi(val soruEkleModu: Boolean) : UygulamaEkrani
     data class DersAlani(val ders: Ders, val geri: UygulamaEkrani) : UygulamaEkrani
@@ -148,6 +151,137 @@ private sealed interface UygulamaEkrani {
     data object Sorulacaklar : UygulamaEkrani
 }
 
+/**
+ * Gezinme durumunu süreç ölümünde de yaşatan saver. Ekranlar küçük bir JSON
+ * ağacı olarak saklanır; `geri` zinciri özyinelemeli yazılır/okunur, bozuk ya
+ * da tanınmayan bir kayıt sessizce Bugün ekranına düşer. Odak oturumu ekranı
+ * bilerek Bugün olarak kurtarılır: oturumun kendisi zaten
+ * `OdakOturumuDeposu`'ndaki kalıcı devam noktasından açılış kurtarmasıyla
+ * geri gelir; tamamlanma ekranı da tek seferlik bir özetdir.
+ */
+internal val UygulamaEkraniSaver = Saver<UygulamaEkrani, String>(
+    save = { ekran -> runCatching { ekraniJsonYaz(ekran, 0).toString() }.getOrDefault("") },
+    restore = { metin ->
+        runCatching { ekraniJsonOku(JSONObject(metin), 0) }.getOrNull() ?: UygulamaEkrani.Bugun
+    },
+)
+
+private const val MAKS_EKRAN_DERINLIGI = 8
+
+private fun dersJsonYaz(ders: Ders): JSONObject = JSONObject()
+    .put("id", ders.id)
+    .put("ad", ders.ad)
+    .put("sira", ders.sira)
+    .put("soruSayisi", ders.soruSayisi)
+    .put("arsivli", ders.arsivli)
+
+private fun dersJsonOku(j: JSONObject): Ders = Ders(
+    id = j.getString("id"),
+    ad = j.getString("ad"),
+    sira = j.getInt("sira"),
+    soruSayisi = j.optInt("soruSayisi"),
+    arsivli = j.optBoolean("arsivli"),
+)
+
+private fun ekraniJsonYaz(ekran: UygulamaEkrani, derinlik: Int): JSONObject {
+    if (derinlik > MAKS_EKRAN_DERINLIGI) return JSONObject().put("t", "bugun")
+    return when (ekran) {
+        UygulamaEkrani.Bugun -> JSONObject().put("t", "bugun")
+        is UygulamaEkrani.DersSecimi -> JSONObject()
+            .put("t", "ders-secimi")
+            .put("soruEkle", ekran.soruEkleModu)
+
+        is UygulamaEkrani.DersAlani -> JSONObject()
+            .put("t", "ders-alani")
+            .put("ders", dersJsonYaz(ekran.ders))
+            .put("geri", ekraniJsonYaz(ekran.geri, derinlik + 1))
+
+        is UygulamaEkrani.Konular -> JSONObject()
+            .put("t", "konular")
+            .put("ders", dersJsonYaz(ekran.ders))
+            .put("geri", ekraniJsonYaz(ekran.geri, derinlik + 1))
+
+        is UygulamaEkrani.SoruAyrintisi -> JSONObject()
+            .put("t", "soru-ayrintisi")
+            .put("ders", dersJsonYaz(ekran.ders))
+            .put("soruId", ekran.soruId)
+            .put("tekrarOturumunda", ekran.tekrarOturumunda)
+            .put("geri", ekraniJsonYaz(ekran.geri, derinlik + 1))
+
+        is UygulamaEkrani.SoruFormu -> JSONObject().apply {
+            put("t", "soru-formu")
+            put("ders", dersJsonYaz(ekran.ders))
+            ekran.soruId?.let { put("soruId", it) }
+            ekran.gizliKaynak?.let { put("gizliKaynak", it) }
+            put("geri", ekraniJsonYaz(ekran.geri, derinlik + 1))
+        }
+
+        UygulamaEkrani.FiltreliCalisma -> JSONObject().put("t", "filtreli")
+        is UygulamaEkrani.FiltreliOturum -> JSONObject().put("t", "bugun")
+        is UygulamaEkrani.FiltreliCalismaTamamlandi -> JSONObject().put("t", "bugun")
+        UygulamaEkrani.GorselBakimi -> JSONObject().put("t", "gorsel-bakimi")
+        UygulamaEkrani.Katalog -> JSONObject().put("t", "katalog")
+        UygulamaEkrani.KonuMerkezi -> JSONObject().put("t", "konu-merkezi")
+        UygulamaEkrani.Seviye -> JSONObject().put("t", "seviye")
+        UygulamaEkrani.Ayarlar -> JSONObject().put("t", "ayarlar")
+        UygulamaEkrani.Denemeler -> JSONObject().put("t", "denemeler")
+        is UygulamaEkrani.DenemeDetay -> JSONObject().apply {
+            put("t", "deneme-detay")
+            ekran.denemeId?.let { put("denemeId", it) }
+        }
+
+        UygulamaEkrani.Sorulacaklar -> JSONObject().put("t", "sorulacaklar")
+    }
+}
+
+private fun ekraniJsonOku(j: JSONObject, derinlik: Int): UygulamaEkrani {
+    if (derinlik > MAKS_EKRAN_DERINLIGI) return UygulamaEkrani.Bugun
+    fun geri(): UygulamaEkrani =
+        j.optJSONObject("geri")?.let { ekraniJsonOku(it, derinlik + 1) } ?: UygulamaEkrani.Bugun
+
+    return when (j.getString("t")) {
+        "bugun" -> UygulamaEkrani.Bugun
+        "ders-secimi" -> UygulamaEkrani.DersSecimi(soruEkleModu = j.optBoolean("soruEkle"))
+        "ders-alani" -> UygulamaEkrani.DersAlani(
+            ders = dersJsonOku(j.getJSONObject("ders")),
+            geri = geri(),
+        )
+
+        "konular" -> UygulamaEkrani.Konular(
+            ders = dersJsonOku(j.getJSONObject("ders")),
+            geri = geri(),
+        )
+
+        "soru-ayrintisi" -> UygulamaEkrani.SoruAyrintisi(
+            ders = dersJsonOku(j.getJSONObject("ders")),
+            soruId = j.getString("soruId"),
+            geri = geri(),
+            tekrarOturumunda = j.optBoolean("tekrarOturumunda"),
+        )
+
+        "soru-formu" -> UygulamaEkrani.SoruFormu(
+            ders = dersJsonOku(j.getJSONObject("ders")),
+            soruId = if (j.has("soruId")) j.getString("soruId") else null,
+            geri = geri(),
+            gizliKaynak = if (j.has("gizliKaynak")) j.getString("gizliKaynak") else null,
+        )
+
+        "filtreli" -> UygulamaEkrani.FiltreliCalisma
+        "gorsel-bakimi" -> UygulamaEkrani.GorselBakimi
+        "katalog" -> UygulamaEkrani.Katalog
+        "konu-merkezi" -> UygulamaEkrani.KonuMerkezi
+        "seviye" -> UygulamaEkrani.Seviye
+        "ayarlar" -> UygulamaEkrani.Ayarlar
+        "denemeler" -> UygulamaEkrani.Denemeler
+        "deneme-detay" -> UygulamaEkrani.DenemeDetay(
+            denemeId = if (j.has("denemeId")) j.getString("denemeId") else null,
+        )
+
+        "sorulacaklar" -> UygulamaEkrani.Sorulacaklar
+        else -> UygulamaEkrani.Bugun
+    }
+}
+
 private enum class KurtarmaDurumu { YUKLENIYOR, HAZIR, HATA }
 
 @Composable
@@ -176,7 +310,11 @@ fun YanlisDefteriUygulamasi(
     val etkinOgretmenDeposu = remember(ogretmenDeposu, context, gorselDeposu) {
         ogretmenDeposu ?: com.keremtulu.questionnote.data.prefs.OgretmenDeposu(context, gorselDeposu)
     }
-    var ekran by remember { mutableStateOf<UygulamaEkrani>(UygulamaEkrani.Bugun) }
+    // Gezinme durumu süreç ölümünde de yaşar: kullanıcı kaldığı ekrana
+    // (ör. kamera dönüşünde açık olan soru formuna) geri döner.
+    var ekran by rememberSaveable(stateSaver = UygulamaEkraniSaver) {
+        mutableStateOf<UygulamaEkrani>(UygulamaEkrani.Bugun)
+    }
     var kurulumGerekli by remember { mutableStateOf(profilDeposu.kurulumGerekli()) }
     val kayitliRol by profilDeposu.rolIzle.collectAsState()
     val aktifRol = com.keremtulu.questionnote.domain.model.UrunKapsami.gorunenRol(kayitliRol)
