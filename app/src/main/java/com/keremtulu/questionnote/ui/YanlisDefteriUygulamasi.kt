@@ -537,6 +537,22 @@ fun YanlisDefteriUygulamasi(
         }
     }
 
+    fun guvenlikYedeginiIncele() {
+        if (yedeklemeIslemde || kurtarma != KurtarmaDurumu.HAZIR) return
+        scope.launch {
+            yedeklemeIslemde = true
+            try {
+                geriYuklemeOnizlemesi = disaAktarmaHizmeti.sonGuvenlikYedeginiOnizle()
+            } catch (cancel: CancellationException) {
+                throw cancel
+            } catch (_: Exception) {
+                snackbarHostState.showSnackbar(context.getString(R.string.backup_restore_error))
+            } finally {
+                yedeklemeIslemde = false
+            }
+        }
+    }
+
     fun ekranSec(hedef: UygulamaEkrani) {
         if (yedeklemeIslemde || oturumBaslatiliyor || kurtarma != KurtarmaDurumu.HAZIR) return
         if (ekran is UygulamaEkrani.FiltreliOturum) {
@@ -899,6 +915,7 @@ fun YanlisDefteriUygulamasi(
                         motorTanisi = motorTanisi,
                         sonYedek = sonYedek,
                         yedeklemeIslemde = yedeklemeIslemde,
+                        onGuvenlikYedeginiIncele = ::guvenlikYedeginiIncele,
                         onYedekOlustur = {
                             if (!yedeklemeIslemde) exportLauncher.launch("yanlis-defteri-yedek.zip")
                         },

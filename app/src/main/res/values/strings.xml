@@ -383,6 +383,7 @@
     <string name="backup_last_info">Son yedek: %1$s · %2$s · %3$s · %4$s</string>
     <string name="backup_last_none">Henüz doğrulanmış bir yedek oluşturulmadı.</string>
     <string name="backup_safety_copy">cihaz içi geri yükleme güvenlik kopyası</string>
+    <string name="backup_safety_preview">Cihazdaki güvenlik kopyasını incele</string>
     <string name="backup_external_copy">seçilen konuma kaydedildi; bulut yüklemesini ayrıca doğrula</string>
     <string name="backup_recovery_ready">Geri yükleme kontrolü tamamlandı.</string>
     <string name="image_maintenance_title">Görsel dosyası bakımı</string>

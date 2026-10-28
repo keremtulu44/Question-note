@@ -27,11 +27,15 @@ import androidx.compose.ui.unit.height
 import androidx.room.Room
 import com.keremtulu.questionnote.MainActivity
 import com.keremtulu.questionnote.R
+import com.keremtulu.questionnote.data.export.SonYedekBilgisi
+import com.keremtulu.questionnote.data.gelisim.MotorTaniHizmeti
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
 import com.keremtulu.questionnote.data.local.VarsayilanDersleriEkle
 import com.keremtulu.questionnote.data.local.YanlisDefteriDatabase
 import com.keremtulu.questionnote.data.prefs.DenemeDeposu
 import com.keremtulu.questionnote.data.prefs.SinavProfiliDeposu
+import com.keremtulu.questionnote.data.prefs.TekrarPolitikasiDeposu
+import com.keremtulu.questionnote.data.prefs.TercihGunlukHedefDeposu
 import com.keremtulu.questionnote.data.repository.RoomDersRepository
 import com.keremtulu.questionnote.data.repository.RoomSoruRepository
 import com.keremtulu.questionnote.domain.model.DenemeDersSatiri
@@ -40,6 +44,7 @@ import com.keremtulu.questionnote.domain.model.NetKurali
 import com.keremtulu.questionnote.domain.model.SoruSecenekTuru
 import com.keremtulu.questionnote.domain.model.Soru
 import com.keremtulu.questionnote.domain.repository.SoruRepository
+import com.keremtulu.questionnote.ui.ayarlar.AyarlarEkrani
 import com.keremtulu.questionnote.ui.deneme.DenemeDetayEkrani
 import com.keremtulu.questionnote.ui.deneme.DenemeListesiEkrani
 import com.keremtulu.questionnote.ui.deneme.denemeTarihYazi
@@ -182,6 +187,30 @@ class DenemeVeKurulumArayuzTest {
         }
         compose.onNodeWithTag("deneme-storage-error").assertIsDisplayed()
         compose.onNodeWithText(compose.activity.getString(R.string.deneme_save)).assertDoesNotExist()
+    }
+
+    @Test
+    fun ayarlardanCihazdakiGuvenlikKopyasiIncelenebilir() {
+        var incelendi = false
+        val context = RuntimeEnvironment.getApplication()
+        compose.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                AyarlarEkrani(
+                    gunlukHedefDeposu = TercihGunlukHedefDeposu(context),
+                    profilDeposu = profilDeposu,
+                    tekrarPolitikasi = TekrarPolitikasiDeposu(context),
+                    motorTanisi = MotorTaniHizmeti(database),
+                    dersRepository = dersRepository,
+                    sonYedek = SonYedekBilgisi("safety-test.zip", 1L, 100L, guvenlikKopyasi = true),
+                    yedeklemeIslemde = false,
+                    onYedekOlustur = {}, onYedekGeriYukle = {}, onGorselBakimi = {},
+                    onKatalog = {}, onKonular = {}, onGuvenlikYedeginiIncele = { incelendi = true },
+                )
+            }
+        }
+        compose.onNodeWithTag("settings-list").performScrollToNode(hasTestTag("settings-safety-backup-preview"))
+        compose.onNodeWithTag("settings-safety-backup-preview").assertIsDisplayed().performClick()
+        assertTrue(incelendi)
     }
 
     @Test

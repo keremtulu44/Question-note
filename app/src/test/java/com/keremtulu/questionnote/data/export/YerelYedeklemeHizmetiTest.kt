@@ -852,7 +852,7 @@ class YerelYedeklemeHizmetiTest {
         }
         assertThrows(IOException::class.java) { runBlocking { bozukServis.dosyadanOnizle(celiskili) } }
 
-        val geriOnizleme = bozukServis.dosyadanOnizle(guvenlikYedegi)
+        val geriOnizleme = bozukServis.sonGuvenlikYedeginiOnizle()
         assertFalse(geriOnizleme.mevcutDenemeBozuk)
         assertTrue(geriOnizleme.yedekteDenemeBozuk)
         val geriSonuc = bozukServis.geriYukle(geriOnizleme)
@@ -862,6 +862,24 @@ class YerelYedeklemeHizmetiTest {
         assertTrue(com.keremtulu.questionnote.data.prefs.DenemeDeposu(context).bozukMuIzle.value)
         assertEquals(grup.id, ogretmen.anlikVeri().gruplar.single().id)
         prefs.edit().clear().commit()
+    }
+
+    @Test
+    fun cihazdakiGuvenlikYedegiYoluVeDosyasiDogrulanir() = runBlocking<Unit> {
+        val root = File(RuntimeEnvironment.getApplication().filesDir, "yedekler").apply { mkdirs() }
+        val bilgi = File(root, "son-yedek.json")
+        val onceki = if (bilgi.exists()) bilgi.readBytes() else null
+        try {
+            val json = JSONObject().put("file_name", "../baska.zip")
+                .put("created_at_epoch_ms", 1L).put("size_bytes", 1L).put("safety_copy", true)
+            bilgi.writeText(json.toString())
+            assertThrows(IOException::class.java) { runBlocking { service.sonGuvenlikYedeginiOnizle() } }
+            json.put("file_name", "safety-${UUID.randomUUID()}.zip")
+            bilgi.writeText(json.toString())
+            assertThrows(IOException::class.java) { runBlocking { service.sonGuvenlikYedeginiOnizle() } }
+        } finally {
+            if (onceki == null) bilgi.delete() else bilgi.writeBytes(onceki)
+        }
     }
 
     @Test

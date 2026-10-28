@@ -209,6 +209,19 @@ class YerelYedeklemeHizmeti(
         }
     }
 
+    /** Preview the most recent on-device safety copy through the same verification path as SAF. */
+    suspend fun sonGuvenlikYedeginiOnizle(): GeriYuklemeOnizlemesi = withContext(Dispatchers.IO) {
+        val son = sonYedekBilgisiGetir()
+        if (son == null || !son.guvenlikKopyasi || !SAFETY_NAME.matches(son.dosyaAdi)) {
+            throw IOException("Cihazda seçilebilir bir güvenlik yedeği bulunamadı.")
+        }
+        val dosya = File(root, son.dosyaAdi)
+        if (!dosya.isFile || dosya.length() != son.boyutBayt) {
+            throw IOException("Güvenlik yedeği eksik veya boyutu değişmiş.")
+        }
+        dosyadanOnizle(dosya)
+    }
+
     suspend fun hazirlananYedegiIptalEt(previewId: String) = withContext(Dispatchers.IO) {
         preparedDirectory(previewId).deleteRecursively()
         Unit
