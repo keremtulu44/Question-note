@@ -1249,4 +1249,111 @@
     <string name="teacher_work_due">Bugün: %1$d</string>
     <string name="teacher_work_overdue">Geciken: %1$d</string>
     <string name="teacher_work_unplanned">Plansız: %1$d</string>
+
+    <!-- Uygulama içi rehber (tutorial). Metinler kullanıcıya yönelik; ton premium ve sade. -->
+    <string name="rehber_kicker">UYGULAMA TURU</string>
+    <string name="rehber_title">Rehber</string>
+    <string name="rehber_progress">%1$d / %2$d</string>
+    <string name="rehber_next">İleri</string>
+    <string name="rehber_prev">Geri</string>
+    <string name="rehber_skip">Atla</string>
+    <string name="rehber_finish">Rehberi bitir</string>
+    <string name="rehber_close">Kapat</string>
+    <string name="rehber_demo_badge">DEMO</string>
+    <string name="rehber_demo_note">Bu bölümdeki sayılar örnektir; defterine yazılmaz.</string>
+    <string name="rehber_resume_hint">Kaldığın yerden devam ediyorsun.</string>
+    <string name="rehber_reopen_hint">Rehberi istediğin zaman Ayarlar → Rehber bölümünden yeniden açabilirsin.</string>
+
+    <string name="rehber_1_kicker">1 · TANIŞMA</string>
+    <string name="rehber_1_title">Yanlış Defterim ne yapar?</string>
+    <string name="rehber_1_body">Yanlış yaptığın soruyu fotoğrafla kaydedersin; uygulama onu doğru günde yeniden önüne getirir. Amaç fotoğraf arşivi değil, “bugün neyi tekrar çözmeliyim?” sorusuna tek cevap vermek.</string>
+    <string name="rehber_1_item1_title">Çözüm ayrı durur</string>
+    <string name="rehber_1_item1_body">Çözümü sorudan ayrı yazarsın ve varsayılan olarak gizlidir. Önce kendin denersin.</string>
+    <string name="rehber_1_item2_title">Aralıklı tekrar</string>
+    <string name="rehber_1_item2_body">Rahat çözdüğün soru seyrekleşir, zorlandığın soru sıklaşır. Tarihleri kural belirler.</string>
+    <string name="rehber_1_item3_title">Çevrimdışı ve tek cihaz</string>
+    <string name="rehber_1_item3_body">Hesap yok, sunucu yok, reklam yok. Veri telefonunda; yedeğini sen alırsın.</string>
+
+    <string name="rehber_2_kicker">2 · KAYIT</string>
+    <string name="rehber_2_title">Bir soruyu deftere al</string>
+    <string name="rehber_2_body">Üç adım: dersi seç, soruyu fotoğrafla, çözümü ayrı yaz. İlk tekrar her zaman yarındır.</string>
+    <string name="rehber_2_step1">Ders ve konu: sorunun hangi derse ait olduğunu seç.</string>
+    <string name="rehber_2_step2">Fotoğraf: kamerayla çek veya galeriden seç; kırpma ile yalnız soruyu bırak.</string>
+    <string name="rehber_2_step3">Çözüm: ayrı alana yaz ya da çözüm fotoğrafı ekle. İstersen hiç eklemeyebilirsin.</string>
+    <string name="rehber_2_prompt">Bugün bu soruyu nasıl değerlendirirdin?</string>
+    <string name="rehber_2_sonuc_cozemedim">Çözemedim</string>
+    <string name="rehber_2_sonuc_zorlandim">Zorlandım</string>
+    <string name="rehber_2_sonuc_rahat">Rahat çözdüm</string>
+    <string name="rehber_2_next_prefix">Sonraki tekrar</string>
+    <string name="rehber_2_next_date">%1$s · %2$d gün sonra</string>
+    <string name="rehber_2_next_note">Tarihi uygulama hesaplar; sen yalnız soruyu nasıl çözdüğünü söylersin.</string>
+
+    <string name="rehber_3_kicker">3 · BUGÜN</string>
+    <string name="rehber_3_title">Bugün: tek karar</string>
+    <string name="rehber_3_body">Ana ekran yalnız bugünün işini söyler: kaç soru, hangi sırada. Geciken sorular öne alınır, tur 5–30 soru arasında kalır.</string>
+    <string name="rehber_3_round">Bugünün turu: %1$d soru</string>
+    <string name="rehber_3_remaining">Sırada %1$d soru · %2$d gecikmiş</string>
+    <string name="rehber_3_queue_note">İlk üç satır önizlemedir; çalışma başladığında aynı sıra kullanılır.</string>
+    <string name="rehber_3_overdue">%1$d gün gecikmiş</string>
+    <string name="rehber_3_due_today">Bugün</string>
+    <string name="rehber_3_upcoming">Yarın</string>
+    <string name="rehber_3_cta">Bugün ekranını gör</string>
+
+    <string name="rehber_4_kicker">4 · DENEME</string>
+    <string name="rehber_4_title">Denemeyi nete ve tekrara çevir</string>
+    <string name="rehber_4_body">Deneme kaydı yalnız net üretmez: hangi dersten kaç sorunun deftere eklenmesi gerektiğini de gösterir. Aşağıdaki sayılarla dene.</string>
+    <string name="rehber_4_correct">Doğru</string>
+    <string name="rehber_4_wrong">Yanlış</string>
+    <string name="rehber_4_blank">Boş %1$d</string>
+    <string name="rehber_4_net">%1$s net</string>
+    <string name="rehber_4_rule">Puanlama kuralı</string>
+    <string name="rehber_4_subject">Matematik · %1$d soru</string>
+    <string name="rehber_4_upload">%1$d soru deftere aday (yanlış + boş)</string>
+    <string name="rehber_4_summary">Örnek geçmiş · %1$d deneme · ortalama %2$s net · en iyi %3$s net</string>
+    <string name="rehber_4_link">Denemeyi kaydettikten sonra “Bu denemeyi çalış” tek dokunuşla o denemenin sorularını açar.</string>
+    <string name="rehber_4_artir">%1$s artır</string>
+    <string name="rehber_4_azalt">%1$s azalt</string>
+    <string name="rehber_4_cta">Deneme kayıtlarını aç</string>
+
+    <string name="rehber_5_kicker">5 · ÇÖZÜM</string>
+    <string name="rehber_5_title">Çözümü kendin ara</string>
+    <string name="rehber_5_body">Soru açıldığında çözüm kapalıdır. Tahtada serbestçe çizersin: kalem, çizgi, şekil, silgi, yakınlaştırma. Çizim geçicidir; sorunun fotoğrafını değiştirmez.</string>
+    <string name="rehber_5_draw_hint">Parmağınla dene: aşağıdaki küçük tahtaya bir şeyler yaz.</string>
+    <string name="rehber_5_width">Kalınlık</string>
+    <string name="rehber_5_clear">Temizle</string>
+    <string name="rehber_5_mark_count">%1$d çizim</string>
+    <string name="rehber_5_empty">Henüz çizim yok</string>
+    <string name="rehber_5_honest">Çözümü açtığın bir tekrar “bağımsız çözüldü” sayılmaz; uygulama bunu ayrı ölçer.</string>
+
+    <string name="rehber_6_kicker">6 · YEDEK</string>
+    <string name="rehber_6_title">Yedeğini al, telefonu değiştir</string>
+    <string name="rehber_6_body">Tek dosya: ZIP. Yeni telefona kur, Ayarlar → Geri yükle ile aynı defteri geri getir.</string>
+    <string name="rehber_6_step1">Ayarlar → “Yedeği oluştur”.</string>
+    <string name="rehber_6_step2">Dosya seçicide bir klasör seç; Drive de olur.</string>
+    <string name="rehber_6_step3">Geri yüklemede önce önizleme görürsün; onaylamadan hiçbir şey silinmez.</string>
+    <string name="rehber_6_list_title">Yedeğe girenler</string>
+    <string name="rehber_backup_item_questions">Sorular ve notları</string>
+    <string name="rehber_backup_item_images">Soru fotoğrafları</string>
+    <string name="rehber_backup_item_solutions">Çözümler ve çözüm fotoğrafları</string>
+    <string name="rehber_backup_item_reviews">Tekrar geçmişi ve plan tarihleri</string>
+    <string name="rehber_backup_item_denemeler">Deneme kayıtları</string>
+    <string name="rehber_backup_item_catalog">Ders ve konu kataloğu</string>
+    <string name="rehber_backup_item_badges">Rozet sahipliği (cihaza özgü)</string>
+    <string name="rehber_backup_item_guide">Rehber ilerlemesi (cihaza özgü)</string>
+    <string name="rehber_6_cta">Ayarlar’da yedek al</string>
+    <string name="rehber_6_note">Yedek senin seçtiğin konuma yazılır; uygulama buluta kendisi yüklemez.</string>
+
+    <string name="rehber_7_kicker">7 · KAPANIŞ</string>
+    <string name="rehber_7_title">Kontrol sende</string>
+    <string name="rehber_7_body">Her şey cihazında kalır. Uygulama internet izni istemez; kamera izni de istemez, fotoğrafı dosya olarak alır.</string>
+    <string name="rehber_7_item1">Verin cihazda: hesap, bulut, abonelik yok.</string>
+    <string name="rehber_7_item2">Bildirim yok: hatırlatma yerine uygulamayı açtığında “bugün” karşına gelir.</string>
+    <string name="rehber_7_item3">Kapsam dışı: sosyal akış, sıralama/lig, yapay zekâ çözüm üretimi.</string>
+    <string name="rehber_7_cta_add">İlk sorumu ekle</string>
+    <string name="rehber_7_cta_today">Bugüne dön</string>
+
+    <string name="settings_guide_section">YARDIM</string>
+    <string name="settings_guide_title">Rehber</string>
+    <string name="settings_guide_note">Uygulamanın tam turu: kayıt, tekrar, deneme, çözüm ve yedek. Yaklaşık 3 dakika; istediğin yerde bırakabilirsin.</string>
+    <string name="settings_guide_action">Uygulamayı tanı</string>
 </resources>

@@ -96,6 +96,7 @@ import com.keremtulu.questionnote.domain.repository.KonuRepository
 import com.keremtulu.questionnote.domain.repository.SoruRepository
 import com.keremtulu.questionnote.ui.ayarlar.AyarlarEkrani
 import com.keremtulu.questionnote.ui.karne.KarneEkrani
+import com.keremtulu.questionnote.ui.rehber.RehberEkrani
 import com.keremtulu.questionnote.ui.seviye.SeviyeEkrani
 import com.keremtulu.questionnote.ui.tema.HareketTuru
 import com.keremtulu.questionnote.ui.tema.LocalHareketPolitikasi
@@ -149,6 +150,12 @@ internal sealed interface UygulamaEkrani {
     data object Denemeler : UygulamaEkrani
     data class DenemeDetay(val denemeId: String?) : UygulamaEkrani
     data object Sorulacaklar : UygulamaEkrani
+
+    /**
+     * Uygulama turu. `geri` alanı rehberin nereden açıldığını taşır: ilk kurulumdan sonra
+     * Bugün'e, Ayarlar'dan açıldığında Ayarlar'a döner. `baslangic` kaldığı bölümdür.
+     */
+    data class Rehber(val baslangic: Int = 0, val geri: UygulamaEkrani = UygulamaEkrani.Bugun) : UygulamaEkrani
 }
 
 /**
@@ -230,6 +237,11 @@ private fun ekraniJsonYaz(ekran: UygulamaEkrani, derinlik: Int): JSONObject {
             ekran.denemeId?.let { put("denemeId", it) }
         }
 
+        is UygulamaEkrani.Rehber -> JSONObject()
+            .put("t", "rehber")
+            .put("baslangic", ekran.baslangic)
+            .put("geri", ekraniJsonYaz(ekran.geri, derinlik + 1))
+
         UygulamaEkrani.Sorulacaklar -> JSONObject().put("t", "sorulacaklar")
     }
 }
@@ -277,6 +289,11 @@ private fun ekraniJsonOku(j: JSONObject, derinlik: Int): UygulamaEkrani {
             denemeId = if (j.has("denemeId")) j.getString("denemeId") else null,
         )
 
+        "rehber" -> UygulamaEkrani.Rehber(
+            baslangic = j.optInt("baslangic").coerceAtLeast(0),
+            geri = geri(),
+        )
+
         "sorulacaklar" -> UygulamaEkrani.Sorulacaklar
         else -> UygulamaEkrani.Bugun
     }
@@ -305,10 +322,14 @@ fun YanlisDefteriUygulamasi(
     tercihHedefDeposu: TercihGunlukHedefDeposu,
     denemeDeposu: com.keremtulu.questionnote.data.prefs.DenemeDeposu,
     ogretmenDeposu: com.keremtulu.questionnote.data.prefs.OgretmenDeposu? = null,
+    rehberDeposu: com.keremtulu.questionnote.data.prefs.RehberDeposu? = null,
 ) {
     val context = LocalContext.current
     val etkinOgretmenDeposu = remember(ogretmenDeposu, context, gorselDeposu) {
         ogretmenDeposu ?: com.keremtulu.questionnote.data.prefs.OgretmenDeposu(context, gorselDeposu)
+    }
+    val etkinRehberDeposu = remember(rehberDeposu, context) {
+        rehberDeposu ?: com.keremtulu.questionnote.data.prefs.RehberDeposu(context)
     }
     // Gezinme durumu süreç ölümünde de yaşar: kullanıcı kaldığı ekrana
     // (ör. kamera dönüşünde açık olan soru formuna) geri döner.
@@ -575,7 +596,14 @@ fun YanlisDefteriUygulamasi(
     if (aktifRol == com.keremtulu.questionnote.domain.model.KullaniciRolu.OGRENCI && kurulumGerekli) {
         com.keremtulu.questionnote.ui.kurulum.DersKurulumEkrani(
             dersRepository = dersRepository,
-            onTamam = { kurulumGerekli = false },
+            onTamam = {
+                kurulumGerekli = false
+                // İlk kurulum bittiğinde rehber bir kez kendiliğinden açılır; "Atla" da
+                // tamamlanmış sayıldığı için bu yol bir daha tekrarlanmaz.
+                if (!etkinRehberDeposu.gorulduMu()) {
+                    ekran = UygulamaEkrani.Rehber(baslangic = 0, geri = UygulamaEkrani.Bugun)
+                }
+            },
         )
         return
     }
@@ -886,6 +914,19 @@ fun YanlisDefteriUygulamasi(
                             ekranSec(UygulamaEkrani.FiltreliCalisma)
                         },
                     )
+                    is UygulamaEkrani.Rehber -> RehberEkrani(
+                        baslangicIndex = current.baslangic,
+                        onBolumDegisti = { etkinRehberDeposu.bolumuKaydet(it) },
+                        onKapat = { ekranSec(current.geriHedefi()) },
+                        onBitir = {
+                            etkinRehberDeposu.tamamla()
+                            ekranSec(current.geriHedefi())
+                        },
+                        onSoruEkle = { ekranSec(UygulamaEkrani.DersSecimi(soruEkleModu = true)) },
+                        onDenemeler = { ekranSec(UygulamaEkrani.Denemeler) },
+                        onYedek = { ekranSec(UygulamaEkrani.Ayarlar) },
+                        onBugun = { ekranSec(UygulamaEkrani.Bugun) },
+                    )
                     UygulamaEkrani.Ayarlar -> AyarlarEkrani(
                         gunlukHedefDeposu = tercihHedefDeposu,
                         profilDeposu = profilDeposu, dersRepository = dersRepository,
@@ -900,6 +941,9 @@ fun YanlisDefteriUygulamasi(
                             if (!yedeklemeIslemde) {
                                 restoreLauncher.launch(arrayOf("application/zip", "application/octet-stream"))
                             }
+                        },
+                        onRehber = {
+                            ekranSec(UygulamaEkrani.Rehber(baslangic = 0, geri = UygulamaEkrani.Ayarlar))
                         },
                         onGorselBakimi = { ekranSec(UygulamaEkrani.GorselBakimi) },
                         onKatalog = { ekranSec(UygulamaEkrani.Katalog) },
@@ -1070,7 +1114,9 @@ private fun UygulamaEkrani.aktifSekme(): AltSekme = when (this) {
     is UygulamaEkrani.FiltreliCalismaTamamlandi,
     -> AltSekme.FILTRELI
     UygulamaEkrani.Seviye -> AltSekme.SEVIYE
-    UygulamaEkrani.Ayarlar, UygulamaEkrani.Katalog, UygulamaEkrani.GorselBakimi, UygulamaEkrani.KonuMerkezi -> AltSekme.AYARLAR
+    UygulamaEkrani.Ayarlar, UygulamaEkrani.Katalog, UygulamaEkrani.GorselBakimi, UygulamaEkrani.KonuMerkezi,
+    is UygulamaEkrani.Rehber,
+    -> AltSekme.AYARLAR
     UygulamaEkrani.Denemeler, is UygulamaEkrani.DenemeDetay, UygulamaEkrani.Sorulacaklar -> AltSekme.BUGUN
     is UygulamaEkrani.SoruAyrintisi -> if (tekrarOturumunda) AltSekme.FILTRELI else if (geri is UygulamaEkrani.Sorulacaklar) AltSekme.BUGUN else AltSekme.DERSLER
     is UygulamaEkrani.SoruFormu -> if (geri is UygulamaEkrani.FiltreliOturum) {
@@ -1110,6 +1156,7 @@ private fun UygulamaEkrani.geriHedefi(): UygulamaEkrani = when (this) {
     UygulamaEkrani.Ayarlar -> UygulamaEkrani.Bugun
     UygulamaEkrani.Denemeler -> UygulamaEkrani.Bugun
     is UygulamaEkrani.DenemeDetay -> UygulamaEkrani.Denemeler
+    is UygulamaEkrani.Rehber -> geri
     UygulamaEkrani.Sorulacaklar -> UygulamaEkrani.Bugun
 }
 
