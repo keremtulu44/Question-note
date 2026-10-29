@@ -25,6 +25,14 @@ class TahtaKalinligiTest {
     }
 
     @Test
+    fun sonluOlmayanDegerVarsayilanaDoner() {
+        // roundToInt() NaN'da istisna fırlatır; kaydırıcı hiç NaN üretmese de bu kapı kapalı kalmalı.
+        assertEquals(VARSAYILAN_KALINLIK_DP, tahtaKalinligiSinirla(Float.NaN), 0.001f)
+        assertEquals(VARSAYILAN_KALINLIK_DP, tahtaKalinligiSinirla(Float.POSITIVE_INFINITY), 0.001f)
+        assertEquals(VARSAYILAN_KALINLIK_DP, tahtaKalinligiSinirla(Float.NEGATIVE_INFINITY), 0.001f)
+    }
+
+    @Test
     fun varsayilanDegerAraliginIcindedir() {
         assertEquals(VARSAYILAN_KALINLIK_DP, tahtaKalinligiSinirla(VARSAYILAN_KALINLIK_DP), 0.001f)
         assertEquals(1f, TAHTA_MIN_KALINLIK_DP, 0.001f)
