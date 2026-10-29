@@ -283,10 +283,12 @@ fun DenemeListesiEkrani(
                     verticalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
                     item {
-                        com.keremtulu.questionnote.ui.bilesenler.DuzBaslik(
-                    baslik = stringResource(R.string.deneme_title),
-                    alt = stringResource(R.string.deneme_list_subtitle),
-                )
+                        // Başlık üst çubukta duruyor; burada ikinci kez yazılmaz, yalnız tek satır bağlam verilir.
+                        Text(
+                            text = stringResource(R.string.deneme_list_subtitle),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
 
                     item {
@@ -624,7 +626,8 @@ private fun DenemeOzetSeridi(ozet: DenemeOzeti) {
         )
         val ortalama = ozet.ortalamaNet
         val enIyi = ozet.enIyiNet
-        if (ortalama != null && enIyi != null) {
+        // Tek kayıtta ortalama = en iyi = son net; üç aynı sayı yerine tek satır gösterilir.
+        if (ortalama != null && enIyi != null && ozet.kayitSayisi >= 2) {
             OzetDegeri(
                 modifier = Modifier.weight(1f),
                 etiket = stringResource(R.string.deneme_summary_average),
