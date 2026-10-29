@@ -10,6 +10,8 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -44,6 +46,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -220,6 +223,7 @@ private fun IlkeSatiri(baslik: String, aciklama: String, vurgu: Color) {
 
 // ---------------------------------------------------------------- 2. Kayıt
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun KayitBolumu(durum: RehberDurumu) {
     BolumBasligi(
@@ -238,6 +242,8 @@ private fun KayitBolumu(durum: RehberDurumu) {
         }
     }
 
+    // %200 yazı ölçeğinde üç seçenek tek satıra sığmaz: seçenekler alt alta geçer.
+    val buyukYazi = LocalDensity.current.fontScale >= 1.5f
     val bugun = remember { LocalDate.now() }
     val plan = remember(durum.tekrarSonucu, bugun) {
         tekrarOnizlemesi(durum.tekrarSonucu, bugun)
@@ -268,9 +274,11 @@ private fun KayitBolumu(durum: RehberDurumu) {
                 )
                 DemoEtiketi()
             }
-            Row(
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
+                maxItemsInEachRow = if (buyukYazi) 1 else 3,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 SecenekCipi(
                     metin = stringResource(R.string.rehber_2_sonuc_cozemedim),
@@ -474,6 +482,7 @@ private fun KuyrukSatiri(soru: DemoSoru) {
 
 // ---------------------------------------------------------------- 4. Deneme
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun DenemeBolumu(durum: RehberDurumu, onDenemeler: () -> Unit) {
     BolumBasligi(
@@ -483,6 +492,7 @@ private fun DenemeBolumu(durum: RehberDurumu, onDenemeler: () -> Unit) {
     )
     val skor = durum.dersSkoru
     val kural = durum.kural
+    val buyukYazi = LocalDensity.current.fontScale >= 1.5f
     val net = skor.net(kural)
     val aday = skor.yanlis + skor.bos
 
@@ -501,9 +511,11 @@ private fun DenemeBolumu(durum: RehberDurumu, onDenemeler: () -> Unit) {
                 DemoEtiketi()
             }
 
-            Row(
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
+                maxItemsInEachRow = if (buyukYazi) 1 else 2,
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 SayacAlani(
                     etiket = stringResource(R.string.rehber_4_correct),
@@ -525,12 +537,14 @@ private fun DenemeBolumu(durum: RehberDurumu, onDenemeler: () -> Unit) {
                 )
             }
 
-            Row(
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
+                maxItemsInEachRow = if (buyukYazi) 1 else 2,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 Surface(
+                    modifier = Modifier.align(Alignment.CenterVertically),
                     shape = RoundedCornerShape(14.dp),
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.28f)),
@@ -547,6 +561,7 @@ private fun DenemeBolumu(durum: RehberDurumu, onDenemeler: () -> Unit) {
                 }
                 Text(
                     text = stringResource(R.string.rehber_4_blank, skor.bos),
+                    modifier = Modifier.align(Alignment.CenterVertically),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -557,7 +572,12 @@ private fun DenemeBolumu(durum: RehberDurumu, onDenemeler: () -> Unit) {
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                maxItemsInEachRow = if (buyukYazi) 1 else 3,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 NetKurali.entries.forEach { secenek ->
                     FilterChip(
                         selected = kural == secenek,
@@ -801,53 +821,99 @@ private fun RehberMiniTahta() {
                 }
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                Text(
-                    text = stringResource(R.string.rehber_5_width),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = colors.onSurfaceVariant,
-                    maxLines = 1,
-                )
-                Slider(
-                    value = kalinlik,
-                    onValueChange = { kalinlik = tahtaKalinligiSinirla(it) },
-                    valueRange = TAHTA_MIN_KALINLIK_DP..TAHTA_MAKS_KALINLIK_DP,
-                    steps = (TAHTA_MAKS_KALINLIK_DP - TAHTA_MIN_KALINLIK_DP).toInt() - 1,
-                    modifier = Modifier
-                        .weight(1f)
-                        .heightIn(min = 34.dp)
-                        .testTag("rehber-kalinlik")
-                        .semantics { stateDescription = kalinlikEtiketi },
-                )
-                Text(
-                    text = kalinlikEtiketi,
-                    style = MaterialTheme.typography.labelSmall.copy(fontFeatureSettings = "tnum"),
-                    color = colors.onSurfaceVariant,
-                    maxLines = 1,
-                )
-                Box(
-                    modifier = Modifier
-                        .heightIn(min = 38.dp)
-                        .clickable(
-                            role = Role.Button,
-                            enabled = vuruslar.isNotEmpty(),
-                            onClick = { vuruslar.clear() },
-                        )
-                        .padding(horizontal = 6.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = stringResource(R.string.rehber_5_clear),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = if (vuruslar.isEmpty()) colors.onSurfaceVariant.copy(alpha = 0.5f) else colors.primary,
-                    )
-                }
+            KalinlikKontrolu(
+                kalinlik = kalinlik,
+                etiket = kalinlikEtiketi,
+                temizlenebilir = vuruslar.isNotEmpty(),
+                onKalinlik = { kalinlik = tahtaKalinligiSinirla(it) },
+                onTemizle = { vuruslar.clear() },
+            )
+        }
+    }
+}
+
+/**
+ * Kalınlık denetimi: normal yazıda tek satır, %200 yazıda üç satır.
+ * Her iki düzende de kaydırıcı ve "Temizle" hedefi en az 44–48 dp kalır.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun KalinlikKontrolu(
+    kalinlik: Float,
+    etiket: String,
+    temizlenebilir: Boolean,
+    onKalinlik: (Float) -> Unit,
+    onTemizle: () -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    val buyukYazi = LocalDensity.current.fontScale >= 1.5f
+    val kaydirici: @Composable (Modifier) -> Unit = { modifier ->
+        Slider(
+            value = kalinlik,
+            onValueChange = onKalinlik,
+            valueRange = TAHTA_MIN_KALINLIK_DP..TAHTA_MAKS_KALINLIK_DP,
+            steps = (TAHTA_MAKS_KALINLIK_DP - TAHTA_MIN_KALINLIK_DP).toInt() - 1,
+            modifier = modifier
+                .heightIn(min = 40.dp)
+                .testTag("rehber-kalinlik")
+                .semantics { stateDescription = etiket },
+        )
+    }
+    val etiketMetni: @Composable () -> Unit = {
+        Text(
+            text = stringResource(R.string.rehber_5_width),
+            style = MaterialTheme.typography.labelSmall,
+            color = colors.onSurfaceVariant,
+            maxLines = 1,
+        )
+    }
+    val degerMetni: @Composable () -> Unit = {
+        Text(
+            text = etiket,
+            style = MaterialTheme.typography.labelSmall.copy(fontFeatureSettings = "tnum"),
+            color = colors.onSurfaceVariant,
+            maxLines = 1,
+        )
+    }
+    val temizle: @Composable () -> Unit = {
+        Box(
+            modifier = Modifier
+                .heightIn(min = 44.dp)
+                .clickable(role = Role.Button, enabled = temizlenebilir, onClick = onTemizle)
+                .padding(horizontal = 6.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = stringResource(R.string.rehber_5_clear),
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = if (temizlenebilir) colors.primary else colors.onSurfaceVariant.copy(alpha = 0.5f),
+            )
+        }
+    }
+    if (buyukYazi) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                etiketMetni()
+                Box(Modifier.weight(1f))
+                degerMetni()
             }
+            kaydirici(Modifier.fillMaxWidth())
+            temizle()
+        }
+    } else {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            etiketMetni()
+            kaydirici(Modifier.weight(1f))
+            degerMetni()
+            temizle()
         }
     }
 }
@@ -1007,17 +1073,17 @@ private fun KapanisBolumu(onSoruEkle: () -> Unit, onBugun: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             IlkeSatiri(
-                baslik = stringResource(R.string.rehber_7_title),
+                baslik = stringResource(R.string.rehber_7_item1_title),
                 aciklama = stringResource(R.string.rehber_7_item1),
                 vurgu = PremiumMarkaRenkler.Petrol,
             )
             IlkeSatiri(
-                baslik = stringResource(R.string.rehber_1_item3_title),
+                baslik = stringResource(R.string.rehber_7_item2_title),
                 aciklama = stringResource(R.string.rehber_7_item2),
                 vurgu = PremiumMarkaRenkler.Bakir,
             )
             IlkeSatiri(
-                baslik = stringResource(R.string.rehber_4_kicker),
+                baslik = stringResource(R.string.rehber_7_item3_title),
                 aciklama = stringResource(R.string.rehber_7_item3),
                 vurgu = PremiumMarkaRenkler.Mor,
             )

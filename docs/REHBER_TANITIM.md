@@ -92,6 +92,7 @@ Plan uygulandı; aşağıdaki farklar bilinçlidir.
 | Kapatma | `RehberDeposu` üç ayrı eylem: `tamamla()` (bitir/atla: görüldü + başa dön), `kapat()` (görüldü, kaldığı bölüm korunur), `bastanBaslat()` (Ayarlar'dan yeniden izle). |
 | Dönüş hedefi | `UygulamaEkrani.Rehber(baslangic, geri)`: Ayarlar'dan açılınca Ayarlar'a, ilk kurulumdan sonra Bugün'e döner. Saver `"rehber"`; süreç ölümünde korunur. |
 | İlk açılış | Yalnızca kurulum **bu oturumda** tamamlandığında ve `gorulduMu()` false ise; mevcut kullanıcı güncellemede rahatsız edilmez. |
+| Büyük yazı | %200 yazı ölçeğinde seçenek çipleri, D/Y sayaçları, puanlama çipleri ve alt düğmeler `FlowRow` / tam genişlik ile alt alta geçer; kalınlık denetimi üç satıra ayrılır. Compose testi bunu `Density(fontScale = 2f)` ile doğrular. |
 | Testler | `RehberModeliTest` (saf JVM), `RehberDeposuTest`, `RehberNavigasyonTest` (Robolectric) ve `RehberEkraniTest` (`app/src/testDebug`, Robolectric + Compose — depodaki mevcut Compose test düzeni). |
 | Metinler | 1.305 kaynak, tekrar yok; rehber metinleri yalnız `strings.xml`. |
 

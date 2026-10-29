@@ -1346,9 +1346,12 @@
     <string name="rehber_7_kicker">7 · KAPANIŞ</string>
     <string name="rehber_7_title">Kontrol sende</string>
     <string name="rehber_7_body">Her şey cihazında kalır. Uygulama internet izni istemez; kamera izni de istemez, fotoğrafı dosya olarak alır.</string>
-    <string name="rehber_7_item1">Verin cihazda: hesap, bulut, abonelik yok.</string>
-    <string name="rehber_7_item2">Bildirim yok: hatırlatma yerine uygulamayı açtığında “bugün” karşına gelir.</string>
-    <string name="rehber_7_item3">Kapsam dışı: sosyal akış, sıralama/lig, yapay zekâ çözüm üretimi.</string>
+    <string name="rehber_7_item1_title">Verin cihazda</string>
+    <string name="rehber_7_item1">Hesap, bulut, abonelik yok. Yedek dosyasını yalnız sen taşırsın.</string>
+    <string name="rehber_7_item2_title">Bildirim yok</string>
+    <string name="rehber_7_item2">Hatırlatma yerine uygulamayı açtığında “bugün” karşına gelir.</string>
+    <string name="rehber_7_item3_title">Kapsam dışı</string>
+    <string name="rehber_7_item3">Sosyal akış, sıralama/lig ve yapay zekâ çözüm üretimi yok.</string>
     <string name="rehber_7_cta_add">İlk sorumu ekle</string>
     <string name="rehber_7_cta_today">Bugüne dön</string>
 

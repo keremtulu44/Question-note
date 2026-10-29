@@ -22,11 +22,13 @@ değişmedi; yeni izin ve bağımlılık yok.
   Yeniden izlemek için **Ayarlar → YARDIM → Uygulamayı tanı** (her zaman açık).
 - **Erişilebilirlik:** her bölümde tek `heading`, ilerleme hem "3 / 7" yazısıyla hem ince ölçekle;
   sayfalar dikey kaydırılabilir; azaltılmış harekette sayfa geçişi animasyonsuz; sistem geri tuşu
-  bölüm bölüm geri sarar (rehberi bir anda kapatmaz).
+  bölüm bölüm geri sarar (rehberi bir anda kapatmaz). **%200 yazı ölçeğinde** seçenekler, sayaçlar,
+  kural çipleri ve alt düğmeler alt alta geçer (FlowRow / tam genişlik); hiçbir etiket kırpılmaz.
 - **Gezinme:** `UygulamaEkrani.Rehber(baslangic, geri)` JSON saver'a eklendi; süreç ölümünde
   bölüm ve dönüş hedefi korunur. Rehberde alt menü/üst panel gizli.
-- **Testler:** `RehberModeliTest` (11 saf JVM), `RehberDeposuTest` (7 Robolectric),
-  `RehberNavigasyonTest` (5 Robolectric saver), `RehberEkraniTest` (7 Robolectric + Compose).
+- **Testler:** `RehberModeliTest` (11 saf JVM), `RehberDeposuTest` (8 Robolectric),
+  `RehberNavigasyonTest` (5 Robolectric saver), `RehberEkraniTest` (8 Robolectric + Compose;
+  %200 yazı ve 320 dp genişlik dahil).
 
 ## [Yayınlanmadı — çizim tahtası] — 2026-10-29
 

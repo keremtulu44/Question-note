@@ -28,6 +28,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -239,64 +240,72 @@ private fun AltBar(
     onBitir: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
+    // %200 yazıda üç düğme tek satıra sığmaz: alt alta, tam genişlikte durur.
+    val buyukYazi = LocalDensity.current.fontScale >= 1.5f
+
+    val atla: @Composable (Modifier) -> Unit = { modifier ->
+        if (!sonSayfa) {
+            PremiumTextButton(
+                onClick = onBitir,
+                modifier = modifier.heightIn(min = 48.dp).testTag("rehber-atla"),
+            ) {
+                Text(stringResource(R.string.rehber_skip))
+            }
+        }
+    }
+    val geri: @Composable (Modifier) -> Unit = { modifier ->
+        if (sayfa > 0) {
+            PremiumOutlinedButton(
+                onClick = onGeri,
+                modifier = modifier.heightIn(min = 48.dp).testTag("rehber-geri"),
+            ) {
+                Text(stringResource(R.string.rehber_prev))
+            }
+        }
+    }
+    val ileri: @Composable (Modifier) -> Unit = { modifier ->
+        if (sonSayfa) {
+            PremiumButton(
+                onClick = onBitir,
+                modifier = modifier.heightIn(min = 48.dp).testTag("rehber-bitir"),
+            ) {
+                Text(stringResource(R.string.rehber_finish), fontWeight = FontWeight.Bold)
+            }
+        } else {
+            PremiumButton(
+                onClick = onIleri,
+                modifier = modifier.heightIn(min = 48.dp).testTag("rehber-ileri"),
+            ) {
+                Text(stringResource(R.string.rehber_next), fontWeight = FontWeight.SemiBold)
+            }
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(colors.surface)
             .padding(horizontal = 20.dp, vertical = 10.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            if (sonSayfa) {
-                PremiumOutlinedButton(
-                    onClick = onGeri,
-                    modifier = Modifier
-                        .weight(1f)
-                        .heightIn(min = 48.dp)
-                        .testTag("rehber-geri"),
-                ) {
-                    Text(stringResource(R.string.rehber_prev))
-                }
-                PremiumButton(
-                    onClick = onBitir,
-                    modifier = Modifier
-                        .weight(1.4f)
-                        .heightIn(min = 48.dp)
-                        .testTag("rehber-bitir"),
-                ) {
-                    Text(stringResource(R.string.rehber_finish), fontWeight = FontWeight.Bold)
-                }
-            } else {
-                PremiumTextButton(
-                    onClick = onBitir,
-                    modifier = Modifier
-                        .heightIn(min = 48.dp)
-                        .testTag("rehber-atla"),
-                ) {
-                    Text(stringResource(R.string.rehber_skip))
-                }
-                Box(Modifier.weight(1f))
-                if (sayfa > 0) {
-                    PremiumOutlinedButton(
-                        onClick = onGeri,
-                        modifier = Modifier
-                            .heightIn(min = 48.dp)
-                            .testTag("rehber-geri"),
-                    ) {
-                        Text(stringResource(R.string.rehber_prev))
-                    }
-                }
-                PremiumButton(
-                    onClick = onIleri,
-                    modifier = Modifier
-                        .heightIn(min = 48.dp)
-                        .testTag("rehber-ileri"),
-                ) {
-                    Text(stringResource(R.string.rehber_next), fontWeight = FontWeight.SemiBold)
+        if (buyukYazi) {
+            atla(Modifier.fillMaxWidth())
+            geri(Modifier.fillMaxWidth())
+            ileri(Modifier.fillMaxWidth())
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                atla(Modifier)
+                if (sonSayfa) {
+                    geri(Modifier.weight(1f))
+                    ileri(Modifier.weight(1.4f))
+                } else {
+                    Box(Modifier.weight(1f))
+                    geri(Modifier)
+                    ileri(Modifier)
                 }
             }
         }

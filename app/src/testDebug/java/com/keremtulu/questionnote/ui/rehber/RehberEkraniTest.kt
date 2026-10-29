@@ -1,7 +1,10 @@
 package com.keremtulu.questionnote.ui.rehber
 
 import android.content.Context
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -37,17 +40,22 @@ class RehberEkraniTest {
     private var bitirilen = 0
     private var kapatilan = 0
 
-    private fun kur() {
+    private fun kur(fontScale: Float = 1f) {
         compose.setContent {
-            PremiumYanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
-                RehberEkrani(
-                    onKapat = { kapatilan++ },
-                    onBitir = { bitirilen++ },
-                    onSoruEkle = {},
-                    onDenemeler = {},
-                    onYedek = {},
-                    onBugun = {},
-                )
+            val taban = LocalDensity.current
+            CompositionLocalProvider(
+                LocalDensity provides Density(density = taban.density, fontScale = fontScale),
+            ) {
+                PremiumYanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                    RehberEkrani(
+                        onKapat = { kapatilan++ },
+                        onBitir = { bitirilen++ },
+                        onSoruEkle = {},
+                        onDenemeler = {},
+                        onYedek = {},
+                        onBugun = {},
+                    )
+                }
             }
         }
     }
@@ -138,6 +146,17 @@ class RehberEkraniTest {
         val dolu = compose.onNodeWithTag("rehber-mini-tahta").fetchSemanticsNode()
             .config[SemanticsProperties.StateDescription]
         assertEquals(context.getString(R.string.rehber_5_mark_count, 1), dolu)
+    }
+
+    @Test
+    fun yuzdeIkiYuzYazidaKontrollerAltAltaGecer() {
+        kur(fontScale = 2f)
+        ilerle(1)
+        // Üç düğme tek satıra sığmadığı için alt alta geçer; hiçbiri kırpılmaz.
+        compose.onNodeWithTag("rehber-atla").assertIsDisplayed()
+        compose.onNodeWithTag("rehber-geri").assertIsDisplayed()
+        compose.onNodeWithTag("rehber-ileri").assertIsDisplayed()
+        compose.onNodeWithTag("rehber-ilerleme").assertIsDisplayed()
     }
 
     @Test
