@@ -45,6 +45,11 @@ kalır, boş soru sayısı 20'dir); `ba1d66f` yeşil. Compose testi eklenince `c
 testDebug Compose dahil). Cihaz kabulü hâlâ açık: TalkBack ile tur, %200 yazı, koyu tema,
 gerçek telefonda mini tahta çizimi.
 
+**Son tur (aynı gün):** %200 yazı için uyarlanabilir yerleşim — seçenek/sayaç/kural çipleri
+`FlowRow` ile alt alta, alt düğmeler tam genişlikte, kalınlık denetimi üç satır, `sizeIn` yerine
+`heightIn(min = 44–48.dp)` hedefleri. `RehberEkraniTest` bunu `Density(fontScale = 2f)` ile
+doğrular. Run `123679774478` yeşil (Debug + Release unit, 8 Compose testi dahil).
+
 ## 2026-10-29 (2) — çizim tahtası elden geçirildi (dal: `arena/ce557218-question-note`)
 
 Kullanıcı geri bildirimi: "çizgide devamlılık yok, nokta koyulmuyor, kalınlık 1–10 ayarlanabilmeli".
