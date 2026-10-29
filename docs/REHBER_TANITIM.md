@@ -77,3 +77,24 @@ data/prefs/RehberDeposu.kt → goruldu / sonBolum (SharedPreferences)
 - Rehber içinde veri silme/yedek oluşturma — yedek gerçek `Ayarlar` akışında yapılır (SAF izinleri).
 - Öğretmen alanı: `AGENTS.md` gereği dokunulmaz.
 - Rehber ilerlemesi ZIP yedeğine **girmez** (cihaz tercihi, veri değil).
+
+## 7. Uygulama sonucu (2026-10-29)
+
+Plan uygulandı; aşağıdaki farklar bilinçlidir.
+
+| Konu | Plandan fark / netleşen karar |
+|---|---|
+| Bölüm içeriği | 7 bölüm aynı sırayla. Her bölüm en fazla 3 kısa metin bloğu + tek etkileşim. |
+| Demo veri | `DemoSorular` yerine düz `List<DemoSoru>`; deneme özeti `demoDenemeOzeti()` içinde gerçek `ozet()` ile üretilir. |
+| Kuyruk | `demoKuyrugu()` tur boyunu 1–30 ve önizlemeyi 3 satırla sınırlar; geciken sorular üstte. |
+| Deneme etkileşimi | D/Y için +/− düğmeleri (TalkBack ve büyük yazıda kaydırıcıdan daha güvenilir); doğru+yanlış soru sayısını aşamaz, eksiltme 0'da durur. Kural seçimi (`NetKurali`) neti canlı değiştirir. |
+| Mini tahta | Gerçek tahtanın küçük hâli: `awaitEachGesture` + `historical`, tek dokunuşta nokta, 1–10 dp kaydırıcı (`TahtaKalinlik` sözleşmesi). Rehber çizimi hiçbir yere kaydedilmez. |
+| Kapatma | `RehberDeposu` üç ayrı eylem: `tamamla()` (bitir/atla: görüldü + başa dön), `kapat()` (görüldü, kaldığı bölüm korunur), `bastanBaslat()` (Ayarlar'dan yeniden izle). |
+| Dönüş hedefi | `UygulamaEkrani.Rehber(baslangic, geri)`: Ayarlar'dan açılınca Ayarlar'a, ilk kurulumdan sonra Bugün'e döner. Saver `"rehber"`; süreç ölümünde korunur. |
+| İlk açılış | Yalnızca kurulum **bu oturumda** tamamlandığında ve `gorulduMu()` false ise; mevcut kullanıcı güncellemede rahatsız edilmez. |
+| Testler | `RehberModeliTest` (saf JVM), `RehberDeposuTest`, `RehberNavigasyonTest` (Robolectric) ve `RehberEkraniTest` (`app/src/testDebug`, Robolectric + Compose — depodaki mevcut Compose test düzeni). |
+| Metinler | 1.305 kaynak, tekrar yok; rehber metinleri yalnız `strings.xml`. |
+
+**Açık kalan cihaz doğrulamaları:** TalkBack ile turun baştan sona okunması, %200 yazı ölçeği,
+koyu tema, 320 dp genişlik (Compose testinde kırpılmadığı doğrulandı) ve gerçek telefonda mini
+tahta çizimi. Bunlar otomatik testle kapatılamaz; kabul listesinde duruyor.

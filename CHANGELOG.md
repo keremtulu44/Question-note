@@ -2,6 +2,32 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [Yayınlanmadı — uygulama içi rehber] — 2026-10-29
+
+Yeni sürüm adayı **v1.7.0 (versionCode 43)**. Sürüm biçimi, Room v5, ZIP yedeği ve tekrar motoru
+değişmedi; yeni izin ve bağımlılık yok.
+
+- **Rehber (7 bölüm):** Tanıtım → Kayıt → Bugün → Deneme → Çözüm → Yedek → Kapanış. Her bölüm
+  gerçek uygulama bileşenleriyle çizilir; sahte ekran görüntüsü yok.
+- **Gerçek motor, demo veri:** "Sonraki tekrar ne zaman?" sorusu `TekrarKurali.hesapla` ile,
+  deneme özeti `ozet()` ile hesaplanır. Örnek sorular/denemeler **DEMO** rozetlidir ve deftere
+  (Room'a) hiçbir şey yazmaz.
+- **Etkileşim:** tekrar sonucu seçimi (Çözemedim/Zorlandım/Rahat) tarihi canlı değiştirir;
+  deneme bölümünde D/Y artır-azalt + kural seçimi neti canlı yeniden hesaplar; çözüm bölümünde
+  mini tahta vardır (gerçek tahtanın 1–10 dp kalınlık sözleşmesi, tek dokunuşta nokta).
+- **Yedek eğitimi:** ZIP'in neyi taşıdığı/taşımadığı listelenir (rozetler ve rehber ilerlemesi
+  cihaza özgüdür, yedeğe girmez) ve gerçek "Ayarlar'da yedek al" akışına geçilir.
+- **Akış:** ilk kurulum bitince rehber bir kez kendiliğinden açılır; "Atla" tamamlanmış sayılır.
+  Yarıda kapatınca kaldığı bölüm saklanır (sonraki açılışta "kaldığın yerden devam" notu).
+  Yeniden izlemek için **Ayarlar → YARDIM → Uygulamayı tanı** (her zaman açık).
+- **Erişilebilirlik:** her bölümde tek `heading`, ilerleme hem "3 / 7" yazısıyla hem ince ölçekle;
+  sayfalar dikey kaydırılabilir; azaltılmış harekette sayfa geçişi animasyonsuz; sistem geri tuşu
+  bölüm bölüm geri sarar (rehberi bir anda kapatmaz).
+- **Gezinme:** `UygulamaEkrani.Rehber(baslangic, geri)` JSON saver'a eklendi; süreç ölümünde
+  bölüm ve dönüş hedefi korunur. Rehberde alt menü/üst panel gizli.
+- **Testler:** `RehberModeliTest` (11 saf JVM), `RehberDeposuTest` (7 Robolectric),
+  `RehberNavigasyonTest` (5 Robolectric saver), `RehberEkraniTest` (7 Robolectric + Compose).
+
 ## [Yayınlanmadı — çizim tahtası] — 2026-10-29
 
 - **Kesintisiz çizgi:** Parmak hareketi artık hareketin kendisinde işlenir (`awaitEachGesture`

@@ -25,6 +25,14 @@ class RehberDeposu(context: Context) {
         prefs.edit().putBoolean(GORULDU, true).putInt(SON_BOLUM, 0).apply()
     }
 
+    /**
+     * Kapatma: otomatik açılış bir daha olmaz ama kaldığı bölüm korunur.
+     * Kullanıcı yarıda bırakıp Ayarlar'dan yeniden açtığında devam notu görünür.
+     */
+    fun kapat() {
+        prefs.edit().putBoolean(GORULDU, true).apply()
+    }
+
     /** Ayarlar'dan yeniden açınca baştan başlar; otomatik açılış yine tetiklenmez. */
     fun bastanBaslat() {
         prefs.edit().putBoolean(GORULDU, true).putInt(SON_BOLUM, 0).apply()

@@ -3,6 +3,45 @@
 **Son güncelleme: 2026-10-29.** Önce bu belge, `docs/DERLEME_RAPORU.md`,
 `docs/PREMIUM_GORSEL_GELISTIRME.md` ve [P4–P6 sözleşme/kanıt kaydı](docs/P4_P5_P6_UYGULAMA.md) okunur.
 
+## 2026-10-29 (3) — uygulama içi rehber (dal: `arena/ce557218-question-note`)
+
+Kullanıcı isteği: "anlamlı bir tutorial hazırla" — hem tanıtan, hem kayıt/deneme/çözmeyi gösteren,
+hem yedeklemeyi öğreten, demo verilerle çalışan, premium hissi koruyan kapsamlı bir tur.
+
+**Sonuç:** `v1.7.0` adayı (versionCode 43). Sürüm/Room/ZIP/tekrar motoru değişmedi; yeni izin ve
+bağımlılık yok; öğretmen alanına dokunulmadı.
+
+**Yeni dosyalar**
+- `ui/rehber/RehberModeli.kt` — `RehberBolumu` (7 bölüm, `anahtar`), demo sorular/kuyruk,
+  `tekrarOnizlemesi()` (gerçek `TekrarKurali`), `DemoDersSkoru` (+/-, `net(kural)`),
+  `demoDenemeOzeti()` (gerçek `ozet()`), `yedekIcerigi()`. Compose bağımlılığı yok.
+- `ui/rehber/RehberCizimleri.kt` — `RehberDefterCizimi`, `RehberAralikYolu`, `RehberYedekKutusu`
+  (Canvas; bitmap/varlık yok, APK büyümez).
+- `ui/rehber/RehberBolumleri.kt` — 7 bölümün içeriği; `RehberDurumu` (bölümler arası seçim),
+  mini tahta `awaitEachGesture` + `historical` ile gerçek tahtanın küçük hâli.
+- `ui/rehber/RehberEkrani.kt` — `HorizontalPager`, "3 / 7" ilerleme + `InceOlcek`, İleri/Geri/Atla,
+  `BackHandler` ile bölüm bölüm geri, azaltılmış harekette animasyonsuz geçiş.
+- `data/prefs/RehberDeposu.kt` — `gorulduMu/sonBolum/bolumuKaydet/tamamla/kapat/bastanBaslat/sifirla`.
+  Ayrı SharedPreferences dosyası (`rehber_durumu`); **ZIP yedeğine girmez** (cihaz tercihi).
+
+**Entegrasyon**
+- `UygulamaEkrani.Rehber(baslangic, geri)` + saver `"rehber"`; `aktifSekme = AYARLAR`,
+  `altMenuGorunur = false`, `geriHedefi = geri` (Ayarlar'dan açılınca Ayarlar, ilk kurulumda Bugün).
+- `DersKurulumEkrani.onTamam` → `kurulumGerekli = false`; rehber hiç görülmediyse bir kez açılır.
+- `AyarlarEkrani`'ye `onRehber: () -> Unit = {}` + **YARDIM** bölümü (varsayılanlı parametre,
+  mevcut çağrılar değişmedi). `AppContainer.rehberDeposu` → `MainActivity` → host.
+- Kapatma `RehberDeposu.kapat()`: otomatik açılış bir daha olmaz, kaldığı bölüm korunur.
+
+**Testler:** `RehberModeliTest` (saf JVM: bölüm kimlikleri, motor eşitliği, aralık sırası,
+kuyruk sınırları, D/Y sınırları ve simetri, özet, yedek listesi), `RehberDeposuTest` (Robolectric),
+`RehberNavigasyonTest` (saver gidiş-dönüş + bozuk kayıt), `RehberEkraniTest` (testDebug,
+Robolectric + Compose: ileri/geri, atla, son bölüm, canlı net, tekrar tarihi, mini tahta dokunuşu,
+320 dp genişlik).
+
+**CI:** `f37db2a` ilk denemede yalnız test beklentileri yanlıştı (ZORLANDIM'ın önceki aralıkla
+sabit kalması, boş soru sayısı); `ba1d66f` yeşil (Debug + Release unit). Cihaz kabulü hâlâ açık:
+TalkBack ile tur, %200 yazı, koyu tema, gerçek telefonda mini tahta çizimi.
+
 ## 2026-10-29 (2) — çizim tahtası elden geçirildi (dal: `arena/ce557218-question-note`)
 
 Kullanıcı geri bildirimi: "çizgide devamlılık yok, nokta koyulmuyor, kalınlık 1–10 ayarlanabilmeli".

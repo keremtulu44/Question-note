@@ -917,7 +917,12 @@ fun YanlisDefteriUygulamasi(
                     is UygulamaEkrani.Rehber -> RehberEkrani(
                         baslangicIndex = current.baslangic,
                         onBolumDegisti = { etkinRehberDeposu.bolumuKaydet(it) },
-                        onKapat = { ekranSec(current.geriHedefi()) },
+                        onKapat = {
+                            // Yarıda bırakmak "tamamlandı" sayılmaz: sıradaki açılışta
+                            // kaldığı bölümden devam eder, otomatik açılış ise tekrarlanmaz.
+                            etkinRehberDeposu.kapat()
+                            ekranSec(current.geriHedefi())
+                        },
                         onBitir = {
                             etkinRehberDeposu.tamamla()
                             ekranSec(current.geriHedefi())

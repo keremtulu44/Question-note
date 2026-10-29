@@ -76,6 +76,15 @@ class RehberDeposuTest {
     }
 
     @Test
+    fun kapatmaOtomatikAcilisiDurdururAmaKaldigiYeriKorur() {
+        val depo = RehberDeposu(context)
+        depo.bolumuKaydet(5)
+        depo.kapat()
+        assertTrue(depo.gorulduMu())
+        assertEquals(5, RehberDeposu(context).sonBolum())
+    }
+
+    @Test
     fun sifirlaHerSeyiGeriAlir() {
         val depo = RehberDeposu(context)
         depo.bolumuKaydet(3)
