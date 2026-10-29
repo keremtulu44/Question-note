@@ -67,6 +67,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -76,6 +78,8 @@ import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.data.prefs.DenemeDeposu
 import com.keremtulu.questionnote.domain.model.DenemeDersSatiri
 import com.keremtulu.questionnote.domain.model.DenemeKaydi
+import com.keremtulu.questionnote.domain.model.DenemeOzeti
+import com.keremtulu.questionnote.domain.model.enZayifDers
 import com.keremtulu.questionnote.domain.model.Ders
 import com.keremtulu.questionnote.domain.model.DersNetKarsilastirma
 import com.keremtulu.questionnote.domain.model.NetKurali
@@ -84,6 +88,7 @@ import com.keremtulu.questionnote.domain.model.denemeKaynakEslesir
 import com.keremtulu.questionnote.domain.model.dersBarlari
 import com.keremtulu.questionnote.domain.model.grafikNoktalari
 import com.keremtulu.questionnote.domain.model.oncekiAyniKural
+import com.keremtulu.questionnote.domain.model.ozet
 import com.keremtulu.questionnote.domain.model.yerelTarih
 import com.keremtulu.questionnote.domain.repository.DersRepository
 import com.keremtulu.questionnote.domain.repository.SoruRepository
@@ -211,6 +216,17 @@ fun DenemeListesiEkrani(
     val grafikKayitlari = remember(kayitlar, seciliKural) {
         val filtreli = if (seciliKural == null) kayitlar else kayitlar.filter { it.kural == seciliKural }
         filtreli.grafikNoktalari()
+    }
+    // Çizgi grafiği tek başına TalkBack'e hiçbir şey söylemez: aynı bilgi metin olarak da verilir.
+    val grafikAciklamasi = if (grafikKayitlari.size >= 2) {
+        stringResource(
+            R.string.deneme_chart_description,
+            grafikKayitlari.size,
+            netYazi(grafikKayitlari.minOf { it.toplamNet() }),
+            netYazi(grafikKayitlari.maxOf { it.toplamNet() }),
+        )
+    } else {
+        stringResource(R.string.deneme_chart_need_more)
     }
     val sonDeneme = grafikKayitlari.lastOrNull() ?: kayitlar.firstOrNull()
 
@@ -340,7 +356,28 @@ fun DenemeListesiEkrani(
                                     }
                                 }
 
-                                NetCizgisi(grafikKayitlari)
+                                NetCizgisi(grafikKayitlari, aciklama = grafikAciklamasi)
+
+                                if (grafikKayitlari.size >= 2) {
+                                    // Tarih etiketi olmayan bir çizgi "hangi dönem" sorusunu yanıtsız bırakıyordu.
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                    ) {
+                                        Text(
+                                            text = denemeTarihYazi(grafikKayitlari.first().gun),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                        Text(
+                                            text = denemeTarihYazi(grafikKayitlari.last().gun),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
+                                }
+
+                                DenemeOzetSeridi(grafikKayitlari.ozet())
 
                                 if (grafikKayitlari.size < 2) {
                                     Text(
@@ -389,6 +426,7 @@ fun DenemeListesiEkrani(
                             deneme = deneme,
                             fark = onceki?.let { deneme.toplamNet() - it.toplamNet() },
                             yuklenenSoruSayisi = if (soruRepository != null) yuklenen else null,
+                            zayifDers = remember(deneme, dersAdlari) { deneme.enZayifDers(dersAdlari) },
                             onClick = { onAc(deneme.id) },
                             modifier = Modifier.graphicsLayer {
                                 alpha = giris
@@ -407,6 +445,7 @@ private fun DenemeListeKarti(
     deneme: DenemeKaydi,
     fark: Double?,
     yuklenenSoruSayisi: Int?,
+    zayifDers: Pair<String, Double>?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -450,6 +489,20 @@ private fun DenemeListeKarti(
                         style = MaterialTheme.typography.bodySmall,
                         color = colors.onSurfaceVariant,
                     )
+                    if (zayifDers != null) {
+                        // Kart, açmadan önce "hangi derse bakmalıyım" sorusunu yanıtlar.
+                        Text(
+                            text = stringResource(
+                                R.string.deneme_card_weakest,
+                                zayifDers.first,
+                                netYazi(zayifDers.second),
+                            ),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = colors.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
                 }
                 NetOzetRozeti(net = deneme.toplamNet(), fark = fark)
             }
@@ -551,8 +604,79 @@ private fun NetOzetRozeti(
     }
 }
 
+/**
+ * Net gidişatının yanındaki üç sayı: kaç deneme, ortalama ve en iyi net.
+ * Kurallar karışıksa ortalama/en iyi net üretilmez; uydurma sayı yerine nedeni yazılır.
+ */
 @Composable
-private fun NetCizgisi(noktalar: List<DenemeKaydi>) {
+private fun DenemeOzetSeridi(ozet: DenemeOzeti) {
+    if (ozet.kayitSayisi == 0) return
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("deneme-summary"),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        OzetDegeri(
+            modifier = Modifier.weight(1f),
+            etiket = stringResource(R.string.deneme_summary_attempts),
+            deger = ozet.kayitSayisi.toString(),
+        )
+        val ortalama = ozet.ortalamaNet
+        val enIyi = ozet.enIyiNet
+        if (ortalama != null && enIyi != null) {
+            OzetDegeri(
+                modifier = Modifier.weight(1f),
+                etiket = stringResource(R.string.deneme_summary_average),
+                deger = netYazi(ortalama),
+            )
+            OzetDegeri(
+                modifier = Modifier.weight(1f),
+                etiket = stringResource(R.string.deneme_summary_best),
+                deger = netYazi(enIyi),
+            )
+        } else {
+            // Kurallar karışık: "son net" karşılaştırma iddiası taşımadan en fazla bilgiyi verir.
+            if (ozet.sonNet != null) {
+                OzetDegeri(
+                    modifier = Modifier.weight(1f),
+                    etiket = stringResource(R.string.deneme_summary_last),
+                    deger = netYazi(ozet.sonNet),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun OzetDegeri(
+    modifier: Modifier,
+    etiket: String,
+    deger: String,
+) {
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(
+            text = deger,
+            style = MaterialTheme.typography.titleMedium.copy(fontFeatureSettings = "tnum"),
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        Text(
+            text = etiket,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+@Composable
+private fun NetCizgisi(
+    noktalar: List<DenemeKaydi>,
+    aciklama: String,
+) {
     if (noktalar.isEmpty()) return
     val cizgiRengi = MaterialTheme.colorScheme.primary
     val izRengi = MaterialTheme.colorScheme.outlineVariant
@@ -567,7 +691,9 @@ private fun NetCizgisi(noktalar: List<DenemeKaydi>) {
         modifier = Modifier
             .fillMaxWidth()
             .height(148.dp)
-            .testTag("deneme-net-chart"),
+            .testTag("deneme-net-chart")
+            // Grafik bir görsel; aynı bilgiyi okuyucuya metin olarak da ver.
+            .semantics { contentDescription = aciklama },
     ) {
         val yatayIcBosluk = 14.dp.toPx()
         val dikeyIcBosluk = 14.dp.toPx()
@@ -1177,6 +1303,44 @@ fun DenemeDetayEkrani(
                             }
                         },
                     )
+                }
+
+                val kayit = mevcut
+                if (kayit != null && onDenemeyiCalis != null && toplamYuklenen > 0) {
+                    item {
+                        // Deneme → defter köprüsü: bu denemeden yüklenen sorular tek turda çalışılır.
+                        SadeKart(elevation = CamYukseklik.DUSUK) {
+                            Column(
+                                modifier = Modifier.padding(18.dp),
+                                verticalArrangement = Arrangement.spacedBy(10.dp),
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.deneme_study_title),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                                Text(
+                                    text = stringResource(R.string.deneme_study_hint, toplamYuklenen),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                                PremiumOutlinedButton(
+                                    onClick = { onDenemeyiCalis?.invoke(kayit.ad) },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .testTag("deneme-study-button"),
+                                ) {
+                                    Text(
+                                        text = stringResource(
+                                            R.string.deneme_study_action,
+                                            toplamYuklenen,
+                                        ),
+                                        fontWeight = FontWeight.SemiBold,
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
 
                 item {

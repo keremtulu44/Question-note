@@ -41,6 +41,14 @@
     <string name="deneme_upload_progress">%1$d / %2$d defterde</string>
     <string name="deneme_upload_complete">Tamamlandı (%1$d)</string>
     <string name="deneme_upload_clean">Eksik soru yok</string>
+    <string name="deneme_summary_attempts">Deneme</string>
+    <string name="deneme_summary_average">Ortalama net</string>
+    <string name="deneme_summary_best">En iyi net</string>
+    <string name="deneme_summary_last">Son net</string>
+    <string name="deneme_chart_description">Net gidişatı: %1$d deneme, en düşük %2$s, en yüksek %3$s net.</string>
+    <string name="deneme_card_weakest">En düşük: %1$s · %2$s net</string>
+    <string name="deneme_study_title">Bu denemenin soruları</string>
+    <string name="deneme_study_hint">%1$d soru bu denemeden defterinde duruyor. Tek turda birlikte çöz.</string>
     <string name="deneme_form_title">Deneme detayı</string>
     <string name="deneme_form_new_title">Yeni deneme</string>
     <string name="deneme_name">Deneme adı</string>
