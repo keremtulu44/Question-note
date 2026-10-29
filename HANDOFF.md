@@ -38,9 +38,12 @@ kuyruk sınırları, D/Y sınırları ve simetri, özet, yedek listesi), `Rehber
 Robolectric + Compose: ileri/geri, atla, son bölüm, canlı net, tekrar tarihi, mini tahta dokunuşu,
 320 dp genişlik).
 
-**CI:** `f37db2a` ilk denemede yalnız test beklentileri yanlıştı (ZORLANDIM'ın önceki aralıkla
-sabit kalması, boş soru sayısı); `ba1d66f` yeşil (Debug + Release unit). Cihaz kabulü hâlâ açık:
-TalkBack ile tur, %200 yazı, koyu tema, gerçek telefonda mini tahta çizimi.
+**CI:** `f37db2a` ilk denemede yalnız test beklentileri yanlıştı (ZORLANDIM önceki aralıkla sabit
+kalır, boş soru sayısı 20'dir); `ba1d66f` yeşil. Compose testi eklenince `c81a5ed` derlenmedi:
+`assertDoesNotExist` ve `fetchSemanticsNode` **üye** fonksiyonlardır, top-level import edilemez
+(annotation'dan okundu) → importlar kaldırıldı, run `123674724445` **yeşil** (Debug + Release unit,
+testDebug Compose dahil). Cihaz kabulü hâlâ açık: TalkBack ile tur, %200 yazı, koyu tema,
+gerçek telefonda mini tahta çizimi.
 
 ## 2026-10-29 (2) — çizim tahtası elden geçirildi (dal: `arena/ce557218-question-note`)
 
