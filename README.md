@@ -104,6 +104,7 @@ turu denemedim” ifadesinin checklist eşlemesi hâlâ teyitsiz; ayrıntı
 | [docs/ui/p6/README.md](docs/ui/p6/README.md) | P5/P6 açık/koyu/%200/boş durum native Compose önizlemeleri; yalnız sentetik veri |
 | [docs/PERFORMANS_DEBUG.md](docs/PERFORMANS_DEBUG.md) · [Release](docs/PERFORMANS_RELEASE.md) | 1.000 soru/20.000 tekrar için kaynak SHA, ham host süreleri ve gerçek sorgu planları; telefon ölçümü değil |
 | [docs/ui/p1/README.md](docs/ui/p1/README.md) | Gerçek Compose bileşenlerinden örnek verili önizlemeler; cihaz testi değildir |
+| [docs/URUN_DEGERLENDIRME_VE_ONERILER.md](docs/URUN_DEGERLENDIRME_VE_ONERILER.md) | 2026-10-29 depo taraması: görsel/erişilebilirlik bulguları, deneme ve çözüm tarafı yol haritası, çevrimdışı OCR değerlendirmesi |
 | [docs/KODLAMA_PLANI.md](docs/KODLAMA_PLANI.md) | Kodlama sırası, hedef dosya yapısı, imzalama kurulumu, test stratejisi |
 | [docs/IMZALAMA.md](docs/IMZALAMA.md) | İmzalama anahtarı prosedürü ve sertifika parmak izi (değerler değil, parmak izi) |
 

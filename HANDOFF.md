@@ -1,7 +1,41 @@
 # HANDOFF — Yanlış Defteri
 
-**Son güncelleme: 2026-10-28.** Önce bu belge, `docs/DERLEME_RAPORU.md`,
+**Son güncelleme: 2026-10-29.** Önce bu belge, `docs/DERLEME_RAPORU.md`,
 `docs/PREMIUM_GORSEL_GELISTIRME.md` ve [P4–P6 sözleşme/kanıt kaydı](docs/P4_P5_P6_UYGULAMA.md) okunur.
+
+## 2026-10-29 — deneme tarafı: görünür eksikler + ürün değerlendirmesi (dal: `arena/ce557218-question-note`)
+
+Kullanıcı isteği: depoyu tara, görüntüsel/eksik yerleri düzelt, deneme ve soru çözüm tarafı için
+öneri üret, çevrimdışı OCR fikrini değerlendir. **Sürüm/Room/ZIP/tekrar motoru/XP değişmedi**,
+öğretmen alanına dokunulmadı (`AGENTS.md`).
+
+**Düzeltilen gerçek eksik:** `UygulamaEkrani.DenemeDetay` host'u `onDenemeyiCalis` veriyordu ama
+`DenemeDetayEkrani` bu parametreyi hiç çizmiyordu (ölü uç). Artık denemede deftere yüklenmiş soru
+varsa "Bu denemenin soruları" kartı görünür ve `SoruCalismaFiltresi(kaynak = deneme.ad)` turunu
+açar (`deneme-study-button`).
+
+**Görsel/erişilebilirlik:**
+- Net grafiğine ilk/son tarih etiketleri ve `contentDescription` (`deneme_chart_description`).
+- Grafiğin altına üç sayılık özet şerit: deneme sayısı, ortalama net, en iyi net. Kurallar
+  karışıksa ortalama/en iyi **üretilmez**, yalnız "son net"; tek kayıtta da yalnız "son net"
+  (uydurma karşılaştırma yok).
+- Liste kartına "En düşük: <ders> · <net>" satırı (tek dersli denemede gösterilmez).
+- Liste ekranındaki üst çubuk + liste başlığı tekrarı kaldırıldı; yerine tek satır bağlam.
+- Bugün'deki deneme satırındaki sabit `oran = 0.72f` halka (sahte yüzde) yerine son 6 denemenin
+  gerçek `MiniCizgi` sparkline'ı; iki kayıttan az veride boş halka.
+
+**Yeni dosyalar:** `domain/model/DenemeOzeti.kt` (`ozet()`, `enZayifDers()`),
+`test/.../DenemeOzetiTest.kt` (6 saf JVM testi), `docs/URUN_DEGERLENDIRME_VE_ONERILER.md`
+(bulgular, deneme/çözüm yol haritası, OCR değerlendirmesi, kapsam sözleşmesi).
+
+**CI:** iki ardışık çalıştırma yeşil — `40902868803` (5m25s) ve `40904376134`
+(Debug + Release birim testleri başarılı; `release` işi PR'da beklendiği gibi atlandı).
+Cihaz kabulü (deneme ekranları %200 yazı, koyu tema, TalkBack, 320 dp) **hâlâ açık**.
+
+**Sıradaki somut adım:** (1) bu ekranların cihaz kontrolü, (2) `DenemeDeposu` bozuk-JSON
+karantinası (bugün `getOrDefault(emptyList())` ile sessiz kayıp), (3) deneme sonrası toplu
+fotoğraf kuyruğu, (4) grafiklerde kalan `clearAndSetSemantics` taraması, (5) ölü metin temizliği
+(1.210 metnin 203'ü kullanılmıyor). Ayrıntı ve gerekçeler: `docs/URUN_DEGERLENDIRME_VE_ONERILER.md`.
 
 ## 2026-10-28 — üç iş: form kurtarma, CI bölme, belge senkronu (dal: `arena/35cb2bf0-question-note`)
 
