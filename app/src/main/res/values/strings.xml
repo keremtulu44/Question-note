@@ -724,11 +724,7 @@
     <string name="whiteboard_color_orange">Turuncu</string>
     <string name="whiteboard_selected_color">Seçili renk: %1$s</string>
     <string name="whiteboard_width_label">Çizgi kalınlığı</string>
-    <string name="whiteboard_width_thin">İnce</string>
-    <string name="whiteboard_width_normal">Normal</string>
-    <string name="whiteboard_width_thick">Kalın</string>
     <string name="whiteboard_width_value">%1$d dp</string>
-    <string name="whiteboard_width_hint">Kalınlığı 1–10 arasında kaydırarak ayarla.</string>
     <string name="whiteboard_zoom_in">Yakınlaştır</string>
     <string name="whiteboard_zoom_out">Uzaklaştır</string>
     <string name="whiteboard_zoom_reset">Tam görünüm</string>

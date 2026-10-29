@@ -3,6 +3,38 @@
 **Son güncelleme: 2026-10-29.** Önce bu belge, `docs/DERLEME_RAPORU.md`,
 `docs/PREMIUM_GORSEL_GELISTIRME.md` ve [P4–P6 sözleşme/kanıt kaydı](docs/P4_P5_P6_UYGULAMA.md) okunur.
 
+## 2026-10-29 (2) — çizim tahtası elden geçirildi (dal: `arena/ce557218-question-note`)
+
+Kullanıcı geri bildirimi: "çizgide devamlılık yok, nokta koyulmuyor, kalınlık 1–10 ayarlanabilmeli".
+
+**Kök nedenler ve düzeltmeler (`ui/calisma/CozumTahtasiDialog.kt`):**
+1. `detectDragGestures` her `onDrag`'da vuruşun **tamamını** kopyalayıp `onVurusDegisti` ile dialog
+   state'ine yazıyordu → her parmak hareketinde tüm listenin yeniden çizimi; hızlı çizimde kare
+   düşmesi ("çizgi arada duruyor"). Artık `awaitEachGesture` + `awaitFirstDown` + `awaitPointerEvent`
+   ile canlı noktalar **tuvalin içinde** (`canliNoktalar` + `canliSurum`) tutuluyor, yalnız çizim
+   katmanı yenileniyor. `historical` ara konumları da işleniyor; hızlı harekette çizgi kopmuyor.
+2. Serbest çizgi düz `lineTo` zinciri yerine **orta noktalardan geçen quadratic eğrilerle**
+   (`noktalariYola`) çiziliyor → köşeli/kesik his kalktı.
+3. Dokun-kaldır hiç iz bırakmıyordu (drag eşiği); artık tek dokunuş `drawCircle` ile nokta bırakır.
+4. Görsel çerçevesi dışında başlayan dokunuş tamamen atılıyordu; başlangıç artık sınıra kırpılır.
+5. Kalınlık 2/4/8 sabitleri yerine **1–10 dp, 1'er adımlı kaydırıcı** (`TahtaKalinlikSecimi`,
+   dar çubukta `TahtaKompaktKalinlikDugmesi`). Uç önizleme + `dp` değeri görünür; `stateDescription`
+   ile TalkBack "N dp" duyar. Renk şeridi dar ekranda yatay kaydırılır (42 dp hedef kırpılmaz).
+6. Silgi `max(kalinlik, 4 dp) × 3.4` genişlikte siler; ince kalemde görünmez silgi hatası kapandı.
+7. Kalınlık sözleşmesi Compose'suz `ui/calisma/TahtaKalinlik.kt` dosyasına alındı
+   (`tahtaKalinligiSinirla`, NaN/Infinity güvenliği) → saf JVM testi `TahtaKalinligiTest`.
+8. Sadeleştirme: kullanılmayan `appendPoint`, `etkinVurus` hoisting'i ve üç eski "İnce/Normal/Kalın"
+   metni kaldırıldı.
+
+**Yeni testler:** `TahtaKalinligiTest` (sınırlar, yuvarlama, NaN), `CozumTahtasiKullanimTest`
+içinde `tekDokunusNoktaBirakirVeSuruklemeTekVurusUretir` ve
+`kalinlikKaydirmalariBirIleOnArasindaAdimAdimAyarlanir`.
+
+**CI:** run `40921231264` yeşil (Debug unit + Release unit). İlk denemede yalnız
+`SemanticsActions` importu eksikti; hata, workflow'un zaten ürettiği **annotation** üzerinden
+okundu (`check-runs/{id}/annotations`) — kısıtlı ağda log/artifact indirilemediğinde bu yol
+kullanılmalı. Cihazda çizim akıcılığı kabulü (60 Hz, 200+ vuruş) hâlâ açık.
+
 ## 2026-10-29 — deneme tarafı: görünür eksikler + ürün değerlendirmesi (dal: `arena/ce557218-question-note`)
 
 Kullanıcı isteği: depoyu tara, görüntüsel/eksik yerleri düzelt, deneme ve soru çözüm tarafı için

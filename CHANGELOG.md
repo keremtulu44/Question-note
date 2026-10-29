@@ -2,6 +2,21 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [Yayınlanmadı — çizim tahtası] — 2026-10-29
+
+- **Kesintisiz çizgi:** Parmak hareketi artık hareketin kendisinde işlenir (`awaitEachGesture`
+  + `historical` ara konumlar). Önceki `detectDragGestures` sürümü her harekette vuruşun tamamını
+  kopyalayıp dialog durumuna taşıyordu; hızlı çizimde kareler düştüğü için çizgi "arada duruyor,
+  sonra devam ediyor" gibi görünüyordu.
+- **Yumuşak hat:** Serbest çizgi, noktaların orta noktalarından geçen ikinci derece eğrilerle
+  çizilir; köşeli/kesik görünüm kalktı.
+- **Tek dokunuşta nokta:** Dokunup kaldırmak da iz bırakır ("nokta koyulmuyor" hatası giderildi).
+  Kenara yakın başlayan çizgiler artık atılmıyor, sınır içine kırpılarak başlıyor.
+- **Kalınlık 1–10:** Üç sabit seçenek (2/4/8) yerine 1–10 dp arası 1'er adımlı kaydırıcı; canlı
+  uç önizlemesi ve `dp` değeri görünür, TalkBack aynı değeri duyar. Dar çubukta mini kaydırıcı.
+- **Silgi:** Kalem inceyken de hissedilir kalınlıkta siler (en az 4 dp × 3.4).
+- Sürüm, Room/ZIP biçimi ve tekrar motoru değişmedi.
+
 ## [Yayınlanmadı — üst panel] — 2026-10-27
 
 - **Üst panel:** alt menünün kalıcı eşi. Canlı tarih (`d MMMM EEEE`), seri ve günlük hedef
