@@ -67,9 +67,10 @@ class RehberModeliTest {
     @Test
     fun cozemedimEnKisaRahatEnUzunAraligiVerir() {
         val bugun = LocalDate.of(2026, 5, 1)
-        val cozemedim = tekrarOnizlemesi(TekrarSonucu.COZEMEDIM, bugun).sonrakiAralik
-        val zorlandim = tekrarOnizlemesi(TekrarSonucu.ZORLANDIM, bugun).sonrakiAralik
-        val rahat = tekrarOnizlemesi(TekrarSonucu.RAHAT, bugun).sonrakiAralik
+        // Aynı geçmiş (3 günlük aralık) verilir: fark yalnız sonucun kendisinden gelmeli.
+        val cozemedim = tekrarOnizlemesi(TekrarSonucu.COZEMEDIM, bugun, oncekiAralik = 3).sonrakiAralik
+        val zorlandim = tekrarOnizlemesi(TekrarSonucu.ZORLANDIM, bugun, oncekiAralik = 3).sonrakiAralik
+        val rahat = tekrarOnizlemesi(TekrarSonucu.RAHAT, bugun, oncekiAralik = 3).sonrakiAralik
         // "Rahat çözdüm" seyrekleşir, "çözemedim" yarına döner: rehberdeki metin bunu anlatır.
         assertTrue(cozemedim < zorlandim)
         assertTrue(zorlandim < rahat)
@@ -116,7 +117,9 @@ class RehberModeliTest {
         val sifir = DemoDersSkoru(dersAdi = "Matematik", soruSayisi = 20, dogru = 0, yanlis = 0)
         assertEquals(sifir, sifir.dogruAzalt())
         assertEquals(sifir, sifir.yanlisAzalt())
-        assertEquals(0, sifir.bos)
+        // Hiç işaretlenmemiş satır tamamen boştur; üç sayının toplamı her zaman soru sayısıdır.
+        assertEquals(20, sifir.bos)
+        assertEquals(20, sifir.dogru + sifir.yanlis + sifir.bos)
     }
 
     @Test
