@@ -70,6 +70,16 @@ class OdakOturumuDeposu(context: Context) {
     /** Committed restore boundary: persistence must succeed BEFORE memory/recovery markers clear. */
     @Synchronized fun temizle() { diskeYaz(null); bellek = null; revizyon++ }
 
+    /** Discard only the session the user confirmed, under the same revision lock as writes. */
+    @Synchronized fun belirliOturumuTemizle(oturumId: String): Boolean {
+        disDegisikligiOku()
+        if (bellek?.id != oturumId) return false
+        diskeYaz(null)
+        bellek = null
+        revizyon++
+        return true
+    }
+
     private fun diskeYaz(oturum: OdakOturumu?) {
         val editor = prefs.edit()
         var yazilan: String? = null

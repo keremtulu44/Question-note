@@ -108,6 +108,7 @@ fun BugunEkrani(
     onOturumBaslat: (List<Soru>, Map<String, Ders>) -> Unit,
     onDevam: (() -> Unit)? = null,
     devamTamamlandi: Boolean = false,
+    onBekleyenOturumuKaldir: (() -> Unit)? = null,
     onDeneme: () -> Unit = {},
     onSorulacaklar: () -> Unit = {},
     denemeler: List<DenemeKaydi> = emptyList(),
@@ -165,7 +166,7 @@ fun BugunEkrani(
         contentWindowInsets = ekranPencereInsetsi(),
     ) { insets ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets),
+            modifier = Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets).testTag("today-list"),
             contentPadding = PaddingValues(start = 20.dp, top = 18.dp, end = 20.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
@@ -179,7 +180,7 @@ fun BugunEkrani(
                 )
             }
             onDevam?.let { devam ->
-                item(key = "bugun-devam") { DevamSatiri(devam, devamTamamlandi) }
+                item(key = "bugun-devam") { DevamSatiri(devam, devamTamamlandi, onBekleyenOturumuKaldir) }
             }
             if (durum is BugunDurumu.Hata) {
                 // Hata durumunda odak kartı yerine tek, eyleme dönük kart: aynı metin iki kez yazılmaz.
@@ -480,28 +481,38 @@ private fun OdakHedefiVeEylemi(
 }
 
 @Composable
-private fun DevamSatiri(onDevam: () -> Unit, tamamlandi: Boolean) {
+private fun DevamSatiri(onDevam: () -> Unit, tamamlandi: Boolean, onKaldir: (() -> Unit)?) {
     val colors = MaterialTheme.colorScheme
     Surface(
-        onClick = onDevam,
         shape = RoundedCornerShape(18.dp),
         color = colors.secondaryContainer.copy(alpha = 0.6f),
-        modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+        modifier = Modifier.fillMaxWidth(),
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            OynatSimgesi(Modifier.size(18.dp), colors.onSecondaryContainer)
-            Text(
-                text = stringResource(if (tamamlandi) R.string.focus_view_finished else R.string.focus_continue_session),
-                modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = colors.onSecondaryContainer,
-            )
-            InceOk(Modifier.size(16.dp), colors.onSecondaryContainer)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Surface(
+                onClick = onDevam,
+                color = Color.Transparent,
+                modifier = Modifier.weight(1f).heightIn(min = 56.dp),
+            ) {
+                Row(Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OynatSimgesi(Modifier.size(18.dp), colors.onSecondaryContainer)
+                    Text(
+                        text = stringResource(if (tamamlandi) R.string.focus_view_finished else R.string.focus_continue_session),
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = colors.onSecondaryContainer,
+                    )
+                    InceOk(Modifier.size(16.dp), colors.onSecondaryContainer)
+                }
+            }
+            if (onKaldir != null) {
+                PremiumTextButton(onClick = onKaldir, modifier = Modifier.padding(end = 4.dp)) {
+                    Text(stringResource(R.string.focus_remove_action))
+                }
+            }
         }
     }
 }

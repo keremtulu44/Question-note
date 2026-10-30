@@ -194,6 +194,27 @@ class CozumTahtasiKullanimTest {
     }
 
     @Test
+    fun tappingTheBoardCreatesAnUndoableDot() {
+        val depot = LocalSoruGorselDeposu(context)
+        compose.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                CozumTahtasiDialog(soru = soru(), gorselDeposu = depot, visible = true, onDismiss = {})
+            }
+        }
+        val canvas = compose.onNodeWithTag("solution-whiteboard-canvas")
+        canvas.performTouchInput { click(Offset(width * 0.2f, height * 0.2f)) }
+        compose.waitUntil(5_000) {
+            canvas.fetchSemanticsNode().config[SemanticsProperties.StateDescription] ==
+                context.getString(R.string.whiteboard_mark_count, 1)
+        }
+        compose.onNodeWithTag("whiteboard-undo").performClick()
+        compose.waitUntil(5_000) {
+            canvas.fetchSemanticsNode().config[SemanticsProperties.StateDescription] ==
+                context.getString(R.string.whiteboard_no_marks)
+        }
+    }
+
+    @Test
     fun drawingDockHasClearToolSelectionAndGroupedStyleControls() {
         val depot = LocalSoruGorselDeposu(context)
         compose.setContent {

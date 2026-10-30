@@ -13,6 +13,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.aspectRatio
@@ -1676,6 +1677,18 @@ private fun TahtaCalismaAlani(
                                             baslangic = null
                                         },
                                     )
+                                }
+                            }
+                            .pointerInput(soruId, arac, renk, kalinlik, imageRatio, soruUzerindeCizim, soruGorseli?.id, panMode) {
+                                // Short taps are useful as dots (and for erasing tiny marks); the
+                                // drag detector above still owns strokes and shapes after touch slop.
+                                if (!panMode && (arac == TahtaAraci.KALEM || arac == TahtaAraci.SILGI)) {
+                                    detectTapGestures { pos ->
+                                        val viewport = fittedImageBounds(Size(size.width.toFloat(), size.height.toFloat()), imageRatio)
+                                        normalizedPoint(pos, viewport, clampToBounds = false)?.let { nokta ->
+                                            onVurusBitti(TahtaVurusu(arac, listOf(nokta), renk, kalinlik))
+                                        }
+                                    }
                                 }
                             },
                     ) {

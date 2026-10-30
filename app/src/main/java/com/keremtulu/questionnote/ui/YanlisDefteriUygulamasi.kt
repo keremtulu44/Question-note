@@ -344,6 +344,7 @@ fun YanlisDefteriUygulamasi(
         calismaTercihleri.filtreliKaydet(profilSecimi.profil, yeni)
     }
     var yeniOturumIstegi by remember { mutableStateOf<OturumBaslatmaIstegi?>(null) }
+    var oturumSilmeOnayi by remember { mutableStateOf(false) }
     // Filtreli oturum sürerken başka bir ekrana geçilirse önce onay istenir.
     var oturumCikisHedefi by remember { mutableStateOf<UygulamaEkrani?>(null) }
     var kurtarma by remember { mutableStateOf(KurtarmaDurumu.YUKLENIYOR) }
@@ -478,9 +479,14 @@ fun YanlisDefteriUygulamasi(
                 val kayit = withContext(Dispatchers.IO) { oturumDeposu.oku() }
                 val yenilenen = kayit?.takeIf { it.id == bekleyenId }?.let { oturumuYukle(it) }
                 if (yenilenen == null) {
-                    if (kayit?.id == bekleyenId) withContext(Dispatchers.IO) { oturumDeposu.temizle() }
-                    bekleyenOturum = null
-                    snackbarHostState.showSnackbar(context.getString(R.string.focus_no_questions))
+                    if (kayit?.id == bekleyenId) withContext(Dispatchers.IO) {
+                        oturumDeposu.belirliOturumuTemizle(bekleyenId)
+                    }
+                    val simdiki = withContext(Dispatchers.IO) { oturumDeposu.oku() }
+                    bekleyenOturum = simdiki?.takeIf { it.id != bekleyenId }?.let { oturumuYukle(it) }
+                    snackbarHostState.showSnackbar(context.getString(
+                        if (bekleyenOturum != null) R.string.focus_session_changed else R.string.focus_no_questions,
+                    ))
                 } else if (ekran == baslangicEkrani) {
                     oturumGoster(yenilenen.sorular, yenilenen.dersler, yenilenen.oturum)
                 } else {
@@ -516,7 +522,7 @@ fun YanlisDefteriUygulamasi(
             if (kayit != null) {
                 val kurtarilan = oturumuYukle(kayit)
                 if (kurtarilan != null) bekleyenOturum = kurtarilan
-                else withContext(Dispatchers.IO) { oturumDeposu.temizle() }
+                else withContext(Dispatchers.IO) { oturumDeposu.belirliOturumuTemizle(kayit.id) }
             }
             rozetHizmeti.degerlendir(kutla = false)
             kurtarma = KurtarmaDurumu.HAZIR
@@ -797,6 +803,7 @@ fun YanlisDefteriUygulamasi(
                         onOturumBaslat = { sorular, dersler -> oturumBaslat(sorular, dersler, bugunden = true) },
                         onDevam = bekleyenOturum?.let { { bekleyenOturumaDevam() } },
                         devamTamamlandi = bekleyenOturum?.oturum?.bitti == true,
+                        onBekleyenOturumuKaldir = bekleyenOturum?.let { { oturumSilmeOnayi = true } },
                     )
                     UygulamaEkrani.Sorulacaklar -> SorulacaklarEkrani(
                         soruRepository = soruRepository,
@@ -868,6 +875,7 @@ fun YanlisDefteriUygulamasi(
                         onOturumBaslat = { questions, lessons -> oturumBaslat(questions, lessons) },
                         onDevam = bekleyenOturum?.let { { bekleyenOturumaDevam() } },
                         devamTamamlandi = bekleyenOturum?.oturum?.bitti == true,
+                        onBekleyenOturumuKaldir = bekleyenOturum?.let { { oturumSilmeOnayi = true } },
                     )
                     is UygulamaEkrani.FiltreliOturum -> {
                         val question = current.sorular.firstOrNull { it.id == current.oturum.simdikiId }
@@ -1028,8 +1036,46 @@ fun YanlisDefteriUygulamasi(
         goster = aktifRol == com.keremtulu.questionnote.domain.model.KullaniciRolu.OGRENCI &&
             kurtarma == KurtarmaDurumu.HAZIR && !yedeklemeIslemde &&
             ekran !is UygulamaEkrani.FiltreliOturum && ekran !is UygulamaEkrani.SoruFormu &&
-            ekran !is UygulamaEkrani.SoruAyrintisi && oturumCikisHedefi == null && geriYuklemeOnizlemesi == null,
+            ekran !is UygulamaEkrani.SoruAyrintisi && oturumCikisHedefi == null &&
+            yeniOturumIstegi == null && !oturumSilmeOnayi && geriYuklemeOnizlemesi == null,
     )
+
+    if (oturumSilmeOnayi && bekleyenOturum != null) {
+        AlertDialog(
+            onDismissRequest = { oturumSilmeOnayi = false },
+            title = { Text(stringResource(R.string.focus_remove_title)) },
+            text = { Text(stringResource(R.string.focus_remove_message)) },
+            confirmButton = {
+                PremiumButton(onClick = {
+                    val id = bekleyenOturum?.oturum?.id
+                    oturumSilmeOnayi = false
+                    if (id != null && !oturumBaslatiliyor && !yedeklemeIslemde) {
+                        oturumBaslatiliyor = true
+                        scope.launch {
+                            try {
+                                val silindi = withContext(Dispatchers.IO) { oturumDeposu.belirliOturumuTemizle(id) }
+                                val guncel = if (silindi) null else
+                                    withContext(Dispatchers.IO) { oturumDeposu.oku() }?.let { oturumuYukle(it) }
+                                if (bekleyenOturum?.oturum?.id == id) bekleyenOturum = guncel
+                                if (!silindi && guncel != null) {
+                                    snackbarHostState.showSnackbar(context.getString(R.string.focus_session_changed))
+                                }
+                            } catch (iptal: CancellationException) {
+                                throw iptal
+                            } catch (_: Exception) {
+                                snackbarHostState.showSnackbar(context.getString(R.string.focus_remove_error))
+                            } finally {
+                                oturumBaslatiliyor = false
+                            }
+                        }
+                    }
+                }) { Text(stringResource(R.string.focus_remove_confirm)) }
+            },
+            dismissButton = {
+                PremiumTextButton(onClick = { oturumSilmeOnayi = false }) { Text(stringResource(R.string.topic_cancel)) }
+            },
+        )
+    }
 
     yeniOturumIstegi?.let { istek ->
         AlertDialog(

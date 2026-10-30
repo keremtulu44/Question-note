@@ -75,6 +75,7 @@
     <string name="deneme_error_name_length">Deneme adı yaz; en fazla 120 karakter kullan.</string>
     <string name="deneme_error_duplicate_name">Bu ad başka bir denemede kullanılıyor. Soruları ayırt etmek için farklı bir ad seç.</string>
     <string name="deneme_save_error">Deneme kaydedilemedi. Bilgilerin ekranda duruyor; yeniden dene.</string>
+    <string name="deneme_save_partial_error">Deneme kaydedilemedi; soruların kaynağı yeni ada taşınmış olabilir. Aynı adla kaydetmeyi yeniden dene.</string>
     <string name="deneme_analysis_title">Deneme analizi</string>
     <string name="deneme_analysis_saved">Son kaydedilen sonuçlara göre</string>
     <string name="deneme_unknown_lesson">Ders</string>
@@ -762,11 +763,17 @@
     <string name="whiteboard_clear_title">Tahtayı temizle?</string>
     <string name="whiteboard_clear_confirm">Bu soru için çizdiğin tüm geçici işaretler kaldırılacak. Özgün soru görseli etkilenmez.</string>
     <string name="whiteboard_clear_action">Tümünü temizle</string>
-    <string name="whiteboard_no_marks">Çözümünü çizmek için alanı sürükle.</string>
+    <string name="whiteboard_no_marks">Çizmek için sürükle, nokta koymak için dokun.</string>
     <string name="focus_no_questions">Bu oturumdaki sorular artık kullanılabilir değil.</string>
     <string name="focus_restore_note">Yarım kalan odak oturumun geri getirildi.</string>
     <string name="focus_continue_session">Yarım kalan oturuma devam et</string>
     <string name="focus_view_finished">Son oturumun özetini aç</string>
+    <string name="focus_remove_action">Kaldır</string>
+    <string name="focus_remove_title">Bekleyen oturum kaldırılsın mı?</string>
+    <string name="focus_remove_message">Devam noktası silinir. Daha önce kaydettiğin tekrarlar ve soruların korunur.</string>
+    <string name="focus_remove_confirm">Oturumu kaldır</string>
+    <string name="focus_remove_error">Oturum kaldırılamadı. Lütfen yeniden dene.</string>
+    <string name="focus_session_changed">Kayıt değişti; güncel oturum gösteriliyor.</string>
     <string name="focus_replace_title">Yarım kalan oturum var</string>
     <string name="focus_replace_message">Yeni bir tur başlatırsan eski oturumun devam noktası kaldırılır. Daha önce kaydettiğin tekrarlar korunur.</string>
     <string name="focus_replace_action">Yeni turu başlat</string>

@@ -64,4 +64,54 @@ class DenemeHesabiTest {
         assertEquals(-2.0, barlar.single().sonNet, 0.001)
         assertEquals("Matematik", barlar.single().dersAdi)
     }
+    @Test
+    fun dersOrtalamasiGelecegiVeFarkliSoruSayisiniKullanmaz() {
+        val eski = DenemeKaydi("e", "Eski", NetKurali.DORTTE_BIR, 1, 10,
+            listOf(DenemeDersSatiri("m", 40, 20, 4)))
+        val farkliBoyut = DenemeKaydi("f", "Farklı", NetKurali.DORTTE_BIR, 2, 15,
+            listOf(DenemeDersSatiri("m", 10, 5, 0)))
+        val secili = DenemeKaydi("s", "Seçili", NetKurali.DORTTE_BIR, 3, 20,
+            listOf(DenemeDersSatiri("m", 40, 25, 4)))
+        val gelecek = DenemeKaydi("g", "Gelecek", NetKurali.DORTTE_BIR, 4, 30,
+            listOf(DenemeDersSatiri("m", 40, 40, 0)))
+        val tumu = listOf(gelecek, secili, farkliBoyut, eski)
+        assertEquals(19.0, tumu.dersBarlari(secili).single().oncekiOrtalama!!, 0.001)
+        assertNull(tumu.dersBarlari(eski).single().oncekiOrtalama)
+        assertEquals(eski, tumu.oncekiAyniKural(secili))
+        assertFalse(farkliBoyut.karsilastirilabilir(secili))
+    }
+
+    @Test
+    fun kayipOraniDersBoyutunuDikkateAlirVeHicKayipYoksaZayifDersUydurmaz() {
+        val kayit = DenemeKaydi("d", "Deneme", NetKurali.DORTTE_BIR, 1, 10, listOf(
+            DenemeDersSatiri("mat", 40, 32, 8),
+            DenemeDersSatiri("fen", 5, 2, 3),
+        ))
+        assertEquals("fen", kayit.enZayif()?.dersId)
+        assertNull(kayit.copy(satirlar = listOf(DenemeDersSatiri("m", 10, 10, 0))).enZayif())
+    }
+
+    @Test
+    fun nedenAnaliziYalnizEslesenSorulariSayisallastirirVeBelirsizKaynaktaTahminYapmaz() {
+        val deneme = DenemeKaydi("d", "Deneme 1", NetKurali.DORTTE_BIR, 1, 10,
+            listOf(DenemeDersSatiri("m", 10, 6, 2)))
+        fun soru(id: String, kaynak: String?, neden: String?) = Soru(
+            id = id, dersId = "m", konuId = null, soruNotu = null, cozumNotu = null,
+            kaynak = kaynak, yanlisNedeni = neden, favori = false, planDurumu = SoruPlanDurumu.AKTIF,
+            ogrenmeDurumu = OgrenmeDurumu.YENI, sonTekrarGun = null, sonrakiTekrarGun = null,
+            olusturma = 1, guncelleme = 1,
+        )
+        val sorular = listOf(
+            soru("1", " deneme  1 ", "Dikkat"), soru("2", "DENEME 1", " dikkat "),
+            soru("3", "Deneme 1", null), soru("4", "Başka", "Konu eksiği"),
+        )
+        val analiz = requireNotNull(deneme.defterAnalizi(listOf(deneme), sorular))
+        assertEquals(3, analiz.soruSayisi)
+        assertEquals(listOf(DenemeNedenSayisi("Dikkat", 2)), analiz.nedenler)
+        assertEquals(1, analiz.nedeniBelirtilmeyen)
+        assertEquals(mapOf("m" to 3), analiz.dersSayilari)
+        assertNull(deneme.defterAnalizi(listOf(deneme, deneme.copy(id = "other")), sorular))
+        assertNull(deneme.copy(kaynakBelirsiz = true).defterAnalizi(listOf(deneme), sorular))
+    }
+
 }

@@ -113,6 +113,7 @@ fun FiltreliCalismaEkrani(
     onOturumBaslat: (List<Soru>, Map<String, Ders>) -> Unit,
     onDevam: (() -> Unit)? = null,
     devamTamamlandi: Boolean = false,
+    onBekleyenOturumuKaldir: (() -> Unit)? = null,
 ) {
     var yenileme by remember { mutableIntStateOf(0) }
     val bugun = com.keremtulu.questionnote.ui.bilesenler.hatirlaYerelGun()
@@ -426,10 +427,15 @@ fun FiltreliCalismaEkrani(
             }
 
             if (onDevam != null) item {
-                PremiumOutlinedButton(onClick = onDevam, modifier = Modifier.fillMaxWidth()) {
-                    Text(androidx.compose.ui.res.stringResource(
-                        if (devamTamamlandi) R.string.focus_view_finished else R.string.focus_continue_session,
-                    ))
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    PremiumOutlinedButton(onClick = onDevam, modifier = Modifier.fillMaxWidth()) {
+                        Text(androidx.compose.ui.res.stringResource(
+                            if (devamTamamlandi) R.string.focus_view_finished else R.string.focus_continue_session,
+                        ))
+                    }
+                    if (onBekleyenOturumuKaldir != null) PremiumTextButton(onClick = onBekleyenOturumuKaldir) {
+                        Text(androidx.compose.ui.res.stringResource(R.string.focus_remove_action))
+                    }
                 }
             }
             if (secenekDurumu is EkranYukleme.Hazir) item {

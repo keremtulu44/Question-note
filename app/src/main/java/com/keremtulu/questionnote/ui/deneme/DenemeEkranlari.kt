@@ -127,6 +127,9 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -979,16 +982,23 @@ fun DenemeDetayEkrani(
             gun = seciliGun,
             satirlar = gecerliSatirlar,
         )
+        var kaynakTasindi = false
         try {
-            // When older records share a name, their questions cannot safely be reassigned
-            // to either exam. Register the new source but leave the old questions untouched.
-            soruRepository.kaynakAdiDegistir(if (kaynakBelirsiz) null else mevcut?.ad, temizAd)
-            denemeDeposu.kaydet(kaydedilecek)
+            // Room and SharedPreferences cannot share a transaction. Finish both operations
+            // even if navigation disposes the screen, and report any partial failure honestly.
+            withContext(NonCancellable + Dispatchers.IO) {
+                // Older duplicate names cannot safely be attributed to either exam.
+                soruRepository.kaynakAdiDegistir(if (kaynakBelirsiz) null else mevcut?.ad, temizAd)
+                kaynakTasindi = mevcut != null && !kaynakBelirsiz && !denemeKaynakEslesir(mevcut.ad, temizAd)
+                denemeDeposu.kaydet(kaydedilecek)
+            }
             return kaydedilecek
         } catch (iptal: kotlinx.coroutines.CancellationException) {
             throw iptal
         } catch (_: Exception) {
-            snackbar.showSnackbar(context.getString(R.string.deneme_save_error))
+            snackbar.showSnackbar(context.getString(
+                if (kaynakTasindi) R.string.deneme_save_partial_error else R.string.deneme_save_error,
+            ))
             return null
         }
     }

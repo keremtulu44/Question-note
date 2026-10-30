@@ -191,7 +191,7 @@ fun DerslerEkrani(
                     } else {
                         LazyVerticalGrid(
                             columns = GridCells.Adaptive(minSize = 156.dp),
-                            modifier = Modifier.fillMaxWidth().weight(1f),
+                            modifier = Modifier.fillMaxWidth().weight(1f).testTag("lessons-grid"),
                             contentPadding = PaddingValues(start = 18.dp, top = 20.dp, end = 18.dp, bottom = 24.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp),

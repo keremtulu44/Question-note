@@ -61,6 +61,23 @@ class OlcumDevamNoktasiTest {
         assertNull(OdakOturumuDeposu(context).oku())
     }
 
+    @Test fun discardingOnlyClearsTheConfirmedOwnerAndInvalidatesQueuedWrites() = runBlocking {
+        val depo = OdakOturumuDeposu(context)
+        depo.kaydet(oturum)
+        val bekleyen = depo.olcumuHazirla(oturum.id, nokta())
+        assertFalse(depo.belirliOturumuTemizle("another-session"))
+        assertEquals(oturum.id, depo.oku()?.id)
+        assertTrue(depo.belirliOturumuTemizle(oturum.id))
+        depo.kalicilastir(bekleyen)
+        assertNull(OdakOturumuDeposu(context).oku())
+
+        val yeni = oturum.copy(id = "new-session")
+        OdakOturumuDeposu(context).kaydet(yeni)
+        assertFalse(depo.belirliOturumuTemizle(oturum.id))
+        assertEquals(yeni.id, depo.oku()?.id)
+        assertEquals(yeni.id, OdakOturumuDeposu(context).oku()?.id)
+    }
+
     @Test fun anotherStoreClearingPreferencesAlsoInvalidatesOldQueuedIo() = runBlocking {
         val depo = OdakOturumuDeposu(context); depo.kaydet(oturum)
         val eski = depo.olcumuHazirla(oturum.id, nokta())
