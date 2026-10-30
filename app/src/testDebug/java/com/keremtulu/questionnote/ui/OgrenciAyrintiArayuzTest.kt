@@ -185,6 +185,39 @@ class OgrenciAyrintiArayuzTest {
         assertTrue(runBlocking { questions.soruGetir("sorulacak")?.cozumNotu.orEmpty().contains("Hocamın çözüm notu") })
     }
 
+    @Test fun kaybolanSorununTaslagiBaskaSoruyaTasinmaz() {
+        soruEkle("ilk", null, plan = "OGRETMENE_SORULACAK")
+        soruEkle("ikinci", null, plan = "OGRETMENE_SORULACAK")
+        val restoration = StateRestorationTester(compose)
+        restoration.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                SorulacaklarEkrani(
+                    soruRepository = questions, dersRepository = lessons, gorselDeposu = images,
+                    onGeri = {}, onSoruDetayAc = { _, _ -> },
+                )
+            }
+        }
+        compose.waitUntil(10_000) { compose.onAllNodesWithTag("sorulacaklar_liste").fetchSemanticsNodes().isNotEmpty() }
+        compose.waitUntil(10_000) {
+            runCatching {
+                compose.onNodeWithTag("sorulacaklar_liste").performScrollToNode(hasTestTag("sorulacak_cozdurdum_ilk"))
+            }.isSuccess
+        }
+        compose.onNodeWithTag("sorulacak_cozdurdum_ilk").performClick()
+        compose.onNodeWithTag("cozdurdum-dialog-list").performScrollToNode(hasTestTag("cozdurdum-solution-note"))
+        compose.onNodeWithTag("cozdurdum-solution-note").performTextReplacement("Yalnızca ilk sorunun notu")
+        runBlocking { db.soruDao().idIleGetir("ilk")?.let { db.soruDao().sil(it) } }
+        restoration.emulateSavedInstanceStateRestore()
+        compose.waitUntil(10_000) {
+            runCatching {
+                compose.onNodeWithTag("sorulacaklar_liste").performScrollToNode(hasTestTag("sorulacak_cozdurdum_ikinci"))
+            }.isSuccess
+        }
+        compose.onNodeWithTag("sorulacak_cozdurdum_ikinci").performClick()
+        compose.onNodeWithTag("cozdurdum-dialog-list").performScrollToNode(hasTestTag("cozdurdum-solution-note"))
+        compose.onNode(hasTestTag("cozdurdum-solution-note") and hasText("Yalnızca ilk sorunun notu")).assertDoesNotExist()
+    }
+
     private fun ayarlariGoster(repository: DersRepository, buyukYazi: Boolean = false) {
         val hedef = TercihGunlukHedefDeposu(context)
         val politika = TekrarPolitikasiDeposu(context)

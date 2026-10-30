@@ -87,6 +87,28 @@ class OlcumDevamNoktasiTest {
         assertNull(OdakOturumuDeposu(context).oku())
     }
 
+    @Test fun anotherStoreClearingAnAlreadyEmptyDiskInvalidatesAnUnwrittenCheckpoint() = runBlocking {
+        val appOwner = OdakOturumuDeposu(context)
+        val restoreOwner = OdakOturumuDeposu(context)
+        val bekleyen = appOwner.hazirla(oturum) // No write has reached preferences yet.
+        restoreOwner.temizle() // Disk was already empty, but this is still a committed restore boundary.
+        appOwner.kalicilastir(bekleyen)
+        assertNull(appOwner.oku())
+        assertNull(OdakOturumuDeposu(context).oku())
+    }
+
+    @Test fun anotherStoreReplacingTheOwnerInvalidatesOldWriteAndDiscard() = runBlocking {
+        val appOwner = OdakOturumuDeposu(context)
+        val otherOwner = OdakOturumuDeposu(context)
+        appOwner.kaydet(oturum)
+        val bekleyen = appOwner.olcumuHazirla(oturum.id, nokta())
+        val yeni = oturum.copy(id = "other-owner")
+        otherOwner.kaydet(yeni)
+        assertFalse(appOwner.belirliOturumuTemizle(oturum.id))
+        appOwner.kalicilastir(bekleyen)
+        assertEquals(yeni.id, OdakOturumuDeposu(context).oku()?.id)
+    }
+
     @Test fun anOlderSessionWriteCannotRewindTheCompletedQuestionPosition() = runBlocking {
         val depo = OdakOturumuDeposu(context)
         val eski = depo.hazirla(oturum)

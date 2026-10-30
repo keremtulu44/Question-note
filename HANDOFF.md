@@ -1,7 +1,41 @@
 # HANDOFF — Yanlış Defteri
 
-**Son güncelleme: 2026-10-28.** Önce bu belge, `docs/DERLEME_RAPORU.md`,
+**Son güncelleme: 2026-10-30.** Önce bu belge, `docs/DERLEME_RAPORU.md`,
 `docs/PREMIUM_GORSEL_GELISTIRME.md` ve [P4–P6 sözleşme/kanıt kaydı](docs/P4_P5_P6_UYGULAMA.md) okunur.
+
+## 2026-10-30 — öğrenci akışı genel kontrolü (taslak PR #16)
+
+Çalışma `arena/02fc0055-question-note` dalında, [PR #16](https://github.com/keremtulu44/Question-note/pull/16)
+üzerindedir; ana dala birleştirilmedi. Öğretmen modu askıda kalır; **öğrencinin**
+öğretmene sorulacaklar akışı çalışır. Oturuma devam her zaman kullanıcının açık seçimiyle yapılır.
+
+- Soru ve deneme formları değişiklik varsa geri/vazgeç öncesinde onay ister; değişiklik
+  yoksa gereksiz uyarı çıkarmaz. Soru formunda görsel sırası ve geçici dosya değişiklikleri
+  de karşılaştırılır; durum kurtarmada ilk değer ve taslak saklanır. Deneme kaydı sırasında
+  girişler/geri eylemi kilitlenir; silme hatası sessiz başarı olarak gösterilmez.
+- Çözdürdüm penceresindeki öğrenci çözüm notu, seçilen görseller ve bekleyen kamera kimliği
+  kurtarılabilir; hedef soru yüklenene kadar beklenir, soru bulunamazsa bildirilir. Soruya özel
+  durum anahtarı taslağın başka soruya geçmesini engeller. Değişiklikleri terk etmek veya
+  seçilmiş fotoğrafları kaydetmeden ilerlemek onay gerektirir; geçici dosyaların temizliği
+  kapatmadan önce beklenir. Bu akış gerçek kamera/galeri cihaz testi değildir.
+- İlk kurulum, Ayarlar ders listesi ve kaynak/neden kataloğunda yükleme hatası açıkça gösterilir
+  ve yeniden denenebilir. Son seçili ders kaldırılamadığında nedeni bildirilir. Sorulacaklar
+  ders filtresi, konu merkezi araması ve dersin arşiv filtresi ileri/geri gezinmede korunur.
+- Soru detayında boş çözüm için yanıltıcı düğme yoktur; açılmış gerçek çözüm yapılandırma
+  kurtarmasından sonra da açılmış sayılır. Üst panelde seri henüz okunmadıysa "sıfır seri"
+  uydurulmaz. `OdakOturumuDeposu` örnekleri süreç içi ortak kilit/nesil ile yedek geri
+  yükleme sonrası eski bekleyen yazıları engeller (farklı Android süreçleri için kilit değildir).
+- Önceki çalışma: ilk karede görünür lazy içerik; ders/filtre tercihlerinin korunması;
+  kullanıcının seçimiyle yarım oturuma devam/silme/üzerine yazma; gerçek deneme, kaynak ve
+  yanlış nedenleriyle analiz. Room kaynak taşıma ile deneme tercihleri aynı işlem değildir;
+  kısmi hata bildirilir ve aynı adla yeniden denenebilir.
+
+Doğrulama: PR'daki Android Debug/Release test sonucu için
+[Actions kontrollerine](https://github.com/keremtulu44/Question-note/pull/16/checks) bak;
+`docs/DERLEME_RAPORU.md` PR çalışmasında güncellenmeyen **main release** raporudur.
+Yerelde SDK yoktur. Gerçek cihaz/emülatör, fiziksel kamera/galeri, imzalı APK ve yayın
+bu çalışmada doğrulanmadı/üretilmedi. Yeni testler Robolectric + gerçek Room ve tercih
+sınamalarıdır; fiziksel cihaz kabul testi yerine geçmez.
 
 ## 2026-10-28 — üç iş: form kurtarma, CI bölme, belge senkronu (dal: `arena/35cb2bf0-question-note`)
 
@@ -13,9 +47,9 @@ Kullanıcı onayıyla üç iş uygulandı; **sürüm artırılmadı** (APK yayı
    durumu `UygulamaEkraniSaver` (JSON) ile kurtarılıyor (odak oturumu ekranı bilerek Bugün'e
    döner, oturum devam noktası deposundan gelir). Düzenlemede kurtarılan değer DB ile
    ezilmiyor; kaydet/vazgeç taslağı sıfırlıyor. Yeni test: `SoruFormuDurumKurtarmaTest`
-   (saver round-trip + `StateRestorationTester`). Aynı desen `SorulacaklarEkrani`
-   Çözdürdüm dialogunda da var; dialog hedefi (`Soru`) kalıcı olmadığından bilinçli olarak
-   kapsam dışı bırakıldı — ayrı küçük iş olarak yapılabilir.
+   (saver round-trip + `StateRestorationTester`). `SorulacaklarEkrani` içindeki
+   Çözdürdüm dialogu o tarihte hedef (`Soru`) kalıcı olmadığı için kapsam dışındaydı;
+   sonraki 2026-10-30 öğrenci akışı kontrolüne bak.
 2. **CI bölündü:** `.github/workflows/android.yml` → `test` (PR + main/v*; salt-okunur,
    secret'sız; kanıt artifact + step summary) ve `release` (yalnız main/v*, `needs: test`;
    imza/Release/rapor commit'i burada). Elle dal listesi kaldırıldı; dalda CI için PR açmak

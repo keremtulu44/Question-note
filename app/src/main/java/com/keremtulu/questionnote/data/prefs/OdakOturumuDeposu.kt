@@ -11,17 +11,32 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 
-/** Process-owned small checkpoint. In-memory revisions prevent late IO from reviving a cleared session. */
+/** Process-owned checkpoint. All instances coordinate so late IO cannot revive a cleared session. */
 class OdakOturumuDeposu(context: Context) {
-    private val prefs = context.applicationContext.getSharedPreferences("odak_oturumu", Context.MODE_PRIVATE)
-    private var diskIzi = prefs.getString("oturum", null)
-    private var revizyon = 0L
-    private var bellek = disktenOku()?.let { s -> s.copy(olcumler = s.olcumler.mapValues { it.value.surectenKurtar() }) }
+    companion object {
+        // The UI and restore service may each construct a repository for this same preferences file.
+        private val ortakKilit = Any()
+        private var ortakYazmaNesli = 0L
+    }
 
-    @Synchronized fun oku(): OdakOturumu? { disDegisikligiOku(); return bellek }
+    private val prefs = context.applicationContext.getSharedPreferences("odak_oturumu", Context.MODE_PRIVATE)
+    private var diskIzi: String? = null
+    private var gorulenYazmaNesli = 0L
+    private var revizyon = 0L
+    private var bellek: OdakOturumu? = null
+
+    init {
+        synchronized(ortakKilit) {
+            diskIzi = prefs.getString("oturum", null)
+            gorulenYazmaNesli = ortakYazmaNesli
+            bellek = disktenOku()?.let { s -> s.copy(olcumler = s.olcumler.mapValues { it.value.surectenKurtar() }) }
+        }
+    }
+
+    fun oku(): OdakOturumu? = synchronized(ortakKilit) { disDegisikligiOku(); bellek }
 
     /** Runs on the UI thread without IO. Call kalicilastir with the returned revision. */
-    @Synchronized fun hazirla(oturum: OdakOturumu): Long {
+    fun hazirla(oturum: OdakOturumu): Long = synchronized(ortakKilit) {
         disDegisikligiOku()
         val onceki = bellek?.takeIf { it.id == oturum.id }
         val birlesik = oturum.olcumler.toMutableMap()
@@ -31,22 +46,22 @@ class OdakOturumuDeposu(context: Context) {
         val kalan = oturum.soruIdleri.drop(oturum.sira).toSet() - oturum.sonuclar.map { it.soruId }.toSet()
         bellek = oturum.copy(olcumler = birlesik.filterKeys { it in kalan },
             cozumAcilanlar = oturum.cozumAcilanlar + onceki?.cozumAcilanlar.orEmpty())
-        return ++revizyon
+        ++revizyon
     }
 
-    @Synchronized fun olcumuHazirla(oturumId: String, nokta: OlcumDevamNoktasi): Long? {
+    fun olcumuHazirla(oturumId: String, nokta: OlcumDevamNoktasi): Long? = synchronized(ortakKilit) {
         disDegisikligiOku()
-        val oturum = bellek?.takeIf { it.id == oturumId } ?: return null
-        if (nokta.soruId !in oturum.soruIdleri.drop(oturum.sira) || oturum.sonuclar.any { it.soruId == nokta.soruId }) return null
+        val oturum = bellek?.takeIf { it.id == oturumId } ?: return@synchronized null
+        if (nokta.soruId !in oturum.soruIdleri.drop(oturum.sira) || oturum.sonuclar.any { it.soruId == nokta.soruId }) return@synchronized null
         val eski = oturum.olcumler[nokta.soruId]
-        if (eski != null && (eski.denemeId != nokta.denemeId || eski.revizyon >= nokta.revizyon)) return null
+        if (eski != null && (eski.denemeId != nokta.denemeId || eski.revizyon >= nokta.revizyon)) return@synchronized null
         bellek = oturum.copy(olcumler = oturum.olcumler + (nokta.soruId to nokta),
             cozumAcilanlar = if (nokta.cozumAcildi) oturum.cozumAcilanlar + nokta.soruId else oturum.cozumAcilanlar)
-        return ++revizyon
+        ++revizyon
     }
 
     suspend fun kalicilastir(surum: Long?) = withContext(Dispatchers.IO) {
-        synchronized(this@OdakOturumuDeposu) {
+        synchronized(ortakKilit) {
             disDegisikligiOku()
             if (surum != null && surum == revizyon) diskeYaz(bellek)
         }
@@ -54,7 +69,7 @@ class OdakOturumuDeposu(context: Context) {
 
     /** Reveal barrier: flush the LATEST owner state, not a possibly superseded queued revision. */
     suspend fun cozumIsaretiniKalicilastir(oturumId: String, soruId: String): Boolean = withContext(Dispatchers.IO) {
-        synchronized(this@OdakOturumuDeposu) {
+        synchronized(ortakKilit) {
             disDegisikligiOku()
             val oturum = bellek
             if (oturum?.id != oturumId || soruId !in oturum.cozumAcilanlar ||
@@ -64,20 +79,22 @@ class OdakOturumuDeposu(context: Context) {
     }
 
     /** Synchronous compatibility/test API. App UI uses hazirla + the IO method instead. */
-    @Synchronized fun kaydet(oturum: OdakOturumu) { hazirla(oturum); diskeYaz(bellek) }
-    @Synchronized fun sifirlamayiHazirla(): Long { bellek = null; return ++revizyon }
+    fun kaydet(oturum: OdakOturumu) = synchronized(ortakKilit) { hazirla(oturum); diskeYaz(bellek) }
+    fun sifirlamayiHazirla(): Long = synchronized(ortakKilit) { bellek = null; ++revizyon }
 
     /** Committed restore boundary: persistence must succeed BEFORE memory/recovery markers clear. */
-    @Synchronized fun temizle() { diskeYaz(null); bellek = null; revizyon++ }
+    fun temizle() {
+        synchronized(ortakKilit) { diskeYaz(null); bellek = null; revizyon++ }
+    }
 
     /** Discard only the session the user confirmed, under the same revision lock as writes. */
-    @Synchronized fun belirliOturumuTemizle(oturumId: String): Boolean {
+    fun belirliOturumuTemizle(oturumId: String): Boolean = synchronized(ortakKilit) {
         disDegisikligiOku()
-        if (bellek?.id != oturumId) return false
+        if (bellek?.id != oturumId) return@synchronized false
         diskeYaz(null)
         bellek = null
         revizyon++
-        return true
+        true
     }
 
     private fun diskeYaz(oturum: OdakOturumu?) {
@@ -102,12 +119,15 @@ class OdakOturumuDeposu(context: Context) {
         }
         check(editor.commit()) { "Oturum kaydedilemedi" }
         diskIzi = yazilan
+        gorulenYazmaNesli = ++ortakYazmaNesli
     }
 
+    /** Called with ortakKilit held; a no-op clear still invalidates another instance's queued IO. */
     private fun disDegisikligiOku() {
         val kayit = prefs.getString("oturum", null)
-        if (kayit != diskIzi) {
+        if (kayit != diskIzi || gorulenYazmaNesli != ortakYazmaNesli) {
             diskIzi = kayit
+            gorulenYazmaNesli = ortakYazmaNesli
             bellek = disktenOku()?.let { s -> s.copy(olcumler = s.olcumler.mapValues { it.value.surectenKurtar() }) }
             revizyon++
         }

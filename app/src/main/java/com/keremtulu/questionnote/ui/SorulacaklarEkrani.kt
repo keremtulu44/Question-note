@@ -47,6 +47,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -370,18 +371,21 @@ fun SorulacaklarEkrani(
     }
 
     cozdurdumHedef?.let { soru ->
-        CozdurdumDialog(
-            soru = soru,
-            soruRepository = soruRepository,
-            gorselDeposu = gorselDeposu,
-            onDismiss = ::cozdurdumuKapat,
-            onBasarili = {
-                cozdurdumuKapat()
-                scope.launch {
-                    snackbarHostState.showSnackbar(context.getString(R.string.ask_teacher_resolved_snackbar))
-                }
-            },
-        )
+        // A restored draft must never be reused for a different question.
+        key(soru.id) {
+            CozdurdumDialog(
+                soru = soru,
+                soruRepository = soruRepository,
+                gorselDeposu = gorselDeposu,
+                onDismiss = ::cozdurdumuKapat,
+                onBasarili = {
+                    cozdurdumuKapat()
+                    scope.launch {
+                        snackbarHostState.showSnackbar(context.getString(R.string.ask_teacher_resolved_snackbar))
+                    }
+                },
+            )
+        }
     }
 }
 
