@@ -136,8 +136,13 @@ class OturumDevamArayuzTest {
         assertEquals("bekleyen", sessions.oku()?.id)
 
         val start = context.getString(R.string.focus_start_today)
-        compose.onNodeWithTag("today-list").performScrollToNode(hasText(start))
-        compose.waitUntil(10_000) { compose.onAllNodes(hasText(start) and isEnabled()).fetchSemanticsNodes().isNotEmpty() }
+        // The resume card can appear before today's Room query completes.
+        compose.waitUntil(10_000) {
+            try {
+                compose.onNodeWithTag("today-list").performScrollToNode(hasText(start))
+                compose.onAllNodes(hasText(start) and isEnabled()).fetchSemanticsNodes().isNotEmpty()
+            } catch (_: AssertionError) { false }
+        }
         compose.onNodeWithText(start).tikla()
         compose.onNodeWithText(context.getString(R.string.focus_replace_title)).assertIsDisplayed()
         compose.onNodeWithText(context.getString(R.string.topic_cancel)).tikla()
