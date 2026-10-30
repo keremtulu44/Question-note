@@ -9,8 +9,10 @@ name: Android CI
 
 on:
   push:
+    # Her dal: PR akışına ek olarak, commit mesajında [apk] geçen dallarda imzalı
+    # önizleme APK'sı üretilir (aşağıdaki release işinin koşuluna bakın).
     branches:
-      - main
+      - '**'
     tags:
       - 'v*'
     paths:
@@ -206,7 +208,15 @@ jobs:
     needs: test
     # Elle tetikleme (workflow_dispatch) herhangi bir dalda çalışabilir: imzalı APK üretir.
     # Bu yol resmî sürüm etiketi oluşturmaz; en fazla "preview-<sürüm>" önizlemesini günceller.
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')))
+    # Resmî sürüm yalnız main/etiketten çıkar. Bir dal commit'i için imzalı APK istendiğinde
+    # commit mesajına [apk] yazılır: APK üretilir ama yalnız "preview-<sürüm>" önizlemesine
+    # yüklenir; sürüm etiketi oluşturulmaz, sürüm numarası uydurulmaz.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' &&
+        (github.ref == 'refs/heads/main' ||
+         startsWith(github.ref, 'refs/tags/v') ||
+         contains(github.event.head_commit.message, '[apk]')))
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
@@ -279,12 +289,14 @@ jobs:
           version_name=$(sed -nE 's/^[[:space:]]*versionName = "([^"]+)".*/\1/p' app/build.gradle.kts | head -n 1)
           version_code=$(sed -nE 's/^[[:space:]]*versionCode = ([0-9]+).*/\1/p' app/build.gradle.kts | head -n 1)
           # Yayın kanalı: main/etiket push'u resmî sürüm, elle tetikleme yalnız önizleme/artefakt.
-          if [[ "${GITHUB_EVENT_NAME:-}" == "workflow_dispatch" ]]; then
+          if [[ "$GITHUB_REF" == "refs/heads/main" || "$GITHUB_REF" == refs/tags/v* ]]; then
+            # main ve v* etiketi: repo'nun normal yayın yolu.
+            if [[ "$PUBLISH_RELEASE" == "true" ]]; then yayin_kanali="surum"; else yayin_kanali="yok"; fi
+          elif [[ "${GITHUB_EVENT_NAME:-}" == "workflow_dispatch" ]]; then
             if [[ "${YAYIN_KANALI_GIRDISI:-onizleme}" == "yok" ]]; then yayin_kanali="yok"; else yayin_kanali="onizleme"; fi
-          elif [[ "$PUBLISH_RELEASE" == "true" ]]; then
-            yayin_kanali="surum"
           else
-            yayin_kanali="yok"
+            # Dal commit'i ([apk] işareti): yalnız önizleme APK'sı.
+            yayin_kanali="onizleme"
           fi
           unsigned_apk="app/build/outputs/apk/release/app-release-unsigned.apk"
           signed_apk="app/build/outputs/apk/release/yanlis-defteri-${version_name}.apk"
