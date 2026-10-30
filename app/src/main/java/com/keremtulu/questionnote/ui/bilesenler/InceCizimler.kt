@@ -288,3 +288,51 @@ fun YolNoktalari(
         }
     }
 }
+
+/**
+ * Kısa gidişat çizgisi (sparkline): son birkaç netin yönü.
+ *
+ * Yalnız gerçek ölçüm noktaları çizilir; eksen, ızgara veya "oran" yoktur. İki noktadan az
+ * veri varsa hiçbir şey çizilmez (çağıran taraf yedek simgeyi gösterir), böylece tek bir
+ * kayıttan trend uydurulmaz.
+ */
+@Composable
+fun MiniCizgi(
+    noktalar: List<Float>,
+    modifier: Modifier = Modifier,
+    renk: Color,
+    kalinlik: Dp = 1.72.dp,
+) {
+    if (noktalar.size < 2) return
+    Canvas(modifier) {
+        val enAz = noktalar.minOrNull() ?: return@Canvas
+        val enCok = noktalar.maxOrNull() ?: enAz
+        val aralik = (enCok - enAz).coerceAtLeast(0.001f)
+        val yaricapPayi = kalinlik.toPx()
+        val kullanilabilirYukseklik = (size.height - yaricapPayi * 2f).coerceAtLeast(1f)
+        val adim = size.width / (noktalar.size - 1)
+        val yol = Path().apply {
+            noktalar.forEachIndexed { indeks, deger ->
+                val x = adim * indeks
+                val oran = ((deger - enAz) / aralik).coerceIn(0f, 1f)
+                val y = yaricapPayi + kullanilabilirYukseklik * (1f - oran)
+                if (indeks == 0) moveTo(x, y) else lineTo(x, y)
+            }
+        }
+        drawPath(
+            path = yol,
+            color = renk,
+            style = Stroke(width = kalinlik.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round),
+        )
+        // Son nokta, çizginin nerede bittiğini gösterir.
+        val sonOran = ((noktalar.last() - enAz) / aralik).coerceIn(0f, 1f)
+        drawCircle(
+            color = renk,
+            radius = kalinlik.toPx() * 1.15f,
+            center = Offset(
+                x = size.width,
+                y = yaricapPayi + kullanilabilirYukseklik * (1f - sonOran),
+            ),
+        )
+    }
+}

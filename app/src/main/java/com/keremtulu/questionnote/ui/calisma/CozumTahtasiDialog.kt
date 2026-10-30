@@ -12,7 +12,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.aspectRatio
@@ -44,11 +45,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -76,6 +79,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
@@ -98,6 +102,7 @@ import com.keremtulu.questionnote.ui.tema.LocalHareketPolitikasi
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.roundToInt
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 
 internal enum class TahtaAraci { KALEM, CIZGI, DIKDORTGEN, UCGEN, SILGI }
@@ -158,10 +163,9 @@ fun CozumTahtasiDialog(
         mutableStateOf(soruGorselleri.firstOrNull()?.id)
     }
     val seciliGorsel = soruGorselleri.firstOrNull { it.id == seciliGorselId } ?: soruGorselleri.firstOrNull()
-    var etkinVurus by remember(soru.id) { mutableStateOf<TahtaVurusu?>(null) }
     var arac by remember(soru.id) { mutableStateOf(TahtaAraci.KALEM) }
     var renk by remember(soru.id) { mutableStateOf(TahtaKalemRenkleri.first().renk) }
-    var kalinlik by remember(soru.id) { mutableStateOf(4f) }
+    var kalinlik by remember(soru.id) { mutableStateOf(VARSAYILAN_KALINLIK_DP) }
     var temizlemeOnayi by remember(soru.id) { mutableStateOf(false) }
     var cizimSiniriUyarisi by remember(soru.id) { mutableStateOf(false) }
     var soruUzerindeCizim by remember(soru.id) { mutableStateOf(false) }
@@ -193,20 +197,17 @@ fun CozumTahtasiDialog(
         seciliGorselId = gorsel.id
         soruUzerindeCizim = true
         soruPaneliAcik = false
-        etkinVurus = null
         cizimSiniriUyarisi = false
     }
 
     fun cizimZemininiDegistir() {
         if (!soruUzerindeCizim && !soruZeminiKullanilabilir) return
         soruUzerindeCizim = !soruUzerindeCizim
-        etkinVurus = null
         cizimSiniriUyarisi = false
     }
 
     fun vurusBitti(yeniVurus: TahtaVurusu?) {
-        etkinVurus = null
-        if (yeniVurus == null) return
+        if (yeniVurus == null || yeniVurus.noktalar.isEmpty()) return
         val katman = cizimKatmanlari[etkinKatmanAnahtari] ?: TahtaYuzeyCizimi()
         if (katman.kalemler.size >= MAX_TAHTA_VURUSU) {
             cizimSiniriUyarisi = true
@@ -237,7 +238,7 @@ fun CozumTahtasiDialog(
 
     val temizlenebilir = cizimKatmanlari.values.any {
         it.kalemler.isNotEmpty() || it.geriAlinanlar.isNotEmpty()
-    } || etkinVurus != null
+    }
 
     androidx.compose.ui.window.Dialog(
         onDismissRequest = {
@@ -287,7 +288,6 @@ fun CozumTahtasiDialog(
                             TahtaCalismaAlani(
                                 kalemler = etkinKatman.kalemler,
                                 geriAlinanlar = etkinKatman.geriAlinanlar,
-                                etkinVurus = etkinVurus,
                                 arac = arac,
                                 renk = renk,
                                 kalinlik = kalinlik,
@@ -304,7 +304,6 @@ fun CozumTahtasiDialog(
                                 onAracSec = { arac = it },
                                 onRenkSec = { renk = it },
                                 onKalinlikSec = { kalinlik = it },
-                                onVurusDegisti = { etkinVurus = it },
                                 onVurusBitti = ::vurusBitti,
                                 onGeriAl = ::geriAl,
                                 onYinele = ::yinele,
@@ -316,7 +315,6 @@ fun CozumTahtasiDialog(
                         TahtaCalismaAlani(
                             kalemler = etkinKatman.kalemler,
                             geriAlinanlar = etkinKatman.geriAlinanlar,
-                            etkinVurus = etkinVurus,
                             arac = arac,
                             renk = renk,
                             kalinlik = kalinlik,
@@ -332,7 +330,6 @@ fun CozumTahtasiDialog(
                             onAracSec = { arac = it },
                             onRenkSec = { renk = it },
                             onKalinlikSec = { kalinlik = it },
-                            onVurusDegisti = { etkinVurus = it },
                             onVurusBitti = ::vurusBitti,
                             onGeriAl = ::geriAl,
                             onYinele = ::yinele,
@@ -386,7 +383,6 @@ fun CozumTahtasiDialog(
             confirmButton = {
                 PremiumTextButton(onClick = {
                     cizimKatmanlari.clear()
-                    etkinVurus = null
                     temizlemeOnayi = false
                     cizimSiniriUyarisi = false
                 }) { Text(stringResource(R.string.whiteboard_clear_action)) }
@@ -1081,66 +1077,70 @@ private fun TahtaCizimStili(
         tonalElevation = 1.dp,
     ) {
         if (tekSatir) {
+            // Geniş ekran: renkler solda, kalınlık kaydırıcısı sağda; panel yüksekliği artmaz.
             Row(
-                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
-                    .padding(horizontal = 9.dp, vertical = 5.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 9.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(3.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Text(stringResource(R.string.whiteboard_color_label), style = MaterialTheme.typography.labelSmall)
                 TahtaKalemRenkleri.forEach { item ->
-                    TahtaRenkSecimi(item, selected = seciliRenk == item.renk, targetSize = 40.dp) {
+                    TahtaRenkSecimi(item, selected = seciliRenk == item.renk, targetSize = 38.dp) {
                         onRenkSec(item.renk)
                     }
                 }
-                Spacer(Modifier.padding(horizontal = 3.dp).width(1.dp).height(23.dp).background(colors.outlineVariant))
-                Text(
-                    stringResource(R.string.whiteboard_width_label),
-                    modifier = Modifier.width(58.dp),
-                    style = MaterialTheme.typography.labelSmall,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+                Spacer(
+                    Modifier.padding(horizontal = 4.dp).width(1.dp).height(24.dp)
+                        .background(colors.outlineVariant),
                 )
-                kalinlikSecenekleri().forEach { (width, label) ->
-                    TahtaKalinlikSecimi(width, label, selected = kalinlik == width, width = 34.dp) {
-                        onKalinlikSec(width)
-                    }
-                }
+                TahtaKalinlikSecimi(
+                    kalinlik = kalinlik,
+                    kompakt = true,
+                    modifier = Modifier.weight(1f),
+                    onKalinlikSec = onKalinlikSec,
+                )
             }
         } else {
             Column(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 5.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 4.dp),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
-                Row(Modifier.fillMaxWidth().height(38.dp), verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    // Yükseklik renk hedeflerine göre: 42 dp dokunma alanı kırpılmasın.
+                    modifier = Modifier.fillMaxWidth().height(if (kompakt) 40.dp else 44.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     Text(
                         stringResource(R.string.whiteboard_color_label),
-                        modifier = Modifier.width(if (kompakt) 62.dp else 52.dp),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = colors.onSurfaceVariant,
-                    )
-                    TahtaKalemRenkleri.forEach { item ->
-                        TahtaRenkSecimi(item, selected = seciliRenk == item.renk, targetSize = if (kompakt) 38.dp else 44.dp) {
-                            onRenkSec(item.renk)
-                        }
-                    }
-                }
-                Spacer(Modifier.fillMaxWidth().height(1.dp).background(colors.outlineVariant.copy(alpha = 0.45f)))
-                Row(Modifier.fillMaxWidth().height(38.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        stringResource(R.string.whiteboard_width_label),
                         modifier = Modifier.width(if (kompakt) 62.dp else 52.dp),
                         style = MaterialTheme.typography.labelMedium,
                         color = colors.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
-                    kalinlikSecenekleri().forEach { (width, label) ->
-                        TahtaKalinlikSecimi(width, label, selected = kalinlik == width, width = 48.dp) {
-                            onKalinlikSec(width)
+                    // Dar ekranda 6 renk + etiket taşmasın: renk şeridi yatay kaydırılır.
+                    Row(
+                        modifier = Modifier.horizontalScroll(rememberScrollState()),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        TahtaKalemRenkleri.forEach { item ->
+                            TahtaRenkSecimi(
+                                item,
+                                selected = seciliRenk == item.renk,
+                                targetSize = if (kompakt) 38.dp else 42.dp,
+                            ) {
+                                onRenkSec(item.renk)
+                            }
                         }
                     }
                 }
+                Spacer(Modifier.fillMaxWidth().height(1.dp).background(colors.outlineVariant.copy(alpha = 0.45f)))
+                TahtaKalinlikSecimi(
+                    kalinlik = kalinlik,
+                    kompakt = kompakt,
+                    modifier = Modifier.fillMaxWidth(),
+                    onKalinlikSec = onKalinlikSec,
+                )
             }
         }
     }
@@ -1182,11 +1182,10 @@ private fun TahtaKompaktKontrolCubugu(
                 Modifier.padding(horizontal = 2.dp).width(1.dp).height(22.dp)
                     .background(colors.outlineVariant),
             )
-            kalinlikSecenekleri().forEach { (width, label) ->
-                TahtaKalinlikSecimi(width, label, selected = kalinlik == width, width = 31.dp) {
-                    onKalinlikSec(width)
-                }
-            }
+            TahtaKompaktKalinlikDugmesi(
+                kalinlik = kalinlik,
+                onKalinlikSec = onKalinlikSec,
+            )
             Spacer(
                 Modifier.padding(horizontal = 2.dp).width(1.dp).height(22.dp)
                     .background(colors.outlineVariant),
@@ -1296,40 +1295,29 @@ private fun TahtaRenkSecimi(
     }
 }
 
+/**
+ * Kompakt çubuktaki dar kalınlık kaydırıcısı: tek satırda yer kaplamaz, yine de 1–10 dp
+ * arasında serbest seçim verir. Dokunma hedefi 32 dp'den küçük olmaz.
+ */
 @Composable
-private fun TahtaKalinlikSecimi(
+private fun TahtaKompaktKalinlikDugmesi(
     kalinlik: Float,
-    etiket: Int,
-    selected: Boolean,
-    width: androidx.compose.ui.unit.Dp,
-    onClick: () -> Unit,
+    onKalinlikSec: (Float) -> Unit,
 ) {
-    val colors = MaterialTheme.colorScheme
-    val description = stringResource(etiket)
-    val shape = RoundedCornerShape(11.dp)
-    Box(
-        modifier = Modifier.width(width).height(32.dp)
-            .clip(shape)
-            .background(if (selected) colors.primaryContainer else Color.Transparent)
-            .border(1.dp, if (selected) colors.primary.copy(alpha = 0.22f) else Color.Transparent, shape)
-            .clickable(role = Role.RadioButton, onClick = onClick)
-            .semantics {
-                contentDescription = description
-                this.selected = selected
-                role = Role.RadioButton
-            },
-        contentAlignment = Alignment.Center,
-    ) {
-        Canvas(Modifier.size(width = 22.dp, height = 20.dp)) {
-            drawLine(
-                if (selected) colors.onPrimaryContainer else colors.onSurfaceVariant,
-                Offset(size.width * 0.12f, size.height * 0.5f),
-                Offset(size.width * 0.88f, size.height * 0.5f),
-                strokeWidth = kalinlik.dp.toPx(),
-                cap = StrokeCap.Round,
-            )
-        }
-    }
+    val sinirli = tahtaKalinligiSinirla(kalinlik)
+    val etiket = stringResource(R.string.whiteboard_width_value, sinirli.roundToInt())
+    Slider(
+        value = sinirli,
+        onValueChange = { onKalinlikSec(tahtaKalinligiSinirla(it)) },
+        valueRange = TAHTA_MIN_KALINLIK_DP..TAHTA_MAKS_KALINLIK_DP,
+        steps = (TAHTA_MAKS_KALINLIK_DP - TAHTA_MIN_KALINLIK_DP).toInt() - 1,
+        modifier = Modifier
+            .width(104.dp)
+            .heightIn(min = 32.dp)
+            .testTag("whiteboard-width-slider")
+            // TalkBack "3 dp" duyar; yüzde değil.
+            .semantics { stateDescription = etiket },
+    )
 }
 
 @Composable
@@ -1452,17 +1440,81 @@ private fun TahtaIslemIkonu(islem: TahtaIslemi, color: Color) {
     }
 }
 
-private fun kalinlikSecenekleri() = listOf(
-    2f to R.string.whiteboard_width_thin,
-    4f to R.string.whiteboard_width_normal,
-    8f to R.string.whiteboard_width_thick,
-)
+/**
+ * Kalınlık: 1–10 dp arası, 1'er adımlı kaydırıcı.
+ *
+ * Eski üç sabit seçenek (2/4/8) hem çok kısıtlıydı hem de ince kalemde çizgi belirsiz kalıyordu.
+ * Kaydırıcı her adımda uç önizlemesini kalınlaştırır; `stateDescription` ile TalkBack
+ * "3 dp" gibi net bir değer duyar, yüzde değil.
+ */
+@Composable
+private fun TahtaKalinlikSecimi(
+    kalinlik: Float,
+    kompakt: Boolean,
+    modifier: Modifier = Modifier,
+    onKalinlikSec: (Float) -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    val sinirli = tahtaKalinligiSinirla(kalinlik)
+    val etiket = stringResource(R.string.whiteboard_width_value, sinirli.roundToInt())
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.whiteboard_width_label),
+                style = MaterialTheme.typography.labelSmall,
+                color = colors.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f, fill = false),
+            )
+            // Uç önizleme: seçili kalem kalınlığı gerçek ölçekte görünür.
+            Canvas(
+                modifier = Modifier
+                    .width(if (kompakt) 30.dp else 44.dp)
+                    .height(14.dp)
+                    .clearAndSetSemantics { },
+            ) {
+                drawLine(
+                    colors.onSurface,
+                    Offset(0f, size.height / 2f),
+                    Offset(size.width, size.height / 2f),
+                    strokeWidth = sinirli.dp.toPx(),
+                    cap = StrokeCap.Round,
+                )
+            }
+            Text(
+                text = etiket,
+                style = MaterialTheme.typography.labelSmall.copy(fontFeatureSettings = "tnum"),
+                color = colors.onSurfaceVariant,
+                maxLines = 1,
+                modifier = Modifier.testTag("whiteboard-width-value"),
+            )
+        }
+        Slider(
+            value = sinirli,
+            onValueChange = { onKalinlikSec(tahtaKalinligiSinirla(it)) },
+            valueRange = TAHTA_MIN_KALINLIK_DP..TAHTA_MAKS_KALINLIK_DP,
+            steps = (TAHTA_MAKS_KALINLIK_DP - TAHTA_MIN_KALINLIK_DP).toInt() - 1,
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = if (kompakt) 34.dp else 40.dp)
+                .testTag("whiteboard-width-slider")
+                .semantics { stateDescription = etiket },
+        )
+    }
+}
 
 @Composable
 private fun TahtaCalismaAlani(
     kalemler: List<TahtaVurusu>,
     geriAlinanlar: List<TahtaVurusu>,
-    etkinVurus: TahtaVurusu?,
     arac: TahtaAraci,
     renk: Color,
     kalinlik: Float,
@@ -1479,7 +1531,6 @@ private fun TahtaCalismaAlani(
     onAracSec: (TahtaAraci) -> Unit,
     onRenkSec: (Color) -> Unit,
     onKalinlikSec: (Float) -> Unit,
-    onVurusDegisti: (TahtaVurusu?) -> Unit,
     onVurusBitti: (TahtaVurusu?) -> Unit,
     onGeriAl: () -> Unit,
     onYinele: () -> Unit,
@@ -1492,6 +1543,18 @@ private fun TahtaCalismaAlani(
     var zoomOffset by remember(soruId, soruGorseli?.id) { mutableStateOf(Offset.Zero) }
     var panMode by remember(soruId, soruGorseli?.id) { mutableStateOf(false) }
     var zoomViewport by remember(soruId, soruGorseli?.id) { mutableStateOf(Size.Zero) }
+    // Canlı (parmak kalkmadan) vuruş burada tutulur: her parmak hareketi dialogu değil,
+    // yalnız tuvalin çizim katmanını yeniler. Eski sürüm vuruşu dialog state'ine taşıyordu ve
+    // her örnekte tüm liste kopyalandığı için hızlı çizimde kareler düşüyordu.
+    val canliNoktalar = remember(soruId, soruGorseli?.id, soruUzerindeCizim) {
+        mutableListOf<TahtaNoktasi>()
+    }
+    val canliSurum = remember(soruId, soruGorseli?.id, soruUzerindeCizim) { mutableIntStateOf(0) }
+    // Parmak kalkınca (veya hareket iptal olunca) canlı vuruş temizlenir.
+    LaunchedEffect(soruId, soruGorseli?.id, soruUzerindeCizim, arac, panMode) {
+        canliNoktalar.clear()
+        canliSurum.intValue++
+    }
     LaunchedEffect(soruId, soruGorseli?.id, soruUzerindeCizim) {
         if (!soruUzerindeCizim) {
             zoom = 1f
@@ -1638,49 +1701,99 @@ private fun TahtaCalismaAlani(
                                 stateDescription = countDescription
                             }
                             .pointerInput(soruId, arac, renk, kalinlik, imageRatio, soruUzerindeCizim, soruGorseli?.id, panMode) {
-                                if (!panMode) {
-                                    var baslangic: TahtaNoktasi? = null
-                                    var sonVurus: TahtaVurusu? = null
-                                    val viewport = fittedImageBounds(Size(size.width.toFloat(), size.height.toFloat()), imageRatio)
-                                    detectDragGestures(
-                                        onDragStart = { pos ->
-                                            val start = normalizedPoint(pos, viewport, clampToBounds = false)
-                                                ?: return@detectDragGestures
-                                            baslangic = start
-                                            sonVurus = TahtaVurusu(arac, listOf(start), renk, kalinlik)
-                                            onVurusDegisti(sonVurus)
-                                        },
-                                        onDrag = { change, _ ->
-                                            change.consume()
-                                            val start = baslangic ?: return@detectDragGestures
-                                            val current = normalizedPoint(change.position, viewport, clampToBounds = true)
-                                                ?: return@detectDragGestures
-                                            val previous = sonVurus ?: TahtaVurusu(arac, listOf(start), renk, kalinlik)
-                                            val next = when (arac) {
-                                                TahtaAraci.KALEM, TahtaAraci.SILGI -> previous.copy(
-                                                    noktalar = appendPoint(previous.noktalar, current, viewport.width, viewport.height),
-                                                )
-                                                else -> previous.copy(noktalar = listOf(start, current))
-                                            }
-                                            sonVurus = next
-                                            onVurusDegisti(next)
-                                        },
-                                        onDragEnd = {
-                                            onVurusBitti(sonVurus)
-                                            sonVurus = null
-                                            baslangic = null
-                                        },
-                                        onDragCancel = {
-                                            onVurusDegisti(null)
-                                            sonVurus = null
-                                            baslangic = null
-                                        },
+                                if (panMode) return@pointerInput
+                                awaitEachGesture {
+                                    val ilkDokunus = awaitFirstDown(requireUnconsumed = false)
+                                    val viewport = fittedImageBounds(
+                                        Size(size.width.toFloat(), size.height.toFloat()),
+                                        imageRatio,
                                     )
+                                    // Eski kod dokunuşu görsel çerçevesinin dışındaysa tamamen atıyordu;
+                                    // kenara yakın başlayan çizgiler hiç oluşmuyordu. Artık başlangıç
+                                    // noktası içeri kırpılır, vuruş her zaman başlar.
+                                    val baslangic = normalizedPoint(
+                                        ilkDokunus.position,
+                                        viewport,
+                                        clampToBounds = true,
+                                    ) ?: return@awaitEachGesture
+                                    canliNoktalar.clear()
+                                    canliNoktalar.add(baslangic)
+                                    canliSurum.intValue++
+                                    ilkDokunus.consume()
+
+                                    fun noktaEkle(ham: Offset) {
+                                        val nokta = normalizedPoint(ham, viewport, clampToBounds = true)
+                                            ?: return
+                                        when (arac) {
+                                            TahtaAraci.KALEM, TahtaAraci.SILGI -> {
+                                                val son = canliNoktalar.lastOrNull()
+                                                if (son != null) {
+                                                    val dx = (nokta.x - son.x) * viewport.width
+                                                    val dy = (nokta.y - son.y) * viewport.height
+                                                    // 1.5 px'ten küçük titremeleri at; noktalar arası
+                                                    // mesafe korunur, çizgi yumuşatmayla birleşir.
+                                                    if (dx * dx + dy * dy <
+                                                        MIN_POINT_DISTANCE_PX * MIN_POINT_DISTANCE_PX
+                                                    ) {
+                                                        return
+                                                    }
+                                                }
+                                                if (canliNoktalar.size >= MAX_POINTS_PER_STROKE) {
+                                                    val seyrek = canliNoktalar.filterIndexed { i, _ -> i % 2 == 0 }
+                                                    canliNoktalar.clear()
+                                                    canliNoktalar.addAll(seyrek)
+                                                }
+                                                canliNoktalar.add(nokta)
+                                            }
+                                            // Şekil araçları yalnız başlangıç + güncel noktayı tutar.
+                                            else -> {
+                                                if (canliNoktalar.size >= 2) {
+                                                    canliNoktalar[1] = nokta
+                                                } else {
+                                                    canliNoktalar.add(nokta)
+                                                }
+                                            }
+                                        }
+                                        canliSurum.intValue++
+                                    }
+
+                                    var devam = true
+                                    while (devam) {
+                                        val olay = awaitPointerEvent()
+                                        val degisim = olay.changes.firstOrNull { it.id == ilkDokunus.id }
+                                            ?: olay.changes.firstOrNull()
+                                            ?: break
+                                        if (!degisim.pressed) {
+                                            // Hızlı kalkışta son konum kaybolmasın.
+                                            noktaEkle(degisim.position)
+                                            degisim.consume()
+                                            devam = false
+                                        } else {
+                                            // Aynı karede biriken ara konumlar: çizgi kopmadan akar.
+                                            degisim.historical.forEach { noktaEkle(it.position) }
+                                            noktaEkle(degisim.position)
+                                            degisim.consume()
+                                            if (olay.changes.none { it.pressed }) devam = false
+                                        }
+                                    }
+
+                                    if (canliNoktalar.isNotEmpty()) {
+                                        onVurusBitti(
+                                            TahtaVurusu(arac, canliNoktalar.toList(), renk, kalinlik),
+                                        )
+                                    }
+                                    canliNoktalar.clear()
+                                    canliSurum.intValue++
                                 }
                             },
                     ) {
+                        // Durum okuması çizim fazını bağlar: her yeni noktada yalnız çizim yenilenir.
+                        val canli = canliSurum.intValue
                         val viewport = fittedImageBounds(size, imageRatio)
-                        (kalemler + listOfNotNull(etkinVurus)).forEach { drawVurus(it, viewport) }
+                        kalemler.forEach { drawVurus(it, viewport) }
+                        if (canli >= 0 && canliNoktalar.isNotEmpty()) {
+                            drawVurus(TahtaVurusu(arac, canliNoktalar, renk, kalinlik), viewport)
+                        }
                     }
                 }
                 if (soruUzerindeCizim && backgroundFile == null) {
@@ -1690,7 +1803,7 @@ private fun TahtaCalismaAlani(
                         color = colors.error,
                         style = MaterialTheme.typography.bodySmall,
                     )
-                } else if (kalemler.isEmpty() && etkinVurus == null) {
+                } else if (kalemler.isEmpty() && canliNoktalar.isEmpty()) {
                     Surface(
                         modifier = Modifier.align(if (soruUzerindeCizim) Alignment.BottomCenter else Alignment.Center)
                             .padding(14.dp),
@@ -1795,22 +1908,32 @@ private fun normalizedPoint(position: Offset, viewport: Rect, clampToBounds: Boo
     )
 }
 
-private fun appendPoint(
-    points: List<TahtaNoktasi>,
-    next: TahtaNoktasi,
-    width: Float,
-    height: Float,
-): List<TahtaNoktasi> {
-    val previous = points.lastOrNull() ?: return listOf(next)
-    val dx = (next.x - previous.x) * width
-    val dy = (next.y - previous.y) * height
-    if (dx * dx + dy * dy < MIN_POINT_DISTANCE_PX * MIN_POINT_DISTANCE_PX) return points
-    return if (points.size >= MAX_POINTS_PER_STROKE) {
-        // Keep every other point so long freehand strokes stay bounded without truncating their ends.
-        points.filterIndexed { index, _ -> index % 2 == 0 }.plus(next)
-    } else {
-        points + next
+/**
+ * Serbest çizgi yolunu, ardışık noktaların **orta noktalarından** geçen ikinci derece
+ * eğrilerle kurar. Düz `lineTo` zinciri, hızlı çizimde köşeli ve "takılıyor" görünüyordu;
+ * bu yumuşatma aynı nokta kümesiyle sürekli, akıcı bir çizgi üretir.
+ */
+private fun noktalariYola(noktalar: List<Offset>): Path {
+    val yol = Path()
+    if (noktalar.isEmpty()) return yol
+    yol.moveTo(noktalar.first().x, noktalar.first().y)
+    if (noktalar.size == 1) return yol
+    if (noktalar.size == 2) {
+        yol.lineTo(noktalar[1].x, noktalar[1].y)
+        return yol
     }
+    for (i in 1 until noktalar.size - 1) {
+        val kontrol = noktalar[i]
+        val sonraki = noktalar[i + 1]
+        yol.quadraticTo(
+            x1 = kontrol.x,
+            y1 = kontrol.y,
+            x2 = (kontrol.x + sonraki.x) / 2f,
+            y2 = (kontrol.y + sonraki.y) / 2f,
+        )
+    }
+    yol.lineTo(noktalar.last().x, noktalar.last().y)
+    return yol
 }
 
 private fun DrawScope.drawVurus(vurus: TahtaVurusu, viewport: Rect) {
@@ -1821,18 +1944,26 @@ private fun DrawScope.drawVurus(vurus: TahtaVurusu, viewport: Rect) {
     val isEraser = vurus.araci == TahtaAraci.SILGI
     val color = if (isEraser) Color.Transparent else vurus.renk
     val blendMode = if (isEraser) BlendMode.Clear else BlendMode.SrcOver
-    val widthPx = vurus.kalinlikDp.dp.toPx() * (if (isEraser) ERASER_WIDTH_FACTOR else 1f)
+    // Silgi her zaman hissedilir kalınlıkta olsun; ince kalem seçiliyken silgi minicik kalmasın.
+    val kalinlikDp = if (isEraser) {
+        max(vurus.kalinlikDp, SILGI_MIN_KALINLIK_DP) * ERASER_WIDTH_FACTOR
+    } else {
+        vurus.kalinlikDp
+    }
+    val widthPx = kalinlikDp.dp.toPx()
     val stroke = Stroke(width = widthPx, cap = StrokeCap.Round, join = StrokeJoin.Round)
     when (vurus.araci) {
         TahtaAraci.KALEM, TahtaAraci.SILGI -> {
             if (points.size == 1) {
+                // Tek dokunuş da iz bırakır: "nokta koyulmuyor" hissi biter.
                 drawCircle(color = color, radius = widthPx / 2f, center = points.first(), blendMode = blendMode)
             } else {
-                val path = Path().apply {
-                    moveTo(points.first().x, points.first().y)
-                    points.drop(1).forEach { lineTo(it.x, it.y) }
-                }
-                drawPath(path = path, color = color, style = stroke, blendMode = blendMode)
+                drawPath(
+                    path = noktalariYola(points),
+                    color = color,
+                    style = stroke,
+                    blendMode = blendMode,
+                )
             }
         }
         TahtaAraci.CIZGI -> if (points.size >= 2) {
@@ -1871,3 +2002,4 @@ private const val MAX_TAHTA_VURUSU = 250
 private const val MAX_POINTS_PER_STROKE = 2_048
 private const val MIN_POINT_DISTANCE_PX = 1.5f
 private const val ERASER_WIDTH_FACTOR = 3.4f
+private const val SILGI_MIN_KALINLIK_DP = 4f

@@ -3,7 +3,7 @@
 > Bu belge **değerleri değil**, sırların nerede ve nasıl tutulduğunu anlatır.
 > Hiçbir anahtar, parola veya token bu depoya yazılmaz.
 
-- Son güncelleme: 2026-10-28
+- Son güncelleme: 2026-10-30
 - Son yayımlanan sürüm: **v1.6.3 (versionCode 42)**. **Debug 384/0/0/0**, **Release 303/0/0/0**; Release derlemesi, imza ve sertifika doğrulandı.
 - [Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.6.3) · [APK indir](https://github.com/keremtulu44/Question-note/releases/download/v1.6.3/yanlis-defteri-1.6.3.apk).
   APK **13.706.249 bayt**; SHA-256 `787690fca609207a057b258c22dfb16f0e205cdec5bef237656c35ed5cad7218`.
@@ -93,8 +93,14 @@ için uygun değildir.
 
 - Derleme/test **otomatik** çalışır: `main` push ve `v*` etiketlerinde iki iş de, pull request'lerde
   yalnız `test` işi (yalnızca workflow'da izlenen dosyalar değişince). Geliştirme dalında CI almak
-  için (taslak) PR açmak yeterlidir. Elle tetik: `workflow_dispatch` (release işi yine yalnız
-  `main` ref'inde çalışır).
+  için (taslak) PR açmak yeterlidir.
+- **Daldan imzalı APK:** commit mesajında `[apk]` geçen bir dal push'unda `release` işi de çalışır.
+  APK **gerçek sürüm anahtarıyla** imzalanır ve parmak izi doğrulanır; ancak resmî sürüm etiketi
+  oluşturulmaz — dosya `preview-<sürüm>` adlı **prerelease**'e yüklenir (her koşuda üzerine yazılır).
+  Böylece cihazdaki mevcut sürümün üzerine kaldırmadan kurulabilir. Örnek:
+  `preview-1.7.0 → yanlis-defteri-1.7.0.apk`.
+- Elle tetik: `workflow_dispatch` (`yayin` girdisi: `onizleme` / `yok`). Not: depo token'ı
+  `actions: write` taşımıyorsa `gh workflow run` 403 döner; bu durumda `[apk]` işareti kullanılır.
 - Token en az yetkiyle bölündü: üst düzey `permissions: contents: read`; yalnız `release` işi
   `contents: write` alır (Release oluşturma + rapor commit'i). İmza secret'ları da yalnız
   `release` işinin imza adımındadır; testler secret'sız ortamda çalışır.

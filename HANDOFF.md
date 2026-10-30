@@ -1,7 +1,140 @@
 # HANDOFF — Yanlış Defteri
 
-**Son güncelleme: 2026-10-28.** Önce bu belge, `docs/DERLEME_RAPORU.md`,
+**Son güncelleme: 2026-10-29.** Önce bu belge, `docs/DERLEME_RAPORU.md`,
 `docs/PREMIUM_GORSEL_GELISTIRME.md` ve [P4–P6 sözleşme/kanıt kaydı](docs/P4_P5_P6_UYGULAMA.md) okunur.
+
+## 2026-10-30 — imzalı önizleme APK (dal: `arena/ce557218-question-note`)
+
+Kullanıcı "APK ver yeni" dedi. Kısıtlı ortamda Gradle/JDK olmadığı için APK CI'da üretildi.
+
+- **CI değişikliği (`android.yml`):** `push.branches` `'**'` oldu; `release` işi, commit mesajında
+  `[apk]` geçen dal push'unda da çalışır. Yayın kanalı `GITHUB_REF`'e göre seçilir: `main`/`v*` →
+  resmî sürüm, diğerleri → **yalnız** `preview-<sürüm>` prerelease (sürüm etiketi oluşturulmaz).
+  `workflow_dispatch`'e `yayin` (onizleme/yok) girdisi eklendi.
+- **Engel:** `gh workflow run` → `403 Resource not accessible by integration` (token'da
+  `actions: write` yok). Bu yüzden tetikleme `[apk]` işaretli commit ile yapıldı; BUILDING.md'ye not
+  düşüldü.
+- **Sonuç:** run `41009802635` yeşil (test + release). Release
+  [`preview-1.7.0`](https://github.com/keremtulu44/Question-note/releases/tag/preview-1.7.0):
+  `yanlis-defteri-1.7.0.apk`, 13.886.473 bayt,
+  SHA-256 `8ff7274f9837c8731d9c83b4b1dc4cf99c95f41254cd53aabba1f73e38bccc02`,
+  commit `152ae9a`. `apksigner verify` + beklenen sertifika parmak izi eşleşti → 1.6.3 üzerine
+  kaldırmadan kurulur. 438 Debug / 337 Release testi geçti.
+- İndirme, sandbox ağı `release-assets.githubusercontent.com`'a çıkamadığı için tarayıcıdan
+  yapılmalı; dosya workspace'e kopyalanamadı.
+
+## 2026-10-29 (3) — uygulama içi rehber (dal: `arena/ce557218-question-note`)
+
+Kullanıcı isteği: "anlamlı bir tutorial hazırla" — hem tanıtan, hem kayıt/deneme/çözmeyi gösteren,
+hem yedeklemeyi öğreten, demo verilerle çalışan, premium hissi koruyan kapsamlı bir tur.
+
+**Sonuç:** `v1.7.0` adayı (versionCode 43). Sürüm/Room/ZIP/tekrar motoru değişmedi; yeni izin ve
+bağımlılık yok; öğretmen alanına dokunulmadı.
+
+**Yeni dosyalar**
+- `ui/rehber/RehberModeli.kt` — `RehberBolumu` (7 bölüm, `anahtar`), demo sorular/kuyruk,
+  `tekrarOnizlemesi()` (gerçek `TekrarKurali`), `DemoDersSkoru` (+/-, `net(kural)`),
+  `demoDenemeOzeti()` (gerçek `ozet()`), `yedekIcerigi()`. Compose bağımlılığı yok.
+- `ui/rehber/RehberCizimleri.kt` — `RehberDefterCizimi`, `RehberAralikYolu`, `RehberYedekKutusu`
+  (Canvas; bitmap/varlık yok, APK büyümez).
+- `ui/rehber/RehberBolumleri.kt` — 7 bölümün içeriği; `RehberDurumu` (bölümler arası seçim),
+  mini tahta `awaitEachGesture` + `historical` ile gerçek tahtanın küçük hâli.
+- `ui/rehber/RehberEkrani.kt` — `HorizontalPager`, "3 / 7" ilerleme + `InceOlcek`, İleri/Geri/Atla,
+  `BackHandler` ile bölüm bölüm geri, azaltılmış harekette animasyonsuz geçiş.
+- `data/prefs/RehberDeposu.kt` — `gorulduMu/sonBolum/bolumuKaydet/tamamla/kapat/bastanBaslat/sifirla`.
+  Ayrı SharedPreferences dosyası (`rehber_durumu`); **ZIP yedeğine girmez** (cihaz tercihi).
+
+**Entegrasyon**
+- `UygulamaEkrani.Rehber(baslangic, geri)` + saver `"rehber"`; `aktifSekme = AYARLAR`,
+  `altMenuGorunur = false`, `geriHedefi = geri` (Ayarlar'dan açılınca Ayarlar, ilk kurulumda Bugün).
+- `DersKurulumEkrani.onTamam` → `kurulumGerekli = false`; rehber hiç görülmediyse bir kez açılır.
+- `AyarlarEkrani`'ye `onRehber: () -> Unit = {}` + **YARDIM** bölümü (varsayılanlı parametre,
+  mevcut çağrılar değişmedi). `AppContainer.rehberDeposu` → `MainActivity` → host.
+- Kapatma `RehberDeposu.kapat()`: otomatik açılış bir daha olmaz, kaldığı bölüm korunur.
+
+**Testler:** `RehberModeliTest` (saf JVM: bölüm kimlikleri, motor eşitliği, aralık sırası,
+kuyruk sınırları, D/Y sınırları ve simetri, özet, yedek listesi), `RehberDeposuTest` (Robolectric),
+`RehberNavigasyonTest` (saver gidiş-dönüş + bozuk kayıt), `RehberEkraniTest` (testDebug,
+Robolectric + Compose: ileri/geri, atla, son bölüm, canlı net, tekrar tarihi, mini tahta dokunuşu,
+320 dp genişlik).
+
+**CI:** `f37db2a` ilk denemede yalnız test beklentileri yanlıştı (ZORLANDIM önceki aralıkla sabit
+kalır, boş soru sayısı 20'dir); `ba1d66f` yeşil. Compose testi eklenince `c81a5ed` derlenmedi:
+`assertDoesNotExist` ve `fetchSemanticsNode` **üye** fonksiyonlardır, top-level import edilemez
+(annotation'dan okundu) → importlar kaldırıldı, run `123674724445` **yeşil** (Debug + Release unit,
+testDebug Compose dahil). Cihaz kabulü hâlâ açık: TalkBack ile tur, %200 yazı, koyu tema,
+gerçek telefonda mini tahta çizimi.
+
+**Son tur (aynı gün):** %200 yazı için uyarlanabilir yerleşim — seçenek/sayaç/kural çipleri
+`FlowRow` ile alt alta, alt düğmeler tam genişlikte, kalınlık denetimi üç satır, `sizeIn` yerine
+`heightIn(min = 44–48.dp)` hedefleri. `RehberEkraniTest` bunu `Density(fontScale = 2f)` ile
+doğrular. Run `123679774478` yeşil (Debug + Release unit, 8 Compose testi dahil).
+
+## 2026-10-29 (2) — çizim tahtası elden geçirildi (dal: `arena/ce557218-question-note`)
+
+Kullanıcı geri bildirimi: "çizgide devamlılık yok, nokta koyulmuyor, kalınlık 1–10 ayarlanabilmeli".
+
+**Kök nedenler ve düzeltmeler (`ui/calisma/CozumTahtasiDialog.kt`):**
+1. `detectDragGestures` her `onDrag`'da vuruşun **tamamını** kopyalayıp `onVurusDegisti` ile dialog
+   state'ine yazıyordu → her parmak hareketinde tüm listenin yeniden çizimi; hızlı çizimde kare
+   düşmesi ("çizgi arada duruyor"). Artık `awaitEachGesture` + `awaitFirstDown` + `awaitPointerEvent`
+   ile canlı noktalar **tuvalin içinde** (`canliNoktalar` + `canliSurum`) tutuluyor, yalnız çizim
+   katmanı yenileniyor. `historical` ara konumları da işleniyor; hızlı harekette çizgi kopmuyor.
+2. Serbest çizgi düz `lineTo` zinciri yerine **orta noktalardan geçen quadratic eğrilerle**
+   (`noktalariYola`) çiziliyor → köşeli/kesik his kalktı.
+3. Dokun-kaldır hiç iz bırakmıyordu (drag eşiği); artık tek dokunuş `drawCircle` ile nokta bırakır.
+4. Görsel çerçevesi dışında başlayan dokunuş tamamen atılıyordu; başlangıç artık sınıra kırpılır.
+5. Kalınlık 2/4/8 sabitleri yerine **1–10 dp, 1'er adımlı kaydırıcı** (`TahtaKalinlikSecimi`,
+   dar çubukta `TahtaKompaktKalinlikDugmesi`). Uç önizleme + `dp` değeri görünür; `stateDescription`
+   ile TalkBack "N dp" duyar. Renk şeridi dar ekranda yatay kaydırılır (42 dp hedef kırpılmaz).
+6. Silgi `max(kalinlik, 4 dp) × 3.4` genişlikte siler; ince kalemde görünmez silgi hatası kapandı.
+7. Kalınlık sözleşmesi Compose'suz `ui/calisma/TahtaKalinlik.kt` dosyasına alındı
+   (`tahtaKalinligiSinirla`, NaN/Infinity güvenliği) → saf JVM testi `TahtaKalinligiTest`.
+8. Sadeleştirme: kullanılmayan `appendPoint`, `etkinVurus` hoisting'i ve üç eski "İnce/Normal/Kalın"
+   metni kaldırıldı.
+
+**Yeni testler:** `TahtaKalinligiTest` (sınırlar, yuvarlama, NaN), `CozumTahtasiKullanimTest`
+içinde `tekDokunusNoktaBirakirVeSuruklemeTekVurusUretir` ve
+`kalinlikKaydirmalariBirIleOnArasindaAdimAdimAyarlanir`.
+
+**CI:** run `40921231264` yeşil (Debug unit + Release unit). İlk denemede yalnız
+`SemanticsActions` importu eksikti; hata, workflow'un zaten ürettiği **annotation** üzerinden
+okundu (`check-runs/{id}/annotations`) — kısıtlı ağda log/artifact indirilemediğinde bu yol
+kullanılmalı. Cihazda çizim akıcılığı kabulü (60 Hz, 200+ vuruş) hâlâ açık.
+
+## 2026-10-29 — deneme tarafı: görünür eksikler + ürün değerlendirmesi (dal: `arena/ce557218-question-note`)
+
+Kullanıcı isteği: depoyu tara, görüntüsel/eksik yerleri düzelt, deneme ve soru çözüm tarafı için
+öneri üret, çevrimdışı OCR fikrini değerlendir. **Sürüm/Room/ZIP/tekrar motoru/XP değişmedi**,
+öğretmen alanına dokunulmadı (`AGENTS.md`).
+
+**Düzeltilen gerçek eksik:** `UygulamaEkrani.DenemeDetay` host'u `onDenemeyiCalis` veriyordu ama
+`DenemeDetayEkrani` bu parametreyi hiç çizmiyordu (ölü uç). Artık denemede deftere yüklenmiş soru
+varsa "Bu denemenin soruları" kartı görünür ve `SoruCalismaFiltresi(kaynak = deneme.ad)` turunu
+açar (`deneme-study-button`).
+
+**Görsel/erişilebilirlik:**
+- Net grafiğine ilk/son tarih etiketleri ve `contentDescription` (`deneme_chart_description`).
+- Grafiğin altına üç sayılık özet şerit: deneme sayısı, ortalama net, en iyi net. Kurallar
+  karışıksa ortalama/en iyi **üretilmez**, yalnız "son net"; tek kayıtta da yalnız "son net"
+  (uydurma karşılaştırma yok).
+- Liste kartına "En düşük: <ders> · <net>" satırı (tek dersli denemede gösterilmez).
+- Liste ekranındaki üst çubuk + liste başlığı tekrarı kaldırıldı; yerine tek satır bağlam.
+- Bugün'deki deneme satırındaki sabit `oran = 0.72f` halka (sahte yüzde) yerine son 6 denemenin
+  gerçek `MiniCizgi` sparkline'ı; iki kayıttan az veride boş halka.
+
+**Yeni dosyalar:** `domain/model/DenemeOzeti.kt` (`ozet()`, `enZayifDers()`),
+`test/.../DenemeOzetiTest.kt` (6 saf JVM testi), `docs/URUN_DEGERLENDIRME_VE_ONERILER.md`
+(bulgular, deneme/çözüm yol haritası, OCR değerlendirmesi, kapsam sözleşmesi).
+
+**CI:** iki ardışık çalıştırma yeşil — `40902868803` (5m25s) ve `40904376134`
+(Debug + Release birim testleri başarılı; `release` işi PR'da beklendiği gibi atlandı).
+Cihaz kabulü (deneme ekranları %200 yazı, koyu tema, TalkBack, 320 dp) **hâlâ açık**.
+
+**Sıradaki somut adım:** (1) bu ekranların cihaz kontrolü, (2) `DenemeDeposu` bozuk-JSON
+karantinası (bugün `getOrDefault(emptyList())` ile sessiz kayıp), (3) deneme sonrası toplu
+fotoğraf kuyruğu, (4) grafiklerde kalan `clearAndSetSemantics` taraması, (5) ölü metin temizliği
+(1.210 metnin 203'ü kullanılmıyor). Ayrıntı ve gerekçeler: `docs/URUN_DEGERLENDIRME_VE_ONERILER.md`.
 
 ## 2026-10-28 — üç iş: form kurtarma, CI bölme, belge senkronu (dal: `arena/35cb2bf0-question-note`)
 
