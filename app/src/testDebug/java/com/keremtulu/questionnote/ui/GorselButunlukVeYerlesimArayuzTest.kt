@@ -10,6 +10,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -199,15 +200,9 @@ class GorselButunlukVeYerlesimArayuzTest {
         val cozumGosterMetni = context.getString(R.string.focus_reveal)
         val cozumYokMetni = context.getString(R.string.focus_no_solution)
         compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText(cozumYokMetni))
-        compose.onNodeWithText(cozumGosterMetni).assertIsDisplayed()
+        // There is no actionable solution for this question; do not present a dead button.
         compose.onNodeWithText(cozumYokMetni).assertIsDisplayed()
-
-        val cozumButonSinir = compose.onNodeWithText(cozumGosterMetni).fetchSemanticsNode().boundsInRoot
-        val cozumYokSinir = compose.onNodeWithText(cozumYokMetni).fetchSemanticsNode().boundsInRoot
-        assertTrue(
-            "Çözüm kaydı yok metni butonun üstüne binmemeli: buton=$cozumButonSinir, metin=$cozumYokSinir",
-            cozumYokSinir.top >= cozumButonSinir.bottom - 1f,
-        )
+        compose.onAllNodesWithText(cozumGosterMetni).assertCountEquals(0)
 
         val sonaBirakMetni = context.getString(R.string.focus_defer)
         val sonaBirakNotMetni = context.getString(R.string.focus_defer_note)
@@ -390,8 +385,11 @@ class GorselButunlukVeYerlesimArayuzTest {
         }
 
         compose.waitUntil(5_000) {
-            compose.onAllNodesWithText("Türkçe").fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithTag("lessons-grid").fetchSemanticsNodes().isNotEmpty()
         }
+        // The summary grows with the font scale; a lazy grid composes cards when scrolled into view.
+        compose.onNodeWithTag("lessons-grid").performScrollToNode(hasText("Türkçe"))
+        compose.onNodeWithText("Türkçe").assertIsDisplayed()
         val turkceSinir = compose.onNodeWithText("Türkçe").fetchSemanticsNode().boundsInRoot
         assertTrue("1.6x yazı ölçeğinde ders kartı görünür olmalı: $turkceSinir", turkceSinir.height > 18f)
 
