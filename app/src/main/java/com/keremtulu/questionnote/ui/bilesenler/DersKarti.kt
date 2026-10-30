@@ -8,25 +8,22 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
@@ -48,78 +45,55 @@ internal fun DersKarti(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val vurguRengi = if (koyuTema) veri.koyuRenk else veri.acikRenk
+    val vurgu = if (koyuTema) veri.koyuRenk else veri.acikRenk
     val renkler = MaterialTheme.colorScheme
-
     PremiumCard(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = renkler.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp, pressedElevation = 7.dp),
-        border = BorderStroke(1.dp, vurguRengi.copy(alpha = 0.28f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp, pressedElevation = 4.dp),
+        border = BorderStroke(1.dp, vurgu.copy(alpha = 0.28f)),
         interactionTur = EtkilesimTuru.KART_ACILIS,
     ) {
-        Box(Modifier.fillMaxWidth()) {
-            Box(
-                Modifier
-                    .align(Alignment.TopStart)
-                    .fillMaxWidth()
-                    .height(4.dp)
-                    .background(vurguRengi.copy(alpha = 0.85f)),
-            )
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 144.dp)
-                    .padding(start = 16.dp, top = 18.dp, end = 16.dp, bottom = 16.dp),
-                verticalArrangement = Arrangement.SpaceBetween,
+        Column(
+            modifier = Modifier.fillMaxWidth().heightIn(min = 160.dp)
+                .background(Brush.linearGradient(listOf(vurgu.copy(alpha = 0.10f), Color.Transparent)))
+                .padding(16.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
+                Box(
+                    modifier = Modifier.size(42.dp).clip(RoundedCornerShape(14.dp))
+                        .background(vurgu.copy(alpha = 0.16f)),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(42.dp)
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(vurguRengi.copy(alpha = 0.13f)),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = stringResource(veri.isaret),
-                            color = vurguRengi,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = PremiumSembolAilesi,
-                        )
-                    }
-                    Surface(
-                        shape = CircleShape,
-                        color = renkler.surfaceVariant,
-                    ) {
-                        Text(
-                            text = pluralStringResource(
-                                R.plurals.question_count,
-                                veri.soruSayisi,
-                                veri.soruSayisi,
-                            ),
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                            color = renkler.onSurfaceVariant,
-                            style = MaterialTheme.typography.labelMedium,
-                            maxLines = 1,
-                        )
-                    }
+                    Text(
+                        text = stringResource(veri.isaret),
+                        color = vurgu,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = PremiumSembolAilesi,
+                    )
                 }
+                InceOk(Modifier.size(16.dp), vurgu)
+            }
+            Column(Modifier.padding(top = 14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                // Do not truncate long lesson names, especially at large font sizes.
                 Text(
                     text = veri.ad,
-                    modifier = Modifier.padding(top = 10.dp),
                     color = renkler.onSurface,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    text = pluralStringResource(R.plurals.question_count, veri.soruSayisi, veri.soruSayisi),
+                    color = renkler.onSurfaceVariant,
+                    style = MaterialTheme.typography.labelLarge,
                 )
             }
         }

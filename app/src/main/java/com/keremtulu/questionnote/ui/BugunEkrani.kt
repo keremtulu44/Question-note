@@ -107,6 +107,7 @@ fun BugunEkrani(
     onSoruEkle: () -> Unit,
     onOturumBaslat: (List<Soru>, Map<String, Ders>) -> Unit,
     onDevam: (() -> Unit)? = null,
+    devamTamamlandi: Boolean = false,
     onDeneme: () -> Unit = {},
     onSorulacaklar: () -> Unit = {},
     denemeler: List<DenemeKaydi> = emptyList(),
@@ -177,6 +178,9 @@ fun BugunEkrani(
                     ekleGoster = !(hazir != null && hazir.sorular.isEmpty()),
                 )
             }
+            onDevam?.let { devam ->
+                item(key = "bugun-devam") { DevamSatiri(devam, devamTamamlandi) }
+            }
             if (durum is BugunDurumu.Hata) {
                 // Hata durumunda odak kartı yerine tek, eyleme dönük kart: aynı metin iki kez yazılmaz.
                 item(key = "bugun-hata") {
@@ -211,9 +215,6 @@ fun BugunEkrani(
                         )
                     }
                 }
-            }
-            onDevam?.let { devam ->
-                item(key = "bugun-devam") { DevamSatiri(devam) }
             }
             item(key = "bugun-kisayollar") {
                 BugunKisayollari(
@@ -479,7 +480,7 @@ private fun OdakHedefiVeEylemi(
 }
 
 @Composable
-private fun DevamSatiri(onDevam: () -> Unit) {
+private fun DevamSatiri(onDevam: () -> Unit, tamamlandi: Boolean) {
     val colors = MaterialTheme.colorScheme
     Surface(
         onClick = onDevam,
@@ -494,7 +495,7 @@ private fun DevamSatiri(onDevam: () -> Unit) {
         ) {
             OynatSimgesi(Modifier.size(18.dp), colors.onSecondaryContainer)
             Text(
-                text = stringResource(R.string.focus_continue_session),
+                text = stringResource(if (tamamlandi) R.string.focus_view_finished else R.string.focus_continue_session),
                 modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,

@@ -74,7 +74,6 @@ import com.keremtulu.questionnote.ui.animasyon.animateFloatPremium
 import com.keremtulu.questionnote.ui.animasyon.tweenPremium
 import com.keremtulu.questionnote.ui.bilesenler.SadeAnaButon
 import androidx.compose.ui.graphics.graphicsLayer
-import com.keremtulu.questionnote.domain.karne.KarneHesabi
 import com.keremtulu.questionnote.domain.karne.OturumSonucu
 import com.keremtulu.questionnote.domain.model.Ders
 import com.keremtulu.questionnote.domain.model.kaynakla
@@ -171,7 +170,6 @@ fun OdakOturumuEkrani(
         com.keremtulu.questionnote.domain.repeat.YakinGecmisHesabi.hesapla(oncekiKayitlar.orEmpty(),
             java.time.LocalDate.now().toEpochDay().toInt())
     }
-    val sayilar = remember(sonuclar) { KarneHesabi.hesapla(sonuclar) }
     val cozumVar = !soru.cozumNotu.isNullOrBlank() || soru.gorseller.any { it.tur == GorselTuru.COZUM }
     val colors = MaterialTheme.colorScheme
 
@@ -327,8 +325,6 @@ fun OdakOturumuEkrani(
                     }
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Text(stringResource(R.string.focus_done, sonuclar.size), color = Color.White, style = MaterialTheme.typography.labelSmall)
-                        Text(stringResource(R.string.focus_effort_xp, sonuclar.size * 5 + sayilar.bagimsiz * 5),
-                            color = Color(0xFFF0D18E), style = MaterialTheme.typography.labelSmall)
                     }
                 }
             }
@@ -384,7 +380,10 @@ fun OdakOturumuEkrani(
                         if (durum == GorselHazirligi.HATA) olcum.kismi(OlcumNedeni.GORSEL_EKSIK)
                     }) { olcum.tamEkran(); gorsel = image }
             }
-            item { Text(stringResource(R.string.focus_image_hint), style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant) }
+            if (soru.gorseller.any { it.tur == GorselTuru.SORU }) item {
+                Text(stringResource(R.string.focus_image_hint), style = MaterialTheme.typography.labelSmall,
+                    color = colors.onSurfaceVariant)
+            }
             item {
                 PremiumOutlinedButton(
                     onClick = { beyazTahtaAcik = true },
@@ -398,7 +397,7 @@ fun OdakOturumuEkrani(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    PremiumOutlinedButton(onClick = {
+                    if (cozumVar) PremiumOutlinedButton(onClick = {
                         if (kaydediliyor || cozumAciliyor) return@PremiumOutlinedButton
                         if (cozumGorunur) cozumGorunur = false else {
                             olcum.aktiflik(false)
@@ -458,12 +457,10 @@ fun OdakOturumuEkrani(
                 ) {
                     Text(stringResource(R.string.focus_assess_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     Text(stringResource(R.string.focus_assess_note), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
-                    Text(stringResource(R.string.measure_frozen_note), style = MaterialTheme.typography.bodySmall)
                     PremiumTextButton(onClick = { olcum.calismayaDon(); planYenilendi = false }, enabled = !mesgul) {
                         Text(stringResource(R.string.measure_return_to_study))
                     }
                     if (onizlemeler == null && !planHatasi) Text(stringResource(R.string.measure_preparing))
-                    onizlemeler?.get(secim ?: TekrarSonucu.RAHAT)?.karar?.let { KararAciklamasi(it) }
                     TekrarSonucu.entries.forEach { sonuc ->
                         val plan = onizlemeler?.get(sonuc)?.plan
                         val secili = secim == sonuc
@@ -532,21 +529,3 @@ private fun OdakGorseli(image: SoruGorseli, depo: LocalSoruGorselDeposu, aciklam
 
 private fun sureMetni(ms: Long?): String = if (ms == null) "—" else
     String.format(Locale.ROOT, "%02d:%02d", ms / 60_000, ms / 1_000 % 60)
-
-@Composable
-private fun KararAciklamasi(karar: com.keremtulu.questionnote.domain.repeat.TekrarKarari) {
-    val mod = karar.mod
-    val aciklama = when (mod) {
-        com.keremtulu.questionnote.domain.repeat.TekrarMotorModu.KAPALI -> R.string.motor_focus_off
-        com.keremtulu.questionnote.domain.repeat.TekrarMotorModu.GOLGE -> R.string.motor_focus_shadow
-        com.keremtulu.questionnote.domain.repeat.TekrarMotorModu.ETKIN -> R.string.motor_focus_active
-    }
-    Text(stringResource(aciklama, karar.temel.sonrakiAralik, karar.aday.sonrakiAralik),
-        style = MaterialTheme.typography.bodySmall)
-    Text(stringResource(when {
-        com.keremtulu.questionnote.domain.repeat.KararNedeni.BIRLIKTE_SINYAL in karar.nedenler -> R.string.motor_reason_combined
-        com.keremtulu.questionnote.domain.repeat.KararNedeni.TOPARLANMA in karar.nedenler -> R.string.motor_reason_recovery
-        com.keremtulu.questionnote.domain.repeat.KararNedeni.IKINCI_INDIRIM_YOK in karar.nedenler -> R.string.motor_reason_no_stack
-        else -> R.string.motor_reason_baseline
-    }), style = MaterialTheme.typography.bodySmall)
-}
