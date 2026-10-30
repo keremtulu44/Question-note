@@ -854,6 +854,9 @@ fun YanlisDefteriUygulamasi(
                         ders = current.ders,
                         repository = konuRepository,
                         onGeri = { ekran = current.geri },
+                        geriEtiketi = if (current.geri == UygulamaEkrani.KonuMerkezi) {
+                            stringResource(R.string.topic_back_to_center)
+                        } else null,
                     )
                     is UygulamaEkrani.SoruAyrintisi -> SoruDetayEkrani(
                         soruId = current.soruId,

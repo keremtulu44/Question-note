@@ -137,7 +137,7 @@ fun AyarlarEkrani(
         contentWindowInsets = ekranPencereInsetsi(),
     ) { insets ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets),
+            modifier = Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets).testTag("settings-list"),
             contentPadding = PaddingValues(
                 start = 20.dp,
                 top = 20.dp,

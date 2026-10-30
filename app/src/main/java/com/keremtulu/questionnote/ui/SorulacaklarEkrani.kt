@@ -1,5 +1,6 @@
 package com.keremtulu.questionnote.ui
 
+import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -33,6 +34,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
@@ -44,6 +46,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -62,6 +65,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -80,6 +86,7 @@ import com.keremtulu.questionnote.domain.repository.SoruRepository
 import com.keremtulu.questionnote.ui.bilesenler.GorselKirpmaAlani
 import com.keremtulu.questionnote.ui.bilesenler.GorselKirpmaDialog
 import com.keremtulu.questionnote.ui.bilesenler.GorselSecimBolumu
+import com.keremtulu.questionnote.ui.bilesenler.KaydedilmemisDegisiklikDialog
 import com.keremtulu.questionnote.ui.bilesenler.SoruGorselResmi
 import com.keremtulu.questionnote.ui.bilesenler.premium.PremiumBosDurum
 import com.keremtulu.questionnote.ui.premium.PremiumButton
@@ -89,6 +96,9 @@ import com.keremtulu.questionnote.ui.premium.PremiumOutlinedButton
 import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -124,6 +134,16 @@ fun SorulacaklarEkrani(
     var seciliDersId by rememberSaveable { mutableStateOf<String?>(null) }
     var tamEkranHedef by remember { mutableStateOf<Pair<Ders, Soru>?>(null) }
     var cozdurdumHedef by remember { mutableStateOf<Soru?>(null) }
+    var cozdurdumSoruId by rememberSaveable { mutableStateOf<String?>(null) }
+
+    fun cozdurdumuAc(soru: Soru) {
+        cozdurdumHedef = soru
+        cozdurdumSoruId = soru.id
+    }
+    fun cozdurdumuKapat() {
+        cozdurdumHedef = null
+        cozdurdumSoruId = null
+    }
 
     val gruplarFlow = remember(soruRepository, dersRepository, yenileme) {
         combine(
@@ -142,6 +162,21 @@ fun SorulacaklarEkrani(
         value = SorulacaklarDurumu.Yukleniyor
         gruplarFlow.catch { value = SorulacaklarDurumu.Hata }
             .collect { value = SorulacaklarDurumu.Hazir(it) }
+    }
+
+    // Rehydrate the dialog target after rotation/process restoration, without dropping
+    // the draft while the Room-backed list is still loading.
+    LaunchedEffect(cozdurdumSoruId, durum) {
+        val id = cozdurdumSoruId ?: return@LaunchedEffect
+        if (cozdurdumHedef != null || durum !is SorulacaklarDurumu.Hazir) return@LaunchedEffect
+        val soru = (durum as SorulacaklarDurumu.Hazir).gruplar
+            .flatMap { it.sorular }.firstOrNull { it.id == id }
+        if (soru != null) {
+            cozdurdumHedef = soru
+        } else {
+            cozdurdumSoruId = null
+            snackbarHostState.showSnackbar(context.getString(R.string.question_error_not_found))
+        }
     }
 
     Scaffold(
@@ -188,7 +223,7 @@ fun SorulacaklarEkrani(
                 SorulacaklarDurumu.Hata -> item {
                     PremiumBosDurum(
                         modifier = Modifier.fillMaxWidth(),
-                        baslik = stringResource(R.string.today_load_error),
+                        baslik = stringResource(R.string.ask_teacher_load_error),
                         aciklama = "",
                         butonMetni = stringResource(R.string.topic_retry),
                         onButonTikla = { yenileme++ },
@@ -310,7 +345,7 @@ fun SorulacaklarEkrani(
                                     soru = soru,
                                     gorselDeposu = gorselDeposu,
                                     onTamEkran = { tamEkranHedef = grup.ders to soru },
-                                    onCozdurdum = { cozdurdumHedef = soru },
+                                    onCozdurdum = { cozdurdumuAc(soru) },
                                     onDetay = { onSoruDetayAc(grup.ders, soru.id) },
                                 )
                             }
@@ -329,7 +364,7 @@ fun SorulacaklarEkrani(
             onDismiss = { tamEkranHedef = null },
             onCozdurdum = {
                 tamEkranHedef = null
-                cozdurdumHedef = soru
+                cozdurdumuAc(soru)
             },
         )
     }
@@ -339,15 +374,12 @@ fun SorulacaklarEkrani(
             soru = soru,
             soruRepository = soruRepository,
             gorselDeposu = gorselDeposu,
-            onDismiss = { cozdurdumHedef = null },
+            onDismiss = ::cozdurdumuKapat,
             onBasarili = {
-                cozdurdumHedef = null
+                cozdurdumuKapat()
                 scope.launch {
                     snackbarHostState.showSnackbar(context.getString(R.string.ask_teacher_resolved_snackbar))
                 }
-            },
-            onHata = { mesaj ->
-                scope.launch { snackbarHostState.showSnackbar(mesaj) }
             },
         )
     }
@@ -628,28 +660,56 @@ internal fun CozdurdumDialog(
     gorselDeposu: LocalSoruGorselDeposu,
     onDismiss: () -> Unit,
     onBasarili: () -> Unit,
-    onHata: (String) -> Unit,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    var cozumGorselleri by remember(soru.id) { mutableStateOf<List<SoruGorselGirdisi>>(emptyList()) }
-    var cozumNotu by remember(soru.id) { mutableStateOf("") }
+    var cozumGorselleri by rememberSaveable(soru.id, stateSaver = SoruGorselGirdileriSaver) {
+        mutableStateOf<List<SoruGorselGirdisi>>(emptyList())
+    }
+    var cozumNotu by rememberSaveable(soru.id) { mutableStateOf("") }
+    var cikisOnayi by rememberSaveable(soru.id) { mutableStateOf(false) }
+    var fotografsizOnayi by rememberSaveable(soru.id) { mutableStateOf(false) }
+    var kameraId by rememberSaveable(soru.id) { mutableStateOf<String?>(null) }
+    var kameraUri by rememberSaveable(soru.id) { mutableStateOf<String?>(null) }
+    var islemHatasi by remember(soru.id) { mutableStateOf<String?>(null) }
     var kaydediliyor by remember(soru.id) { mutableStateOf(false) }
-    var kameraCekimi by remember(soru.id) { mutableStateOf<KameraCekimi?>(null) }
     var kirpmaHedefi by remember(soru.id) { mutableStateOf<SoruGorselGirdisi?>(null) }
     var kirpmaIsleniyor by remember(soru.id) { mutableStateOf(false) }
 
-    fun gecicileriTemizle() {
-        val kopya = cozumGorselleri
-        cozumGorselleri = emptyList()
-        scope.launch {
-            kopya.filter { it.gecici }.forEach { runCatching { gorselDeposu.geciciDosyayiSil(it.dosyaAdi) } }
+    fun kameraCekimi(): KameraCekimi? = kameraId?.let { id ->
+        kameraUri?.let { uri -> KameraCekimi(id, Uri.parse(uri)) }
+    }
+    fun kameraCekiminiAyarla(cekim: KameraCekimi?) {
+        kameraId = cekim?.id
+        kameraUri = cekim?.uri?.toString()
+    }
+    suspend fun gecicileriTemizle() {
+        val kopya = cozumGorselleri.filter { it.gecici }
+        withContext(NonCancellable + Dispatchers.IO) {
+            kopya.forEach { runCatching { gorselDeposu.geciciDosyayiSil(it.dosyaAdi) } }
         }
+        cozumGorselleri = emptyList()
+    }
+    fun kapat() {
+        if (kaydediliyor || kirpmaIsleniyor) return
+        kaydediliyor = true
+        scope.launch {
+            try {
+                gecicileriTemizle()
+                onDismiss()
+            } finally {
+                kaydediliyor = false
+            }
+        }
+    }
+    fun cikisIste() {
+        if (kaydediliyor || kirpmaIsleniyor) return
+        if (cozumNotu.isNotEmpty() || cozumGorselleri.isNotEmpty()) cikisOnayi = true else kapat()
     }
 
     val takePicture = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { basarili ->
-        val aktif = kameraCekimi
-        kameraCekimi = null
+        val aktif = kameraCekimi()
+        kameraCekiminiAyarla(null)
         if (aktif == null) return@rememberLauncherForActivityResult
         if (!basarili) {
             gorselDeposu.kameraCekiminiSil(aktif.id)
@@ -659,7 +719,7 @@ internal fun CozdurdumDialog(
             try {
                 if (cozumGorselleri.size >= 20) {
                     gorselDeposu.kameraCekiminiSil(aktif.id)
-                    onHata(context.getString(R.string.question_form_photo_limit))
+                    islemHatasi = context.getString(R.string.question_form_photo_limit)
                     return@launch
                 }
                 val girdi = gorselDeposu.kameradanHazirla(aktif.id, GorselTuru.COZUM, cozumGorselleri.size)
@@ -667,25 +727,35 @@ internal fun CozdurdumDialog(
             } catch (cancel: CancellationException) {
                 throw cancel
             } catch (_: Throwable) {
-                onHata(context.getString(R.string.question_form_photo_error))
+                islemHatasi = context.getString(R.string.question_form_photo_error)
             }
         }
     }
 
     val galeriSecici = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(5)) { uris ->
         if (uris.isEmpty()) return@rememberLauncherForActivityResult
+        if (cozumGorselleri.size + uris.size > 20) {
+            islemHatasi = context.getString(R.string.question_form_photo_limit)
+            return@rememberLauncherForActivityResult
+        }
         scope.launch {
+            val eklenenler = mutableListOf<SoruGorselGirdisi>()
             try {
-                val guncel = cozumGorselleri.toMutableList()
                 for (uri in uris) {
-                    if (guncel.size >= 20) break
-                    guncel += gorselDeposu.secicidenHazirla(uri, GorselTuru.COZUM, guncel.size)
+                    eklenenler += gorselDeposu.secicidenHazirla(uri, GorselTuru.COZUM, cozumGorselleri.size + eklenenler.size)
                 }
-                cozumGorselleri = guncel
-            } catch (cancel: CancellationException) {
-                throw cancel
-            } catch (_: Throwable) {
-                onHata(context.getString(R.string.question_form_photo_error))
+                cozumGorselleri = cozumGorselleri + eklenenler
+                islemHatasi = null
+            } catch (iptal: CancellationException) {
+                withContext(NonCancellable + Dispatchers.IO) {
+                    eklenenler.forEach { runCatching { gorselDeposu.geciciDosyayiSil(it.dosyaAdi) } }
+                }
+                throw iptal
+            } catch (_: Exception) {
+                withContext(NonCancellable + Dispatchers.IO) {
+                    eklenenler.forEach { runCatching { gorselDeposu.geciciDosyayiSil(it.dosyaAdi) } }
+                }
+                islemHatasi = context.getString(R.string.question_form_photo_error)
             }
         }
     }
@@ -697,16 +767,20 @@ internal fun CozdurdumDialog(
     fun kamerayiAc() {
         try {
             val cekim = gorselDeposu.kameraCekimiOlustur()
-            kameraCekimi = cekim
+            kameraCekiminiAyarla(cekim)
+            islemHatasi = null
             takePicture.launch(cekim.uri)
-        } catch (_: Throwable) {
-            onHata(context.getString(R.string.question_form_photo_error))
+        } catch (_: Exception) {
+            kameraId?.let(gorselDeposu::kameraCekiminiSil)
+            kameraCekiminiAyarla(null)
+            islemHatasi = context.getString(R.string.question_form_photo_error)
         }
     }
 
     fun tekraraAl(gorsellerle: Boolean) {
         if (kaydediliyor) return
         kaydediliyor = true
+        islemHatasi = null
         scope.launch {
             try {
                 val gonderilecek = if (gorsellerle) cozumGorselleri else emptyList()
@@ -719,12 +793,12 @@ internal fun CozdurdumDialog(
                     if (!gorsellerle && cozumGorselleri.isNotEmpty()) gecicileriTemizle()
                     onBasarili()
                 } else {
-                    onHata(context.getString(R.string.question_error_generic))
+                    islemHatasi = context.getString(R.string.question_error_generic)
                 }
             } catch (cancel: CancellationException) {
                 throw cancel
             } catch (_: Throwable) {
-                onHata(context.getString(R.string.question_error_generic))
+                islemHatasi = context.getString(R.string.question_error_generic)
             } finally {
                 kaydediliyor = false
             }
@@ -732,12 +806,7 @@ internal fun CozdurdumDialog(
     }
 
     Dialog(
-        onDismissRequest = {
-            if (!kaydediliyor && !kirpmaIsleniyor) {
-                gecicileriTemizle()
-                onDismiss()
-            }
-        },
+        onDismissRequest = ::cikisIste,
         properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
         Surface(
@@ -750,7 +819,7 @@ internal fun CozdurdumDialog(
             tonalElevation = 6.dp,
         ) {
             LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().testTag("cozdurdum-dialog-list"),
                 contentPadding = PaddingValues(20.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
@@ -786,12 +855,22 @@ internal fun CozdurdumDialog(
                     OutlinedTextField(
                         value = cozumNotu,
                         onValueChange = { cozumNotu = it },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().testTag("cozdurdum-solution-note"),
                         enabled = !kaydediliyor,
                         minLines = 2,
                         label = { Text(stringResource(R.string.ask_teacher_solution_note_label)) },
                         shape = RoundedCornerShape(14.dp),
                     )
+                }
+                islemHatasi?.let { mesaj ->
+                    item {
+                        Text(
+                            mesaj,
+                            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Assertive },
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
                 }
                 if (cozumGorselleri.isNotEmpty()) {
                     item {
@@ -807,7 +886,10 @@ internal fun CozdurdumDialog(
                 }
                 item {
                     PremiumOutlinedButton(
-                        onClick = { tekraraAl(gorsellerle = false) },
+                        onClick = {
+                            if (cozumGorselleri.isNotEmpty()) fotografsizOnayi = true
+                            else tekraraAl(gorsellerle = false)
+                        },
                         enabled = !kaydediliyor,
                         modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("cozdurdum_fotografsiz_onay"),
                         shape = RoundedCornerShape(14.dp),
@@ -822,10 +904,7 @@ internal fun CozdurdumDialog(
                     ) {
                         PremiumTextButton(
                             enabled = !kaydediliyor,
-                            onClick = {
-                                gecicileriTemizle()
-                                onDismiss()
-                            },
+                            onClick = ::cikisIste,
                         ) {
                             Text(stringResource(R.string.question_form_cancel))
                         }
@@ -833,6 +912,30 @@ internal fun CozdurdumDialog(
                 }
             }
         }
+    }
+
+    if (cikisOnayi) {
+        KaydedilmemisDegisiklikDialog(
+            onCik = { cikisOnayi = false; kapat() },
+            onDevam = { cikisOnayi = false },
+        )
+    }
+    if (fotografsizOnayi) {
+        AlertDialog(
+            onDismissRequest = { fotografsizOnayi = false },
+            title = { Text(stringResource(R.string.ask_teacher_without_photos_title)) },
+            text = { Text(stringResource(R.string.ask_teacher_without_photos_message)) },
+            confirmButton = {
+                PremiumTextButton(onClick = { fotografsizOnayi = false; tekraraAl(gorsellerle = false) }) {
+                    Text(stringResource(R.string.ask_teacher_without_photos_confirm))
+                }
+            },
+            dismissButton = {
+                PremiumTextButton(onClick = { fotografsizOnayi = false }) {
+                    Text(stringResource(R.string.unsaved_changes_continue))
+                }
+            },
+        )
     }
 
     kirpmaHedefi?.let { target ->
@@ -865,7 +968,7 @@ internal fun CozdurdumDialog(
                         } catch (cancel: CancellationException) {
                             throw cancel
                         } catch (_: Throwable) {
-                            onHata(context.getString(R.string.question_form_crop_error))
+                            islemHatasi = context.getString(R.string.question_form_crop_error)
                         } finally {
                             if (!replaced) {
                                 output?.takeIf { it.gecici && it.id != target.id }?.let {

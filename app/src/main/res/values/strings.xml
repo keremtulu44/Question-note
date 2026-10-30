@@ -396,6 +396,7 @@
     <string name="image_orphan_deleted">%1$d yetim dosya silindi.</string>
     <string name="image_audit_clean">Görsel dosyaları tutarlı görünüyor; silinecek eski yetim yok.</string>
 
+    <string name="topic_back_to_center">← Konu yönetimine dön</string>
     <string name="topic_back_to_lessons">← Derslere dön</string>
     <string name="topic_screen_title">Konular</string>
     <string name="topic_filter_active">Etkin</string>
@@ -1028,6 +1029,7 @@
     <string name="ask_teacher_screen_subtitle">Soruları ders ders ayırdık. Hocanın yanında tam ekran açıp kağıtta çözdürdükten sonra yarına tekrara alabilirsin.</string>
     <string name="ask_teacher_all_lessons">Tüm Dersler (%1$d)</string>
     <string name="ask_teacher_lesson_chip">%1$s (%2$d)</string>
+    <string name="ask_teacher_load_error">Sorulacaklar listesi yüklenemedi.</string>
     <string name="ask_teacher_empty_title">Bekleyen soru kalmadı</string>
     <string name="ask_teacher_empty_description">Öğretmene sorulacak olarak işaretlediğin sorular ders ders burada toplanır.</string>
     <string name="ask_teacher_open_fullscreen">Tam Ekran Aç</string>
@@ -1036,6 +1038,9 @@
     <string name="ask_teacher_dialog_subtitle">İstersen hocanın kağıttaki çözüm fotoğrafını ekleyip kırpabilir, istersen doğrudan fotoğrafsız olarak yarınki tekrar listene alabilirsin.</string>
     <string name="ask_teacher_solution_note_label">Kısa çözüm notu (isteğe bağlı)</string>
     <string name="ask_teacher_save_with_photo">Çözümle tekrara al (Yarın)</string>
+    <string name="ask_teacher_without_photos_title">Fotoğraflar eklenmeden devam edilsin mi?</string>
+    <string name="ask_teacher_without_photos_message">Seçtiğin çözüm fotoğrafları kaydedilmeyecek. Çözüm notun varsa kaydedilir.</string>
+    <string name="ask_teacher_without_photos_confirm">Fotoğrafsız devam et</string>
     <string name="ask_teacher_save_without_photo">Fotoğrafsız tekrara al (Yarın)</string>
     <string name="ask_teacher_resolved_snackbar">Soru yarınki tekrar listene eklendi.</string>
     <string name="ask_teacher_page_indicator">Sayfa %1$d / %2$d</string>

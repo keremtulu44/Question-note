@@ -23,6 +23,7 @@ import com.keremtulu.questionnote.data.repository.RoomKonuRepository
 import com.keremtulu.questionnote.data.repository.RoomSoruRepository
 import com.keremtulu.questionnote.domain.model.Ders
 import com.keremtulu.questionnote.domain.model.SoruSecenegi
+import com.keremtulu.questionnote.domain.model.SoruPlanDurumu
 import com.keremtulu.questionnote.domain.model.SoruSecenekTuru
 import com.keremtulu.questionnote.domain.repository.DersRepository
 import com.keremtulu.questionnote.domain.repository.SoruRepository
@@ -89,10 +90,10 @@ class OgrenciAyrintiArayuzTest {
         }
     }
 
-    private fun soruEkle(id: String, solution: String?) = runBlocking {
+    private fun soruEkle(id: String, solution: String?, plan: String = "AKTIF") = runBlocking {
         db.soruDao().ekle(
             SoruEntity(
-                id = id, dersId = math.id, soruNotu = "Detay testi", cozumNotu = solution,
+                id = id, dersId = math.id, soruNotu = "Detay testi", cozumNotu = solution, planDurumu = plan,
                 sonrakiTekrarGun = LocalDate.now().toEpochDay().toInt(), olusturma = 1L, guncelleme = 1L,
             ),
         )
@@ -148,13 +149,52 @@ class OgrenciAyrintiArayuzTest {
         assertTrue(runBlocking { db.tekrarDao().tumunuGetir().single().cozumAcildi })
     }
 
+    @Test fun hocayaCozdurmeNotuKurtarilirVeYanlisliklaKapatilmaz() {
+        soruEkle("sorulacak", null, plan = "OGRETMENE_SORULACAK")
+        val restoration = StateRestorationTester(compose)
+        restoration.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                SorulacaklarEkrani(
+                    soruRepository = questions, dersRepository = lessons, gorselDeposu = images,
+                    onGeri = {}, onSoruDetayAc = { _, _ -> },
+                )
+            }
+        }
+        compose.waitUntil(10_000) { compose.onAllNodesWithTag("sorulacaklar_liste").fetchSemanticsNodes().isNotEmpty() }
+        compose.waitUntil(10_000) {
+            runCatching {
+                compose.onNodeWithTag("sorulacaklar_liste").performScrollToNode(hasTestTag("sorulacak_cozdurdum_sorulacak"))
+            }.isSuccess
+        }
+        compose.onNodeWithTag("sorulacak_cozdurdum_sorulacak").performClick()
+        compose.onNodeWithTag("cozdurdum-dialog-list").performScrollToNode(hasTestTag("cozdurdum-solution-note"))
+        compose.onNodeWithTag("cozdurdum-solution-note").performTextReplacement("Hocamın çözüm notu")
+        restoration.emulateSavedInstanceStateRestore()
+        compose.waitUntil(10_000) { compose.onAllNodesWithTag("cozdurdum-dialog-list").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("cozdurdum-dialog-list").performScrollToNode(hasText(context.getString(R.string.question_form_cancel)))
+        compose.onNodeWithText(context.getString(R.string.question_form_cancel)).performClick()
+        compose.onNodeWithText(context.getString(R.string.unsaved_changes_title)).assertIsDisplayed()
+        compose.onNodeWithText(context.getString(R.string.unsaved_changes_continue)).performClick()
+        compose.onNodeWithTag("cozdurdum-dialog-list").performScrollToNode(hasTestTag("cozdurdum-solution-note"))
+        compose.onNode(hasTestTag("cozdurdum-solution-note") and hasText("Hocamın çözüm notu")).assertExists()
+        compose.onNodeWithTag("cozdurdum-dialog-list").performScrollToNode(hasTestTag("cozdurdum_fotografsiz_onay"))
+        compose.onNodeWithTag("cozdurdum_fotografsiz_onay").performClick()
+        compose.waitUntil(10_000) {
+            runBlocking { questions.soruGetir("sorulacak")?.planDurumu == SoruPlanDurumu.AKTIF }
+        }
+        assertTrue(runBlocking { questions.soruGetir("sorulacak")?.cozumNotu.orEmpty().contains("Hocamın çözüm notu") })
+    }
+
     private fun ayarlariGoster(repository: DersRepository, buyukYazi: Boolean = false) {
+        val hedef = TercihGunlukHedefDeposu(context)
+        val politika = TekrarPolitikasiDeposu(context)
+        val tani = MotorTaniHizmeti(db)
         compose.setContent {
             CompositionLocalProvider(LocalDensity provides Density(1f, fontScale = if (buyukYazi) 2f else 1f)) {
                 YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
                     AyarlarEkrani(
-                        gunlukHedefDeposu = TercihGunlukHedefDeposu(context), profilDeposu = profile,
-                        tekrarPolitikasi = TekrarPolitikasiDeposu(context), motorTanisi = MotorTaniHizmeti(db),
+                        gunlukHedefDeposu = hedef, profilDeposu = profile,
+                        tekrarPolitikasi = politika, motorTanisi = tani,
                         dersRepository = repository, sonYedek = null, yedeklemeIslemde = false,
                         onYedekOlustur = {}, onYedekGeriYukle = {}, onGorselBakimi = {},
                         onKatalog = {}, onKonular = {},

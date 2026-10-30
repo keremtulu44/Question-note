@@ -26,6 +26,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.keremtulu.questionnote.R
@@ -73,7 +74,7 @@ fun KonuMerkeziEkrani(
         contentWindowInsets = WindowInsets.safeDrawing,
     ) { insets ->
         LazyColumn(
-            Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets),
+            Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets).testTag("topics-center-list"),
             contentPadding = PaddingValues(20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -90,7 +91,7 @@ fun KonuMerkeziEkrani(
                 OutlinedTextField(
                     value = arama,
                     onValueChange = { arama = it },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().testTag("topics-search-field"),
                     label = { Text(stringResource(R.string.topics_search)) },
                     singleLine = true,
                     shape = RoundedCornerShape(16.dp),
@@ -113,7 +114,8 @@ fun KonuMerkeziEkrani(
                 val bulunanlar = dersler.orEmpty().filter { it.ders.ad.contains(arama, ignoreCase = true) }
                 if (bulunanlar.isEmpty()) item { Text(stringResource(R.string.topics_search_empty)) }
                 items(bulunanlar, key = { it.ders.id }) { satir ->
-                    PremiumCard(onClick = { onDers(satir.ders) }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp)) {
+                    PremiumCard(onClick = { onDers(satir.ders) },
+                        modifier = Modifier.fillMaxWidth().testTag("topics-lesson-${satir.ders.id}"), shape = RoundedCornerShape(20.dp)) {
                         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Text(satir.ders.ad, style = MaterialTheme.typography.titleMedium)
                             Text(stringResource(R.string.topics_center_count, satir.konuSayisi, satir.ders.soruSayisi),

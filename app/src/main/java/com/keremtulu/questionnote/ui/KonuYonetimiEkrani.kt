@@ -77,6 +77,7 @@ fun KonuYonetimiEkrani(
     ders: Ders,
     repository: KonuRepository,
     onGeri: () -> Unit,
+    geriEtiketi: String? = null,
 ) {
     var arsivlilerGosteriliyor by rememberSaveable(ders.id) { mutableStateOf(false) }
     var akisYenileme by remember { mutableIntStateOf(0) }
@@ -117,7 +118,7 @@ fun KonuYonetimiEkrani(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 PremiumTextButton(onClick = onGeri) {
-                    Text(text = stringResource(R.string.topic_back_to_lessons))
+                    Text(text = geriEtiketi ?: stringResource(R.string.topic_back_to_lessons))
                 }
                 com.keremtulu.questionnote.ui.bilesenler.DuzBaslik(
                     baslik = stringResource(R.string.topic_screen_title),
