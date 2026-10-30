@@ -3,6 +3,26 @@
 **Son güncelleme: 2026-10-29.** Önce bu belge, `docs/DERLEME_RAPORU.md`,
 `docs/PREMIUM_GORSEL_GELISTIRME.md` ve [P4–P6 sözleşme/kanıt kaydı](docs/P4_P5_P6_UYGULAMA.md) okunur.
 
+## 2026-10-30 — imzalı önizleme APK (dal: `arena/ce557218-question-note`)
+
+Kullanıcı "APK ver yeni" dedi. Kısıtlı ortamda Gradle/JDK olmadığı için APK CI'da üretildi.
+
+- **CI değişikliği (`android.yml`):** `push.branches` `'**'` oldu; `release` işi, commit mesajında
+  `[apk]` geçen dal push'unda da çalışır. Yayın kanalı `GITHUB_REF`'e göre seçilir: `main`/`v*` →
+  resmî sürüm, diğerleri → **yalnız** `preview-<sürüm>` prerelease (sürüm etiketi oluşturulmaz).
+  `workflow_dispatch`'e `yayin` (onizleme/yok) girdisi eklendi.
+- **Engel:** `gh workflow run` → `403 Resource not accessible by integration` (token'da
+  `actions: write` yok). Bu yüzden tetikleme `[apk]` işaretli commit ile yapıldı; BUILDING.md'ye not
+  düşüldü.
+- **Sonuç:** run `41009802635` yeşil (test + release). Release
+  [`preview-1.7.0`](https://github.com/keremtulu44/Question-note/releases/tag/preview-1.7.0):
+  `yanlis-defteri-1.7.0.apk`, 13.886.473 bayt,
+  SHA-256 `8ff7274f9837c8731d9c83b4b1dc4cf99c95f41254cd53aabba1f73e38bccc02`,
+  commit `152ae9a`. `apksigner verify` + beklenen sertifika parmak izi eşleşti → 1.6.3 üzerine
+  kaldırmadan kurulur. 438 Debug / 337 Release testi geçti.
+- İndirme, sandbox ağı `release-assets.githubusercontent.com`'a çıkamadığı için tarayıcıdan
+  yapılmalı; dosya workspace'e kopyalanamadı.
+
 ## 2026-10-29 (3) — uygulama içi rehber (dal: `arena/ce557218-question-note`)
 
 Kullanıcı isteği: "anlamlı bir tutorial hazırla" — hem tanıtan, hem kayıt/deneme/çözmeyi gösteren,

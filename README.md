@@ -37,6 +37,11 @@ Ortak testler iki varyantta tekrar eder; sayılar toplanmaz. Güncel CI kanıtı
 Dal `arena/ce557218-question-note`. Kapsam ve testler:
 [docs/REHBER_TANITIM.md](docs/REHBER_TANITIM.md).
 
+**1.7.0 önizleme APK'sı** (imzalı, 1.6.3'ün üzerine kaldırmadan kurulur):
+[yanlis-defteri-1.7.0.apk](https://github.com/keremtulu44/Question-note/releases/download/preview-1.7.0/yanlis-defteri-1.7.0.apk)
+· 13.886.473 bayt · SHA-256 `8ff7274f9837c8731d9c83b4b1dc4cf99c95f41254cd53aabba1f73e38bccc02`.
+Resmî `v1.7.0` etiketi **yoktur**: cihaz/TalkBack kabulü yapılmadan sürüm yayımlanmaz.
+
 - **Öğretmen çalışma alanı gizli/askıda (1.6.2+):** ürün odağı öğrenci tarafıdır
   (güncel karar: [AGENTS.md](AGENTS.md)). Öğretmen kodu, Room v5 tabloları, kayıtlı rol,
   fotoğraflar ve yedek desteği **silinmeden** arkada korunur; kurulumda/ayarlarda öğretmen

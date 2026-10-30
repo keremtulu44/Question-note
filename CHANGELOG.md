@@ -26,6 +26,13 @@ değişmedi; yeni izin ve bağımlılık yok.
   kural çipleri ve alt düğmeler alt alta geçer (FlowRow / tam genişlik); hiçbir etiket kırpılmaz.
 - **Gezinme:** `UygulamaEkrani.Rehber(baslangic, geri)` JSON saver'a eklendi; süreç ölümünde
   bölüm ve dönüş hedefi korunur. Rehberde alt menü/üst panel gizli.
+- **APK (önizleme):** `preview-1.7.0` → `yanlis-defteri-1.7.0.apk`, 13.886.473 bayt,
+  SHA-256 `8ff7274f9837c8731d9c83b4b1dc4cf99c95f41254cd53aabba1f73e38bccc02`. CI'da 438 Debug +
+  337 Release testi geçti, APK sürüm anahtarıyla imzalandı ve sertifika parmak izi doğrulandı;
+  bu yüzden cihazdaki 1.6.3'ün üzerine **kaldırmadan** kurulabilir. Resmî `v1.7.0` etiketi
+  oluşturulmadı (cihaz kabulü açık).
+- **CI:** dal push'unda commit mesajında `[apk]` geçerse imzalı APK üretilir (`preview-<sürüm>`
+  prerelease). `workflow_dispatch` de var (`yayin`: `onizleme`/`yok`).
 - **Testler:** `RehberModeliTest` (11 saf JVM), `RehberDeposuTest` (8 Robolectric),
   `RehberNavigasyonTest` (5 Robolectric saver), `RehberEkraniTest` (8 Robolectric + Compose;
   %200 yazı ve 320 dp genişlik dahil).
