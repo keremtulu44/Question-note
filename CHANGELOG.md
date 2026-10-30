@@ -2,6 +2,61 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [1.7.1 önizleme adayı] — 2026-10-30
+
+- 1.7.0 önizlemesindeki rehber, çizim tahtası ve deneme iyileştirmeleri; öğrenci genel
+  kontrolüyle birleştirildi. Kaydedilmemiş taslak uyarıları, Çözdürdüm taslağı, filtre/arama
+  durumları ve yükleme hatası sonrası yeniden deneme korundu.
+- Yarım kalmış oturum yalnız kullanıcının seçimiyle açılır; yedek geri yükleme sonrası bekleyen
+  eski oturum yazıları engellenir. Dersler ve deneme analizlerinde gerçek veriler kullanılır.
+- Karşılaştırılamayan farklı deneme biçimlerinden ortalama/en iyi net veya Bugün trendi üretilmez;
+  denemeyi çalışma yolu yalnız uygun soru ve güvenli kaynak eşleşmesi varsa kullanılır.
+- **versionCode 44**, uygulama kimliği ve release imza anahtarı sabit. Room/ZIP v5 değişmedi;
+  1.7.0 (43) üzerine güncelleme hedeflenir. Fiziksel cihaz kabulü ayrı doğrulama gerektirir.
+
+## [Yayınlanmadı — uygulama içi rehber] — 2026-10-29
+
+Yeni sürüm adayı **v1.7.0 (versionCode 43)**. Sürüm biçimi, Room v5, ZIP yedeği ve tekrar motoru
+değişmedi; yeni izin ve bağımlılık yok.
+
+- **Rehber (7 bölüm):** Tanıtım → Kayıt → Bugün → Deneme → Çözüm → Yedek → Kapanış. Her bölüm
+  gerçek uygulama bileşenleriyle çizilir; sahte ekran görüntüsü yok.
+- **Gerçek motor, demo veri:** "Sonraki tekrar ne zaman?" sorusu `TekrarKurali.hesapla` ile,
+  deneme özeti `ozet()` ile hesaplanır. Örnek sorular/denemeler **DEMO** rozetlidir ve deftere
+  (Room'a) hiçbir şey yazmaz.
+- **Etkileşim:** tekrar sonucu seçimi (Çözemedim/Zorlandım/Rahat) tarihi canlı değiştirir;
+  deneme bölümünde D/Y artır-azalt + kural seçimi neti canlı yeniden hesaplar; çözüm bölümünde
+  mini tahta vardır (gerçek tahtanın 1–10 dp kalınlık sözleşmesi, tek dokunuşta nokta).
+- **Yedek eğitimi:** ZIP'in neyi taşıdığı/taşımadığı listelenir (rozetler ve rehber ilerlemesi
+  cihaza özgüdür, yedeğe girmez) ve gerçek "Ayarlar'da yedek al" akışına geçilir.
+- **Akış:** ilk kurulum bitince rehber bir kez kendiliğinden açılır; "Atla" tamamlanmış sayılır.
+  Yarıda kapatınca kaldığı bölüm saklanır (sonraki açılışta "kaldığın yerden devam" notu).
+  Yeniden izlemek için **Ayarlar → YARDIM → Uygulamayı tanı** (her zaman açık).
+- **Erişilebilirlik:** her bölümde tek `heading`, ilerleme hem "3 / 7" yazısıyla hem ince ölçekle;
+  sayfalar dikey kaydırılabilir; azaltılmış harekette sayfa geçişi animasyonsuz; sistem geri tuşu
+  bölüm bölüm geri sarar (rehberi bir anda kapatmaz). **%200 yazı ölçeğinde** seçenekler, sayaçlar,
+  kural çipleri ve alt düğmeler alt alta geçer (FlowRow / tam genişlik); hiçbir etiket kırpılmaz.
+- **Gezinme:** `UygulamaEkrani.Rehber(baslangic, geri)` JSON saver'a eklendi; süreç ölümünde
+  bölüm ve dönüş hedefi korunur. Rehberde alt menü/üst panel gizli.
+- **Testler:** `RehberModeliTest` (11 saf JVM), `RehberDeposuTest` (8 Robolectric),
+  `RehberNavigasyonTest` (5 Robolectric saver), `RehberEkraniTest` (8 Robolectric + Compose;
+  %200 yazı ve 320 dp genişlik dahil).
+
+## [Yayınlanmadı — çizim tahtası] — 2026-10-29
+
+- **Kesintisiz çizgi:** Parmak hareketi artık hareketin kendisinde işlenir (`awaitEachGesture`
+  + `historical` ara konumlar). Önceki `detectDragGestures` sürümü her harekette vuruşun tamamını
+  kopyalayıp dialog durumuna taşıyordu; hızlı çizimde kareler düştüğü için çizgi "arada duruyor,
+  sonra devam ediyor" gibi görünüyordu.
+- **Yumuşak hat:** Serbest çizgi, noktaların orta noktalarından geçen ikinci derece eğrilerle
+  çizilir; köşeli/kesik görünüm kalktı.
+- **Tek dokunuşta nokta:** Dokunup kaldırmak da iz bırakır ("nokta koyulmuyor" hatası giderildi).
+  Kenara yakın başlayan çizgiler artık atılmıyor, sınır içine kırpılarak başlıyor.
+- **Kalınlık 1–10:** Üç sabit seçenek (2/4/8) yerine 1–10 dp arası 1'er adımlı kaydırıcı; canlı
+  uç önizlemesi ve `dp` değeri görünür, TalkBack aynı değeri duyar. Dar çubukta mini kaydırıcı.
+- **Silgi:** Kalem inceyken de hissedilir kalınlıkta siler (en az 4 dp × 3.4).
+- Sürüm, Room/ZIP biçimi ve tekrar motoru değişmedi.
+
 ## [Yayınlanmadı — üst panel] — 2026-10-27
 
 - **Üst panel:** alt menünün kalıcı eşi. Canlı tarih (`d MMMM EEEE`), seri ve günlük hedef

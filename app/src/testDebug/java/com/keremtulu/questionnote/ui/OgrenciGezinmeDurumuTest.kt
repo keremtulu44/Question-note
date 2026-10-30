@@ -46,7 +46,7 @@ class OgrenciGezinmeDurumuTest {
     private val context: Context = RuntimeEnvironment.getApplication()
     private val preferences = listOf(
         "karne_rozetleri", "rutbe_kutlamalari", "odak_oturumu", "sinav_profili", "tekrar_politikasi",
-        "ilerleme_ayarlari", "denemeler", "calisma_tercihleri",
+        "ilerleme_ayarlari", "denemeler", "calisma_tercihleri", "rehber_durumu",
     )
     private lateinit var db: YanlisDefteriDatabase
     private lateinit var math: Ders
@@ -157,6 +157,22 @@ class OgrenciGezinmeDurumuTest {
         }
         compose.onNodeWithTag("sorulacaklar_liste").performScrollToNode(hasText("Matematik (1)"))
         compose.onNodeWithText("Matematik (1)").assertIsSelected()
+    }
+
+    @Test fun ayarlardanRehberAcilirVeAtlanincaAyarlaraDoner() {
+        app()
+        val settingsTab = hasText(context.getString(R.string.nav_settings)) and
+            SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Tab)
+        compose.waitUntil(10_000) { compose.onAllNodes(settingsTab and isEnabled()).fetchSemanticsNodes().isNotEmpty() }
+        compose.onNode(settingsTab).tikla()
+        compose.waitUntil(10_000) { compose.onAllNodesWithTag("settings-list").fetchSemanticsNodes().isNotEmpty() }
+        val guideAction = context.getString(R.string.settings_guide_action)
+        compose.onNodeWithTag("settings-list").performScrollToNode(hasText(guideAction))
+        compose.onNodeWithText(guideAction).tikla()
+        compose.waitUntil(10_000) { compose.onAllNodesWithTag("rehber-sayfalar").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("rehber-atla").tikla()
+        compose.waitUntil(10_000) { compose.onAllNodesWithTag("settings-list").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("settings-list").assertExists()
     }
 
     @Test fun konuAramasiVeArsivFiltresiIleriGeriGezinmedeKorunur() {

@@ -50,6 +50,8 @@ import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.data.ilerleme.IlerlemeHizmeti
 import com.keremtulu.questionnote.data.prefs.GunlukHedefDeposu
 import com.keremtulu.questionnote.domain.model.DenemeKaydi
+import com.keremtulu.questionnote.domain.model.kronolojik
+import com.keremtulu.questionnote.domain.model.karsilastirilabilir
 import com.keremtulu.questionnote.domain.model.Ders
 import com.keremtulu.questionnote.domain.model.Soru
 import com.keremtulu.questionnote.domain.repeat.GunlukCalismaPlani
@@ -62,6 +64,7 @@ import com.keremtulu.questionnote.ui.bilesenler.InceOk
 import com.keremtulu.questionnote.ui.bilesenler.InceOlcek
 import com.keremtulu.questionnote.ui.bilesenler.KucukArti
 import com.keremtulu.questionnote.ui.bilesenler.KucukOnay
+import com.keremtulu.questionnote.ui.bilesenler.MiniCizgi
 import com.keremtulu.questionnote.ui.bilesenler.OynatSimgesi
 import com.keremtulu.questionnote.ui.bilesenler.SadeKart
 import com.keremtulu.questionnote.ui.bilesenler.SoruIsareti
@@ -702,6 +705,13 @@ private fun DenemeSatiri(
 ) {
     val colors = MaterialTheme.colorScheme
     val sonDeneme = denemeler.firstOrNull()
+    // Simge gerçek sonuçlardan üretilir: sabit bir "yüzde" halkası sahte ilerleme gösteriyordu.
+    val trend = remember(denemeler) {
+        val sonKayitlar = denemeler.kronolojik().takeLast(6)
+        if (sonKayitlar.size >= 2 && sonKayitlar.drop(1).all { it.karsilastirilabilir(sonKayitlar.first()) }) {
+            sonKayitlar.map { it.toplamNet().toFloat() }
+        } else emptyList()
+    }
     val altMetin = if (sonDeneme == null) {
         stringResource(R.string.today_deneme_subtitle_empty)
     } else {
@@ -725,14 +735,25 @@ private fun DenemeSatiri(
             modifier = Modifier.size(38.dp).background(colors.primaryContainer, RoundedCornerShape(12.dp)),
             contentAlignment = Alignment.Center,
         ) {
-            com.keremtulu.questionnote.ui.bilesenler.HedefHalkasi(
-                oran = 0.72f,
-                modifier = Modifier.size(18.dp),
-                izRenk = colors.primary.copy(alpha = 0.25f),
-                dolguRenk = colors.primary,
-                kalinlik = 2.dp,
-                isaretSayisi = 12,
-            )
+            if (trend.size >= 2) {
+                MiniCizgi(
+                    noktalar = trend,
+                    modifier = Modifier
+                        .size(width = 24.dp, height = 15.dp)
+                        .clearAndSetSemantics { },
+                    renk = colors.primary,
+                )
+            } else {
+                // Tek kayıtta çizgi trend iddiası taşır; boş halka "henüz gidişat yok" der.
+                com.keremtulu.questionnote.ui.bilesenler.HedefHalkasi(
+                    oran = 0f,
+                    modifier = Modifier.size(18.dp),
+                    izRenk = colors.primary.copy(alpha = 0.25f),
+                    dolguRenk = colors.primary,
+                    kalinlik = 2.dp,
+                    isaretSayisi = 1,
+                )
+            }
         }
         Column(
             modifier = Modifier.weight(1f),

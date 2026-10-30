@@ -3,8 +3,9 @@
 > Bu belge **değerleri değil**, sırların nerede ve nasıl tutulduğunu anlatır.
 > Hiçbir anahtar, parola veya token bu depoya yazılmaz.
 
-- Son güncelleme: 2026-10-28
-- Son yayımlanan sürüm: **v1.6.3 (versionCode 42)**. **Debug 384/0/0/0**, **Release 303/0/0/0**; Release derlemesi, imza ve sertifika doğrulandı.
+- Son güncelleme: 2026-10-30
+- Son resmî sürüm: **v1.6.3 (versionCode 42)**. 1.7.0 önizlemesi (43) yayımlandı;
+  1.7.1 (44) birleştirilmiş önizleme adayıdır. **Debug 384/0/0/0**, **Release 303/0/0/0**; Release derlemesi, imza ve sertifika doğrulandı.
 - [Release](https://github.com/keremtulu44/Question-note/releases/tag/v1.6.3) · [APK indir](https://github.com/keremtulu44/Question-note/releases/download/v1.6.3/yanlis-defteri-1.6.3.apk).
   APK **13.706.249 bayt**; SHA-256 `787690fca609207a057b258c22dfb16f0e205cdec5bef237656c35ed5cad7218`.
   Derlenen commit `9e9df5b27801dbd3bb90b9b4bbac76f184426e5f`; sertifika SHA-256 `FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54`.
@@ -18,8 +19,9 @@
 
 ## Varyant ve kanıt kapısı
 
-- CI iki iştir: **`test`** (PR + `main`/`v*` push; salt-okunur token, imza secret'ı yok) ve
-  **`release`** (yalnız `main` push veya `v*` etiketi; `test` geçmeden başlamaz). Güncel
+- CI iki iştir: **`test`** (PR + `main`/`v*` push + `[apk]` istekli dal; salt-okunur token,
+  imza secret'ı yok) ve **`release`** (test geçmeden başlamaz). `main`/`v*` push resmî yayın,
+  `[apk]` istekli dal yalnız önizleme; elle tetikleme de yalnız önizleme/artefakt üretir. Güncel
   sonuç ve kaynak: [DERLEME_RAPORU.md](docs/DERLEME_RAPORU.md) (yalnız `main` release
   çalıştırmalarında güncellenir; PR kanıtı Actions artifact + step summary'dedir).
 - Debug başarısız olsa da Release testi çalışır; APK için **ikisi de** geçmelidir. Sıra: `test` işinde `:app:testDebugUnitTest` → `:app:testReleaseUnitTest`; `release` işinde `:app:assembleRelease` →
@@ -92,9 +94,9 @@ için uygun değildir.
 ## 4. Actions kullanımı
 
 - Derleme/test **otomatik** çalışır: `main` push ve `v*` etiketlerinde iki iş de, pull request'lerde
-  yalnız `test` işi (yalnızca workflow'da izlenen dosyalar değişince). Geliştirme dalında CI almak
-  için (taslak) PR açmak yeterlidir. Elle tetik: `workflow_dispatch` (release işi yine yalnız
-  `main` ref'inde çalışır).
+  yalnız `test` işi (yalnızca workflow'da izlenen dosyalar değişince). Dal commit mesajında `[apk]`
+  açıkça istenirse iki testten sonra yalnız imzalı önizleme üretilir; resmî etiket oluşturulmaz.
+  Elle `workflow_dispatch` de yalnız önizleme veya artefakt sunar.
 - Token en az yetkiyle bölündü: üst düzey `permissions: contents: read`; yalnız `release` işi
   `contents: write` alır (Release oluşturma + rapor commit'i). İmza secret'ları da yalnız
   `release` işinin imza adımındadır; testler secret'sız ortamda çalışır.

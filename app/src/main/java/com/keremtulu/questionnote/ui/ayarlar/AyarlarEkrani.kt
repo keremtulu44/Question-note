@@ -85,6 +85,7 @@ fun AyarlarEkrani(
     onGorselBakimi: () -> Unit,
     onKatalog: () -> Unit,
     onKonular: () -> Unit,
+    onRehber: () -> Unit = {},
     onPremiumDemo: () -> Unit = {},
     onOgretmenModunaGec: () -> Unit = {},
 ) {
@@ -395,6 +396,22 @@ fun AyarlarEkrani(
                     androidx.compose.material3.HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                     com.keremtulu.questionnote.ui.bilesenler.GezinmeSatiri(
                         stringResource(R.string.menu_image_maintenance), onGorselBakimi, enabled = !yedeklemeIslemde,
+                    )
+                }
+            }
+            item {
+                Bolum(stringResource(R.string.settings_guide_section)) {
+                    com.keremtulu.questionnote.ui.bilesenler.GezinmeSatiri(
+                        stringResource(R.string.settings_guide_action),
+                        onRehber,
+                        enabled = !yedeklemeIslemde,
+                        alt = stringResource(R.string.settings_guide_title),
+                    )
+                    Text(
+                        stringResource(R.string.settings_guide_note),
+                        modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 2.dp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodySmall,
                     )
                 }
             }

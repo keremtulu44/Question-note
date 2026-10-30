@@ -12,8 +12,8 @@ android {
         applicationId = "com.keremtulu.questionnote"
         minSdk = 26
         targetSdk = 37
-        versionCode = 42
-        versionName = "1.6.3"
+        versionCode = 44
+        versionName = "1.7.1"
     }
 
     buildFeatures {
