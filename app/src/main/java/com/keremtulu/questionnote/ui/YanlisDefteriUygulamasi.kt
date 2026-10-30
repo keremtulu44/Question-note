@@ -43,6 +43,7 @@ import com.keremtulu.questionnote.data.ilerleme.dayanikliIzle
 import com.keremtulu.questionnote.data.ilerleme.IzlemeDurumu
 import com.keremtulu.questionnote.data.prefs.SinavProfiliDeposu
 import com.keremtulu.questionnote.data.prefs.OdakOturumuDeposu
+import com.keremtulu.questionnote.data.prefs.CalismaTercihleriDeposu
 import com.keremtulu.questionnote.domain.calisma.OdakOturumu
 import com.keremtulu.questionnote.domain.calisma.YerelTakvimSaati
 import com.keremtulu.questionnote.domain.model.SoruIslemSonucu
@@ -69,6 +70,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import org.json.JSONObject
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -89,6 +91,8 @@ import com.keremtulu.questionnote.data.prefs.TercihGunlukHedefDeposu
 import com.keremtulu.questionnote.data.seviye.SeviyeHizmeti
 import com.keremtulu.questionnote.domain.karne.OturumSonucu
 import com.keremtulu.questionnote.domain.model.Ders
+import com.keremtulu.questionnote.domain.model.FiltreliCalismaEkraniAyar
+import com.keremtulu.questionnote.domain.gelisim.kaynakAnahtari
 import com.keremtulu.questionnote.domain.model.Soru
 import com.keremtulu.questionnote.domain.model.SoruCalismaFiltresi
 import com.keremtulu.questionnote.domain.repository.DersRepository
@@ -96,6 +100,7 @@ import com.keremtulu.questionnote.domain.repository.KonuRepository
 import com.keremtulu.questionnote.domain.repository.SoruRepository
 import com.keremtulu.questionnote.ui.ayarlar.AyarlarEkrani
 import com.keremtulu.questionnote.ui.karne.KarneEkrani
+import com.keremtulu.questionnote.ui.rehber.RehberEkrani
 import com.keremtulu.questionnote.ui.seviye.SeviyeEkrani
 import com.keremtulu.questionnote.ui.tema.HareketTuru
 import com.keremtulu.questionnote.ui.tema.LocalHareketPolitikasi
@@ -149,6 +154,12 @@ internal sealed interface UygulamaEkrani {
     data object Denemeler : UygulamaEkrani
     data class DenemeDetay(val denemeId: String?) : UygulamaEkrani
     data object Sorulacaklar : UygulamaEkrani
+
+    /**
+     * Uygulama turu. `geri` alanı rehberin nereden açıldığını taşır: ilk kurulumdan sonra
+     * Bugün'e, Ayarlar'dan açıldığında Ayarlar'a döner. `baslangic` kaldığı bölümdür.
+     */
+    data class Rehber(val baslangic: Int = 0, val geri: UygulamaEkrani = UygulamaEkrani.Bugun) : UygulamaEkrani
 }
 
 /**
@@ -156,8 +167,8 @@ internal sealed interface UygulamaEkrani {
  * ağacı olarak saklanır; `geri` zinciri özyinelemeli yazılır/okunur, bozuk ya
  * da tanınmayan bir kayıt sessizce Bugün ekranına düşer. Odak oturumu ekranı
  * bilerek Bugün olarak kurtarılır: oturumun kendisi zaten
- * `OdakOturumuDeposu`'ndaki kalıcı devam noktasından açılış kurtarmasıyla
- * geri gelir; tamamlanma ekranı da tek seferlik bir özetdir.
+ * `OdakOturumuDeposu`'ndaki devam noktası kullanıcıya ayrıca sunulur;
+ * ancak açıkça devam seçilince açılır. Tamamlanma ekranı tek seferlik bir özettir.
  */
 internal val UygulamaEkraniSaver = Saver<UygulamaEkrani, String>(
     save = { ekran -> runCatching { ekraniJsonYaz(ekran, 0).toString() }.getOrDefault("") },
@@ -230,6 +241,11 @@ private fun ekraniJsonYaz(ekran: UygulamaEkrani, derinlik: Int): JSONObject {
             ekran.denemeId?.let { put("denemeId", it) }
         }
 
+        is UygulamaEkrani.Rehber -> JSONObject()
+            .put("t", "rehber")
+            .put("baslangic", ekran.baslangic)
+            .put("geri", ekraniJsonYaz(ekran.geri, derinlik + 1))
+
         UygulamaEkrani.Sorulacaklar -> JSONObject().put("t", "sorulacaklar")
     }
 }
@@ -277,12 +293,23 @@ private fun ekraniJsonOku(j: JSONObject, derinlik: Int): UygulamaEkrani {
             denemeId = if (j.has("denemeId")) j.getString("denemeId") else null,
         )
 
+        "rehber" -> UygulamaEkrani.Rehber(
+            baslangic = j.optInt("baslangic").coerceAtLeast(0),
+            geri = geri(),
+        )
+
         "sorulacaklar" -> UygulamaEkrani.Sorulacaklar
         else -> UygulamaEkrani.Bugun
     }
 }
 
 private enum class KurtarmaDurumu { YUKLENIYOR, HAZIR, HATA }
+
+private data class OturumBaslatmaIstegi(
+    val sorular: List<Soru>,
+    val dersler: Map<String, Ders>,
+    val bugunden: Boolean,
+)
 
 @Composable
 fun YanlisDefteriUygulamasi(
@@ -305,10 +332,14 @@ fun YanlisDefteriUygulamasi(
     tercihHedefDeposu: TercihGunlukHedefDeposu,
     denemeDeposu: com.keremtulu.questionnote.data.prefs.DenemeDeposu,
     ogretmenDeposu: com.keremtulu.questionnote.data.prefs.OgretmenDeposu? = null,
+    rehberDeposu: com.keremtulu.questionnote.data.prefs.RehberDeposu? = null,
 ) {
     val context = LocalContext.current
     val etkinOgretmenDeposu = remember(ogretmenDeposu, context, gorselDeposu) {
         ogretmenDeposu ?: com.keremtulu.questionnote.data.prefs.OgretmenDeposu(context, gorselDeposu)
+    }
+    val etkinRehberDeposu = remember(rehberDeposu, context) {
+        rehberDeposu ?: com.keremtulu.questionnote.data.prefs.RehberDeposu(context)
     }
     // Gezinme durumu süreç ölümünde de yaşar: kullanıcı kaldığı ekrana
     // (ör. kamera dönüşünde açık olan soru formuna) geri döner.
@@ -324,7 +355,17 @@ fun YanlisDefteriUygulamasi(
     val profilSecimi by profilDeposu.secimIzle.collectAsState()
     val denemeler by denemeDeposu.kayitlariIzle.collectAsState()
     var bekleyenOturum by remember { mutableStateOf<UygulamaEkrani.FiltreliOturum?>(null) }
-    var filtreliCalismaAyar by remember { mutableStateOf(FiltreliCalismaEkraniAyar()) }
+    val calismaTercihleri = remember(context) { CalismaTercihleriDeposu(context) }
+    var filtreliCalismaAyar by remember(profilSecimi.profil) {
+        mutableStateOf(calismaTercihleri.filtreliOku(profilSecimi.profil))
+    }
+    val listeDurumlari = rememberSaveableStateHolder()
+    fun filtreliAyariGuncelle(yeni: FiltreliCalismaEkraniAyar) {
+        filtreliCalismaAyar = yeni
+        calismaTercihleri.filtreliKaydet(profilSecimi.profil, yeni)
+    }
+    var yeniOturumIstegi by remember { mutableStateOf<OturumBaslatmaIstegi?>(null) }
+    var oturumSilmeOnayi by remember { mutableStateOf(false) }
     // Filtreli oturum sürerken başka bir ekrana geçilirse önce onay istenir.
     var oturumCikisHedefi by remember { mutableStateOf<UygulamaEkrani?>(null) }
     var kurtarma by remember { mutableStateOf(KurtarmaDurumu.YUKLENIYOR) }
@@ -398,18 +439,80 @@ fun YanlisDefteriUygulamasi(
         }
     }
 
-    fun oturumBaslat(sorular: List<Soru>, dersler: Map<String, Ders>, bugunden: Boolean = false) {
+    fun oturumBaslat(
+        sorular: List<Soru>,
+        dersler: Map<String, Ders>,
+        bugunden: Boolean = false,
+        eskiOturumunYerine: Boolean = false,
+    ) {
         if (sorular.isEmpty() || oturumBaslatiliyor || yedeklemeIslemde || kurtarma != KurtarmaDurumu.HAZIR) return
+        if (bekleyenOturum != null && !eskiOturumunYerine) {
+            yeniOturumIstegi = OturumBaslatmaIstegi(sorular, dersler, bugunden)
+            return
+        }
         oturumBaslatiliyor = true
+        val baslangicEkrani = ekran
+        // Capture the exact scope when the user taps, not after an asynchronous fetch.
+        val filtre = if (bugunden) SoruCalismaFiltresi(vadesiGelen = true) else filtreliCalismaAyar.filtre
         scope.launch {
             try {
-                val filtre = if (bugunden) SoruCalismaFiltresi(vadesiGelen = true) else filtreliCalismaAyar.filtre
                 val uygun = soruRepository.filtreliCalismaSorulariniIzle(filtre).first().associateBy { it.id }
                 val guncelDersler = dersRepository.aktifDersleriIzle().first().associateBy { it.id }
                 val benzersiz = sorular.distinctBy { it.id }.mapNotNull { uygun[it.id] }.filter { it.dersId in guncelDersler }
-                if (benzersiz.isNotEmpty()) oturumGoster(benzersiz, guncelDersler,
-                    OdakOturumu(UUID.randomUUID().toString(), benzersiz.map { it.id }, System.currentTimeMillis(), bugunden))
-                else snackbarHostState.showSnackbar(context.getString(R.string.analysis_no_eligible_group))
+                if (benzersiz.isNotEmpty() && ekran == baslangicEkrani) {
+                    oturumGoster(benzersiz, guncelDersler,
+                        OdakOturumu(UUID.randomUUID().toString(), benzersiz.map { it.id }, System.currentTimeMillis(), bugunden))
+                } else if (benzersiz.isEmpty()) {
+                    snackbarHostState.showSnackbar(context.getString(R.string.analysis_no_eligible_group))
+                }
+            } catch (iptal: CancellationException) {
+                throw iptal
+            } catch (_: Exception) {
+                snackbarHostState.showSnackbar(context.getString(R.string.focus_load_error))
+            } finally {
+                oturumBaslatiliyor = false
+            }
+        }
+    }
+
+    // Reload edited/deleted questions and reconcile a Room commit with the checkpoint.
+    // Keeping this separate from navigation also prevents a recovered session from opening itself.
+    suspend fun oturumuYukle(kayit: OdakOturumu): UygulamaEkrani.FiltreliOturum? {
+        val dersler = dersRepository.dersleriIzle(false).first().associateBy { it.id }
+        val sorular = kayit.soruIdleri.mapNotNull { soruRepository.soruGetir(it) }
+            .filter { it.dersId in dersler }
+        val gecmis = sorular.mapNotNull { soru ->
+            soruRepository.tekrarGecmisiniIzle(soru.id).first().firstOrNull()?.let { soru.id to it }
+        }.toMap()
+        val kurtarilan = kayit.kurtar(sorular.map { it.id }.toSet(), gecmis)
+        return if (kurtarilan.soruIdleri.isNotEmpty()) {
+            UygulamaEkrani.FiltreliOturum(sorular, dersler, kurtarilan)
+        } else null
+    }
+
+    fun bekleyenOturumaDevam() {
+        val bekleyenId = bekleyenOturum?.oturum?.id ?: return
+        if (oturumBaslatiliyor || yedeklemeIslemde || kurtarma != KurtarmaDurumu.HAZIR) return
+        val baslangicEkrani = ekran
+        oturumBaslatiliyor = true
+        scope.launch {
+            try {
+                val kayit = withContext(Dispatchers.IO) { oturumDeposu.oku() }
+                val yenilenen = kayit?.takeIf { it.id == bekleyenId }?.let { oturumuYukle(it) }
+                if (yenilenen == null) {
+                    if (kayit?.id == bekleyenId) withContext(Dispatchers.IO) {
+                        oturumDeposu.belirliOturumuTemizle(bekleyenId)
+                    }
+                    val simdiki = withContext(Dispatchers.IO) { oturumDeposu.oku() }
+                    bekleyenOturum = simdiki?.takeIf { it.id != bekleyenId }?.let { oturumuYukle(it) }
+                    snackbarHostState.showSnackbar(context.getString(
+                        if (bekleyenOturum != null) R.string.focus_session_changed else R.string.focus_no_questions,
+                    ))
+                } else if (ekran == baslangicEkrani) {
+                    oturumGoster(yenilenen.sorular, yenilenen.dersler, yenilenen.oturum)
+                } else {
+                    bekleyenOturum = yenilenen
+                }
             } catch (iptal: CancellationException) {
                 throw iptal
             } catch (_: Exception) {
@@ -438,15 +541,9 @@ fun YanlisDefteriUygulamasi(
             sonYedek = disaAktarmaHizmeti.sonYedekBilgisiGetir()
             val kayit = withContext(Dispatchers.IO) { oturumDeposu.oku() }
             if (kayit != null) {
-                val dersler = dersRepository.dersleriIzle(false).first().associateBy { it.id }
-                val sorular = kayit.soruIdleri.mapNotNull { soruRepository.soruGetir(it) }
-                    .filter { it.dersId in dersler }
-                val gecmis = sorular.mapNotNull { soru ->
-                    soruRepository.tekrarGecmisiniIzle(soru.id).first().firstOrNull()?.let { soru.id to it }
-                }.toMap()
-                val kurtarilan = kayit.kurtar(sorular.map { it.id }.toSet(), gecmis)
-                if (kurtarilan.soruIdleri.isNotEmpty()) oturumGoster(sorular, dersler, kurtarilan)
-                else withContext(Dispatchers.IO) { oturumDeposu.temizle() }
+                val kurtarilan = oturumuYukle(kayit)
+                if (kurtarilan != null) bekleyenOturum = kurtarilan
+                else withContext(Dispatchers.IO) { oturumDeposu.belirliOturumuTemizle(kayit.id) }
             }
             rozetHizmeti.degerlendir(kutla = false)
             kurtarma = KurtarmaDurumu.HAZIR
@@ -458,7 +555,6 @@ fun YanlisDefteriUygulamasi(
     }
 
     LaunchedEffect(disaAktarmaHizmeti) { kurtarmayiCalistir() }
-    LaunchedEffect(profilSecimi.profil) { filtreliCalismaAyar = FiltreliCalismaEkraniAyar() }
     LaunchedEffect(ekran, kurtarma, yedeklemeIslemde, aktifRol) {
         if (aktifRol == com.keremtulu.questionnote.domain.model.KullaniciRolu.OGRENCI &&
             kurtarma == KurtarmaDurumu.HAZIR && !yedeklemeIslemde &&
@@ -575,7 +671,14 @@ fun YanlisDefteriUygulamasi(
     if (aktifRol == com.keremtulu.questionnote.domain.model.KullaniciRolu.OGRENCI && kurulumGerekli) {
         com.keremtulu.questionnote.ui.kurulum.DersKurulumEkrani(
             dersRepository = dersRepository,
-            onTamam = { kurulumGerekli = false },
+            onTamam = {
+                kurulumGerekli = false
+                // İlk kurulum bittiğinde rehber bir kez kendiliğinden açılır; "Atla" da
+                // tamamlanmış sayıldığı için bu yol bir daha tekrarlanmaz.
+                if (!etkinRehberDeposu.gorulduMu()) {
+                    ekran = UygulamaEkrani.Rehber(baslangic = 0, geri = UygulamaEkrani.Bugun)
+                }
+            },
         )
         return
     }
@@ -676,6 +779,11 @@ fun YanlisDefteriUygulamasi(
             .wrapContentWidth(androidx.compose.ui.Alignment.CenterHorizontally).widthIn(max = 840.dp)) {
             AnimatedContent(
                 targetState = ekran,
+                // Reopening the solution updates the same session object. Treat that as the
+                // same screen so its visible/hidden state is not recreated mid-reveal.
+                contentKey = { hedef ->
+                    if (hedef is UygulamaEkrani.FiltreliOturum) "odak-${hedef.oturum.id}" else hedef
+                },
                 transitionSpec = {
                     if (hareketPolitikasi.hareketAcik) {
                         val duration = hareketPolitikasi.sure(HareketTuru.GIRIS)
@@ -692,6 +800,17 @@ fun YanlisDefteriUygulamasi(
                 },
                 label = "uygulama-ekran-gecisi",
             ) { displayedScreen ->
+            val listeAnahtari = when (displayedScreen) {
+                is UygulamaEkrani.DersSecimi -> "dersler-${displayedScreen.soruEkleModu}-${profilSecimi.profil.name}"
+                is UygulamaEkrani.DersAlani -> "ders-${displayedScreen.ders.id}-${profilSecimi.profil.name}"
+                UygulamaEkrani.FiltreliCalisma -> "filtreli-${profilSecimi.profil.name}"
+                UygulamaEkrani.Denemeler -> "denemeler"
+                UygulamaEkrani.Sorulacaklar -> "sorulacaklar-${profilSecimi.profil.name}"
+                UygulamaEkrani.KonuMerkezi -> "konu-merkezi"
+                is UygulamaEkrani.Konular -> "konular-${displayedScreen.ders.id}"
+                else -> null
+            }
+            val icerik: @Composable () -> Unit = {
             when (kurtarma) {
                 KurtarmaDurumu.YUKLENIYOR -> UygulamaDurumEkrani(
                     metin = stringResource(R.string.backup_restore_working),
@@ -713,7 +832,9 @@ fun YanlisDefteriUygulamasi(
                         onSorulacaklar = { ekran = UygulamaEkrani.Sorulacaklar },
                         denemeler = denemeler,
                         onOturumBaslat = { sorular, dersler -> oturumBaslat(sorular, dersler, bugunden = true) },
-                        onDevam = bekleyenOturum?.let { onceki -> { ekran = onceki; bekleyenOturum = null } },
+                        onDevam = bekleyenOturum?.let { { bekleyenOturumaDevam() } },
+                        devamTamamlandi = bekleyenOturum?.oturum?.bitti == true,
+                        onBekleyenOturumuKaldir = bekleyenOturum?.let { { oturumSilmeOnayi = true } },
                     )
                     UygulamaEkrani.Sorulacaklar -> SorulacaklarEkrani(
                         soruRepository = soruRepository,
@@ -742,6 +863,12 @@ fun YanlisDefteriUygulamasi(
                         konuRepository = konuRepository,
                         soruRepository = soruRepository,
                         denemeler = denemeler,
+                        profil = profilSecimi.profil,
+                        calismaTercihleri = calismaTercihleri,
+                        onDersiCalis = {
+                            filtreliAyariGuncelle(filtreliCalismaAyar.copy(filtre = SoruCalismaFiltresi(dersId = current.ders.id)))
+                            ekran = UygulamaEkrani.FiltreliCalisma
+                        },
                         onGeri = { ekran = current.geri },
                         onKonulariYonet = { ekran = UygulamaEkrani.Konular(current.ders, current) },
                         onSoruEkle = {
@@ -755,6 +882,9 @@ fun YanlisDefteriUygulamasi(
                         ders = current.ders,
                         repository = konuRepository,
                         onGeri = { ekran = current.geri },
+                        geriEtiketi = if (current.geri == UygulamaEkrani.KonuMerkezi) {
+                            stringResource(R.string.topic_back_to_center)
+                        } else null,
                     )
                     is UygulamaEkrani.SoruAyrintisi -> SoruDetayEkrani(
                         soruId = current.soruId,
@@ -775,9 +905,11 @@ fun YanlisDefteriUygulamasi(
                         konuRepository = konuRepository,
                         soruRepository = soruRepository,
                         ayar = filtreliCalismaAyar,
-                        onAyarDegisti = { filtreliCalismaAyar = it },
+                        onAyarDegisti = ::filtreliAyariGuncelle,
                         onOturumBaslat = { questions, lessons -> oturumBaslat(questions, lessons) },
-                        onDevam = bekleyenOturum?.let { onceki -> { ekran = onceki; bekleyenOturum = null } },
+                        onDevam = bekleyenOturum?.let { { bekleyenOturumaDevam() } },
+                        devamTamamlandi = bekleyenOturum?.oturum?.bitti == true,
+                        onBekleyenOturumuKaldir = bekleyenOturum?.let { { oturumSilmeOnayi = true } },
                     )
                     is UygulamaEkrani.FiltreliOturum -> {
                         val question = current.sorular.firstOrNull { it.id == current.oturum.simdikiId }
@@ -803,7 +935,11 @@ fun YanlisDefteriUygulamasi(
                                     val yeni = current.oturum.cevapla(OturumSonucu(question.id, sonuc, cozum))
                                     oturumGoster(current.sorular, current.dersler, yeni)
                                 },
-                                onKaydedildi = ::geriAlKutucuguGoster,
+                                // Undoing a Room review without rewinding the session would make
+                                // the report and checkpoint lie. Progress itself confirms the save.
+                                onKaydedildi = { _, _ ->
+                                    SesYoneticisi.uygulama(context).calPremium(SesTuruGenis.TEKRAR, HapticTipi.BASARI)
+                                },
                                 onSonaBirak = { oturumGoster(current.sorular, current.dersler, current.oturum.sonaBirak()) },
                                 onAtla = { oturumGoster(current.sorular, current.dersler, current.oturum.atla()) },
                             )
@@ -819,9 +955,9 @@ fun YanlisDefteriUygulamasi(
                         rozetHizmeti = rozetHizmeti,
                         gunlukHedefDeposu = gunlukHedefDeposu,
                         onKonudanCalis = { konuId ->
-                            filtreliCalismaAyar = FiltreliCalismaEkraniAyar(
+                            filtreliAyariGuncelle(filtreliCalismaAyar.copy(
                                 filtre = SoruCalismaFiltresi(konuId = konuId),
-                            )
+                            ))
                             karneyiKapat(UygulamaEkrani.FiltreliCalisma)
                         },
                         onFiltrelereDon = { karneyiKapat(UygulamaEkrani.FiltreliCalisma) },
@@ -857,9 +993,9 @@ fun YanlisDefteriUygulamasi(
                             ekran = UygulamaEkrani.SoruFormu(ders, null, UygulamaEkrani.DenemeDetay(id), kaynak)
                         },
                         onDenemeyiCalis = { kaynakAdi ->
-                            filtreliCalismaAyar = FiltreliCalismaEkraniAyar(
-                                filtre = SoruCalismaFiltresi(kaynak = kaynakAdi),
-                            )
+                            filtreliAyariGuncelle(filtreliCalismaAyar.copy(
+                                filtre = SoruCalismaFiltresi(kaynakAnahtari = kaynakAnahtari(kaynakAdi)),
+                            ))
                             ekran = UygulamaEkrani.FiltreliCalisma
                         },
                     )
@@ -882,9 +1018,27 @@ fun YanlisDefteriUygulamasi(
                         onBugun = { ekranSec(UygulamaEkrani.Bugun) },
                         onSoruEkle = { ekranSec(UygulamaEkrani.DersSecimi(soruEkleModu = true)) },
                         onCalis = { filtre, adet ->
-                            filtreliCalismaAyar = FiltreliCalismaEkraniAyar(filtre, adet.coerceIn(1, 5).toString())
+                            filtreliAyariGuncelle(FiltreliCalismaEkraniAyar(filtre, adet.coerceIn(1, 5).toString()))
                             ekranSec(UygulamaEkrani.FiltreliCalisma)
                         },
+                    )
+                    is UygulamaEkrani.Rehber -> RehberEkrani(
+                        baslangicIndex = current.baslangic,
+                        onBolumDegisti = { etkinRehberDeposu.bolumuKaydet(it) },
+                        onKapat = {
+                            // Yarıda bırakmak "tamamlandı" sayılmaz: sıradaki açılışta
+                            // kaldığı bölümden devam eder, otomatik açılış ise tekrarlanmaz.
+                            etkinRehberDeposu.kapat()
+                            ekranSec(current.geriHedefi())
+                        },
+                        onBitir = {
+                            etkinRehberDeposu.tamamla()
+                            ekranSec(current.geriHedefi())
+                        },
+                        onSoruEkle = { ekranSec(UygulamaEkrani.DersSecimi(soruEkleModu = true)) },
+                        onDenemeler = { ekranSec(UygulamaEkrani.Denemeler) },
+                        onYedek = { ekranSec(UygulamaEkrani.Ayarlar) },
+                        onBugun = { ekranSec(UygulamaEkrani.Bugun) },
                     )
                     UygulamaEkrani.Ayarlar -> AyarlarEkrani(
                         gunlukHedefDeposu = tercihHedefDeposu,
@@ -900,6 +1054,9 @@ fun YanlisDefteriUygulamasi(
                             if (!yedeklemeIslemde) {
                                 restoreLauncher.launch(arrayOf("application/zip", "application/octet-stream"))
                             }
+                        },
+                        onRehber = {
+                            ekranSec(UygulamaEkrani.Rehber(baslangic = 0, geri = UygulamaEkrani.Ayarlar))
                         },
                         onGorselBakimi = { ekranSec(UygulamaEkrani.GorselBakimi) },
                         onKatalog = { ekranSec(UygulamaEkrani.Katalog) },
@@ -921,6 +1078,10 @@ fun YanlisDefteriUygulamasi(
                 }
             }
             }
+            if (listeAnahtari != null) {
+                listeDurumlari.SaveableStateProvider(listeAnahtari, content = icerik)
+            } else icerik()
+            }
         }
         }
     }
@@ -930,8 +1091,65 @@ fun YanlisDefteriUygulamasi(
         goster = aktifRol == com.keremtulu.questionnote.domain.model.KullaniciRolu.OGRENCI &&
             kurtarma == KurtarmaDurumu.HAZIR && !yedeklemeIslemde &&
             ekran !is UygulamaEkrani.FiltreliOturum && ekran !is UygulamaEkrani.SoruFormu &&
-            ekran !is UygulamaEkrani.SoruAyrintisi && oturumCikisHedefi == null && geriYuklemeOnizlemesi == null,
+            ekran !is UygulamaEkrani.SoruAyrintisi && oturumCikisHedefi == null &&
+            yeniOturumIstegi == null && !oturumSilmeOnayi && geriYuklemeOnizlemesi == null,
     )
+
+    if (oturumSilmeOnayi && bekleyenOturum != null) {
+        AlertDialog(
+            onDismissRequest = { oturumSilmeOnayi = false },
+            title = { Text(stringResource(R.string.focus_remove_title)) },
+            text = { Text(stringResource(R.string.focus_remove_message)) },
+            confirmButton = {
+                PremiumButton(onClick = {
+                    val id = bekleyenOturum?.oturum?.id
+                    oturumSilmeOnayi = false
+                    if (id != null && !oturumBaslatiliyor && !yedeklemeIslemde) {
+                        oturumBaslatiliyor = true
+                        scope.launch {
+                            try {
+                                val silindi = withContext(Dispatchers.IO) { oturumDeposu.belirliOturumuTemizle(id) }
+                                val guncel = if (silindi) null else
+                                    withContext(Dispatchers.IO) { oturumDeposu.oku() }?.let { oturumuYukle(it) }
+                                if (bekleyenOturum?.oturum?.id == id) bekleyenOturum = guncel
+                                if (!silindi && guncel != null) {
+                                    snackbarHostState.showSnackbar(context.getString(R.string.focus_session_changed))
+                                }
+                            } catch (iptal: CancellationException) {
+                                throw iptal
+                            } catch (_: Exception) {
+                                snackbarHostState.showSnackbar(context.getString(R.string.focus_remove_error))
+                            } finally {
+                                oturumBaslatiliyor = false
+                            }
+                        }
+                    }
+                }) { Text(stringResource(R.string.focus_remove_confirm)) }
+            },
+            dismissButton = {
+                PremiumTextButton(onClick = { oturumSilmeOnayi = false }) { Text(stringResource(R.string.topic_cancel)) }
+            },
+        )
+    }
+
+    yeniOturumIstegi?.let { istek ->
+        AlertDialog(
+            onDismissRequest = { yeniOturumIstegi = null },
+            title = { Text(stringResource(R.string.focus_replace_title)) },
+            text = { Text(stringResource(R.string.focus_replace_message)) },
+            confirmButton = {
+                PremiumButton(onClick = {
+                    yeniOturumIstegi = null
+                    oturumBaslat(istek.sorular, istek.dersler, istek.bugunden, eskiOturumunYerine = true)
+                }) { Text(stringResource(R.string.focus_replace_action)) }
+            },
+            dismissButton = {
+                PremiumTextButton(onClick = { yeniOturumIstegi = null }) {
+                    Text(stringResource(R.string.topic_cancel))
+                }
+            },
+        )
+    }
 
     oturumCikisHedefi?.let { hedef ->
         val oturum = ekran as? UygulamaEkrani.FiltreliOturum
@@ -1070,7 +1288,9 @@ private fun UygulamaEkrani.aktifSekme(): AltSekme = when (this) {
     is UygulamaEkrani.FiltreliCalismaTamamlandi,
     -> AltSekme.FILTRELI
     UygulamaEkrani.Seviye -> AltSekme.SEVIYE
-    UygulamaEkrani.Ayarlar, UygulamaEkrani.Katalog, UygulamaEkrani.GorselBakimi, UygulamaEkrani.KonuMerkezi -> AltSekme.AYARLAR
+    UygulamaEkrani.Ayarlar, UygulamaEkrani.Katalog, UygulamaEkrani.GorselBakimi, UygulamaEkrani.KonuMerkezi,
+    is UygulamaEkrani.Rehber,
+    -> AltSekme.AYARLAR
     UygulamaEkrani.Denemeler, is UygulamaEkrani.DenemeDetay, UygulamaEkrani.Sorulacaklar -> AltSekme.BUGUN
     is UygulamaEkrani.SoruAyrintisi -> if (tekrarOturumunda) AltSekme.FILTRELI else if (geri is UygulamaEkrani.Sorulacaklar) AltSekme.BUGUN else AltSekme.DERSLER
     is UygulamaEkrani.SoruFormu -> if (geri is UygulamaEkrani.FiltreliOturum) {
@@ -1110,6 +1330,7 @@ private fun UygulamaEkrani.geriHedefi(): UygulamaEkrani = when (this) {
     UygulamaEkrani.Ayarlar -> UygulamaEkrani.Bugun
     UygulamaEkrani.Denemeler -> UygulamaEkrani.Bugun
     is UygulamaEkrani.DenemeDetay -> UygulamaEkrani.Denemeler
+    is UygulamaEkrani.Rehber -> geri
     UygulamaEkrani.Sorulacaklar -> UygulamaEkrani.Bugun
 }
 

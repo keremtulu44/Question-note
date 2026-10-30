@@ -499,7 +499,11 @@ fun PremiumBosDurum(
         label = "empty-state-enter",
     )
     Column(
-        modifier = modifier.padding(24.dp).graphicsLayer { alpha = enter.value; scaleX = enter.value; scaleY = enter.value },
+        // Empty/error content must be readable immediately, including when reached by a fling.
+        modifier = modifier.padding(24.dp).graphicsLayer {
+            scaleX = 0.98f + enter.value * 0.02f
+            scaleY = 0.98f + enter.value * 0.02f
+        },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(18.dp, Alignment.CenterVertically),
     ) {

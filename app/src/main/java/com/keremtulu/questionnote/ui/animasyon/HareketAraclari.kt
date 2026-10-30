@@ -144,20 +144,11 @@ fun rememberButtonPress(): Pair<MutableState<Boolean>, State<Float>> {
     return pressed to scale
 }
 
-/** Staggered enter state for lists whose items are composed together. */
+/** Lazy items can be composed while the user is flinging. Never hide them behind an
+ * entrance delay: recycled items must be visible on their first frame. Page transitions
+ * and press feedback still provide motion, respecting the system motion policy. */
 @Composable
-fun animateItemInsertion(index: Int): State<Float> {
-    val hareket = LocalHareketPolitikasi.current
-    val shown = remember(index) { mutableStateOf(!hareket.hareketAcik) }
-    LaunchedEffect(index, hareket.hareketAcik) {
-        shown.value = true
-    }
-    return animateFloatPremium(
-        target = if (shown.value) 1f else 0f,
-        animationSpec = staggeredTween(index),
-        label = "list-item-enter",
-    )
-}
+fun animateItemInsertion(index: Int): State<Float> = remember(index) { mutableFloatStateOf(1f) }
 
 /** Explicit, opt-in horizontal swipe navigation; apply only to a surface without a horizontal pager. */
 fun Modifier.horizontalSwipeNavigation(

@@ -65,6 +65,12 @@ import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import com.keremtulu.questionnote.ui.panel.ekranPencereInsetsi
 
+private sealed interface AyarlarDersDurumu {
+    data object Yukleniyor : AyarlarDersDurumu
+    data class Hazir(val dersler: List<Ders>) : AyarlarDersDurumu
+    data object Hata : AyarlarDersDurumu
+}
+
 @Composable
 fun AyarlarEkrani(
     gunlukHedefDeposu: TercihGunlukHedefDeposu,
@@ -79,6 +85,7 @@ fun AyarlarEkrani(
     onGorselBakimi: () -> Unit,
     onKatalog: () -> Unit,
     onKonular: () -> Unit,
+    onRehber: () -> Unit = {},
     onPremiumDemo: () -> Unit = {},
     onOgretmenModunaGec: () -> Unit = {},
 ) {
@@ -87,9 +94,31 @@ fun AyarlarEkrani(
     val sesEfektleri = LocalUygulamaSesleri.current
     var sesAcik by remember { mutableStateOf(sesEfektleri?.acikMi() ?: false) }
     val secim by profilDeposu.secimIzle.collectAsState()
-    LaunchedEffect(Unit) { runCatching { dersRepository.kataloguHazirla() } }
+    var dersListesiYenileme by remember { mutableIntStateOf(0) }
+    LaunchedEffect(dersRepository, dersListesiYenileme) {
+        try {
+            dersRepository.kataloguHazirla()
+        } catch (iptal: CancellationException) {
+            throw iptal
+        } catch (_: Exception) {
+            // A failed seed can be retried from the empty/error state below.
+        }
+    }
     var profilKaydediliyor by remember { mutableStateOf(false) }
     var profilHatasi by remember { mutableStateOf(false) }
+    var sonDersUyarisi by remember { mutableStateOf(false) }
+    val dersDurumu by produceState<AyarlarDersDurumu>(
+        AyarlarDersDurumu.Yukleniyor, dersRepository, dersListesiYenileme,
+    ) {
+        value = AyarlarDersDurumu.Yukleniyor
+        try {
+            dersRepository.dersleriIzle(false).collect { value = AyarlarDersDurumu.Hazir(it) }
+        } catch (iptal: CancellationException) {
+            throw iptal
+        } catch (_: Exception) {
+            value = AyarlarDersDurumu.Hata
+        }
+    }
     var hedef by remember { mutableIntStateOf(gunlukHedefDeposu.hedef()) }
     val sonYedekMetni = sonYedek?.let { backup ->
         val tarih = SimpleDateFormat("d MMM yyyy HH:mm", Locale.forLanguageTag("tr-TR"))
@@ -109,7 +138,7 @@ fun AyarlarEkrani(
         contentWindowInsets = ekranPencereInsetsi(),
     ) { insets ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets),
+            modifier = Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets).testTag("settings-list"),
             contentPadding = PaddingValues(
                 start = 20.dp,
                 top = 20.dp,
@@ -147,44 +176,81 @@ fun AyarlarEkrani(
                 }
             }
             item {
-                val tumDersler by produceState(emptyList<Ders>()) {
-                    dersRepository.dersleriIzle(false).collect { value = it }
-                }
                 Bolum(stringResource(R.string.settings_profile_title)) {
                     Text(stringResource(R.string.settings_profile_note), style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    @OptIn(ExperimentalLayoutApi::class)
-                    FlowRow(
-                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp),
-                    ) {
-                        tumDersler.forEach { ders ->
-                            val acik = secim.gorunur(ders)
-                            FilterChip(
-                                selected = acik,
-                                onClick = {
-                                    if (profilKaydediliyor || yedeklemeIslemde) return@FilterChip
-                                    profilKaydediliyor = true
-                                    profilHatasi = false
-                                    val simdiki = tumDersler.filter(secim::gorunur).map { it.id }.toSet()
-                                    val yeni = if (ders.id in simdiki) simdiki - ders.id else simdiki + ders.id
-                                    scope.launch {
-                                        try {
-                                            if (yeni.isNotEmpty()) dersRepository.dersSeciminiKaydet(yeni)
-                                        } catch (iptal: CancellationException) {
-                                            throw iptal
-                                        } catch (_: Exception) {
-                                            profilHatasi = true
-                                        } finally {
-                                            profilKaydediliyor = false
-                                        }
-                                    }
-                                },
-                                enabled = !profilKaydediliyor && !yedeklemeIslemde,
-                                label = { Text(ders.ad) },
+                    when (val durum = dersDurumu) {
+                        AyarlarDersDurumu.Yukleniyor -> Text(
+                            stringResource(R.string.settings_profile_loading),
+                            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                        )
+                        AyarlarDersDurumu.Hata -> {
+                            Text(
+                                stringResource(R.string.settings_profile_load_error),
+                                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Assertive },
+                                color = MaterialTheme.colorScheme.error,
                             )
+                            PremiumTextButton(onClick = { dersListesiYenileme++ }) {
+                                Text(stringResource(R.string.topic_retry))
+                            }
                         }
+                        is AyarlarDersDurumu.Hazir -> {
+                            val tumDersler = durum.dersler
+                            if (tumDersler.isEmpty()) {
+                                Text(stringResource(R.string.settings_profile_empty))
+                                PremiumTextButton(onClick = { dersListesiYenileme++ }) {
+                                    Text(stringResource(R.string.topic_retry))
+                                }
+                            } else {
+                                @OptIn(ExperimentalLayoutApi::class)
+                                FlowRow(
+                                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                                ) {
+                                    tumDersler.forEach { ders ->
+                                        val acik = secim.gorunur(ders)
+                                        FilterChip(
+                                            selected = acik,
+                                            onClick = {
+                                                if (profilKaydediliyor || yedeklemeIslemde) return@FilterChip
+                                                val simdiki = tumDersler.filter(secim::gorunur).map { it.id }.toSet()
+                                                val yeni = if (ders.id in simdiki) simdiki - ders.id else simdiki + ders.id
+                                                if (yeni.isEmpty()) {
+                                                    profilHatasi = false
+                                                    sonDersUyarisi = true
+                                                    return@FilterChip
+                                                }
+                                                sonDersUyarisi = false
+                                                profilKaydediliyor = true
+                                                profilHatasi = false
+                                                scope.launch {
+                                                    try {
+                                                        dersRepository.dersSeciminiKaydet(yeni)
+                                                    } catch (iptal: CancellationException) {
+                                                        throw iptal
+                                                    } catch (_: Exception) {
+                                                        profilHatasi = true
+                                                    } finally {
+                                                        profilKaydediliyor = false
+                                                    }
+                                                }
+                                            },
+                                            enabled = !profilKaydediliyor && !yedeklemeIslemde,
+                                            label = { Text(ders.ad) },
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (sonDersUyarisi) {
+                        Text(
+                            stringResource(R.string.settings_profile_at_least_one),
+                            modifier = Modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite },
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
                     }
                     if (profilKaydediliyor) {
                         Text(
@@ -330,6 +396,22 @@ fun AyarlarEkrani(
                     androidx.compose.material3.HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                     com.keremtulu.questionnote.ui.bilesenler.GezinmeSatiri(
                         stringResource(R.string.menu_image_maintenance), onGorselBakimi, enabled = !yedeklemeIslemde,
+                    )
+                }
+            }
+            item {
+                Bolum(stringResource(R.string.settings_guide_section)) {
+                    com.keremtulu.questionnote.ui.bilesenler.GezinmeSatiri(
+                        stringResource(R.string.settings_guide_action),
+                        onRehber,
+                        enabled = !yedeklemeIslemde,
+                        alt = stringResource(R.string.settings_guide_title),
+                    )
+                    Text(
+                        stringResource(R.string.settings_guide_note),
+                        modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 2.dp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodySmall,
                     )
                 }
             }

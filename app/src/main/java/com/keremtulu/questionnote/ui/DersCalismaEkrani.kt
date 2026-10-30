@@ -38,6 +38,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
@@ -48,6 +50,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.domain.model.Ders
+import com.keremtulu.questionnote.domain.model.DersCalismaAyar
+import com.keremtulu.questionnote.domain.model.SinavProfili
+import com.keremtulu.questionnote.domain.model.GorselTuru
+import com.keremtulu.questionnote.data.prefs.CalismaTercihleriDeposu
 import com.keremtulu.questionnote.domain.model.Konu
 import com.keremtulu.questionnote.domain.model.Soru
 import com.keremtulu.questionnote.domain.model.SoruPlanDurumu
@@ -94,12 +100,22 @@ fun DersCalismaEkrani(
     onSoruEkle: () -> Unit,
     onSoruAc: (String) -> Unit,
     denemeler: List<com.keremtulu.questionnote.domain.model.DenemeKaydi> = emptyList(),
+    profil: SinavProfili = SinavProfili.YKS,
+    calismaTercihleri: CalismaTercihleriDeposu? = null,
+    onDersiCalis: (() -> Unit)? = null,
 ) {
-    var seciliKonuId by remember(ders.id) { mutableStateOf<String?>(null) }
-    var konusuzFiltre by remember(ders.id) { mutableStateOf(false) }
-    var planDurumuFiltresi by remember(ders.id) { mutableStateOf<SoruPlanDurumu?>(null) }
-    var sadeceFavori by remember(ders.id) { mutableStateOf(false) }
-    var arama by remember(ders.id) { mutableStateOf("") }
+    var ayar by remember(ders.id, profil, calismaTercihleri) {
+        mutableStateOf(calismaTercihleri?.dersOku(profil, ders.id) ?: DersCalismaAyar())
+    }
+    fun ayariGuncelle(yeni: DersCalismaAyar) {
+        ayar = yeni
+        calismaTercihleri?.dersKaydet(profil, ders.id, yeni)
+    }
+    val seciliKonuId = ayar.konuId
+    val konusuzFiltre = ayar.konusuz
+    val planDurumuFiltresi = ayar.planDurumu
+    val sadeceFavori = ayar.sadeceFavori
+    val arama = ayar.arama
     var yenileme by remember { mutableIntStateOf(0) }
     val konuAkisi = remember(konuRepository, ders.id, yenileme) {
         combine(
@@ -134,6 +150,7 @@ fun DersCalismaEkrani(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
+                .testTag("lesson-question-list")
                 .padding(padding)
                 .consumeWindowInsets(padding)
                 .then(
@@ -171,10 +188,17 @@ fun DersCalismaEkrani(
                             }
                         }
                     }
-                    com.keremtulu.questionnote.ui.bilesenler.DuzBaslik(
-                    baslik = ders.ad,
-                    alt = if (dersArsivli) stringResource(R.string.lesson_archived_read_only) else stringResource(R.string.question_screen_subtitle),
-                )
+                    GradyanKart(borderAnimation = false) {
+                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text(stringResource(R.string.lesson_workspace_kicker),
+                                color = Color(0xFFF0D18E), style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold)
+                            Text(ders.ad, color = Color.White, style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Bold)
+                            if (dersArsivli) Text(stringResource(R.string.lesson_archived_read_only),
+                                color = Color.White.copy(alpha = 0.85f), style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
                 }
             }
 
@@ -194,6 +218,15 @@ fun DersCalismaEkrani(
                             modifier = Modifier.weight(1f),
                         ) { Text(stringResource(R.string.question_add)) }
                     }
+                }
+            }
+
+            if (!dersArsivli && onDersiCalis != null) {
+                item {
+                    com.keremtulu.questionnote.ui.bilesenler.SadeAnaButon(
+                        onClick = onDersiCalis,
+                        modifier = Modifier.testTag("lesson-study-action"),
+                    ) { Text(stringResource(R.string.lesson_study_action)) }
                 }
             }
 
@@ -221,18 +254,18 @@ fun DersCalismaEkrani(
                         ) {
                             FilterChip(
                                 selected = seciliKonuId == null && !konusuzFiltre,
-                                onClick = { seciliKonuId = null; konusuzFiltre = false },
+                                onClick = { ayariGuncelle(ayar.copy(konuId = null, konusuz = false)) },
                                 label = { Text(stringResource(R.string.question_filter_all)) },
                             )
                             FilterChip(
                                 selected = konusuzFiltre,
-                                onClick = { seciliKonuId = null; konusuzFiltre = true },
+                                onClick = { ayariGuncelle(ayar.copy(konuId = null, konusuz = true)) },
                                 label = { Text(stringResource(R.string.question_filter_unassigned)) },
                             )
                             current.konular.forEach { konu ->
                                 FilterChip(
                                     selected = seciliKonuId == konu.id,
-                                    onClick = { seciliKonuId = konu.id; konusuzFiltre = false },
+                                    onClick = { ayariGuncelle(ayar.copy(konuId = konu.id, konusuz = false)) },
                                     label = {
                                         Text(
                                             if (konu.arsivli) stringResource(R.string.topic_name_archived, konu.ad)
@@ -253,19 +286,19 @@ fun DersCalismaEkrani(
                 ) {
                     FilterChip(
                         selected = planDurumuFiltresi == null,
-                        onClick = { planDurumuFiltresi = null },
+                        onClick = { ayariGuncelle(ayar.copy(planDurumu = null)) },
                         label = { Text(stringResource(R.string.question_filter_all_statuses)) },
                     )
                     SoruPlanDurumu.entries.forEach { status ->
                         FilterChip(
                             selected = planDurumuFiltresi == status,
-                            onClick = { planDurumuFiltresi = status },
+                            onClick = { ayariGuncelle(ayar.copy(planDurumu = status)) },
                             label = { Text(stringResource(statusFilterLabel(status))) },
                         )
                     }
                     FilterChip(
                         selected = sadeceFavori,
-                        onClick = { sadeceFavori = !sadeceFavori },
+                        onClick = { ayariGuncelle(ayar.copy(sadeceFavori = !sadeceFavori)) },
                         label = { Text(stringResource(R.string.question_filter_favorites), maxLines = 1) },
                     )
                 }
@@ -274,9 +307,14 @@ fun DersCalismaEkrani(
             item {
                 OutlinedTextField(
                     value = arama,
-                    onValueChange = { arama = it.take(80) },
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+                    onValueChange = { ayariGuncelle(ayar.copy(arama = it.take(80))) },
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("lesson-search"),
                     label = { Text(stringResource(R.string.question_search), maxLines = 1) },
+                    trailingIcon = if (arama.isNotEmpty()) {
+                        { PremiumTextButton(onClick = { ayariGuncelle(ayar.copy(arama = "")) }) {
+                            Text(stringResource(R.string.lesson_clear_search))
+                        } }
+                    } else null,
                     singleLine = true,
                     shape = RoundedCornerShape(16.dp),
                     keyboardOptions = KeyboardOptions(
@@ -286,6 +324,13 @@ fun DersCalismaEkrani(
                         onSearch = { focusManager.clearFocus() },
                     ),
                 )
+            }
+
+            if (ayar != DersCalismaAyar()) item {
+                PremiumTextButton(
+                    onClick = { ayariGuncelle(DersCalismaAyar()) },
+                    modifier = Modifier.testTag("lesson-clear-filters"),
+                ) { Text(stringResource(R.string.filtered_practice_clear_filters)) }
             }
 
             when (val current = sorular) {
@@ -311,7 +356,8 @@ fun DersCalismaEkrani(
                     }
                     if (visibleQuestions.isEmpty()) {
                         val emptyMessage = when {
-                            current.sorular.isNotEmpty() || planDurumuFiltresi != null || seciliKonuId != null ->
+                            current.sorular.isNotEmpty() || planDurumuFiltresi != null || seciliKonuId != null ||
+                                sadeceFavori || arama.isNotBlank() ->
                                 R.string.question_empty_filtered
                             konusuzFiltre -> R.string.question_empty_unassigned
                             dersArsivli -> R.string.question_empty_archived_lesson
@@ -430,11 +476,14 @@ private fun SoruListeKarti(
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                     )
                 }
-                Text(
-                    text = stringResource(R.string.question_photo_badge),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                if (soru.gorseller.any { it.tur == GorselTuru.SORU }) {
+                    Text(
+                        text = stringResource(R.string.question_photo_only),
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         }
     }

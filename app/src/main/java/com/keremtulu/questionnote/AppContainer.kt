@@ -29,6 +29,7 @@ class AppContainer(context: Context) {
     val denemeDeposu = com.keremtulu.questionnote.data.prefs.DenemeDeposu(context)
     val ogretmenDeposu = com.keremtulu.questionnote.data.prefs.OgretmenDeposu(context, gorselDeposu)
     val oturumDeposu = OdakOturumuDeposu(context)
+    val rehberDeposu = com.keremtulu.questionnote.data.prefs.RehberDeposu(context)
     val tekrarPolitikasi = TekrarPolitikasiDeposu(context)
     val motorTanisi = com.keremtulu.questionnote.data.gelisim.MotorTaniHizmeti(database)
     val dersRepository: DersRepository = RoomDersRepository(database, profilDeposu)

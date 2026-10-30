@@ -1,16 +1,17 @@
 name: Android CI
 
 # İki iş:
-# - test: PR'larda ve main/etiket push'larında çalışır; salt-okunur token,
-#   imza secret'ı YOK. Kanıt (log, özet, önizleme) artifact + step summary.
-# - release: yalnız main push'u ve v* etiketinde, test işi geçtikten sonra
-#   çalışır; build + imza + GitHub Release + DERLEME_RAPORU commit'i burada.
-# Dalda çalışırken CI almak için (taslak) PR açmak yeterli.
+# - test: PR, main/etiket push ve [apk] isteklerinde salt-okunur token ile çalışır;
+#   imza secret'ı YOK. Kanıt artifact + step summary.
+# - release: yalnız test geçerse build/imza. Main/etiket için resmî yayın, açıkça
+#   [apk] istenmiş dal için yalnız önizleme; main raporu yalnız main'e yazılır.
 
 on:
   push:
+    # Her dal: PR akışına ek olarak, commit mesajında [apk] geçen dallarda imzalı
+    # önizleme APK'sı üretilir (aşağıdaki release işinin koşuluna bakın).
     branches:
-      - main
+      - '**'
     tags:
       - 'v*'
     paths:
@@ -35,6 +36,14 @@ on:
       - 'gradle.properties'
       - '.github/workflows/android.yml'
   workflow_dispatch:
+    inputs:
+      yayin:
+        description: 'APK nereye gitsin? (yok = yalnız artefakt)'
+        type: choice
+        options:
+          - onizleme
+          - yok
+        default: onizleme
 
 permissions:
   contents: read
@@ -46,6 +55,11 @@ concurrency:
 jobs:
   test:
     name: Testler (Debug + Release)
+    # Branch pushes without an explicit APK request already get the PR test job.
+    if: >-
+      github.event_name != 'push' || github.ref == 'refs/heads/main' ||
+      startsWith(github.ref, 'refs/tags/v') ||
+      contains(github.event.head_commit.message, '[apk]')
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -196,7 +210,17 @@ jobs:
   release:
     name: Release (derle + imzala + yayımla)
     needs: test
-    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    # Elle tetikleme (workflow_dispatch) herhangi bir dalda çalışabilir: imzalı APK üretir.
+    # Bu yol resmî sürüm etiketi oluşturmaz; en fazla "preview-<sürüm>" önizlemesini günceller.
+    # Resmî sürüm yalnız main/etiketten çıkar. Bir dal commit'i için imzalı APK istendiğinde
+    # commit mesajına [apk] yazılır: APK üretilir ama yalnız "preview-<sürüm>" önizlemesine
+    # yüklenir; sürüm etiketi oluşturulmaz, sürüm numarası uydurulmaz.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' &&
+        (github.ref == 'refs/heads/main' ||
+         startsWith(github.ref, 'refs/tags/v') ||
+         contains(github.event.head_commit.message, '[apk]')))
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
@@ -224,6 +248,7 @@ jobs:
         env:
           # Ana dal/etiket yayımları normal akışı izler; etiketler sürüm kapılıdır.
           PUBLISH_RELEASE: "true"
+          YAYIN_KANALI_GIRDISI: ${{ inputs.yayin }}
           WRAPPER_VERSION: "9.8.1"
           BUILD_TOOLS_VERSION: "37.0.0"
           EXPECTED_FINGERPRINT: "FA:13:DE:D7:3C:B4:6E:DE:9E:36:37:47:EE:38:95:F2:B6:37:14:9C:16:57:90:A2:E4:67:78:F1:30:89:DE:54"
@@ -267,6 +292,16 @@ jobs:
           fingerprint_status="doğrulanmadı"
           version_name=$(sed -nE 's/^[[:space:]]*versionName = "([^"]+)".*/\1/p' app/build.gradle.kts | head -n 1)
           version_code=$(sed -nE 's/^[[:space:]]*versionCode = ([0-9]+).*/\1/p' app/build.gradle.kts | head -n 1)
+          # Yayın kanalı: main/etiket push'u resmî sürüm, elle tetikleme yalnız önizleme/artefakt.
+          if [[ "${GITHUB_EVENT_NAME:-}" == "workflow_dispatch" ]]; then
+            # Manual runs never publish an official release, including from main.
+            if [[ "${YAYIN_KANALI_GIRDISI:-onizleme}" == "yok" ]]; then yayin_kanali="yok"; else yayin_kanali="onizleme"; fi
+          elif [[ "$GITHUB_REF" == "refs/heads/main" || "$GITHUB_REF" == refs/tags/v* ]]; then
+            if [[ "$PUBLISH_RELEASE" == "true" ]]; then yayin_kanali="surum"; else yayin_kanali="yok"; fi
+          else
+            # Dal commit'i ([apk] işareti): yalnız önizleme APK'sı.
+            yayin_kanali="onizleme"
+          fi
           unsigned_apk="app/build/outputs/apk/release/app-release-unsigned.apk"
           signed_apk="app/build/outputs/apk/release/yanlis-defteri-${version_name}.apk"
           keystore_file="$RUNNER_TEMP/yanlisdefteri.p12"
@@ -391,11 +426,11 @@ jobs:
               echo "- Sertifika SHA-256: ${actual_fingerprint_display}"
             } > "$notes_file"
 
-            if [[ "$PUBLISH_RELEASE" != "true" ]]; then
+            if [[ "$yayin_kanali" == "yok" ]]; then
               release_exit=0
               release_result="Ara doğrulama başarılı; yayın kapısı kapalı, Release oluşturulmadı"
               printf '%s\n' "$release_result" > "$release_log"
-            elif gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            elif [[ "$yayin_kanali" == "onizleme" ]] || gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
               # Sürüm etiketi çoktan yayımlandı: uygulamanın adı/sürümü değiştirilmez, yeni bir
               # sürüm numarası uydurulmaz. Bu derlemenin imzalı APK'sı yine de indirilebilsin diye
               # sabit bir "preview-<sürüm>" etiketine (prerelease) yüklenir; her koşuda üzerine yazılır.
@@ -465,6 +500,7 @@ jobs:
             echo "- İmzalama secret durumu: $secret_status"
             echo "- İmzalama/verify durumu: $signing_result (kod: $signing_exit; apksigner verify: $verify_exit)"
             echo "- Sertifika parmak izi: $actual_fingerprint_display (beklenen: $EXPECTED_FINGERPRINT; durum: $fingerprint_status)"
+            echo "- Yayın kanalı: $yayin_kanali (elle tetikleme sürüm etiketi oluşturmaz)"
             echo "- Release: $release_result (kod: $release_exit)"
             echo "- Release URL: ${release_url:-yok}"
             echo "- İmzalı APK SHA-256: $apk_sha256"

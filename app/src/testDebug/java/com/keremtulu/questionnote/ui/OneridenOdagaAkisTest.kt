@@ -38,7 +38,7 @@ class OneridenOdagaAkisTest {
     @get:Rule val compose = createComposeRule()
     @Test fun recommendationFilterFocusReportAndProgressKeepEligibilityAndShadowDateContract() {
         val context: Context = RuntimeEnvironment.getApplication()
-        listOf("karne_rozetleri", "rutbe_kutlamalari", "odak_oturumu", "sinav_profili", "tekrar_politikasi", "ilerleme_ayarlari", "denemeler")
+        listOf("karne_rozetleri", "rutbe_kutlamalari", "odak_oturumu", "sinav_profili", "tekrar_politikasi", "ilerleme_ayarlari", "denemeler", "calisma_tercihleri")
             .forEach { context.getSharedPreferences(it, 0).edit().clear().commit() }
         val db = Room.inMemoryDatabaseBuilder(context, YanlisDefteriDatabase::class.java)
             .addCallback(VarsayilanDersleriEkle()).allowMainThreadQueries().build()

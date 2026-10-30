@@ -9,6 +9,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.StateRestorationTester
@@ -26,12 +30,15 @@ import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
 import com.keremtulu.questionnote.data.local.VarsayilanDersleriEkle
 import com.keremtulu.questionnote.data.local.YanlisDefteriDatabase
+import com.keremtulu.questionnote.data.local.entity.SoruEntity
 import com.keremtulu.questionnote.data.prefs.DenemeDeposu
 import com.keremtulu.questionnote.data.prefs.SinavProfiliDeposu
 import com.keremtulu.questionnote.data.repository.RoomDersRepository
 import com.keremtulu.questionnote.data.repository.RoomSoruRepository
 import com.keremtulu.questionnote.domain.model.DenemeDersSatiri
 import com.keremtulu.questionnote.domain.model.DenemeKaydi
+import com.keremtulu.questionnote.domain.model.Ders
+import com.keremtulu.questionnote.domain.repository.DersRepository
 import com.keremtulu.questionnote.domain.model.NetKurali
 import com.keremtulu.questionnote.domain.model.SoruSecenekTuru
 import com.keremtulu.questionnote.ui.deneme.DenemeDetayEkrani
@@ -41,6 +48,8 @@ import com.keremtulu.questionnote.ui.tema.HareketPolitikasi
 import com.keremtulu.questionnote.ui.tema.YanlisDefteriTema
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -122,6 +131,87 @@ class DenemeVeKurulumArayuzTest {
 
         assertTrue(tamamlandi)
         assertTrue(!profilDeposu.kurulumGerekli())
+    }
+
+    @Test
+    fun kurulumdaDersYuklemesiBasarisizsaYenidenDenenebilir() {
+        val denemeler = AtomicInteger()
+        val tamamlandi = AtomicBoolean(false)
+        val sorunluDersler = object : DersRepository by dersRepository {
+            override suspend fun kataloguHazirla(adlar: List<String>): List<Ders> {
+                if (denemeler.incrementAndGet() == 1) error("geçici yükleme hatası")
+                return dersRepository.kataloguHazirla(adlar)
+            }
+        }
+        compose.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                DersKurulumEkrani(sorunluDersler, onTamam = { tamamlandi.set(true) })
+            }
+        }
+        compose.waitUntil(5_000) {
+            compose.onAllNodes(hasText(compose.activity.getString(R.string.onboarding_load_error)))
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithTag("onboarding-continue-button").assertIsNotEnabled()
+        compose.onNodeWithTag("onboarding-retry").performClick()
+        compose.waitUntil(5_000) {
+            compose.onAllNodes(hasTestTag("onboarding-lesson-list")).fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithTag("onboarding-continue-button").assertIsEnabled().performClick()
+        compose.waitUntil(5_000) { tamamlandi.get() }
+        assertTrue(!profilDeposu.kurulumGerekli())
+    }
+
+    @Test
+    fun yeniDenemeTaslagiGeriDonusteVeDurumKurtarmadaKorunur() {
+        val geri = AtomicBoolean(false)
+        val restoration = StateRestorationTester(compose)
+        restoration.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                DenemeDetayEkrani(
+                    denemeId = null, denemeDeposu = denemeDeposu, dersRepository = dersRepository,
+                    soruRepository = soruRepository, onGeri = { geri.set(true) },
+                    onKaydedildi = {}, onSoruEkle = { _, _, _ -> },
+                )
+            }
+        }
+        compose.onNodeWithTag("deneme-name-input").performTextReplacement("Yarım kalan deneme")
+        restoration.emulateSavedInstanceStateRestore()
+        compose.onNodeWithTag("deneme-back-button").performClick()
+        compose.onNodeWithText(compose.activity.getString(R.string.unsaved_changes_title)).assertIsDisplayed()
+        assertTrue(!geri.get())
+        compose.onNodeWithText(compose.activity.getString(R.string.unsaved_changes_continue)).performClick()
+        compose.onNode(hasTestTag("deneme-name-input") and hasText("Yarım kalan deneme")).assertExists()
+        compose.onNodeWithTag("deneme-back-button").performClick()
+        compose.onNodeWithText(compose.activity.getString(R.string.unsaved_changes_discard)).performClick()
+        compose.waitUntil(5_000) { geri.get() }
+        assertTrue(denemeDeposu.kayitlariIzle.value.isEmpty())
+    }
+
+    @Test
+    fun kayitliDenemedeDegisiklikYoksaGeriUyariGostermez() {
+        val mat = runBlocking { dersRepository.kataloguHazirla().first { it.ad == "Matematik" } }
+        runBlocking { dersRepository.dersSeciminiKaydet(setOf(mat.id)) }
+        denemeDeposu.kaydet(
+            DenemeKaydi("degismedi", "Deneme", NetKurali.DORTTE_BIR, 1L, 20_000,
+                listOf(DenemeDersSatiri(mat.id, 40, 25, 5, mat.ad))),
+        )
+        val geri = AtomicBoolean(false)
+        compose.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                DenemeDetayEkrani(
+                    denemeId = "degismedi", denemeDeposu = denemeDeposu, dersRepository = dersRepository,
+                    soruRepository = soruRepository, onGeri = { geri.set(true) },
+                    onKaydedildi = {}, onSoruEkle = { _, _, _ -> },
+                )
+            }
+        }
+        compose.waitUntil(5_000) {
+            compose.onAllNodes(hasTestTag("deneme-lesson-${mat.id}")).fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithTag("deneme-back-button").performClick()
+        compose.waitUntil(5_000) { geri.get() }
+        compose.onNodeWithText(compose.activity.getString(R.string.unsaved_changes_title)).assertDoesNotExist()
     }
 
     @Test
@@ -217,6 +307,78 @@ class DenemeVeKurulumArayuzTest {
         compose.onNodeWithText(compose.activity.getString(R.string.deneme_delete_confirm_action)).performClick()
         compose.waitForIdle()
         assertNull(denemeDeposu.getir("d-1"))
+    }
+
+    @Test
+    fun denemeAnaliziYalnizKayitliNedenleriGosterirVeUygunSorularaYonlendirir() {
+        val mat = runBlocking { dersRepository.kataloguHazirla().first { it.ad == "Matematik" } }
+        runBlocking {
+            dersRepository.dersSeciminiKaydet(setOf(mat.id))
+            database.soruDao().ekle(listOf(
+                SoruEntity("deneme-s1", mat.id, soruNotu = "Birinci", kaynak = " DENEME   1 ",
+                    yanlisNedeni = "Dikkat", olusturma = 1, guncelleme = 1),
+                SoruEntity("deneme-s2", mat.id, soruNotu = "İkinci", kaynak = "Deneme 1",
+                    yanlisNedeni = null, sonTekrarGun = java.time.LocalDate.now().toEpochDay().toInt(),
+                    olusturma = 2, guncelleme = 2),
+                SoruEntity("deneme-s3", mat.id, soruNotu = "Başka", kaynak = "Diğer",
+                    yanlisNedeni = "Konu eksiği", olusturma = 3, guncelleme = 3),
+            ))
+        }
+        denemeDeposu.kaydet(DenemeKaydi("d", "Deneme 1", NetKurali.DORTTE_BIR, 1, 20000,
+            listOf(DenemeDersSatiri(mat.id, 10, 6, 2, mat.ad))))
+        var yonlendirilen: String? = null
+        compose.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                DenemeDetayEkrani(
+                    denemeId = "d", denemeDeposu = denemeDeposu, dersRepository = dersRepository,
+                    soruRepository = soruRepository, onGeri = {}, onKaydedildi = {}, onSoruEkle = { _, _, _ -> },
+                    onDenemeyiCalis = { yonlendirilen = it },
+                )
+            }
+        }
+        // The analysis is below the lazy-list viewport and arrives from Room asynchronously.
+        compose.waitUntil(10_000) {
+            try {
+                compose.onNodeWithTag("deneme-detail-list").performScrollToNode(hasText("Dikkat"))
+                true
+            } catch (_: AssertionError) { false }
+        }
+        compose.onNodeWithText(compose.activity.getString(R.string.deneme_analysis_notebook_count, 2))
+            .performScrollTo().assertIsDisplayed()
+        compose.onNodeWithTag("deneme-detail-list").performScrollToNode(hasText("Dikkat"))
+        compose.onNodeWithText("Dikkat").assertIsDisplayed()
+        compose.onNodeWithText(compose.activity.getString(R.string.deneme_analysis_missing_reason, 1))
+            .performScrollTo().assertIsDisplayed()
+        compose.onNodeWithTag("deneme-detail-list").performScrollToNode(hasTestTag("deneme-study-action"))
+        compose.onNodeWithTag("deneme-study-action").assertIsEnabled().performClick()
+        assertEquals("Deneme 1", yonlendirilen)
+    }
+
+    @Test
+    fun ayniAdliEskiKayitYenidenAdlandirilincaSorularDigerDenemedenCalinmaz() {
+        val mat = runBlocking { dersRepository.kataloguHazirla().first { it.ad == "Matematik" } }
+        runBlocking {
+            dersRepository.dersSeciminiKaydet(setOf(mat.id))
+            database.soruDao().ekle(SoruEntity("shared-question", mat.id, soruNotu = "Ortak kaynak",
+                kaynak = "Ortak deneme", olusturma = 1, guncelleme = 1))
+        }
+        val row = listOf(DenemeDersSatiri(mat.id, 10, 6, 2, mat.ad))
+        denemeDeposu.kaydet(DenemeKaydi("a", "Ortak deneme", NetKurali.DORTTE_BIR, 1, 20000, row))
+        denemeDeposu.kaydet(DenemeKaydi("b", "ortak deneme", NetKurali.DORTTE_BIR, 2, 20001, row))
+        compose.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                DenemeDetayEkrani(
+                    denemeId = "a", denemeDeposu = denemeDeposu, dersRepository = dersRepository,
+                    soruRepository = soruRepository, onGeri = {}, onKaydedildi = {}, onSoruEkle = { _, _, _ -> },
+                )
+            }
+        }
+        compose.onNodeWithTag("deneme-name-input").performTextReplacement("Yeni ad")
+        compose.onNodeWithTag("deneme-detail-list").performScrollToNode(hasTestTag("deneme-save-button"))
+        compose.onNodeWithTag("deneme-save-button").performClick()
+        compose.waitUntil(10_000) { denemeDeposu.getir("a")?.ad == "Yeni ad" }
+        assertEquals("Ortak deneme", runBlocking { soruRepository.soruGetir("shared-question")?.kaynak })
+        assertTrue(requireNotNull(denemeDeposu.getir("b")).kaynakBelirsiz)
     }
 
     @Test

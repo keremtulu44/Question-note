@@ -33,6 +33,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -76,8 +77,9 @@ fun KonuYonetimiEkrani(
     ders: Ders,
     repository: KonuRepository,
     onGeri: () -> Unit,
+    geriEtiketi: String? = null,
 ) {
-    var arsivlilerGosteriliyor by remember { mutableStateOf(false) }
+    var arsivlilerGosteriliyor by rememberSaveable(ders.id) { mutableStateOf(false) }
     var akisYenileme by remember { mutableIntStateOf(0) }
     var konuFormu by remember { mutableStateOf<KonuFormu?>(null) }
     var silinecekKonu by remember { mutableStateOf<Konu?>(null) }
@@ -89,6 +91,7 @@ fun KonuYonetimiEkrani(
         initialValue = KonuEkraniDurumu.Yukleniyor,
         key1 = konularAkisi,
     ) {
+        value = KonuEkraniDurumu.Yukleniyor
         konularAkisi
             .catch { value = KonuEkraniDurumu.Hata }
             .collect { konular -> value = KonuEkraniDurumu.Hazir(konular) }
@@ -115,7 +118,7 @@ fun KonuYonetimiEkrani(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 PremiumTextButton(onClick = onGeri) {
-                    Text(text = stringResource(R.string.topic_back_to_lessons))
+                    Text(text = geriEtiketi ?: stringResource(R.string.topic_back_to_lessons))
                 }
                 com.keremtulu.questionnote.ui.bilesenler.DuzBaslik(
                     baslik = stringResource(R.string.topic_screen_title),

@@ -33,6 +33,8 @@ data class DenemeKaydi(
     val olusturma: Long,
     val gun: Int,
     val satirlar: List<DenemeDersSatiri>,
+    // A formerly shared source name cannot be attributed safely, even after a rename/delete.
+    val kaynakBelirsiz: Boolean = false,
 ) {
     val toplamYuklenecek: Int get() = satirlar.sumOf { it.yuklenecek }
     fun toplamNet(): Double = satirlar.sumOf { kural.net(it.dogru, it.yanlis) }

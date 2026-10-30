@@ -26,9 +26,11 @@ data class DersNetKarsilastirma(
 )
 
 fun List<DenemeKaydi>.dersBarlari(son: DenemeKaydi): List<DersNetKarsilastirma> {
-    val ayni = filter { it.kural == son.kural && it.id != son.id }
+    val oncekiDenemeler = filter { it.kural == son.kural && it.id != son.id && it.sondanOnce(son) }
     return son.satirlar.map { satir ->
-        val oncekiler = ayni.mapNotNull { it.satir(satir.dersId) }
+        // A 10-question lesson and a 40-question lesson do not have comparable raw nets.
+        val oncekiler = oncekiDenemeler.mapNotNull { it.satir(satir.dersId) }
+            .filter { it.soruSayisi == satir.soruSayisi && it.soruSayisi > 0 }
             .map { son.kural.net(it.dogru, it.yanlis) }
         DersNetKarsilastirma(
             dersId = satir.dersId,
@@ -46,16 +48,55 @@ fun denemeKaynakEslesir(bir: String?, iki: String?): Boolean {
 
 fun List<DenemeKaydi>.kaynakla(ad: String?): DenemeKaydi? {
     if (ad.isNullOrBlank()) return null
-    return firstOrNull { denemeKaynakEslesir(it.ad, ad) }
+    // Source names are the only link in existing data; duplicates cannot be attributed safely.
+    return filter { denemeKaynakEslesir(it.ad, ad) }.singleOrNull()?.takeUnless { it.kaynakBelirsiz }
 }
 
-fun List<DenemeKaydi>.oncekiAyniKural(son: DenemeKaydi): DenemeKaydi? =
-    kronolojik()
-        .filter { it.kural == son.kural && it.id != son.id }
-        .lastOrNull { it.gun < son.gun || (it.gun == son.gun && it.olusturma < son.olusturma) }
+private fun DenemeKaydi.sondanOnce(son: DenemeKaydi): Boolean =
+    gun < son.gun || (gun == son.gun && olusturma < son.olusturma)
 
+/** Absolute net differences are meaningful only for the same rule and lesson/question makeup. */
+fun DenemeKaydi.karsilastirilabilir(diger: DenemeKaydi): Boolean =
+    kural == diger.kural && satirlar.isNotEmpty() &&
+        satirlar.all { it.soruSayisi > 0 } && diger.satirlar.all { it.soruSayisi > 0 } &&
+        satirlar.associate { it.dersId to it.soruSayisi } ==
+            diger.satirlar.associate { it.dersId to it.soruSayisi }
+
+fun List<DenemeKaydi>.oncekiAyniKural(son: DenemeKaydi): DenemeKaydi? =
+    kronolojik().lastOrNull { it.id != son.id && it.sondanOnce(son) && it.karsilastirilabilir(son) }
+
+/** This is a per-exam observation, not a claim about a student's overall ability. */
 fun DenemeKaydi.enZayif(): DenemeDersSatiri? =
-    satirlar.minByOrNull { kural.net(it.dogru, it.yanlis) }
+    satirlar.filter { it.gecerli() && it.soruSayisi > 0 && it.yuklenecek > 0 }
+        .maxByOrNull { it.yuklenecek.toDouble() / it.soruSayisi }
+
+data class DenemeNedenSayisi(val neden: String, val adet: Int)
+
+data class DenemeDefterAnalizi(
+    val soruSayisi: Int,
+    val nedenler: List<DenemeNedenSayisi>,
+    val nedeniBelirtilmeyen: Int,
+    val dersSayilari: Map<String, Int>,
+)
+
+/**
+ * Only currently linked notebook questions are analysed. The source is a name, not a
+ * stable exam ID: an ambiguous name yields null instead of invented associations.
+ */
+fun DenemeKaydi.defterAnalizi(kayitlar: List<DenemeKaydi>, sorular: List<Soru>): DenemeDefterAnalizi? {
+    if (kaynakBelirsiz || kayitlar.count { denemeKaynakEslesir(it.ad, ad) } != 1) return null
+    val eslesen = sorular.filter { denemeKaynakEslesir(it.kaynak, ad) }.distinctBy { it.id }
+    val nedenli = eslesen.mapNotNull { it.yanlisNedeni?.let(::canonicalSoruSecenegiAdi)?.takeIf(String::isNotEmpty) }
+    val nedenler = nedenli.groupBy(::normalizeSoruSecenegiAdi).values
+        .map { DenemeNedenSayisi(it.first(), it.size) }
+        .sortedWith(compareByDescending<DenemeNedenSayisi> { it.adet }.thenBy { normalizeSoruSecenegiAdi(it.neden) })
+    return DenemeDefterAnalizi(
+        soruSayisi = eslesen.size,
+        nedenler = nedenler,
+        nedeniBelirtilmeyen = eslesen.size - nedenli.size,
+        dersSayilari = eslesen.groupingBy { it.dersId }.eachCount(),
+    )
+}
 
 fun denemeHatirlatmaIndeksi(soruId: String): Int =
     (soruId.hashCode() and Int.MAX_VALUE) % 4

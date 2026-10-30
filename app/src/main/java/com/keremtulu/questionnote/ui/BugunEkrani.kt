@@ -50,6 +50,8 @@ import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.data.ilerleme.IlerlemeHizmeti
 import com.keremtulu.questionnote.data.prefs.GunlukHedefDeposu
 import com.keremtulu.questionnote.domain.model.DenemeKaydi
+import com.keremtulu.questionnote.domain.model.kronolojik
+import com.keremtulu.questionnote.domain.model.karsilastirilabilir
 import com.keremtulu.questionnote.domain.model.Ders
 import com.keremtulu.questionnote.domain.model.Soru
 import com.keremtulu.questionnote.domain.repeat.GunlukCalismaPlani
@@ -62,6 +64,7 @@ import com.keremtulu.questionnote.ui.bilesenler.InceOk
 import com.keremtulu.questionnote.ui.bilesenler.InceOlcek
 import com.keremtulu.questionnote.ui.bilesenler.KucukArti
 import com.keremtulu.questionnote.ui.bilesenler.KucukOnay
+import com.keremtulu.questionnote.ui.bilesenler.MiniCizgi
 import com.keremtulu.questionnote.ui.bilesenler.OynatSimgesi
 import com.keremtulu.questionnote.ui.bilesenler.SadeKart
 import com.keremtulu.questionnote.ui.bilesenler.SoruIsareti
@@ -107,6 +110,8 @@ fun BugunEkrani(
     onSoruEkle: () -> Unit,
     onOturumBaslat: (List<Soru>, Map<String, Ders>) -> Unit,
     onDevam: (() -> Unit)? = null,
+    devamTamamlandi: Boolean = false,
+    onBekleyenOturumuKaldir: (() -> Unit)? = null,
     onDeneme: () -> Unit = {},
     onSorulacaklar: () -> Unit = {},
     denemeler: List<DenemeKaydi> = emptyList(),
@@ -164,7 +169,7 @@ fun BugunEkrani(
         contentWindowInsets = ekranPencereInsetsi(),
     ) { insets ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets),
+            modifier = Modifier.fillMaxSize().padding(insets).consumeWindowInsets(insets).testTag("today-list"),
             contentPadding = PaddingValues(start = 20.dp, top = 18.dp, end = 20.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
@@ -176,6 +181,9 @@ fun BugunEkrani(
                     onSoruEkle = onSoruEkle,
                     ekleGoster = !(hazir != null && hazir.sorular.isEmpty()),
                 )
+            }
+            onDevam?.let { devam ->
+                item(key = "bugun-devam") { DevamSatiri(devam, devamTamamlandi, onBekleyenOturumuKaldir) }
             }
             if (durum is BugunDurumu.Hata) {
                 // Hata durumunda odak kartı yerine tek, eyleme dönük kart: aynı metin iki kez yazılmaz.
@@ -211,9 +219,6 @@ fun BugunEkrani(
                         )
                     }
                 }
-            }
-            onDevam?.let { devam ->
-                item(key = "bugun-devam") { DevamSatiri(devam) }
             }
             item(key = "bugun-kisayollar") {
                 BugunKisayollari(
@@ -479,28 +484,38 @@ private fun OdakHedefiVeEylemi(
 }
 
 @Composable
-private fun DevamSatiri(onDevam: () -> Unit) {
+private fun DevamSatiri(onDevam: () -> Unit, tamamlandi: Boolean, onKaldir: (() -> Unit)?) {
     val colors = MaterialTheme.colorScheme
     Surface(
-        onClick = onDevam,
         shape = RoundedCornerShape(18.dp),
         color = colors.secondaryContainer.copy(alpha = 0.6f),
-        modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+        modifier = Modifier.fillMaxWidth(),
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            OynatSimgesi(Modifier.size(18.dp), colors.onSecondaryContainer)
-            Text(
-                text = stringResource(R.string.focus_continue_session),
-                modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = colors.onSecondaryContainer,
-            )
-            InceOk(Modifier.size(16.dp), colors.onSecondaryContainer)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Surface(
+                onClick = onDevam,
+                color = Color.Transparent,
+                modifier = Modifier.weight(1f).heightIn(min = 56.dp),
+            ) {
+                Row(Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OynatSimgesi(Modifier.size(18.dp), colors.onSecondaryContainer)
+                    Text(
+                        text = stringResource(if (tamamlandi) R.string.focus_view_finished else R.string.focus_continue_session),
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = colors.onSecondaryContainer,
+                    )
+                    InceOk(Modifier.size(16.dp), colors.onSecondaryContainer)
+                }
+            }
+            if (onKaldir != null) {
+                PremiumTextButton(onClick = onKaldir, modifier = Modifier.padding(end = 4.dp)) {
+                    Text(stringResource(R.string.focus_remove_action))
+                }
+            }
         }
     }
 }
@@ -690,6 +705,13 @@ private fun DenemeSatiri(
 ) {
     val colors = MaterialTheme.colorScheme
     val sonDeneme = denemeler.firstOrNull()
+    // Simge gerçek sonuçlardan üretilir: sabit bir "yüzde" halkası sahte ilerleme gösteriyordu.
+    val trend = remember(denemeler) {
+        val sonKayitlar = denemeler.kronolojik().takeLast(6)
+        if (sonKayitlar.size >= 2 && sonKayitlar.drop(1).all { it.karsilastirilabilir(sonKayitlar.first()) }) {
+            sonKayitlar.map { it.toplamNet().toFloat() }
+        } else emptyList()
+    }
     val altMetin = if (sonDeneme == null) {
         stringResource(R.string.today_deneme_subtitle_empty)
     } else {
@@ -713,14 +735,25 @@ private fun DenemeSatiri(
             modifier = Modifier.size(38.dp).background(colors.primaryContainer, RoundedCornerShape(12.dp)),
             contentAlignment = Alignment.Center,
         ) {
-            com.keremtulu.questionnote.ui.bilesenler.HedefHalkasi(
-                oran = 0.72f,
-                modifier = Modifier.size(18.dp),
-                izRenk = colors.primary.copy(alpha = 0.25f),
-                dolguRenk = colors.primary,
-                kalinlik = 2.dp,
-                isaretSayisi = 12,
-            )
+            if (trend.size >= 2) {
+                MiniCizgi(
+                    noktalar = trend,
+                    modifier = Modifier
+                        .size(width = 24.dp, height = 15.dp)
+                        .clearAndSetSemantics { },
+                    renk = colors.primary,
+                )
+            } else {
+                // Tek kayıtta çizgi trend iddiası taşır; boş halka "henüz gidişat yok" der.
+                com.keremtulu.questionnote.ui.bilesenler.HedefHalkasi(
+                    oran = 0f,
+                    modifier = Modifier.size(18.dp),
+                    izRenk = colors.primary.copy(alpha = 0.25f),
+                    dolguRenk = colors.primary,
+                    kalinlik = 2.dp,
+                    isaretSayisi = 1,
+                )
+            }
         }
         Column(
             modifier = Modifier.weight(1f),

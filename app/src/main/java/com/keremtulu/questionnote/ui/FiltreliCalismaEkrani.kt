@@ -42,6 +42,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.domain.model.Ders
+import com.keremtulu.questionnote.domain.model.FiltreliCalismaEkraniAyar
 import com.keremtulu.questionnote.domain.model.Konu
 import com.keremtulu.questionnote.domain.model.Soru
 import com.keremtulu.questionnote.domain.model.SoruCalismaFiltresi
@@ -78,13 +79,6 @@ import com.keremtulu.questionnote.ui.premium.PremiumGradyanButon
 import java.time.LocalDate
 import com.keremtulu.questionnote.ui.panel.ekranPencereInsetsi
 
-/** State kept by the app shell so opening a question does not discard the chosen filters. */
-data class FiltreliCalismaEkraniAyar(
-    val filtre: SoruCalismaFiltresi = SoruCalismaFiltresi(),
-    val soruSayisi: String = "10",
-    val akilliSira: Boolean = true,
-)
-
 private sealed interface EkranYukleme<out T> {
     data object Yukleniyor : EkranYukleme<Nothing>
     data class Hazir<T>(val deger: T) : EkranYukleme<T>
@@ -118,6 +112,8 @@ fun FiltreliCalismaEkrani(
     onAyarDegisti: (FiltreliCalismaEkraniAyar) -> Unit,
     onOturumBaslat: (List<Soru>, Map<String, Ders>) -> Unit,
     onDevam: (() -> Unit)? = null,
+    devamTamamlandi: Boolean = false,
+    onBekleyenOturumuKaldir: (() -> Unit)? = null,
 ) {
     var yenileme by remember { mutableIntStateOf(0) }
     val bugun = com.keremtulu.questionnote.ui.bilesenler.hatirlaYerelGun()
@@ -431,8 +427,15 @@ fun FiltreliCalismaEkrani(
             }
 
             if (onDevam != null) item {
-                PremiumOutlinedButton(onClick = onDevam, modifier = Modifier.fillMaxWidth()) {
-                    Text(androidx.compose.ui.res.stringResource(R.string.focus_continue_session))
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    PremiumOutlinedButton(onClick = onDevam, modifier = Modifier.fillMaxWidth()) {
+                        Text(androidx.compose.ui.res.stringResource(
+                            if (devamTamamlandi) R.string.focus_view_finished else R.string.focus_continue_session,
+                        ))
+                    }
+                    if (onBekleyenOturumuKaldir != null) PremiumTextButton(onClick = onBekleyenOturumuKaldir) {
+                        Text(androidx.compose.ui.res.stringResource(R.string.focus_remove_action))
+                    }
                 }
             }
             if (secenekDurumu is EkranYukleme.Hazir) item {
@@ -552,7 +555,9 @@ fun FiltreliCalismaEkrani(
                                     color = MaterialTheme.colorScheme.onBackground,
                                 )
                                 Text(
-                                    androidx.compose.ui.res.stringResource(R.string.filtered_practice_order_note),
+                                    androidx.compose.ui.res.stringResource(
+                                        if (ayar.akilliSira) R.string.focus_order_note else R.string.filtered_practice_oldest_order_note,
+                                    ),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )

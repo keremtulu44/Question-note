@@ -6,6 +6,7 @@ import com.keremtulu.questionnote.domain.model.DenemeDersSatiri
 import com.keremtulu.questionnote.domain.model.DenemeKaydi
 import com.keremtulu.questionnote.domain.model.NetKurali
 import com.keremtulu.questionnote.domain.model.dersAnahtari
+import com.keremtulu.questionnote.domain.model.denemeKaynakEslesir
 import com.keremtulu.questionnote.domain.model.yerelEpochGun
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,13 +23,26 @@ class DenemeDeposu(context: Context) {
 
     @Synchronized
     fun kaydet(deneme: DenemeKaydi) {
-        val guncel = kayitlar.value.filter { it.id != deneme.id } + deneme
-        yaz(sirala(guncel))
+        val onceki = kayitlar.value.firstOrNull { it.id == deneme.id }
+        val adDegisti = onceki != null && !denemeKaynakEslesir(onceki.ad, deneme.ad)
+        val digerleri = kayitlar.value.filter { it.id != deneme.id }.map { diger ->
+            if (adDegisti && denemeKaynakEslesir(diger.ad, onceki?.ad)) diger.copy(kaynakBelirsiz = true)
+            else if (denemeKaynakEslesir(diger.ad, deneme.ad)) diger.copy(kaynakBelirsiz = true)
+            else diger
+        }
+        val yeniBelirsiz = digerleri.any { denemeKaynakEslesir(it.ad, deneme.ad) } ||
+            (!adDegisti && (onceki?.kaynakBelirsiz == true || deneme.kaynakBelirsiz))
+        yaz(sirala(digerleri + deneme.copy(kaynakBelirsiz = yeniBelirsiz)))
     }
 
     @Synchronized
     fun sil(id: String) {
-        yaz(kayitlar.value.filter { it.id != id })
+        val silinen = kayitlar.value.firstOrNull { it.id == id }
+        val kalan = kayitlar.value.filter { it.id != id }.map { diger ->
+            if (silinen != null && denemeKaynakEslesir(diger.ad, silinen.ad)) diger.copy(kaynakBelirsiz = true)
+            else diger
+        }
+        yaz(kalan)
     }
 
     @Synchronized
@@ -82,6 +96,7 @@ class DenemeDeposu(context: Context) {
                 .put("kural", deneme.kural.name)
                 .put("olusturma", deneme.olusturma)
                 .put("gun", deneme.gun)
+                .put("kaynakBelirsiz", deneme.kaynakBelirsiz)
                 .put(
                     "satirlar",
                     JSONArray().apply {
@@ -138,6 +153,7 @@ class DenemeDeposu(context: Context) {
                 olusturma = olusturma,
                 gun = if (o.has("gun")) o.getInt("gun") else olusturma.yerelEpochGun(),
                 satirlar = satirlar,
+                kaynakBelirsiz = o.optBoolean("kaynakBelirsiz", false),
             )
         }
     }

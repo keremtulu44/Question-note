@@ -21,6 +21,8 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
@@ -127,11 +129,25 @@ fun DerslerEkrani(
     ) { padding ->
         @Composable
         fun DerslerUstBaslik(modifier: Modifier = Modifier) {
-            com.keremtulu.questionnote.ui.bilesenler.SayfaBasligi(
-                baslik = stringResource(if (soruEkleModu) R.string.lessons_choose_title else R.string.lessons_title),
-                alt = if (soruEkleModu) stringResource(R.string.lessons_choose_subtitle) else profilAdi.takeIf { it.isNotBlank() },
-                modifier = modifier,
-            )
+            Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                com.keremtulu.questionnote.ui.bilesenler.SayfaBasligi(
+                    baslik = stringResource(if (soruEkleModu) R.string.lessons_choose_title else R.string.lessons_title),
+                    alt = if (soruEkleModu) stringResource(R.string.lessons_choose_subtitle) else stringResource(R.string.lessons_browse_subtitle),
+                )
+                val hazir = durum as? DersSecimDurumu.Hazir
+                if (!soruEkleModu && hazir != null && hazir.dersler.isNotEmpty()) {
+                    GradyanKart(modifier = Modifier.testTag("lessons-summary"), borderAnimation = false) {
+                        Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                            Text(stringResource(R.string.lessons_summary_kicker), color = Color(0xFFF0D18E),
+                                style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.lessons_summary_questions, hazir.dersler.sumOf { it.soruSayisi }),
+                                color = Color.White, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.lessons_summary_detail, hazir.dersler.size, profilAdi),
+                                color = Color.White.copy(alpha = 0.82f), style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                }
+            }
         }
 
         Column(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding)) {
@@ -175,7 +191,7 @@ fun DerslerEkrani(
                     } else {
                         LazyVerticalGrid(
                             columns = GridCells.Adaptive(minSize = 156.dp),
-                            modifier = Modifier.fillMaxWidth().weight(1f),
+                            modifier = Modifier.fillMaxWidth().weight(1f).testTag("lessons-grid"),
                             contentPadding = PaddingValues(start = 18.dp, top = 20.dp, end = 18.dp, bottom = 24.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp),

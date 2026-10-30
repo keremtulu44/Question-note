@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -191,6 +192,101 @@ class CozumTahtasiKullanimTest {
         compose.waitUntil(5_000) {
             canvas.fetchSemanticsNode().config[SemanticsProperties.StateDescription] == oneMark
         }
+    }
+
+    @Test
+    fun tappingTheBoardCreatesAnUndoableDot() {
+        val depot = LocalSoruGorselDeposu(context)
+        compose.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                CozumTahtasiDialog(soru = soru(), gorselDeposu = depot, visible = true, onDismiss = {})
+            }
+        }
+        val canvas = compose.onNodeWithTag("solution-whiteboard-canvas")
+        canvas.performTouchInput { click(Offset(width * 0.2f, height * 0.2f)) }
+        compose.waitUntil(5_000) {
+            canvas.fetchSemanticsNode().config[SemanticsProperties.StateDescription] ==
+                context.getString(R.string.whiteboard_mark_count, 1)
+        }
+        compose.onNodeWithTag("whiteboard-undo").performClick()
+        compose.waitUntil(5_000) {
+            canvas.fetchSemanticsNode().config[SemanticsProperties.StateDescription] ==
+                context.getString(R.string.whiteboard_no_marks)
+        }
+    }
+
+    @Test
+    fun tekDokunusNoktaBirakirVeSuruklemeTekVurusUretir() {
+        val depot = LocalSoruGorselDeposu(context)
+        val memory = TahtaOturumCizimBellegi()
+        compose.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                CozumTahtasiDialog(
+                    soru = soru(),
+                    gorselDeposu = depot,
+                    visible = true,
+                    oturumCizimBellegi = memory,
+                    onDismiss = {},
+                )
+            }
+        }
+        val canvas = compose.onNodeWithTag("solution-whiteboard-canvas")
+        val oneMark = context.getString(R.string.whiteboard_mark_count, 1)
+        val ikiMark = context.getString(R.string.whiteboard_mark_count, 2)
+
+        // Yalnız dokunup kaldırma: eskiden hiç iz bırakmıyordu ("nokta koyulmuyor").
+        val bounds = canvas.fetchSemanticsNode().boundsInRoot
+        canvas.performTouchInput {
+            down(Offset(bounds.width * 0.30f, bounds.height * 0.30f))
+            up()
+        }
+        compose.waitUntil(5_000) {
+            canvas.fetchSemanticsNode().config[SemanticsProperties.StateDescription] == oneMark
+        }
+
+        // Sürükleme tek vuruş olarak eklenir ve ilk vuruş korunur.
+        canvas.performTouchInput {
+            down(Offset(bounds.width * 0.20f, bounds.height * 0.60f))
+            moveTo(Offset(bounds.width * 0.40f, bounds.height * 0.55f), delayMillis = 16)
+            moveTo(Offset(bounds.width * 0.60f, bounds.height * 0.50f), delayMillis = 16)
+            moveTo(Offset(bounds.width * 0.80f, bounds.height * 0.45f), delayMillis = 16)
+            up()
+        }
+        compose.waitUntil(5_000) {
+            canvas.fetchSemanticsNode().config[SemanticsProperties.StateDescription] == ikiMark
+        }
+    }
+
+    @Test
+    fun kalinlikKaydirmalariBirIleOnArasindaAdimAdimAyarlanir() {
+        val depot = LocalSoruGorselDeposu(context)
+        compose.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                CozumTahtasiDialog(
+                    soru = soru(),
+                    gorselDeposu = depot,
+                    visible = true,
+                    onDismiss = {},
+                )
+            }
+        }
+        val kaydirici = compose.onNodeWithTag("whiteboard-width-slider")
+        kaydirici.assertExists()
+        // Açılışta varsayılan kalınlık 4 dp.
+        compose.onNodeWithTag("whiteboard-width-value")
+            .assertTextEquals(context.getString(R.string.whiteboard_width_value, 4))
+
+        kaydirici.performSemanticsAction(SemanticsActions.SetProgress) { it(10f) }
+        compose.onNodeWithTag("whiteboard-width-value")
+            .assertTextEquals(context.getString(R.string.whiteboard_width_value, 10))
+
+        // Sınır dışı değerler 1–10 aralığına kırpılır.
+        kaydirici.performSemanticsAction(SemanticsActions.SetProgress) { it(99f) }
+        compose.onNodeWithTag("whiteboard-width-value")
+            .assertTextEquals(context.getString(R.string.whiteboard_width_value, 10))
+        kaydirici.performSemanticsAction(SemanticsActions.SetProgress) { it(-5f) }
+        compose.onNodeWithTag("whiteboard-width-value")
+            .assertTextEquals(context.getString(R.string.whiteboard_width_value, 1))
     }
 
     @Test

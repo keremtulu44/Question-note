@@ -10,9 +10,11 @@ import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.room.Room
+import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
 import com.keremtulu.questionnote.data.local.VarsayilanDersleriEkle
 import com.keremtulu.questionnote.data.local.YanlisDefteriDatabase
+import com.keremtulu.questionnote.data.local.entity.SoruEntity
 import com.keremtulu.questionnote.data.prefs.SinavProfiliDeposu
 import com.keremtulu.questionnote.data.repository.RoomDersRepository
 import com.keremtulu.questionnote.data.repository.RoomKonuRepository
@@ -27,6 +29,7 @@ import com.keremtulu.questionnote.ui.tema.HareketPolitikasi
 import com.keremtulu.questionnote.ui.tema.PremiumYanlisDefteriTema
 import java.io.File
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -280,6 +283,72 @@ class SoruFormuDurumKurtarmaTest {
         } finally {
             kaynakDosya.delete()
         }
+    }
+
+    @Test
+    fun yeniSoruTaslagiCikarkenOnayIsterVeKurtarmadaKaybolmaz() {
+        val ders = runBlocking { dersRepository.dersleriIzle(false).first().first() }
+        val geri = AtomicBoolean(false)
+        val restoration = StateRestorationTester(compose)
+        restoration.setContent {
+            PremiumYanlisDefteriTema(koyuTema = false, hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                SoruFormuEkrani(
+                    ders = ders, soruId = null, soruRepository = soruRepository, konuRepository = konuRepository,
+                    gorselDeposu = gorselDeposu, onGeri = { geri.set(true) }, gizliKaynak = "Deneme 1",
+                )
+            }
+        }
+        compose.waitUntil(5_000) {
+            compose.onAllNodesWithTag("soru_formu_liste").fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithTag("soru_formu_liste").performScrollToNode(hasTestTag("soru_formu_kaynak_konumu"))
+        compose.onNodeWithTag("soru_formu_kaynak_konumu").performTextReplacement("Sayfa 7")
+        restoration.emulateSavedInstanceStateRestore()
+        compose.runOnIdle { compose.activity.onBackPressedDispatcher.onBackPressed() }
+        compose.onNodeWithText(context.getString(R.string.unsaved_changes_title)).assertIsDisplayed()
+        assertEquals(false, geri.get())
+        compose.onNodeWithText(context.getString(R.string.unsaved_changes_continue)).performClick()
+        compose.onNodeWithTag("soru_formu_liste").performScrollToNode(hasTestTag("soru_formu_kaynak_konumu"))
+        compose.onNode(hasTestTag("soru_formu_kaynak_konumu") and hasText("Sayfa 7")).assertExists()
+        compose.onNodeWithTag("soru_formu_liste")
+            .performScrollToNode(hasText(context.getString(R.string.question_form_cancel)))
+        compose.onNodeWithText(context.getString(R.string.question_form_cancel)).performClick()
+        compose.onNodeWithText(context.getString(R.string.unsaved_changes_discard)).performClick()
+        compose.waitUntil(5_000) { geri.get() }
+        assertEquals(0, runBlocking { database.soruDao().tumunuGetir().size })
+    }
+
+    @Test
+    fun duzenlemedeEskiDegereDonulurseGereksizCikisOnayiGosterilmez() {
+        val ders = runBlocking { dersRepository.dersleriIzle(false).first().first() }
+        runBlocking {
+            database.soruDao().ekle(SoruEntity("orijinal", ders.id, kaynakKonumu = "Sayfa 3", olusturma = 1, guncelleme = 1))
+        }
+        val geri = AtomicBoolean(false)
+        compose.setContent {
+            PremiumYanlisDefteriTema(koyuTema = false, hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                SoruFormuEkrani(
+                    ders = ders, soruId = "orijinal", soruRepository = soruRepository, konuRepository = konuRepository,
+                    gorselDeposu = gorselDeposu, onGeri = { geri.set(true) },
+                )
+            }
+        }
+        compose.waitUntil(5_000) {
+            compose.onAllNodesWithTag("soru_formu_liste").fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithTag("soru_formu_liste").performScrollToNode(hasTestTag("soru_formu_kaynak_konumu"))
+        compose.waitUntil(5_000) {
+            compose.onAllNodes(hasTestTag("soru_formu_kaynak_konumu") and hasText("Sayfa 3"))
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithTag("soru_formu_kaynak_konumu").performTextReplacement("Sayfa 5")
+        compose.onNodeWithTag("soru_formu_kaynak_konumu").performTextReplacement("Sayfa 3")
+        compose.onNodeWithTag("soru_formu_liste")
+            .performScrollToNode(hasText(context.getString(R.string.question_form_cancel)))
+        compose.onNodeWithText(context.getString(R.string.question_form_cancel)).performClick()
+        compose.waitUntil(5_000) { geri.get() }
+        compose.onNodeWithText(context.getString(R.string.unsaved_changes_title)).assertDoesNotExist()
+        assertEquals("Sayfa 3", runBlocking { database.soruDao().tumunuGetir().single().kaynakKonumu })
     }
 
     private fun ornekJpegOlustur(dosya: File) {
