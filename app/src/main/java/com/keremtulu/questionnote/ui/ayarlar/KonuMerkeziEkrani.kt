@@ -63,6 +63,7 @@ fun KonuMerkeziEkrani(
         }
     }
     val dersler by produceState<List<KonuMerkeziSatiri>?>(null, akis) {
+        value = null
         hata = false
         akis.catch { hata = true }.collect { value = it }
     }
@@ -100,7 +101,12 @@ fun KonuMerkeziEkrani(
                 )
             }
             if (hata) {
-                item { PremiumTextButton(onClick = { yenile++ }) { Text(stringResource(R.string.topic_retry)) } }
+                item {
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(stringResource(R.string.topic_load_error), color = MaterialTheme.colorScheme.error)
+                        PremiumTextButton(onClick = { yenile++ }) { Text(stringResource(R.string.topic_retry)) }
+                    }
+                }
             } else if (dersler == null) {
                 item { CircularProgressIndicator() }
             } else {

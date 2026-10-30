@@ -23,6 +23,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -31,6 +32,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.domain.model.SoruSecenekTuru
@@ -38,7 +42,6 @@ import com.keremtulu.questionnote.domain.model.SoruSecenegi
 import com.keremtulu.questionnote.domain.model.SoruSecenegiSilmeSonucu
 import com.keremtulu.questionnote.domain.repository.SoruRepository
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
@@ -66,14 +69,20 @@ fun KatalogYonetimiEkrani(
     var silinecek by remember { mutableStateOf<SoruSecenegi?>(null) }
     var uyariMetni by remember { mutableStateOf<String?>(null) }
 
-    val akis = remember(soruRepository) {
-        combine(
-            soruRepository.secenekleriIzle(SoruSecenekTuru.KAYNAK),
-            soruRepository.secenekleriIzle(SoruSecenekTuru.YANLIS_NEDENI),
-        ) { kaynaklar, nedenler -> KatalogDurumu.Hazir(kaynaklar, nedenler) }
-    }
-    val durum = produceState<KatalogDurumu>(KatalogDurumu.Yukleniyor, akis) {
-        akis.catch { value = KatalogDurumu.Hata }.collect { value = it }
+    var yenileme by remember { mutableIntStateOf(0) }
+    val durum = produceState<KatalogDurumu>(KatalogDurumu.Yukleniyor, soruRepository, yenileme) {
+        value = KatalogDurumu.Yukleniyor
+        try {
+            combine(
+                soruRepository.secenekleriIzle(SoruSecenekTuru.KAYNAK),
+                soruRepository.secenekleriIzle(SoruSecenekTuru.YANLIS_NEDENI),
+            ) { kaynaklar, nedenler -> KatalogDurumu.Hazir(kaynaklar, nedenler) }
+                .collect { value = it }
+        } catch (iptal: CancellationException) {
+            throw iptal
+        } catch (_: Exception) {
+            value = KatalogDurumu.Hata
+        }
     }.value
 
     Scaffold(
@@ -93,6 +102,7 @@ fun KatalogYonetimiEkrani(
             @Composable
             fun KatalogUstKart(modifier: Modifier = Modifier) {
                 com.keremtulu.questionnote.ui.bilesenler.DuzBaslik(
+                    modifier = modifier,
                     baslik = stringResource(R.string.catalog_manage_title),
                     alt = stringResource(R.string.catalog_manage_subtitle),
                 )
@@ -108,13 +118,19 @@ fun KatalogYonetimiEkrani(
                 KatalogDurumu.Hata -> {
                     KatalogUstKart(Modifier.padding(horizontal = 20.dp, vertical = 6.dp))
                     Box(
-                        Modifier.fillMaxSize(),
+                        Modifier.fillMaxSize().padding(20.dp),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Text(
-                            stringResource(R.string.filtered_practice_options_error),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                stringResource(R.string.catalog_load_error),
+                                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Assertive },
+                                color = MaterialTheme.colorScheme.error,
+                            )
+                            PremiumTextButton(onClick = { yenileme++ }) {
+                                Text(stringResource(R.string.topic_retry))
+                            }
+                        }
                     }
                 }
                 is KatalogDurumu.Hazir -> LazyColumn(

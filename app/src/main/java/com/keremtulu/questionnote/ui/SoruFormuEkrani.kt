@@ -77,6 +77,9 @@ import com.keremtulu.questionnote.domain.repository.KonuRepository
 import com.keremtulu.questionnote.domain.repository.SoruRepository
 import com.keremtulu.questionnote.ui.bilesenler.GorselKirpmaAlani
 import com.keremtulu.questionnote.ui.bilesenler.GorselKirpmaDialog
+import com.keremtulu.questionnote.ui.bilesenler.KaydedilmemisDegisiklikDialog
+import org.json.JSONArray
+import org.json.JSONObject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
@@ -157,6 +160,30 @@ internal val GorselTuruSaver = Saver<GorselTuru, String>(
     },
 )
 
+/** A deterministic snapshot of editable fields, including image order and replacements. */
+private fun soruFormuImzasi(
+    cozumNotu: String,
+    kaynak: String,
+    kaynakKonumu: String,
+    yanlisNedeni: String,
+    konuId: String?,
+    planDurumu: SoruPlanDurumu,
+    favori: Boolean,
+    soruGorselleri: List<SoruGorselGirdisi>,
+    cozumGorselleri: List<SoruGorselGirdisi>,
+): String {
+    fun gorseller(liste: List<SoruGorselGirdisi>) = JSONArray().apply {
+        liste.forEach { girdi ->
+            put(JSONArray().put(girdi.id).put(girdi.tur.name).put(girdi.sira)
+                .put(girdi.dosyaAdi).put(girdi.gecici).put(girdi.mimeType)
+                .put(girdi.genislik).put(girdi.yukseklik).put(girdi.boyut).put(girdi.sha256))
+        }
+    }
+    return JSONArray().put(cozumNotu).put(kaynak).put(kaynakKonumu).put(yanlisNedeni)
+        .put(konuId ?: JSONObject.NULL).put(planDurumu.name).put(favori)
+        .put(gorseller(soruGorselleri)).put(gorseller(cozumGorselleri)).toString()
+}
+
 private sealed interface KonuSecenekleriDurumu {
     data object Yukleniyor : KonuSecenekleriDurumu
     data class Hazir(val topics: List<Konu>) : KonuSecenekleriDurumu
@@ -212,6 +239,18 @@ fun SoruFormuEkrani(
     var cozumGorselleri by rememberSaveable(formAnahtari, stateSaver = SoruGorselGirdileriSaver) {
         mutableStateOf<List<SoruGorselGirdisi>>(emptyList())
     }
+    var ilkFormImzasi by rememberSaveable(formAnahtari) {
+        mutableStateOf(
+            if (soruId == null) soruFormuImzasi(
+                "", gizliKaynak.orEmpty(), "", "", null, SoruPlanDurumu.AKTIF, false, emptyList(), emptyList(),
+            ) else null,
+        )
+    }
+    var cikisOnayi by rememberSaveable(formAnahtari) { mutableStateOf(false) }
+    fun guncelFormImzasi() = soruFormuImzasi(
+        cozumNotu, kaynak, kaynakKonumu, yanlisNedeni, konuId, planDurumu, favori,
+        soruGorselleri, cozumGorselleri,
+    )
     var kirpmaHedefi by remember(soruId) { mutableStateOf<SoruGorselGirdisi?>(null) }
     var kirpmaIsleniyor by remember(soruId) { mutableStateOf(false) }
     var konuMenu by remember { mutableStateOf(false) }
@@ -302,6 +341,7 @@ fun SoruFormuEkrani(
                 favori = current.favori
                 soruGorselleri = current.gorseller.filter { it.tur == GorselTuru.SORU }.map { it.toGirdi() }
                 cozumGorselleri = current.gorseller.filter { it.tur == GorselTuru.COZUM }.map { it.toGirdi() }
+                ilkFormImzasi = guncelFormImzasi()
                 kayitYuklendi = true
             }
         } catch (cancel: CancellationException) {
@@ -328,7 +368,7 @@ fun SoruFormuEkrani(
         kayitYuklendi = false
     }
 
-    fun cancelAndReturn() {
+    fun formuKapat() {
         if (kaydediliyor) return
         val silinecekGeciciler = (soruGorselleri + cozumGorselleri).filter { it.gecici }
         scope.launch {
@@ -337,6 +377,13 @@ fun SoruFormuEkrani(
             kaliciFormDurumunuTemizle()
             onGeri()
         }
+    }
+
+    fun cikisIste() {
+        if (kaydediliyor) return
+        val degisti = !yukleniyor && !bulunamadi && !yuklemeBasarisiz &&
+            (ilkFormImzasi?.let { it != guncelFormImzasi() } ?: kayitYuklendi)
+        if (degisti) cikisOnayi = true else formuKapat()
     }
 
     val photoPicker = rememberLauncherForActivityResult(
@@ -544,7 +591,7 @@ fun SoruFormuEkrani(
     val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
     val klavyeAcik = WindowInsets.ime.getBottom(androidx.compose.ui.platform.LocalDensity.current) > 0
 
-    BackHandler(enabled = true, onBack = ::cancelAndReturn)
+    BackHandler(enabled = true, onBack = ::cikisIste)
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -642,7 +689,7 @@ fun SoruFormuEkrani(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             PremiumTextButton(
-                                onClick = ::cancelAndReturn,
+                                onClick = ::cikisIste,
                                 enabled = !kaydediliyor,
                                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
                             ) {
@@ -1027,6 +1074,13 @@ fun SoruFormuEkrani(
                 }
             }
         }
+    }
+
+    if (cikisOnayi) {
+        KaydedilmemisDegisiklikDialog(
+            onCik = { cikisOnayi = false; formuKapat() },
+            onDevam = { cikisOnayi = false },
+        )
     }
 
     kirpmaHedefi?.let { target ->

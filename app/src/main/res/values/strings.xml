@@ -67,6 +67,7 @@
     <string name="deneme_add_question">Soru ekle</string>
     <string name="deneme_save">Denemeyi kaydet</string>
     <string name="deneme_delete">Denemeyi sil</string>
+    <string name="deneme_delete_error">Denemenin silinmesi doğrulanamadı. Yeniden deneyebilirsin.</string>
     <string name="deneme_delete_confirm_title">Deneme silinsin mi?</string>
     <string name="deneme_delete_confirm_body">%1$s deneme kaydı silinecek. Bu denemeden deftere yüklediğin sorular silinmez.</string>
     <string name="deneme_delete_confirm_action">Sil</string>
@@ -106,6 +107,7 @@
     <string name="onboarding_group_social">Sosyal Bilimler</string>
     <string name="onboarding_group_foreign">Yabancı Dil ve Diğer</string>
     <string name="onboarding_continue">Seçili derslerle başla</string>
+    <string name="onboarding_load_error">Dersler yüklenemedi. Bağlantı gerekmez; yeniden deneyebilirsin.</string>
     <string name="onboarding_error">Ders seçimi kaydedilemedi. Lütfen tekrar dene.</string>
     <string name="today_due_today">Bugün</string>
     <string name="today_photo_count">%1$d soru fotoğrafı</string>
@@ -349,6 +351,10 @@
     <string name="question_form_crop_error">Görsel kırpılamadı. Özgün görsel korunuyor; yeniden deneyebilirsin.</string>
     <string name="question_form_save">Soruyu kaydet</string>
     <string name="question_form_saving">Kaydediliyor…</string>
+    <string name="unsaved_changes_title">Kaydetmeden çıkılsın mı?</string>
+    <string name="unsaved_changes_message">Kaydetmediğin değişiklikler kaybolacak.</string>
+    <string name="unsaved_changes_discard">Kaydetmeden çık</string>
+    <string name="unsaved_changes_continue">Düzenlemeye devam et</string>
     <string name="question_form_cancel">Vazgeç</string>
     <string name="question_form_saved">Soru kaydedildi.</string>
     <string name="question_form_updated">Soru güncellendi.</string>
@@ -628,6 +634,7 @@
     <string name="topic_delete_archive">Arşivle</string>
     <string name="topic_delete_error">Konu silinemedi.</string>
 
+    <string name="catalog_load_error">Kaynak ve yanlış nedenleri yüklenemedi.</string>
     <string name="catalog_manage_title">Kaynak ve nedenler</string>
     <string name="catalog_manage_subtitle">Eklediğin kaynakları ve yanlış nedenlerini buradan yönetebilirsin. Hazır seçenekler silinemez.</string>
     <string name="catalog_source_heading">KAYNAKLAR</string>
@@ -645,8 +652,12 @@
     <string name="catalog_empty">Henüz kendi eklediğin kayıt yok.</string>
     <string name="settings_profile_title">DERSLERİM</string>
     <string name="settings_profile_note">Görmek istediğin dersleri işaretle. İşaretsiz dersler gizlenir; sorular silinmez.</string>
+    <string name="settings_profile_loading">Dersler yükleniyor…</string>
+    <string name="settings_profile_load_error">Dersler yüklenemedi. Yeniden deneyebilirsin.</string>
+    <string name="settings_profile_empty">Henüz gösterilecek ders yok.</string>
+    <string name="settings_profile_at_least_one">En az bir ders seçili kalmalı.</string>
     <string name="settings_profile_saving">Dersler hazırlanıyor…</string>
-    <string name="settings_profile_error">Format kaydedilemedi. Önceki seçimin korundu; yeniden deneyebilirsin.</string>
+    <string name="settings_profile_error">Ders seçimi kaydedilemedi. Önceki seçimin korundu; yeniden deneyebilirsin.</string>
     <string name="settings_topics">Konu yönetimi ve silme</string>
     <string name="settings_topics_note">Tüm dersler · konu ekle, düzenle, arşivle veya sil</string>
     <string name="topics_center_note">Format dışında kalan dersler de burada. Soruda kullanılan konular silinmez; arşivleyebilirsin.</string>

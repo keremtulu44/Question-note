@@ -50,6 +50,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -120,7 +121,7 @@ fun SorulacaklarEkrani(
     val koyuTema = isSystemInDarkTheme()
     val snackbarHostState = remember { SnackbarHostState() }
     var yenileme by remember { mutableIntStateOf(0) }
-    var seciliDersId by remember { mutableStateOf<String?>(null) }
+    var seciliDersId by rememberSaveable { mutableStateOf<String?>(null) }
     var tamEkranHedef by remember { mutableStateOf<Pair<Ders, Soru>?>(null) }
     var cozdurdumHedef by remember { mutableStateOf<Soru?>(null) }
 
@@ -138,6 +139,7 @@ fun SorulacaklarEkrani(
         }
     }
     val durum by produceState<SorulacaklarDurumu>(SorulacaklarDurumu.Yukleniyor, gruplarFlow) {
+        value = SorulacaklarDurumu.Yukleniyor
         gruplarFlow.catch { value = SorulacaklarDurumu.Hata }
             .collect { value = SorulacaklarDurumu.Hazir(it) }
     }

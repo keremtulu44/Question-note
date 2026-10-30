@@ -777,6 +777,9 @@ fun YanlisDefteriUygulamasi(
                 is UygulamaEkrani.DersAlani -> "ders-${displayedScreen.ders.id}-${profilSecimi.profil.name}"
                 UygulamaEkrani.FiltreliCalisma -> "filtreli-${profilSecimi.profil.name}"
                 UygulamaEkrani.Denemeler -> "denemeler"
+                UygulamaEkrani.Sorulacaklar -> "sorulacaklar-${profilSecimi.profil.name}"
+                UygulamaEkrani.KonuMerkezi -> "konu-merkezi"
+                is UygulamaEkrani.Konular -> "konular-${displayedScreen.ders.id}"
                 else -> null
             }
             val icerik: @Composable () -> Unit = {

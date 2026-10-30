@@ -27,6 +27,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -36,6 +37,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -52,6 +55,7 @@ import com.keremtulu.questionnote.ui.bilesenler.SadeAnaButon
 import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
 import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -113,26 +117,37 @@ fun DersKurulumEkrani(
     var yukleniyor by remember { mutableStateOf(true) }
     var baslatildi by rememberSaveable { mutableStateOf(false) }
     var seciliListe by rememberSaveable { mutableStateOf(listOf<String>()) }
-    var hata by rememberSaveable { mutableStateOf(false) }
+    var yuklemeHatasi by remember { mutableStateOf(false) }
+    var kayitHatasi by rememberSaveable { mutableStateOf(false) }
+    var yenileme by remember { mutableIntStateOf(0) }
     var kaydediliyor by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     val secili = remember(seciliListe) { seciliListe.toSet() }
     val gruplar = remember(dersler) { dersleriGrupla(dersler) }
 
-    LaunchedEffect(dersRepository) {
+    LaunchedEffect(dersRepository, yenileme) {
         yukleniyor = true
-        val hazir = runCatching { dersRepository.kataloguHazirla() }.getOrElse {
-            hata = true
+        yuklemeHatasi = false
+        val hazir = try {
+            dersRepository.kataloguHazirla()
+        } catch (iptal: CancellationException) {
+            throw iptal
+        } catch (_: Exception) {
             emptyList()
         }
         dersler = hazir
-        if (!baslatildi && hazir.isNotEmpty()) {
+        yuklemeHatasi = hazir.isEmpty()
+        if (!yuklemeHatasi && !baslatildi) {
             val cekirdek = hazir
                 .filter { it.ad.dersAnahtari() in VarsayilanBaslangicAnahtarlari }
                 .map { it.id }
             seciliListe = cekirdek.ifEmpty { hazir.map { it.id } }
             baslatildi = true
+        } else if (!yuklemeHatasi) {
+            // Restored selections may reference lessons removed since the last load.
+            val mevcutIdler = hazir.map { it.id }.toSet()
+            seciliListe = seciliListe.filter { it in mevcutIdler }
         }
         yukleniyor = false
     }
@@ -176,7 +191,7 @@ fun DersKurulumEkrani(
 
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     PremiumTextButton(
-                        enabled = dersler.isNotEmpty() && secili.size < dersler.size,
+                        enabled = !kaydediliyor && !yukleniyor && dersler.isNotEmpty() && secili.size < dersler.size,
                         interactionTur = EtkilesimTuru.TOGGLE_AC,
                         onClick = { seciliListe = dersler.map { it.id } },
                         modifier = Modifier.testTag("onboarding-select-all"),
@@ -184,7 +199,7 @@ fun DersKurulumEkrani(
                         Text(stringResource(R.string.onboarding_select_all))
                     }
                     PremiumTextButton(
-                        enabled = secili.isNotEmpty(),
+                        enabled = !kaydediliyor && !yukleniyor && !yuklemeHatasi && secili.isNotEmpty(),
                         interactionTur = EtkilesimTuru.TOGGLE_KAPA,
                         onClick = { seciliListe = emptyList() },
                         modifier = Modifier.testTag("onboarding-clear-all"),
@@ -200,6 +215,23 @@ fun DersKurulumEkrani(
                     contentAlignment = Alignment.Center,
                 ) {
                     CircularProgressIndicator()
+                }
+            } else if (yuklemeHatasi) {
+                Box(
+                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            stringResource(R.string.onboarding_load_error),
+                            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Assertive },
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                        PremiumTextButton(
+                            onClick = { yenileme++ },
+                            modifier = Modifier.testTag("onboarding-retry"),
+                        ) { Text(stringResource(R.string.topic_retry)) }
+                    }
                 }
             } else {
                 LazyColumn(
@@ -232,6 +264,7 @@ fun DersKurulumEkrani(
                                     KurulumDersKarti(
                                         ders = ders,
                                         secili = seciliMi,
+                                        enabled = !kaydediliyor,
                                         modifier = Modifier.weight(1f),
                                         onTikla = {
                                             seciliListe = if (seciliMi) {
@@ -251,7 +284,7 @@ fun DersKurulumEkrani(
                 }
             }
 
-            if (hata) {
+            if (kayitHatasi) {
                 Text(
                     text = stringResource(R.string.onboarding_error),
                     color = MaterialTheme.colorScheme.error,
@@ -260,16 +293,19 @@ fun DersKurulumEkrani(
             }
 
             SadeAnaButon(
-                enabled = !kaydediliyor && secili.isNotEmpty(),
+                enabled = !kaydediliyor && !yukleniyor && !yuklemeHatasi && secili.isNotEmpty(),
                 onClick = {
+                    if (kaydediliyor || yukleniyor || yuklemeHatasi) return@SadeAnaButon
                     kaydediliyor = true
-                    hata = false
+                    kayitHatasi = false
                     scope.launch {
                         try {
                             dersRepository.dersSeciminiKaydet(secili)
                             onTamam()
+                        } catch (iptal: CancellationException) {
+                            throw iptal
                         } catch (_: Exception) {
-                            hata = true
+                            kayitHatasi = true
                             kaydediliyor = false
                         }
                     }
@@ -291,6 +327,7 @@ fun DersKurulumEkrani(
 private fun KurulumDersKarti(
     ders: Ders,
     secili: Boolean,
+    enabled: Boolean,
     modifier: Modifier = Modifier,
     onTikla: () -> Unit,
 ) {
@@ -302,6 +339,7 @@ private fun KurulumDersKarti(
 
     PremiumCard(
         onClick = onTikla,
+        enabled = enabled,
         modifier = modifier
             .semantics { selected = secili }
             .testTag("onboarding-lesson-${ders.id}"),

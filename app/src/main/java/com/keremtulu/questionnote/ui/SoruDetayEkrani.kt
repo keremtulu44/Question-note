@@ -31,6 +31,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -115,8 +116,8 @@ fun SoruDetayEkrani(
 ) {
     val denemeId = remember(soruId) { UUID.randomUUID().toString() }
     var yenileme by remember(soruId) { mutableIntStateOf(0) }
-    var cozumAcik by remember(soruId) { mutableStateOf(false) }
-    var cozumAcildi by remember(soruId) { mutableStateOf(false) }
+    var cozumAcik by rememberSaveable(soruId) { mutableStateOf(false) }
+    var cozumAcildi by rememberSaveable(soruId) { mutableStateOf(false) }
     var beyazTahtaAcik by remember(soruId) { mutableStateOf(false) }
     var tekrarKaydediliyor by remember(soruId) { mutableStateOf(false) }
     var silmeOnayi by remember { mutableStateOf(false) }
@@ -233,7 +234,8 @@ fun SoruDetayEkrani(
                 }
                 val cozumVar = !soru.cozumNotu.isNullOrBlank() || cozumGorselleri.isNotEmpty()
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding),
+                    modifier = Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding)
+                        .testTag("soru-detay-list"),
                     contentPadding = PaddingValues(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 32.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
@@ -307,21 +309,22 @@ fun SoruDetayEkrani(
                         ) { Text(stringResource(R.string.focus_whiteboard_open)) }
                     }
                     item {
-                        Row(
+                        @OptIn(ExperimentalLayoutApi::class)
+                        FlowRow(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
+                            verticalArrangement = Arrangement.spacedBy(6.dp),
                         ) {
-                            PremiumButton(
-                                onClick = {
-                                    if (!cozumAcik && (soru.cozumNotu != null || soru.gorseller.any { it.tur == com.keremtulu.questionnote.domain.model.GorselTuru.COZUM })) {
-                                        cozumAcildi = true
-                                    }
-                                    cozumAcik = !cozumAcik
-                                },
-                                interactionTur = EtkilesimTuru.TIKLAMA,
-                            ) {
-                                Text(stringResource(if (cozumAcik) R.string.question_hide_solution else R.string.question_show_solution))
+                            if (cozumVar) {
+                                PremiumButton(
+                                    onClick = {
+                                        if (!cozumAcik) cozumAcildi = true
+                                        cozumAcik = !cozumAcik
+                                    },
+                                    interactionTur = EtkilesimTuru.TIKLAMA,
+                                ) {
+                                    Text(stringResource(if (cozumAcik) R.string.question_hide_solution else R.string.question_show_solution))
+                                }
                             }
                             Text(
                                 text = stringResource(
@@ -337,28 +340,28 @@ fun SoruDetayEkrani(
                             )
                         }
                     }
-                    if (cozumAcik) {
-                        if (!cozumVar) {
-                            item {
-                                Text(
-                                    text = stringResource(R.string.focus_no_solution),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                )
-                            }
-                        } else {
-                            if (soru.cozumNotu != null) item { BilgiAlani(R.string.question_solution_note, soru.cozumNotu) }
-                            items(cozumGorselleri, key = { it.id }) { image ->
-                                val file = gorselDeposu.dosyaGoruntuIcin(image.dosyaAdi)
-                                SoruGorselResmi(
-                                    file = file,
-                                    contentDescription = stringResource(R.string.solution_image_description),
-                                    modifier = Modifier.fillMaxWidth().height(250.dp),
-                                    contentScale = androidx.compose.ui.layout.ContentScale.Fit,
-                                    maxDecodeEdge = 1_200,
-                                    onClick = { if (file != null) tamEkranGorsel = image },
-                                )
-                            }
+                    if (!cozumVar) {
+                        item {
+                            Text(
+                                text = stringResource(R.string.focus_no_solution),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
+                    } else if (cozumAcik) {
+                        soru.cozumNotu?.takeIf { it.isNotBlank() }?.let { not ->
+                            item { BilgiAlani(R.string.question_solution_note, not) }
+                        }
+                        items(cozumGorselleri, key = { it.id }) { image ->
+                            val file = gorselDeposu.dosyaGoruntuIcin(image.dosyaAdi)
+                            SoruGorselResmi(
+                                file = file,
+                                contentDescription = stringResource(R.string.solution_image_description),
+                                modifier = Modifier.fillMaxWidth().height(250.dp),
+                                contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+                                maxDecodeEdge = 1_200,
+                                onClick = { if (file != null) tamEkranGorsel = image },
+                            )
                         }
                     }
                     item {

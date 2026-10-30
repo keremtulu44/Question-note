@@ -1,6 +1,7 @@
 package com.keremtulu.questionnote.ui.deneme
 
 import android.app.DatePickerDialog
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -100,6 +101,7 @@ import com.keremtulu.questionnote.ui.animasyon.animateFloatPremium
 import com.keremtulu.questionnote.ui.animasyon.animateItemInsertion
 import com.keremtulu.questionnote.ui.animasyon.tweenPremium
 import com.keremtulu.questionnote.ui.bilesenler.hatirlaYerelGun
+import com.keremtulu.questionnote.ui.bilesenler.KaydedilmemisDegisiklikDialog
 import com.keremtulu.questionnote.ui.bilesenler.SadeKart
 import com.keremtulu.questionnote.ui.bilesenler.premium.CamYukseklik
 import com.keremtulu.questionnote.ui.bilesenler.premium.PremiumBosDurum
@@ -887,9 +889,8 @@ fun DenemeDetayEkrani(
     var kuralAdi by rememberSaveable(kayitAnahtari) {
         mutableStateOf((mevcut?.kural ?: NetKurali.DORTTE_BIR).name)
     }
-    var seciliGun by rememberSaveable(kayitAnahtari) {
-        mutableIntStateOf(mevcut?.gun ?: bugunTarih.toEpochDay().toInt())
-    }
+    val ilkGun = rememberSaveable(kayitAnahtari) { mevcut?.gun ?: bugunTarih.toEpochDay().toInt() }
+    var seciliGun by rememberSaveable(kayitAnahtari) { mutableIntStateOf(ilkGun) }
     var soruMetinleri by rememberSaveable(kayitAnahtari, stateSaver = MetinHaritasiSaver) {
         mutableStateOf(
             mevcut?.satirlar?.associate { it.dersId to it.soruSayisi.toString() }.orEmpty(),
@@ -906,6 +907,7 @@ fun DenemeDetayEkrani(
         )
     }
     var silmeOnayiAcik by rememberSaveable { mutableStateOf(false) }
+    var cikisOnayi by rememberSaveable(kayitAnahtari) { mutableStateOf(false) }
     var islemde by remember { mutableStateOf(false) }
 
     val kural = remember(kuralAdi) {
@@ -953,10 +955,20 @@ fun DenemeDetayEkrani(
 
     fun skorlar(satirlar: List<DenemeDersSatiri>) =
         satirlar.associate { it.dersId to Triple(it.soruSayisi, it.dogru, it.yanlis) }
-    val kaydedilmemisDegisiklik = mevcut != null && (
+    val kaydedilmemisDegisiklik = if (mevcut != null) {
         ad.trim() != mevcut.ad || kural != mevcut.kural || seciliGun != mevcut.gun ||
             skorlar(anlikSatirlar) != skorlar(mevcut.satirlar)
-        )
+    } else {
+        ad.isNotEmpty() || kural != NetKurali.DORTTE_BIR || seciliGun != ilkGun ||
+            soruMetinleri.values.any { it.isNotEmpty() } || dogruMetinleri.values.any { it.isNotEmpty() } ||
+            yanlisMetinleri.values.any { it.isNotEmpty() }
+    }
+
+    fun cikisIste() {
+        if (islemde) return
+        if (kaydedilmemisDegisiklik) cikisOnayi = true else onGeri()
+    }
+    BackHandler(enabled = true, onBack = ::cikisIste)
 
     suspend fun dogrulaVeKaydet(): DenemeKaydi? {
         val temizAd = ad.trim()
@@ -1012,8 +1024,12 @@ fun DenemeDetayEkrani(
                 PremiumButton(
                     onClick = {
                         silmeOnayiAcik = false
-                        denemeDeposu.sil(mevcut.id)
-                        onGeri()
+                        try {
+                            denemeDeposu.sil(mevcut.id)
+                            onGeri()
+                        } catch (_: Exception) {
+                            scope.launch { snackbar.showSnackbar(context.getString(R.string.deneme_delete_error)) }
+                        }
                     },
                 ) {
                     Text(stringResource(R.string.deneme_delete_confirm_action))
@@ -1024,6 +1040,13 @@ fun DenemeDetayEkrani(
                     Text(stringResource(R.string.topic_cancel))
                 }
             },
+        )
+    }
+
+    if (cikisOnayi) {
+        KaydedilmemisDegisiklikDialog(
+            onCik = { cikisOnayi = false; onGeri() },
+            onDevam = { cikisOnayi = false },
         )
     }
 
@@ -1045,7 +1068,8 @@ fun DenemeDetayEkrani(
                 baslik = stringResource(
                     if (mevcut == null) R.string.deneme_form_new_title else R.string.deneme_form_title,
                 ),
-                onGeri = onGeri,
+                onGeri = ::cikisIste,
+                geriEtkin = !islemde,
                 sagAksiyon = if (klavyeAcik || mevcut != null) {
                     {
                         Row(
@@ -1066,6 +1090,7 @@ fun DenemeDetayEkrani(
                             if (mevcut != null) {
                                 PremiumTextButton(
                                     onClick = { silmeOnayiAcik = true },
+                                    enabled = !islemde,
                                     modifier = Modifier.testTag("deneme-delete-button"),
                                 ) {
                                     Text(
@@ -1103,7 +1128,7 @@ fun DenemeDetayEkrani(
                         soruDurumu = soruDurumu,
                         kaynakBelirsiz = kaynakBelirsiz,
                         uygunSoruSayisi = uygunSoruSayisi,
-                        kaydedilmemisDegisiklik = kaydedilmemisDegisiklik,
+                        kaydedilmemisDegisiklik = kaydedilmemisDegisiklik || islemde,
                         onDenemeyiCalis = onDenemeyiCalis?.let { callback -> { callback(mevcut.ad) } },
                     )
                 }
@@ -1116,6 +1141,7 @@ fun DenemeDetayEkrani(
                         ) {
                             OutlinedTextField(
                                 value = ad,
+                                enabled = !islemde,
                                 onValueChange = { ad = it.take(SORU_SECENEGI_ADI_UST_SINIR) },
                                 label = { Text(stringResource(R.string.deneme_name)) },
                                 placeholder = { Text(stringResource(R.string.deneme_name_placeholder)) },
@@ -1162,6 +1188,7 @@ fun DenemeDetayEkrani(
                                         )
                                     }
                                     PremiumTextButton(
+                                        enabled = !islemde,
                                         onClick = {
                                             val mevcutTarih = LocalDate.ofEpochDay(seciliGun.toLong())
                                             DatePickerDialog(
@@ -1196,6 +1223,7 @@ fun DenemeDetayEkrani(
                                     NetKurali.entries.forEach { secenek ->
                                         FilterChip(
                                             selected = kural == secenek,
+                                            enabled = !islemde,
                                             onClick = { kuralAdi = secenek.name },
                                             label = { Text(netKuraliEtiketi(secenek)) },
                                         )
@@ -1232,6 +1260,7 @@ fun DenemeDetayEkrani(
                         ders = ders,
                         gizli = oge.gizli,
                         sonDersMi = siraIndex == formDersleri.lastIndex,
+                        etkin = !islemde,
                         soruMetni = soruMetinleri[ders.id].orEmpty(),
                         dogruMetni = dogruMetinleri[ders.id].orEmpty(),
                         yanlisMetni = yanlisMetinleri[ders.id].orEmpty(),
@@ -1244,8 +1273,8 @@ fun DenemeDetayEkrani(
                         onYanlisDegisti = { deger -> yanlisMetinleri = yanlisMetinleri + (ders.id to deger) },
                         onFotografYukle = {
                             if (!islemde) {
+                                islemde = true
                                 scope.launch {
-                                    islemde = true
                                     try {
                                         val kaydedilen = dogrulaVeKaydet()
                                         if (kaydedilen != null) {
@@ -1265,8 +1294,9 @@ fun DenemeDetayEkrani(
                     SadeAnaButon(
                         enabled = !islemde,
                         onClick = {
+                            if (islemde) return@SadeAnaButon
+                            islemde = true
                             scope.launch {
-                                islemde = true
                                 try {
                                     val kaydedilen = dogrulaVeKaydet()
                                     if (kaydedilen != null) {
@@ -1382,6 +1412,7 @@ private fun DenemeDersSkorKarti(
     ders: Ders,
     gizli: Boolean,
     sonDersMi: Boolean,
+    etkin: Boolean,
     soruMetni: String,
     dogruMetni: String,
     yanlisMetni: String,
@@ -1488,6 +1519,7 @@ private fun DenemeDersSkorKarti(
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 SayiAlani(
                     etiket = stringResource(R.string.deneme_total),
+                    enabled = etkin,
                     deger = soruMetni,
                     hatali = gecersiz,
                     imeAction = ImeAction.Next,
@@ -1496,6 +1528,7 @@ private fun DenemeDersSkorKarti(
                 )
                 SayiAlani(
                     etiket = stringResource(R.string.deneme_correct),
+                    enabled = etkin,
                     deger = dogruMetni,
                     hatali = gecersiz,
                     imeAction = ImeAction.Next,
@@ -1504,6 +1537,7 @@ private fun DenemeDersSkorKarti(
                 )
                 SayiAlani(
                     etiket = stringResource(R.string.deneme_wrong),
+                    enabled = etkin,
                     deger = yanlisMetni,
                     hatali = gecersiz,
                     imeAction = if (sonDersMi) ImeAction.Done else ImeAction.Next,
@@ -1544,6 +1578,7 @@ private fun SayiAlani(
     etiket: String,
     deger: String,
     hatali: Boolean,
+    enabled: Boolean,
     imeAction: ImeAction = ImeAction.Next,
     modifier: Modifier = Modifier,
     onDegisti: (String) -> Unit,
@@ -1551,6 +1586,7 @@ private fun SayiAlani(
     val focusManager = LocalFocusManager.current
     OutlinedTextField(
         value = deger,
+        enabled = enabled,
         onValueChange = { girdi -> onDegisti(girdi.filter(Char::isDigit).take(3)) },
         label = { Text(etiket, maxLines = 1, overflow = TextOverflow.Ellipsis) },
         singleLine = true,
@@ -1576,6 +1612,7 @@ private fun SayiAlani(
 private fun DenemeUstCubuk(
     baslik: String,
     onGeri: () -> Unit,
+    geriEtkin: Boolean = true,
     sagAksiyon: (@Composable () -> Unit)? = null,
 ) {
     Row(
@@ -1591,6 +1628,7 @@ private fun DenemeUstCubuk(
         ) {
             PremiumTextButton(
                 onClick = onGeri,
+                enabled = geriEtkin,
                 interactionTur = EtkilesimTuru.GERI,
                 modifier = Modifier.testTag("deneme-back-button"),
             ) {
