@@ -189,6 +189,10 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
+      - name: GECICI Room v6 kimlik ozeti
+        if: always()
+        run: python3 -c "import json; d=json.load(open('app/schemas/com.keremtulu.questionnote.data.local.YanlisDefteriDatabase/6.json')); print('::notice title=ROOM6HASH::'+d['database']['identityHash'])"
+
       - name: Test başarısızsa işi kırmızıya çevir
         if: steps.testler.outputs.wrapper_exit != '0' || steps.testler.outputs.unit_test_exit != '0' || steps.testler.outputs.release_test_exit != '0'
         run: exit 1
