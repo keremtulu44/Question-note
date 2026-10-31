@@ -191,7 +191,13 @@ jobs:
 
       - name: GECICI Room v6 kimlik ozeti
         if: always()
-        run: python3 -c "import json; d=json.load(open('app/schemas/com.keremtulu.questionnote.data.local.YanlisDefteriDatabase/6.json')); print('::notice title=ROOM6HASH::'+d['database']['identityHash'])"
+        run: |
+          python3 - <<'PYEOF'
+          import glob, re
+          for f in glob.glob('app/build/**/YanlisDefteriDatabase_Impl.*', recursive=True):
+              m = re.search(r'"([0-9a-f]{32})"', open(f, encoding='utf-8').read())
+              print('::notice title=ROOM6IMPL::' + f + ' -> ' + (m.group(1) if m else 'YOK'))
+          PYEOF
 
       - name: Test başarısızsa işi kırmızıya çevir
         if: steps.testler.outputs.wrapper_exit != '0' || steps.testler.outputs.unit_test_exit != '0' || steps.testler.outputs.release_test_exit != '0'
