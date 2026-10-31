@@ -189,7 +189,7 @@ class GorselButunlukVeYerlesimArayuzTest {
                     cozumOnceAcildi = false,
                     onCozumAcildi = {},
                     onGeri = {},
-                    onSonuc = { _, _ -> },
+                    onSonuc = { _, _, _ -> },
                     onSonaBirak = {},
                     onAtla = {},
                 )

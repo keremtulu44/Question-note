@@ -112,8 +112,8 @@ class OlcumVeProfilArayuzTest {
                 YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
                     OdakOturumuEkrani(soru, ders, repo, images, "ui-session", depo,
                         sira = 1, toplam = 1, sonuclar = emptyList(), cozumOnceAcildi = false,
-                        onCozumAcildi = {}, onGeri = {}, onSonuc = { sonuc, cozum ->
-                            assertEquals(TekrarSonucu.RAHAT, sonuc); assertFalse(cozum); tamam.set(true)
+                        onCozumAcildi = {}, onGeri = {}, onSonuc = { sonuc, cozum, kontrol ->
+                            assertEquals(TekrarSonucu.RAHAT, sonuc); assertFalse(cozum); assertFalse(kontrol); tamam.set(true)
                         }, onSonaBirak = {}, onAtla = {}, monotonikSaat = MonotonikSaat { now })
                 }
             }
@@ -162,7 +162,7 @@ class OlcumVeProfilArayuzTest {
                         onCozumAcildi = {
                             assertTrue("q" in requireNotNull(OdakOturumuDeposu(context).oku()).cozumAcilanlar)
                             acildi.set(true)
-                        }, onGeri = {}, onSonuc = { _, _ -> }, onSonaBirak = {}, onAtla = {})
+                        }, onGeri = {}, onSonuc = { _, _, _ -> }, onSonaBirak = {}, onAtla = {})
                 }
             }
             compose.onNodeWithText("Çözüm içeriği").assertDoesNotExist()
