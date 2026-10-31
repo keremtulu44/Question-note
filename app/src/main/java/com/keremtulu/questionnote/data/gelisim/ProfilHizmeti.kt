@@ -50,6 +50,7 @@ class ProfilHizmeti(private val db: YanlisDefteriDatabase) {
             SureOlcumu(kalite = OlcumKalitesi.GECERSIZ, nedenler = setOf(OlcumNedeni.GECERSIZ_GIRDI))
         }
         return SureOrnegi(e.tekrarId, e.denemeId, satir.soruId, satir.gun, satir.zaman,
-            ProfilBaglami(e.dersId, e.konuId, e.kaynakAnahtari), TekrarSonucu.valueOf(satir.sonuc), satir.cozumAcildi, olcum)
+            ProfilBaglami(e.dersId, e.konuId, e.kaynakAnahtari), TekrarSonucu.valueOf(satir.sonuc), satir.cozumAcildi, olcum,
+            satir.kontrolAcilisi)
     }
 }

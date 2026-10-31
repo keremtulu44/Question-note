@@ -2,6 +2,19 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [Yayınlanmadı — kilitle ve kontrol et] — 2026-10-31
+
+- **Kilitle → kontrol et:** Çözümü açmak artık iki türlü. Sonucunu çözüme bakmadan önce seçip
+  kilitlersen çözüm **kontrol** için açılmış sayılıyor: doğru yapıp yapmadığını ceza almadan
+  görebilirsin (bağımsızlık, aralık, karne ve XP korunur). Yanlış çıktığını görürsen sonucunu
+  düşürebilirsin ama kilidinin **üstüne çıkamazsın**; kilitli sonucuna geri dönebilirsin.
+  Kilitsiz açmak eskisi gibi **yardım** sayılır ve tekrar yarına alınır. Odak ve soru detay
+  ekranlarının ikisinde de çalışır; tekrar geçmişi açılış türünü ("Kontrol için açıldı") ve
+  düşürülmüş kilidi gösterir.
+- **Veri:** Room **6** (`tekrarlar.kontrol_acilisi`, `kilitli_sonuc` — eklemeli geçiş, geçmiş
+  kayıtlar yardım sayılarak aynen korunur) ve yedek biçimi ZIP **6** (`solution_checked`,
+  `locked_result`; eski v2–v5 yedekleri okunmaya devam eder).
+
 ## [Yayınlanmadı — üst panel] — 2026-10-27
 
 - **Üst panel:** alt menünün kalıcı eşi. Canlı tarih (`d MMMM EEEE`), seri ve günlük hedef

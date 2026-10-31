@@ -30,7 +30,8 @@ class OdakOturumuDeposu(context: Context) {
         }
         val kalan = oturum.soruIdleri.drop(oturum.sira).toSet() - oturum.sonuclar.map { it.soruId }.toSet()
         bellek = oturum.copy(olcumler = birlesik.filterKeys { it in kalan },
-            cozumAcilanlar = oturum.cozumAcilanlar + onceki?.cozumAcilanlar.orEmpty())
+            cozumAcilanlar = oturum.cozumAcilanlar + onceki?.cozumAcilanlar.orEmpty(),
+            kontrolAcilanlar = oturum.kontrolAcilanlar + onceki?.kontrolAcilanlar.orEmpty())
         return ++revizyon
     }
 
@@ -41,7 +42,9 @@ class OdakOturumuDeposu(context: Context) {
         val eski = oturum.olcumler[nokta.soruId]
         if (eski != null && (eski.denemeId != nokta.denemeId || eski.revizyon >= nokta.revizyon)) return null
         bellek = oturum.copy(olcumler = oturum.olcumler + (nokta.soruId to nokta),
-            cozumAcilanlar = if (nokta.cozumAcildi) oturum.cozumAcilanlar + nokta.soruId else oturum.cozumAcilanlar)
+            cozumAcilanlar = if (nokta.cozumAcildi) oturum.cozumAcilanlar + nokta.soruId else oturum.cozumAcilanlar,
+            kontrolAcilanlar = if (nokta.cozumAcildi && nokta.kontrolAcilisi && nokta.soruId !in oturum.cozumAcilanlar)
+                oturum.kontrolAcilanlar + nokta.soruId else oturum.kontrolAcilanlar)
         return ++revizyon
     }
 
@@ -77,13 +80,16 @@ class OdakOturumuDeposu(context: Context) {
             val json = JSONObject().put("version", 2).put("id", oturum.id).put("baslama", oturum.baslamaZamani)
                 .put("bugunden", oturum.bugunden).put("sira", oturum.sira).put("olcum_destekli", oturum.olcumDestekli)
                 .put("sorular", JSONArray(oturum.soruIdleri)).put("cozumler", JSONArray(oturum.cozumAcilanlar.toList()))
+                .put("kontroller", JSONArray(oturum.kontrolAcilanlar.toList()))
                 .put("sonuclar", JSONArray().apply { oturum.sonuclar.forEach {
-                    put(JSONObject().put("id", it.soruId).put("sonuc", it.sonuc.name).put("cozum", it.cozumAcildi))
+                    put(JSONObject().put("id", it.soruId).put("sonuc", it.sonuc.name).put("cozum", it.cozumAcildi)
+                        .put("kontrol", it.kontrolAcilisi))
                 } })
                 .put("olcumler", JSONArray().apply { oturum.olcumler.values.forEach {
                     put(JSONObject().put("soru", it.soruId).put("deneme", it.denemeId).put("olcum", OlcumSerilestirme.olcumYaz(it.olcum))
                         .put("cozum", it.cozumAcildi).put("dondu", it.donduruldu).put("secim", it.secim?.name ?: JSONObject.NULL)
-                        .put("revizyon", it.revizyon))
+                        .put("revizyon", it.revizyon).put("kontrol", it.kontrolAcilisi)
+                        .put("kilit", it.kilitliSecim?.name ?: JSONObject.NULL))
                 } })
             val metin = json.toString()
             check(metin.length <= 4_000_000) { "Oturum devam noktası çok büyük" }
@@ -115,6 +121,8 @@ class OdakOturumuDeposu(context: Context) {
         val sira = json.getInt("sira").coerceIn(0, sorular.size)
         val sonuclar = json.getJSONArray("sonuclar")
         val cozumler = json.getJSONArray("cozumler").strings().toSet().intersect(sorular.toSet())
+        val kontroller = (json.optJSONArray("kontroller")?.strings()?.toSet() ?: emptySet())
+            .intersect(cozumler)
         var destekli = surum == 2 && json.getBoolean("olcum_destekli")
         val olcumler = mutableMapOf<String, OlcumDevamNoktasi>()
         if (surum == 2) {
@@ -124,10 +132,15 @@ class OdakOturumuDeposu(context: Context) {
                     val o = dizi.getJSONObject(i)
                     val soruId = o.getString("soru"); val denemeId = o.getString("deneme")
                     require(soruId in sorular && kimlik(denemeId))
+                    val acildi = o.getBoolean("cozum") || soruId in cozumler
+                    val kilit = if (o.isNull("kilit")) null else TekrarSonucu.valueOf(o.getString("kilit"))
+                    val kontrol = acildi && kilit != null &&
+                        (o.optBoolean("kontrol", false) || soruId in kontroller)
                     OlcumDevamNoktasi(soruId, denemeId, OlcumSerilestirme.olcumOku(o.getJSONObject("olcum")),
-                        o.getBoolean("cozum") || soruId in cozumler, o.getBoolean("dondu"),
+                        acildi, o.getBoolean("dondu"),
                         if (o.isNull("secim")) null else TekrarSonucu.valueOf(o.getString("secim")),
-                        OlcumSerilestirme.tamLong(o, "revizyon").also { require(it in 0 until Long.MAX_VALUE) })
+                        OlcumSerilestirme.tamLong(o, "revizyon").also { require(it in 0 until Long.MAX_VALUE) },
+                        kontrol, if (kontrol) kilit else null)
                 }.getOrNull()
                 if (nokta == null || nokta.soruId in olcumler) destekli = false
                 else olcumler[nokta.soruId] = nokta
@@ -136,8 +149,9 @@ class OdakOturumuDeposu(context: Context) {
         OdakOturumu(id, sorular, json.getLong("baslama"), json.optBoolean("bugunden"), sira,
             (0 until sonuclar.length()).map {
                 val s = sonuclar.getJSONObject(it)
-                OturumSonucu(s.getString("id"), TekrarSonucu.valueOf(s.getString("sonuc")), s.getBoolean("cozum"))
-            }.filter { it.soruId in sorular }.distinctBy { it.soruId }, cozumler, olcumler, destekli)
+                OturumSonucu(s.getString("id"), TekrarSonucu.valueOf(s.getString("sonuc")), s.getBoolean("cozum"),
+                    s.optBoolean("kontrol", false))
+            }.filter { it.soruId in sorular }.distinctBy { it.soruId }, cozumler, olcumler, destekli, kontroller)
     }.getOrNull()
 
     private fun kimlik(s: String): Boolean = s.isNotBlank() && s.length <= 128

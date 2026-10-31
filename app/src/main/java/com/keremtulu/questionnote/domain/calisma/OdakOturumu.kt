@@ -14,14 +14,18 @@ data class OdakOturumu(
     val cozumAcilanlar: Set<String> = emptySet(),
     val olcumler: Map<String, OlcumDevamNoktasi> = emptyMap(),
     val olcumDestekli: Boolean = true,
+    /** Subset of [cozumAcilanlar] whose first reveal verified a locked-in answer. */
+    val kontrolAcilanlar: Set<String> = emptySet(),
 ) {
     val bitti: Boolean get() = sira >= soruIdleri.size
     val simdikiId: String? get() = soruIdleri.getOrNull(sira)
 
     fun cevapla(sonuc: OturumSonucu): OdakOturumu {
         if (sonuc.soruId != simdikiId || sonuclar.any { it.soruId == sonuc.soruId }) return this
+        val acildi = sonuc.cozumAcildi || sonuc.soruId in cozumAcilanlar
         return copy(sira = sira + 1, sonuclar = sonuclar + sonuc.copy(
-            cozumAcildi = sonuc.cozumAcildi || sonuc.soruId in cozumAcilanlar,
+            cozumAcildi = acildi,
+            kontrolAcilisi = acildi && (sonuc.kontrolAcilisi || sonuc.soruId in kontrolAcilanlar),
         ))
     }
 
@@ -34,7 +38,14 @@ data class OdakOturumu(
         return copy(soruIdleri = yeni)
     }
 
-    fun cozumuAc(): OdakOturumu = simdikiId?.let { copy(cozumAcilanlar = cozumAcilanlar + it) } ?: this
+    // First reveal fixes the opening kind; a later reveal can never upgrade help into verification.
+    fun cozumuAc(kontrol: Boolean = false): OdakOturumu = simdikiId?.let { id ->
+        if (id in cozumAcilanlar) this
+        else copy(
+            cozumAcilanlar = cozumAcilanlar + id,
+            kontrolAcilanlar = if (kontrol) kontrolAcilanlar + id else kontrolAcilanlar,
+        )
+    } ?: this
 
     /** Reconcile a process death between the Room commit and the preference checkpoint. */
     fun kurtar(mevcutIdler: Set<String>, kayitlar: Map<String, TekrarKaydi>): OdakOturumu {
@@ -48,7 +59,7 @@ data class OdakOturumu(
                     else -> kayit.zaman >= baslamaZamani
                 }
             }?.let {
-                verilenler.putIfAbsent(id, OturumSonucu(id, it.sonuc, it.cozumAcildi))
+                verilenler.putIfAbsent(id, OturumSonucu(id, it.sonuc, it.cozumAcildi, it.kontrolAcilisi))
             }
         }
         val biten = soruIdleri.filterIndexed { index, id -> id in mevcutIdler && (index < sira || id in verilenler) }
@@ -59,6 +70,7 @@ data class OdakOturumu(
             sonuclar = soruIdleri.mapNotNull { verilenler[it] },
             cozumAcilanlar = cozumAcilanlar.intersect(mevcutIdler),
             olcumler = olcumler.filterKeys { it in kalan },
+            kontrolAcilanlar = kontrolAcilanlar.intersect(mevcutIdler),
         )
     }
 }

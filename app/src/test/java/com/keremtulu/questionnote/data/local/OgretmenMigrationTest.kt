@@ -69,11 +69,12 @@ class OgretmenMigrationTest {
                 YanlisDefteriMigrations.MIGRATION_2_3,
                 YanlisDefteriMigrations.MIGRATION_3_4,
                 YanlisDefteriMigrations.MIGRATION_4_5,
+                YanlisDefteriMigrations.MIGRATION_5_6,
             )
             .allowMainThreadQueries()
             .build()
         try {
-            assertEquals(5, db.openHelper.readableDatabase.version)
+            assertEquals(6, db.openHelper.readableDatabase.version)
             // Student data survives.
             assertEquals("Matematik", db.dersDao().tumunuGetir().single().ad)
             // Teacher tables start empty.

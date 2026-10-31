@@ -39,6 +39,23 @@ class KarneHesabiTest {
     }
 
     @Test
+    fun `kontrol icin acilan rahat bagimsiz sayilir`() {
+        assertEquals(
+            KarneKovasi.BAGIMSIZ,
+            KarneHesabi.kova(OturumSonucu("soru", TekrarSonucu.RAHAT, true, kontrolAcilisi = true)),
+        )
+        // Kontrolde yanlis cikip dusurulen sonuc, yardim kovasi yerine kendi sonucuna gider.
+        assertEquals(
+            KarneKovasi.YARIM,
+            KarneHesabi.kova(OturumSonucu("soru", TekrarSonucu.ZORLANDIM, true, kontrolAcilisi = true)),
+        )
+        assertEquals(
+            KarneKovasi.COZEMEDI,
+            KarneHesabi.kova(OturumSonucu("soru", TekrarSonucu.COZEMEDIM, true, kontrolAcilisi = true)),
+        )
+    }
+
+    @Test
     fun `sayilar kovalara dogru dagilir`() {
         val sayilar = KarneHesabi.hesapla(
             listOf(

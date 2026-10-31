@@ -469,7 +469,8 @@ class RoomSoruRepository(
         if (once != null) {
             val kayit = olcumDao.tekrarGetir(once.tekrarId)
             return@withTransaction if (kayit?.soruId == deneme.soruId && kayit.sonuc == deneme.sonuc.name &&
-                kayit.cozumAcildi == deneme.cozumAcildi && once.oturumId == deneme.oturumId)
+                kayit.cozumAcildi == deneme.cozumAcildi && kayit.kontrolAcilisi == deneme.kontrolAcilisi &&
+                kayit.kilitliSonuc == deneme.kilitliSonuc?.name && once.oturumId == deneme.oturumId)
                 SoruIslemSonucu.Basarili else SoruIslemSonucu.DenemeCakismasi
         }
         val soru = soruDao.idIleGetir(deneme.soruId) ?: return@withTransaction SoruIslemSonucu.Bulunamadi
@@ -490,7 +491,8 @@ class RoomSoruRepository(
         val now = kayitAni.toEpochMilli()
         val tekrar = TekrarEntity(UUID.randomUUID().toString(), soru.id, now, gun, soru.sonrakiTekrarGun,
             deneme.sonuc.name, deneme.cozumAcildi, plan.oncekiAralik, plan.sonrakiAralik,
-            requireNotNull(simdi.karar).algoritmaSurumu, false)
+            requireNotNull(simdi.karar).algoritmaSurumu, false,
+            kontrolAcilisi = deneme.kontrolAcilisi, kilitliSonuc = deneme.kilitliSonuc?.name)
         val olcum = simdi.deneme.olcum
         val kayit = TekrarOlcumEntity(tekrar.id, deneme.denemeId, deneme.oturumId,
             olcum.denemeAktifMs, olcum.incelemeAktifMs, olcum.kalite.name, OlcumSerilestirme.nedenlerYaz(olcum.nedenler), olcum.surum,
@@ -562,6 +564,7 @@ class RoomSoruRepository(
             .put("source", soru.kaynak ?: JSONObject.NULL).put("scheduled", soru.sonrakiTekrarGun ?: JSONObject.NULL))
             .put("history", JSONArray().apply { gecmis.sortedBy { it.id }.forEach { put(JSONObject()
                 .put("id", it.id).put("day", it.gun).put("time", it.zaman).put("result", it.sonuc).put("solution", it.cozumAcildi)
+                .put("checked", it.kontrolAcilisi).put("locked", it.kilitliSonuc ?: JSONObject.NULL)
                 .put("interval", it.sonrakiAralik ?: JSONObject.NULL).put("algorithm", it.algoritmaSurumu)) } })
             .put("decision", JSONObject(karar)).toString()
         val imza = MessageDigest.getInstance("SHA-256").digest(baglam.toByteArray(Charsets.UTF_8))
@@ -649,6 +652,8 @@ class RoomSoruRepository(
         denemeId = olcumKaydi?.denemeId,
         oturumId = olcumKaydi?.oturumId,
         olcum = olcumKaydi?.let(OlcumSerilestirme::olcum),
+        kontrolAcilisi = kontrolAcilisi,
+        kilitliSonuc = kilitliSonuc?.let { ad -> TekrarSonucu.entries.firstOrNull { it.name == ad } },
     )
 
     private inline fun <reified T : Enum<T>> enumOrDefault(value: String, default: T): T =

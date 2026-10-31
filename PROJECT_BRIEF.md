@@ -62,13 +62,13 @@ Android telefonda kullanılacak, tek kişilik bir dijital yanlış defteri:
 | K16 | Soru ekleme akışı: fotoğraf çek/seç → (isteğe bağlı döndür) → ders seç → kaydet. Diğer tüm alanlar isteğe bağlıdır. |
 | K17 | Sorunun **plan durumu** (`AKTIF` / `ASKIDA` / `TAMAMLANDI`) öğrenme düzeyinden **ayrı** bir alandır. Kullanıcı bir soruyu tekrar planından geçici olarak çıkarabilir veya kalıcı olarak bitirebilir; kayıt ve geçmiş silinmez, işlem geri alınabilir. |
 | K18 | Tekrar aralığı kuralı **sürümlenmiş tek bir sınıfta** tutulur (`algoritma_surumu`); ileride algoritma değişirse geçmiş kayıtlar yeniden yazılmaz. |
-| K19 | Çözüm açılarak yapılan tekrar **bağımsız deneme sayılmaz**. Aynı gün ikinci deneme yapılmaz (çözüm görüldüğü için bu gerçek hatırlama olmaz); soru **1 gün sonra** yeniden karşımıza çıkar ve bu kez bağımsız olarak çözülür. |
+| K19 | **Yardım için** çözüm açılarak yapılan tekrar **bağımsız deneme sayılmaz**: soru **1 gün sonra** yeniden karşımıza çıkar. **İstisna (kontrol açılışı):** Kullanıcı çözüme bakmadan önce sonucunu (Çözemedim/Zorlandım/Rahat) seçip **kilitlediyse**, çözüm yalnızca kendi cevabını **kontrol etmek** için açılmış sayılır (`kontrol_acilisi`, kilitli sonuç `kilitli_sonuc` olarak saklanır; Room 6). Kontrol açılışı bağımsızlığı düşürmez ve aralığı kilit öncesi duruma göre ilerletir. Kilit tavandır: kontrol sonrası sonuç yalnızca kilidin **altına veya aynısına** inebilir, üstüne çıkamaz. İlk açılış türü belirler; yardım, sonradan kontrole yükseltilemez. Aynı gün ikinci deneme her durumda yapılmaz. |
 | K20 | Uzun bir aradan sonra **hiçbir soru otomatik olarak sıfırlanmaz**; gecikmiş sorular tek listede toplanır ve kullanıcı ne yapacağını kendisi seçer. |
 | K21 | **Görsel kalite politikası:** fotoğraflar kaydedilirken otomatik optimize edilir (uzun kenar ~3000 piksel, JPEG kalitesi ~%90). Tek ölçüt **okunabilirliktir**: küçük formüller, kök içi ifadeler ve grafik etiketleri okunur kalmalı. Bu, Aşama 2'de gerçek fotoğraflarla doğrulanır. |
 | K22 | Ana ekranın odağı **Bugün**. Gezinti beş alt sekmededir; yedekleme, bakım ve katalog Ayarlar içindedir. Üst sağda tekrar eden Ayarlar kısayolu yoktur. |
 | K23 | **Sınav formatı seçimi Ayarlar'da:** LGS, TYT, AYT, KPSS Genel Yetenek/Genel Kültür ve Tümü / özel. Eksik dersler eklenir; mevcut ders ID'leri ve kayıtlar korunur. Tümü seçimi tüm aktif dersleri geri gösterir. |
 | K24 | Kaynak kataloğu dersler arasında ortaktır; yeni kaynak `+` ile kaydedilir. Her soru için isteğe bağlı sayfa/test/soru konumu tutulur. Yanlış nedeni hazır listeden **tek ana seçim** veya kullanıcı tarafından eklenen özel seçenektir. Soru notu giriş/gösterim alanı kaldırılır; önceki `soru_notu` verisi migration, düzenleme ve ZIP yedeklerinde korunur. |
-| K25 | **Sonuç → karne eşlemesi:** `Rahat` = bağımsız çözüm, `Zorlandım` = yarım (destekli), `Çözemedim` = çözemedi. Çözüm açıldıysa hangi sonuç seçilirse seçilsin soru bağımsız sayılmaz. Ayrıntı: `docs/SONUC_KARNESI_VE_ILERLEME.md`. |
+| K25 | **Sonuç → karne eşlemesi:** `Rahat` = bağımsız çözüm, `Zorlandım` = yarım, `Çözemedim` = çözemedi. Çözüm **yardım için** açıldıysa hangi sonuç seçilirse seçilsin soru bağımsız sayılmaz; **kontrol için** açıldıysa (bkz. K19) kova kayıtlı sonuca göre belirlenir. Ayrıntı: `docs/SONUC_KARNESI_VE_ILERLEME.md`. |
 | K26 | **Kutlama tonu:** karne ekranı animasyonlu ve rozetli olacak; tebrik cümlesi skora göre değişir, olumsuz/cezalandırıcı dil ve üzgün animasyon kullanılmaz. |
 | K27 | **Günlük hedef 5/10/15/20/30 seçilebilir** (v1.1.0+), varsayılan 10. Hedef tercihi cihaz-yereldir; mola günü jetonu ve ilk-kurulum sihirbazı bu sürümde yoktur. |
 | K28 | Karne karşılaştırması **önceki takvim haftasına** (Pzt–Paz) göre yapılır; geçen haftada yeterli kayıt yoksa satır gizlenir. |
@@ -158,8 +158,10 @@ işareti. Soru notu alanı arayüzde yoktur; eski kayıtları silmeden saklamak/
 - "Çözemedim" → aralık 1 güne döner.
 - "Zorlanarak çözdüm" → daha yavaş ilerler.
 - "Rahat çözdüm" → aralık büyür.
-- **Çözüm açıldıysa** tekrar bağımsız sayılmaz; soru **1 gün sonra** yeniden karşımıza çıkar ve o
-  zaman yardımsız çözülür. Aynı gün ikinci deneme kaydedilmez.
+- **Çözüm yardım için açıldıysa** tekrar bağımsız sayılmaz; soru **1 gün sonra** yeniden
+  karşımıza çıkar. Sonucunu önceden **kilitlemiş** kullanıcının çözümü açması **kontrol**
+  sayılır: doğru yaptığını görmenin tek yolu çözüme bakmak olduğundan, kontrol açılışı ceza
+  getirmez. Aynı gün ikinci deneme kaydedilmez.
 - Sorunun **plan durumu** (aktif/askıda/tamamlandı) ayrı tutulur; "Bugün" listesi yalnızca aktif
   soruları gösterir.
 - Uzun aradan sonra hiçbir soru otomatik sıfırlanmaz; gecikmişler tek listede toplanır.

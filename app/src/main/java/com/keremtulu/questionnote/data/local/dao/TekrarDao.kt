@@ -42,14 +42,14 @@ interface TekrarDao {
     @Query("SELECT DISTINCT gun FROM tekrarlar ORDER BY gun DESC")
     suspend fun gunler(): List<Int>
 
-    @Query("SELECT COUNT(*) FROM tekrarlar WHERE sonuc = 'RAHAT' AND cozum_acildi = 0")
+    @Query("SELECT COUNT(*) FROM tekrarlar WHERE sonuc = 'RAHAT' AND (cozum_acildi = 0 OR kontrol_acilisi = 1)")
     suspend fun toplamBagimsiz(): Int
 
     @Query(
         """
         SELECT gun,
                COUNT(*) AS toplam,
-               SUM(CASE WHEN sonuc = 'RAHAT' AND cozum_acildi = 0 THEN 1 ELSE 0 END) AS bagimsiz
+               SUM(CASE WHEN sonuc = 'RAHAT' AND (cozum_acildi = 0 OR kontrol_acilisi = 1) THEN 1 ELSE 0 END) AS bagimsiz
         FROM tekrarlar
         WHERE gun BETWEEN :ilkGun AND :sonGun
         GROUP BY gun

@@ -797,10 +797,10 @@ fun YanlisDefteriUygulamasi(
                                 denemeler = denemeler,
                                 disDuraklatildi = oturumCikisHedefi != null,
                                 cozumOnceAcildi = question.id in current.oturum.cozumAcilanlar,
-                                onCozumAcildi = { oturumGoster(current.sorular, current.dersler, current.oturum.cozumuAc()) },
+                                onCozumAcildi = { kontrol -> oturumGoster(current.sorular, current.dersler, current.oturum.cozumuAc(kontrol)) },
                                 onGeri = { ekranSec(current.geriHedefi()) },
-                                onSonuc = { sonuc, cozum ->
-                                    val yeni = current.oturum.cevapla(OturumSonucu(question.id, sonuc, cozum))
+                                onSonuc = { sonuc, cozum, kontrol ->
+                                    val yeni = current.oturum.cevapla(OturumSonucu(question.id, sonuc, cozum, kontrol))
                                     oturumGoster(current.sorular, current.dersler, yeni)
                                 },
                                 onKaydedildi = ::geriAlKutucuguGoster,

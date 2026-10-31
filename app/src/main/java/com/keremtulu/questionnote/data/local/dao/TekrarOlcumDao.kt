@@ -42,6 +42,7 @@ data class ProfilSatiri(
     @ColumnInfo(name = "zaman") val zaman: Long,
     @ColumnInfo(name = "sonuc") val sonuc: String,
     @ColumnInfo(name = "cozum_acildi") val cozumAcildi: Boolean,
+    @ColumnInfo(name = "kontrol_acilisi") val kontrolAcilisi: Boolean,
 )
 
 @Dao
@@ -62,12 +63,12 @@ interface TekrarOlcumDao {
     @Transaction
     @Query("SELECT * FROM tekrarlar WHERE soru_id = :soruId ORDER BY gun DESC, zaman DESC, id ASC")
     fun gecmisiIzle(soruId: String): Flow<List<OlcumluTekrar>>
-    @Query("""SELECT m.tekrar_id, m.deneme_id, m.deneme_aktif_ms, m.inceleme_aktif_ms, m.kalite, m.nedenler_json, m.olcum_surumu, m.ders_id, m.ders_adi, m.konu_id, m.konu_adi, m.kaynak_anahtari, m.kaynak_etiketi, t.soru_id, t.gun, t.zaman, t.sonuc, t.cozum_acildi
+    @Query("""SELECT m.tekrar_id, m.deneme_id, m.deneme_aktif_ms, m.inceleme_aktif_ms, m.kalite, m.nedenler_json, m.olcum_surumu, m.ders_id, m.ders_adi, m.konu_id, m.konu_adi, m.kaynak_anahtari, m.kaynak_etiketi, t.soru_id, t.gun, t.zaman, t.sonuc, t.cozum_acildi, t.kontrol_acilisi
         FROM tekrar_olcumleri m JOIN tekrarlar t ON t.id = m.tekrar_id
         WHERE t.gun BETWEEN :ilkGun AND :sonGun AND m.ders_id = :dersId
         ORDER BY t.gun, t.zaman, t.id""")
     suspend fun dersVerileri(dersId: String, ilkGun: Int, sonGun: Int): List<ProfilSatiri>
-    @Query("""SELECT m.tekrar_id, m.deneme_id, m.deneme_aktif_ms, m.inceleme_aktif_ms, m.kalite, m.nedenler_json, m.olcum_surumu, m.ders_id, m.ders_adi, m.konu_id, m.konu_adi, m.kaynak_anahtari, m.kaynak_etiketi, t.soru_id, t.gun, t.zaman, t.sonuc, t.cozum_acildi
+    @Query("""SELECT m.tekrar_id, m.deneme_id, m.deneme_aktif_ms, m.inceleme_aktif_ms, m.kalite, m.nedenler_json, m.olcum_surumu, m.ders_id, m.ders_adi, m.konu_id, m.konu_adi, m.kaynak_anahtari, m.kaynak_etiketi, t.soru_id, t.gun, t.zaman, t.sonuc, t.cozum_acildi, t.kontrol_acilisi
         FROM tekrarlar t JOIN tekrar_olcumleri m ON t.id = m.tekrar_id
         WHERE t.gun BETWEEN :ilkGun AND :sonGun ORDER BY t.gun, t.zaman, t.id""")
     suspend fun pencereVerileri(ilkGun: Int, sonGun: Int): List<ProfilSatiri>

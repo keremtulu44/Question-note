@@ -120,9 +120,9 @@ fun OdakOturumuEkrani(
     toplam: Int,
     sonuclar: List<OturumSonucu>,
     cozumOnceAcildi: Boolean,
-    onCozumAcildi: () -> Unit,
+    onCozumAcildi: (kontrol: Boolean) -> Unit,
     onGeri: () -> Unit,
-    onSonuc: (TekrarSonucu, Boolean) -> Unit,
+    onSonuc: (TekrarSonucu, Boolean, Boolean) -> Unit,
     onKaydedildi: (soruId: String, sonrakiGun: Int?) -> Unit = { _, _ -> },
     onSonaBirak: () -> Unit,
     onAtla: () -> Unit,
@@ -136,6 +136,7 @@ fun OdakOturumuEkrani(
     val liste = rememberLazyListState()
     val olcum = rememberOdakOlcum(oturumId, soru.id, cozumOnceAcildi, oturumDeposu, monotonikSaat)
     val cozumAcildi = olcum.nokta.cozumAcildi
+    val kontrolAcilisi = olcum.nokta.kontrolAcilisi
     val degerlendirme = olcum.nokta.donduruldu
     val secim = olcum.nokta.secim
     var gorselDurumlari by remember(soru.id) { mutableStateOf<Map<String, GorselHazirligi>>(emptyMap()) }
@@ -187,7 +188,7 @@ fun OdakOturumuEkrani(
     OdakOlcumIzleyicisi(olcum, oncekiKayitlar != null && gorselHazir && !mola && gorsel == null &&
         !mesgul && !degerlendirme && !disDuraklatildi && !tekrarli && !kullanilamaz)
     val onizlemeler by produceState<Map<TekrarSonucu, TekrarOnizlemesi>?>(null, soru.id, degerlendirme,
-        cozumAcildi, olcum.nokta.olcum, oncekiKayitlar, yenileme, olcum.yenidenOnPlanda) {
+        cozumAcildi, kontrolAcilisi, olcum.nokta.kilitliSecim, olcum.nokta.olcum, oncekiKayitlar, yenileme, olcum.yenidenOnPlanda) {
         value = null
         planHatasi = false
         if (degerlendirme && oncekiKayitlar != null) {
@@ -235,7 +236,7 @@ fun OdakOturumuEkrani(
                 when (repository.tekrarKaydet(onizleme)) {
                     SoruIslemSonucu.Basarili -> {
                         onKaydedildi(soru.id, onizleme.plan.sonrakiGun)
-                        onSonuc(sonuc, cozumAcildi || cozumOnceAcildi)
+                        onSonuc(sonuc, cozumAcildi || cozumOnceAcildi, olcum.nokta.kontrolAcilisi)
                     }
                     SoruIslemSonucu.AyniGunTekrarVar -> tekrarli = true
                     SoruIslemSonucu.OnizlemeGuncellendi -> { planYenilendi = true; yenileme++ }
@@ -403,27 +404,39 @@ fun OdakOturumuEkrani(
                         if (cozumGorunur) cozumGorunur = false else {
                             olcum.aktiflik(false)
                             olcum.cozumuAc()
+                            val kontrolMu = olcum.nokta.kontrolAcilisi
                             cozumAciliyor = true
                             cozumKayitHatasi = false
                             scope.launch {
                                 try {
                                     if (olcum.cozumIzni()) {
                                         cozumGorunur = true
-                                        onCozumAcildi()
+                                        onCozumAcildi(kontrolMu)
                                     } else cozumKayitHatasi = true
                                 } finally { cozumAciliyor = false }
                             }
                         }
                     }, enabled = cozumVar && !mesgul, modifier = Modifier.fillMaxWidth(),
                         interactionTur = if (cozumGorunur) EtkilesimTuru.KART_KAPANIS else EtkilesimTuru.COZUM_ACILDI) {
-                        Text(stringResource(if (cozumAciliyor) R.string.measure_solution_preparing
-                            else if (cozumGorunur) R.string.question_hide_solution else R.string.focus_reveal))
+                        Text(stringResource(when {
+                            cozumAciliyor -> R.string.measure_solution_preparing
+                            cozumGorunur -> R.string.question_hide_solution
+                            !cozumAcildi && degerlendirme && secim != null -> R.string.focus_reveal_check
+                            else -> R.string.focus_reveal
+                        }))
                     }
                     if (cozumKayitHatasi) Text(stringResource(R.string.measure_solution_checkpoint_error), color = colors.error,
                         style = MaterialTheme.typography.bodySmall)
                     if (!cozumVar) Text(stringResource(R.string.focus_no_solution), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
-                    if (cozumAcildi || cozumOnceAcildi) Text(stringResource(R.string.focus_solution_note), style = MaterialTheme.typography.bodySmall,
-                        color = colors.primary)
+                    if (cozumAcildi || cozumOnceAcildi) Text(stringResource(
+                        if (kontrolAcilisi) R.string.focus_solution_checked_note else R.string.focus_solution_note),
+                        style = MaterialTheme.typography.bodySmall, color = colors.primary)
+                    else if (cozumVar) Text(stringResource(when {
+                        !degerlendirme -> R.string.focus_solution_lock_hint
+                        secim == null -> R.string.focus_solution_pick_first_hint
+                        else -> R.string.focus_solution_locked_ready_hint
+                    }), style = MaterialTheme.typography.bodySmall,
+                        color = if (secim != null) colors.primary else colors.onSurfaceVariant)
                 }
             }
             if (cozumGorunur) {
@@ -462,12 +475,19 @@ fun OdakOturumuEkrani(
                     PremiumTextButton(onClick = { olcum.calismayaDon(); planYenilendi = false }, enabled = !mesgul) {
                         Text(stringResource(R.string.measure_return_to_study))
                     }
+                    val tavan = if (kontrolAcilisi) olcum.nokta.kilitliSecim else null
+                    if (tavan != null) Text(stringResource(R.string.focus_locked_ceiling_note, stringResource(when (tavan) {
+                        TekrarSonucu.COZEMEDIM -> R.string.review_result_not_solved
+                        TekrarSonucu.ZORLANDIM -> R.string.review_result_struggled
+                        TekrarSonucu.RAHAT -> R.string.review_result_easy
+                    })), style = MaterialTheme.typography.bodySmall, color = colors.primary)
                     if (onizlemeler == null && !planHatasi) Text(stringResource(R.string.measure_preparing))
                     onizlemeler?.get(secim ?: TekrarSonucu.RAHAT)?.karar?.let { KararAciklamasi(it) }
                     TekrarSonucu.entries.forEach { sonuc ->
                         val plan = onizlemeler?.get(sonuc)?.plan
                         val secili = secim == sonuc
-                        PremiumCard(onClick = { olcum.dondur(sonuc) }, enabled = !mesgul && plan != null,
+                        val tavanUstu = tavan != null && sonuc.ordinal > tavan.ordinal
+                        PremiumCard(onClick = { olcum.dondur(sonuc) }, enabled = !mesgul && plan != null && !tavanUstu,
                             modifier = Modifier.fillMaxWidth().semantics { selected = secili; role = Role.RadioButton },
                             shape = MaterialTheme.shapes.large,
                             colors = CardDefaults.cardColors(containerColor = if (secili) colors.primaryContainer else colors.surface)) {
@@ -479,7 +499,7 @@ fun OdakOturumuEkrani(
                                     TekrarSonucu.RAHAT -> R.string.review_result_easy
                                 }), fontWeight = FontWeight.SemiBold)
                                 Column(horizontalAlignment = Alignment.End) {
-                                    Text(if (plan == null) "—" else if (plan.sonrakiAralik == 1) stringResource(R.string.focus_tomorrow)
+                                    Text(if (plan == null || tavanUstu) "—" else if (plan.sonrakiAralik == 1) stringResource(R.string.focus_tomorrow)
                                     else stringResource(R.string.focus_next_days, plan.sonrakiAralik), style = MaterialTheme.typography.labelSmall)
                                     if (secili) Text("✓", color = colors.primary, fontFamily = PremiumSembolAilesi)
                                 }

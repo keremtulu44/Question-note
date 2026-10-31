@@ -20,6 +20,7 @@ object YanlisDefteriDatabaseProvider {
                     YanlisDefteriMigrations.MIGRATION_2_3,
                     YanlisDefteriMigrations.MIGRATION_3_4,
                     YanlisDefteriMigrations.MIGRATION_4_5,
+                    YanlisDefteriMigrations.MIGRATION_5_6,
                 )
                 .build()
                 .also { instance = it }

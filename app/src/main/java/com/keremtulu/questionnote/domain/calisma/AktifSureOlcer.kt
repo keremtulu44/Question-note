@@ -21,7 +21,16 @@ class AktifSureOlcer(private val saat: MonotonikSaat, baslangic: OlcumDevamNokta
 
     fun cozumuAc() {
         biriktir()
-        nokta = nokta.copy(cozumAcildi = true)
+        // Only the first reveal decides the opening kind. A selection locked in beforehand makes
+        // this a verification ("kontrol") of a finished answer; before any selection it is help.
+        if (!nokta.cozumAcildi) {
+            val kilit = nokta.secim
+            nokta = nokta.copy(
+                cozumAcildi = true,
+                kontrolAcilisi = kilit != null,
+                kilitliSecim = kilit,
+            )
+        }
     }
 
     fun tamEkranaGir() {
@@ -31,7 +40,10 @@ class AktifSureOlcer(private val saat: MonotonikSaat, baslangic: OlcumDevamNokta
 
     fun dondur(secim: TekrarSonucu? = nokta.secim) {
         aktifligiAyarla(false)
-        nokta = nokta.copy(donduruldu = true, secim = secim)
+        // The pre-reveal lock is a ceiling: moving within or below it stays free, above it is capped.
+        val kilit = if (nokta.kontrolAcilisi) nokta.kilitliSecim else null
+        val gecerli = if (secim != null && kilit != null && secim.ordinal > kilit.ordinal) kilit else secim
+        nokta = nokta.copy(donduruldu = true, secim = gecerli)
     }
 
     fun calismayaDon() { nokta = nokta.copy(donduruldu = false, secim = null) }

@@ -7,7 +7,12 @@ data class OturumSonucu(
     val soruId: String,
     val sonuc: TekrarSonucu,
     val cozumAcildi: Boolean,
-)
+    /** Solution was opened only to verify an answer locked in before the reveal. */
+    val kontrolAcilisi: Boolean = false,
+) {
+    /** Assisted answer: the solution was used as help, not as post-lock verification. */
+    val destekli: Boolean get() = cozumAcildi && !kontrolAcilisi
+}
 
 /** Mutually exclusive buckets. A question opened with the solution always lands in [COZUMLU]. */
 enum class KarneKovasi {
@@ -50,7 +55,7 @@ enum class TebrikSeviyesi {
 
 object KarneHesabi {
     fun kova(sonuc: OturumSonucu): KarneKovasi = when {
-        sonuc.cozumAcildi -> KarneKovasi.COZUMLU
+        sonuc.destekli -> KarneKovasi.COZUMLU
         sonuc.sonuc == TekrarSonucu.RAHAT -> KarneKovasi.BAGIMSIZ
         sonuc.sonuc == TekrarSonucu.ZORLANDIM -> KarneKovasi.YARIM
         else -> KarneKovasi.COZEMEDI

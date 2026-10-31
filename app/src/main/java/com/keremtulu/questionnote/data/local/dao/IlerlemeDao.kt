@@ -46,10 +46,10 @@ interface IlerlemeDao {
         """
         SELECT EXISTS(
             SELECT 1 FROM tekrarlar basari
-            WHERE basari.sonuc = 'RAHAT' AND basari.cozum_acildi = 0
+            WHERE basari.sonuc = 'RAHAT' AND (basari.cozum_acildi = 0 OR basari.kontrol_acilisi = 1)
               AND (SELECT COUNT(DISTINCT eski.gun) FROM tekrarlar eski
                    WHERE eski.soru_id = basari.soru_id AND eski.gun < basari.gun
-                     AND eski.sonuc = 'COZEMEDIM' AND eski.cozum_acildi = 0) >= 3
+                     AND eski.sonuc = 'COZEMEDIM' AND (eski.cozum_acildi = 0 OR eski.kontrol_acilisi = 1)) >= 3
         )
         """,
     )
@@ -61,12 +61,12 @@ interface IlerlemeDao {
     @Query("SELECT COUNT(*) FROM tekrarlar")
     suspend fun tekrarSayisi(): Int
 
-    @Query("SELECT COUNT(*) FROM tekrarlar WHERE sonuc = 'RAHAT' AND cozum_acildi = 0")
+    @Query("SELECT COUNT(*) FROM tekrarlar WHERE sonuc = 'RAHAT' AND (cozum_acildi = 0 OR kontrol_acilisi = 1)")
     suspend fun bagimsizTekrarSayisi(): Int
 
     @Query(
         """
-        SELECT gun, SUM(CASE WHEN sonuc = 'RAHAT' AND cozum_acildi = 0 THEN 1 ELSE 0 END) AS adet
+        SELECT gun, SUM(CASE WHEN sonuc = 'RAHAT' AND (cozum_acildi = 0 OR kontrol_acilisi = 1) THEN 1 ELSE 0 END) AS adet
         FROM tekrarlar
         GROUP BY gun
         ORDER BY gun ASC

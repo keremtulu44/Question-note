@@ -39,11 +39,13 @@ class OlcumMigrationTest {
             old.execSQL("INSERT INTO tekrarlar (id, soru_id, zaman, gun, sonuc, onceki_aralik, sonraki_aralik, algoritma_surumu) VALUES ('r', 'q', 12345, 200, 'RAHAT', 7, 18, 2)")
         } finally { old.close() }
         val db = Room.databaseBuilder(context, YanlisDefteriDatabase::class.java, name)
-            .addMigrations(YanlisDefteriMigrations.MIGRATION_3_4, YanlisDefteriMigrations.MIGRATION_4_5)
+            .addMigrations(YanlisDefteriMigrations.MIGRATION_3_4, YanlisDefteriMigrations.MIGRATION_4_5, YanlisDefteriMigrations.MIGRATION_5_6)
             .allowMainThreadQueries().build()
         try {
-            assertEquals(5, db.openHelper.readableDatabase.version)
+            assertEquals(6, db.openHelper.readableDatabase.version)
             val tekrar = db.tekrarDao().tumunuGetir().single()
+            assertFalse(tekrar.kontrolAcilisi)
+            assertNull(tekrar.kilitliSonuc)
             assertEquals(12345L, tekrar.zaman)
             assertEquals(18, tekrar.sonrakiAralik)
             assertEquals(2, tekrar.algoritmaSurumu)

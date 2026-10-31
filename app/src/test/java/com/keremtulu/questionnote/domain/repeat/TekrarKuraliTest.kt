@@ -43,4 +43,12 @@ class TekrarKuraliTest {
         assertEquals(1, TekrarKurali.ALGORITMA_SURUMU)
         assertEquals(listOf(1, 3, 7, 21, 45, 90, 180), TekrarKurali.araliklar)
     }
+    @Test
+    fun verificationRevealKeepsTheIndependentProgression() {
+        assertEquals(21, TekrarKurali.hesapla(7, TekrarSonucu.RAHAT, true, today, kontrolAcilisi = true).sonrakiAralik)
+        assertEquals(7, TekrarKurali.hesapla(7, TekrarSonucu.ZORLANDIM, true, today, kontrolAcilisi = true).sonrakiAralik)
+        // Checking and finding the answer wrong still schedules tomorrow through the corrected result.
+        assertEquals(1, TekrarKurali.hesapla(90, TekrarSonucu.COZEMEDIM, true, today, kontrolAcilisi = true).sonrakiAralik)
+    }
+
 }

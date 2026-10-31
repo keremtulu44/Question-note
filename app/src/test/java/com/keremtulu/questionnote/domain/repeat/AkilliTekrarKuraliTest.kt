@@ -68,4 +68,14 @@ class AkilliTekrarKuraliTest {
         assertEquals(2, AkilliTekrarKurali.ALGORITMA_SURUMU)
         assertEquals(1, TekrarKurali.ALGORITMA_SURUMU)
     }
+    @Test fun verifiedRevealSchedulesLikeAnIndependentAnswerAndFeedsEaseLikeOne() {
+        assertEquals(3, AkilliTekrarKurali.hesapla(emptyList(), TekrarSonucu.RAHAT, true, bugun, gun, kontrolAcilisi = true).sonrakiAralik)
+        val kontrolRahat = listOf(kayit(aralik = 90, sonuc = TekrarSonucu.RAHAT, cozum = true, surum = 2)
+            .copy(kontrolAcilisi = true, kilitliSonuc = TekrarSonucu.RAHAT))
+        assertEquals(255, AkilliTekrarKurali.hafiza(kontrolRahat).kolaylikYuz)
+        val kontrolCozemedi = listOf(kayit(sonuc = TekrarSonucu.COZEMEDIM, cozum = true)
+            .copy(kontrolAcilisi = true, kilitliSonuc = TekrarSonucu.COZEMEDIM))
+        assertEquals(1, AkilliTekrarKurali.hafiza(kontrolCozemedi).unutma)
+    }
+
 }
