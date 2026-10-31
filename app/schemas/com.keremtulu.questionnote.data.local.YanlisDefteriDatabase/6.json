@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 6,
-    "identityHash": "82a5297a5241053002e92cda4c2a7c6d",
+    "identityHash": "51374d84cdb4f3e5bbbb720d2506dd25",
     "entities": [
       {
         "tableName": "dersler",
