@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -159,7 +160,8 @@ class OlcumVeProfilArayuzTest {
                 YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
                     OdakOturumuEkrani(soru, ders, repo, images, "reveal-session", depo,
                         sira = 1, toplam = 1, sonuclar = emptyList(), cozumOnceAcildi = false,
-                        onCozumAcildi = {
+                        onCozumAcildi = { kontrol ->
+                            assertFalse(kontrol)
                             assertTrue("q" in requireNotNull(OdakOturumuDeposu(context).oku()).cozumAcilanlar)
                             acildi.set(true)
                         }, onGeri = {}, onSonuc = { _, _, _ -> }, onSonaBirak = {}, onAtla = {})
@@ -167,8 +169,67 @@ class OlcumVeProfilArayuzTest {
             }
             compose.onNodeWithText("Çözüm içeriği").assertDoesNotExist()
             compose.onNodeWithText(context.getString(R.string.focus_reveal)).performScrollTo().performClick()
+            // Unlocked first reveal asks before it can turn the attempt into help.
+            compose.onNodeWithText(context.getString(R.string.focus_reveal_help_confirm)).performClick()
             compose.waitUntil(5_000) { acildi.get() }
-            assertTrue(requireNotNull(depo.oku()?.olcumler?.get("q")).cozumAcildi)
+            val yardimNoktasi = requireNotNull(depo.oku()?.olcumler?.get("q"))
+            assertTrue(yardimNoktasi.cozumAcildi)
+            assertFalse(yardimNoktasi.kontrolAcilisi)
+            assertNull(yardimNoktasi.kilitliSecim)
+        } finally { db.close() }
+    }
+
+
+    @Test fun focusLockThenCheckKeepsTheAttemptIndependentAndCapsAtTheLock() {
+        val db = Room.inMemoryDatabaseBuilder(context, YanlisDefteriDatabase::class.java)
+            .addCallback(VarsayilanDersleriEkle()).allowMainThreadQueries().build()
+        val depo = OdakOturumuDeposu(context)
+        depo.temizle(); depo.kaydet(OdakOturumu("kontrol-session", listOf("q"), 1_000))
+        val images = LocalSoruGorselDeposu(context)
+        val repo = RoomSoruRepository(db, images)
+        val (ders, soru) = runBlocking {
+            val d = RoomDersRepository(db).dersleriIzle(false).first().first()
+            db.soruDao().ekle(SoruEntity("q", d.id, soruNotu = "Örnek soru", cozumNotu = "Kontrol çözümü", olusturma = 1, guncelleme = 1))
+            d to requireNotNull(repo.soruGetir("q"))
+        }
+        val tamam = AtomicBoolean(false)
+        try {
+            compose.setContent {
+                YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                    OdakOturumuEkrani(soru, ders, repo, images, "kontrol-session", depo,
+                        sira = 1, toplam = 1, sonuclar = emptyList(), cozumOnceAcildi = false,
+                        onCozumAcildi = { kontrol -> assertTrue(kontrol) }, onGeri = {},
+                        onSonuc = { sonuc, cozum, kontrol ->
+                            assertEquals(TekrarSonucu.ZORLANDIM, sonuc); assertTrue(cozum); assertTrue(kontrol); tamam.set(true)
+                        }, onSonaBirak = {}, onAtla = {})
+                }
+            }
+            val degerlendir = context.getString(R.string.focus_assess)
+            compose.waitUntil(5_000) { compose.onAllNodes(hasText(degerlendir) and isEnabled()).fetchSemanticsNodes().isNotEmpty() }
+            compose.onNodeWithText(degerlendir).performClick()
+            compose.mainClock.advanceTimeBy(150)
+            val zorlandim = context.getString(R.string.review_result_struggled)
+            compose.waitUntil(5_000) { compose.onAllNodes(hasText(zorlandim) and isEnabled()).fetchSemanticsNodes().isNotEmpty() }
+            compose.onNodeWithText(zorlandim).performClick() // lock = Zorlandım
+            compose.waitForIdle()
+            compose.onNodeWithText("Kontrol çözümü").assertDoesNotExist()
+            compose.onNodeWithText(context.getString(R.string.focus_reveal_check)).performScrollTo().performClick()
+            compose.waitUntil(5_000) {
+                requireNotNull(depo.oku()?.olcumler?.get("q")).kontrolAcilisi
+            }
+            val nokta = requireNotNull(depo.oku()?.olcumler?.get("q"))
+            assertEquals(TekrarSonucu.ZORLANDIM, nokta.kilitliSecim)
+            // The grade above the lock cannot be claimed after seeing the solution.
+            compose.onNodeWithText(context.getString(R.string.review_result_easy)).performScrollTo().assertIsNotEnabled()
+            compose.onNodeWithText(zorlandim).performClick()
+            compose.onNodeWithText(context.getString(R.string.focus_save_last)).performClick()
+            compose.waitUntil(5_000) { tamam.get() }
+            val kayit = runBlocking { db.tekrarDao().tumunuGetir().single() }
+            assertTrue(kayit.cozumAcildi)
+            assertTrue(kayit.kontrolAcilisi)
+            assertEquals("ZORLANDIM", kayit.kilitliSonuc)
+            assertEquals("ZORLANDIM", kayit.sonuc)
+            assertTrue((kayit.sonrakiAralik ?: 0) > 1) // verified attempt still makes progress
         } finally { db.close() }
     }
 

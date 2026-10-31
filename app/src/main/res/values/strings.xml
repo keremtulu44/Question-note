@@ -687,6 +687,9 @@
     <string name="focus_no_solution">Bu soruya henüz çözüm eklenmemiş.</string>
     <string name="focus_reveal">Çözümü incele</string>
     <string name="focus_reveal_check">Çözümü kontrol et</string>
+    <string name="focus_reveal_help_title">Kilitsiz açıyorsun</string>
+    <string name="focus_reveal_help_message">Sonucunu kilitlemeden açarsan bu tur yardım sayılır ve soru yarına alınır. Doğru yaptığını kontrol etmek istiyorsan önce sonucunu seçip kilitle.</string>
+    <string name="focus_reveal_help_confirm">Yardımla aç</string>
     <string name="focus_assess">Cevabımı değerlendir</string>
     <string name="focus_assess_title">Nasıl geçti?</string>
     <string name="focus_assess_note">Bu bir öz değerlendirme. Uygulama cevabını otomatik olarak doğrulamaz.</string>

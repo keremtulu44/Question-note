@@ -14,6 +14,10 @@ Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih 
 - **Veri:** Room **6** (`tekrarlar.kontrol_acilisi`, `kilitli_sonuc` — eklemeli geçiş, geçmiş
   kayıtlar yardım sayılarak aynen korunur) ve yedek biçimi ZIP **6** (`solution_checked`,
   `locked_result`; eski v2–v5 yedekleri okunmaya devam eder).
+- **Akış incelikleri:** Kilitlemeden ilk açılışta yanlışlıkla dokunmaya karşı onay sorulur
+  ("Yardımla aç"); salt gezinme amaçlı detay görüntülemede sorulmaz. Kilitliyken düğme her iki
+  ekranda da "Çözümü kontrol et" olur, değerlendirme alanında kilit hazır ipucu görünür ve
+  karar açıklaması kilidi varsayılan alır.
 
 ## [Yayınlanmadı — üst panel] — 2026-10-27
 

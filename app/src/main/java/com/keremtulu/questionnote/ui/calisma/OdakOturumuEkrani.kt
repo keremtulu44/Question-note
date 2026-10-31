@@ -147,6 +147,7 @@ fun OdakOturumuEkrani(
     var beyazTahtaAcik by rememberSaveable(soru.id) { mutableStateOf(false) }
     var cozumGorunur by rememberSaveable(soru.id) { mutableStateOf(false) }
     var kaydediliyor by remember(soru.id) { mutableStateOf(false) }
+    var yardimOnayi by rememberSaveable(soru.id) { mutableStateOf(false) }
     var cozumAciliyor by remember(soru.id) { mutableStateOf(false) }
     var cozumKayitHatasi by remember(soru.id) { mutableStateOf(false) }
     val mesgul = kaydediliyor || cozumAciliyor
@@ -216,6 +217,23 @@ fun OdakOturumuEkrani(
             delay(100) // wait for newly composed assessment items; only the scroll motion is optional
             val hedef = (liste.layoutInfo.totalItemsCount - if (sira < toplam) 2 else 1).coerceAtLeast(0)
             if (hareket.azaltildi) liste.scrollToItem(hedef) else liste.animateScrollToItem(hedef)
+        }
+    }
+
+    fun cozumuGoster() {
+        if (kaydediliyor || cozumAciliyor || cozumGorunur) return
+        olcum.aktiflik(false)
+        olcum.cozumuAc()
+        val kontrolMu = olcum.nokta.kontrolAcilisi
+        cozumAciliyor = true
+        cozumKayitHatasi = false
+        scope.launch {
+            try {
+                if (olcum.cozumIzni()) {
+                    cozumGorunur = true
+                    onCozumAcildi(kontrolMu)
+                } else cozumKayitHatasi = true
+            } finally { cozumAciliyor = false }
         }
     }
 
@@ -401,27 +419,18 @@ fun OdakOturumuEkrani(
                 ) {
                     PremiumOutlinedButton(onClick = {
                         if (kaydediliyor || cozumAciliyor) return@PremiumOutlinedButton
-                        if (cozumGorunur) cozumGorunur = false else {
-                            olcum.aktiflik(false)
-                            olcum.cozumuAc()
-                            val kontrolMu = olcum.nokta.kontrolAcilisi
-                            cozumAciliyor = true
-                            cozumKayitHatasi = false
-                            scope.launch {
-                                try {
-                                    if (olcum.cozumIzni()) {
-                                        cozumGorunur = true
-                                        onCozumAcildi(kontrolMu)
-                                    } else cozumKayitHatasi = true
-                                } finally { cozumAciliyor = false }
-                            }
+                        when {
+                            cozumGorunur -> cozumGorunur = false
+                            // An accidental tap must not permanently turn this attempt into help.
+                            !cozumAcildi && secim == null -> yardimOnayi = true
+                            else -> cozumuGoster()
                         }
                     }, enabled = cozumVar && !mesgul, modifier = Modifier.fillMaxWidth(),
                         interactionTur = if (cozumGorunur) EtkilesimTuru.KART_KAPANIS else EtkilesimTuru.COZUM_ACILDI) {
                         Text(stringResource(when {
                             cozumAciliyor -> R.string.measure_solution_preparing
                             cozumGorunur -> R.string.question_hide_solution
-                            !cozumAcildi && degerlendirme && secim != null -> R.string.focus_reveal_check
+                            kontrolAcilisi || (!cozumAcildi && degerlendirme && secim != null) -> R.string.focus_reveal_check
                             else -> R.string.focus_reveal
                         }))
                     }
@@ -475,6 +484,9 @@ fun OdakOturumuEkrani(
                     PremiumTextButton(onClick = { olcum.calismayaDon(); planYenilendi = false }, enabled = !mesgul) {
                         Text(stringResource(R.string.measure_return_to_study))
                     }
+                    if (!cozumAcildi && !cozumOnceAcildi && secim != null && cozumVar)
+                        Text(stringResource(R.string.focus_solution_locked_ready_hint),
+                            style = MaterialTheme.typography.bodySmall, color = colors.primary)
                     val tavan = if (kontrolAcilisi) olcum.nokta.kilitliSecim else null
                     if (tavan != null) Text(stringResource(R.string.focus_locked_ceiling_note, stringResource(when (tavan) {
                         TekrarSonucu.COZEMEDIM -> R.string.review_result_not_solved
@@ -482,7 +494,7 @@ fun OdakOturumuEkrani(
                         TekrarSonucu.RAHAT -> R.string.review_result_easy
                     })), style = MaterialTheme.typography.bodySmall, color = colors.primary)
                     if (onizlemeler == null && !planHatasi) Text(stringResource(R.string.measure_preparing))
-                    onizlemeler?.get(secim ?: TekrarSonucu.RAHAT)?.karar?.let { KararAciklamasi(it) }
+                    onizlemeler?.get(secim ?: tavan ?: TekrarSonucu.RAHAT)?.karar?.let { KararAciklamasi(it) }
                     TekrarSonucu.entries.forEach { sonuc ->
                         val plan = onizlemeler?.get(sonuc)?.plan
                         val secili = secim == sonuc
@@ -529,6 +541,13 @@ fun OdakOturumuEkrani(
         oturumCizimBellegi = oturumCizimBellegi,
         onDismiss = { beyazTahtaAcik = false },
     )
+    if (yardimOnayi) AlertDialog(onDismissRequest = { yardimOnayi = false },
+        title = { Text(stringResource(R.string.focus_reveal_help_title)) },
+        text = { Text(stringResource(R.string.focus_reveal_help_message)) },
+        confirmButton = { PremiumTextButton(onClick = { yardimOnayi = false; cozumuGoster() }) {
+            Text(stringResource(R.string.focus_reveal_help_confirm)) } },
+        dismissButton = { PremiumTextButton(onClick = { yardimOnayi = false }) {
+            Text(stringResource(R.string.common_cancel)) } })
     if (mola) AlertDialog(onDismissRequest = { mola = false },
         title = { Text(stringResource(R.string.focus_paused_title)) },
         text = { Text(stringResource(R.string.focus_paused_note)) },

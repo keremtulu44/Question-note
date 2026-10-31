@@ -1,8 +1,10 @@
-# Tam ZIP yedek biçimi — v5
+# Tam ZIP yedek biçimi — v6
 
-Güncel yazım: `yanlis-defteri-backup`, **ZIP v5 / Room v5**. Okuma: **v2, v3, v4, v5**; her biri
-kendi şema/CSV/alan sözleşmesiyle doğrulanır. Algoritma ve karar snapshot sürümleri bunlardan ayrıdır.
-Varsayılan **Gölge**, v2 planını uygular ve ayrı v3 adayı saklar. Son güncelleme: 2026-10-18.
+Güncel yazım: `yanlis-defteri-backup`, **ZIP v6 / Room v6**. Okuma: **v2, v3, v4, v5, v6**; her biri
+kendi şema/CSV/alan sözleşmesiyle doğrulanır. v6, tekrar kayıtlarına `solution_checked` ve
+`locked_result` (kontrol açılışı) alanlarını ekler; önceki sürümlerde her açılış yardım sayılır.
+Algoritma ve karar snapshot sürümleri bunlardan ayrıdır.
+Varsayılan **Gölge**, v2 planını uygular ve ayrı v3 adayı saklar. Son güncelleme: 2026-10-31.
 
 ## 1. Arşiv yapısı
 
