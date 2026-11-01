@@ -639,6 +639,7 @@
     <string name="rank_remaining">Bu rütbeye %1$d XP kaldı</string>
     <string name="rank_earned">Bu rütbeye ulaştın</string>
     <string name="rank_locked">Henüz ulaşılmadı</string>
+    <string name="rank_current">Şu anki rütben</string>
     <string name="rank_next_label">SIRADAKİ RÜTBE</string>
     <string name="rank_next_remaining">%1$d XP kaldı</string>
     <string name="level_retry">Yeniden yükle</string>
@@ -905,7 +906,7 @@
     <string name="progress_badge_count">%1$d / %2$d rozet</string>
     <string name="progress_daily_count">%1$d / %2$d tekrar</string>
     <string name="progress_action_due">Tekrar zamanı gelen %1$d soru var.</string>
-    <string name="progress_action_difficulty">Zorlandığın alandan devam et.</string>
+    <string name="progress_action_difficulty">Bu grupta bugün çalışabileceğin %1$d soru var; %2$d soruda yakın zamanda zorlandın.</string>
     <string name="progress_action_small">Kısa bir çalışma turu hazır.</string>
     <string name="progress_action_inspect">%1$d soruluk turu hazırla</string>
     <string name="progress_rhythm_scope">Tekrar sayıları · tüm dersler</string>
@@ -1195,8 +1196,9 @@
     <string name="today_batch_explanation">Bu turda %1$d soru çalışacağız. Tur dışında %2$d soru sırada kalacak; hepsini bugün bitirmek zorunda değilsin.</string>
     <string name="today_preview_title">Sıradan kısa bir önizleme</string>
     <string name="progress_weekly_title">Son 7 gün</string>
-    <string name="progress_weekly_summary">%1$d gün çalıştın · %2$d tekrar yaptın</string>
-    <string name="progress_weekly_reviews">%1$d tekrar</string>
+    <string name="progress_weekly_summary">%1$d gün çalıştın · %2$d tekrar · %3$d bağımsız</string>
+    <string name="progress_weekly_reviews">%1$d tekrar · %2$d bağımsız</string>
+    <string name="progress_weekly_other_reviews">Diğer tekrarlar</string>
     <string name="progress_weekly_note">Bugün henüz tamamlanmadı.</string>
     <string name="teacher_plan_move_today">Bugüne al</string>
     <string name="teacher_plan_move_tomorrow">Yarına planla</string>

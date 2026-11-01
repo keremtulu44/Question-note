@@ -33,7 +33,7 @@ data class DonemKarsilastirmasi(val onceki: AnalizSayaci, val son: AnalizSayaci,
 data class AnalizGrubu(val anahtar: GrupAnahtari, val dersAdi: String?, val etiketler: List<String>,
     val sayac: AnalizSayaci, val donem: DonemKarsilastirmasi, val filtre: SoruCalismaFiltresi?, val uygunSoru: Int,
     val yardimsizProfil: SureProfili?, val dersReferansi: SureProfili?, val yakinGuclukSoru: Int, val sonIkiBagimsizSoru: Int)
-data class RitimGunu(val gun: Int, val soru: Int, val tekrar: Int, val bugunTamamlanmadi: Boolean)
+data class RitimGunu(val gun: Int, val soru: Int, val tekrar: Int, val bagimsiz: Int, val bugunTamamlanmadi: Boolean)
 data class PlanIsYuku(val gun: Int, val adet: Int, val kapsanan: Int, val bilinmeyen: Int,
     val altMs: Double, val ustMs: Double) {
     val kapsamYuzde: Int get() = if (adet == 0) 0 else (100L * kapsanan / adet).toInt()
@@ -92,7 +92,7 @@ object GelisimAnaliziHesabi {
         }
         val ritim = tarihli.filter { it.gun >= gun - 6 }.groupBy { it.gun }
         return GelisimAnalizi(gun, secim.profil.ad, say(tekrarlar), grupListesi(AnalizTuru.KONU), grupListesi(AnalizTuru.KAYNAK),
-            (gun - 6..gun).map { g -> val l = ritim[g].orEmpty(); RitimGunu(g, l.map { it.soruId }.distinct().size, l.size, g == gun) },
+            (gun - 6..gun).map { g -> val l = ritim[g].orEmpty(); RitimGunu(g, l.map { it.soruId }.distinct().size, l.size, l.count { it.bagimsiz }, g == gun) },
             donem(tarihli, gun), plan, oneri(bugunUygun, soruGecmisi, dersMap, konular, gun))
     }
 

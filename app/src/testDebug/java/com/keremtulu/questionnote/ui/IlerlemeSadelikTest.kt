@@ -72,8 +72,19 @@ class IlerlemeSadelikTest {
         compose.onNodeWithTag("progress-weekly-summary").assertExists()
         val a = requireNotNull(sample.analiz)
         compose.onNodeWithText(text(R.string.progress_weekly_summary,
-            a.ritim.count { it.tekrar > 0 }, a.ritim.sumOf { it.tekrar })).assertExists()
+            a.ritim.count { it.tekrar > 0 }, a.ritim.sumOf { it.tekrar }, a.ritim.sumOf { it.bagimsiz })).assertExists()
         compose.onNodeWithTag("progress-details").assertDoesNotExist()
+    }
+
+    @Test fun rankGalleryStartsAtAndMarksCurrentRank() {
+        val sample = ornekIlerlemeOzeti()
+        compose.setContent { YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+            SeviyeSayfasi(SeviyeDurumuUi.ozetten(sample))
+        } }
+        bolumAc("progress-collection", "progress-list")
+        bolumAc("progress-open-ranks")
+        compose.onNodeWithText(sample.durum.rutbe.ad).assertIsDisplayed()
+        compose.onNodeWithText(text(R.string.rank_current)).assertIsDisplayed()
     }
 
     @Test fun collectionSurvivesSavedStateRestoration() {

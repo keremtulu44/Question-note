@@ -64,7 +64,11 @@ fun SeviyeEkrani(
         onDispose { activity?.lifecycle?.removeObserver(gozlemci) }
     }
     val durum by produceState<SeviyeDurumuUi>(SeviyeDurumuUi.Yukleniyor, seviyeHizmeti, yenileme, bugun) {
-        value = SeviyeDurumuUi.Yukleniyor
+        // A date/resume refresh keeps the last real summary on screen; only the first load
+        // and an explicit retry after an error use the loading panel.
+        if (value !is SeviyeDurumuUi.Hazir && value !is SeviyeDurumuUi.YetersizVeri) {
+            value = SeviyeDurumuUi.Yukleniyor
+        }
         seviyeHizmeti.ozetIzle().catch { hata ->
             if (hata is CancellationException) throw hata
             value = SeviyeDurumuUi.Hata

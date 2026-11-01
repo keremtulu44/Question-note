@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CardDefaults
@@ -46,6 +47,7 @@ import com.keremtulu.questionnote.ui.premium.PremiumCard
 @Composable
 fun RutbeYolculugu(durum: SeviyeDurumu, baslikGoster: Boolean = true) {
     val kartGenisligi = if (LocalDensity.current.fontScale >= 1.5f) 200.dp else 132.dp
+    val listeDurumu = rememberLazyListState(initialFirstVisibleItemIndex = durum.rutbe.ordinal)
     var detay by remember { mutableStateOf<Rutbe?>(null) }
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         if (baslikGoster) Text(stringResource(R.string.rank_gallery_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
@@ -59,22 +61,30 @@ fun RutbeYolculugu(durum: SeviyeDurumu, baslikGoster: Boolean = true) {
             dolguRenk = MaterialTheme.colorScheme.primary,
             noktaSayisi = Rutbe.entries.size.coerceIn(2, 15),
         )
-        LazyRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        LazyRow(state = listeDurumu, modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             items(Rutbe.entries.toList(), key = { it.anahtar }) { rutbe ->
                 val aktif = durum.seviye >= rutbe.baslangicSeviye
-                val durumMetni = stringResource(if (aktif) R.string.rank_earned else R.string.rank_locked)
+                val suAnki = rutbe == durum.rutbe
+                val durumMetni = stringResource(when {
+                    suAnki -> R.string.rank_current
+                    aktif -> R.string.rank_earned
+                    else -> R.string.rank_locked
+                })
                 PremiumCard(onClick = { detay = rutbe },
                     modifier = Modifier.width(kartGenisligi)
                         .semantics { stateDescription = durumMetni },
                     shape = RoundedCornerShape(22.dp),
-                    colors = CardDefaults.cardColors(containerColor = if (rutbe == durum.rutbe) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface)) {
+                    colors = CardDefaults.cardColors(containerColor = if (suAnki) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface)) {
                     Column(Modifier.fillMaxWidth().padding(14.dp), horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Image(painterResource(rutbe.gorsel), contentDescription = null,
                             modifier = Modifier.size(80.dp).alpha(if (aktif) 1f else 0.45f))
                         Text(rutbe.ad, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                         Text(stringResource(R.string.level_number, rutbe.baslangicSeviye), style = MaterialTheme.typography.labelSmall)
-                        if (aktif) {
+                        if (suAnki) {
+                            Text(stringResource(R.string.rank_current), style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
+                        } else if (aktif) {
                             KucukOnay(Modifier.size(14.dp).clearAndSetSemantics { }, MaterialTheme.colorScheme.primary)
                         } else {
                             HedefHalkasi(
@@ -157,7 +167,8 @@ fun RutbeYolculugu(durum: SeviyeDurumu, baslikGoster: Boolean = true) {
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(stringResource(R.string.rank_unlock, rutbe.baslangicSeviye, esik))
-                    if (durum.toplamXp >= esik) Text(stringResource(R.string.rank_earned))
+                    if (rutbe == durum.rutbe) Text(stringResource(R.string.rank_current))
+                    else if (durum.toplamXp >= esik) Text(stringResource(R.string.rank_earned))
                     else Text(stringResource(R.string.rank_remaining, esik - durum.toplamXp))
                 }
             },

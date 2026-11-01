@@ -51,7 +51,7 @@ class GelisimAnaliziTest {
     @Test fun rhythmUsesRealDaysMarksTodayIncompleteAndCountsQuestionsSeparately() {
         val a = analiz(rs = listOf(r("a", g = gun), r("b", g = gun), r("c", g = gun - 7)))
         assertEquals(7, a.ritim.size)
-        assertEquals(2, a.ritim.last().tekrar); assertEquals(1, a.ritim.last().soru)
+        assertEquals(2, a.ritim.last().tekrar); assertEquals(1, a.ritim.last().soru); assertEquals(2, a.ritim.last().bagimsiz)
         assertTrue(a.ritim.last().bugunTamamlanmadi)
         assertTrue(a.ritim.dropLast(1).none { it.bugunTamamlanmadi })
         assertEquals(2, a.ritim.sumOf { it.tekrar })

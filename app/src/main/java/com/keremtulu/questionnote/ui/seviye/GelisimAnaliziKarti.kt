@@ -65,12 +65,18 @@ internal fun SonrakiAdimIcerigi(a: GelisimAnalizi, onCalis: (SoruCalismaFiltresi
         Text(stringResource(R.string.analysis_no_action), style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant)
     } else {
-        Text(stringResource(when (o.tur) {
-            OneriTuru.VADESI_GELEN -> R.string.progress_action_due
-            OneriTuru.YAKIN_GUCLUK -> R.string.progress_action_difficulty
-            OneriTuru.KUCUK_TUR -> R.string.progress_action_small
-        }, o.uygunSoru), style = MaterialTheme.typography.bodyMedium)
-        o.etiket?.let { Text(it, style = MaterialTheme.typography.titleSmall) }
+        if (o.tur == OneriTuru.YAKIN_GUCLUK) {
+            o.etiket?.let { Text(it, style = MaterialTheme.typography.titleSmall) }
+            Text(stringResource(R.string.progress_action_difficulty, o.uygunSoru, o.guclukSoru),
+                style = MaterialTheme.typography.bodyMedium)
+        } else {
+            Text(stringResource(when (o.tur) {
+                OneriTuru.VADESI_GELEN -> R.string.progress_action_due
+                OneriTuru.YAKIN_GUCLUK -> R.string.progress_action_difficulty
+                OneriTuru.KUCUK_TUR -> R.string.progress_action_small
+            }, o.uygunSoru), style = MaterialTheme.typography.bodyMedium)
+            o.etiket?.let { Text(it, style = MaterialTheme.typography.titleSmall) }
+        }
         PremiumButton(onClick = { onCalis(o.filtre, o.turBoyutu) }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
             .testTag("analysis-action")) { Text(stringResource(R.string.progress_action_inspect, o.turBoyutu)) }
     }
