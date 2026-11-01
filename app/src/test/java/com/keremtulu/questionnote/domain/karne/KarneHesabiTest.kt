@@ -74,6 +74,20 @@ class KarneHesabiTest {
     }
 
     @Test
+    fun `kontrol acilisi fiziksel acilis sayilir ama yardim kovasina gitmez`() {
+        val sayilar = KarneHesabi.hesapla(
+            listOf(
+                OturumSonucu("kontrol", TekrarSonucu.RAHAT, true, kontrolAcilisi = true),
+                sonuc(TekrarSonucu.RAHAT, cozumAcildi = true, soruId = "yardim"),
+            ),
+        )
+
+        assertEquals(1, sayilar.bagimsiz)
+        assertEquals(1, sayilar.cozumle)
+        assertEquals(2, sayilar.cozumAcilan)
+    }
+
+    @Test
     fun `oran yukari yuvarlanir`() {
         val sayilar = KarneHesabi.hesapla(
             listOf(
@@ -221,13 +235,19 @@ class HaftaDengesiTest {
 }
 
 class RozetKurallariTest {
-    private fun sayilar(toplam: Int, bagimsiz: Int, cozumle: Int = 0): KarneSayilari =
+    private fun sayilar(
+        toplam: Int,
+        bagimsiz: Int,
+        cozumle: Int = 0,
+        cozumAcilan: Int = cozumle,
+    ): KarneSayilari =
         KarneSayilari(
             toplam = toplam,
             bagimsiz = bagimsiz,
             yarim = 0,
             cozemedi = toplam - bagimsiz - cozumle,
             cozumle = cozumle,
+            cozumAcilan = cozumAcilan,
         )
 
     private fun girdi(
@@ -255,6 +275,13 @@ class RozetKurallariTest {
         assertTrue(Rozet.COZUMSUZ in RozetKurallari.kazanilanlar(girdi(sayilar(6, 4)), emptySet()))
         assertFalse(
             Rozet.COZUMSUZ in RozetKurallari.kazanilanlar(girdi(sayilar(6, 4, cozumle = 1)), emptySet()),
+        )
+        // Kontrol açılışı bağımsızlığı korur; fakat rozet fiziksel olarak hiç çözüm açılmamasını ister.
+        assertFalse(
+            Rozet.COZUMSUZ in RozetKurallari.kazanilanlar(
+                girdi(sayilar(6, 6, cozumAcilan = 6)),
+                emptySet(),
+            ),
         )
     }
 

@@ -1,9 +1,9 @@
-# Veri Modeli (Room şema v5)
+# Veri Modeli (Room şema v6)
 
-> Room v5: öğretmen çalışma alanı JSON dosyasından veritabanına taşındı. `MIGRATION_4_5` yalnız üç
-> yeni tablo ve beş indeks ekler; öğrenci tablolarına, tekrarlara ve ölçümlere dokunmaz.
-> 1→2→3→4→5 zinciri korunur. Güncel CI kanıtı `DERLEME_RAPORU.md` içinde; fiziksel cihaz kabulü ayrıdır.
-> Son güncelleme: 2026-10-26.
+> Room v6: `MIGRATION_5_6`, tekrarlara kontrol açılışı için `kontrol_acilisi` ve
+> `kilitli_sonuc` kolonlarını ekler; eski açılışlar yardım sayılarak korunur.
+> 1→2→3→4→5→6 zinciri korunur. Güncel CI kanıtı `DERLEME_RAPORU.md` içinde; fiziksel cihaz
+> kabulü ayrıdır. Son güncelleme: 2026-11-01.
 
 Veritabanı: **Room / SQLite**. Yerel veri tek doğruluk kaynağıdır.
 
@@ -241,7 +241,7 @@ Veritabanı işlemi ile dosya sistemi işlemi tek atomik işlem değildir. Bu y�
   güncelleme çözümü değildir.
 - Şema JSON'ları sürüm kontrolünde saklanır (Room `exportSchema`).
 - **Her migration için otomatik test yazılır**; şema ve veri koruması test edilir. `MIGRATION_1_2` yalnızca `geri_yukleme_isaretleri` tablosunu ekler. `MIGRATION_2_3`, `kaynak_konumu` kolonunu ve global katalog tablosunu ekler; mevcut soru notu/kaynak/neden değerleri korunur, kaynak ve özel nedenler yeniden kullanılabilir kataloğa alınır.
-- Room v1/v2/v3/v4 şemaları `app/schemas/com.keremtulu.questionnote.data.local.YanlisDefteriDatabase/` altında korunur. `MIGRATION_3_4` ölçüm tablosu ve indeksleri ekler; 1/2/3→4 yolları ve null tarihsel ölçümler test edilir. v3 tarihsel CI kanıtı `39037429421`, v4 ana paket kanıtı `39135928734` (217/0).
+- Room v1–v6 şemaları `app/schemas/com.keremtulu.questionnote.data.local.YanlisDefteriDatabase/` altında korunur. `MIGRATION_3_4` ölçüm tablosu ve indeksleri, `MIGRATION_4_5` öğretmen tablolarını, `MIGRATION_5_6` kontrol açılışı kolonlarını ekler; geçiş yolları ve tarihsel veri koruması test edilir.
 - Testler JVM/Robolectric üzerinde çalışır; CI sonucu fiziksel cihaz güncelleme kabulü değildir.
 
 

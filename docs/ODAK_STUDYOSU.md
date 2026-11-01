@@ -52,15 +52,16 @@ kullanır. Kural sezgiseldir; klinik/akademik olarak kişiselleştirilmiş öğr
 
 - Aralık = son geçerli tekrarın `sonraki_aralik` değeri, yoksa **1**.
 - Kolaylık başlangıcı **250** (%250); yalnız `algoritma_surumu >= 2` kayıtlarıyla güncellenir.
-- Çözüm açılmamış desteklenen v2/v3 kayıtta: Rahat +5, Zorlandım −15, Çözemedim −20. Sınır **130…280**.
-- Çözüm açılmışsa kolaylık yargısı verilmez.
-- Unutma sayısı = çözüm açılmadan Çözemedim verilen kayıtların sayısı (eski kayıtlar dahil).
+- Destekli olmayan (çözüm açılmamış veya kontrol için açılmış) desteklenen v2/v3 kayıtta:
+  Rahat +5, Zorlandım −15, Çözemedim −20. Sınır **130…280**.
+- Çözüm yardım için açılmışsa kolaylık yargısı verilmez.
+- Unutma sayısı = destekli olmayan Çözemedim kayıtlarının sayısı (eski kayıtlar dahil).
   **4 ve üzeri** destekleyici "biraz daha ilgi istiyor" kartını açar; otomatik askıya alma yoktur.
 
 ### Yeni aralık
 
 ```
-çözüm açıldı veya Çözemedim → 1 gün
+çözüm yardımla açıldı veya Çözemedim → 1 gün
 Zorlandım                   → max(önceki + 1, round(önceki × 1.2))
 Rahat                       → round(önceki × kolaylık / 100)
 
@@ -71,7 +72,8 @@ sonraki tarih               → bugünün yerel takvim tarihi + aralık
 
 Tam sayı yuvarlama yarımda yukarıdır. Örnekler: ilk Rahat **3 gün**, ilk Zorlandım **2 gün**,
 7 günden kolaylık 250 ile Rahat **18 gün**; 21 günden kolaylık 255 ile 50 gün gecikmiş Rahat
-**43 gün**. Çözüm açılan her sonuç ertesi güne gelir. Aynı soru için aynı yerel günde ikinci
+**43 gün**. Yardımla açılan her sonuç ertesi güne gelir; kontrol açılışı kayıtlı sonucuna göre
+ilerler. Aynı soru için aynı yerel günde ikinci
 kayıt hâlâ engellenir; ne plan ne XP iki kez artar.
 
 ### Tarihsel v1.2.0 kararı: neden o aşamada Room v4 gerekmedi?

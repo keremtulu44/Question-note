@@ -14,7 +14,7 @@ data class OturumSonucu(
     val destekli: Boolean get() = cozumAcildi && !kontrolAcilisi
 }
 
-/** Mutually exclusive buckets. A question opened with the solution always lands in [COZUMLU]. */
+/** Mutually exclusive buckets. A help opening lands in [COZUMLU]; verification follows its result. */
 enum class KarneKovasi {
     BAGIMSIZ,
     YARIM,
@@ -28,6 +28,8 @@ data class KarneSayilari(
     val yarim: Int,
     val cozemedi: Int,
     val cozumle: Int,
+    /** Physical reveals, including post-lock verification; distinct from the help bucket. */
+    val cozumAcilan: Int = 0,
 ) {
     /** Independent-solve percentage, rounded half-up. */
     val oran: Int
@@ -66,7 +68,9 @@ object KarneHesabi {
         var yarim = 0
         var cozemedi = 0
         var cozumle = 0
+        var cozumAcilan = 0
         sonuclar.forEach { sonuc ->
+            if (sonuc.cozumAcildi) cozumAcilan++
             when (kova(sonuc)) {
                 KarneKovasi.BAGIMSIZ -> bagimsiz++
                 KarneKovasi.YARIM -> yarim++
@@ -80,6 +84,7 @@ object KarneHesabi {
             yarim = yarim,
             cozemedi = cozemedi,
             cozumle = cozumle,
+            cozumAcilan = cozumAcilan,
         )
     }
 

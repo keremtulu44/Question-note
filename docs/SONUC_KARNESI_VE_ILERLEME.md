@@ -346,7 +346,7 @@ Kolaylık güncellemesi (aynı işlemde):
 | RAHAT | +5 (`kolaylik_yuz += 5`) |
 | ZORLANDIM | −15 |
 | COZEMEDIM | −20, `unutma_sayisi += 1` |
-| Çözüm açıldı | 0 (yargıya varmıyoruz) |
+| Yardımla açıldı | 0 (yargıya varmıyoruz) |
 
 Sınırlar `130…280` arasında kırpılır.
 
