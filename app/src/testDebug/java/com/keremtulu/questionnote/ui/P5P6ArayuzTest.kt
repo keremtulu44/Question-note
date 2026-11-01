@@ -148,7 +148,7 @@ class P5P6ArayuzTest {
         compose.onNodeWithText(context.getString(R.string.badge_celebrate_continue)).performScrollTo().performClick()
         compose.waitUntil(5_000) { badges.bekleyenIzle.value.isEmpty() }
         compose.onNodeWithTag("rank-celebration").assertExists()
-        compose.onNodeWithText(context.getString(R.string.badge_celebrate_continue)).assertDoesNotExist()
+        compose.onNodeWithText(context.getString(R.string.badge_celebrate_title)).assertDoesNotExist()
         compose.onNodeWithText(context.getString(R.string.rank_celebration_continue)).performScrollTo().performClick()
         compose.waitUntil(5_000) { ranks.bekleyenIzle.value == null }
         assertNull(RutbeDeposu(context).bekleyenIzle.value)
