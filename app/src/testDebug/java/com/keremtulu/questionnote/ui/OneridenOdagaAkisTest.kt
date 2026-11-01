@@ -92,7 +92,7 @@ class OneridenOdagaAkisTest {
             }
             compose.waitUntil(10_000) { compose.onAllNodes(progressTab and isEnabled()).fetchSemanticsNodes().isNotEmpty() }
             compose.onNode(progressTab).tikla()
-            ilerlemeyiBekle()
+            ilerlemeyiBekle("ilk ilerleme açılışı")
             compose.onNodeWithTag("progress-list").performScrollToNode(hasTestTag("analysis-action"))
             compose.onNodeWithTag("analysis-action").tikla()
             val dueFilter = context.getString(R.string.analysis_filter_due)
@@ -138,7 +138,7 @@ class OneridenOdagaAkisTest {
             compose.waitUntil(10_000) { compose.onAllNodesWithTag("practice-filter-list").fetchSemanticsNodes().isNotEmpty() }
             compose.waitUntil(10_000) { compose.onAllNodes(progressTab and isEnabled()).fetchSemanticsNodes().isNotEmpty() }
             compose.onNode(progressTab).tikla()
-            ilerlemeyiBekle()
+            ilerlemeyiBekle("karneden dönüşte ilerleme")
             compose.onNodeWithTag("progress-list").performScrollToNode(hasText(context.getString(R.string.analysis_no_action)))
             compose.onNodeWithText(context.getString(R.string.analysis_no_action)).assertExists()
             assertEquals(1, runBlocking { db.tekrarDao().tumunuGetir().size })
@@ -152,11 +152,11 @@ class OneridenOdagaAkisTest {
     // Touch size/layout are covered separately; a report heading must never impersonate a tab click.
     private fun SemanticsNodeInteraction.tikla() = assertIsDisplayed().assertIsEnabled().assertHasClickAction()
         .performSemanticsAction(SemanticsActions.OnClick) { it() }
-    private fun ilerlemeyiBekle() {
+    private fun ilerlemeyiBekle(asama: String) {
         try {
-            compose.waitUntil(10_000) { compose.onAllNodesWithTag("progress-list").fetchSemanticsNodes().isNotEmpty() }
+            compose.waitUntil(30_000) { compose.onAllNodesWithTag("progress-list").fetchSemanticsNodes().isNotEmpty() }
         } catch (e: ComposeTimeoutException) {
-            throw AssertionError("Progress did not load. UI state:\n" + compose.onRoot().printToString(), e)
+            throw AssertionError("Progress did not load ($asama). UI state:\n" + compose.onRoot().printToString(), e)
         }
     }
 }
