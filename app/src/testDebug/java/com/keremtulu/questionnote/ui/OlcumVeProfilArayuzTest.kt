@@ -112,7 +112,7 @@ class OlcumVeProfilArayuzTest {
             compose.setContent {
                 YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
                     OdakOturumuEkrani(soru, ders, repo, images, "ui-session", depo,
-                        sira = 1, toplam = 1, sonuclar = emptyList(), cozumOnceAcildi = false,
+                        sira = 1, toplam = 1, cozumOnceAcildi = false,
                         onCozumAcildi = {}, onGeri = {}, onSonuc = { sonuc, cozum, kontrol ->
                             assertEquals(TekrarSonucu.RAHAT, sonuc); assertFalse(cozum); assertFalse(kontrol); tamam.set(true)
                         }, onSonaBirak = {}, onAtla = {}, monotonikSaat = MonotonikSaat { now })
@@ -159,7 +159,7 @@ class OlcumVeProfilArayuzTest {
             compose.setContent {
                 YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
                     OdakOturumuEkrani(soru, ders, repo, images, "reveal-session", depo,
-                        sira = 1, toplam = 1, sonuclar = emptyList(), cozumOnceAcildi = false,
+                        sira = 1, toplam = 1, cozumOnceAcildi = false,
                         onCozumAcildi = { kontrol ->
                             assertFalse(kontrol)
                             assertTrue("q" in requireNotNull(OdakOturumuDeposu(context).oku()).cozumAcilanlar)
@@ -197,7 +197,7 @@ class OlcumVeProfilArayuzTest {
             compose.setContent {
                 YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
                     OdakOturumuEkrani(soru, ders, repo, images, "kontrol-session", depo,
-                        sira = 1, toplam = 1, sonuclar = emptyList(), cozumOnceAcildi = false,
+                        sira = 1, toplam = 1, cozumOnceAcildi = false,
                         onCozumAcildi = { kontrol -> assertTrue(kontrol) }, onGeri = {},
                         onSonuc = { sonuc, cozum, kontrol ->
                             assertEquals(TekrarSonucu.ZORLANDIM, sonuc); assertTrue(cozum); assertTrue(kontrol); tamam.set(true)

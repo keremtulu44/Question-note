@@ -18,6 +18,12 @@ Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih 
   ("Yardımla aç"); salt gezinme amaçlı detay görüntülemede sorulmaz. Kilitliyken düğme her iki
   ekranda da "Çözümü kontrol et" olur, değerlendirme alanında kilit hazır ipucu görünür ve
   karar açıklaması kilidi varsayılan alır.
+- **Sade odak:** Çalışma sırasında canlı süre, ölçüm kalitesi, oturum XP'si, ambiyans kartı ve
+  tekrar motoru açıklamaları gösterilmez. Süre ölçümü sessizce sürer; kayıtlı süreler tekrar
+  geçmişi ve profilde korunur. Çözüm alanında yalnız gerekli durum ve eylemler kalır.
+- **Serpiştirilmiş akıllı sıra:** Geciken, vadesi bugün gelen ve gelecek sorular birbirinin
+  önüne geçmeden; her aciliyet kuşağının içinde dersler ve mümkün olduğunda konular
+  serpiştirilir. Toplu yüklenen sorular artık tek ders bloğu hâlinde gelmez.
 
 ## [Yayınlanmadı — üst panel] — 2026-10-27
 

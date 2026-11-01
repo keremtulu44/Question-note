@@ -6,8 +6,10 @@
    özel soru sayısı ve mevcut konu/kaynak/neden filtreleri de kullanılabilir.
 2. **Akıllı sıra** (varsayılan) veya **En eski önce** seçilir. Bugün/Filtreli listesindeki tek
    soruya dokunmak da aynı odak ekranını bir soruluk oturumla açar.
-3. Odak ekranı ders, oturum ilerlemesi, ayrı **deneme/inceleme süreleri**, tamamlanan sayı ve oturum emeği
-   XP'sini gösterir. Fotoğrafa dokunarak tam ekran yakınlaştırılır; eski soru notları okunabilir.
+3. Odak ekranı yalnız ders ve oturum ilerlemesini gösterir. Deneme/inceleme süresi sessizce
+   ölçülür; canlı sayaç, ölçüm kalitesi ve oturum XP'si çalışma sırasında gösterilmez. Süreler
+   tekrar geçmişi ve profilde kalır. Fotoğrafa dokunarak tam ekran yakınlaştırılır; eski soru
+   notları okunabilir.
 4. **Çözümü incele** isteğe bağlıdır. **Cevabımı değerlendir** çözüm açılmasını zorunlu kılmaz.
 5. Çözemedim / Zorlandım / Rahat için bir sonraki tekrar aralığı **kaydetmeden önce** görünür.
    Sonuç seçimi tek başına kayıt değildir; **Kaydet ve ilerle** gerekir. Yanlışlıkla dokunmada
@@ -25,12 +27,17 @@ Bu bir **öz değerlendirme ve tekrar planlama** sistemidir; fotoğraftaki soruy
 
 ## Sıralama
 
-`CalismaSorulariniSirala.akilliOncelik` deterministiktir:
+Temel `CalismaSorulariniSirala.akilliOncelik` deterministiktir:
 
 1. Zamanı gelmiş/gecikmiş sorular;
 2. Planlanan tekrar günü (erken olan önce);
 3. Aynı günde Öğreniyor → Yeni → Pekişiyor → Sağlam;
 4. Son tekrar günü, oluşturma zamanı ve ID ile kararlı eşitlik çözümü.
+
+Çalışma sunumu `karmaAkilliOncelik` kullanır. Geciken → vadesi bugün → gelecek aciliyet
+kuşakları birbirinin önüne geçmez; kuşak içinde dersler ve mümkün olduğunda konular
+serpiştirilir. Aynı konu kuyruğundaki akıllı öncelik korunur. Bu yalnız sunum sırasıdır;
+tekrar tarihini veya öğrenme durumunu değiştirmez.
 
 Arşivli dersler, aktif olmayan soru planları, seçili sınav formatının dışındaki dersler ve bugün
 zaten tekrarlanan sorular yeni oturuma alınmaz. Manuel "En eski önce" sırası korunur. Kullanıcının

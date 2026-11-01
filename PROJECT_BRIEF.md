@@ -90,6 +90,7 @@ Android telefonda kullanılacak, tek kişilik bir dijital yanlış defteri:
 | K45 | **Öğretmen pencereleri tek kabuktan çizilir:** onay, seçim ve form pencereleri `OgretmenDiyalogu` (düz `Dialog` + yüzey) kullanır. Material3 `AlertDialog` Robolectric Compose testlerinde boşta kalmadığı için (AppNotIdle) terk edildi; görünüm ve etiketler korunur. |
 | K46 | **Öğretmen sekme geçişi animasyonsuz:** host ekranları `AnimatedContent` yerine düz `when` ile çizilir. Ekranlar kendi `Dialog` pencerelerini taşıdığı için geçiş animasyonu pencereyi her karede yeniden kuruyordu. |
 | K37 | **Adaptif v2** yeni tekrarları sürüm 2 yazar; eski kayıtları değiştirmez. Kolaylık/aralık/unutma mevcut geçmişten türetildiği için Room v3 / ZIP v3 korunur; eski v4 kolon önerisi bu uygulamada gerekli değildir. |
+| K47 | **Çalışma sunumu sadedir:** Odak'ta canlı süre, ölçüm kalitesi, motor jargonu, ambiyans ve oturum XP'si gösterilmez; süre sessizce ölçülür ve geçmiş/profilde görünür. Akıllı sıra geciken → vadesi bugün → gelecek kuşaklarını korur, kuşak içinde ders ve konuları serpiştirir. |
 
 ### Soru kaydındaki alanlar
 

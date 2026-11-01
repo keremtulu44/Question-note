@@ -185,7 +185,6 @@ class GorselButunlukVeYerlesimArayuzTest {
                     oturumDeposu = oturumDeposu,
                     sira = 1,
                     toplam = 2,
-                    sonuclar = emptyList(),
                     cozumOnceAcildi = false,
                     onCozumAcildi = {},
                     onGeri = {},
@@ -210,15 +209,8 @@ class GorselButunlukVeYerlesimArayuzTest {
         )
 
         val sonaBirakMetni = context.getString(R.string.focus_defer)
-        val sonaBirakNotMetni = context.getString(R.string.focus_defer_note)
-        compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText(sonaBirakNotMetni))
-        compose.onNodeWithText(sonaBirakNotMetni).assertIsDisplayed()
-        val sonaBirakButonSinir = compose.onNodeWithText(sonaBirakMetni).fetchSemanticsNode().boundsInRoot
-        val sonaBirakNotSinir = compose.onNodeWithText(sonaBirakNotMetni).fetchSemanticsNode().boundsInRoot
-        assertTrue(
-            "Sona bırak açıklaması butonun üstüne binmemeli: buton=$sonaBirakButonSinir, not=$sonaBirakNotSinir",
-            sonaBirakNotSinir.top >= sonaBirakButonSinir.bottom - 1f,
-        )
+        compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText(sonaBirakMetni))
+        compose.onNodeWithText(sonaBirakMetni).assertIsDisplayed()
     }
 
     @Test

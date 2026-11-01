@@ -790,7 +790,7 @@ fun YanlisDefteriUygulamasi(
                         } else key(current.oturum.id, question.id) {
                             OdakOturumuEkrani(
                                 soru = question, ders = lesson, repository = soruRepository, gorselDeposu = gorselDeposu,
-                                sira = current.sira + 1, toplam = current.oturum.soruIdleri.size, sonuclar = current.sonuclar,
+                                sira = current.sira + 1, toplam = current.oturum.soruIdleri.size,
                                 oturumId = current.oturum.id,
                                 oturumDeposu = oturumDeposu,
                                 oturumCizimBellegi = tahtaOturumCizimBellegi,

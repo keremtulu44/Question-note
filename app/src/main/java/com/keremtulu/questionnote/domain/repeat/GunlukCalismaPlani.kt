@@ -15,7 +15,7 @@ data class GunlukCalismaPlani(
         const val ONIZLEME_SINIRI = 3
 
         fun olustur(sorular: List<Soru>, bugun: Int, hedef: Int, yapilan: Int): GunlukCalismaPlani {
-            val sirali = CalismaSorulariniSirala.akilliOncelik(sorular, bugun)
+            val sirali = CalismaSorulariniSirala.karmaAkilliOncelik(sorular, bugun)
             val tur = sirali.take((hedef.coerceAtLeast(1) - yapilan.coerceAtLeast(0)).coerceIn(5, 30))
             return GunlukCalismaPlani(
                 sirali, tur, tur.take(ONIZLEME_SINIRI),

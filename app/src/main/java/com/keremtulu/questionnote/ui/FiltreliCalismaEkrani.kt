@@ -243,7 +243,7 @@ fun FiltreliCalismaEkrani(
         else -> emptyList()
     }
     val siraliSorular = remember(sorular, ayar.akilliSira, bugun) {
-        if (ayar.akilliSira) CalismaSorulariniSirala.akilliOncelik(sorular, bugun.toEpochDay().toInt())
+        if (ayar.akilliSira) CalismaSorulariniSirala.karmaAkilliOncelik(sorular, bugun.toEpochDay().toInt())
         else CalismaSorulariniSirala.enUzunSureCalisilmayanlar(sorular, ZoneId.systemDefault())
     }
     // Kullanıcının yazdığı sayı korunur; istenen sayı eşleşenden büyükse altındaki bilgi metni
