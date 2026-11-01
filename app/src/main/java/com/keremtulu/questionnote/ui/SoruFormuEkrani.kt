@@ -676,11 +676,6 @@ fun SoruFormuEkrani(
                                 verticalArrangement = Arrangement.spacedBy(10.dp),
                             ) {
                                 Text(
-                                    stringResource(R.string.question_form_header_kicker),
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    style = MaterialTheme.typography.labelMedium,
-                                )
-                                Text(
                                     stringResource(
                                         if (soruId == null) R.string.question_form_add_title
                                         else R.string.question_form_edit_title,
@@ -688,11 +683,6 @@ fun SoruFormuEkrani(
                                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                                     style = MaterialTheme.typography.headlineMedium,
                                     fontWeight = FontWeight.Bold,
-                                )
-                                Text(
-                                    stringResource(R.string.question_form_header_hint),
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.86f),
-                                    style = MaterialTheme.typography.bodyMedium,
                                 )
                                 Surface(
                                     shape = CircleShape,
@@ -734,86 +724,9 @@ fun SoruFormuEkrani(
                     }
                 }
                 item {
-                    val sorulacakSecili = planDurumu == SoruPlanDurumu.OGRETMENE_SORULACAK
-                    PremiumCard(
-                        onClick = {
-                            if (!kaydediliyor) {
-                                planDurumu = if (sorulacakSecili) {
-                                    SoruPlanDurumu.AKTIF
-                                } else {
-                                    SoruPlanDurumu.OGRETMENE_SORULACAK
-                                }
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth().testTag("form_ogretmene_sorulacak_karti"),
-                        shape = RoundedCornerShape(22.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = if (sorulacakSecili) {
-                                MaterialTheme.colorScheme.secondaryContainer
-                            } else {
-                                MaterialTheme.colorScheme.surface
-                            },
-                        ),
-                        border = BorderStroke(
-                            width = if (sorulacakSecili) 1.5.dp else 1.dp,
-                            color = if (sorulacakSecili) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.65f)
-                            },
-                        ),
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Surface(
-                                shape = CircleShape,
-                                color = if (sorulacakSecili) {
-                                    MaterialTheme.colorScheme.primary
-                                } else {
-                                    MaterialTheme.colorScheme.primaryContainer
-                                },
-                            ) {
-                                Box(Modifier.width(38.dp).height(38.dp), contentAlignment = Alignment.Center) {
-                                    Text(
-                                        text = if (sorulacakSecili) "✓" else "?",
-                                        color = if (sorulacakSecili) {
-                                            MaterialTheme.colorScheme.onPrimary
-                                        } else {
-                                            MaterialTheme.colorScheme.onPrimaryContainer
-                                        },
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold,
-                                        fontFamily = PremiumSembolAilesi,
-                                    )
-                                }
-                            }
-                            Column(
-                                modifier = Modifier.weight(1f),
-                                verticalArrangement = Arrangement.spacedBy(4.dp),
-                            ) {
-                                Text(
-                                    stringResource(R.string.question_form_ask_teacher_title),
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                )
-                                Text(
-                                    stringResource(R.string.question_form_ask_teacher_subtitle),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                        }
-                    }
-                }
-                item {
                     SoruFormBolumu(
                         adim = "02",
                         baslik = stringResource(R.string.question_form_section_details),
-                        aciklama = stringResource(R.string.question_form_section_details_hint),
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             if (topicsState is KonuSecenekleriDurumu.Hata) {
@@ -958,7 +871,6 @@ fun SoruFormuEkrani(
                     SoruFormBolumu(
                         adim = "04",
                         baslik = stringResource(R.string.question_form_section_plan),
-                        aciklama = stringResource(R.string.question_form_section_plan_hint),
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                             FilterChip(
@@ -984,6 +896,13 @@ fun SoruFormuEkrani(
                                             enabled = !kaydediliyor,
                                         )
                                     }
+                                }
+                                if (planDurumu == SoruPlanDurumu.OGRETMENE_SORULACAK) {
+                                    Text(
+                                        stringResource(R.string.question_form_ask_teacher_subtitle),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
                                 }
                             }
                         }
@@ -1179,7 +1098,7 @@ fun SoruFormuEkrani(
 private fun SoruFormBolumu(
     adim: String,
     baslik: String,
-    aciklama: String,
+    aciklama: String? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
@@ -1213,11 +1132,13 @@ private fun SoruFormBolumu(
                     verticalArrangement = Arrangement.spacedBy(3.dp),
                 ) {
                     Text(baslik, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                    Text(
-                        aciklama,
-                        color = colors.onSurfaceVariant,
-                        style = MaterialTheme.typography.bodySmall,
-                    )
+                    if (!aciklama.isNullOrBlank()) {
+                        Text(
+                            aciklama,
+                            color = colors.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
                 }
             }
             content()

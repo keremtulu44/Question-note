@@ -786,6 +786,7 @@ fun YanlisDefteriUygulamasi(
                             UygulamaDurumEkrani(
                                 metin = stringResource(R.string.filtered_practice_question_unavailable), yukleniyor = false,
                                 tekrarDene = { oturumGoster(current.sorular, current.dersler, current.oturum.atla()) },
+                                eylemMetni = R.string.common_continue,
                             )
                         } else key(current.oturum.id, question.id) {
                             OdakOturumuEkrani(
@@ -889,8 +890,6 @@ fun YanlisDefteriUygulamasi(
                     UygulamaEkrani.Ayarlar -> AyarlarEkrani(
                         gunlukHedefDeposu = tercihHedefDeposu,
                         profilDeposu = profilDeposu, dersRepository = dersRepository,
-                        tekrarPolitikasi = tekrarPolitikasi,
-                        motorTanisi = motorTanisi,
                         sonYedek = sonYedek,
                         yedeklemeIslemde = yedeklemeIslemde,
                         onYedekOlustur = {
@@ -904,14 +903,6 @@ fun YanlisDefteriUygulamasi(
                         onGorselBakimi = { ekranSec(UygulamaEkrani.GorselBakimi) },
                         onKatalog = { ekranSec(UygulamaEkrani.Katalog) },
                         onKonular = { ekranSec(UygulamaEkrani.KonuMerkezi) },
-                        onPremiumDemo = {
-                            context.startActivity(
-                                android.content.Intent(
-                                    context,
-                                    com.keremtulu.questionnote.ui.premium.PremiumDemoActivity::class.java,
-                                ),
-                            )
-                        },
                         onOgretmenModunaGec = {
                             if (com.keremtulu.questionnote.domain.model.UrunKapsami.OGRETMEN_MODU_GORUNUR) {
                                 profilDeposu.rolKaydet(com.keremtulu.questionnote.domain.model.KullaniciRolu.OGRETMEN)
@@ -997,8 +988,7 @@ fun YanlisDefteriUygulamasi(
                             preview.yedek.sayilar.gorselSayisi,
                             preview.mevcut.soruSayisi,
                             preview.mevcut.gorselSayisi,
-                        ) + "\n\n" + context.getString(R.string.backup_measurement_count, preview.yedek.sayilar.olcumSayisi) +
-                            ogretmenSatiri,
+                        ) + ogretmenSatiri,
                     )
                 }
             },
@@ -1118,6 +1108,7 @@ private fun UygulamaDurumEkrani(
     metin: String,
     yukleniyor: Boolean,
     tekrarDene: (() -> Unit)? = null,
+    @androidx.annotation.StringRes eylemMetni: Int = R.string.backup_restore_retry,
 ) {
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),
@@ -1127,7 +1118,7 @@ private fun UygulamaDurumEkrani(
         if (yukleniyor) CircularProgressIndicator()
         Text(metin, modifier = Modifier.padding(top = 16.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
         tekrarDene?.let { retry ->
-            PremiumTextButton(onClick = retry) { Text(stringResource(R.string.backup_restore_retry)) }
+            PremiumTextButton(onClick = retry) { Text(stringResource(eylemMetni)) }
         }
     }
 }

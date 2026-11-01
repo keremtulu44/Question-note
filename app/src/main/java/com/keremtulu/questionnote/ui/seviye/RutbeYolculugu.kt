@@ -53,7 +53,7 @@ fun RutbeYolculugu(durum: SeviyeDurumu, baslikGoster: Boolean = true) {
             color = MaterialTheme.colorScheme.onSurfaceVariant)
         // Küçük yol: 15 rütbenin neresinde olduğumuz, tek bakışta.
         com.keremtulu.questionnote.ui.bilesenler.YolNoktalari(
-            oran = ((durum.seviye - 1).toFloat() / (Rutbe.entries.size - 1).coerceAtLeast(1)).coerceIn(0f, 1f),
+            oran = (durum.rutbe.ordinal.toFloat() / Rutbe.entries.lastIndex.coerceAtLeast(1)).coerceIn(0f, 1f),
             modifier = Modifier.width(232.dp).height(14.dp).clearAndSetSemantics { },
             renk = MaterialTheme.colorScheme.surfaceVariant,
             dolguRenk = MaterialTheme.colorScheme.primary,
@@ -94,9 +94,9 @@ fun RutbeYolculugu(durum: SeviyeDurumu, baslikGoster: Boolean = true) {
         val sonraki = Rutbe.entries.firstOrNull { it.baslangicSeviye > durum.seviye }
         if (sonraki != null) {
             val esik = SeviyeHesabi.seviyeEsigi(sonraki.baslangicSeviye)
-            val oncekiEsik = SeviyeHesabi.seviyeEsigi(sonraki.baslangicSeviye - 1)
-            val aralik = (esik - oncekiEsik).coerceAtLeast(1)
-            val ilerleme = ((durum.toplamXp - oncekiEsik).toFloat() / aralik).coerceIn(0f, 1f)
+            val mevcutEsik = SeviyeHesabi.seviyeEsigi(durum.rutbe.baslangicSeviye)
+            val aralik = (esik - mevcutEsik).coerceAtLeast(1)
+            val ilerleme = ((durum.toplamXp - mevcutEsik).toFloat() / aralik).coerceIn(0f, 1f)
             PremiumCard(
                 modifier = Modifier.fillMaxWidth().testTag("rank-next-card"),
                 shape = RoundedCornerShape(22.dp),
@@ -161,7 +161,7 @@ fun RutbeYolculugu(durum: SeviyeDurumu, baslikGoster: Boolean = true) {
                     else Text(stringResource(R.string.rank_remaining, esik - durum.toplamXp))
                 }
             },
-            confirmButton = { PremiumTextButton(onClick = { detay = null }) { Text(stringResource(R.string.common_back)) } },
+            confirmButton = { PremiumTextButton(onClick = { detay = null }) { Text(stringResource(R.string.common_close)) } },
         )
     }
 }

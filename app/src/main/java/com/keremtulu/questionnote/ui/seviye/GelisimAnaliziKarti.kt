@@ -65,8 +65,6 @@ internal fun SonrakiAdimIcerigi(a: GelisimAnalizi, onCalis: (SoruCalismaFiltresi
         Text(stringResource(R.string.analysis_no_action), style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant)
     } else {
-        Text(stringResource(R.string.progress_action_scope, a.kapsamAdi), style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(stringResource(when (o.tur) {
             OneriTuru.VADESI_GELEN -> R.string.progress_action_due
             OneriTuru.YAKIN_GUCLUK -> R.string.progress_action_difficulty
@@ -122,8 +120,6 @@ private fun RitimKarti(a: GelisimAnalizi) {
 private fun PlanKarti(a: GelisimAnalizi) {
     var acikGun by rememberSaveable(a.gun, a.kapsamAdi) { mutableStateOf<Int?>(null) }
     IlerlemePaneli(Modifier.testTag("analysis-plan"), icerikBosluk = 4) {
-        Text(stringResource(R.string.progress_action_scope, a.kapsamAdi), style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant)
         a.plan.forEachIndexed { i, p ->
             val acik = acikGun == p.gun
             val aciklik = stringResource(if (acik) R.string.progress_details_open else R.string.progress_details_closed)

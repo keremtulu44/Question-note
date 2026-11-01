@@ -115,7 +115,7 @@ fun KonuYonetimiEkrani(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 PremiumTextButton(onClick = onGeri) {
-                    Text(text = stringResource(R.string.topic_back_to_lessons))
+                    Text(text = stringResource(R.string.common_back))
                 }
                 com.keremtulu.questionnote.ui.bilesenler.DuzBaslik(
                     baslik = stringResource(R.string.topic_screen_title),

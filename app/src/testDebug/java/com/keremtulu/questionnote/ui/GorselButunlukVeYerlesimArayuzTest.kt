@@ -198,15 +198,8 @@ class GorselButunlukVeYerlesimArayuzTest {
         val cozumGosterMetni = context.getString(R.string.focus_reveal)
         val cozumYokMetni = context.getString(R.string.focus_no_solution)
         compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText(cozumYokMetni))
-        compose.onNodeWithText(cozumGosterMetni).assertIsDisplayed()
+        compose.onNodeWithText(cozumGosterMetni).assertDoesNotExist()
         compose.onNodeWithText(cozumYokMetni).assertIsDisplayed()
-
-        val cozumButonSinir = compose.onNodeWithText(cozumGosterMetni).fetchSemanticsNode().boundsInRoot
-        val cozumYokSinir = compose.onNodeWithText(cozumYokMetni).fetchSemanticsNode().boundsInRoot
-        assertTrue(
-            "Çözüm kaydı yok metni butonun üstüne binmemeli: buton=$cozumButonSinir, metin=$cozumYokSinir",
-            cozumYokSinir.top >= cozumButonSinir.bottom - 1f,
-        )
 
         val sonaBirakMetni = context.getString(R.string.focus_defer)
         compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText(sonaBirakMetni))

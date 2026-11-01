@@ -3,6 +3,7 @@ package com.keremtulu.questionnote.ui.bilesenler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -130,11 +131,6 @@ fun GorselSecimBolumu(
                             stringResource(R.string.question_form_no_photos),
                             style = MaterialTheme.typography.labelLarge,
                         )
-                        Text(
-                            stringResource(R.string.question_form_photo_empty_hint),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.bodySmall,
-                        )
                     }
                 }
             }
@@ -156,7 +152,8 @@ fun GorselSecimBolumu(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(196.dp)
+                            .heightIn(min = 160.dp, max = 340.dp)
+                            .aspectRatio((image.genislik.toFloat() / image.yukseklik.coerceAtLeast(1)).coerceIn(1f, 2f))
                             .clip(RoundedCornerShape(16.dp))
                             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f)),
                         contentAlignment = Alignment.Center,
@@ -164,14 +161,14 @@ fun GorselSecimBolumu(
                         SoruGorselResmi(
                             file = file,
                             contentDescription = stringResource(R.string.question_image_description),
-                            modifier = Modifier.fillMaxWidth().height(196.dp),
+                            modifier = Modifier.matchParentSize(),
                             contentScale = ContentScale.Fit,
                             maxDecodeEdge = 900,
                             cerceve = false,
                             onClick = file?.let { f -> { tamEkranDosya = f } },
                         )
                     }
-                    PremiumButton(
+                    PremiumOutlinedButton(
                         onClick = { onCrop(image) },
                         enabled = enabled,
                         modifier = Modifier
@@ -180,10 +177,6 @@ fun GorselSecimBolumu(
                             .testTag("gorsel_kirp_merkez_0")
                             .semantics { contentDescription = cropLabel },
                         shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary,
-                        ),
                     ) {
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -197,12 +190,6 @@ fun GorselSecimBolumu(
                             )
                         }
                     }
-                    Text(
-                        stringResource(R.string.question_form_crop_center_hint),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.bodySmall,
-                        textAlign = TextAlign.Center,
-                    )
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -253,21 +240,22 @@ fun GorselSecimBolumu(
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(156.dp)
+                                    .heightIn(min = 140.dp, max = 256.dp)
+                                    .aspectRatio((image.genislik.toFloat() / image.yukseklik.coerceAtLeast(1)).coerceIn(1f, 2f))
                                     .clip(RoundedCornerShape(14.dp))
                                     .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f)),
                             ) {
                                 SoruGorselResmi(
                                     file = file,
                                     contentDescription = stringResource(R.string.question_image_description),
-                                    modifier = Modifier.fillMaxWidth().height(156.dp),
+                                    modifier = Modifier.matchParentSize(),
                                     contentScale = ContentScale.Fit,
                                     maxDecodeEdge = 640,
                                     cerceve = false,
                                     onClick = file?.let { f -> { tamEkranDosya = f } },
                                 )
                             }
-                            PremiumButton(
+                            PremiumOutlinedButton(
                                 onClick = { onCrop(image) },
                                 enabled = enabled,
                                 modifier = Modifier
@@ -276,10 +264,6 @@ fun GorselSecimBolumu(
                                     .testTag("gorsel_kirp_merkez_${image.sira}")
                                     .semantics { contentDescription = cropLabel },
                                 shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                                ),
                             ) {
                                 Row(
                                     horizontalArrangement = Arrangement.spacedBy(6.dp),

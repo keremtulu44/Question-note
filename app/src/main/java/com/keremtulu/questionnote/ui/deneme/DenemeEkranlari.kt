@@ -267,13 +267,6 @@ fun DenemeListesiEkrani(
                     verticalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
                     item {
-                        com.keremtulu.questionnote.ui.bilesenler.DuzBaslik(
-                    baslik = stringResource(R.string.deneme_title),
-                    alt = stringResource(R.string.deneme_list_subtitle),
-                )
-                    }
-
-                    item {
                         SadeKart(elevation = CamYukseklik.DUSUK) {
                             Column(
                                 modifier = Modifier.padding(18.dp),
@@ -340,7 +333,9 @@ fun DenemeListesiEkrani(
                                     }
                                 }
 
-                                NetCizgisi(grafikKayitlari)
+                                if (grafikKayitlari.size >= 2) {
+                                    NetCizgisi(grafikKayitlari)
+                                }
 
                                 if (grafikKayitlari.size < 2) {
                                     Text(
@@ -355,6 +350,7 @@ fun DenemeListesiEkrani(
 
                     if (sonDeneme != null && sonDeneme.satirlar.isNotEmpty()) {
                         item {
+                            val dersBarlari = remember(kayitlar, sonDeneme) { kayitlar.dersBarlari(sonDeneme) }
                             SadeKart(elevation = CamYukseklik.DUSUK) {
                                 Column(
                                     modifier = Modifier.padding(18.dp),
@@ -365,13 +361,15 @@ fun DenemeListesiEkrani(
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Bold,
                                     )
-                                    Text(
-                                        text = stringResource(R.string.deneme_chart_legend),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
+                                    if (dersBarlari.any { it.oncekiOrtalama != null }) {
+                                        Text(
+                                            text = stringResource(R.string.deneme_chart_legend),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
                                     DersNetBarlari(
-                                        barlar = kayitlar.dersBarlari(sonDeneme),
+                                        barlar = dersBarlari,
                                         dersAdlari = dersAdlari,
                                     )
                                 }
@@ -1019,11 +1017,13 @@ fun DenemeDetayEkrani(
                 contentPadding = PaddingValues(start = 20.dp, top = 6.dp, end = 20.dp, bottom = 36.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
-                item {
-                    com.keremtulu.questionnote.ui.bilesenler.DuzBaslik(
-                    baslik = stringResource(R.string.deneme_net_line, netYazi(anlikToplamNet)),
-                    alt = stringResource( R.string.deneme_live_counts, anlikDogru, anlikYanlis, anlikBos, ),
-                )
+                if (denemeId != null || anlikDogru + anlikYanlis + anlikBos > 0) {
+                    item {
+                        com.keremtulu.questionnote.ui.bilesenler.DuzBaslik(
+                            baslik = stringResource(R.string.deneme_net_line, netYazi(anlikToplamNet)),
+                            alt = stringResource(R.string.deneme_live_counts, anlikDogru, anlikYanlis, anlikBos),
+                        )
+                    }
                 }
 
                 item {

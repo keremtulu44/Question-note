@@ -185,8 +185,6 @@ private fun HaftalikCalismaOzeti(a: com.keremtulu.questionnote.domain.gelisim.Ge
     val tarih = remember { java.time.format.DateTimeFormatter.ofPattern("d MMM", Locale.forLanguageTag("tr-TR")) }
     IlerlemePaneli(Modifier.testTag("progress-weekly-summary")) {
         BolumBasligi(stringResource(R.string.progress_weekly_title))
-        Text(stringResource(R.string.progress_action_scope, a.kapsamAdi),
-            style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(stringResource(R.string.progress_weekly_summary, aktifGun, toplam),
             style = MaterialTheme.typography.titleMedium)
         val enYuksek = (a.ritim.maxOfOrNull { it.tekrar } ?: 0).coerceAtLeast(1)
@@ -351,7 +349,7 @@ private fun GunlukHedef(tekrar: Int, hedef: Int) {
                 style = Stroke(kalinlik, cap = StrokeCap.Round))
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-            Text(stringResource(R.string.progress_today_scope), style = MaterialTheme.typography.labelMedium,
+            Text(stringResource(R.string.settings_goal_title), style = MaterialTheme.typography.labelMedium,
                 color = renk.onSurfaceVariant)
             Text(stringResource(R.string.progress_daily_count, tekrar, hedef), style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold, modifier = Modifier.testTag("progress-daily-count"))
@@ -362,8 +360,6 @@ private fun GunlukHedef(tekrar: Int, hedef: Int) {
 @Composable
 private fun DersPekismesi(dersler: List<DersIlerlemesi>) {
     IlerlemePaneli {
-        Text(stringResource(R.string.progress_learning_note), style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant)
         dersler.forEach { ders ->
             Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(vertical = 8.dp)) {
                 Text(ders.dersAdi, style = MaterialTheme.typography.titleSmall)

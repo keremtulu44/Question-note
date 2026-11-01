@@ -1,5 +1,6 @@
 package com.keremtulu.questionnote.ui
 
+import android.text.format.Formatter
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -89,7 +90,11 @@ fun GorselBakimEkrani(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 22.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                PremiumButton(onClick = ::runAudit, enabled = !loading) { Text(stringResource(R.string.image_audit_action)) }
+                PremiumButton(
+                    onClick = ::runAudit,
+                    enabled = !loading,
+                    modifier = Modifier.weight(1f),
+                ) { Text(stringResource(R.string.image_audit_action)) }
             }
             if (loading) {
                 Column(
@@ -138,7 +143,11 @@ fun GorselBakimEkrani(
                             }
                             items(current.onayBekleyenYetimler, key = { it.dosyaAdi }) { file ->
                                 Text(
-                                    stringResource(R.string.image_orphan_item, file.dosyaAdi, file.boyut),
+                                    stringResource(
+                                        R.string.image_orphan_item,
+                                        file.dosyaAdi,
+                                        Formatter.formatShortFileSize(context, file.boyut),
+                                    ),
                                     style = MaterialTheme.typography.bodySmall,
                                 )
                             }

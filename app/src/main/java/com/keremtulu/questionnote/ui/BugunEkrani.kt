@@ -75,6 +75,7 @@ import com.keremtulu.questionnote.ui.premium.EtkilesimTuru
 import com.keremtulu.questionnote.ui.premium.PremiumButton
 import com.keremtulu.questionnote.ui.premium.PremiumGradyanlar
 import com.keremtulu.questionnote.ui.premium.PremiumMarkaRenkler
+import com.keremtulu.questionnote.ui.premium.PremiumSembolAilesi
 import com.keremtulu.questionnote.ui.premium.PremiumTextButton
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
@@ -332,7 +333,7 @@ private fun BugunOdakKarti(
         durum is BugunDurumu.Yukleniyor -> stringResource(R.string.today_loading_count)
         durum is BugunDurumu.Hata -> stringResource(R.string.today_load_error)
         adet == 0 -> stringResource(R.string.today_focus_empty)
-        else -> stringResource(R.string.today_focus_message)
+        else -> null
     }
     Box(Modifier.fillMaxWidth()) {
         GradyanKart(
@@ -378,11 +379,13 @@ private fun BugunOdakKarti(
                         )
                     }
                 }
-                Text(
-                    text = mesaj,
-                    color = kagit.copy(alpha = 0.88f),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
+                if (mesaj != null) {
+                    Text(
+                        text = mesaj,
+                        color = kagit.copy(alpha = 0.88f),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
                 // Yüklenirken hedef/CTA iskeleti gösterilmez: yanlış "0 soru" düğmesi doğmaz.
                 if (adet != null) {
                     OdakHedefiVeEylemi(
@@ -713,13 +716,13 @@ private fun DenemeSatiri(
             modifier = Modifier.size(38.dp).background(colors.primaryContainer, RoundedCornerShape(12.dp)),
             contentAlignment = Alignment.Center,
         ) {
-            com.keremtulu.questionnote.ui.bilesenler.HedefHalkasi(
-                oran = 0.72f,
-                modifier = Modifier.size(18.dp),
-                izRenk = colors.primary.copy(alpha = 0.25f),
-                dolguRenk = colors.primary,
-                kalinlik = 2.dp,
-                isaretSayisi = 12,
+            Text(
+                text = "◈",
+                color = colors.primary,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                fontFamily = PremiumSembolAilesi,
+                modifier = Modifier.clearAndSetSemantics { },
             )
         }
         Column(

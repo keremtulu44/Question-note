@@ -100,7 +100,7 @@ class OneridenOdagaAkisTest {
                 compose.onAllNodes(hasText(dueFilter), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
             }
             compose.onNodeWithText(dueFilter, useUnmergedTree = true).assertExists()
-            val start = context.getString(R.string.filtered_practice_start)
+            val start = context.getString(R.string.filtered_practice_start_n, 1)
             compose.onNodeWithTag("practice-filter-list").performScrollToNode(hasText(start))
             compose.waitUntil(10_000) { compose.onAllNodes(hasText(start) and isEnabled()).fetchSemanticsNodes().isNotEmpty() }
             compose.onNodeWithText(start).tikla()

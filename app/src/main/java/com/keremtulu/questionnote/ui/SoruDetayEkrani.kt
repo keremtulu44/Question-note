@@ -10,7 +10,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -310,9 +311,11 @@ fun SoruDetayEkrani(
                         SoruGorselResmi(
                             file = file,
                             contentDescription = stringResource(R.string.question_image_description),
-                            modifier = Modifier.fillMaxWidth().height(250.dp),
+                            modifier = Modifier.fillMaxWidth()
+                                .heightIn(min = 160.dp, max = 560.dp)
+                                .aspectRatio((image.genislik.toFloat() / image.yukseklik.coerceAtLeast(1)).coerceIn(0.55f, 2f)),
                             contentScale = androidx.compose.ui.layout.ContentScale.Fit,
-                            maxDecodeEdge = 1_200,
+                            maxDecodeEdge = 1_800,
                             onClick = { if (file != null) tamEkranGorsel = image },
                         )
                     }
@@ -330,10 +333,9 @@ fun SoruDetayEkrani(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            PremiumButton(
+                            if (cozumVar) PremiumButton(
                                 onClick = {
-                                    val ilkAcilis = !cozumAcik && !cozumAcildi &&
-                                        (soru.cozumNotu != null || soru.gorseller.any { it.tur == com.keremtulu.questionnote.domain.model.GorselTuru.COZUM })
+                                    val ilkAcilis = !cozumAcik && !cozumAcildi && cozumVar
                                     when {
                                         cozumAcik -> cozumAcik = false
                                         ilkAcilis && seciliSonuc == null && tekrarKaydedilebilir -> yardimOnayi = true
@@ -351,6 +353,13 @@ fun SoruDetayEkrani(
                                     else -> R.string.question_show_solution
                                 }))
                             }
+                            if (!cozumVar) {
+                                Text(
+                                    text = stringResource(R.string.focus_no_solution),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            }
                             Text(
                                 text = stringResource(
                                     when (soru.planDurumu) {
@@ -365,29 +374,23 @@ fun SoruDetayEkrani(
                             )
                         }
                     }
-                    if (cozumAcik) {
-                        if (!cozumVar) {
-                            item {
-                                Text(
-                                    text = stringResource(R.string.focus_no_solution),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                )
+                    if (cozumAcik && cozumVar) {
+                            soru.cozumNotu?.takeIf { it.isNotBlank() }?.let { note ->
+                                item { BilgiAlani(R.string.question_solution_note, note) }
                             }
-                        } else {
-                            if (soru.cozumNotu != null) item { BilgiAlani(R.string.question_solution_note, soru.cozumNotu) }
                             items(cozumGorselleri, key = { it.id }) { image ->
                                 val file = gorselDeposu.dosyaGoruntuIcin(image.dosyaAdi)
                                 SoruGorselResmi(
                                     file = file,
                                     contentDescription = stringResource(R.string.solution_image_description),
-                                    modifier = Modifier.fillMaxWidth().height(250.dp),
+                                    modifier = Modifier.fillMaxWidth()
+                                        .heightIn(min = 160.dp, max = 560.dp)
+                                        .aspectRatio((image.genislik.toFloat() / image.yukseklik.coerceAtLeast(1)).coerceIn(0.55f, 2f)),
                                     contentScale = androidx.compose.ui.layout.ContentScale.Fit,
-                                    maxDecodeEdge = 1_200,
+                                    maxDecodeEdge = 1_800,
                                     onClick = { if (file != null) tamEkranGorsel = image },
                                 )
                             }
-                        }
                     }
                     item {
                         Text(
@@ -482,7 +485,6 @@ fun SoruDetayEkrani(
                                             when {
                                                 kontrolAcilisi -> R.string.review_checked_note
                                                 cozumAcildi -> R.string.review_assisted_note
-                                                tekrarOturumunda -> R.string.filtered_practice_result_note
                                                 seciliSonuc != null -> R.string.review_lock_selected_note
                                                 else -> R.string.review_record_subtitle
                                             },
@@ -712,19 +714,6 @@ private fun TekrarGecmisiKarti(record: TekrarKaydi) {
                     ),
                     style = MaterialTheme.typography.bodySmall,
                 )
-            }
-            val olcum = record.olcum
-            if (olcum?.denemeAktifMs == null || olcum.incelemeAktifMs == null) {
-                Text(stringResource(R.string.measure_unavailable), style = MaterialTheme.typography.bodySmall)
-            } else {
-                fun sure(ms: Long) = String.format(Locale.ROOT, "%02d:%02d", ms / 60_000, ms / 1_000 % 60)
-                Text(stringResource(R.string.measure_phase_times, sure(olcum.denemeAktifMs), sure(olcum.incelemeAktifMs)),
-                    style = MaterialTheme.typography.bodySmall)
-                Text(stringResource(when (olcum.kalite) {
-                    com.keremtulu.questionnote.domain.calisma.OlcumKalitesi.TAM -> R.string.measure_complete
-                    com.keremtulu.questionnote.domain.calisma.OlcumKalitesi.KISMI -> R.string.measure_partial
-                    else -> R.string.measure_invalid
-                }), style = MaterialTheme.typography.labelSmall)
             }
             if (record.elleAtandi) {
                 Text(

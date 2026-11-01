@@ -185,15 +185,9 @@ fun SoruGorselTamEkran(
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    text = stringResource(R.string.teacher_zoom_hint),
-                    modifier = Modifier.weight(1f),
-                    color = PremiumMarkaRenkler.Kagit.copy(alpha = 0.72f),
-                    style = MaterialTheme.typography.bodySmall,
-                )
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically,

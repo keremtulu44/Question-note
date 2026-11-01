@@ -173,7 +173,7 @@ fun DersCalismaEkrani(
                     }
                     com.keremtulu.questionnote.ui.bilesenler.DuzBaslik(
                     baslik = ders.ad,
-                    alt = if (dersArsivli) stringResource(R.string.lesson_archived_read_only) else stringResource(R.string.question_screen_subtitle),
+                    alt = if (dersArsivli) stringResource(R.string.lesson_archived_read_only) else null,
                 )
                 }
             }
@@ -300,14 +300,15 @@ fun DersCalismaEkrani(
                     )
                 }
                 is SoruListesiDurumu.Hazir -> {
-                    val query = arama.trim()
+                    val turkce = java.util.Locale.forLanguageTag("tr-TR")
+                    val query = arama.trim().lowercase(turkce)
                     val visibleQuestions = current.sorular.filter { question ->
                         (planDurumuFiltresi == null || question.planDurumu == planDurumuFiltresi) &&
                             (!sadeceFavori || question.favori) &&
                             (query.isEmpty() ||
-                                question.soruNotu.orEmpty().contains(query, ignoreCase = true) ||
-                                question.kaynak.orEmpty().contains(query, ignoreCase = true) ||
-                                question.yanlisNedeni.orEmpty().contains(query, ignoreCase = true))
+                                question.soruNotu.orEmpty().lowercase(turkce).contains(query) ||
+                                question.kaynak.orEmpty().lowercase(turkce).contains(query) ||
+                                question.yanlisNedeni.orEmpty().lowercase(turkce).contains(query))
                     }
                     if (visibleQuestions.isEmpty()) {
                         val emptyMessage = when {
@@ -367,6 +368,9 @@ private fun SoruListeKarti(
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f)),
         interactionTur = EtkilesimTuru.KART_ACILIS,
     ) {
+        val baslik = soru.soruNotu?.takeIf { it.isNotBlank() }
+            ?: soru.kaynak?.takeIf { it.isNotBlank() }
+            ?: stringResource(R.string.question_untitled)
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -374,9 +378,7 @@ private fun SoruListeKarti(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = soru.soruNotu?.takeIf { it.isNotBlank() }
-                        ?: soru.kaynak?.takeIf { it.isNotBlank() }
-                        ?: stringResource(R.string.question_untitled),
+                    text = baslik,
                     modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
@@ -397,7 +399,7 @@ private fun SoruListeKarti(
             if (deneme != null) {
                 com.keremtulu.questionnote.ui.deneme.DenemeDamgaYazi(deneme)
             } else {
-            soru.kaynak?.takeIf { it.isNotBlank() && it != soru.soruNotu }?.let {
+            soru.kaynak?.takeIf { it.isNotBlank() && it != baslik }?.let {
                 Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             }
@@ -430,11 +432,6 @@ private fun SoruListeKarti(
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                     )
                 }
-                Text(
-                    text = stringResource(R.string.question_photo_badge),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
             }
         }
     }

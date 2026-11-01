@@ -129,7 +129,7 @@ fun DerslerEkrani(
         fun DerslerUstBaslik(modifier: Modifier = Modifier) {
             com.keremtulu.questionnote.ui.bilesenler.SayfaBasligi(
                 baslik = stringResource(if (soruEkleModu) R.string.lessons_choose_title else R.string.lessons_title),
-                alt = if (soruEkleModu) stringResource(R.string.lessons_choose_subtitle) else profilAdi.takeIf { it.isNotBlank() },
+                alt = if (soruEkleModu) null else profilAdi.takeIf { it.isNotBlank() },
                 modifier = modifier,
             )
         }

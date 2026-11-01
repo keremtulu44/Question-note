@@ -89,18 +89,18 @@ fun RutbeKutlamasiIcerigi(r: RutbeKutlamasi, mesgul: Boolean = false, hata: Bool
                 scaleX = 0.9f + v * 0.1f; scaleY = scaleX; alpha = v
             })
             // Rütbe yolculuğunun küçük noktaları: kutlama anında soldan sağa dolar.
+            val yolOrani = r.son.ordinal.toFloat() /
+                com.keremtulu.questionnote.domain.seviye.Rutbe.entries.lastIndex.coerceAtLeast(1)
             com.keremtulu.questionnote.ui.bilesenler.YolNoktalari(
-                oran = if (p.azaltildi) 1f else giris.value,
+                oran = if (p.azaltildi) yolOrani else giris.value * yolOrani,
                 modifier = Modifier.width(168.dp).height(12.dp).clearAndSetSemantics { },
                 renk = Color(0xFFEFC18A).copy(alpha = 0.35f),
                 dolguRenk = Color(0xFFEFC18A),
-                noktaSayisi = 9,
+                noktaSayisi = com.keremtulu.questionnote.domain.seviye.Rutbe.entries.size,
             )
             Text(r.son.ad, color = Color.White, style = MaterialTheme.typography.headlineLarge, textAlign = TextAlign.Center)
-            Text(stringResource(R.string.rank_celebration_summary, r.gecilenEsik, r.onceki.ad, r.son.ad),
+            Text(stringResource(R.string.rank_celebration_summary, r.onceki.ad, r.son.ad),
                 color = Color.White, textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyLarge)
-            Text(stringResource(R.string.rank_celebration_note), color = Color(0xFFE8DCCB), textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodyMedium)
             if (hata) Text(stringResource(R.string.rank_celebration_error), color = Color(0xFFFFDAD6))
             PremiumButton(onClick = onKapat, enabled = !mesgul, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEFC18A), contentColor = Color(0xFF0C202C))) {

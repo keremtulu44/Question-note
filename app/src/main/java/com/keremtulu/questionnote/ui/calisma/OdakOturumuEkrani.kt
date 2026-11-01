@@ -154,10 +154,6 @@ fun OdakOturumuEkrani(
         }
     }
     val oncekiKayitlar = gecmis
-    val yakinGecmis = remember(oncekiKayitlar, olcum.yenidenOnPlanda, degerlendirme) {
-        com.keremtulu.questionnote.domain.repeat.YakinGecmisHesabi.hesapla(oncekiKayitlar.orEmpty(),
-            java.time.LocalDate.now().toEpochDay().toInt())
-    }
     val cozumVar = !soru.cozumNotu.isNullOrBlank() || soru.gorseller.any { it.tur == GorselTuru.COZUM }
     val colors = MaterialTheme.colorScheme
 
@@ -313,14 +309,6 @@ fun OdakOturumuEkrani(
                     }
                 }
             }
-            if (yakinGecmis.tekrarGucluk) item {
-                PremiumCard(colors = CardDefaults.cardColors(containerColor = colors.secondaryContainer), shape = MaterialTheme.shapes.large) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text(stringResource(R.string.focus_difficult), fontWeight = FontWeight.Bold)
-                        Text(stringResource(R.string.recent_difficulty_hint), style = MaterialTheme.typography.bodySmall)
-                    }
-                }
-            }
             if (!soru.soruNotu.isNullOrBlank()) item {
                 Text(soru.soruNotu.orEmpty(), style = MaterialTheme.typography.bodyLarge, color = colors.onSurface)
             }
@@ -355,7 +343,7 @@ fun OdakOturumuEkrani(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    PremiumOutlinedButton(onClick = {
+                    if (cozumVar) PremiumOutlinedButton(onClick = {
                         if (kaydediliyor || cozumAciliyor) return@PremiumOutlinedButton
                         when {
                             cozumGorunur -> cozumGorunur = false
@@ -478,7 +466,6 @@ fun OdakOturumuEkrani(
             Text(stringResource(R.string.common_cancel)) } })
     if (mola) AlertDialog(onDismissRequest = { mola = false },
         title = { Text(stringResource(R.string.focus_paused_title)) },
-        text = { Text(stringResource(R.string.focus_paused_note)) },
         confirmButton = { PremiumTextButton(onClick = { mola = false }) { Text(stringResource(R.string.focus_resume)) } })
     gorsel?.let { image ->
         val file = gorselDeposu.dosyaGoruntuIcin(image.dosyaAdi)

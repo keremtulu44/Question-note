@@ -483,7 +483,7 @@ fun AdimIlerlemeGostergesi(
 fun PremiumBosDurum(
     illustration: @Composable () -> Unit = { VarsayilanIlustrasyon() },
     baslik: String,
-    aciklama: String,
+    aciklama: String? = null,
     butonMetni: String? = null,
     onButonTikla: (() -> Unit)? = null,
     modifier: Modifier = Modifier.fillMaxSize(),
@@ -509,7 +509,9 @@ fun PremiumBosDurum(
         ) { illustration() }
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(baslik, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-            Text(aciklama, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+            if (!aciklama.isNullOrBlank()) {
+                Text(aciklama, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+            }
         }
         if (butonMetni != null && onButonTikla != null) {
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -559,17 +561,6 @@ fun BosDurumSoruYok(onSoruEkle: () -> Unit) {
         aciklama = stringResource(R.string.today_empty_description),
         butonMetni = stringResource(R.string.progress_add_question),
         onButonTikla = onSoruEkle,
-        illustration = { VarsayilanIlustrasyon() },
-    )
-}
-
-@Composable
-fun BosDurumTekrarYok(onGit: () -> Unit) {
-    PremiumBosDurum(
-        baslik = "Bugün tekrar yok",
-        aciklama = "Bugün için planlı tekrarın bulunmuyor. İstersen bir soru ekleyip öğrenme yolculuğuna devam edebilirsin.",
-        butonMetni = "Soru ekle",
-        onButonTikla = onGit,
         illustration = { VarsayilanIlustrasyon() },
     )
 }

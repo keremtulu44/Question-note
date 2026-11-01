@@ -100,11 +100,24 @@ fun KonuMerkeziEkrani(
                 )
             }
             if (hata) {
-                item { PremiumTextButton(onClick = { yenile++ }) { Text(stringResource(R.string.topic_retry)) } }
+                item {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            stringResource(R.string.topic_load_error),
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                        PremiumTextButton(onClick = { yenile++ }) {
+                            Text(stringResource(R.string.topic_retry))
+                        }
+                    }
+                }
             } else if (dersler == null) {
                 item { CircularProgressIndicator() }
             } else {
-                val bulunanlar = dersler.orEmpty().filter { it.ders.ad.contains(arama, ignoreCase = true) }
+                val aramaMetni = arama.trim().lowercase(java.util.Locale.forLanguageTag("tr-TR"))
+                val bulunanlar = dersler.orEmpty().filter {
+                    it.ders.ad.lowercase(java.util.Locale.forLanguageTag("tr-TR")).contains(aramaMetni)
+                }
                 if (bulunanlar.isEmpty()) item { Text(stringResource(R.string.topics_search_empty)) }
                 items(bulunanlar, key = { it.ders.id }) { satir ->
                     PremiumCard(onClick = { onDers(satir.ders) }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp)) {
@@ -112,7 +125,7 @@ fun KonuMerkeziEkrani(
                             Text(satir.ders.ad, style = MaterialTheme.typography.titleMedium)
                             Text(stringResource(R.string.topics_center_count, satir.konuSayisi, satir.ders.soruSayisi),
                                 style = MaterialTheme.typography.bodySmall)
-                            if (satir.arsivli) Text(stringResource(R.string.topic_filter_archived), style = MaterialTheme.typography.labelSmall)
+                            if (satir.arsivli) Text(stringResource(R.string.topic_archived_label), style = MaterialTheme.typography.labelSmall)
                         }
                     }
                 }

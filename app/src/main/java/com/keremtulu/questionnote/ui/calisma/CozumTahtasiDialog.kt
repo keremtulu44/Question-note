@@ -415,7 +415,7 @@ private fun TahtaCalismaBasligi(
     val subtitle = if (oturumSira != null && oturumToplam != null) {
         stringResource(R.string.whiteboard_session_progress, oturumSira, oturumToplam)
     } else {
-        stringResource(R.string.whiteboard_subtitle)
+        null
     }
     Box(
         modifier = modifier
@@ -448,23 +448,34 @@ private fun TahtaCalismaBasligi(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Text(
-                    subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.76f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                if (subtitle != null) {
+                    Text(
+                        subtitle,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.White.copy(alpha = 0.76f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
             IconButton(
                 onClick = onSoruPaneliTikla,
-                modifier = Modifier.size(46.dp)
-                    .clip(CircleShape)
+                modifier = Modifier.height(46.dp)
+                    .clip(RoundedCornerShape(999.dp))
                     .background(Color.White.copy(alpha = 0.12f))
+                    .padding(horizontal = 12.dp)
                     .testTag("whiteboard-question-preview-toggle")
                     .semantics { contentDescription = panelButtonLabel },
             ) {
-                SoruPaneliDugmeIkonu(acik = soruPaneliAcik, color = Color.White)
+                Text(
+                    text = stringResource(
+                        if (soruPaneliAcik) R.string.common_close else R.string.whiteboard_question_section,
+                    ),
+                    color = Color.White,
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                )
             }
             IconButton(
                 onClick = onKapat,
@@ -505,42 +516,6 @@ private fun SoruPaneliAnimasyonu(
         exit = exit,
     ) {
         content()
-    }
-}
-
-@Composable
-private fun SoruPaneliDugmeIkonu(
-    acik: Boolean,
-    color: Color = MaterialTheme.colorScheme.onSurface,
-) {
-    Canvas(Modifier.size(22.dp)) {
-        val stroke = 1.8.dp.toPx()
-        val center = Offset(size.width * 0.4f, size.height * 0.4f)
-        val radius = size.minDimension * 0.23f
-        drawCircle(color = color, radius = radius, center = center, style = Stroke(width = stroke))
-        drawLine(
-            color = color,
-            start = Offset(center.x + radius * 0.7f, center.y + radius * 0.7f),
-            end = Offset(size.width * 0.9f, size.height * 0.9f),
-            strokeWidth = stroke,
-            cap = StrokeCap.Round,
-        )
-        drawLine(
-            color = color,
-            start = Offset(center.x - radius * 0.45f, center.y),
-            end = Offset(center.x + radius * 0.45f, center.y),
-            strokeWidth = stroke,
-            cap = StrokeCap.Round,
-        )
-        if (!acik) {
-            drawLine(
-                color = color,
-                start = Offset(center.x, center.y - radius * 0.45f),
-                end = Offset(center.x, center.y + radius * 0.45f),
-                strokeWidth = stroke,
-                cap = StrokeCap.Round,
-            )
-        }
     }
 }
 
