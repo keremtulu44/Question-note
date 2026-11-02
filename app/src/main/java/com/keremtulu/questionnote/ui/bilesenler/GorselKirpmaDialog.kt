@@ -124,9 +124,6 @@ fun GorselKirpmaDialog(
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                     )
-                    PremiumTextButton(onClick = onDismiss, enabled = !isSaving) {
-                        Text(stringResource(R.string.common_close))
-                    }
                 }
                 Text(
                     stringResource(R.string.question_form_crop_hint),
@@ -194,15 +191,9 @@ fun GorselKirpmaDialog(
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(
-                        if (isSaving) stringResource(R.string.question_form_crop_saving) else selectionDescription,
-                        modifier = Modifier.weight(1f),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
                     PremiumTextButton(
                         onClick = { selection = GorselKirpmaAlani.Tamami },
                         enabled = !isSaving && bitmap != null,

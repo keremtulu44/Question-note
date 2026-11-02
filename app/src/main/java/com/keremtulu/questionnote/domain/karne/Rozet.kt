@@ -78,7 +78,7 @@ object RozetKurallari {
             Rozet.KUSURSUZ_TUR -> kusursuz to 5
             Rozet.ON_BAGIMSIZ -> o.bagimsiz to 10
             Rozet.YIRMI_SORU -> o.toplam to 20
-            Rozet.COZUMSUZ -> (if (o.cozumle == 0) o.toplam else 0) to 5
+            Rozet.COZUMSUZ -> (if (o.cozumAcilan == 0 && o.cozumle == 0) o.toplam else 0) to 5
             Rozet.ISTIKRAR -> istikrar to 5
             Rozet.SERI_3 -> girdi.seri to 3
             Rozet.SERI_7 -> girdi.seri to 7

@@ -22,18 +22,29 @@ data class DersNetKarsilastirma(
     val dersId: String,
     val sonNet: Double,
     val oncekiOrtalama: Double?,
+    val sonNetOrani: Double,
+    val oncekiOrtalamaOrani: Double?,
     val dersAdi: String? = null,
-)
+) {
+    val oranFarki: Double? get() = oncekiOrtalamaOrani?.let { sonNetOrani - it }
+}
 
 fun List<DenemeKaydi>.dersBarlari(son: DenemeKaydi): List<DersNetKarsilastirma> {
-    val ayni = filter { it.kural == son.kural && it.id != son.id }
+    val oncekiAyniKural = kronolojik().filter {
+        it.kural == son.kural && it.id != son.id &&
+            (it.gun < son.gun || (it.gun == son.gun && it.olusturma < son.olusturma))
+    }
     return son.satirlar.map { satir ->
-        val oncekiler = ayni.mapNotNull { it.satir(satir.dersId) }
-            .map { son.kural.net(it.dogru, it.yanlis) }
+        val oncekiSatirlar = oncekiAyniKural.mapNotNull { it.satir(satir.dersId) }
+        val oncekiNetler = oncekiSatirlar.map { son.kural.net(it.dogru, it.yanlis) }
+        val oncekiSoruToplami = oncekiSatirlar.sumOf { it.soruSayisi }
         DersNetKarsilastirma(
             dersId = satir.dersId,
             sonNet = son.kural.net(satir.dogru, satir.yanlis),
-            oncekiOrtalama = oncekiler.takeIf { it.isNotEmpty() }?.average(),
+            oncekiOrtalama = oncekiNetler.takeIf { it.isNotEmpty() }?.average(),
+            sonNetOrani = satir.netOrani(son.kural) ?: 0.0,
+            oncekiOrtalamaOrani = oncekiSoruToplami.takeIf { it > 0 }
+                ?.let { oncekiNetler.sum() / it * 100.0 },
             dersAdi = satir.dersAdi,
         )
     }

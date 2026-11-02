@@ -83,7 +83,8 @@ object OlcumSerilestirme {
             .put("v2_late_discount", karar.v2GecikmeIndirimi)
             .put("reasons", JSONArray(karar.nedenler.map { it.name }.sorted()))
             .put("recent", JSONArray().apply { karar.yakin.gunler.forEach {
-                put(JSONObject().put("day", it.gun).put("result", it.sonuc.name).put("solution_opened", it.cozumAcildi))
+                put(JSONObject().put("day", it.gun).put("result", it.sonuc.name).put("solution_opened", it.cozumAcildi)
+                    .put("solution_checked", it.kontrolAcilisi))
             } }).toString()
     }
 
@@ -110,6 +111,12 @@ object OlcumSerilestirme {
         val o = olcum(e)
         require(o.gecerliAlanlar())
         require(tekrar.cozumAcildi || (o.incelemeAktifMs ?: 0) == 0L)
+        // A verification opening needs a pre-reveal lock at or above the recorded result.
+        val kilit = tekrar.kilitliSonuc?.let { ad -> TekrarSonucu.entries.firstOrNull { it.name == ad } }
+        require(tekrar.kilitliSonuc == null || kilit != null)
+        require(if (tekrar.kontrolAcilisi) tekrar.cozumAcildi && kilit != null &&
+            TekrarSonucu.valueOf(tekrar.sonuc).ordinal <= requireNotNull(kilit).ordinal
+            else tekrar.kilitliSonuc == null)
         require(e.kararJson.toByteArray(Charsets.UTF_8).size <= KARAR_UST_SINIR)
         val karar = JSONObject(e.kararJson)
         val surum = tamInt(karar, "version")
@@ -151,14 +158,15 @@ object OlcumSerilestirme {
         val temelAralik = tamInt(json, "base_interval")
         val onceki = requireNotNull(t.oncekiAralik)
         require(temelAralik in 1..180 && onceki in 1..180)
-        if (t.cozumAcildi || t.sonuc == "COZEMEDIM") require(temelAralik == 1)
+        if (t.destekli || t.sonuc == "COZEMEDIM") require(temelAralik == 1)
         val dizi = json.getJSONArray("recent")
         require(dizi.length() <= YakinGecmisHesabi.EN_COK_GUN)
         val gunler = (0 until dizi.length()).map { i ->
             val k = dizi.getJSONObject(i)
             val gun = tamInt(k, "day")
             require(gun.toLong() in (t.gun.toLong() - 89)..t.gun.toLong())
-            YakinTekrar(gun, TekrarSonucu.valueOf(k.getString("result")), k.get("solution_opened") as Boolean)
+            YakinTekrar(gun, TekrarSonucu.valueOf(k.getString("result")), k.get("solution_opened") as Boolean,
+                k.optBoolean("solution_checked", false))
         }
         require(gunler.map { it.gun } == gunler.map { it.gun }.distinct().sortedDescending())
         val temel = TekrarPlani(onceki, temelAralik, Math.addExact(t.gun, temelAralik), when {
@@ -168,10 +176,11 @@ object OlcumSerilestirme {
         })
         val profil = json.getJSONObject("profile").getJSONObject("independent")
         val referans = if (profil.isNull("reference")) null else profilOku(profil.getJSONObject("reference"))
-        val gecikme = t.planlananGun?.let { t.gun.toLong() - it > 2L * onceki } == true && !t.cozumAcildi && t.sonuc != "COZEMEDIM"
+        val gecikme = t.planlananGun?.let { t.gun.toLong() - it > 2L * onceki } == true && !t.destekli && t.sonuc != "COZEMEDIM"
         require(json.get("v2_late_discount") as Boolean == gecikme)
         val hesap = UyarlanabilirTekrarKurali.karar(temel,
-            TekrarDenemesi(e.denemeId, t.soruId, TekrarSonucu.valueOf(t.sonuc), t.cozumAcildi, olcum(e), e.oturumId),
+            TekrarDenemesi(e.denemeId, t.soruId, TekrarSonucu.valueOf(t.sonuc), t.cozumAcildi, olcum(e), e.oturumId,
+                t.kontrolAcilisi, t.kilitliSonuc?.let(TekrarSonucu::valueOf)),
             referans, t.gun, istenen, mod, YakinGecmis(gunler), json.get("unknown_history") as Boolean, gecikme)
         require(hesap.aday.sonrakiAralik == tamInt(json, "candidate_interval"))
         require(hesap.uygulanan.sonrakiAralik == t.sonrakiAralik)

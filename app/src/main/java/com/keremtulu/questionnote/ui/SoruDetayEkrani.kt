@@ -10,7 +10,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -36,6 +37,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
@@ -117,6 +121,10 @@ fun SoruDetayEkrani(
     var yenileme by remember(soruId) { mutableIntStateOf(0) }
     var cozumAcik by remember(soruId) { mutableStateOf(false) }
     var cozumAcildi by remember(soruId) { mutableStateOf(false) }
+    var seciliSonuc by remember(soruId) { mutableStateOf<TekrarSonucu?>(null) }
+    var kilitliSonuc by remember(soruId) { mutableStateOf<TekrarSonucu?>(null) }
+    var kontrolAcilisi by remember(soruId) { mutableStateOf(false) }
+    var yardimOnayi by remember(soruId) { mutableStateOf(false) }
     var beyazTahtaAcik by remember(soruId) { mutableStateOf(false) }
     var tekrarKaydediliyor by remember(soruId) { mutableStateOf(false) }
     var silmeOnayi by remember { mutableStateOf(false) }
@@ -162,7 +170,8 @@ fun SoruDetayEkrani(
         scope.launch {
             var sonrakiGun: Int? = null
             val result = try {
-                val onizleme = soruRepository.tekrarOnizle(TekrarDenemesi(denemeId, soru.id, sonuc, cozumAcildi))
+                val onizleme = soruRepository.tekrarOnizle(TekrarDenemesi(denemeId, soru.id, sonuc, cozumAcildi,
+                    kontrolAcilisi = kontrolAcilisi, kilitliSonuc = kilitliSonuc))
                 if (onizleme == null) SoruIslemSonucu.Bulunamadi else {
                     sonrakiGun = onizleme.plan.sonrakiGun
                     soruRepository.tekrarKaydet(onizleme)
@@ -232,6 +241,16 @@ fun SoruDetayEkrani(
                     soru.gorseller.filter { it.tur == com.keremtulu.questionnote.domain.model.GorselTuru.COZUM }
                 }
                 val cozumVar = !soru.cozumNotu.isNullOrBlank() || cozumGorselleri.isNotEmpty()
+                val tekrarKaydedilebilir = !dersArsivli && soru.planDurumu == SoruPlanDurumu.AKTIF &&
+                    (tekrarOturumunda || soru.sonrakiTekrarGun?.let { it <= today } == true)
+                fun cozumAcilisiniIsle() {
+                    cozumAcildi = true
+                    val kilit = seciliSonuc
+                    if (kilit != null) {
+                        kontrolAcilisi = true
+                        kilitliSonuc = kilit
+                    }
+                }
                 LazyColumn(
                     modifier = Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding),
                     contentPadding = PaddingValues(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 32.dp),
@@ -292,9 +311,11 @@ fun SoruDetayEkrani(
                         SoruGorselResmi(
                             file = file,
                             contentDescription = stringResource(R.string.question_image_description),
-                            modifier = Modifier.fillMaxWidth().height(250.dp),
+                            modifier = Modifier.fillMaxWidth()
+                                .heightIn(min = 160.dp, max = 560.dp)
+                                .aspectRatio((image.genislik.toFloat() / image.yukseklik.coerceAtLeast(1)).coerceIn(0.55f, 2f)),
                             contentScale = androidx.compose.ui.layout.ContentScale.Fit,
-                            maxDecodeEdge = 1_200,
+                            maxDecodeEdge = 1_800,
                             onClick = { if (file != null) tamEkranGorsel = image },
                         )
                     }
@@ -312,16 +333,32 @@ fun SoruDetayEkrani(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            PremiumButton(
+                            if (cozumVar) PremiumButton(
                                 onClick = {
-                                    if (!cozumAcik && (soru.cozumNotu != null || soru.gorseller.any { it.tur == com.keremtulu.questionnote.domain.model.GorselTuru.COZUM })) {
-                                        cozumAcildi = true
+                                    val ilkAcilis = !cozumAcik && !cozumAcildi && cozumVar
+                                    when {
+                                        cozumAcik -> cozumAcik = false
+                                        ilkAcilis && seciliSonuc == null && tekrarKaydedilebilir -> yardimOnayi = true
+                                        else -> {
+                                            if (ilkAcilis) cozumAcilisiniIsle()
+                                            cozumAcik = true
+                                        }
                                     }
-                                    cozumAcik = !cozumAcik
                                 },
                                 interactionTur = EtkilesimTuru.TIKLAMA,
                             ) {
-                                Text(stringResource(if (cozumAcik) R.string.question_hide_solution else R.string.question_show_solution))
+                                Text(stringResource(when {
+                                    cozumAcik -> R.string.question_hide_solution
+                                    kontrolAcilisi || (!cozumAcildi && seciliSonuc != null) -> R.string.focus_reveal_check
+                                    else -> R.string.question_show_solution
+                                }))
+                            }
+                            if (!cozumVar) {
+                                Text(
+                                    text = stringResource(R.string.focus_no_solution),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
                             }
                             Text(
                                 text = stringResource(
@@ -337,29 +374,23 @@ fun SoruDetayEkrani(
                             )
                         }
                     }
-                    if (cozumAcik) {
-                        if (!cozumVar) {
-                            item {
-                                Text(
-                                    text = stringResource(R.string.focus_no_solution),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                )
+                    if (cozumAcik && cozumVar) {
+                            soru.cozumNotu?.takeIf { it.isNotBlank() }?.let { note ->
+                                item { BilgiAlani(R.string.question_solution_note, note) }
                             }
-                        } else {
-                            if (soru.cozumNotu != null) item { BilgiAlani(R.string.question_solution_note, soru.cozumNotu) }
                             items(cozumGorselleri, key = { it.id }) { image ->
                                 val file = gorselDeposu.dosyaGoruntuIcin(image.dosyaAdi)
                                 SoruGorselResmi(
                                     file = file,
                                     contentDescription = stringResource(R.string.solution_image_description),
-                                    modifier = Modifier.fillMaxWidth().height(250.dp),
+                                    modifier = Modifier.fillMaxWidth()
+                                        .heightIn(min = 160.dp, max = 560.dp)
+                                        .aspectRatio((image.genislik.toFloat() / image.yukseklik.coerceAtLeast(1)).coerceIn(0.55f, 2f)),
                                     contentScale = androidx.compose.ui.layout.ContentScale.Fit,
-                                    maxDecodeEdge = 1_200,
+                                    maxDecodeEdge = 1_800,
                                     onClick = { if (file != null) tamEkranGorsel = image },
                                 )
                             }
-                        }
                     }
                     item {
                         Text(
@@ -430,10 +461,7 @@ fun SoruDetayEkrani(
                             }
                         }
                     }
-                    if (
-                        !dersArsivli && soru.planDurumu == SoruPlanDurumu.AKTIF &&
-                        (tekrarOturumunda || soru.sonrakiTekrarGun?.let { it <= today } == true)
-                    ) {
+                    if (tekrarKaydedilebilir) {
                         item {
                             PremiumCard(
                                 modifier = Modifier.fillMaxWidth(),
@@ -454,33 +482,53 @@ fun SoruDetayEkrani(
                                     )
                                     Text(
                                         stringResource(
-                                            if (tekrarOturumunda) R.string.filtered_practice_result_note
-                                            else R.string.review_record_subtitle,
+                                            when {
+                                                kontrolAcilisi -> R.string.review_checked_note
+                                                cozumAcildi -> R.string.review_assisted_note
+                                                seciliSonuc != null -> R.string.review_lock_selected_note
+                                                else -> R.string.review_record_subtitle
+                                            },
                                         ),
                                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.78f),
                                         style = MaterialTheme.typography.bodySmall,
                                     )
-                                    PremiumOutlinedButton(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        enabled = !tekrarKaydediliyor,
-                                        interactionTur = EtkilesimTuru.TIKLAMA,
-                                        onClick = { tekrarSonucunuKaydet(soru, TekrarSonucu.COZEMEDIM) },
-                                    ) { Text(stringResource(R.string.review_result_not_solved)) }
-                                    PremiumOutlinedButton(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        enabled = !tekrarKaydediliyor,
-                                        interactionTur = EtkilesimTuru.TIKLAMA,
-                                        onClick = { tekrarSonucunuKaydet(soru, TekrarSonucu.ZORLANDIM) },
-                                    ) { Text(stringResource(R.string.review_result_struggled)) }
+                                    val sonucEtiketleri = listOf(
+                                        TekrarSonucu.COZEMEDIM to R.string.review_result_not_solved,
+                                        TekrarSonucu.ZORLANDIM to R.string.review_result_struggled,
+                                        TekrarSonucu.RAHAT to R.string.review_result_easy,
+                                    )
+                                    sonucEtiketleri.forEach { (adaySonuc, etiket) ->
+                                        val tavanUstu = kontrolAcilisi && kilitliSonuc != null &&
+                                            adaySonuc.ordinal > requireNotNull(kilitliSonuc).ordinal
+                                        val secili = seciliSonuc == adaySonuc
+                                        val metin = stringResource(etiket) +
+                                            if (kontrolAcilisi && kilitliSonuc == adaySonuc)
+                                                " · " + stringResource(R.string.review_lock_label) else ""
+                                        if (secili) {
+                                            PremiumButton(
+                                                modifier = Modifier.fillMaxWidth().semantics { selected = true; role = Role.RadioButton },
+                                                enabled = !tekrarKaydediliyor && !tavanUstu,
+                                                interactionTur = EtkilesimTuru.TIKLAMA,
+                                                onClick = { seciliSonuc = adaySonuc },
+                                            ) { Text(metin) }
+                                        } else {
+                                            PremiumOutlinedButton(
+                                                modifier = Modifier.fillMaxWidth().semantics { selected = false; role = Role.RadioButton },
+                                                enabled = !tekrarKaydediliyor && !tavanUstu,
+                                                interactionTur = EtkilesimTuru.TIKLAMA,
+                                                onClick = { seciliSonuc = adaySonuc },
+                                            ) { Text(metin) }
+                                        }
+                                    }
                                     PremiumButton(
                                         modifier = Modifier.fillMaxWidth(),
-                                        enabled = !tekrarKaydediliyor,
+                                        enabled = !tekrarKaydediliyor && seciliSonuc != null,
                                         interactionTur = EtkilesimTuru.TIKLAMA,
-                                        onClick = { tekrarSonucunuKaydet(soru, TekrarSonucu.RAHAT) },
+                                        onClick = { seciliSonuc?.let { tekrarSonucunuKaydet(soru, it) } },
                                     ) {
                                         Text(
                                             stringResource(
-                                                if (tekrarKaydediliyor) R.string.review_saving else R.string.review_result_easy,
+                                                if (tekrarKaydediliyor) R.string.review_saving else R.string.review_save_result,
                                             ),
                                         )
                                     }
@@ -536,6 +584,23 @@ fun SoruDetayEkrani(
                 }
             }
         }
+    }
+
+    if (yardimOnayi && currentQuestion != null) {
+        AlertDialog(
+            onDismissRequest = { yardimOnayi = false },
+            title = { Text(stringResource(R.string.focus_reveal_help_title)) },
+            text = { Text(stringResource(R.string.focus_reveal_help_message)) },
+            confirmButton = {
+                PremiumTextButton(onClick = {
+                    yardimOnayi = false
+                    // Same first-reveal marking as the plain tap; no lock was made, so it is help.
+                    if (!cozumAcildi) cozumAcildi = true
+                    cozumAcik = true
+                }) { Text(stringResource(R.string.focus_reveal_help_confirm)) }
+            },
+            dismissButton = { PremiumTextButton(onClick = { yardimOnayi = false }) { Text(stringResource(R.string.common_cancel)) } },
+        )
     }
 
     if (silmeOnayi && currentQuestion != null) {
@@ -621,11 +686,25 @@ private fun TekrarGecmisiKarti(record: TekrarKaydi) {
             )
             Text(
                 stringResource(
-                    if (record.cozumAcildi) R.string.review_history_solution_opened
-                    else R.string.review_history_solution_not_opened,
+                    when {
+                        record.kontrolAcilisi -> R.string.review_history_solution_checked
+                        record.cozumAcildi -> R.string.review_history_solution_opened
+                        else -> R.string.review_history_solution_not_opened
+                    },
                 ),
                 style = MaterialTheme.typography.bodySmall,
             )
+            val kilit = record.kilitliSonuc
+            if (kilit != null && kilit != record.sonuc) {
+                Text(
+                    stringResource(R.string.review_history_locked_result, stringResource(when (kilit) {
+                        TekrarSonucu.COZEMEDIM -> R.string.review_result_not_solved
+                        TekrarSonucu.ZORLANDIM -> R.string.review_result_struggled
+                        TekrarSonucu.RAHAT -> R.string.review_result_easy
+                    })),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
             if (record.oncekiAralik != null && record.sonrakiAralik != null) {
                 Text(
                     stringResource(
@@ -635,19 +714,6 @@ private fun TekrarGecmisiKarti(record: TekrarKaydi) {
                     ),
                     style = MaterialTheme.typography.bodySmall,
                 )
-            }
-            val olcum = record.olcum
-            if (olcum?.denemeAktifMs == null || olcum.incelemeAktifMs == null) {
-                Text(stringResource(R.string.measure_unavailable), style = MaterialTheme.typography.bodySmall)
-            } else {
-                fun sure(ms: Long) = String.format(Locale.ROOT, "%02d:%02d", ms / 60_000, ms / 1_000 % 60)
-                Text(stringResource(R.string.measure_phase_times, sure(olcum.denemeAktifMs), sure(olcum.incelemeAktifMs)),
-                    style = MaterialTheme.typography.bodySmall)
-                Text(stringResource(when (olcum.kalite) {
-                    com.keremtulu.questionnote.domain.calisma.OlcumKalitesi.TAM -> R.string.measure_complete
-                    com.keremtulu.questionnote.domain.calisma.OlcumKalitesi.KISMI -> R.string.measure_partial
-                    else -> R.string.measure_invalid
-                }), style = MaterialTheme.typography.labelSmall)
             }
             if (record.elleAtandi) {
                 Text(

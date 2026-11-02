@@ -35,7 +35,7 @@ Kapsam dışı: sosyal paylaşım, çok kullanıcı, sunucu, bildirim (ayrı de�
 | # | Karar |
 |---|---|
 | S1 | **Sonuç → karne eşlemesi:** `Rahat` = bağımsız çözüm, `Zorlandım` = yarım (destekli), `Çözemedim` = çözemedi. |
-| S2 | **Çözüm açıldıysa** hangi düğmeye basılırsa basılsın soru **bağımsız sayılmaz**; ayrı sayılır. |
+| S2 | **Çözüm yardım için açıldıysa** hangi düğmeye basılırsa basılsın soru **bağımsız sayılmaz**; ayrı sayılır. Sonuç açılıştan önce kilitlenmişse açılış **kontrol** sayılır ve bağımsızlığı düşürmez (K19). |
 | S3 | Karne, “20 sorudan 17'sini bağımsız çözdün” biçiminde **sayı + oran** gösterir. |
 | S4 | **En çok zorlanılan yanlış nedeni** ve **en çok zorlanılan ders/konu** karnede listelenir. |
 | S5 | Kutlama **animasyonlu ve rozetli**, skora göre değişen, zevkli ama abartısız olacak. |
@@ -63,7 +63,8 @@ Karne, “doğru/yanlış” değil **bağımsızlık** ölçer. Soru bazında t
 Kurallar:
 
 - Toplam = bağımsız + yarım + çözemedi + çözümle. Dört kova **birbirini dışlar** (öncelik:
-  `cozum_acildi` her şeyden önce gelir).
+  **destekli** durumu — çözümün yardım için açılması, `cozum_acildi && !kontrol_acilisi` —
+  her şeyden önce gelir; kontrol açılışı destekli değildir).
 - **Bağımsız oran** = bağımsız / toplam. Karnenin ana sayısı budur.
 - “Yarım” kovada gösterilir ama bağımsız orana **dahil edilmez** (K9 ve K19'un devamı).
 - Bu tanım `algoritma_surumu`'ndan bağımsızdır; v1 ve v2 kayıtlarında aynı şekilde okunur.
@@ -159,7 +160,7 @@ Karne **oturum bitişinde, bellekteki listeden** hesaplanır:
 |---|---|
 | Bu hafta | Bu haftanın Pazartesi'sinden **bugüne kadar** (bugün dâhil) tüm tekrarlar |
 | Geçen hafta | Bir önceki Pazartesi–Pazar aralığındaki tüm tekrarlar |
-| Oran | Aynı bağımsızlık tanımı (§3): `sonuc != COZEMEDIM AND cozum_acildi = 0` |
+| Oran | Aynı bağımsızlık tanımı (§3): `sonuc != COZEMEDIM AND (cozum_acildi = 0 OR kontrol_acilisi = 1)` |
 
 **Gösterim:** `Bu hafta %85 · geçen hafta %76 (+9 puan)`. Fark 0 ise “(aynı)”, negatifse “(−4 puan)”
 biçiminde yazılır; eksi işareti kırmızıya boyanmaz (cezalandırıcı görünüm yok, K26).
@@ -277,7 +278,7 @@ Karne ekranının altında veya ayrı “İlerleme” sekmesinde son 7 gün:
 | Gösterge | Hesap |
 |---|---|
 | Günlük çubuklar | `gun` başına kayıt sayısı (0 olan gün boş çubuk) |
-| Bağımsız oranı | `sonuc != COZEMEDIM AND cozum_acildi = 0` |
+| Bağımsız oranı | `sonuc != COZEMEDIM AND (cozum_acildi = 0 OR kontrol_acilisi = 1)` |
 | En çok zorlanılan neden | `yanlis_nedeni` + `sonuc != RAHAT` grubu |
 | Toplam süre | **yok** (ölçüm eklenmedi; eklenirse §9'daki süre notu) |
 
@@ -321,7 +322,7 @@ Bunlar DB kolonları değil, geçmişten türetilen domain değerleridir. `kolay
 ```
 önceki = aralik_gun  (soru ilk kez çözülüyorsa 1)
 
-eğer cozum_acildi veya sonuç == COZEMEDIM:
+eğer (cozum_acildi ve kontrol_acilisi değil) veya sonuç == COZEMEDIM:
     yeni = 1
 aksi halde eğer sonuç == ZORLANDIM:
     yeni = max(önceki + 1, round(önceki * 1,2))
@@ -345,7 +346,7 @@ Kolaylık güncellemesi (aynı işlemde):
 | RAHAT | +5 (`kolaylik_yuz += 5`) |
 | ZORLANDIM | −15 |
 | COZEMEDIM | −20, `unutma_sayisi += 1` |
-| Çözüm açıldı | 0 (yargıya varmıyoruz) |
+| Yardımla açıldı | 0 (yargıya varmıyoruz) |
 
 Sınırlar `130…280` arasında kırpılır.
 
@@ -412,7 +413,7 @@ Saf fonksiyonlar ayrı sınıflarda tutulur ki JVM testi hızlı olsun (Compose'
 | # | Test | Faz |
 |---|---|---|
 | T-1 | Dört kova birbirini dışlar; toplam = bağımsız+yarım+çözemedi+çözümle | A |
-| T-2 | `cozum_acildi = true` iken `RAHAT` seçilse bile **bağımsız sayılmaz** | A |
+| T-2 | Yardım açılışında (`cozum_acildi = true`, `kontrol_acilisi = false`) `RAHAT` seçilse bile **bağımsız sayılmaz**; kontrol açılışında sayılır | A |
 | T-3 | Toplam 0 iken oran hesabı çökmez (oturum boş olamaz, savunma amaçlı) | A |
 | T-4 | Tebrik eşikleri sınırlarda doğru cümleyi seçer (%49/50, %69/70, %89/90) | A |
 | T-5 | Rozet kilidi idempotent: aynı koşul ikinci kez animasyon üretmez | A |

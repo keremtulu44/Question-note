@@ -54,6 +54,109 @@ class CalismaSorulariniSiralaTest {
             CalismaSorulariniSirala.akilliOncelik(listOf(future, strong, weak, overdue), day).map { it.id })
     }
 
+    @Test
+    fun interleavedOrderingSpreadsLessonsWithoutChangingTheirRelativePriority() {
+        val gun = day("2026-10-17")
+        val matematik1 = soru("mat-1", null, "2026-10-01").copy(sonrakiTekrarGun = gun)
+        val matematik2 = matematik1.copy(
+            id = "mat-2",
+            olusturma = LocalDate.parse("2026-10-02").atStartOfDay(zone).toInstant().toEpochMilli(),
+        )
+        val biyoloji1 = matematik1.copy(
+            id = "bio-1",
+            dersId = "biyoloji",
+            olusturma = LocalDate.parse("2026-10-03").atStartOfDay(zone).toInstant().toEpochMilli(),
+        )
+        val biyoloji2 = biyoloji1.copy(
+            id = "bio-2",
+            olusturma = LocalDate.parse("2026-10-04").atStartOfDay(zone).toInstant().toEpochMilli(),
+        )
+
+        val ordered = CalismaSorulariniSirala.karmaAkilliOncelik(
+            listOf(biyoloji2, matematik2, biyoloji1, matematik1),
+            gun,
+        )
+
+        assertEquals(listOf("mat-1", "bio-1", "mat-2", "bio-2"), ordered.map { it.id })
+    }
+
+    @Test
+    fun interleavedOrderingSpreadsTopicsWhenOnlyOneLessonRemains() {
+        val gun = day("2026-10-17")
+        val konuA1 = soru("a-1", null, "2026-10-01").copy(sonrakiTekrarGun = gun, konuId = "a")
+        val konuA2 = konuA1.copy(
+            id = "a-2",
+            olusturma = LocalDate.parse("2026-10-02").atStartOfDay(zone).toInstant().toEpochMilli(),
+        )
+        val konuB1 = konuA1.copy(
+            id = "b-1",
+            konuId = "b",
+            olusturma = LocalDate.parse("2026-10-03").atStartOfDay(zone).toInstant().toEpochMilli(),
+        )
+        val konuB2 = konuB1.copy(
+            id = "b-2",
+            olusturma = LocalDate.parse("2026-10-04").atStartOfDay(zone).toInstant().toEpochMilli(),
+        )
+
+        val ordered = CalismaSorulariniSirala.karmaAkilliOncelik(
+            listOf(konuB2, konuA2, konuB1, konuA1),
+            gun,
+        )
+
+        assertEquals(listOf("a-1", "b-1", "a-2", "b-2"), ordered.map { it.id })
+    }
+
+    @Test
+    fun interleavingDoesNotLetDueTodayQuestionsJumpTheOverdueBand() {
+        val gun = day("2026-10-17")
+        val gecikenMat1 = soru("mat-1", null, "2026-10-01")
+            .copy(sonrakiTekrarGun = gun - 5)
+        val gecikenMat2 = gecikenMat1.copy(id = "mat-2", sonrakiTekrarGun = gun - 4)
+        val gecikenBiyo = gecikenMat1.copy(
+            id = "bio-overdue",
+            dersId = "biyoloji",
+            sonrakiTekrarGun = gun - 1,
+        )
+        val bugunBiyo = gecikenBiyo.copy(id = "bio-today", sonrakiTekrarGun = gun)
+
+        val ordered = CalismaSorulariniSirala.karmaAkilliOncelik(
+            listOf(bugunBiyo, gecikenMat2, gecikenBiyo, gecikenMat1),
+            gun,
+        )
+
+        assertEquals(
+            listOf("mat-1", "bio-overdue", "mat-2", "bio-today"),
+            ordered.map { it.id },
+        )
+    }
+
+    @Test
+    fun interleavingAlsoAvoidsSameLessonAcrossUrgencyBandBoundary() {
+        val gun = day("2026-10-17")
+        val gecikenMat = soru("overdue-mat", null, "2026-10-01")
+            .copy(sonrakiTekrarGun = gun - 1)
+        val bugunMat1 = gecikenMat.copy(id = "today-mat-1", sonrakiTekrarGun = gun)
+        val bugunMat2 = bugunMat1.copy(
+            id = "today-mat-2",
+            olusturma = LocalDate.parse("2026-10-02").atStartOfDay(zone).toInstant().toEpochMilli(),
+        )
+        val bugunBiyo = bugunMat1.copy(
+            id = "today-bio",
+            dersId = "biyoloji",
+            olusturma = LocalDate.parse("2026-10-03").atStartOfDay(zone).toInstant().toEpochMilli(),
+        )
+
+        val ordered = CalismaSorulariniSirala.karmaAkilliOncelik(
+            listOf(bugunBiyo, bugunMat2, gecikenMat, bugunMat1),
+            gun,
+        )
+
+        assertEquals(
+            listOf("overdue-mat", "today-bio", "today-mat-1", "today-mat-2"),
+            ordered.map { it.id },
+        )
+    }
+
     private fun soru(id: String, sonTekrar: String?, olusturuldu: String): Soru = Soru(
         id = id,
         dersId = "lesson",

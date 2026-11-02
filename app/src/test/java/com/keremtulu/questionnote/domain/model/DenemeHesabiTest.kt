@@ -16,6 +16,7 @@ class DenemeHesabiTest {
         assertEquals(28.0, NetKurali.DORTTE_BIR.net(30, 8), 0.001)
         assertEquals(30.0 - 8.0 / 3.0, NetKurali.UCTE_BIR.net(30, 8), 0.001)
         assertEquals(30.0, NetKurali.YOK.net(30, 8), 0.001)
+        assertEquals(70.0, satir.netOrani(NetKurali.DORTTE_BIR)!!, 0.001)
         assertTrue(satir.gecerli())
         assertFalse(DenemeDersSatiri("m", 10, 8, 4).gecerli())
     }
@@ -31,7 +32,38 @@ class DenemeHesabiTest {
         val bar = liste.dersBarlari(b).single()
         assertEquals(NetKurali.DORTTE_BIR.net(28, 4), bar.sonNet, 0.001)
         assertEquals(NetKurali.DORTTE_BIR.net(20, 8), bar.oncekiOrtalama!!, 0.001)
+        assertEquals(67.5, bar.sonNetOrani, 0.001)
+        assertEquals(45.0, bar.oncekiOrtalamaOrani!!, 0.001)
+        assertEquals(22.5, bar.oranFarki!!, 0.001)
+        assertEquals(67.5, b.netOrani()!!, 0.001)
         assertEquals(0, denemeHatirlatmaIndeksi("x") % 4)
+    }
+
+    @Test
+    fun dersBarlariOncekiOraniSoruSayisiylaAgirliklandirirVeGelecegiDislar() {
+        val kisa = DenemeKaydi(
+            "1", "Kısa", NetKurali.YOK, 1L, 10,
+            listOf(DenemeDersSatiri("m", 10, 9, 0)),
+        )
+        val uzun = DenemeKaydi(
+            "2", "Uzun", NetKurali.YOK, 2L, 20,
+            listOf(DenemeDersSatiri("m", 40, 10, 0)),
+        )
+        val son = DenemeKaydi(
+            "3", "Son", NetKurali.YOK, 3L, 30,
+            listOf(DenemeDersSatiri("m", 20, 15, 0)),
+        )
+        val gelecek = DenemeKaydi(
+            "4", "Gelecek", NetKurali.YOK, 4L, 40,
+            listOf(DenemeDersSatiri("m", 40, 40, 0)),
+        )
+
+        val bar = listOf(gelecek, uzun, son, kisa).dersBarlari(son).single()
+
+        assertEquals(9.5, bar.oncekiOrtalama!!, 0.001)
+        assertEquals(38.0, bar.oncekiOrtalamaOrani!!, 0.001)
+        assertEquals(75.0, bar.sonNetOrani, 0.001)
+        assertEquals(37.0, bar.oranFarki!!, 0.001)
     }
 
     @Test

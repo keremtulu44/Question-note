@@ -138,10 +138,6 @@ data class DersIlerlemesi(
     val pekisiyor: Int,
     val ogreniyor: Int,
     val yeni: Int,
-) {
-    /** SAGLAM counts fully, PEKISIYOR counts three quarters. */
-    val pekismeOrani: Int
-        get() = if (toplam == 0) 0 else ((saglam * 4 + pekisiyor * 3) * 25 / toplam).coerceIn(0, 100)
-}
+)
 
 data class GunTahmini(val gun: Int, val adet: Int)

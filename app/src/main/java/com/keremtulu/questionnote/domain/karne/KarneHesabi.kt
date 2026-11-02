@@ -7,9 +7,14 @@ data class OturumSonucu(
     val soruId: String,
     val sonuc: TekrarSonucu,
     val cozumAcildi: Boolean,
-)
+    /** Solution was opened only to verify an answer locked in before the reveal. */
+    val kontrolAcilisi: Boolean = false,
+) {
+    /** Assisted answer: the solution was used as help, not as post-lock verification. */
+    val destekli: Boolean get() = cozumAcildi && !kontrolAcilisi
+}
 
-/** Mutually exclusive buckets. A question opened with the solution always lands in [COZUMLU]. */
+/** Mutually exclusive buckets. A help opening lands in [COZUMLU]; verification follows its result. */
 enum class KarneKovasi {
     BAGIMSIZ,
     YARIM,
@@ -23,6 +28,8 @@ data class KarneSayilari(
     val yarim: Int,
     val cozemedi: Int,
     val cozumle: Int,
+    /** Physical reveals, including post-lock verification; distinct from the help bucket. */
+    val cozumAcilan: Int = 0,
 ) {
     /** Independent-solve percentage, rounded half-up. */
     val oran: Int
@@ -50,7 +57,7 @@ enum class TebrikSeviyesi {
 
 object KarneHesabi {
     fun kova(sonuc: OturumSonucu): KarneKovasi = when {
-        sonuc.cozumAcildi -> KarneKovasi.COZUMLU
+        sonuc.destekli -> KarneKovasi.COZUMLU
         sonuc.sonuc == TekrarSonucu.RAHAT -> KarneKovasi.BAGIMSIZ
         sonuc.sonuc == TekrarSonucu.ZORLANDIM -> KarneKovasi.YARIM
         else -> KarneKovasi.COZEMEDI
@@ -61,7 +68,9 @@ object KarneHesabi {
         var yarim = 0
         var cozemedi = 0
         var cozumle = 0
+        var cozumAcilan = 0
         sonuclar.forEach { sonuc ->
+            if (sonuc.cozumAcildi) cozumAcilan++
             when (kova(sonuc)) {
                 KarneKovasi.BAGIMSIZ -> bagimsiz++
                 KarneKovasi.YARIM -> yarim++
@@ -75,6 +84,7 @@ object KarneHesabi {
             yarim = yarim,
             cozemedi = cozemedi,
             cozumle = cozumle,
+            cozumAcilan = cozumAcilan,
         )
     }
 

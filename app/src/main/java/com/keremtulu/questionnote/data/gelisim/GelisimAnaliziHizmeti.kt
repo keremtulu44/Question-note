@@ -25,7 +25,8 @@ class GelisimAnaliziHizmeti(private val db: YanlisDefteriDatabase) {
                 val o = m?.let { runCatching { OlcumSerilestirme.olcum(it).guvenli() }.getOrElse {
                     SureOlcumu(kalite = OlcumKalitesi.GECERSIZ, nedenler = setOf(OlcumNedeni.GECERSIZ_GIRDI)) } }
                 AnalizTekrari(t.id, t.soruId, t.gun, t.zaman, sonuc, t.cozumAcildi, m?.let {
-                    TarihselBaglam(it.dersId, it.dersAdi, it.konuId, it.konuAdi, it.kaynakAnahtari, it.kaynakEtiketi) }, o)
+                    TarihselBaglam(it.dersId, it.dersAdi, it.konuId, it.konuAdi, it.kaynakAnahtari, it.kaynakEtiketi) }, o,
+                    t.kontrolAcilisi)
             }
             Girdi(sorular, dersler, konular, tekrarlar)
         }

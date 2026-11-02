@@ -1,9 +1,9 @@
-# Veri Modeli (Room şema v5)
+# Veri Modeli (Room şema v6)
 
-> Room v5: öğretmen çalışma alanı JSON dosyasından veritabanına taşındı. `MIGRATION_4_5` yalnız üç
-> yeni tablo ve beş indeks ekler; öğrenci tablolarına, tekrarlara ve ölçümlere dokunmaz.
-> 1→2→3→4→5 zinciri korunur. Güncel CI kanıtı `DERLEME_RAPORU.md` içinde; fiziksel cihaz kabulü ayrıdır.
-> Son güncelleme: 2026-10-26.
+> Room v6: `MIGRATION_5_6`, tekrarlara kontrol açılışı için `kontrol_acilisi` ve
+> `kilitli_sonuc` kolonlarını ekler; eski açılışlar yardım sayılarak korunur.
+> 1→2→3→4→5→6 zinciri korunur. Güncel CI kanıtı `DERLEME_RAPORU.md` içinde; fiziksel cihaz
+> kabulü ayrıdır. Son güncelleme: 2026-11-01.
 
 Veritabanı: **Room / SQLite**. Yerel veri tek doğruluk kaynağıdır.
 
@@ -123,7 +123,9 @@ Liste kaydırması ölçümde yetersiz kalırsa bir görsel önbelleği eklenmes
 | `gun` | INTEGER | **Tekrarın yapıldığı yerel takvim günü** (kayıt anında hesaplanır, sonradan değişmez) |
 | `planlanan_gun` | INTEGER, NULL | Bu tekrarın **planlandığı** gün; gerçekleşen günden ayrıdır → gecikme ölçülebilir |
 | `sonuc` | TEXT | `COZEMEDIM`, `ZORLANDIM`, `RAHAT` |
-| `cozum_acildi` | INTEGER | 0/1 — kullanıcı "Çözümü göster"e bastı mı (v1'de "destekli deneme" işaretidir) |
+| `cozum_acildi` | INTEGER | 0/1 — kullanıcı çözümü açtı mı (fiziksel gerçek) |
+| `kontrol_acilisi` | INTEGER | 0/1 — açılış, önceden kilitlenmiş sonucun **kontrolü** mü (v6). Destekli deneme: `cozum_acildi = 1 AND kontrol_acilisi = 0` |
+| `kilitli_sonuc` | TEXT, NULL | Kontrol açılışından önce kilitlenen sonuç; kayıtlı `sonuc` bunu aşamaz (v6) |
 | `onceki_aralik` | INTEGER, NULL | **Gün cinsinden** uygulanan planın uzunluğu |
 | `sonraki_aralik` | INTEGER, NULL | **Gün cinsinden** yeni aralık |
 | `algoritma_surumu` | INTEGER | Aralığı hesaplayan kural setinin sürümü (ör. 1) |
@@ -215,7 +217,8 @@ Veritabanı işlemi ile dosya sistemi işlemi tek atomik işlem değildir. Bu y�
 - `COZEMEDIM` → aralık 1 güne döner.
 - `ZORLANDIM` → aralık daha yavaş büyür (mevcut aralıkta kalır veya bir kademe ilerler).
 - `RAHAT` → aralık bir kademe büyür.
-- **`cozum_acildi = 1` olan tekrar bağımsız deneme sayılmaz:** sonuç ne olursa olsun sonraki tekrar
+- **Yardım için açılan (`cozum_acildi = 1 AND kontrol_acilisi = 0`) tekrar bağımsız deneme sayılmaz:**
+  sonuç ne olursa olsun sonraki tekrar
   **1 gün** sonradır. Amaç unutulanı hatırlamak olduğu için soru kısa süre sonra yeniden karşımıza
   çıkar ve bu kez bağımsız olarak çözülür. **Aynı gün ikinci deneme kaydedilmez;** çözüm görüldükten
   sonra aynı oturumda yapılan çözüm gerçek hatırlama sayılmaz.
@@ -238,7 +241,7 @@ Veritabanı işlemi ile dosya sistemi işlemi tek atomik işlem değildir. Bu y�
   güncelleme çözümü değildir.
 - Şema JSON'ları sürüm kontrolünde saklanır (Room `exportSchema`).
 - **Her migration için otomatik test yazılır**; şema ve veri koruması test edilir. `MIGRATION_1_2` yalnızca `geri_yukleme_isaretleri` tablosunu ekler. `MIGRATION_2_3`, `kaynak_konumu` kolonunu ve global katalog tablosunu ekler; mevcut soru notu/kaynak/neden değerleri korunur, kaynak ve özel nedenler yeniden kullanılabilir kataloğa alınır.
-- Room v1/v2/v3/v4 şemaları `app/schemas/com.keremtulu.questionnote.data.local.YanlisDefteriDatabase/` altında korunur. `MIGRATION_3_4` ölçüm tablosu ve indeksleri ekler; 1/2/3→4 yolları ve null tarihsel ölçümler test edilir. v3 tarihsel CI kanıtı `39037429421`, v4 ana paket kanıtı `39135928734` (217/0).
+- Room v1–v6 şemaları `app/schemas/com.keremtulu.questionnote.data.local.YanlisDefteriDatabase/` altında korunur. `MIGRATION_3_4` ölçüm tablosu ve indeksleri, `MIGRATION_4_5` öğretmen tablolarını, `MIGRATION_5_6` kontrol açılışı kolonlarını ekler; geçiş yolları ve tarihsel veri koruması test edilir.
 - Testler JVM/Robolectric üzerinde çalışır; CI sonucu fiziksel cihaz güncelleme kabulü değildir.
 
 
@@ -250,7 +253,7 @@ artık mevcut `zaman` ve `algoritma_surumu` değerlerini de taşır; bunlar yeni
 
 Sınav formatları eksik dersleri normal `dersler` satırları olarak ekler, ad eşleşen ID'yi tekrar
 kullanır. Profil tercihi, rozet sahipliği/kutlama kuyruğu ve son oturum devam noktası prefs'tedir.
-Bağımsız çözüm sorguları `sonuc = 'RAHAT' AND cozum_acildi = 0` kullanır.
+Bağımsız çözüm sorguları `sonuc = 'RAHAT' AND (cozum_acildi = 0 OR kontrol_acilisi = 1)` kullanır.
 
 ## v1.4.x / P2–P3
 

@@ -31,8 +31,10 @@ enum class KararNedeni {
     BIRLIKTE_SINYAL, GOLGE_TARIH_KORUNDU, V3_SINIRLI_DUZELTME,
 }
 
-data class YakinTekrar(val gun: Int, val sonuc: TekrarSonucu, val cozumAcildi: Boolean) {
-    val bagimsiz: Boolean get() = sonuc == TekrarSonucu.RAHAT && !cozumAcildi
+data class YakinTekrar(val gun: Int, val sonuc: TekrarSonucu, val cozumAcildi: Boolean,
+    val kontrolAcilisi: Boolean = false) {
+    val destekli: Boolean get() = cozumAcildi && !kontrolAcilisi
+    val bagimsiz: Boolean get() = sonuc == TekrarSonucu.RAHAT && !destekli
     val gucluk: Boolean get() = !bagimsiz
 }
 data class YakinGecmis(val gunler: List<YakinTekrar>) {
@@ -46,7 +48,7 @@ object YakinGecmisHesabi {
     fun hesapla(gecmis: List<TekrarKaydi>, bugun: Int): YakinGecmis = YakinGecmis(gecmis
         .filter { it.gun.toLong() in (bugun.toLong() - PENCERE_GUN + 1)..bugun.toLong() }
         .sortedWith(compareByDescending<TekrarKaydi> { it.gun }.thenByDescending { it.zaman }.thenBy { it.id })
-        .distinctBy { it.gun }.take(EN_COK_GUN).map { YakinTekrar(it.gun, it.sonuc, it.cozumAcildi) })
+        .distinctBy { it.gun }.take(EN_COK_GUN).map { YakinTekrar(it.gun, it.sonuc, it.cozumAcildi, it.kontrolAcilisi) })
 }
 
 data class TekrarKarari(
@@ -69,10 +71,10 @@ object UyarlanabilirTekrarKurali {
 
     fun hesapla(gecmis: List<TekrarKaydi>, deneme: TekrarDenemesi, profil: KisiselProfil,
         bugun: LocalDate, planlananGun: Int?, ayar: MotorAyari): TekrarKarari {
-        val temel = AkilliTekrarKurali.hesapla(gecmis, deneme.sonuc, deneme.cozumAcildi, bugun, planlananGun)
+        val temel = AkilliTekrarKurali.hesapla(gecmis, deneme.sonuc, deneme.cozumAcildi, bugun, planlananGun, deneme.kontrolAcilisi)
         val yakin = YakinGecmisHesabi.hesapla(gecmis.filter { it.denemeId != deneme.denemeId }, bugun.toEpochDay().toInt())
         val gecikme = planlananGun?.let { bugun.toEpochDay() - it > 2L * temel.oncekiAralik } == true &&
-            !deneme.cozumAcildi && deneme.sonuc != TekrarSonucu.COZEMEDIM
+            !deneme.destekli && deneme.sonuc != TekrarSonucu.COZEMEDIM
         return karar(temel, deneme, profil.yardimsiz.referans, bugun.toEpochDay().toInt(), ayar.istenen,
             ayar.uygulanan, yakin, gecmis.any { it.algoritmaSurumu !in DESTEKLENEN_GECMIS }, gecikme)
     }
@@ -89,7 +91,7 @@ object UyarlanabilirTekrarKurali {
         when {
             mod == TekrarMotorModu.KAPALI -> nedenler += KararNedeni.KATMAN_KAPALI
             bilinmeyen -> nedenler += KararNedeni.DESTEKLENMEYEN_GECMIS
-            deneme.cozumAcildi || deneme.sonuc == TekrarSonucu.COZEMEDIM -> nedenler += KararNedeni.COZUM_VEYA_COZEMEDI
+            deneme.destekli || deneme.sonuc == TekrarSonucu.COZEMEDIM -> nedenler += KararNedeni.COZUM_VEYA_COZEMEDI
             deneme.sonuc == TekrarSonucu.ZORLANDIM -> nedenler += KararNedeni.ZORLANDIM_KURALI_KORUNDU
             yakin.toparlandi -> nedenler += KararNedeni.TOPARLANMA
             !sureUygun -> nedenler += KararNedeni.OLCUM_YETERSIZ

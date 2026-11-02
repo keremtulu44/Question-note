@@ -7,6 +7,8 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -34,6 +36,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.selected
@@ -119,6 +122,7 @@ fun DersKurulumEkrani(
 
     val secili = remember(seciliListe) { seciliListe.toSet() }
     val gruplar = remember(dersler) { dersleriGrupla(dersler) }
+    val buyukYazi = LocalDensity.current.fontScale >= 1.5f
 
     LaunchedEffect(dersRepository) {
         yukleniyor = true
@@ -154,10 +158,12 @@ fun DersKurulumEkrani(
                     alt = stringResource(R.string.onboarding_subtitle),
                 )
 
-            Row(
+            @OptIn(ExperimentalLayoutApi::class)
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
             ) {
                 Surface(
                     shape = RoundedCornerShape(999.dp),
@@ -220,7 +226,7 @@ fun DersKurulumEkrani(
                                 modifier = Modifier.padding(top = 6.dp, bottom = 2.dp),
                             )
                         }
-                        val ciftler = grup.dersler.chunked(2)
+                        val ciftler = grup.dersler.chunked(if (buyukYazi) 1 else 2)
                         items(ciftler.size, key = { idx -> "row-${grup.baslikRes}-$idx" }) { idx ->
                             val satir = ciftler[idx]
                             Row(
@@ -254,6 +260,12 @@ fun DersKurulumEkrani(
             if (hata) {
                 Text(
                     text = stringResource(R.string.onboarding_error),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            } else if (!yukleniyor && dersler.isNotEmpty() && secili.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.onboarding_minimum_selection),
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall,
                 )

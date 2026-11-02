@@ -116,7 +116,7 @@ class YanlisDefteriDatabaseTest {
             assertTrue(it.moveToFirst())
             it.getInt(0)
         }
-        assertEquals(5, version)
+        assertEquals(6, version)
 
         val namesCursor = sqlite.query("SELECT name FROM sqlite_master WHERE type = 'table'")
         val tableNames = namesCursor.use { rows ->
@@ -167,6 +167,7 @@ class YanlisDefteriDatabaseTest {
                 YanlisDefteriMigrations.MIGRATION_2_3,
                 YanlisDefteriMigrations.MIGRATION_3_4,
                 YanlisDefteriMigrations.MIGRATION_4_5,
+                YanlisDefteriMigrations.MIGRATION_5_6,
             )
             .allowMainThreadQueries()
             .build()
@@ -181,7 +182,7 @@ class YanlisDefteriDatabaseTest {
                 it.moveToFirst()
                 it.getInt(0)
             }
-            assertEquals(5, version)
+            assertEquals(6, version)
             assertEquals(VarsayilanSoruNedenleri, migrated.soruSecenegiDao().tumunuGetir()
                 .filter { it.varsayilan }
                 .map { it.ad })
@@ -237,6 +238,7 @@ class YanlisDefteriDatabaseTest {
                 YanlisDefteriMigrations.MIGRATION_2_3,
                 YanlisDefteriMigrations.MIGRATION_3_4,
                 YanlisDefteriMigrations.MIGRATION_4_5,
+                YanlisDefteriMigrations.MIGRATION_5_6,
             )
             .allowMainThreadQueries()
             .build()
@@ -261,7 +263,7 @@ class YanlisDefteriDatabaseTest {
                 it.moveToFirst()
                 it.getInt(0)
             }
-            assertEquals(5, version)
+            assertEquals(6, version)
         } finally {
             migrated.close()
             context.deleteDatabase(databaseName)

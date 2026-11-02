@@ -41,7 +41,11 @@ data class SureOrnegi(
     val sonuc: TekrarSonucu,
     val cozumAcildi: Boolean,
     val olcum: SureOlcumu,
-)
+    /** Reveal verified a locked-in answer; the attempt phase stayed unaided. */
+    val kontrolAcilisi: Boolean = false,
+) {
+    val destekli: Boolean get() = cozumAcildi && !kontrolAcilisi
+}
 
 data class DayanikliDagilim(val medyanMs: Double, val altCeyrekMs: Double, val ustCeyrekMs: Double, val madMs: Double) {
     val iqrMs: Double get() = (ustCeyrekMs - altCeyrekMs).coerceAtLeast(0.0)
@@ -113,7 +117,7 @@ object KisiselProfilHesabi {
             if (!olcum.gecerliAlanlar() || olcum.kalite != OlcumKalitesi.TAM ||
                 (!ornek.cozumAcildi && olcum.incelemeAktifMs != 0L)) return@mapNotNull null
             val deger = if (yardimsiz) {
-                if (ornek.sonuc != TekrarSonucu.RAHAT || ornek.cozumAcildi) return@mapNotNull null
+                if (ornek.sonuc != TekrarSonucu.RAHAT || ornek.destekli) return@mapNotNull null
                 olcum.denemeAktifMs
             } else olcum.toplamMs
             if (deger == null || deger <= 0) null else ornek to deger.toDouble()

@@ -18,6 +18,8 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.unit.Density
 import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.data.prefs.*
+import com.keremtulu.questionnote.domain.gelisim.CalismaOnerisi
+import com.keremtulu.questionnote.domain.gelisim.OneriTuru
 import com.keremtulu.questionnote.domain.karne.Rozet
 import com.keremtulu.questionnote.domain.model.SoruCalismaFiltresi
 import com.keremtulu.questionnote.domain.repeat.TekrarMotorModu
@@ -63,6 +65,18 @@ class P5P6ArayuzTest {
         assertTrue(bounds.width >= 48 && bounds.height >= 48)
         assertTrue(requireNotNull(route).first.vadesiGelen)
         assertEquals(5, route?.second)
+    }
+    @Test fun difficultyRecommendationShowsItsAreaAndReason() {
+        val a = p6AnalizOrnegi().copy(oneri = CalismaOnerisi(
+            tur = OneriTuru.YAKIN_GUCLUK,
+            filtre = SoruCalismaFiltresi(dersId = "m", konuId = "kesirler"),
+            etiket = "Matematik · Kesirler",
+            uygunSoru = 4,
+            guclukSoru = 2,
+        ))
+        compose.setContent { YanlisDefteriTema { SonrakiAdimKarti(a) { _, _ -> } } }
+        compose.onNodeWithText("Matematik · Kesirler").assertExists()
+        compose.onNodeWithText(context.getString(R.string.progress_action_difficulty, 4, 2)).assertExists()
     }
     @Test fun noEligibleDataShowsNoInventedAction() {
         compose.setContent { YanlisDefteriTema { SonrakiAdimKarti(p6AnalizOrnegi(true)) { _, _ -> fail("No route allowed") } } }
@@ -148,7 +162,7 @@ class P5P6ArayuzTest {
         compose.onNodeWithText(context.getString(R.string.badge_celebrate_continue)).performScrollTo().performClick()
         compose.waitUntil(5_000) { badges.bekleyenIzle.value.isEmpty() }
         compose.onNodeWithTag("rank-celebration").assertExists()
-        compose.onNodeWithText(context.getString(R.string.badge_celebrate_continue)).assertDoesNotExist()
+        compose.onNodeWithText(context.getString(R.string.badge_celebrate_title)).assertDoesNotExist()
         compose.onNodeWithText(context.getString(R.string.rank_celebration_continue)).performScrollTo().performClick()
         compose.waitUntil(5_000) { ranks.bekleyenIzle.value == null }
         assertNull(RutbeDeposu(context).bekleyenIzle.value)

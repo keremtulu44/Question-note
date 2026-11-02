@@ -189,7 +189,7 @@ fun KarneEkrani(
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        Baslik(sayilar, animasyonAcik, hero = true)
+                        Baslik(sayilar, animasyonAcik)
                     }
                 }
                 item(key = "ratio") {
@@ -208,7 +208,8 @@ fun KarneEkrani(
                 if (dagilim.nedenler.isNotEmpty()) {
                     item(key = "reasons") {
                         BolumKarti(baslik = stringResource(R.string.karne_reasons_title)) {
-                            dagilim.nedenler.forEach { satir -> DagilimCubugu(satir) }
+                            val enYuksek = dagilim.nedenler.maxOfOrNull { it.sayi } ?: 1
+                            dagilim.nedenler.forEach { satir -> DagilimCubugu(satir, enYuksek) }
                         }
                     }
                 }
@@ -295,13 +296,13 @@ fun KarneEkrani(
 private const val KONFETI_ESIGI = 70
 
 @Composable
-private fun Baslik(sayilar: KarneSayilari, animasyonAcik: Boolean, hero: Boolean = false) {
+private fun Baslik(sayilar: KarneSayilari, animasyonAcik: Boolean) {
     val toplam = sayanDeger(sayilar.toplam, animasyonAcik, 0)
     val bagimsiz = sayanDeger(sayilar.bagimsiz, animasyonAcik, 150)
     val colors = MaterialTheme.colorScheme
-    val titleColor = if (hero) PremiumMarkaRenkler.Kagit else colors.onBackground
-    val supportingColor = if (hero) PremiumMarkaRenkler.Kagit.copy(alpha = 0.86f) else colors.onSurfaceVariant
-    val greetingColor = if (hero) PremiumMarkaRenkler.Kagit else colors.onSurface
+    val titleColor = colors.onBackground
+    val supportingColor = colors.onSurfaceVariant
+    val greetingColor = colors.onSurface
     if (sayilar.kisaOturum) {
         Text(
             text = stringResource(R.string.karne_short_title),
@@ -497,9 +498,9 @@ private fun BolumKarti(baslik: String, icerik: @Composable () -> Unit) {
 }
 
 @Composable
-private fun DagilimCubugu(satir: DagilimSatiri) {
+private fun DagilimCubugu(satir: DagilimSatiri, enYuksek: Int) {
     val colors = MaterialTheme.colorScheme
-    val oran = (satir.sayi / 6f).coerceIn(0.12f, 1f)
+    val oran = (satir.sayi / enYuksek.coerceAtLeast(1).toFloat()).coerceIn(0.12f, 1f)
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),

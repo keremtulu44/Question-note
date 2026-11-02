@@ -186,8 +186,7 @@ fun SorulacaklarEkrani(
                 SorulacaklarDurumu.Hata -> item {
                     PremiumBosDurum(
                         modifier = Modifier.fillMaxWidth(),
-                        baslik = stringResource(R.string.today_load_error),
-                        aciklama = "",
+                        baslik = stringResource(R.string.ask_teacher_load_error),
                         butonMetni = stringResource(R.string.topic_retry),
                         onButonTikla = { yenileme++ },
                     )
@@ -396,7 +395,7 @@ private fun SorulacakSoruKarti(
             }
             val baslikMetni = soru.kaynak?.takeIf { it.isNotBlank() }
                 ?: soru.soruNotu?.takeIf { it.isNotBlank() }
-                ?: ders.ad
+                ?: stringResource(R.string.question_photo_only)
             Text(
                 text = baslikMetni,
                 style = MaterialTheme.typography.titleSmall,
@@ -503,12 +502,6 @@ private fun SorulacakTamEkranSunumDialog(
                         Text(
                             text = stringResource(R.string.ask_teacher_page_indicator, sayfa + 1, gorseller.size),
                             color = Color.White.copy(alpha = 0.72f),
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    } else {
-                        Text(
-                            text = stringResource(R.string.teacher_zoom_hint),
-                            color = Color.White.copy(alpha = 0.68f),
                             style = MaterialTheme.typography.bodySmall,
                         )
                     }

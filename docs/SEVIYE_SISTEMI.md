@@ -70,7 +70,7 @@ kontrol listesinde ayrıca doğrulanmalıdır.
 |---|---:|
 | Defterdeki her kayıtlı soru | 10 |
 | Her tekrar, sonuç ne olursa olsun | 5 |
-| Bağımsız çözüm: **RAHAT ve çözüm açılmamış** | +5 |
+| Bağımsız çözüm: **RAHAT ve yardımla açılmamış** (kontrol açılışı sayılır) | +5 |
 | Seçili günlük hedefe ulaşılan her farklı gün | 25 |
 | Bir kesintisiz serinin 3. / 7. / 30. gününe ulaşılması | 30 / 70 / 300 |
 | Her kazanılan rozet, yalnız bir kez | 50 |

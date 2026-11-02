@@ -52,7 +52,8 @@ internal class OdakOlcumDurumu(
     fun kismi(neden: OlcumNedeni) { olcer.kismiIsaretle(neden); kaydet() }
     fun onPlanda() { yenidenOnPlanda++ }
     fun gosterimiYenile() { nokta = nokta.copy(olcum = olcer.olcum()) }
-    fun deneme(sonuc: TekrarSonucu) = TekrarDenemesi(nokta.denemeId, nokta.soruId, sonuc, nokta.cozumAcildi, nokta.olcum, oturumId)
+    fun deneme(sonuc: TekrarSonucu) = TekrarDenemesi(nokta.denemeId, nokta.soruId, sonuc, nokta.cozumAcildi, nokta.olcum, oturumId,
+        nokta.kontrolAcilisi, nokta.kilitliSecim)
 
     suspend fun cozumIzni(): Boolean = try {
         depo.cozumIsaretiniKalicilastir(oturumId, nokta.soruId).also { kayitHatasi = !it }

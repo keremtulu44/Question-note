@@ -69,8 +69,6 @@ import com.keremtulu.questionnote.ui.panel.ekranPencereInsetsi
 fun AyarlarEkrani(
     gunlukHedefDeposu: TercihGunlukHedefDeposu,
     profilDeposu: SinavProfiliDeposu,
-    tekrarPolitikasi: com.keremtulu.questionnote.data.prefs.TekrarPolitikasiDeposu,
-    motorTanisi: com.keremtulu.questionnote.data.gelisim.MotorTaniHizmeti,
     dersRepository: DersRepository,
     sonYedek: SonYedekBilgisi?,
     yedeklemeIslemde: Boolean,
@@ -79,7 +77,6 @@ fun AyarlarEkrani(
     onGorselBakimi: () -> Unit,
     onKatalog: () -> Unit,
     onKonular: () -> Unit,
-    onPremiumDemo: () -> Unit = {},
     onOgretmenModunaGec: () -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -159,6 +156,7 @@ fun AyarlarEkrani(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
+                        val gorunenDersSayisi = tumDersler.count(secim::gorunur)
                         tumDersler.forEach { ders ->
                             val acik = secim.gorunur(ders)
                             FilterChip(
@@ -181,7 +179,8 @@ fun AyarlarEkrani(
                                         }
                                     }
                                 },
-                                enabled = !profilKaydediliyor && !yedeklemeIslemde,
+                                enabled = !profilKaydediliyor && !yedeklemeIslemde &&
+                                    !(acik && gorunenDersSayisi == 1),
                                 label = { Text(ders.ad) },
                             )
                         }
@@ -203,12 +202,6 @@ fun AyarlarEkrani(
             }
             item {
                 Bolum(stringResource(R.string.settings_category_goal)) {
-                    Text(
-                        stringResource(R.string.settings_goal_title),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold,
-                    )
                     Text(
                         stringResource(R.string.settings_goal_note),
                         modifier = Modifier.padding(top = 2.dp),
@@ -268,18 +261,6 @@ fun AyarlarEkrani(
             }
             item {
                 Bolum(stringResource(R.string.settings_category_data)) {
-                    Text(
-                        stringResource(R.string.settings_backup_title),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                    Text(
-                        stringResource(R.string.settings_backup_note),
-                        modifier = Modifier.padding(top = 2.dp),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.bodySmall,
-                    )
                     Text(
                         sonYedekMetni,
                         modifier = Modifier.padding(top = 8.dp),

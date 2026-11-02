@@ -71,7 +71,7 @@ class IlerlemeArayuzTest {
             }
         }
         val root = compose.onNodeWithTag("root").fetchSemanticsNode().boundsInRoot
-        listOf("Bugün", "Dersler", "Filtreli", "İlerleme", "Ayarlar").forEach { text ->
+        listOf("Bugün", "Dersler", "Çalışma", "İlerleme", "Ayarlar").forEach { text ->
             val tab = (hasText(text) or hasContentDescription(text)) and SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Tab)
             val node = compose.onNode(tab).fetchSemanticsNode().boundsInRoot
             assertTrue("$text overlaps system navigation", node.bottom <= root.bottom - navHeightPx + 1)
@@ -88,7 +88,7 @@ class IlerlemeArayuzTest {
                 Box(Modifier.requiredSize(320.dp, 180.dp)) { AltMenu(selected.value, { selected.value = it }, WindowInsets(0, 0, 0, 0)) }
             }
         } }
-        val labels = mapOf(AltSekme.BUGUN to "Bugün", AltSekme.DERSLER to "Dersler", AltSekme.FILTRELI to "Filtreli",
+        val labels = mapOf(AltSekme.BUGUN to "Bugün", AltSekme.DERSLER to "Dersler", AltSekme.FILTRELI to "Çalışma",
             AltSekme.SEVIYE to "İlerleme", AltSekme.AYARLAR to "Ayarlar")
         compose.onAllNodes(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Tab)).assertCountEquals(5)
         labels.forEach { (destination, label) ->

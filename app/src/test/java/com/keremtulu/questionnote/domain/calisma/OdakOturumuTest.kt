@@ -68,4 +68,19 @@ class OdakOturumuTest {
         assertEquals(yeni(), yeni().kurtar(setOf("a", "b", "c"), mapOf("a" to kayit)))
     }
 
+    @Test fun verificationRevealSurvivesDeferralAndHelpCannotBeUpgradedLater() {
+        val deferred = yeni().cozumuAc(kontrol = true).sonaBirak()
+        assertEquals(setOf("a"), deferred.kontrolAcilanlar)
+        assertEquals(setOf("a"), deferred.cozumAcilanlar)
+        val answered = deferred.atla().atla().cevapla(sonuc("a"))
+        val kayit = answered.sonuclar.single()
+        assertTrue(kayit.cozumAcildi)
+        assertTrue(kayit.kontrolAcilisi)
+        assertFalse(kayit.destekli)
+
+        val downgraded = yeni().cozumuAc() // help first
+        assertEquals(downgraded, downgraded.cozumuAc(kontrol = true))
+        assertTrue(downgraded.kontrolAcilanlar.isEmpty())
+    }
+
 }

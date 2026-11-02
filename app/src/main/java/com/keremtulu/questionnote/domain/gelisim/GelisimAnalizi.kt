@@ -11,8 +11,11 @@ import com.keremtulu.questionnote.domain.repeat.YakinTekrar
 data class TarihselBaglam(val dersId: String, val dersAdi: String, val konuId: String?, val konuAdi: String?,
     val kaynakAnahtari: String?, val kaynakEtiketi: String?)
 data class AnalizTekrari(val id: String, val soruId: String, val gun: Int, val zaman: Long,
-    val sonuc: TekrarSonucu, val cozumAcildi: Boolean, val baglam: TarihselBaglam?, val olcum: SureOlcumu?) {
-    val bagimsiz: Boolean get() = sonuc == TekrarSonucu.RAHAT && !cozumAcildi
+    val sonuc: TekrarSonucu, val cozumAcildi: Boolean, val baglam: TarihselBaglam?, val olcum: SureOlcumu?,
+    /** Reveal verified a locked-in answer; only help openings count as assisted. */
+    val kontrolAcilisi: Boolean = false) {
+    val destekli: Boolean get() = cozumAcildi && !kontrolAcilisi
+    val bagimsiz: Boolean get() = sonuc == TekrarSonucu.RAHAT && !destekli
     val guvenilirSure: Boolean get() = olcum?.let { it.gecerliAlanlar() && it.kalite == OlcumKalitesi.TAM &&
         (it.toplamMs ?: 0) > 0 && (cozumAcildi || it.incelemeAktifMs == 0L) } == true
 }
@@ -30,7 +33,7 @@ data class DonemKarsilastirmasi(val onceki: AnalizSayaci, val son: AnalizSayaci,
 data class AnalizGrubu(val anahtar: GrupAnahtari, val dersAdi: String?, val etiketler: List<String>,
     val sayac: AnalizSayaci, val donem: DonemKarsilastirmasi, val filtre: SoruCalismaFiltresi?, val uygunSoru: Int,
     val yardimsizProfil: SureProfili?, val dersReferansi: SureProfili?, val yakinGuclukSoru: Int, val sonIkiBagimsizSoru: Int)
-data class RitimGunu(val gun: Int, val soru: Int, val tekrar: Int, val bugunTamamlanmadi: Boolean)
+data class RitimGunu(val gun: Int, val soru: Int, val tekrar: Int, val bagimsiz: Int, val bugunTamamlanmadi: Boolean)
 data class PlanIsYuku(val gun: Int, val adet: Int, val kapsanan: Int, val bilinmeyen: Int,
     val altMs: Double, val ustMs: Double) {
     val kapsamYuzde: Int get() = if (adet == 0) 0 else (100L * kapsanan / adet).toInt()
@@ -67,7 +70,7 @@ object GelisimAnaliziHesabi {
                 .distinct().sorted()
             val yakinlar = rows.filter { it.gun in (gun - 89)..gun }.groupBy { it.soruId }.values.map { l ->
                 YakinGecmis(l.sortedWith(compareByDescending<AnalizTekrari> { it.gun }.thenByDescending { it.zaman }.thenBy { it.id })
-                    .distinctBy { it.gun }.take(5).map { YakinTekrar(it.gun, it.sonuc, it.cozumAcildi) }) }
+                    .distinctBy { it.gun }.take(5).map { YakinTekrar(it.gun, it.sonuc, it.cozumAcildi, it.kontrolAcilisi) }) }
             AnalizGrubu(key, son?.dersAdi, etiketler, say(rows), donem(rows, gun), filtre(key), uygunGruplar.getValue(tur)[key] ?: 0,
                 profiller.bagimsiz[key], profiller.bagimsiz[GrupAnahtari(AnalizTuru.KONU, key.dersId, null, false)]
                     ?.takeIf { it.dayanak == VeriDayanagi.YETERLI },
@@ -89,7 +92,7 @@ object GelisimAnaliziHesabi {
         }
         val ritim = tarihli.filter { it.gun >= gun - 6 }.groupBy { it.gun }
         return GelisimAnalizi(gun, secim.profil.ad, say(tekrarlar), grupListesi(AnalizTuru.KONU), grupListesi(AnalizTuru.KAYNAK),
-            (gun - 6..gun).map { g -> val l = ritim[g].orEmpty(); RitimGunu(g, l.map { it.soruId }.distinct().size, l.size, g == gun) },
+            (gun - 6..gun).map { g -> val l = ritim[g].orEmpty(); RitimGunu(g, l.map { it.soruId }.distinct().size, l.size, l.count { it.bagimsiz }, g == gun) },
             donem(tarihli, gun), plan, oneri(bugunUygun, soruGecmisi, dersMap, konular, gun))
     }
 
@@ -123,7 +126,7 @@ object GelisimAnaliziHesabi {
             .distinctBy { it.soruId to it.gun }.mapNotNull { r ->
             val b = r.baglam ?: return@mapNotNull null
             val o = r.olcum ?: return@mapNotNull null
-            SureOrnegi(r.id, r.id, r.soruId, r.gun, r.zaman, ProfilBaglami(b.dersId, b.konuId, b.kaynakAnahtari), r.sonuc, r.cozumAcildi, o)
+            SureOrnegi(r.id, r.id, r.soruId, r.gun, r.zaman, ProfilBaglami(b.dersId, b.konuId, b.kaynakAnahtari), r.sonuc, r.cozumAcildi, o, r.kontrolAcilisi)
         }
         val sonuc = mutableMapOf<GrupAnahtari, SureProfili>()
         val bagimsiz = mutableMapOf<GrupAnahtari, SureProfili>()

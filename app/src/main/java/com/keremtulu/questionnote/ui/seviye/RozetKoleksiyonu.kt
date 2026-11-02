@@ -160,7 +160,7 @@ fun RozetKoleksiyonu(sahip: Set<Rozet>, girdi: RozetGirdisi, kazanilmaZamani: (R
                     }
                 }
             },
-            confirmButton = { PremiumTextButton(onClick = { detay = null }) { Text(stringResource(R.string.common_back)) } },
+            confirmButton = { PremiumTextButton(onClick = { detay = null }) { Text(stringResource(R.string.common_close)) } },
         )
     }
 }

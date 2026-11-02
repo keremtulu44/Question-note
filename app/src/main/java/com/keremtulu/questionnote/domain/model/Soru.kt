@@ -112,7 +112,15 @@ data class TekrarKaydi(
     val denemeId: String? = null,
     val oturumId: String? = null,
     val olcum: com.keremtulu.questionnote.domain.calisma.SureOlcumu? = null,
-)
+    /** Solution was opened only to verify an answer locked in before the reveal. */
+    val kontrolAcilisi: Boolean = false,
+    /** Self-assessment locked before a verification reveal; the recorded result never exceeds it. */
+    val kilitliSonuc: TekrarSonucu? = null,
+) {
+    /** Assisted attempt: the solution was used as help, not as post-lock verification. */
+    val destekli: Boolean get() = cozumAcildi && !kontrolAcilisi
+    val bagimsiz: Boolean get() = sonuc == TekrarSonucu.RAHAT && !destekli
+}
 
 data class TekrarPlani(
     val oncekiAralik: Int,

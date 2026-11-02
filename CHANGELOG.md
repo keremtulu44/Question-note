@@ -2,6 +2,29 @@
 
 Bu dosya kullanıcıya yansıyan sürüm değişikliklerini ve aşağıda tarih sırasıyla proje geçmişini içerir.
 
+## [Yayınlanmadı — kilitle ve kontrol et] — 2026-10-31
+
+- **Kilitle → kontrol et:** Çözümü açmak artık iki türlü. Sonucunu çözüme bakmadan önce seçip
+  kilitlersen çözüm **kontrol** için açılmış sayılıyor: doğru yapıp yapmadığını ceza almadan
+  görebilirsin (bağımsızlık, aralık, karne ve XP korunur). Yanlış çıktığını görürsen sonucunu
+  düşürebilirsin ama kilidinin **üstüne çıkamazsın**; kilitli sonucuna geri dönebilirsin.
+  Kilitsiz açmak eskisi gibi **yardım** sayılır ve tekrar yarına alınır. Odak ve soru detay
+  ekranlarının ikisinde de çalışır; tekrar geçmişi açılış türünü ("Kontrol için açıldı") ve
+  düşürülmüş kilidi gösterir.
+- **Veri:** Room **6** (`tekrarlar.kontrol_acilisi`, `kilitli_sonuc` — eklemeli geçiş, geçmiş
+  kayıtlar yardım sayılarak aynen korunur) ve yedek biçimi ZIP **6** (`solution_checked`,
+  `locked_result`; eski v2–v5 yedekleri okunmaya devam eder).
+- **Akış incelikleri:** Kilitlemeden ilk açılışta yanlışlıkla dokunmaya karşı onay sorulur
+  ("Yardımla aç"); salt gezinme amaçlı detay görüntülemede sorulmaz. Kilitliyken düğme her iki
+  ekranda da "Çözümü kontrol et" olur, değerlendirme alanında kilit hazır ipucu görünür ve
+  karar açıklaması kilidi varsayılan alır.
+- **Sade odak:** Çalışma sırasında canlı süre, ölçüm kalitesi, oturum XP'si, ambiyans kartı ve
+  tekrar motoru açıklamaları gösterilmez. Süre ölçümü sessizce sürer; kayıtlı süreler tekrar
+  geçmişi ve profilde korunur. Çözüm alanında yalnız gerekli durum ve eylemler kalır.
+- **Serpiştirilmiş akıllı sıra:** Geciken, vadesi bugün gelen ve gelecek sorular birbirinin
+  önüne geçmeden; her aciliyet kuşağının içinde dersler ve mümkün olduğunda konular
+  serpiştirilir. Toplu yüklenen sorular artık tek ders bloğu hâlinde gelmez.
+
 ## [Yayınlanmadı — üst panel] — 2026-10-27
 
 - **Üst panel:** alt menünün kalıcı eşi. Canlı tarih (`d MMMM EEEE`), seri ve günlük hedef

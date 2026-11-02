@@ -26,8 +26,8 @@ object AkilliTekrarKurali {
         var kolaylik = 250
         var unutma = 0
         sirali.forEach { kayit ->
-            if (!kayit.cozumAcildi && kayit.sonuc == TekrarSonucu.COZEMEDIM) unutma++
-            if (kayit.algoritmaSurumu in setOf(2, 3) && !kayit.cozumAcildi) {
+            if (!kayit.destekli && kayit.sonuc == TekrarSonucu.COZEMEDIM) unutma++
+            if (kayit.algoritmaSurumu in setOf(2, 3) && !kayit.destekli) {
                 kolaylik = (kolaylik + when (kayit.sonuc) {
                     TekrarSonucu.RAHAT -> 5
                     TekrarSonucu.ZORLANDIM -> -15
@@ -48,16 +48,19 @@ object AkilliTekrarKurali {
         cozumAcildi: Boolean,
         bugun: LocalDate,
         planlananGun: Int?,
+        kontrolAcilisi: Boolean = false,
     ): TekrarPlani {
         val hafiza = hafiza(gecmis)
         val onceki = hafiza.aralik
+        // A post-lock verification keeps the attempt independent for scheduling.
+        val destekli = cozumAcildi && !kontrolAcilisi
         var yeni = when {
-            cozumAcildi || sonuc == TekrarSonucu.COZEMEDIM -> 1
+            destekli || sonuc == TekrarSonucu.COZEMEDIM -> 1
             sonuc == TekrarSonucu.ZORLANDIM -> maxOf(onceki + 1, yuzde(onceki, 120))
             else -> yuzde(onceki, hafiza.kolaylikYuz)
         }
         val gecikme = planlananGun?.let { (bugun.toEpochDay() - it).coerceAtLeast(0) } ?: 0
-        if (!cozumAcildi && sonuc != TekrarSonucu.COZEMEDIM && gecikme > 2L * onceki) {
+        if (!destekli && sonuc != TekrarSonucu.COZEMEDIM && gecikme > 2L * onceki) {
             yeni = yuzde(yeni, 80)
         }
         yeni = yeni.coerceIn(1, 180)

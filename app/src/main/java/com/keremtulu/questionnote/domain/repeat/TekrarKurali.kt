@@ -17,10 +17,13 @@ object TekrarKurali {
         sonuc: TekrarSonucu,
         cozumAcildi: Boolean,
         bugun: LocalDate,
+        kontrolAcilisi: Boolean = false,
     ): TekrarPlani {
         val onceki = oncekiAralik?.coerceIn(1, araliklar.last()) ?: 1
+        // Only an opening used as help resets the interval; a post-lock check changes nothing.
+        val destekli = cozumAcildi && !kontrolAcilisi
         val sonraki = when {
-            cozumAcildi || sonuc == TekrarSonucu.COZEMEDIM -> 1
+            destekli || sonuc == TekrarSonucu.COZEMEDIM -> 1
             sonuc == TekrarSonucu.ZORLANDIM -> onceki
             else -> {
                 val siradakiIndex = araliklar.indexOfFirst { it >= onceki }

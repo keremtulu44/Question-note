@@ -200,7 +200,7 @@ fun KatalogYonetimiEkrani(
             text = { Text(metin) },
             confirmButton = {
                 PremiumTextButton(onClick = { uyariMetni = null }) {
-                    Text(stringResource(R.string.topic_cancel))
+                    Text(stringResource(R.string.common_close))
                 }
             },
         )

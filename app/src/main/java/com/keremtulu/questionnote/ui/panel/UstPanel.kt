@@ -97,7 +97,7 @@ fun UstPanel(
     val yapilan by produceState<Int?>(null, bugunAkisi) {
         bugunAkisi.catch { }.collect { value = it }
     }
-    val seri by produceState(0, seriAkisi) {
+    val seri by produceState<Int?>(null, seriAkisi) {
         seriAkisi.catch { }.collect { value = it }
     }
     // %200 yazıda hafta günü yerine kısa tarih: tarih tek satırda okunur kalır.
@@ -149,14 +149,11 @@ fun UstPanel(
                     ) {
                         SeriAlevi(
                             modifier = Modifier.size(12.dp).clearAndSetSemantics { },
-                            renk = if (seri > 0) colors.secondary else colors.onSurfaceVariant.copy(alpha = 0.6f),
+                            renk = if ((seri ?: 0) > 0) colors.secondary else colors.onSurfaceVariant.copy(alpha = 0.6f),
                         )
                         Text(
-                            text = if (seri > 0) {
-                                stringResource(R.string.today_streak, seri)
-                            } else {
-                                stringResource(R.string.ust_panel_streak_start)
-                            },
+                            text = seri?.let { stringResource(R.string.today_streak, it) }
+                                ?: stringResource(R.string.ust_panel_loading),
                             style = MaterialTheme.typography.bodySmall,
                             color = colors.onSurfaceVariant.copy(alpha = 0.92f),
                             maxLines = 1,

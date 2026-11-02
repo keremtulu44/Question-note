@@ -243,7 +243,7 @@ fun FiltreliCalismaEkrani(
         else -> emptyList()
     }
     val siraliSorular = remember(sorular, ayar.akilliSira, bugun) {
-        if (ayar.akilliSira) CalismaSorulariniSirala.akilliOncelik(sorular, bugun.toEpochDay().toInt())
+        if (ayar.akilliSira) CalismaSorulariniSirala.karmaAkilliOncelik(sorular, bugun.toEpochDay().toInt())
         else CalismaSorulariniSirala.enUzunSureCalisilmayanlar(sorular, ZoneId.systemDefault())
     }
     // Kullanıcının yazdığı sayı korunur; istenen sayı eşleşenden büyükse altındaki bilgi metni
@@ -257,9 +257,6 @@ fun FiltreliCalismaEkrani(
     val secilecekSoruSayisi = istenenSoruSayisi
         ?.coerceAtMost(siraliSorular.size)
         ?.takeIf { siraliSorular.isNotEmpty() }
-    val sayiAsimi = istenenSoruSayisi != null &&
-        siraliSorular.isNotEmpty() &&
-        istenenSoruSayisi > siraliSorular.size
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -278,7 +275,6 @@ fun FiltreliCalismaEkrani(
                 // Sekme kökünde "Geri" düğmesi yok: geri zaten alt menü ve sistem tuşuyla çalışır.
                 com.keremtulu.questionnote.ui.bilesenler.SayfaBasligi(
                     baslik = androidx.compose.ui.res.stringResource(R.string.filtered_practice_title),
-                    alt = androidx.compose.ui.res.stringResource(R.string.filtered_practice_subtitle),
                 )
             }
 
@@ -330,11 +326,6 @@ fun FiltreliCalismaEkrani(
                             modifier = Modifier.fillMaxWidth().padding(16.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
-                            Text(
-                                text = androidx.compose.ui.res.stringResource(R.string.filtered_practice_filters_title),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold,
-                            )
                             FiltreDropdown(
                                 baslik = androidx.compose.ui.res.stringResource(R.string.analysis_filter_lesson),
                                 secim = ayar.filtre.dersId?.let { FiltreSecimi.Deger(it) } ?: tumuSecimi,
@@ -445,11 +436,6 @@ fun FiltreliCalismaEkrani(
                         modifier = Modifier.fillMaxWidth().padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        Text(
-                            text = androidx.compose.ui.res.stringResource(R.string.focus_order_note),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
                         Row(
                             modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -556,16 +542,6 @@ fun FiltreliCalismaEkrani(
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
-                                if (sayiAsimi) {
-                                    Text(
-                                        text = androidx.compose.ui.res.stringResource(
-                                            R.string.filtered_practice_count_capped,
-                                            siraliSorular.size,
-                                        ),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        style = MaterialTheme.typography.bodySmall,
-                                    )
-                                }
                                 SadeAnaButon(
                                     modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
                                     enabled = secenekler != null && secilecekSoruSayisi != null,
@@ -580,7 +556,10 @@ fun FiltreliCalismaEkrani(
                                     },
                                 ) {
                                     Text(
-                                        androidx.compose.ui.res.stringResource(R.string.filtered_practice_start),
+                                        androidx.compose.ui.res.stringResource(
+                                            R.string.filtered_practice_start_n,
+                                            secilecekSoruSayisi ?: 0,
+                                        ),
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
                                         fontWeight = FontWeight.Bold,

@@ -185,11 +185,10 @@ class GorselButunlukVeYerlesimArayuzTest {
                     oturumDeposu = oturumDeposu,
                     sira = 1,
                     toplam = 2,
-                    sonuclar = emptyList(),
                     cozumOnceAcildi = false,
                     onCozumAcildi = {},
                     onGeri = {},
-                    onSonuc = { _, _ -> },
+                    onSonuc = { _, _, _ -> },
                     onSonaBirak = {},
                     onAtla = {},
                 )
@@ -199,26 +198,12 @@ class GorselButunlukVeYerlesimArayuzTest {
         val cozumGosterMetni = context.getString(R.string.focus_reveal)
         val cozumYokMetni = context.getString(R.string.focus_no_solution)
         compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText(cozumYokMetni))
-        compose.onNodeWithText(cozumGosterMetni).assertIsDisplayed()
+        compose.onNodeWithText(cozumGosterMetni).assertDoesNotExist()
         compose.onNodeWithText(cozumYokMetni).assertIsDisplayed()
 
-        val cozumButonSinir = compose.onNodeWithText(cozumGosterMetni).fetchSemanticsNode().boundsInRoot
-        val cozumYokSinir = compose.onNodeWithText(cozumYokMetni).fetchSemanticsNode().boundsInRoot
-        assertTrue(
-            "Çözüm kaydı yok metni butonun üstüne binmemeli: buton=$cozumButonSinir, metin=$cozumYokSinir",
-            cozumYokSinir.top >= cozumButonSinir.bottom - 1f,
-        )
-
         val sonaBirakMetni = context.getString(R.string.focus_defer)
-        val sonaBirakNotMetni = context.getString(R.string.focus_defer_note)
-        compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText(sonaBirakNotMetni))
-        compose.onNodeWithText(sonaBirakNotMetni).assertIsDisplayed()
-        val sonaBirakButonSinir = compose.onNodeWithText(sonaBirakMetni).fetchSemanticsNode().boundsInRoot
-        val sonaBirakNotSinir = compose.onNodeWithText(sonaBirakNotMetni).fetchSemanticsNode().boundsInRoot
-        assertTrue(
-            "Sona bırak açıklaması butonun üstüne binmemeli: buton=$sonaBirakButonSinir, not=$sonaBirakNotSinir",
-            sonaBirakNotSinir.top >= sonaBirakButonSinir.bottom - 1f,
-        )
+        compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText(sonaBirakMetni))
+        compose.onNodeWithText(sonaBirakMetni).assertIsDisplayed()
     }
 
     @Test

@@ -6,8 +6,10 @@
    özel soru sayısı ve mevcut konu/kaynak/neden filtreleri de kullanılabilir.
 2. **Akıllı sıra** (varsayılan) veya **En eski önce** seçilir. Bugün/Filtreli listesindeki tek
    soruya dokunmak da aynı odak ekranını bir soruluk oturumla açar.
-3. Odak ekranı ders, oturum ilerlemesi, ayrı **deneme/inceleme süreleri**, tamamlanan sayı ve oturum emeği
-   XP'sini gösterir. Fotoğrafa dokunarak tam ekran yakınlaştırılır; eski soru notları okunabilir.
+3. Odak ekranı yalnız ders ve oturum ilerlemesini gösterir. Deneme/inceleme süresi sessizce
+   ölçülür; canlı sayaç, ölçüm kalitesi ve oturum XP'si çalışma sırasında gösterilmez. Süreler
+   tekrar geçmişi ve profilde kalır. Fotoğrafa dokunarak tam ekran yakınlaştırılır; eski soru
+   notları okunabilir.
 4. **Çözümü incele** isteğe bağlıdır. **Cevabımı değerlendir** çözüm açılmasını zorunlu kılmaz.
 5. Çözemedim / Zorlandım / Rahat için bir sonraki tekrar aralığı **kaydetmeden önce** görünür.
    Sonuç seçimi tek başına kayıt değildir; **Kaydet ve ilerle** gerekir. Yanlışlıkla dokunmada
@@ -25,12 +27,17 @@ Bu bir **öz değerlendirme ve tekrar planlama** sistemidir; fotoğraftaki soruy
 
 ## Sıralama
 
-`CalismaSorulariniSirala.akilliOncelik` deterministiktir:
+Temel `CalismaSorulariniSirala.akilliOncelik` deterministiktir:
 
 1. Zamanı gelmiş/gecikmiş sorular;
 2. Planlanan tekrar günü (erken olan önce);
 3. Aynı günde Öğreniyor → Yeni → Pekişiyor → Sağlam;
 4. Son tekrar günü, oluşturma zamanı ve ID ile kararlı eşitlik çözümü.
+
+Çalışma sunumu `karmaAkilliOncelik` kullanır. Geciken → vadesi bugün → gelecek aciliyet
+kuşakları birbirinin önüne geçmez; kuşak içinde dersler ve mümkün olduğunda konular
+serpiştirilir. Aynı konu kuyruğundaki akıllı öncelik korunur. Bu yalnız sunum sırasıdır;
+tekrar tarihini veya öğrenme durumunu değiştirmez.
 
 Arşivli dersler, aktif olmayan soru planları, seçili sınav formatının dışındaki dersler ve bugün
 zaten tekrarlanan sorular yeni oturuma alınmaz. Manuel "En eski önce" sırası korunur. Kullanıcının
@@ -45,15 +52,16 @@ kullanır. Kural sezgiseldir; klinik/akademik olarak kişiselleştirilmiş öğr
 
 - Aralık = son geçerli tekrarın `sonraki_aralik` değeri, yoksa **1**.
 - Kolaylık başlangıcı **250** (%250); yalnız `algoritma_surumu >= 2` kayıtlarıyla güncellenir.
-- Çözüm açılmamış desteklenen v2/v3 kayıtta: Rahat +5, Zorlandım −15, Çözemedim −20. Sınır **130…280**.
-- Çözüm açılmışsa kolaylık yargısı verilmez.
-- Unutma sayısı = çözüm açılmadan Çözemedim verilen kayıtların sayısı (eski kayıtlar dahil).
+- Destekli olmayan (çözüm açılmamış veya kontrol için açılmış) desteklenen v2/v3 kayıtta:
+  Rahat +5, Zorlandım −15, Çözemedim −20. Sınır **130…280**.
+- Çözüm yardım için açılmışsa kolaylık yargısı verilmez.
+- Unutma sayısı = destekli olmayan Çözemedim kayıtlarının sayısı (eski kayıtlar dahil).
   **4 ve üzeri** destekleyici "biraz daha ilgi istiyor" kartını açar; otomatik askıya alma yoktur.
 
 ### Yeni aralık
 
 ```
-çözüm açıldı veya Çözemedim → 1 gün
+çözüm yardımla açıldı veya Çözemedim → 1 gün
 Zorlandım                   → max(önceki + 1, round(önceki × 1.2))
 Rahat                       → round(önceki × kolaylık / 100)
 
@@ -64,7 +72,8 @@ sonraki tarih               → bugünün yerel takvim tarihi + aralık
 
 Tam sayı yuvarlama yarımda yukarıdır. Örnekler: ilk Rahat **3 gün**, ilk Zorlandım **2 gün**,
 7 günden kolaylık 250 ile Rahat **18 gün**; 21 günden kolaylık 255 ile 50 gün gecikmiş Rahat
-**43 gün**. Çözüm açılan her sonuç ertesi güne gelir. Aynı soru için aynı yerel günde ikinci
+**43 gün**. Yardımla açılan her sonuç ertesi güne gelir; kontrol açılışı kayıtlı sonucuna göre
+ilerler. Aynı soru için aynı yerel günde ikinci
 kayıt hâlâ engellenir; ne plan ne XP iki kez artar.
 
 ### Tarihsel v1.2.0 kararı: neden o aşamada Room v4 gerekmedi?

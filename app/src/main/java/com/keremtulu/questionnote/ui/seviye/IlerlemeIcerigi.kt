@@ -20,7 +20,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -76,11 +75,10 @@ internal fun IlerlemeIcerigi(
     val padding = PaddingValues(20.dp, insets.calculateTopPadding() + 16.dp, 20.dp, insets.calculateBottomPadding() + 24.dp)
 
     if (sayfa == IlerlemeBolumu.OZET) {
-        // Study first, evidence second, rewards last. No technical report navigation.
+        // Compact progress identity first; today's single study action stays in the next panel.
         LazyColumn(state = ozetListesi, modifier = Modifier.fillMaxSize().testTag("progress-list"),
             contentPadding = padding, verticalArrangement = Arrangement.spacedBy(16.dp)) {
             item(key = "baslik") { IlerlemeBasligi() }
-            // Level first: this is the "how far have I come" screen, the action comes right below it.
             item(key = "rutbe") { YeniRutbeKarti(ozet) }
             item(key = "bugun") {
                 IlerlemePaneli(Modifier.testTag(if (yetersizVeri) "progress-empty" else "progress-today")) {
@@ -105,7 +103,7 @@ internal fun IlerlemeIcerigi(
                     }
                 }
             }
-            ozet.analiz?.let { analiz ->
+            ozet.analiz?.takeIf { analiz -> analiz.ritim.any { it.tekrar > 0 } }?.let { analiz ->
                 item(key = "hafta") { HaftalikCalismaOzeti(analiz) }
             }
             if (ozet.dersler.isNotEmpty()) item(key = "dersler") {
@@ -178,63 +176,92 @@ internal fun IlerlemeGecisSatiri(baslik: String, alt: String?, tag: String, onCl
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun HaftalikCalismaOzeti(a: com.keremtulu.questionnote.domain.gelisim.GelisimAnalizi) {
     val toplam = a.ritim.sumOf { it.tekrar }
+    val bagimsizToplam = a.ritim.sumOf { it.bagimsiz }
     val aktifGun = a.ritim.count { it.tekrar > 0 }
     val tarih = remember { java.time.format.DateTimeFormatter.ofPattern("d MMM", Locale.forLanguageTag("tr-TR")) }
     IlerlemePaneli(Modifier.testTag("progress-weekly-summary")) {
         BolumBasligi(stringResource(R.string.progress_weekly_title))
-        Text(stringResource(R.string.progress_action_scope, a.kapsamAdi),
-            style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(stringResource(R.string.progress_weekly_summary, aktifGun, toplam),
+        Text(stringResource(R.string.progress_weekly_summary, aktifGun, toplam, bagimsizToplam),
             style = MaterialTheme.typography.titleMedium)
+        if (bagimsizToplam in 1 until toplam) {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                HaftalikGosterim(MaterialTheme.colorScheme.primary, stringResource(R.string.level_stat_independent))
+                HaftalikGosterim(MaterialTheme.colorScheme.secondary, stringResource(R.string.progress_weekly_other_reviews))
+            }
+        }
         val enYuksek = (a.ritim.maxOfOrNull { it.tekrar } ?: 0).coerceAtLeast(1)
         if (LocalDensity.current.fontScale < 1.5f) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.Bottom) {
                 a.ritim.forEach { gun ->
+                    val bagimsiz = gun.bagimsiz.coerceIn(0, gun.tekrar)
                     val aciklama = tarih.format(java.time.LocalDate.ofEpochDay(gun.gun.toLong())) + ": " +
-                        stringResource(R.string.progress_weekly_reviews, gun.tekrar)
+                        stringResource(R.string.progress_weekly_reviews, gun.tekrar, bagimsiz)
                     Column(Modifier.weight(1f).clearAndSetSemantics { contentDescription = aciklama },
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(gun.tekrar.toString(), style = MaterialTheme.typography.labelMedium)
                         Box(Modifier.fillMaxWidth().height(64.dp).clip(RoundedCornerShape(6.dp))
                             .background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.BottomCenter) {
-                            if (gun.tekrar > 0) Box(Modifier.fillMaxWidth()
-                                .height((64f * gun.tekrar / enYuksek).dp)
-                                .background(if (gun.gun == a.gun) MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.secondary))
+                            if (gun.tekrar > 0) {
+                                val toplamYukseklik = 64f * gun.tekrar / enYuksek
+                                val bagimsizYukseklik = 64f * bagimsiz / enYuksek
+                                Column(Modifier.fillMaxWidth().height(toplamYukseklik.dp)) {
+                                    if (bagimsiz < gun.tekrar) Box(Modifier.fillMaxWidth()
+                                        .height((toplamYukseklik - bagimsizYukseklik).dp)
+                                        .background(MaterialTheme.colorScheme.secondary))
+                                    if (bagimsiz > 0) Box(Modifier.fillMaxWidth()
+                                        .height(bagimsizYukseklik.dp)
+                                        .background(MaterialTheme.colorScheme.primary))
+                                }
+                            }
                         }
                         Text(java.time.LocalDate.ofEpochDay(gun.gun.toLong()).dayOfMonth.toString(),
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            fontWeight = if (gun.gun == a.gun) FontWeight.SemiBold else FontWeight.Normal,
+                            color = if (gun.gun == a.gun) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
         } else {
             a.ritim.forEach { gun ->
+                val bagimsiz = gun.bagimsiz.coerceIn(0, gun.tekrar)
                 Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text(tarih.format(java.time.LocalDate.ofEpochDay(gun.gun.toLong())), Modifier.weight(1f),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = if (gun.gun == a.gun) FontWeight.SemiBold else FontWeight.Normal)
-                        Text(stringResource(R.string.progress_weekly_reviews, gun.tekrar),
+                        Text(stringResource(R.string.progress_weekly_reviews, gun.tekrar, bagimsiz),
                             style = MaterialTheme.typography.bodyMedium)
                     }
                     // Decorative count bars: exact accessible counts remain in text above; no fake percentage.
                     Box(Modifier.fillMaxWidth().height(4.dp).clip(CircleShape)
                         .background(MaterialTheme.colorScheme.surfaceVariant).clearAndSetSemantics {}) {
-                        if (gun.tekrar > 0) Box(Modifier.fillMaxWidth(gun.tekrar.toFloat() / enYuksek)
-                            .height(4.dp).background(if (gun.gun == a.gun) MaterialTheme.colorScheme.primary
-                                else MaterialTheme.colorScheme.secondary))
+                        if (gun.tekrar > 0) Row(Modifier.fillMaxWidth(gun.tekrar.toFloat() / enYuksek).height(4.dp)) {
+                            if (bagimsiz > 0) Box(Modifier.weight(bagimsiz.toFloat()).fillMaxHeight()
+                                .background(MaterialTheme.colorScheme.primary))
+                            if (bagimsiz < gun.tekrar) Box(Modifier.weight((gun.tekrar - bagimsiz).toFloat())
+                                .fillMaxHeight().background(MaterialTheme.colorScheme.secondary))
+                        }
                     }
                 }
             }
         }
         Text(stringResource(R.string.progress_weekly_note), style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Composable
+private fun HaftalikGosterim(renk: Color, etiket: String) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        Box(Modifier.size(8.dp).clip(CircleShape).background(renk).clearAndSetSemantics {})
+        Text(etiket, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -264,15 +291,15 @@ private fun YeniRutbeKarti(ozet: SeviyeOzeti) {
         border = BorderStroke(1.dp, yuzeyRenkleri.outlineVariant.copy(alpha = 0.7f)),
         modifier = Modifier.fillMaxWidth().testTag("progress-hero")) {
         Box {
-            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 if (LocalDensity.current.fontScale >= 1.5f) Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     EmekEtiketi(); XpMetni(xp)
                 } else Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically) { EmekEtiketi(); XpMetni(xp) }
-                if (LocalDensity.current.fontScale >= 1.5f) Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    RutbeMadalyonu(durum.rutbe, durum.oran); RutbeBasligi(durum.rutbe, durum.seviye)
-                } else Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    RutbeMadalyonu(durum.rutbe, durum.oran)
+                if (LocalDensity.current.fontScale >= 1.5f) Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    RutbeMadalyonu(durum.rutbe); RutbeBasligi(durum.rutbe, durum.seviye)
+                } else Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    RutbeMadalyonu(durum.rutbe)
                     Column(Modifier.weight(1f)) { RutbeBasligi(durum.rutbe, durum.seviye) }
                 }
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -299,20 +326,16 @@ private fun YeniRutbeKarti(ozet: SeviyeOzeti) {
     Text(stringResource(R.string.level_number, seviye), color = MaterialTheme.colorScheme.onSurfaceVariant,
         style = MaterialTheme.typography.bodyMedium)
 }
-@Composable private fun RutbeMadalyonu(rutbe: Rutbe, oran: Float) {
-    // Flat medallion; ince çift halka ve seviye içi bakır yay süs değil, ilerlemenin kendisidir.
+@Composable private fun RutbeMadalyonu(rutbe: Rutbe) {
+    // The level ratio lives only in the accessible XP bar below; the medallion stays a flat identity mark.
     val renk = MaterialTheme.colorScheme
-    Box(Modifier.size(80.dp), contentAlignment = Alignment.Center) {
+    Box(Modifier.size(64.dp), contentAlignment = Alignment.Center) {
         Canvas(Modifier.fillMaxSize().clearAndSetSemantics { }) {
             drawCircle(renk.outlineVariant.copy(alpha = 0.65f), radius = size.minDimension / 2f - 0.5.dp.toPx(),
                 style = Stroke(1.dp.toPx()))
-            val dis = size.minDimension / 2f - 4.dp.toPx()
-            drawCircle(renk.surfaceVariant, radius = dis, style = Stroke(2.dp.toPx()))
-            if (oran > 0f) drawArc(renk.primary, -90f, 360f * oran.coerceIn(0f, 1f), false,
-                topLeft = Offset(size.width / 2f - dis, size.height / 2f - dis), size = Size(dis * 2f, dis * 2f),
-                style = Stroke(2.dp.toPx(), cap = StrokeCap.Round))
+            drawCircle(renk.surfaceVariant, radius = size.minDimension / 2f - 4.dp.toPx(), style = Stroke(2.dp.toPx()))
         }
-        Image(painterResource(rutbe.gorsel), contentDescription = null, modifier = Modifier.size(64.dp))
+        Image(painterResource(rutbe.gorsel), contentDescription = null, modifier = Modifier.size(52.dp))
     }
 }
 @Composable private fun XpCubugu(oran: Float) {
@@ -351,7 +374,7 @@ private fun GunlukHedef(tekrar: Int, hedef: Int) {
                 style = Stroke(kalinlik, cap = StrokeCap.Round))
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-            Text(stringResource(R.string.progress_today_scope), style = MaterialTheme.typography.labelMedium,
+            Text(stringResource(R.string.settings_goal_title), style = MaterialTheme.typography.labelMedium,
                 color = renk.onSurfaceVariant)
             Text(stringResource(R.string.progress_daily_count, tekrar, hedef), style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold, modifier = Modifier.testTag("progress-daily-count"))
@@ -362,17 +385,36 @@ private fun GunlukHedef(tekrar: Int, hedef: Int) {
 @Composable
 private fun DersPekismesi(dersler: List<DersIlerlemesi>) {
     IlerlemePaneli {
-        Text(stringResource(R.string.progress_learning_note), style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant)
         dersler.forEach { ders ->
             Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(vertical = 8.dp)) {
                 Text(ders.dersAdi, style = MaterialTheme.typography.titleSmall)
                 Text(stringResource(R.string.level_lesson_counts, ders.saglam, ders.pekisiyor, ders.ogreniyor, ders.yeni),
                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                val oran = ders.pekismeOrani / 100f
-                LinearProgressIndicator(progress = { oran }, modifier = Modifier.fillMaxWidth().height(5.dp))
+                DersDagilimCubugu(ders)
             }
         }
+    }
+}
+
+@Composable
+private fun DersDagilimCubugu(ders: DersIlerlemesi) {
+    val renkler = MaterialTheme.colorScheme
+    val bolumler = listOf(
+        ders.saglam.coerceAtLeast(0) to renkler.primary,
+        ders.pekisiyor.coerceAtLeast(0) to renkler.primary.copy(alpha = 0.55f),
+        ders.ogreniyor.coerceAtLeast(0) to renkler.secondary,
+        ders.yeni.coerceAtLeast(0) to renkler.outlineVariant,
+    )
+    val bilinen = bolumler.sumOf { it.first }
+    val payda = maxOf(ders.toplam.coerceAtLeast(0), bilinen)
+    // Exact counts are already in the text above; this stacked shape is decorative distribution, not a score.
+    Row(Modifier.fillMaxWidth().height(6.dp).clip(CircleShape)
+        .background(renkler.surfaceVariant).clearAndSetSemantics {}) {
+        bolumler.forEach { (adet, renk) ->
+            if (adet > 0 && payda > 0) Box(Modifier.weight(adet.toFloat()).fillMaxHeight().background(renk))
+        }
+        val diger = payda - bilinen
+        if (diger > 0) Spacer(Modifier.weight(diger.toFloat()))
     }
 }
 

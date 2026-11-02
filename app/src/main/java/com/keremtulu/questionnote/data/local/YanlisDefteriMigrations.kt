@@ -205,4 +205,17 @@ object YanlisDefteriMigrations {
             )
         }
     }
+
+    /**
+     * Additive only: separates a verification opening (answer locked in before the reveal, then
+     * checked against the solution) from a help opening. Historical rows keep the old meaning:
+     * every earlier reveal was recorded as help, so they migrate as kontrol_acilisi = 0 and no
+     * past result, interval or scheduled day is rewritten.
+     */
+    val MIGRATION_5_6 = object : Migration(5, 6) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("ALTER TABLE `tekrarlar` ADD COLUMN `kontrol_acilisi` INTEGER NOT NULL DEFAULT 0")
+            database.execSQL("ALTER TABLE `tekrarlar` ADD COLUMN `kilitli_sonuc` TEXT")
+        }
+    }
 }

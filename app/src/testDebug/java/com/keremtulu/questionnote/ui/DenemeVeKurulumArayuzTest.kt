@@ -8,11 +8,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -26,6 +28,7 @@ import com.keremtulu.questionnote.R
 import com.keremtulu.questionnote.data.images.LocalSoruGorselDeposu
 import com.keremtulu.questionnote.data.local.VarsayilanDersleriEkle
 import com.keremtulu.questionnote.data.local.YanlisDefteriDatabase
+import com.keremtulu.questionnote.data.local.entity.SoruEntity
 import com.keremtulu.questionnote.data.prefs.DenemeDeposu
 import com.keremtulu.questionnote.data.prefs.SinavProfiliDeposu
 import com.keremtulu.questionnote.data.repository.RoomDersRepository
@@ -153,8 +156,44 @@ class DenemeVeKurulumArayuzTest {
         compose.waitForIdle()
 
         compose.onNodeWithTag("deneme-net-chart").assertIsDisplayed()
+        compose.onNodeWithTag("deneme-list").performScrollToNode(hasTestTag("deneme-lesson-insights"))
+        compose.onNodeWithText(
+            compose.activity.getString(R.string.deneme_insight_rising, "Matematik", "22,5"),
+        ).assertIsDisplayed()
         compose.onNodeWithTag("deneme-list").performScrollToNode(hasTestTag("deneme-card-d2"))
         compose.onNodeWithTag("deneme-card-d2").assertIsDisplayed()
+    }
+
+    @Test
+    fun karisikKurallardaGrafikOnceSonDenemeninKuraliylaAcilir() {
+        runBlocking { dersRepository.kataloguHazirla() }
+        val matId = runBlocking { database.dersDao().tumunuGetir().first { it.ad == "Matematik" }.id }
+        denemeDeposu.kaydet(
+            DenemeKaydi("k1", "Kural 4", NetKurali.DORTTE_BIR, 10L, 20_000, listOf(DenemeDersSatiri(matId, 40, 20, 8, "Matematik"))),
+        )
+        denemeDeposu.kaydet(
+            DenemeKaydi("k2", "Kural 3", NetKurali.UCTE_BIR, 20L, 20_005, listOf(DenemeDersSatiri(matId, 40, 28, 4, "Matematik"))),
+        )
+
+        compose.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                DenemeListesiEkrani(
+                    denemeDeposu = denemeDeposu,
+                    dersRepository = dersRepository,
+                    soruRepository = soruRepository,
+                    onGeri = {},
+                    onYeni = {},
+                    onAc = {},
+                )
+            }
+        }
+        compose.waitForIdle()
+
+        compose.onAllNodesWithTag("deneme-net-chart").assertCountEquals(0)
+        compose.onNodeWithText(compose.activity.getString(R.string.deneme_chart_all_rules)).performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("deneme-net-chart").assertIsDisplayed()
+        compose.onNodeWithText(compose.activity.getString(R.string.deneme_chart_mixed)).assertIsDisplayed()
     }
 
     @Test
@@ -217,6 +256,60 @@ class DenemeVeKurulumArayuzTest {
         compose.onNodeWithText(compose.activity.getString(R.string.deneme_delete_confirm_action)).performClick()
         compose.waitForIdle()
         assertNull(denemeDeposu.getir("d-1"))
+    }
+
+    @Test
+    fun denemeDetayDefterdekiSorulariCalismaEylemineBaglar() {
+        val tumDersler = runBlocking { dersRepository.kataloguHazirla() }
+        val mat = tumDersler.first { it.ad == "Matematik" }
+        runBlocking { dersRepository.dersSeciminiKaydet(setOf(mat.id)) }
+        denemeDeposu.kaydet(
+            DenemeKaydi(
+                id = "d-study",
+                ad = "Miray TG 9",
+                kural = NetKurali.DORTTE_BIR,
+                olusturma = 100L,
+                gun = 20_100,
+                satirlar = listOf(DenemeDersSatiri(mat.id, 40, 30, 4, "Matematik")),
+            ),
+        )
+        runBlocking {
+            database.soruDao().ekle(
+                SoruEntity(
+                    id = "q-deneme",
+                    dersId = mat.id,
+                    kaynak = "Miray TG 9",
+                    sonrakiTekrarGun = 20_100,
+                    olusturma = 1L,
+                    guncelleme = 1L,
+                ),
+            )
+        }
+        var calisilacakKaynak: String? = null
+
+        compose.setContent {
+            YanlisDefteriTema(hareketPolitikasi = HareketPolitikasi.Azaltilmis) {
+                DenemeDetayEkrani(
+                    denemeId = "d-study",
+                    denemeDeposu = denemeDeposu,
+                    dersRepository = dersRepository,
+                    soruRepository = soruRepository,
+                    onGeri = {},
+                    onKaydedildi = {},
+                    onSoruEkle = { _, _, _ -> },
+                    onDenemeyiCalis = { calisilacakKaynak = it },
+                )
+            }
+        }
+        compose.waitUntil(5_000) {
+            compose.onAllNodesWithTag("deneme-study-button").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        compose.onNodeWithText(
+            compose.activity.getString(R.string.deneme_notebook_focus, "Matematik", 9),
+        ).assertIsDisplayed()
+        compose.onNodeWithTag("deneme-study-button").performClick()
+        assertEquals("Miray TG 9", calisilacakKaynak)
     }
 
     @Test

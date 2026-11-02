@@ -43,4 +43,14 @@ data class TekrarEntity(
     val algoritmaSurumu: Int = 1,
     @ColumnInfo(name = "elle_atandi", defaultValue = "0")
     val elleAtandi: Boolean = false,
-)
+    /** 1 when the solution was opened only to verify a result locked in before the reveal. */
+    @ColumnInfo(name = "kontrol_acilisi", defaultValue = "0")
+    val kontrolAcilisi: Boolean = false,
+    /** Locked pre-reveal result name; non-null only for verification openings. */
+    @ColumnInfo(name = "kilitli_sonuc")
+    val kilitliSonuc: String? = null,
+) {
+    /** Assisted attempt: opened as help, not as post-lock verification. Not a stored column. */
+    @get:androidx.room.Ignore
+    val destekli: Boolean get() = cozumAcildi && !kontrolAcilisi
+}

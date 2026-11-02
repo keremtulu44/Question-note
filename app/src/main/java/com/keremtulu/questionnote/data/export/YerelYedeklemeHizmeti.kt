@@ -698,8 +698,8 @@ class YerelYedeklemeHizmeti(
             data.images.map { listOf(it.id, it.questionId, it.tur.name, it.sira, it.zipFileName, it.mimeType, it.width, it.height, it.sizeBytes, it.sha256, it.createdAt) },
         ),
         "csv/reviews.csv" to csv(
-            listOf("id", "question_id", "time_epoch_ms", "day", "scheduled_day", "result", "solution_opened", "previous_interval_days", "next_interval_days", "algorithm_version", "manually_assigned"),
-            data.tekrarlar.map { listOf(it.id, it.soruId, it.zaman, it.gun, it.planlananGun, it.sonuc, it.cozumAcildi, it.oncekiAralik, it.sonrakiAralik, it.algoritmaSurumu, it.elleAtandi) },
+            listOf("id", "question_id", "time_epoch_ms", "day", "scheduled_day", "result", "solution_opened", "previous_interval_days", "next_interval_days", "algorithm_version", "manually_assigned", "solution_checked", "locked_result"),
+            data.tekrarlar.map { listOf(it.id, it.soruId, it.zaman, it.gun, it.planlananGun, it.sonuc, it.cozumAcildi, it.oncekiAralik, it.sonrakiAralik, it.algoritmaSurumu, it.elleAtandi, it.kontrolAcilisi, it.kilitliSonuc) },
         ),
         "csv/measurements.csv" to csv(
             listOf("review_id", "attempt_id", "session_id", "attempt_active_ms", "assisted_active_ms", "quality", "reasons", "measurement_version",
@@ -797,6 +797,8 @@ class YerelYedeklemeHizmeti(
         .putNullable("scheduled_day", planlananGun)
         .put("result", sonuc)
         .put("solution_opened", cozumAcildi)
+        .put("solution_checked", kontrolAcilisi)
+        .putNullable("locked_result", kilitliSonuc)
         .putNullable("previous_interval_days", oncekiAralik)
         .putNullable("next_interval_days", sonrakiAralik)
         .put("algorithm_version", algoritmaSurumu)
@@ -866,6 +868,7 @@ class YerelYedeklemeHizmeti(
                 3 -> 3
                 4 -> 4
                 5 -> 5
+                6 -> 6
                 else -> throw IOException("Desteklenmeyen yedek sürümü.")
             }
             if (manifest.getInt("room_schema_version") != expectedSchemaVersion) {
@@ -878,7 +881,7 @@ class YerelYedeklemeHizmeti(
             if (createdAt <= 0L) throw IOException("Yedek tarihi geçersiz.")
             val manifestCounts = manifest.getJSONObject("counts")
             val counts = manifestCounts.toCounts(formatVersion)
-            val catalogOptionCount = if (formatVersion in 3..5) {
+            val catalogOptionCount = if (formatVersion in 3..6) {
                 manifestCounts.getInt("catalog_options").also {
                     if (it < 0) throw IOException("Manifest içindeki katalog sayısı negatif.")
                 }
@@ -897,7 +900,7 @@ class YerelYedeklemeHizmeti(
             val expectedCsvFiles = when (formatVersion) {
                 2 -> LEGACY_REQUIRED_CSV_FILES
                 3 -> V3_REQUIRED_CSV_FILES
-                4, 5 -> REQUIRED_CSV_FILES
+                4, 5, 6 -> REQUIRED_CSV_FILES
                 else -> throw IOException("Desteklenmeyen CSV sürümü.")
             }
             if (declaredCsv != expectedCsvFiles || !inventoryPaths.containsAll(expectedCsvFiles)) {
@@ -1030,7 +1033,7 @@ class YerelYedeklemeHizmeti(
         }
         val options = when (formatVersion) {
             2 -> legacyCatalogOptions(questions)
-            3, 4, 5 -> {
+            3, 4, 5, 6 -> {
             json.getJSONArray("catalog_options").toTypedList(MAX_ROWS_PER_TABLE) { item ->
                 val type = runCatching { SoruSecenekTuru.valueOf(item.getString("type")) }
                     .getOrElse { throw IOException("Yedekte bilinmeyen katalog türü var.") }
@@ -1069,6 +1072,17 @@ class YerelYedeklemeHizmeti(
             if (result !in TekrarSonucu.entries.map { it.name }) throw IOException("Yedekte bilinmeyen tekrar sonucu var.")
             val algorithmVersion = item.getInt("algorithm_version")
             if (algorithmVersion <= 0) throw IOException("Tekrar algoritması sürümü geçersiz.")
+            val opened = item.getBoolean("solution_opened")
+            // Verification openings exist only in v6+; earlier formats recorded every reveal as help.
+            val checked = if (formatVersion >= 6) item.getBoolean("solution_checked") else false
+            val locked = if (formatVersion >= 6) item.nullableString("locked_result") else null
+            val lockedResult = locked?.let { ad -> TekrarSonucu.entries.firstOrNull { it.name == ad }
+                ?: throw IOException("Yedekte bilinmeyen kilitli sonuç var.") }
+            if (checked && (!opened || lockedResult == null ||
+                    TekrarSonucu.valueOf(result).ordinal > lockedResult.ordinal) ||
+                !checked && locked != null) {
+                throw IOException("Yedekte kontrol açılışı kaydı tutarsız.")
+            }
             TekrarEntity(
                 id = item.getString("id"),
                 soruId = item.getString("question_id"),
@@ -1076,11 +1090,13 @@ class YerelYedeklemeHizmeti(
                 gun = item.getInt("day"),
                 planlananGun = item.nullableInt("scheduled_day"),
                 sonuc = result,
-                cozumAcildi = item.getBoolean("solution_opened"),
+                cozumAcildi = opened,
                 oncekiAralik = item.nullableInt("previous_interval_days"),
                 sonrakiAralik = item.nullableInt("next_interval_days"),
                 algoritmaSurumu = algorithmVersion,
                 elleAtandi = item.getBoolean("manually_assigned"),
+                kontrolAcilisi = checked,
+                kilitliSonuc = locked,
             )
         }
         val measurements = when (formatVersion) {
@@ -1088,7 +1104,7 @@ class YerelYedeklemeHizmeti(
                 if (json.has("measurements")) throw IOException("Eski biçim ölçüm tablosu içeremez.")
                 emptyList()
             }
-            4, 5 -> json.getJSONArray("measurements").toTypedList(MAX_ROWS_PER_TABLE, OlcumSerilestirme::oku)
+            4, 5, 6 -> json.getJSONArray("measurements").toTypedList(MAX_ROWS_PER_TABLE, OlcumSerilestirme::oku)
             else -> throw IOException("Desteklenmeyen ölçüm tablosu sürümü.")
         }
         val mockExams = if (json.has("mock_exams") && !json.isNull("mock_exams")) {
@@ -1716,9 +1732,9 @@ class YerelYedeklemeHizmeti(
         const val FORMAT_ID = "yanlis-defteri-backup"
         const val LEGACY_FORMAT_VERSION = 2
         const val LEGACY_ROOM_SCHEMA_VERSION = 2
-        const val FORMAT_VERSION = 5
-        const val ROOM_SCHEMA_VERSION = 5
-        val SUPPORTED_FORMAT_VERSIONS = setOf(2, 3, 4, 5)
+        const val FORMAT_VERSION = 6
+        const val ROOM_SCHEMA_VERSION = 6
+        val SUPPORTED_FORMAT_VERSIONS = setOf(2, 3, 4, 5, 6)
         const val STATE_PREPARED = "PREPARED"
         const val STATE_COMMITTED = "COMMITTED"
         const val JPEG_MIME = "image/jpeg"

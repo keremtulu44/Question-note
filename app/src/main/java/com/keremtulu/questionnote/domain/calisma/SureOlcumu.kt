@@ -46,6 +46,10 @@ data class OlcumDevamNoktasi(
     val donduruldu: Boolean = false,
     val secim: TekrarSonucu? = null,
     val revizyon: Long = 0,
+    /** First reveal happened after a selection was locked in: verification, not help. */
+    val kontrolAcilisi: Boolean = false,
+    /** Selection captured at that first reveal. Later selections may only move at or below it. */
+    val kilitliSecim: TekrarSonucu? = null,
 ) {
     fun surectenKurtar(): OlcumDevamNoktasi {
         val kurtarilan = if (olcum.kalite == OlcumKalitesi.TAM || olcum.kalite == OlcumKalitesi.KISMI) {
@@ -63,13 +67,28 @@ data class TekrarDenemesi(
     val cozumAcildi: Boolean,
     val olcum: SureOlcumu = SureOlcumu(),
     val oturumId: String? = null,
+    /** Solution was opened only to verify an answer locked in before the reveal. */
+    val kontrolAcilisi: Boolean = false,
+    /** Locked pre-reveal self-assessment. The final result may be lowered after checking, never raised. */
+    val kilitliSonuc: TekrarSonucu? = null,
 ) {
+    /** Assisted attempt: opening counted as help because no result was locked in before the reveal. */
+    val destekli: Boolean get() = cozumAcildi && !kontrolAcilisi
+
     fun guvenli(): TekrarDenemesi {
         var sonucOlcumu = olcum.guvenli()
         if (!cozumAcildi && (sonucOlcumu.incelemeAktifMs ?: 0L) > 0L) {
             sonucOlcumu = SureOlcumu(kalite = OlcumKalitesi.GECERSIZ, nedenler = setOf(OlcumNedeni.GECERSIZ_GIRDI))
         }
-        return copy(olcum = sonucOlcumu)
+        // A verification claim needs a lock made before the reveal; without one it degrades to help.
+        val kontrol = kontrolAcilisi && cozumAcildi && kilitliSonuc != null
+        val kilit = if (kontrol) kilitliSonuc else null
+        return copy(
+            olcum = sonucOlcumu,
+            sonuc = if (kontrol && sonuc.ordinal > requireNotNull(kilit).ordinal) kilit else sonuc,
+            kontrolAcilisi = kontrol,
+            kilitliSonuc = kilit,
+        )
     }
 }
 

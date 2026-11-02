@@ -138,4 +138,66 @@ class AktifSureOlcerTest {
         } finally { java.util.TimeZone.setDefault(onceki) }
     }
 
+    @Test fun revealAfterLockedSelectionIsAVerificationRevealWithoutOneIsHelp() {
+        val kilitli = yeni(Saat())
+        kilitli.dondur(TekrarSonucu.RAHAT); kilitli.cozumuAc()
+        assertTrue(kilitli.devamNoktasi().kontrolAcilisi)
+        assertEquals(TekrarSonucu.RAHAT, kilitli.devamNoktasi().kilitliSecim)
+
+        val yardim = yeni(Saat())
+        yardim.cozumuAc()
+        assertFalse(yardim.devamNoktasi().kontrolAcilisi)
+        assertNull(yardim.devamNoktasi().kilitliSecim)
+
+        val secimsizDondurma = yeni(Saat())
+        secimsizDondurma.dondur(); secimsizDondurma.cozumuAc()
+        assertFalse(secimsizDondurma.devamNoktasi().kontrolAcilisi)
+    }
+
+    @Test fun firstRevealFixesTheOpeningKind() {
+        val o = yeni(Saat())
+        o.cozumuAc() // help first
+        o.dondur(TekrarSonucu.RAHAT); o.cozumuAc()
+        assertFalse(o.devamNoktasi().kontrolAcilisi)
+        assertNull(o.devamNoktasi().kilitliSecim)
+    }
+
+    @Test fun lockedResultIsACeilingButMovementAtOrBelowItStaysFree() {
+        val rahat = yeni(Saat())
+        rahat.dondur(TekrarSonucu.RAHAT); rahat.cozumuAc()
+        rahat.dondur(TekrarSonucu.ZORLANDIM)
+        assertEquals(TekrarSonucu.ZORLANDIM, rahat.devamNoktasi().secim)
+        rahat.dondur(TekrarSonucu.COZEMEDIM)
+        assertEquals(TekrarSonucu.COZEMEDIM, rahat.devamNoktasi().secim)
+        rahat.dondur(TekrarSonucu.RAHAT) // back up to the lock itself is allowed
+        assertEquals(TekrarSonucu.RAHAT, rahat.devamNoktasi().secim)
+
+        val zorlandi = yeni(Saat())
+        zorlandi.dondur(TekrarSonucu.ZORLANDIM); zorlandi.cozumuAc()
+        zorlandi.dondur(TekrarSonucu.RAHAT)
+        assertEquals(TekrarSonucu.ZORLANDIM, zorlandi.devamNoktasi().secim)
+
+        val cozemedi = yeni(Saat())
+        cozemedi.dondur(TekrarSonucu.COZEMEDIM); cozemedi.cozumuAc()
+        cozemedi.dondur(TekrarSonucu.ZORLANDIM)
+        assertEquals(TekrarSonucu.COZEMEDIM, cozemedi.devamNoktasi().secim)
+    }
+
+    @Test fun verificationClaimWithoutALockDegradesToHelpAndResultIsCappedAtTheLock() {
+        val kilitsiz = TekrarDenemesi("d", "q", TekrarSonucu.RAHAT, true,
+            kontrolAcilisi = true).guvenli()
+        assertFalse(kilitsiz.kontrolAcilisi)
+        assertNull(kilitsiz.kilitliSonuc)
+
+        val yukseltme = TekrarDenemesi("d", "q", TekrarSonucu.RAHAT, true,
+            kontrolAcilisi = true, kilitliSonuc = TekrarSonucu.ZORLANDIM).guvenli()
+        assertTrue(yukseltme.kontrolAcilisi)
+        assertEquals(TekrarSonucu.ZORLANDIM, yukseltme.sonuc)
+
+        val kilitsizAcilis = TekrarDenemesi("d", "q", TekrarSonucu.RAHAT, false,
+            kontrolAcilisi = true, kilitliSonuc = TekrarSonucu.RAHAT).guvenli()
+        assertFalse(kilitsizAcilis.kontrolAcilisi)
+        assertNull(kilitsizAcilis.kilitliSonuc)
+    }
+
 }
