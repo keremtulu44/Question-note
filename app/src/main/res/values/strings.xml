@@ -26,7 +26,13 @@
     <string name="deneme_chart_all_rules">Tümü</string>
     <string name="deneme_chart_range">En düşük %1$s · En yüksek %2$s net</string>
     <string name="deneme_chart_lessons">Ders netleri · %1$s</string>
-    <string name="deneme_chart_legend">Renkli çubuk bu deneme, açık çubuk aynı kuraldaki önceki ortalaman.</string>
+    <string name="deneme_chart_legend">Çubuklar net oranını gösterir; renkli bölüm bu deneme, açık bölüm aynı kuraldaki önceki ortalaman.</string>
+    <string name="deneme_chart_rate_legend">Çubuklar her dersteki net oranını gösterir.</string>
+    <string name="deneme_insight_rising">En çok yükselen: %1$s (+%2$s puan)</string>
+    <string name="deneme_insight_falling">En çok gerileyen: %1$s (%2$s puan)</string>
+    <string name="deneme_insight_lowest_rate">En düşük net oranı: %1$s (%2$s)</string>
+    <string name="deneme_rate_delta_positive">+%1$s puan</string>
+    <string name="deneme_rate_delta">%1$s puan</string>
     <string name="deneme_stamp">%1$s · %2$s</string>
     <string name="deneme_recall_0">%1$s (%2$s) denemesinden</string>
     <string name="deneme_recall_1">%1$s (%2$s) denemesinden</string>
@@ -39,6 +45,8 @@
     <string name="deneme_upload_progress">%1$d / %2$d defterde</string>
     <string name="deneme_upload_complete">Tamamlandı (%1$d)</string>
     <string name="deneme_upload_clean">Eksik soru yok</string>
+    <string name="deneme_notebook_remaining">%1$d yanlış veya boş daha deftere eklenebilir</string>
+    <string name="deneme_notebook_focus">En çok eksik: %1$s (%2$d)</string>
     <string name="deneme_form_title">Deneme detayı</string>
     <string name="deneme_form_new_title">Yeni deneme</string>
     <string name="deneme_name">Deneme adı</string>
