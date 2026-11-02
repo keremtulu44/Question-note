@@ -1,21 +1,21 @@
 # P6 sentetik analitik ölçümü · debug
 
-Kaynak: `a741ceaec253bb79432154457586d2f5518ad6cb`
+Kaynak: `a8cab3042e8fe426406cfd8c51aaf224b6521d11`
 
-Robolectric 4.15.1 / SDK 35 / yerel SQLite / OpenJDK 64-Bit Server VM 17.0.20.1 / Linux amd64
+Robolectric 4.15.1 / SDK 35 / yerel SQLite / OpenJDK 64-Bit Server VM 17.0.21 / Linux amd64
 
 1.000 soru, 20.000 tekrar ve bağlam/ölçüm; 4 ders, 40 konu, 100 ders/kaynak grubu, 20 gün; tüm sonuç/kalite türleri. Veri yalnız testte üretildi, Git'e yazılmadı.
 
-Analiz başına **4 uygulama SELECT**; karar JSON'u taşınmadı (veritabanındaki toplam karar yükü: 22749680 bayt). Room iç invalidation sorguları bu sayıya dahil değildir.
+Analiz başına **4 uygulama SELECT**; karar JSON'u taşınmadı (veritabanındaki toplam karar yükü: 24874680 bayt). Room iç invalidation sorguları bu sayıya dahil değildir.
 
 | İşlem | Örnek | medyan ms | p95 ms* | ham ms |
 |---|---:|---:|---:|---|
-| Sentetik veri üretimi + transaction yükleme | 1 | 2093.20 | 2093.20 | 2093.20 |
-| İlk analiz çağrısı (DB kurulumu hariç) | 1 | 774.63 | 774.63 | 774.63 |
-| Isınmış toplu analiz (5 tekrar) | 5 | 633.43 | 736.82 | 644.05, 629.59, 736.82, 633.43, 576.52 |
-| Tek ders profili (ince projeksiyon) | 1 | 65.61 | 65.61 | 65.61 |
-| Tüm ders süre kapsamı | 1 | 344.32 | 344.32 | 344.32 |
-| Tam İlerleme özeti (XP + profil + analiz) | 1 | 772.44 | 772.44 | 772.44 |
+| Sentetik veri üretimi + transaction yükleme | 1 | 1902.35 | 1902.35 | 1902.35 |
+| İlk analiz çağrısı (DB kurulumu hariç) | 1 | 912.68 | 912.68 | 912.68 |
+| Isınmış toplu analiz (5 tekrar) | 5 | 771.56 | 823.91 | 792.11, 771.56, 823.91, 640.24, 487.78 |
+| Tek ders profili (ince projeksiyon) | 1 | 63.65 | 63.65 | 63.65 |
+| Tüm ders süre kapsamı | 1 | 326.48 | 326.48 | 326.48 |
+| Tam İlerleme özeti (XP + profil + analiz) | 1 | 838.78 | 838.78 | 838.78 |
 
 *Az sayıda host örneğinin nearest-rank yüzdeliği; kare/frame p95 değildir. İlk çağrı gerçek telefon soğuk açılışı değildir. GC/CI paylaşımı sonuçları etkileyebilir; bu sayılar cihaz performansı veya S24 FE kabulü diye yorumlanamaz.
 
