@@ -1,0 +1,100 @@
+name: Test APK
+
+on:
+  pull_request:
+    paths:
+      - 'app/**'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - 'settings.gradle.kts'
+      - 'build.gradle.kts'
+      - 'gradle.properties'
+      - '.github/workflows/apk-preview.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: test-apk-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  apk:
+    name: Kurulabilir test APK'sı
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Değişiklik dalını al
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+      - name: Temurin JDK 17'i kur
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Debug APK derle
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! -f gradle/wrapper/gradle-wrapper.jar || ! -f gradle/wrapper/gradle-wrapper.properties ]]; then
+            bootstrap_dir="$RUNNER_TEMP/gradle-wrapper-bootstrap"
+            mkdir -p "$bootstrap_dir"
+            printf '// Temporary project to generate the official Gradle wrapper.\n' > "$bootstrap_dir/build.gradle"
+            (cd "$bootstrap_dir" && gradle wrapper --gradle-version 9.8.1 --distribution-type bin)
+            mkdir -p gradle/wrapper
+            cp "$bootstrap_dir/gradlew" ./gradlew
+            cp "$bootstrap_dir/gradlew.bat" ./gradlew.bat
+            cp "$bootstrap_dir/gradle/wrapper/gradle-wrapper.jar" gradle/wrapper/gradle-wrapper.jar
+            cp "$bootstrap_dir/gradle/wrapper/gradle-wrapper.properties" gradle/wrapper/gradle-wrapper.properties
+          fi
+          chmod +x ./gradlew
+          ./gradlew --no-daemon --console=plain :app:assembleDebug
+          cp app/build/outputs/apk/debug/app-debug.apk "$RUNNER_TEMP/YanlisDefterim-test.apk"
+          apksigner=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f 2>/dev/null | sort -V | tail -n 1 || true)
+          if [[ -n "$apksigner" && -x "$apksigner" ]]; then
+            "$apksigner" verify --print-certs "$RUNNER_TEMP/YanlisDefterim-test.apk"
+          fi
+          apk_sha=$(sha256sum "$RUNNER_TEMP/YanlisDefterim-test.apk" | cut -d' ' -f1)
+          apk_size=$(stat -c%s "$RUNNER_TEMP/YanlisDefterim-test.apk")
+          echo "::notice title=APK SHA-256::$apk_sha"
+          {
+            echo '## Test APK'
+            echo
+            echo "- Kaynak: ${{ github.event.pull_request.head.sha }}"
+            echo "- Boyut: $apk_size bayt"
+            echo "- SHA-256: \`$apk_sha\`"
+            echo '- Debug imzalıdır; yayın sürümünün üzerine kurulamayabilir.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: APK'yı artifact olarak kaydet
+        uses: actions/upload-artifact@v4
+        with:
+          name: YanlisDefterim-test-APK
+          path: ${{ runner.temp }}/YanlisDefterim-test.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: APK'yı geçici Git nesnesi olarak aktar
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PYTHON'
+          import base64, json, os
+          from pathlib import Path
+          root = Path(os.environ['RUNNER_TEMP'])
+          apk = root / 'YanlisDefterim-test.apk'
+          with (root / 'apk-blob.json').open('w') as out:
+              json.dump({'content': base64.b64encode(apk.read_bytes()).decode('ascii'), 'encoding': 'base64'}, out)
+          PYTHON
+          blob=$(gh api --method POST "repos/$GITHUB_REPOSITORY/git/blobs" --input "$RUNNER_TEMP/apk-blob.json" --jq '.sha')
+          rm -f "$RUNNER_TEMP/apk-blob.json"
+          echo "::notice title=Geçici APK nesnesi::$blob"
+          echo "- Geçici APK nesnesi: \`$blob\`" >> "$GITHUB_STEP_SUMMARY"
