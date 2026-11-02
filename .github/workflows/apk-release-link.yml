@@ -1,0 +1,62 @@
+name: Test APK bağlantısı
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/apk-release-link.yml'
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  publish:
+    name: APK'yı kalıcı bağlantıya yayımla
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Önceki derlemeden APK'yı al
+        uses: actions/download-artifact@v5
+        with:
+          name: YanlisDefterim-test-APK
+          path: ${{ runner.temp }}/apk-link
+          run-id: 41395822846
+          github-token: ${{ github.token }}
+
+      - name: APK'yı doğrula ve önizleme sürümüne yükle
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: preview-pr17-004ddfd
+          TARGET: 004ddfd2284b3947ccafe0905eeb450e32d8aecb
+          APK_SHA: 21d85a216c48f25703a0e4a5712ffbac76ee96aeaf5c5d3afce4b19a65a8f732
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk="$RUNNER_TEMP/apk-link/YanlisDefterim-test.apk"
+          test -s "$apk"
+          echo "$APK_SHA  $apk" | sha256sum --check
+          cat > "$RUNNER_TEMP/release-notes.md" <<'EOF'
+          PR #17 için üretilmiş **debug imzalı test APK'sıdır**.
+
+          SHA-256: `21d85a216c48f25703a0e4a5712ffbac76ee96aeaf5c5d3afce4b19a65a8f732`
+
+          Not: Sabit release anahtarıyla imzalanmadı. Telefonda release sürüm kuruluysa üzerine kurulamayabilir; verileri silmemek için kurulu sürümü kaldırmayın.
+          EOF
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$apk" --clobber
+          else
+            gh release create "$TAG" "$apk" \
+              --target "$TARGET" \
+              --title "Yanlış Defterim PR #17 test APK'sı" \
+              --notes-file "$RUNNER_TEMP/release-notes.md" \
+              --prerelease
+          fi
+          direct="https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG/YanlisDefterim-test.apk"
+          echo "::notice title=APK doğrudan bağlantısı::$direct"
+          {
+            echo '## Test APK bağlantısı'
+            echo
+            echo "- Doğrudan APK: $direct"
+            echo "- SHA-256: \`$APK_SHA\`"
+          } >> "$GITHUB_STEP_SUMMARY"
